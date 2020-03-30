@@ -3,17 +3,17 @@
 
 - **Breaking changes**
 
-  - Remove ``javascript-jscs`` checker [GH-1024]
-  - Remove ``elixir-dogma`` checker [GH-1450]
-  - ``rust-cargo`` now requires Rust 1.17 or newer [GH-1289]
-  - ``rust`` now requires 1.18 or newer [GH-1501]
-  - Rename ``flycheck-cargo-rustc-args`` to ``flycheck-cargo-check-args``
+  - Remove the ``javascript-jscs`` checker. [GH-1024]
+  - Remove the ``elixir-dogma`` checker. [GH-1450]
+  - ``rust-cargo`` now requires Rust 1.17 or newer. [GH-1289]
+  - ``rust`` now requires 1.18 or newer. [GH-1501]
+  - Rename ``flycheck-cargo-rustc-args`` to ``flycheck-cargo-check-args``.
     [GH-1289]
-  - ``rust-cargo`` does not use the variable ``flycheck-rust-args`` anymore
+  - ``rust-cargo`` does not use the variable ``flycheck-rust-args`` anymore.
     [GH-1289]
   - Improve detection of default directory for ``haskell-ghc`` to consider
-    ``hpack`` project files [GH-1435]
-  - Replace ``go tool vet`` with ``go vet`` [GH-1548]
+    ``hpack`` project files. [GH-1435]
+  - Replace ``go tool vet`` with ``go vet``. [GH-1548]
   - Remove the deprecated ``go-megacheck`` checker, which is replaced by
     ``go-staticcheck``. [GH-1583]
 
@@ -43,13 +43,13 @@
 - New features:
 
   - Add ``flycheck-cppcheck-suppressions-file`` to pass a suppressions
-    file to cppcheck [GH-1329]
-  - Add ``--force-exclusion`` flag to ``rubocop`` command [GH-1348]
+    file to cppcheck. [GH-1329]
+  - Add ``--force-exclusion`` flag to ``rubocop`` command. [GH-1348]
   - Add ``flycheck-ghc-stack-project-file`` for the
     ``haskell-stack-ghc`` checker. [GH-1316]
   - Add ``flycheck-perl-module-list`` to use specified modules when
     syntax checking code with the ``perl`` checker. [GH-1207]
-  - Add ``flycheck-sh-bash-args`` to pass arguments to ``sh-bash`` [GH-1439].
+  - Add ``flycheck-sh-bash-args`` to pass arguments to ``sh-bash``. [GH-1439]
   - Add ``flychjeck-eslint-args`` to pass arguments to ``javascript-eslint``.
     [GH-1360]
   - Add ``flycheck-default-executable-find``, the new default value for
@@ -59,10 +59,11 @@
     ``flycheck-check-syntax-automatically``.  Variables
     ``flycheck-idle-buffer-switch-delay`` and
     ``flycheck-buffer-switch-check-intermediate-buffers`` control the
-    functionality [GH-1297]
+    functionality. [GH-1297]
   - Add ``flycheck-ghdl-ieee-library`` to select which standard IEEE
     library to use for ghdl. [GH-1547]
-  - ``javascript-eslint`` checker now supports ``typescript-mode`` by default.
+  - The ``javascript-eslint`` checker now supports ``typescript-mode`` by
+    default.
   - Add ``flycheck-erlang-rebar3-profile`` to select which profile to
     use when compiling erlang with rebar3.
   - Add ``flycheck-relevant-error-other-file-show`` to avoid showing errors
@@ -79,25 +80,28 @@
     instead of ignored.  They can be navigated to from the error list.
     This change helps with compiled languages, where an error in another file
     may cause the current file to be considered invalid. [GH-1427]
-  - Enhanced the ``flycheck-verify-setup`` to show more clearly which checkers
+  - ``flycheck-verify-setup`` now shows more clearly which checkers
     will run in the buffer, and which are misconfigured. [GH-1478]
-  - Use Emacs' native XML parsing when libXML fails.  This behavior can be
-    changed by customizing ``flycheck-xml-parser`` [GH-1349]
-  - Changed parsing of ESLint output from checkstyle XML to JSON [GH-1350]
-  - Flycheck will execute ``rubocop`` from directory where ``Gemfile`` is
-    located. If ``Gemfile`` does not exist, old behaviour of running command
-    from directory where ``.rubocop.yml`` is found will be used [GH-1368]
-  - ``rust-cargo`` now uses ``cargo check`` and ``cargo test`` [GH-1289]
+  - Flycheck will now use Emacs' native XML parsing when libXML fails.  This
+    behavior can be changed by customizing ``flycheck-xml-parser``. [GH-1349]
+  - Flycheck now uses ESLint's JSON output instead of checkstyle XML. [GH-1350]
+  - Flycheck will execute ``rubocop`` from the directory where a ``Gemfile`` is
+    located. If a ``Gemfile`` does not exist, the old behaviour of running
+    the command from the directory where ``.rubocop.yml`` is found will be
+    used. [GH-1368]
+  - ``rust-cargo`` now uses ``cargo check`` and ``cargo test``. [GH-1289]
   - ``python-pylint`` and ``python-flake8`` are now invoked with ``python -c``,
-    to make it easier to change between Python 2 and Python 3 [GH-1113]
-  - ``haskell-stack-ghc`` will not try to install GHC thereby freezing Emacs
-    [GH-1443]
+    to make it easier to change between Python 2 and Python 3. [GH-1113]
+  - ``haskell-stack-ghc`` will not try to install GHC anymore. [GH-1443]
   - Checkers that report error positions as a single offset from the start of
     the file can use the new ``flycheck-error-new-at-pos`` constructor instead
     of converting that position to a line and a column.
   - ``flycheck-compile`` now locates the checker executable relative to
     ``exec-path`` instead of the shell's ``PATH``.
   - The Emacs Lisp checker can now run in buffers not backed by files. [GH-1695]
+  - Config-file variables can now be set to a list of file names.  This is
+    useful for checkers like mypy which don't run correctly when called from a
+    subdirectory without passing an explicit config file. [GH-1711]
 
 31 (Oct 07, 2017)
 =================

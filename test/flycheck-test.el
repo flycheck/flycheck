@@ -2905,6 +2905,25 @@ evaluating BODY."
                    (expand-file-name "flycheck-test.el"
                                      flycheck-test-directory)))))
 
+(ert-deftest flycheck-locate-config-file/multiple-files ()
+  :tags '(configuration)
+  (flycheck-ert-with-temp-buffer
+    (setq buffer-file-name (expand-file-name "specs/test-documentation.el"
+                                             flycheck-test-directory))
+    (should (equal (flycheck-locate-config-file
+                    '("test-documentation.el" "flycheck-test.el") 'emacs-lisp)
+                   (expand-file-name "specs/test-documentation.el"
+                                     flycheck-test-directory)))))
+
+(ert-deftest flycheck-locate-config-file/multiple-files-ordered ()
+  :tags '(configuration)
+  (flycheck-ert-with-temp-buffer
+    (setq buffer-file-name (expand-file-name "specs/test-documentation.el"
+                                             flycheck-test-directory))
+    (should (equal (flycheck-locate-config-file
+                    '("flycheck-test.el" "test-documentation.el") 'emacs-lisp)
+                   (expand-file-name "flycheck-test.el" flycheck-test-directory)))))
+
 (ert-deftest flycheck-option-int/pass-through-nil ()
   :tags '(option-filters)
   (should (null (flycheck-option-int nil))))
