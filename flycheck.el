@@ -8848,35 +8848,30 @@ containing a file that matches REGEXP."
    (lambda (dir)
      (directory-files dir nil regexp t))))
 
-(defun flycheck-haskell--find-default-directory (checker)
-  "Come up with a suitable default directory for Haskell to run CHECKER in.
+(defun flycheck-haskell--find-stack-default-directory ()
+  "Find a directory to run haskell-stack-ghc.
 
-In case of `haskell-stack-ghc' checker it is directory with
-stack.yaml file.  If there's no stack.yaml file in any parent
-directory, it will be the directory that \"stack path --project-root\"
-command returns.
+Return a parent directory with a stack*.y[a]ml file, or the
+directory returned by \"stack path --project-root\"."
+  (or
+   (when (buffer-file-name)
+     (flycheck--locate-dominating-file-matching
+      (file-name-directory (buffer-file-name))
+      (rx "stack" (* any) "." (or "yml" "yaml") eos)))
+   (-when-let* ((stack (funcall flycheck-executable-find "stack"))
+                (output (ignore-errors
+                          (process-lines stack
+                                         "--no-install-ghc"
+                                         "path" "--project-root")))
+                (stack-dir (car output)))
+     (and (file-directory-p stack-dir) stack-dir))))
 
-For all other checkers, it is the closest parent directory that
-contains a cabal file."
-  (pcase checker
-    (`haskell-stack-ghc
-     (or
-      (when (buffer-file-name)
-        (flycheck--locate-dominating-file-matching
-         (file-name-directory (buffer-file-name))
-         "stack.*\\.yaml\\'"))
-      (-when-let* ((stack (funcall flycheck-executable-find "stack"))
-                   (output (ignore-errors
-                             (process-lines stack
-                                            "--no-install-ghc"
-                                            "path" "--project-root")))
-                   (stack-dir (car output)))
-        (and (file-directory-p stack-dir) stack-dir))))
-    (_
-     (when (buffer-file-name)
-       (flycheck--locate-dominating-file-matching
-        (file-name-directory (buffer-file-name))
-        "\\.cabal\\'\\|\\`package\\.yaml\\'")))))
+(defun flycheck-haskell--ghc-find-default-directory (_checker)
+  "Find a parent directory containing a cabal or package.yaml file."
+  (when (buffer-file-name)
+    (flycheck--locate-dominating-file-matching
+     (file-name-directory (buffer-file-name))
+     "\\.cabal\\'\\|\\`package\\.yaml\\'")))
 
 (flycheck-define-checker haskell-stack-ghc
   "A Haskell syntax and type checker using `stack ghc'.
@@ -8925,7 +8920,16 @@ See URL `https://github.com/commercialhaskell/stack'."
     (flycheck-sanitize-errors (flycheck-dedent-error-messages errors)))
   :modes (haskell-mode literate-haskell-mode)
   :next-checkers ((warning . haskell-hlint))
-  :working-directory flycheck-haskell--find-default-directory)
+  :working-directory (lambda (_)
+                       (flycheck-haskell--find-stack-default-directory))
+  :enabled flycheck-haskell--find-stack-default-directory
+  :verify (lambda (_)
+            (let* ((stack (flycheck-haskell--find-stack-default-directory)))
+              (list
+               (flycheck-verification-result-new
+                :label "stack config"
+                :message (or stack "Not found")
+                :face (if stack 'success '(bold error)))))))
 
 (flycheck-define-checker haskell-ghc
   "A Haskell syntax and type checker using ghc.
@@ -8975,7 +8979,7 @@ See URL `https://www.haskell.org/ghc/'."
     (flycheck-sanitize-errors (flycheck-dedent-error-messages errors)))
   :modes (haskell-mode literate-haskell-mode)
   :next-checkers ((warning . haskell-hlint))
-  :working-directory flycheck-haskell--find-default-directory)
+  :working-directory flycheck-haskell--ghc-find-default-directory)
 
 (flycheck-def-config-file-var flycheck-hlintrc haskell-hlint "HLint.hs")
 
