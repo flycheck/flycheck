@@ -9928,7 +9928,7 @@ Requires Flake8 3.0 or newer. See URL
   :command ("python3"
             (eval (flycheck-python-module-args 'python-flake8 "flake8"))
             "--format=default"
-            (config-file "--config" flycheck-flake8rc)
+            (config-file "--append-config" flycheck-flake8rc)
             (option "--max-complexity" flycheck-flake8-maximum-complexity nil
                     flycheck-option-int)
             (option "--max-line-length" flycheck-flake8-maximum-line-length nil
