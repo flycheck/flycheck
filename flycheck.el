@@ -8851,13 +8851,13 @@ containing a file that matches REGEXP."
 (defun flycheck-haskell--find-stack-default-directory ()
   "Find a directory to run haskell-stack-ghc.
 
-Return a parent directory with a stack.*.yaml file, or the
+Return a parent directory with a stack*.y[a]ml file, or the
 directory returned by \"stack path --project-root\"."
   (or
    (when (buffer-file-name)
      (flycheck--locate-dominating-file-matching
       (file-name-directory (buffer-file-name))
-      "stack.*\\.yaml\\'"))
+      (rx "stack" (* any) "." (or "yml" "yaml") eos)))
    (-when-let* ((stack (funcall flycheck-executable-find "stack"))
                 (output (ignore-errors
                           (process-lines stack
