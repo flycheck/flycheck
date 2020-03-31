@@ -586,7 +586,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
    .. syntax-checker:: go-staticcheck
 
-      Perform static analysis and code linting with staticcheck_, the successor to megacheck_.
+      Perform static analysis and code linting with staticcheck_, the successor to megacheck.
 
       .. defcustom:: flycheck-go-version
 
@@ -1593,5 +1593,3 @@ to view the docstring of the syntax checker.  Likewise, you may use
       Check syntax with yamllint.
 
       .. syntax-checker-config-file:: flycheck-yamllintrc
-
-         Location of yamllint configuration file.
