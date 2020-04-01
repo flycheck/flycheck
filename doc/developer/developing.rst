@@ -286,3 +286,60 @@ Once you have written your own syntax checker, why not `submit a pull request
 <https://github.com/flycheck/flycheck/pulls>`__ to integrate it into Flycheck?
 If it's useful to you, it may be useful for someone else!  Please do check out
 our :ref:`flycheck-contributors-guide` to learn how we deal with pull requests.
+
+Issues with auto-quoting in `flycheck-define-checker`
+-----------------------------------------------------
+
+You may have noticed that lists passed to the ``:command`` or
+``:error-patterns`` in the snippets above are not quoted.  That is because
+`flycheck-define-checker` is a macro which automatically quotes these arguments
+(not unlike ``use-package`` and other configuration macros).
+
+While this makes for less noisy syntax, it unfortunately prevents you from
+defining a checker with compile-time arguments.  For example, you may be tempted
+to have a custom checker in your Emacs configuration written like this:
+
+.. code-block:: elisp
+
+   (flycheck-define-checker my-foobar-checker
+     :command ("foobar" source)
+     :error-patterns ((error …))
+     :modes `(foobar-mode ,my-other-foobar-mode))
+
+The idea is that you know statically one mode that you want to use the checker
+in: ``foobar-mode``, but another mode can be given via the variable
+``my-other-foobar-mode`` before the checker is defined.  This won't work,
+because the ``:modes`` property is auto-quoted by `flycheck-define-checker`.
+The issue arises not just with ``:modes``:, but with almost all the other
+properties since they are also auto-quoted.
+
+If you do find yourself in need to define such a checker, there is a solution
+though.  The `flycheck-define-checker` macro is just a convenience over
+`flycheck-define-command-checker`, so you could define the checker above as
+follows:
+
+.. code-block:: elisp
+
+   (flycheck-def-executable-var my-foobar-checker "foobar")
+   (flycheck-define-command-checker 'my-foobar-checker
+     :command '("foobar" source)
+     :error-patterns '((error …))
+     :modes `(foobar-mode ,my-other-foobar-mode))
+
+Using `flycheck-define-command-checker`, you now need to quote all the list
+arguments, but now with the confidence that no auto-quoting will take place,
+since `flycheck-define-command-checker` is just a function.  Also note that you
+need to explicitly define the executable variable for the checker.  Using
+`flycheck-define-command-checker` is the recommended way to define a checker
+with compile-time arguments.
+
+.. note::
+
+   The `flycheck-define-checker` macro is an autoload, so using it inside a
+   `with-eval-after-load` form will load all of Flycheck.  While this ensures
+   the macro is correctly expanded, it also defeats the purpose of using
+   `with-eval-after-load`.
+
+   For the background behind this state of affairs, see `issue 1398`_.
+
+   .. _issue 1398: https://github.com/flycheck/flycheck/issues/1398
