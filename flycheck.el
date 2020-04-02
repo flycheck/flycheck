@@ -5604,7 +5604,7 @@ function is probably far less efficient than
   ;; Chunk process output on Windows to work around
   ;; https://github.com/flycheck/flycheck/issues/794 and
   ;; https://debbugs.gnu.org/cgi/bugreport.cgi?bug=22344.  The presence of
-  ;; `w32-pipe-buffer-size' denotes an Emacs version (> Emacs 25.1 )where pipe
+  ;; `w32-pipe-buffer-size' denotes an Emacs version (> Emacs 25.1) where pipe
   ;; writes on Windows are fixed.
   ;;
   ;; TODO: Remove option and chunking when dropping Emacs 24 support, see
@@ -5651,6 +5651,7 @@ and rely on Emacs' own buffering and chunking."
         (let* ((program (flycheck-find-checker-executable checker))
                (args (flycheck-checker-substituted-arguments checker))
                (command (flycheck--wrap-command program args))
+               (sentinel-events nil)
                ;; Use pipes to receive output from the syntax checker.  They are
                ;; more efficient and more robust than PTYs, which Emacs uses by
                ;; default, and since we don't need any job control features, we
@@ -5667,7 +5668,11 @@ and rely on Emacs' own buffering and chunking."
           ;; example for such a conflict.
           (setq process (apply 'start-process (format "flycheck-%s" checker)
                                nil command))
-          (setf (process-sentinel process) #'flycheck-handle-signal)
+          ;; Process sentinels can be called while sending input to the process.
+          ;; We want to record errors raised by process-send before calling
+          ;; `flycheck-handle-signal', so initially just accumulate events.
+          (setf (process-sentinel process)
+                (lambda (_ event) (push event sentinel-events)))
           (setf (process-filter process) #'flycheck-receive-checker-output)
           (set-process-query-on-exit-flag process nil)
           ;; Remember the syntax checker, the buffer and the callback
@@ -5683,7 +5688,19 @@ and rely on Emacs' own buffering and chunking."
           (setq flycheck-temporaries nil)
           ;; Send the buffer to the process on standard input, if enabled.
           (when (flycheck-checker-get checker 'standard-input)
-            (flycheck-process-send-buffer process))
+            (condition-case err
+                (flycheck-process-send-buffer process)
+              ;; Some checkers exit before reading all input, causing errors
+              ;; such as a `file-error' for a closed pipe, or a plain “no longer
+              ;; connected to pipe; closed it” error for a disconnection.  We
+              ;; report them if needed in `flycheck-finish-checker-process' (see
+              ;; `https://github.com/flycheck/flycheck/issues/1278').
+              (error (process-put process 'flycheck-error err))))
+          ;; Set the actual sentinel and process any events that might have
+          ;; happened while we were sending input.
+          (setf (process-sentinel process) #'flycheck-handle-signal)
+          (dolist (event (nreverse sentinel-events))
+            (flycheck-handle-signal process event))
           ;; Return the process.
           process)
       (error
@@ -5780,7 +5797,8 @@ _EVENT is ignored."
     (let ((files (process-get process 'flycheck-temporaries))
           (buffer (process-get process 'flycheck-buffer))
           (callback (process-get process 'flycheck-callback))
-          (cwd (process-get process 'flycheck-working-directory)))
+          (cwd (process-get process 'flycheck-working-directory))
+          (err (process-get process 'flycheck-error)))
       ;; Delete the temporary files
       (seq-do #'flycheck-safe-delete files)
       (when (buffer-live-p buffer)
@@ -5792,7 +5810,7 @@ _EVENT is ignored."
                 (`exit
                  (flycheck-finish-checker-process
                   (process-get process 'flycheck-checker)
-                  (process-exit-status process)
+                  (or err (process-exit-status process))
                   files
                   (flycheck-get-output process) callback cwd)))
             ((debug error)
@@ -5802,6 +5820,9 @@ _EVENT is ignored."
     (checker exit-status files output callback cwd)
   "Finish a checker process from CHECKER with EXIT-STATUS.
 
+EXIT-STATUS can be a number or an arbitrary form (if it is not 0,
+a `suspicious' status is reported to CALLBACK).
+
 FILES is a list of files given as input to the checker.  OUTPUT
 is the output of the syntax checker.  CALLBACK is the status
 callback to use for reporting.
@@ -5810,17 +5831,17 @@ Parse the OUTPUT and report an appropriate error status.
 
 Resolve all errors in OUTPUT using CWD as working directory."
   (let ((errors (flycheck-parse-output output checker (current-buffer))))
-    (when (and (/= exit-status 0) (not errors))
+    (when (and (not (equal exit-status 0)) (null errors))
       ;; Warn about a suspicious result from the syntax checker.  We do right
       ;; after parsing the errors, before filtering, because a syntax checker
       ;; might report errors from other files (e.g. includes) even if there
       ;; are no errors in the file being checked.
       (funcall callback 'suspicious
-               (format "Flycheck checker %S returned non-zero \
-exit code %s, but its output contained no errors: %s\nTry \
-installing a more recent version of %S, and please open a bug \
-report if the issue persists in the latest release.  Thanks!"
-                       checker exit-status output checker)))
+               (format "Flycheck checker %S returned %S, but \
+its output contained no errors: %s\nTry installing a more \
+recent version of %S, and please open a bug report if the issue \
+persists in the latest release.  Thanks!"  checker exit-status
+output checker)))
     (funcall callback 'finished
              ;; Fix error file names, by substituting them backwards from the
              ;; temporaries.
