@@ -9972,6 +9972,29 @@ which should be used and reported to the user."
   :safe #'booleanp
   :package-version '(flycheck . "0.25"))
 
+(defun flycheck-parse-pylint (output checker buffer)
+  "Parse JSON OUTPUT of CHECKER on BUFFER as Pylint errors."
+  (mapcar (lambda (err)
+            (let-alist err
+              ;; Pylint can return -1 as a line or a column, hence the call to
+              ;; `max'.  See `https://github.com/flycheck/flycheck/issues/1383'.
+              (flycheck-error-new-at
+               (and .line (max .line 1))
+               (and .column (max (1+ .column) 1))
+               (pcase .type
+                 ;; See "pylint/utils.py"
+                 ((or "fatal" "error") 'error)
+                 ((or "info" "convention") 'info)
+                 ((or "warning" "refactor" _) 'warning))
+               ;; Drop lines showing the error in context
+               (and (string-match (rx (*? nonl) eol) .message)
+                    (match-string 0 .message))
+               :id (if flycheck-pylint-use-symbolic-id .symbol .message-id)
+               :checker checker
+               :buffer buffer
+               :filename .path)))
+          (car (flycheck-parse-json output))))
+
 (flycheck-define-checker python-pylint
   "A Python syntax and style checker using Pylint.
 
@@ -9984,30 +10007,12 @@ See URL `https://www.pylint.org/'."
   :command ("python3"
             (eval (flycheck-python-module-args 'python-pylint "pylint"))
             "--reports=n"
-            "--output-format=text"
-            (eval (if flycheck-pylint-use-symbolic-id
-                      "--msg-template={path}:{line}:{column}:{C}:{symbol}:{msg}"
-                    "--msg-template={path}:{line}:{column}:{C}:{msg_id}:{msg}"))
+            "--output-format=json"
             (config-file "--rcfile=" flycheck-pylintrc concat)
             ;; Need `source-inplace' for relative imports (e.g. `from .foo
             ;; import bar'), see https://github.com/flycheck/flycheck/issues/280
             source-inplace)
-  :error-filter
-  (lambda (errors)
-    (flycheck-sanitize-errors (flycheck-increment-error-columns errors)))
-  :error-patterns
-  ((error line-start (file-name) ":" line ":" column ":"
-          (or "E" "F") ":"
-          (id (one-or-more (not (any ":")))) ":"
-          (message) line-end)
-   (warning line-start (file-name) ":" line ":" column ":"
-            (or "W" "R") ":"
-            (id (one-or-more (not (any ":")))) ":"
-            (message) line-end)
-   (info line-start (file-name) ":" line ":" column ":"
-         (or "C" "I") ":"
-         (id (one-or-more (not (any ":")))) ":"
-         (message) line-end))
+  :error-parser flycheck-parse-pylint
   :enabled (lambda ()
              (or (not (flycheck-python-needs-module-p 'python-pylint))
                  (flycheck-python-find-module 'python-pylint "pylint")))
