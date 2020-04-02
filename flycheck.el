@@ -6450,26 +6450,23 @@ the BUFFER that was checked respectively.
 
 See URL `https://palantir.github.io/tslint/' for more information
 about TSLint."
-  (let ((json-array-type 'list))
-    (seq-map (lambda (message)
-               (let-alist message
-                 (flycheck-error-new-at
-                  (+ 1 .startPosition.line)
-                  (+ 1 .startPosition.character)
-                  (pcase .ruleSeverity
-                    ("ERROR"   'error)
-                    ("WARNING" 'warning)
-                    (_         'warning))
-                  .failure
-                  :id .ruleName
-                  :checker checker
-                  :buffer buffer
-                  :filename .name
-                  :end-line (+ 1 .endPosition.line)
-                  :end-column (+ 1 .endPosition.character))))
-             ;; Don't try to parse empty output as JSON
-             (and (not (string-empty-p output))
-                  (car (flycheck-parse-json output))))))
+  (seq-map (lambda (message)
+             (let-alist message
+               (flycheck-error-new-at
+                (+ 1 .startPosition.line)
+                (+ 1 .startPosition.character)
+                (pcase .ruleSeverity
+                  ("ERROR"   'error)
+                  ("WARNING" 'warning)
+                  (_         'warning))
+                .failure
+                :id .ruleName
+                :checker checker
+                :buffer buffer
+                :filename .name
+                :end-line (+ 1 .endPosition.line)
+                :end-column (+ 1 .endPosition.character))))
+           (car (flycheck-parse-json output))))
 
 (defun flycheck-parse-rust-collect-spans (span)
   "Return a list of spans contained in a SPAN object."
@@ -6620,6 +6617,17 @@ https://github.com/rust-lang/rust/blob/master/src/librustc_errors/json.rs#L154"
             errors))
     (nreverse errors)))
 
+(defconst flycheck--json-parser
+  (if (and (functionp 'json-parse-buffer)
+           ;; json-parse-buffer only supports keyword arguments in Emacs 27+
+           (>= emacs-major-version 27))
+      (lambda ()
+        (json-parse-buffer
+         :object-type 'alist :array-type 'list
+         :null-object nil :false-object nil))
+    #'json-read)
+  "Function to use to parse JSON strings.")
+
 (defun flycheck-parse-json (output)
   "Return parsed JSON data from OUTPUT.
 
@@ -6637,7 +6645,7 @@ lines, and returns the parsed JSON lines in a list."
       (goto-char (point-min))
       (while (not (eobp))
         (when (memq (char-after) '(?\{ ?\[))
-          (push (json-read) objects))
+          (push (funcall flycheck--json-parser) objects))
         (forward-line)))
     (nreverse objects)))
 
