@@ -4924,9 +4924,13 @@ source buffer, and on the same line as point.  Then recenter the
 error list to the highlighted error, unless PRESERVE-POS is
 non-nil."
   (when (get-buffer flycheck-error-list-buffer)
-    (let ((current-errors (flycheck-overlay-errors-in (line-beginning-position)
-                                                      (line-end-position))))
-      (with-current-buffer flycheck-error-list-buffer
+    (with-current-buffer flycheck-error-list-buffer
+      (let ((current-errors
+             (when (buffer-live-p flycheck-error-list-source-buffer)
+               (with-current-buffer flycheck-error-list-source-buffer
+                 (flycheck-overlay-errors-in (line-beginning-position)
+                                             (line-end-position))))))
+        (message "Got errors %S from buffer %S" current-errors flycheck-error-list-source-buffer)
         (let ((old-overlays flycheck-error-list-highlight-overlays)
               (min-point (point-max))
               (max-point (point-min)))
