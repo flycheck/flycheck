@@ -2725,7 +2725,7 @@ buffer manually.
    (flycheck-mode
     (flycheck-clear)
 
-    (pcase-dolist (`(,hook . ,fn) flycheck-hooks-alist)
+    (pcase-dolist (`(,hook . ,fn) (reverse flycheck-hooks-alist))
       (add-hook hook fn nil 'local))
 
     (setq flycheck-old-next-error-function
@@ -4930,7 +4930,6 @@ non-nil."
                (with-current-buffer flycheck-error-list-source-buffer
                  (flycheck-overlay-errors-in (line-beginning-position)
                                              (line-end-position))))))
-        (message "Got errors %S from buffer %S" current-errors flycheck-error-list-source-buffer)
         (let ((old-overlays flycheck-error-list-highlight-overlays)
               (min-point (point-max))
               (max-point (point-min)))
