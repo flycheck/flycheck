@@ -4855,7 +4855,9 @@ POS defaults to `point'."
       ;; and try again
       (widen)
       (goto-char pos)))
-  ;; Re-highlight the errors
+  ;; Re-highlight the errors.  We have post-command-hook for that, but calls to
+  ;; `flycheck-jump-in-buffer' that come from other buffers (e.g. from the error
+  ;; list) won't trigger it.
   (flycheck-error-list-highlight-errors 'preserve-pos))
 
 (defun flycheck-error-list-explain-error (&optional pos)
