@@ -9950,6 +9950,12 @@ Update the error level of ERR according to
       (setf (flycheck-error-level err) level)))
   err)
 
+(defun flycheck-flake8--find-project-root (_checker)
+  "Find setup.cfg in a parent directory of the current buffer."
+  ;; This is a workaround for `https://gitlab.com/pycqa/flake8/issues/517'; see
+  ;; also `https://github.com/flycheck/flycheck/issues/1722'
+  (locate-dominating-file (or buffer-file-name default-directory) "setup.cfg"))
+
 (flycheck-define-checker python-flake8
   "A Python syntax and style checker using Flake8.
 
@@ -9960,7 +9966,7 @@ Requires Flake8 3.0 or newer. See URL
   :command ("python3"
             (eval (flycheck-python-module-args 'python-flake8 "flake8"))
             "--format=default"
-            (config-file "--config" flycheck-flake8rc)
+            (config-file "--append-config" flycheck-flake8rc)
             (option "--max-complexity" flycheck-flake8-maximum-complexity nil
                     flycheck-option-int)
             (option "--max-line-length" flycheck-flake8-maximum-line-length nil
@@ -9969,6 +9975,7 @@ Requires Flake8 3.0 or newer. See URL
                     (concat "--stdin-display-name=" buffer-file-name)))
             "-")
   :standard-input t
+  :working-directory flycheck-flake8--find-project-root
   :error-filter (lambda (errors)
                   (let ((errors (flycheck-sanitize-errors errors)))
                     (seq-map #'flycheck-flake8-fix-error-level errors)))
