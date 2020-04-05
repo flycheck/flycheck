@@ -2766,6 +2766,54 @@ evaluating BODY."
     ;; Called once for `emacs-lisp', and a second time for checkdoc
     (should (equal was-called 2))))
 
+(define-derived-mode truncated-stdin-mode prog-mode "trunc")
+
+(flycheck-define-command-checker 'truncated-stdin
+  "Reply with an error after reading after reading 12345 bytes."
+  ;; This checker will close its stdin before we can write all of our input.
+  :command `(;; CI machines have python3 as "python"
+             ,(or (executable-find "python3") "python")
+             "-c" "import sys; sys.stdin.close(); print('stdin:1:1:error')")
+  :error-patterns '((error bol "stdin" ":" line ":" column ":" (message)))
+  :modes '(truncated-stdin-mode)
+  :standard-input t)
+
+(defconst flycheck-test--truncated-stdin
+  (symbol-plist 'truncated-stdin))
+
+;; Forget about this checker, otherwise later tests that ensure that all
+;; checkers are registered and documented documentation and fail
+(setf (symbol-plist 'truncated-stdin) nil)
+
+;; https://github.com/flycheck/flycheck/issues/1278
+(ert-deftest flycheck-start-command-checker/truncated-stdin-with-errors ()
+  :tags '(command-checker)
+  (cl-letf* ((flycheck-checker 'truncated-stdin)
+             ((symbol-plist 'truncated-stdin) flycheck-test--truncated-stdin))
+    (dolist (buffer-size '(4095 65537))
+      ;; As long as the checker reports at least one error closing stdin early
+      ;; isn't an issue.
+      (flycheck-ert-with-temp-buffer
+        (truncated-stdin-mode)
+        (insert (make-string buffer-size ?a))
+        (flycheck-ert-should-syntax-check-in-buffer
+         '(1 1 error "error" :checker truncated-stdin))))))
+
+;; https://github.com/flycheck/flycheck/issues/1278
+(ert-deftest flycheck-start-command-checker/truncated-stdin-without-errors ()
+  :tags '(command-checker)
+  (cl-letf* ((flycheck-checker 'truncated-stdin)
+             ((symbol-plist 'truncated-stdin) flycheck-test--truncated-stdin)
+             ((flycheck-checker-get 'truncated-stdin 'error-patterns)
+              '(("\\`_\\`" . error))))
+    ;; If the checker closes stdin early without reporting errors, something
+    ;; might have gone wrong, so warn the user.
+    (flycheck-ert-with-temp-buffer
+      (truncated-stdin-mode)
+      (insert (make-string 65537 ?\n))
+      (should-error (shut-up (flycheck-ert-should-syntax-check-in-buffer))
+                    :type 'flycheck-ert-suspicious-checker))))
+
 
 ;;; Executables of command checkers
 
@@ -4151,7 +4199,6 @@ Why not:
 
 (flycheck-ert-def-checker-test python-flake8 python syntax-error
   (let ((python-indent-guess-indent-offset nil) ; Silence Python Mode!
-
         (flycheck-python-flake8-executable "python3"))
     (flycheck-ert-should-syntax-check
      "language/python/syntax-error.py" 'python-mode
