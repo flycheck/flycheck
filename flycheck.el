@@ -2201,10 +2201,10 @@ Pop up a help buffer with the documentation of CHECKER."
                 (save-excursion
                   (while (re-search-backward "`\\([^`']+\\)'"
                                              beg-checker-list t)
-                    (when (flycheck-valid-checker-p
-                           (intern-soft (match-string 1)))
-                      (help-xref-button 1 'help-flycheck-checker-def checker
-                                        filename))))))))
+                    (let ((checker (intern-soft (match-string 1))))
+                      (when (flycheck-valid-checker-p checker)
+                        (help-xref-button 1 'help-flycheck-checker-doc
+                                          checker)))))))))
         ;; Call the custom print-doc function of the checker, if present
         (when print-doc
           (funcall print-doc checker))
