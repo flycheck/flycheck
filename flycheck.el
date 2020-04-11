@@ -8522,7 +8522,7 @@ The checker runs `checkdoc-current-buffer'."
             "--eval" (eval flycheck-emacs-lisp-checkdoc-form)
             "--" source)
   :error-patterns
-  ((warning line-start (file-name) ":" line ": " (message) line-end))
+  ((info line-start (file-name) ":" line ": " (message) line-end))
   :modes (emacs-lisp-mode)
   :enabled flycheck--emacs-lisp-enabled-p)
 

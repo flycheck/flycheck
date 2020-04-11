@@ -1024,7 +1024,7 @@
       (should (eq (flycheck-get-checker-for-buffer) 'emacs-lisp-checkdoc))
       (flycheck-ert-buffer-sync)
       (flycheck-ert-should-errors
-       '(12 nil warning "First sentence should end with punctuation"
+       '(12 nil info "First sentence should end with punctuation"
             :checker emacs-lisp-checkdoc)))))
 
 (ert-deftest flycheck-checker/disabled-checker-is-not-used ()
@@ -1051,7 +1051,7 @@
         (should (eq (flycheck-get-checker-for-buffer) 'emacs-lisp-checkdoc))
         (flycheck-ert-buffer-sync)
         (flycheck-ert-should-errors
-         '(12 nil warning "First sentence should end with punctuation"
+         '(12 nil info "First sentence should end with punctuation"
               :checker emacs-lisp-checkdoc))))))
 
 (ert-deftest flycheck-select-checker/selecting-sets-the-syntax-checker ()
@@ -1111,7 +1111,7 @@
       (flycheck-ert-buffer-sync)
       (should-not flycheck-checker)
       (flycheck-ert-should-errors
-       '(12 nil warning "First sentence should end with punctuation"
+       '(12 nil info "First sentence should end with punctuation"
             :checker emacs-lisp-checkdoc)))))
 
 (ert-deftest flycheck-disable-checker/disables-checker ()
@@ -2104,7 +2104,7 @@
          :checker emacs-lisp)
      '(11 8 warning "`message' called with 0 args to fill 1 format field(s)"
           :checker emacs-lisp)
-     '(12 nil warning "First sentence should end with punctuation"
+     '(12 nil info "First sentence should end with punctuation"
           :checker emacs-lisp-checkdoc)
      '(15 1 warning "`message' called with 0 args to fill 1 format field(s)"
           :checker emacs-lisp))))
@@ -2861,7 +2861,7 @@ evaluating BODY."
                                          "bin/dummy-emacs")))
     (flycheck-ert-should-syntax-check
      "language/emacs-lisp/warnings.el" 'emacs-lisp-mode
-     '(12 nil warning "First sentence should end with punctuation"
+     '(12 nil info "First sentence should end with punctuation"
           :checker emacs-lisp-checkdoc)
      '(17 4 error "t is not true!" :checker emacs-lisp)
      '(19 11 warning "This is a stupid message" :checker emacs-lisp))))
@@ -3443,7 +3443,7 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
 (flycheck-ert-def-checker-test (emacs-lisp emacs-lisp-checkdoc) emacs-lisp nil
   (flycheck-ert-should-syntax-check
    "language/emacs-lisp/warnings.el" 'emacs-lisp-mode
-   '(12 nil warning "First sentence should end with punctuation"
+   '(12 nil info "First sentence should end with punctuation"
         :checker emacs-lisp-checkdoc)
    '(16 6 warning "foobar called with 1 argument, but accepts only 0"
         :checker emacs-lisp)
@@ -3454,7 +3454,7 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
                                uses-right-major-mode
   (flycheck-ert-should-syntax-check
    "language/emacs-lisp/checkdoc-elisp-mode-regression.el" 'emacs-lisp-mode
-   '(11 nil warning "All variables and subroutines might as well have a documentation string"
+   '(11 nil info "All variables and subroutines might as well have a documentation string"
         :checker emacs-lisp-checkdoc)))
 
 (flycheck-ert-def-checker-test (emacs-lisp-checkdoc) emacs-lisp
@@ -3470,7 +3470,7 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
   (let ((inhibit-message t))
     (flycheck-ert-should-syntax-check
      "language/emacs-lisp/warnings.el.gz" 'emacs-lisp-mode
-     '(12 nil warning "First sentence should end with punctuation"
+     '(12 nil info "First sentence should end with punctuation"
           :checker emacs-lisp-checkdoc)
      '(16 6 warning "foobar called with 1 argument, but accepts only 0"
           :checker emacs-lisp)
@@ -3523,7 +3523,7 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
     (unwind-protect
         (flycheck-ert-should-syntax-check
          "language/emacs-lisp/warnings.el" 'emacs-lisp-mode
-         '(12 nil warning "First sentence should end with punctuation"
+         '(12 nil info "First sentence should end with punctuation"
               :checker emacs-lisp-checkdoc))
       (remove-hook 'emacs-lisp-mode-hook disable-byte-comp))))
 
