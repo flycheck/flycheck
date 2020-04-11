@@ -7367,12 +7367,15 @@ Requires GCC 4.4 or newer.  See URL `https://gcc.gnu.org/'."
             "-")
   :standard-input t
   :error-patterns
-  ((info line-start (or "<stdin>" (file-name)) ":" line ":" column
+  ((info line-start (or "<stdin>" (file-name))
+         ":" line (optional ":" column)
          ": note: " (message) line-end)
-   (warning line-start (or "<stdin>" (file-name)) ":" line ":" column
+   (warning line-start (or "<stdin>" (file-name))
+            ":" line (optional ":" column)
             ": warning: " (message (one-or-more (not (any "\n["))))
             (optional "[" (id (one-or-more not-newline)) "]") line-end)
-   (error line-start (or "<stdin>" (file-name)) ":" line ":" column
+   (error line-start (or "<stdin>" (file-name))
+          ":" line (optional ":" column)
           ": " (or "fatal error" "error") ": " (message) line-end))
   :modes (c-mode c++-mode)
   :next-checkers ((warning . c/c++-cppcheck)))

@@ -3069,6 +3069,8 @@ evaluating BODY."
      '(2 20 error "no member named 'bar' in 'A'"
          :checker c/c++-clang)
      '(6 19 info "in instantiation of function template specialization 'foo<A>' requested here"
+         :checker c/c++-clang)
+     '(8 9 warning "unknown pragma ignored"
          :checker c/c++-clang))))
 
 (flycheck-ert-def-checker-test c/c++-clang (c c++) fatal-error
@@ -3108,7 +3110,9 @@ evaluating BODY."
     (flycheck-ert-should-syntax-check
      "language/c_c++/error.cpp" 'c++-mode
      '(2 20 error "'struct A' has no member named 'bar'"
-         :checker c/c++-gcc))))
+         :checker c/c++-gcc)
+     '(8 nil warning "ignoring #pragma nope"
+         :id "-Wunknown-pragmas" :checker c/c++-gcc))))
 
 (flycheck-ert-def-checker-test c/c++-gcc (c c++) fatal-error
   (let ((flycheck-disabled-checkers '(c/c++-clang)))
