@@ -4009,7 +4009,8 @@ The following PROPERTIES constitute an error level:
 `:severity SEVERITY'
      A number denoting the severity of this level.  The higher
      the number, the more severe is this level compared to other
-     levels.  Defaults to 0.
+     levels.  Defaults to 0; info is -10, warning is 10, and
+     error is 100.
 
      The severity is used by `flycheck-error-level-<' to
      determine the ordering of errors according to their levels.
