@@ -4823,7 +4823,7 @@ The manifest path is relative to
   (let ((flycheck-disabled-checkers '(rust-cargo)))
     (flycheck-ert-should-syntax-check
      "language/rust/flycheck-test/src/importing.rs" 'rust-mode
-     '(1 5 error "failed to resolve: there are too many initial `super`s. (there are too many initial `super`s.)"
+     '(1 5 error "failed to resolve: there are too many leading `super` keywords (there are too many leading `super` keywords)"
          :checker rust :id "E0433" :group 2
          :end-line 1 :end-column 10)
      '(4 24 error "failed to resolve: use of undeclared type or module `imported` (use of undeclared type or module `imported`)"
