@@ -3730,7 +3730,7 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
   (skip-unless (file-exists-p (getenv "HOME")))
   (let ((flycheck-disabled-checkers '(haskell-ghc)))
     (flycheck-ert-should-syntax-check
-     "language/haskell/Literate.lhs" 'literate-haskell-mode
+     "language/haskell/Literate.lhs" 'haskell-literate-mode
      '(6 1 warning "Top-level binding with no type signature: foo :: a"
          :id "-Wmissing-signatures"
          :checker haskell-stack-ghc))))
@@ -3790,7 +3790,7 @@ Why not:
 (flycheck-ert-def-checker-test (haskell-ghc haskell-hlint) haskell literate
   (let ((flycheck-disabled-checkers '(haskell-stack-ghc)))
     (flycheck-ert-should-syntax-check
-     "language/haskell/Literate.lhs" 'literate-haskell-mode
+     "language/haskell/Literate.lhs" 'haskell-literate-mode
      '(6 1 warning "Top-level binding with no type signature: foo :: a"
          :id "-Wmissing-signatures"
          :checker haskell-ghc))))
