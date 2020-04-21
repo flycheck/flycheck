@@ -5123,19 +5123,19 @@ and if the echo area is not occupied by minibuffer input."
 (defun flycheck-display-error-messages (errors)
   "Display the messages of ERRORS.
 
-Concatenate all non-nil messages of ERRORS separated by empty
-lines, and display them with `display-message-or-buffer', which
-shows the messages either in the echo area or in a separate
-buffer, depending on the number of lines.  See Info
-node `(elisp)Displaying Messages' for more information.
+Concatenate all non-nil messages of ERRORS as with
+`flycheck-help-echo-all-error-messages', and display them with
+`display-message-or-buffer', which shows the messages either in
+the echo area or in a separate buffer, depending on the number of
+lines.  See Info node `(elisp)Displaying Messages' for more
+information.
 
 In the latter case, show messages in the buffer denoted by
 variable `flycheck-error-message-buffer'."
   (when (and errors (flycheck-may-use-echo-area-p))
-    (let ((messages (seq-map #'flycheck-error-format-message-and-id errors)))
-      (display-message-or-buffer (string-join messages "\n\n")
-                                 flycheck-error-message-buffer
-                                 'not-this-window)
+    (let ((message (flycheck-help-echo-all-error-messages errors)))
+      (display-message-or-buffer
+       message flycheck-error-message-buffer 'not-this-window)
       ;; We cannot rely on `display-message-or-buffer' returning the right
       ;; window. See URL `https://github.com/flycheck/flycheck/issues/1643'.
       (-when-let ((buf (get-buffer flycheck-error-message-buffer)))
