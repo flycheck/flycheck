@@ -3473,18 +3473,25 @@ If the buffer of ERR is not live, FORMS are not evaluated."
      (with-current-buffer (flycheck-error-buffer ,err)
        ,@forms)))
 
-(defun flycheck--exact-region (line col end-line end-col)
-  "Get the region of range LINE, COL, END-LINE, END-COL.
+(defun flycheck--exact-region (err)
+  "Get the region of ERR, if ERR specifies a range.
 
 Return a cons cell `(BEG . END)'.  If the input range is empty,
 it is expanded to cover at least one character so that END is
-always greater than BEG."
-  (let ((beg (flycheck-line-column-to-position line col))
-        (end (flycheck-line-column-to-position end-line end-col)))
-    (cond
-     ((< beg end) (cons beg end))
-     ((= end (point-max)) (cons (1- end) end))
-     (t (cons end (1+ end))))))
+always greater than BEG.  If ERR doesn't specify an end-column
+return nil."
+  (-if-let* ((line (flycheck-error-line err))
+             (column (flycheck-error-column err))
+             (end-line (or (flycheck-error-end-line err) line))
+             (end-column (flycheck-error-end-column err)))
+      ;; Ignoring fields speeds up calls to `line-end-position'.
+      (let* ((inhibit-field-text-motion t)
+             (beg (flycheck-line-column-to-position line column))
+             (end (flycheck-line-column-to-position end-line end-column)))
+        (cond
+         ((< beg end) (cons beg end))
+         ((= end (point-max)) (cons (1- end) end))
+         (t (cons end (1+ end)))))))
 
 (defun flycheck--line-region (pos)
   "Get the line region of position POS.
@@ -3530,9 +3537,13 @@ the THING at the column, and END the end of the THING."
     (goto-char pos)
     (bounds-of-thing-at-point thing)))
 
-(defun flycheck--approximate-region (line column mode)
-  "Compute the region of LINE, COLUMN based on MODE."
-  (let* ((beg (flycheck-line-column-to-position line (or column 1))))
+(defun flycheck--approximate-region (err mode)
+  "Compute the region of ERR based on MODE and ERR's line and column."
+  ;; Ignoring fields speeds up calls to `line-end-position'.
+  (let* ((inhibit-field-text-motion t)
+         (line (flycheck-error-line err))
+         (column (flycheck-error-column err))
+         (beg (flycheck-line-column-to-position line (or column 1))))
     (if (or (null column)
             (eq mode 'lines))
         (flycheck--line-region beg)
@@ -3554,18 +3565,10 @@ ERR is a Flycheck error.  If its position is fully specified, use
 that to compute a region; otherwise, use MODE, as documented in
 `flycheck-highlighting-mode'.  If MODE is nil, signal an error."
   (flycheck-error-with-buffer err
-    (save-excursion
-      (save-restriction
-        (widen)
-        ;; Ignoring fields speeds up calls to `line-end-position'.
-        (let* ((inhibit-field-text-motion t)
-               (line (flycheck-error-line err))
-               (column (flycheck-error-column err))
-               (end-line (or (flycheck-error-end-line err) line))
-               (end-column (flycheck-error-end-column err)))
-          (if (and line column end-line end-column)
-              (flycheck--exact-region line column end-line end-column)
-            (flycheck--approximate-region line column mode)))))))
+    (save-restriction
+      (widen)
+      (or (flycheck--exact-region err)
+          (flycheck--approximate-region err mode)))))
 
 (defun flycheck-error-pos (err)
   "Get the buffer position of ERR.
