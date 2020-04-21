@@ -104,6 +104,9 @@ attention to case differences."
              (eq t (compare-strings suffix nil nil
                                     string start-pos nil ignore-case))))))
 
+  (defalias 'flycheck--format-message
+    (if (fboundp 'format-message) #'format-message #'format))
+
   ;; TODO: Remove when dropping support for Emacs 24.3 and earlier
   (unless (featurep 'subr-x)
     ;; `subr-x' function for Emacs 24.3 and below
@@ -3597,16 +3600,23 @@ most.  It defaults to 20."
            "\\s-+" " " (buffer-substring beg (min end (point-max))))
           (or max-length 20) nil nil t))))))
 
-(defun flycheck-error-format-message-and-id (err)
-  "Format the message and id of ERR as human-readable string."
-  (let ((id (flycheck-error-id err))
-        (filename (flycheck-error-filename err)))
-    (concat (when (and filename (not (equal filename (buffer-file-name))))
-              (format "In \"%s\":\n"
-                      (file-relative-name filename default-directory)))
-            (flycheck-error-message err)
-            (when id
-              (format " [%s]" id)))))
+(defun flycheck-error-format-message-and-id (err &optional include-snippet)
+  "Format the message and id of ERR as human-readable string.
+
+If INCLUDE-SNIPPET is non-nil, prepend the message with a snippet
+of the text that the error applies to (such text can only be
+determined if the error contains a full span, not just a
+beginning position)."
+  (let* ((id (flycheck-error-id err))
+         (fname (flycheck-error-filename err))
+         (other-file-p (and fname (not (equal fname (buffer-file-name))))))
+    (concat (and other-file-p (format "In %S:\n" (file-relative-name fname)))
+            (and include-snippet
+                 (-when-let* ((snippet (flycheck-error-format-snippet err)))
+                   (flycheck--format-message "`%s': " snippet)))
+            (or (flycheck-error-message err)
+                (format "Unknown %S" (flycheck-error-level err)))
+            (and id (format " [%s]" id)))))
 
 (defun flycheck-error-format-position (err)
   "Format the position of ERR as a human-readable string."
@@ -4684,7 +4694,7 @@ Return a list with the contents of the table cell."
          (line (flycheck-error-line error))
          (column (flycheck-error-column error))
          (message (or (flycheck-error-message error)
-                      (format "Unknown %s" (symbol-name level))))
+                      (format "Unknown %S" level)))
          (flushed-msg (flycheck-flush-multiline-message message))
          (id (flycheck-error-id error))
          (id-str (if id (format "%s" id) ""))
