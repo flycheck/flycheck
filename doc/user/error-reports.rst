@@ -99,11 +99,11 @@ The highlights use the following faces depending on the error level:
    The highlighting face for ``error``, ``warning`` and ``info`` levels
    respectively.
 
-Fringe icons
-============
+Fringe and margin icons
+=======================
 
-In GUI frames Flycheck also adds indicators to the fringe—the left or right
-border of an Emacs window that is—to help you identify erroneous lines quickly.
+In GUI frames, Flycheck also adds indicators to the fringe—the left or right
+border of an Emacs window—to help you identify erroneous lines quickly.
 These indicators consist of a rightward-pointing double arrow shape coloured in
 the colour of the corresponding error level.  By default the arrow is 8 pixels
 wide, but a 16 pixels version is used if the fringe is `wide enough
@@ -121,22 +121,29 @@ wide, but a 16 pixels version is used if the fringe is `wide enough
    indicators.
 
 You can customise the location of these indicators (left or right fringe) with
-`flycheck-indication-mode` which also lets you turn off these indicators
-completely:
+`flycheck-indication-mode`, which also lets you turn off these indicators
+completely; additionally, you can move these indicators into the margins instead
+of the fringes:
 
 .. defcustom:: flycheck-indication-mode
 
    How Flycheck indicates errors and warnings in the buffer fringes:
 
    ``left-fringe`` or ``right-fringe``
-      Use the left or right fringe respectively.
+      Use the left or right fringe respectively.  Fringes can only contain
+      monochrome bitmaps, so Flycheck draws small pixel-art arrows.
+
+   ``left-margin`` or ``right-margin``
+      Use the left or right margin respectively.  Margins can support all of
+      Emacs' rendering facilities, so Flycheck uses the ``»`` character, which
+      scales with the font size.
 
    ``nil``
-      Do not indicate errors and warnings in the fringe.
+      Do not indicate errors and warnings in the fringe or in the margin.
 
-The following faces control the colours of the fringe indicators.  However they
-do not let you change the shape of the indicators—to achieve this you'd have to
-redefine the error levels with `flycheck-define-error-level`.
+The following faces control the colours of fringe and margin indicators.
+However they do not let you change the shape of the indicators—to achieve this
+you'd have to redefine the error levels with `flycheck-define-error-level`.
 
 .. defface:: flycheck-fringe-error
              flycheck-fringe-warning
