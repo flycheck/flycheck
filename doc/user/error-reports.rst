@@ -117,9 +117,6 @@ wide, but a 16 pixels version is used if the fringe is `wide enough
    distribution please take a look at its documentation if you're unsure about
    the appearance of Flycheck's indicators.
 
-   Note that we discourage you from changing the shape of Flycheck’s fringe
-   indicators.
-
 You can customise the location of these indicators (left or right fringe) with
 `flycheck-indication-mode`, which also lets you turn off these indicators
 completely; additionally, you can move these indicators into the margins instead
@@ -142,14 +139,15 @@ of the fringes:
       Do not indicate errors and warnings in the fringe or in the margin.
 
 The following faces control the colours of fringe and margin indicators.
-However they do not let you change the shape of the indicators—to achieve this
-you'd have to redefine the error levels with `flycheck-define-error-level`.
 
 .. defface:: flycheck-fringe-error
              flycheck-fringe-warning
              flycheck-fringe-info
 
    The icon faces for ``error``, ``warning`` and ``info`` levels respectively.
+
+To change the fringe bitmap or the symbol used in the margins, use the function
+``flycheck-redefine-standard-error-levels``.
 
 Mode line
 =========
