@@ -3952,23 +3952,32 @@ show the icon."
 ;;; Built-in error levels
 (when (fboundp 'define-fringe-bitmap)
   (define-fringe-bitmap 'flycheck-fringe-bitmap-double-arrow
-    (vector #b00000000
-            #b00000000
-            #b00000000
-            #b00000000
-            #b00000000
-            #b10011000
-            #b01101100
-            #b00110110
-            #b00011011
-            #b00110110
-            #b01101100
-            #b10011000
-            #b00000000
-            #b00000000
-            #b00000000
-            #b00000000
-            #b00000000)))
+    [#b11011000
+     #b01101100
+     #b00110110
+     #b00011011
+     #b00110110
+     #b01101100
+     #b11011000
+     #b00000000])
+  (define-fringe-bitmap 'flycheck-fringe-bitmap-double-arrow-hi-res
+    [#b0000000000000000
+     #b0000000000000000
+     #b1111001111000000
+     #b0111100111100000
+     #b0011110011110000
+     #b0001111001111000
+     #b0000111100111100
+     #b0000011110011110
+     #b0000011110011110
+     #b0000111100111100
+     #b0001111001111000
+     #b0011110011110000
+     #b0111100111100000
+     #b1111001111000000
+     #b0000000000000000
+     #b0000000000000000]
+    nil 16))
 
 (setf (get 'flycheck-error-overlay 'face) 'flycheck-error)
 (setf (get 'flycheck-error-overlay 'priority) 110)
