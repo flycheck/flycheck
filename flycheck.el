@@ -3872,11 +3872,12 @@ The following PROPERTIES constitute an error level:
      property for error level categories is `priority', to
      influence the stacking of multiple error level overlays.
 
-`:fringe-bitmap BITMAP'
+`:fringe-bitmap BITMAPS'
      A fringe bitmap symbol denoting the bitmap to use for fringe
-     indicators for this level.  See Info node `(elisp)Fringe
-     Bitmaps' for more information about fringe bitmaps,
-     including a list of built-in fringe bitmaps.
+     indicators for this level, or a cons of two bitmaps (one for
+     narrow fringes and one for wide fringes).  See Info node
+     `(elisp)Fringe Bitmaps' for more information about fringe
+     bitmaps, including a list of built-in fringe bitmaps.
 
 `:fringe-face FACE'
      A face symbol denoting the face to use for fringe indicators
@@ -3893,8 +3894,9 @@ The following PROPERTIES constitute an error level:
         (plist-get properties :compilation-level))
   (setf (get level 'flycheck-overlay-category)
         (plist-get properties :overlay-category))
-  (setf (get level 'flycheck-fringe-bitmap-double-arrow)
-        (plist-get properties :fringe-bitmap))
+  (setf (get level 'flycheck-fringe-bitmaps-double-arrow)
+        (let ((bitmap (plist-get properties :fringe-bitmap)))
+          (if (consp bitmap) bitmap (cons bitmap bitmap))))
   (setf (get level 'flycheck-fringe-face)
         (plist-get properties :fringe-face))
   (setf (get level 'flycheck-error-list-face)
@@ -3916,9 +3918,13 @@ The following PROPERTIES constitute an error level:
   "Get the overlay category for LEVEL."
   (get level 'flycheck-overlay-category))
 
-(defun flycheck-error-level-fringe-bitmap (level)
-  "Get the fringe bitmap for LEVEL."
-  (get level 'flycheck-fringe-bitmap-double-arrow))
+(defun flycheck-error-level-fringe-bitmap (level &optional hi-res)
+  "Get the fringe bitmap for LEVEL.
+
+Optional argument HI-RES non-nil means that the returned bitmap
+will be the high resolution version."
+  (let ((bitmaps (get level 'flycheck-fringe-bitmaps-double-arrow)))
+    (if hi-res (cdr bitmaps) (car bitmaps))))
 
 (defun flycheck-error-level-fringe-face (level)
   "Get the fringe face for LEVEL."
@@ -3943,10 +3949,14 @@ intended for use as `before-string' of an overlay to actually
 show the icon."
   (unless (memq side '(left-fringe right-fringe))
     (error "Invalid fringe side: %S" side))
-  (propertize "!" 'display
-              (list side
-                    (flycheck-error-level-fringe-bitmap level)
-                    (flycheck-error-level-fringe-face level))))
+  (let* ((fringe-width (pcase side
+                         (`left-fringe (car (window-fringes)))
+                         (`right-fringe (cadr (window-fringes)))))
+         (high-res (= 16 fringe-width)))
+    (propertize "!" 'display
+                (list side
+                      (flycheck-error-level-fringe-bitmap level high-res)
+                      (flycheck-error-level-fringe-face level)))))
 
 
 ;;; Built-in error levels
@@ -3986,7 +3996,8 @@ show the icon."
   :severity 100
   :compilation-level 2
   :overlay-category 'flycheck-error-overlay
-  :fringe-bitmap 'flycheck-fringe-bitmap-double-arrow
+  :fringe-bitmap (cons 'flycheck-fringe-bitmap-double-arrow
+                       'flycheck-fringe-bitmap-double-arrow-hi-res)
   :fringe-face 'flycheck-fringe-error
   :error-list-face 'flycheck-error-list-error)
 
@@ -3997,7 +4008,8 @@ show the icon."
   :severity 10
   :compilation-level 1
   :overlay-category 'flycheck-warning-overlay
-  :fringe-bitmap 'flycheck-fringe-bitmap-double-arrow
+  :fringe-bitmap (cons 'flycheck-fringe-bitmap-double-arrow
+                       'flycheck-fringe-bitmap-double-arrow-hi-res)
   :fringe-face 'flycheck-fringe-warning
   :error-list-face 'flycheck-error-list-warning)
 
@@ -4008,7 +4020,8 @@ show the icon."
   :severity -10
   :compilation-level 0
   :overlay-category 'flycheck-info-overlay
-  :fringe-bitmap 'flycheck-fringe-bitmap-double-arrow
+  :fringe-bitmap (cons 'flycheck-fringe-bitmap-double-arrow
+                       'flycheck-fringe-bitmap-double-arrow-hi-res)
   :fringe-face 'flycheck-fringe-info
   :error-list-face 'flycheck-error-list-info)
 
