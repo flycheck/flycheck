@@ -138,6 +138,24 @@ of the fringes:
    ``nil``
       Do not indicate errors and warnings in the fringe or in the margin.
 
+By default, Emacs displays fringes, but not margins.  With ``left-margin`` and
+``right-margin`` indication modes, you will need to enable margins in your
+``.emacs``.  For example:
+
+.. code-block:: elisp
+
+   (setq-default left-fringe-width 1 right-fringe-width 8
+                 left-margin-width 1 right-margin-width 0)
+
+If you intend to use margins only with Flycheck, consider using
+``flycheck-set-indication-mode`` in a hook instead; this function adjusts
+margins and fringes for the current buffer.
+
+.. code-block:: elisp
+
+   (setq-default flycheck-indication-mode 'left-margin)
+   (add-hook 'flycheck-mode-hook #'flycheck-set-indication-mode)
+
 The following faces control the colours of fringe and margin indicators.
 
 .. defface:: flycheck-fringe-error
