@@ -105,7 +105,9 @@ Fringe icons
 In GUI frames Flycheck also adds indicators to the fringe—the left or right
 border of an Emacs window that is—to help you identify erroneous lines quickly.
 These indicators consist of a rightward-pointing double arrow shape coloured in
-the colour of the corresponding error level.
+the colour of the corresponding error level.  By default the arrow is 8 pixels
+wide, but a 16 pixels version is used if the fringe is `wide enough
+<https://www.gnu.org/software/emacs/manual/html_node/emacs/Fringes.html>`_.
 
 .. note::
 
