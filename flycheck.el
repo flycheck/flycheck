@@ -3894,7 +3894,7 @@ The following PROPERTIES constitute an error level:
         (plist-get properties :compilation-level))
   (setf (get level 'flycheck-overlay-category)
         (plist-get properties :overlay-category))
-  (setf (get level 'flycheck-fringe-bitmaps-double-arrow)
+  (setf (get level 'flycheck-fringe-bitmaps)
         (let ((bitmap (plist-get properties :fringe-bitmap)))
           (if (consp bitmap) bitmap (cons bitmap bitmap))))
   (setf (get level 'flycheck-fringe-face)
@@ -3923,7 +3923,7 @@ The following PROPERTIES constitute an error level:
 
 Optional argument HI-RES non-nil means that the returned bitmap
 will be the high resolution version."
-  (let ((bitmaps (get level 'flycheck-fringe-bitmaps-double-arrow)))
+  (let ((bitmaps (get level 'flycheck-fringe-bitmaps)))
     (if hi-res (cdr bitmaps) (car bitmaps))))
 
 (defun flycheck-error-level-fringe-face (level)
@@ -3989,6 +3989,10 @@ show the icon."
      #b0000000000000000]
     nil 16))
 
+(defconst flycheck-default-fringe-bitmaps
+  (cons 'flycheck-fringe-bitmap-double-arrow
+        'flycheck-fringe-bitmap-double-arrow-hi-res))
+
 (setf (get 'flycheck-error-overlay 'face) 'flycheck-error)
 (setf (get 'flycheck-error-overlay 'priority) 110)
 
@@ -3996,8 +4000,7 @@ show the icon."
   :severity 100
   :compilation-level 2
   :overlay-category 'flycheck-error-overlay
-  :fringe-bitmap (cons 'flycheck-fringe-bitmap-double-arrow
-                       'flycheck-fringe-bitmap-double-arrow-hi-res)
+  :fringe-bitmap flycheck-default-fringe-bitmaps
   :fringe-face 'flycheck-fringe-error
   :error-list-face 'flycheck-error-list-error)
 
@@ -4008,8 +4011,7 @@ show the icon."
   :severity 10
   :compilation-level 1
   :overlay-category 'flycheck-warning-overlay
-  :fringe-bitmap (cons 'flycheck-fringe-bitmap-double-arrow
-                       'flycheck-fringe-bitmap-double-arrow-hi-res)
+  :fringe-bitmap flycheck-default-fringe-bitmaps
   :fringe-face 'flycheck-fringe-warning
   :error-list-face 'flycheck-error-list-warning)
 
@@ -4020,8 +4022,7 @@ show the icon."
   :severity -10
   :compilation-level 0
   :overlay-category 'flycheck-info-overlay
-  :fringe-bitmap (cons 'flycheck-fringe-bitmap-double-arrow
-                       'flycheck-fringe-bitmap-double-arrow-hi-res)
+  :fringe-bitmap flycheck-default-fringe-bitmaps
   :fringe-face 'flycheck-fringe-info
   :error-list-face 'flycheck-error-list-info)
 
