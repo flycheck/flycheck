@@ -3897,6 +3897,9 @@ The following PROPERTIES constitute an error level:
   (setf (get level 'flycheck-fringe-bitmaps)
         (let ((bitmap (plist-get properties :fringe-bitmap)))
           (if (consp bitmap) bitmap (cons bitmap bitmap))))
+  ;; Kept for compatibility
+  (setf (get level 'flycheck-fringe-bitmap-double-arrow)
+        (car (get level 'flycheck-fringe-bitmaps)))
   (setf (get level 'flycheck-fringe-face)
         (plist-get properties :fringe-face))
   (setf (get level 'flycheck-error-list-face)
