@@ -7196,8 +7196,8 @@ information about warnings."
 (defun flycheck-c/c++-quoted-include-directory ()
   "Get the directory for quoted includes.
 
-C/C++ compiles typicall look up includes with quotation marks in
-the directory of the file being compiled.  However, since
+C/C++ compilers typically look up includes with quotation marks
+in the directory of the file being compiled.  However, since
 Flycheck uses temporary copies for syntax checking, it needs to
 explicitly determine the directory for quoted includes.
 
