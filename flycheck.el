@@ -3872,6 +3872,15 @@ nil."
 
 
 ;;; Error levels
+(defun flycheck-make-margin-spec (margin-str face)
+  "Make a display spec to indicate errors in the margins.
+
+Returns MARGIN-STR with FACE applied."
+  (propertize margin-str 'face `(,face default)))
+
+(defconst flycheck-default-margin-str
+  "»")
+
 ;;;###autoload
 (defun flycheck-define-error-level (level &rest properties)
   "Define a new error LEVEL with PROPERTIES.
@@ -3907,13 +3916,6 @@ The following PROPERTIES constitute an error level:
      property for error level categories is `priority', to
      influence the stacking of multiple error level overlays.
 
-`:margin-spec SPEC'
-     A display specification indicating what to display in the
-     margin when `flycheck-indication-mode' is `left-margin' or
-     `right-margin'.  See Info node `(elisp)Displaying in the
-     Margins'.  If omitted, Flycheck generates an image spec from
-     the fringe bitmap.
-
 `:fringe-bitmap BITMAPS'
      A fringe bitmap symbol denoting the bitmap to use for fringe
      indicators for this level, or a cons of two bitmaps (one for
@@ -3924,6 +3926,13 @@ The following PROPERTIES constitute an error level:
 `:fringe-face FACE'
      A face symbol denoting the face to use for fringe indicators
      for this level.
+
+`:margin-spec SPEC'
+     A display specification indicating what to display in the
+     margin when `flycheck-indication-mode' is `left-margin' or
+     `right-margin'.  See Info node `(elisp)Displaying in the
+     Margins'.  If omitted, Flycheck generates an image spec from
+     the fringe bitmap.
 
 `:error-list-face FACE'
      A face symbol denoting the face to use for messages of this
@@ -3942,10 +3951,13 @@ The following PROPERTIES constitute an error level:
   ;; Kept for compatibility
   (setf (get level 'flycheck-fringe-bitmap-double-arrow)
         (car (get level 'flycheck-fringe-bitmaps)))
-  (setf (get level 'flycheck-margin-spec)
-        (plist-get properties :margin-spec))
   (setf (get level 'flycheck-fringe-face)
         (plist-get properties :fringe-face))
+  (setf (get level 'flycheck-margin-spec)
+        (or (plist-get properties :margin-spec)
+            (flycheck-make-margin-spec
+             flycheck-default-margin-str
+             (or (get level 'flycheck-fringe-face) 'default))))
   (setf (get level 'flycheck-error-list-face)
         (plist-get properties :error-list-face)))
 
@@ -4045,12 +4057,6 @@ show the indicator."
    #b1111001111000000]
   "High-resolution bitmap used to indicate errors in the fringes.")
 
-(defun flycheck-make-margin-spec (margin-str face)
-  "Make a display spec to indicate errors in the margins.
-
-Returns MARGIN-STR with FACE applied."
-  (propertize margin-str 'face `(,face default)))
-
 (when (fboundp 'define-fringe-bitmap) ;; #ifdef HAVE_WINDOW_SYSTEM
   (define-fringe-bitmap
     'flycheck-fringe-bitmap-double-arrow
@@ -4069,7 +4075,7 @@ margins (MARGIN-STR, a string) or the bitmap drawn in the
 fringes (FRINGE-BITMAP, a fringe bitmap symbol or a cons of such
 symbols, as in `flycheck-define-error-level')."
   (unless margin-str
-    (setq margin-str "»"))
+    (setq margin-str flycheck-default-margin-str))
 
   (unless fringe-bitmap
     (setq fringe-bitmap
