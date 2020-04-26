@@ -187,10 +187,10 @@ $graph:
         identity: true
       doc: |
         The format of the file: this must be an IRI of a concept node that
-        represents the file format, preferrably defined within an ontology.
+        represents the file format, preferably defined within an ontology.
         If no ontology is available, file formats may be tested by exact match.
 
-        Reasoning about format compatability must be done by checking that an
+        Reasoning about format compatibility must be done by checking that an
         input file format is the same, `owl:equivalentClass` or
         `rdfs:subClassOf` the format required by the input parameter.
         `owl:equivalentClass` is transitive with `rdfs:subClassOf`, e.g. if
@@ -364,7 +364,7 @@ $graph:
 
         For input parameters, this must be one or more IRIs of concept nodes
         that represents file formats which are allowed as input to this
-        parameter, preferrably defined within an ontology.  If no ontology is
+        parameter, preferably defined within an ontology.  If no ontology is
         available, file formats may be tested by exact match.
 
         For output parameters, this is the file format that will be assigned to

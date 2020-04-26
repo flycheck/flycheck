@@ -275,7 +275,7 @@ $graph:
         this input parameter.
 
         If `valueFrom` is a parameter reference or expression, it must be
-        evaluated to yield the actual value to be assiged to the input field.
+        evaluated to yield the actual value to be assigned to the input field.
 
         The `self` value of in the parameter reference or expression must be
         the value of the parameter(s) specified in the `source` field, or
@@ -465,7 +465,7 @@ $graph:
     those steps.  When a step produces output that will be consumed by a
     second step, the first step is a dependency of the second step.
 
-    When there is a dependency, the workflow engine must execute the preceeding
+    When there is a dependency, the workflow engine must execute the preceding
     step and wait for it to successfully produce output before executing the
     dependent step.  If two steps are defined in the workflow graph that
     are not directly or indirectly dependent, these steps are **independent**,
@@ -479,7 +479,7 @@ $graph:
     The `source` field expresses the dependency of one parameter on another
     such that when a value is associated with the parameter specified by
     `source`, that value is propagated to the destination parameter.  When all
-    data links inbound to a given step are fufilled, the step is ready to
+    data links inbound to a given step are fulfilled, the step is ready to
     execute.
 
     ## Workflow success and failure
@@ -516,7 +516,7 @@ $graph:
     - name: steps
       doc: |
         The individual steps that make up the workflow.  Each step is executed when all of its
-        input data links are fufilled.  An implementation may choose to execute
+        input data links are fulfilled.  An implementation may choose to execute
         the steps in a different order than listed and/or execute steps
         concurrently, provided that dependencies between steps are met.
       type:
