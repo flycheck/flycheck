@@ -3822,8 +3822,7 @@ again."
 
 Add ERRORS to `flycheck-current-errors' and process each error
 with `flycheck-process-error-functions'."
-  (setq flycheck-current-errors (sort (append errors flycheck-current-errors)
-                                      #'flycheck-error-<))
+  (setq flycheck-current-errors (append errors flycheck-current-errors))
   (overlay-recenter (point-max))
   (seq-do (lambda (err)
             (run-hook-with-args-until-success 'flycheck-process-error-functions
