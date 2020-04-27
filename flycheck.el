@@ -1057,6 +1057,12 @@ is used."
   :group 'flycheck-faces
   :package-version '(flycheck . "0.21"))
 
+(defface flycheck-error-list-error-message
+  '((t))
+  "Face for the error message in the error list."
+  :group 'flycheck-faces
+  :package-version '(flycheck . "33"))
+
 (defface flycheck-error-list-highlight
   '((t :bold t))
   "Flycheck face to highlight errors in the error list."
@@ -4812,7 +4818,9 @@ the beginning of the buffer."
 MESSAGE and CHECKER are displayed in a single column to allow the
 message to stretch arbitrarily far."
   (let ((checker-name (propertize (symbol-name checker)
-                                  'face 'flycheck-error-list-checker-name)))
+                                  'face 'flycheck-error-list-checker-name))
+        (message (propertize message
+                             'face 'flycheck-error-list-error-message)))
     (format "%s (%s)" message checker-name)))
 
 (defconst flycheck-error-list-format
