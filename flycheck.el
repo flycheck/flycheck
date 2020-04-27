@@ -2561,7 +2561,7 @@ is applicable from Emacs Lisp code.  Use
     (save-buffer))
 
   (let ((buffer (current-buffer)))
-    (with-help-window (get-buffer-create " *Flycheck checker*")
+    (with-help-window "*Flycheck checker*"
       (with-current-buffer standard-output
         (flycheck--verify-print-header "Syntax checker in buffer " buffer)
         (flycheck--verify-princ-checker checker buffer 'with-mm)
@@ -2600,11 +2600,10 @@ possible problems are shown."
          (other-checkers
           (seq-difference (seq-filter #'flycheck-checker-supports-major-mode-p
                                       flycheck-checkers)
-                          (cons first-checker valid-checkers)))
-         (help-buffer (get-buffer-create " *Flycheck checkers*")))
+                          (cons first-checker valid-checkers))))
 
     ;; Print all applicable checkers for this buffer
-    (with-help-window help-buffer
+    (with-help-window "*Flycheck checkers*"
       (with-current-buffer standard-output
         (flycheck--verify-print-header "Syntax checkers for buffer " buffer)
 
@@ -2653,12 +2652,11 @@ but will not run until properly configured:\n\n")
             (princ
              "\nTry adding these syntax checkers to `flycheck-checkers'.\n")))
 
-        (flycheck--verify-print-footer buffer)))
+        (flycheck--verify-print-footer buffer)
 
-    (with-current-buffer help-buffer
-      (setq-local revert-buffer-function
-                  (lambda (_ignore-auto _noconfirm)
-                    (with-current-buffer buffer (flycheck-verify-setup)))))))
+        (setq-local revert-buffer-function
+                    (lambda (_ignore-auto _noconfirm)
+                      (with-current-buffer buffer (flycheck-verify-setup))))))))
 
 
 ;;; Predicates for generic syntax checkers
@@ -5469,7 +5467,7 @@ this error to produce the explanation to display."
 
 (defun flycheck-display-error-explanation (explanation)
   "Display the EXPLANATION string in a help buffer."
-  (with-help-window (get-buffer-create flycheck-explain-error-buffer)
+  (with-help-window flycheck-explain-error-buffer
     (princ explanation)))
 
 
