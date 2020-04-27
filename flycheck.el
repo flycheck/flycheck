@@ -2273,15 +2273,20 @@ Pop up a help buffer with the documentation of CHECKER."
      (list (flycheck-read-checker prompt default))))
   (unless (flycheck-valid-checker-p checker)
     (user-error "You didn't specify a Flycheck syntax checker"))
-  (help-setup-xref (list #'flycheck-describe-checker checker)
-                   (called-interactively-p 'interactive))
-  (save-excursion
-    (with-help-window (help-buffer)
-      (let ((filename (flycheck-checker-get checker 'file))
-            (modes (flycheck-checker-get checker 'modes))
-            (predicate (flycheck-checker-get checker 'predicate))
-            (print-doc (flycheck-checker-get checker 'print-doc))
-            (next-checkers (flycheck-checker-get checker 'next-checkers)))
+  (let ((filename (flycheck-checker-get checker 'file))
+        (modes (flycheck-checker-get checker 'modes))
+        (predicate (flycheck-checker-get checker 'predicate))
+        (print-doc (flycheck-checker-get checker 'print-doc))
+        (next-checkers (flycheck-checker-get checker 'next-checkers))
+        (help-xref-following
+         ;; Ensure that we don't reuse buffers like `flycheck-verify-checker',
+         ;; and that we don't error out if a `help-flycheck-checker-doc' button
+         ;; is added outside of a documentation window.
+         (and help-xref-following (eq major-mode 'help-mode))))
+    (help-setup-xref (list #'flycheck-describe-checker checker)
+                     (called-interactively-p 'interactive))
+    (save-excursion
+      (with-help-window (help-buffer)
         (princ (format "%s is a Flycheck syntax checker" checker))
         (when filename
           (princ (format " in `%s'" (file-name-nondirectory filename)))
