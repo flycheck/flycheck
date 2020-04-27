@@ -30,10 +30,11 @@
 (defmacro flycheck/with-error-list-buffer (&rest body)
   "Run BODY in a temporary error list buffer."
   (declare (indent 0))
-  `(with-temp-buffer
+  `(with-current-buffer (get-buffer-create flycheck-error-list-buffer)
      (delay-mode-hooks (flycheck-error-list-mode))
      (setq delayed-mode-hooks nil)
-     ,@body))
+     (prog1 (progn ,@body)
+       (kill-buffer flycheck-error-list-buffer))))
 
 (describe "Error List"
   (it "has the correct buffer name"
