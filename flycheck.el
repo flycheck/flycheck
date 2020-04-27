@@ -5361,39 +5361,39 @@ error instead.  Return nil if there's no Nth error from POS."
 
 If PRESERVE-POS is nil, also recenter the table around
 CURRENT-ERRORS."
-        (let ((old-overlays flycheck-error-table-highlight-overlays)
-              (min-point (point-max))
-              (max-point (point-min)))
-          ;; Display the new overlays first, to avoid re-display flickering
-          (setq flycheck-error-table-highlight-overlays nil)
-          (when current-errors
-            (let ((next-error-pos (point-min)))
-              (while next-error-pos
-                (let* ((beg next-error-pos)
-                       (end (next-single-property-change beg 'tabulated-list-id))
-                       (err (tabulated-list-get-id beg)))
-                  (when (member err current-errors)
-                    (setq min-point (min min-point beg)
-                          max-point (max max-point beg))
-                    (let ((ov (make-overlay beg
-                                            ;; Extend overlay to the beginning
-                                            ;; of the next line, to highlight
-                                            ;; the whole line
-                                            (or end (point-max)))))
-                      (push ov flycheck-error-table-highlight-overlays)
-                      (setf (overlay-get ov 'flycheck-error-highlight-overlay)
-                            t)
-                      (setf (overlay-get ov 'face)
-                            'flycheck-error-list-highlight)))
-                  (setq next-error-pos end)))))
-          ;; Delete the old overlays
-          (seq-do #'delete-overlay old-overlays)
-          (when (and (not preserve-pos) current-errors)
-            ;; Move point to the middle error
-            (goto-char (+ min-point (/ (- max-point min-point) 2)))
-            (beginning-of-line)
-            ;; And recenter the error list at this position
-            (flycheck-error-list-recenter-at (point)))))
+  (let ((old-overlays flycheck-error-table-highlight-overlays)
+        (min-point (point-max))
+        (max-point (point-min)))
+    ;; Display the new overlays first, to avoid re-display flickering
+    (setq flycheck-error-table-highlight-overlays nil)
+    (when current-errors
+      (let ((next-error-pos (point-min)))
+        (while next-error-pos
+          (let* ((beg next-error-pos)
+                 (end (next-single-property-change beg 'tabulated-list-id))
+                 (err (tabulated-list-get-id beg)))
+            (when (member err current-errors)
+              (setq min-point (min min-point beg)
+                    max-point (max max-point beg))
+              (let ((ov (make-overlay beg
+                                      ;; Extend overlay to the beginning
+                                      ;; of the next line, to highlight
+                                      ;; the whole line
+                                      (or end (point-max)))))
+                (push ov flycheck-error-table-highlight-overlays)
+                (setf (overlay-get ov 'flycheck-error-highlight-overlay)
+                      t)
+                (setf (overlay-get ov 'face)
+                      'flycheck-error-list-highlight)))
+            (setq next-error-pos end)))))
+    ;; Delete the old overlays
+    (seq-do #'delete-overlay old-overlays)
+    (when (and (not preserve-pos) current-errors)
+      ;; Move point to the middle error
+      (goto-char (+ min-point (/ (- max-point min-point) 2)))
+      (beginning-of-line)
+      ;; And recenter the error list at this position
+      (flycheck-error-list-recenter-at (point)))))
 
 (defun flycheck-error-list--errors-to-highlight ()
   "Compute which errors to highlight in the error list."
