@@ -4810,6 +4810,10 @@ the beginning of the buffer."
 
 
 ;;; Listing errors in buffers
+(defvar flycheck-error-list-backend
+  'flycheck-error-table
+  "The backend used to render the error list.")
+
 (defconst flycheck-error-list-buffer "*Flycheck errors*"
   "The name of the buffer to show error lists.")
 
@@ -4819,6 +4823,52 @@ the beginning of the buffer."
   `(when (get-buffer flycheck-error-list-buffer)
      (with-current-buffer flycheck-error-list-buffer
        ,@body)))
+
+(defun flycheck-error-list--invoke (action &rest args)
+  "Call a function of the current error list backend.
+
+Error list backends are functions with accept two parameters,
+ACTION and ARGS.  The current backend is
+`flycheck-error-list-backend'.
+
+All backend calls happen inside of `flycheck-error-list-buffer'.
+ACTION is a symbol; ARGS holds the arguments to the function.
+ACTION and ARGS should be as follows:
+
+\(`init')
+     Prepare the current buffer to render the error list,
+     including setting up the appropriate major mode, keymaps, ….
+     It is fine for this to do nothing if the error list is
+     already set up.
+
+\(`error-at' POS)
+     Return the error, if any, at POS in the error list buffer.
+
+\(`apply-filter')
+     Selectively hide errors to obey the value of
+     `flycheck-error-list-minimum-level'.
+
+\(`highlight-errors' ERRORS PRESERVE-POS)
+     Highlight ERRORS and recenter the error list to display them
+     unless PRESERVE-POS is non-nil.
+
+\(`next-error-pos' POS N)
+
+     Find the beginning of the Nth past POS in the error list.
+     If N is negative, move back.  When the point is at the
+     beginning of an error, N = -1 means find the beginning of
+     the previous error; when the point is inside an error, N =
+     -1 means find the beginning of this error.  If there are not
+     enough errors, return nil.
+     `flycheck-error-list--nth-error-pos' implements this logic
+     for backends that track errors using text properties.
+
+There is no function to populate or refresh the error list:
+instead, FLycheck will call `revert-buffer' with the error list
+buffer current.  Backends should set an appropriate
+`revert-buffer-function' in `init'."
+  (flycheck-error-list-with-buffer
+    (apply flycheck-error-list-backend action args)))
 
 (defvar flycheck-error-list-mode-map
   (let ((map (make-sparse-keymap)))
@@ -4939,6 +4989,14 @@ message to stretch arbitrarily far."
 ;; Needs to permanently local to preserve the source buffer across buffer
 ;; reversions
 (put 'flycheck-error-list-source-buffer 'permanent-local t)
+
+(defmacro flycheck-error-list-with-source-buffer (&rest body)
+  "Run BODY in the source buffer of the error list, if it exists."
+  (declare (indent 0) (debug t))
+  `(flycheck-error-list-with-buffer
+     (when (buffer-live-p flycheck-error-list-source-buffer)
+       (with-current-buffer flycheck-error-list-source-buffer
+         ,@body))))
 
 (defun flycheck-error-list-set-source (buffer)
   "Set BUFFER as the source buffer of the error list."
@@ -5167,21 +5225,16 @@ LEVEL is either an error level symbol, or nil, to remove the filter."
     (user-error "Invalid level: %s" level))
   (flycheck-error-list-with-buffer
     (setq-local flycheck-error-list-minimum-level level)
-    (force-mode-line-update)
-    (flycheck-error-list-refresh)
-    (flycheck-error-list-recenter-at (point-min))))
+    (flycheck-error-list--invoke 'apply-filter)
+    (force-mode-line-update)))
 
-(defun flycheck-error-list-reset-filter (&optional refresh)
-  "Remove local error filters and reset to the default filter.
-
-Interactively, or with non-nil REFRESH, refresh the error list."
-  (interactive '(t))
+(defun flycheck-error-list-reset-filter ()
+  "Remove local error filters and reset to the default filter."
+  (interactive)
   (flycheck-error-list-with-buffer
     (kill-local-variable 'flycheck-error-list-minimum-level)
-    (when refresh
-      (flycheck-error-list-refresh)
-      (flycheck-error-list-recenter-at (point-min))
-      (force-mode-line-update))))
+    (flycheck-error-list--invoke 'apply-filter)
+    (force-mode-line-update)))
 
 (defun flycheck-error-table-filter-errors (errors)
   "Filter ERRORS according to `flycheck-error-list-minimum-level'."
@@ -5195,7 +5248,7 @@ Interactively, or with non-nil REFRESH, refresh the error list."
 
 (defun flycheck-error-list-error-at (pos)
   "Return the error at POS in the error list."
-  (tabulated-list-get-id pos))
+  (flycheck-error-list--invoke 'error-at pos))
 
 (defun flycheck-error-list-goto-error (&optional pos)
   "Go to the location of the error at POS in the error list.
@@ -5258,29 +5311,29 @@ POS defaults to `point'."
                (explanation (funcall explainer error)))
     (flycheck-display-error-explanation explanation)))
 
+(defun flycheck-error-list--nth-error-pos (prop pos n)
+  "Navigate N errors away from POS.
+
+Errors are assumed to correspond to changes in PROP."
+  (if (>= (setq n (or n 1)) 0)
+      (dotimes (_ n)
+        (setq pos (next-single-property-change pos prop)))
+    (dotimes (_ (- n))
+      ;; We explicitly give the limit here to explicitly have the minimum
+      ;; point returned, to be able to move to the first error (which starts
+      ;; at `point-min')
+      (setq pos (previous-single-property-change
+                 pos prop nil
+                 (when (> pos (point-min))
+                   (point-min))))))
+  pos)
+
 (defun flycheck-error-list-next-error-pos (pos &optional n)
-  "Starting from POS get the N'th next error in the error list.
+  "Get the N'th error after POS in the error list.
 
-N defaults to 1.  If N is negative, search for the previous error
-instead.
-
-Get the beginning position of the N'th next error from POS, or
-nil, if there is no next error."
-  (let ((n (or n 1)))
-    (if (>= n 0)
-        ;; Search forward
-        (while (and pos (/= n 0))
-          (setq n (1- n))
-          (setq pos (next-single-property-change pos 'tabulated-list-id)))
-      ;; Search backwards
-      (while (/= n 0)
-        (setq n (1+ n))
-        ;; We explicitly give the limit here to explicitly have the minimum
-        ;; point returned, to be able to move to the first error (which starts
-        ;; at `point-min')
-        (setq pos (previous-single-property-change pos 'tabulated-list-id
-                                                   nil (point-min)))))
-    pos))
+N defaults to 1.  If N is negative, search for the Nth previous
+error instead.  Return nil if there's no Nth error from POS."
+  (flycheck-error-list--invoke 'next-error-pos pos n))
 
 (defun flycheck-error-list-previous-error (n)
   "Go to the N'th previous error in the error list."
@@ -5301,22 +5354,13 @@ nil, if there is no next error."
 
 (defvar-local flycheck-error-table-highlight-overlays nil
   "Error highlight overlays in the error list buffer.")
+
 (put 'flycheck-error-table-highlight-overlays 'permanent-local t)
+(defun flycheck-error-table-highlight-errors (current-errors preserve-pos)
+  "Highlight CURRENT-ERRORS in the current error table buffer.
 
-(defun flycheck-error-list-highlight-errors (&optional preserve-pos)
-  "Highlight errors in the error list.
-
-Highlight all errors in the error list that are at point in the
-source buffer, and on the same line as point.  Then recenter the
-error list to the highlighted error, unless PRESERVE-POS is
-non-nil."
-  (when (get-buffer flycheck-error-list-buffer)
-    (with-current-buffer flycheck-error-list-buffer
-      (let ((current-errors
-             (when (buffer-live-p flycheck-error-list-source-buffer)
-               (with-current-buffer flycheck-error-list-source-buffer
-                 (flycheck-overlay-errors-in (line-beginning-position)
-                                             (line-end-position))))))
+If PRESERVE-POS is nil, also recenter the table around
+CURRENT-ERRORS."
         (let ((old-overlays flycheck-error-table-highlight-overlays)
               (min-point (point-max))
               (max-point (point-min)))
@@ -5326,7 +5370,7 @@ non-nil."
             (let ((next-error-pos (point-min)))
               (while next-error-pos
                 (let* ((beg next-error-pos)
-                       (end (flycheck-error-list-next-error-pos beg))
+                       (end (next-single-property-change beg 'tabulated-list-id))
                        (err (tabulated-list-get-id beg)))
                   (when (member err current-errors)
                     (setq min-point (min min-point beg)
@@ -5349,7 +5393,23 @@ non-nil."
             (goto-char (+ min-point (/ (- max-point min-point) 2)))
             (beginning-of-line)
             ;; And recenter the error list at this position
-            (flycheck-error-list-recenter-at (point))))))))
+            (flycheck-error-list-recenter-at (point)))))
+
+(defun flycheck-error-list--errors-to-highlight ()
+  "Compute which errors to highlight in the error list."
+  (flycheck-error-list-with-source-buffer
+    (flycheck-overlay-errors-in (line-beginning-position)
+                                (line-end-position))))
+
+(defun flycheck-error-list-highlight-errors (&optional preserve-pos)
+  "Highlight errors in the error list.
+
+Highlight all errors in the error list that are at point in the
+source buffer, and on the same line as point.  Then recenter the
+error list to the highlighted error, unless PRESERVE-POS is
+non-nil."
+  (let ((errors (flycheck-error-list--errors-to-highlight)))
+    (flycheck-error-list--invoke 'highlight-errors errors preserve-pos)))
 
 (defun flycheck-list-errors ()
   "Show the error list for the current buffer."
@@ -5357,9 +5417,8 @@ non-nil."
   (unless flycheck-mode
     (user-error "Flycheck mode not enabled"))
   ;; Create and initialize the error list
-  (unless (get-buffer flycheck-error-list-buffer)
-    (with-current-buffer (get-buffer-create flycheck-error-list-buffer)
-      (flycheck-error-table-mode)))
+  (get-buffer-create flycheck-error-list-buffer)
+  (flycheck-error-list--invoke 'init)
   ;; Reset the error filter
   (flycheck-error-list-reset-filter)
   ;; Show the error list in a window, and re-select the old window
@@ -5368,6 +5427,26 @@ non-nil."
   (flycheck-error-list-set-source (current-buffer)))
 
 (defalias 'list-flycheck-errors 'flycheck-list-errors)
+
+
+;;; Displaying errors in a tabulated list
+
+(defun flycheck-error-table (&rest invocation)
+  "A `tabulated-list-mode' backend for the Flycheck error list.
+
+INVOCATION is as documented in `flycheck-error-list--invoke'."
+  (pcase invocation
+    (`(init . ,_)
+     (flycheck-error-table-mode))
+    (`(error-at ,pos . ,_)
+     (tabulated-list-get-id pos))
+    (`(highlight-errors ,errors ,preserve-pos . ,_)
+     (flycheck-error-table-highlight-errors errors preserve-pos))
+    (`(apply-filter . ,_)
+     (flycheck-error-list-refresh)
+     (flycheck-error-list-recenter-at (point-min)))
+    (`(next-error-pos ,pos ,n . ,_)
+     (flycheck-error-list--nth-error-pos 'tabulated-list-id pos n))))
 
 
 ;;; Displaying errors in the current buffer
