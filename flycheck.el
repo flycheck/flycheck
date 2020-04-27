@@ -5479,6 +5479,9 @@ INVOCATION is as documented in `flycheck-error-list--invoke'."
 
 ;;; Display errors in a tree
 
+(defvar-local flycheck-error-tree--error-levels nil
+  "List of all error levels currently present in the error tree.")
+
 ;; FIXME defcustom
 (defvar flycheck-error-tree-groups '(filename checker))
 (defvar flycheck-error-tree-order '(line column level end-line end-column))
@@ -5828,8 +5831,9 @@ many spaces of the indentation will be used by actual text, so
 don't insert those."
   (let ((width (- (* indent flycheck-error-tree-indentation) (or subtract 0))))
     (when (> width 0)
-      (flycheck-error-tree--with-properties `(display (space :width ,width))
-        (insert " ")))))
+      ;; Using a specified space breaks invisibility
+      ;; See https://debbugs.gnu.org/cgi/bugreport.cgi?bug=40857
+      (insert (make-string width ?\s)))))
 
 (defconst flycheck-error-tree--field-separator " "
   "The string used to delimit error fields in the error tree.")
@@ -5924,7 +5928,9 @@ the tree, in the form (POINT HEADER . PRINTER)."
         (level (flycheck-error-level err)))
     (flycheck-error-tree--with-properties
         (list 'flycheck-breadcrumbs breadcrumbs
-              'flycheck-error err)
+              'flycheck-error err
+              'invisible level)
+      (cl-pushnew level flycheck-error-tree--error-levels)
       (dolist (fn printers)
         (funcall fn err indent)
         (setq indent nil))
@@ -6047,11 +6053,21 @@ The resulting function prints each field in FIELDS according to
    (flycheck-error-tree--prepare-printer flycheck-error-tree-columns)
    0 nil))
 
+(defun flycheck-error-tree--apply-filter ()
+  (dolist (level flycheck-error-tree--error-levels)
+    (remove-from-invisibility-spec level))
+  (-if-let* ((min-level flycheck-error-list-minimum-level)
+             (min-severity (flycheck-error-level-severity min-level)))
+      (dolist (level flycheck-error-tree--error-levels)
+        (when (< (flycheck-error-level-severity level) min-severity)
+          (add-to-invisibility-spec level)))))
+
 (defun flycheck-error-tree--refresh ()
   "Erase the buffer and insert a new error tree.
 
 Errors are taken from `flycheck-error-list-source-buffer'."
   (let ((inhibit-read-only t))
+    (setq-local flycheck-error-tree--error-levels nil)
     (erase-buffer)
     (flycheck-error-tree--insert-errors (flycheck-error-list-current-errors))
     (flycheck-error-list-recenter)))
@@ -6070,6 +6086,7 @@ Errors are taken from `flycheck-error-list-source-buffer'."
 
 \\{flycheck-error-tree-mode-map}"
   (setq buffer-read-only t
+        buffer-invisibility-spec nil
         truncate-lines t
         mode-line-buffer-identification flycheck-error-list-mode-line)
   (setq-local inhibit-field-text-motion t)
@@ -6085,6 +6102,8 @@ INVOCATION is as documented in `flycheck-error-list--invoke'."
      (flycheck-error-tree-mode))
     (`(error-at ,pos . ,_)
      (get-text-property (or pos (point)) 'flycheck-error))
+    (`(apply-filter . ,_)
+     (flycheck-error-tree--apply-filter))
     (`(next-error-pos ,pos ,n . ,_)
      (flycheck-error-list--nth-error-pos 'flycheck-error pos n))))
 
