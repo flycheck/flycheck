@@ -2542,6 +2542,12 @@ to enable disabled checkers.")))
   (princ (format "System:           %s\n" system-configuration))
   (princ (format "Window system:    %S\n" window-system)))
 
+(define-derived-mode flycheck-verify-mode help-mode
+  "Flycheck verification"
+  "Major mode to display Flycheck verification results."
+  ;; `help-mode-finish' will restore `buffer-read-only'
+  (setq buffer-read-only nil))
+
 (defun flycheck-verify-checker (checker)
   "Check whether a CHECKER can be used in this buffer.
 
@@ -2563,6 +2569,7 @@ is applicable from Emacs Lisp code.  Use
   (let ((buffer (current-buffer)))
     (with-help-window "*Flycheck checker*"
       (with-current-buffer standard-output
+        (flycheck-verify-mode)
         (flycheck--verify-print-header "Syntax checker in buffer " buffer)
         (flycheck--verify-princ-checker checker buffer 'with-mm)
         (if (with-current-buffer buffer (flycheck-may-use-checker checker))
@@ -2605,6 +2612,8 @@ possible problems are shown."
     ;; Print all applicable checkers for this buffer
     (with-help-window "*Flycheck checkers*"
       (with-current-buffer standard-output
+        (flycheck-verify-mode)
+
         (flycheck--verify-print-header "Syntax checkers for buffer " buffer)
 
         (if first-checker
