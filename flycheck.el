@@ -4895,21 +4895,13 @@ message to stretch arbitrarily far."
         (flycheck-buffer)))))
 
 (define-button-type 'flycheck-error-list
-  'action #'flycheck-error-list-button-goto-error
+  'action #'flycheck-error-list-goto-error
   'help-echo "mouse-1, RET: goto error"
   'face nil)
 
-(defun flycheck-error-list-button-goto-error (button)
-  "Go to the error at BUTTON."
-  (flycheck-error-list-goto-error (button-start button)))
-
 (define-button-type 'flycheck-error-list-explain-error
-  'action #'flycheck-error-list-button-explain-error
+  'action #'flycheck-error-list-explain-error
   'help-echo "mouse-1, RET: explain error")
-
-(defun flycheck-error-list-button-explain-error (button)
-  "Explain the error at BUTTON."
-  (flycheck-error-list-explain-error (button-start button)))
 
 (defsubst flycheck-error-list-make-cell (text &optional face help-echo type)
   "Make an error list cell with TEXT and FACE.
