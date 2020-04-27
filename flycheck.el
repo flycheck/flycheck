@@ -4813,6 +4813,13 @@ the beginning of the buffer."
 (defconst flycheck-error-list-buffer "*Flycheck errors*"
   "The name of the buffer to show error lists.")
 
+(defmacro flycheck-error-list-with-buffer (&rest body)
+  "Evaluate BODY in flycheck-error-list-buffer, if it exists."
+  (declare (indent 0) (debug t))
+  `(when (get-buffer flycheck-error-list-buffer)
+     (with-current-buffer flycheck-error-list-buffer
+       ,@body)))
+
 (defvar flycheck-error-list-mode-map
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "f") #'flycheck-error-list-set-filter)
@@ -4886,18 +4893,19 @@ message to stretch arbitrarily far."
 
 (defun flycheck-error-list-set-source (buffer)
   "Set BUFFER as the source buffer of the error list."
-  (when (get-buffer flycheck-error-list-buffer)
-    (with-current-buffer flycheck-error-list-buffer
-      ;; Only update the source when required
-      (unless (eq buffer flycheck-error-list-source-buffer)
-        (setq flycheck-error-list-source-buffer buffer)
-        (flycheck-error-list-refresh)))))
+  (flycheck-error-list-with-buffer
+    (setq flycheck-error-list-source-buffer buffer)
+    (flycheck-error-list-refresh)))
 
 (defun flycheck-error-list-update-source ()
-  "Update the source buffer of the error list."
-  (unless (eq (current-buffer) (get-buffer flycheck-error-list-buffer))
-    ;; We must not update the source buffer, if the current buffer is the error
-    ;; list itself.
+  "Make the error list display errors from the current buffer.
+
+The update is skipped if the current buffer is the error list or
+if the error list is already pointing to the current buffer."
+  (unless (memq (current-buffer)
+                (list (get-buffer flycheck-error-list-buffer)
+                      (flycheck-error-list-with-buffer
+                        flycheck-error-list-source-buffer)))
     (flycheck-error-list-set-source (current-buffer))))
 
 (defun flycheck-error-list-check-source ()
@@ -5299,13 +5307,12 @@ non-nil."
   (unless (get-buffer flycheck-error-list-buffer)
     (with-current-buffer (get-buffer-create flycheck-error-list-buffer)
       (flycheck-error-list-mode)))
-  (flycheck-error-list-set-source (current-buffer))
   ;; Reset the error filter
   (flycheck-error-list-reset-filter)
   ;; Show the error list in a window, and re-select the old window
   (display-buffer flycheck-error-list-buffer)
-  ;; Finally, refresh the error list to show the most recent errors
-  (flycheck-error-list-refresh))
+  ;; Adjust the source, causing a refresh
+  (flycheck-error-list-set-source (current-buffer)))
 
 (defalias 'list-flycheck-errors 'flycheck-list-errors)
 
