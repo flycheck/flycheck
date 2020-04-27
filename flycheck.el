@@ -1020,15 +1020,14 @@ is used."
   :package-version '(flycheck . "0.16")
   :group 'flycheck-faces)
 
-;; The base faces for the following two faces are inspired by Compilation Mode
 (defface flycheck-error-list-line-number
-  '((t :inherit font-lock-constant-face))
+  '((t))
   "Face for line numbers in the error list."
   :group 'flycheck-faces
   :package-version '(flycheck . "0.16"))
 
 (defface flycheck-error-list-column-number
-  '((t :inherit font-lock-constant-face))
+  '((t))
   "Face for line numbers in the error list."
   :group 'flycheck-faces
   :package-version '(flycheck . "0.16"))
