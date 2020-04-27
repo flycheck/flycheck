@@ -31,7 +31,7 @@
   "Run BODY in a temporary error list buffer."
   (declare (indent 0))
   `(with-current-buffer (get-buffer-create flycheck-error-list-buffer)
-     (delay-mode-hooks (flycheck-error-list-mode))
+     (delay-mode-hooks (flycheck-error-table-mode))
      (setq delayed-mode-hooks nil)
      (prog1 (progn ,@body)
        (kill-buffer flycheck-error-list-buffer))))
@@ -62,7 +62,7 @@
 
     (it "sets the list entries locally"
       (flycheck/with-error-list-buffer
-        (expect tabulated-list-entries :to-equal 'flycheck-error-list-entries)
+        (expect tabulated-list-entries :to-equal 'flycheck-error-table-entries)
         (expect 'tabulated-list-entries :to-be-local)))
 
     (it "has a local header line"
@@ -82,7 +82,7 @@
       (flycheck/with-error-list-buffer
         (expect (aref tabulated-list-format 1)
                 :to-equal
-                '("Line" 5 flycheck-error-list-entry-< :right-align t))))
+                '("Line" 5 flycheck-error-table-entry-< :right-align t))))
 
     (it "has the column number in the 3rd column"
       (flycheck/with-error-list-buffer
@@ -92,7 +92,7 @@
     (it "has the error level in the 4th column"
       (flycheck/with-error-list-buffer
         (expect (aref tabulated-list-format 3)
-                :to-equal '("Level" 8 flycheck-error-list-entry-level-<))))
+                :to-equal '("Level" 8 flycheck-error-table-entry-level-<))))
 
     (it "has the error ID in the 5th column"
       (flycheck/with-error-list-buffer
@@ -108,7 +108,7 @@
     (let* ((warning (flycheck-error-new-at 10 12 'warning "A foo warning"
                                            :checker 'emacs-lisp-checkdoc
                                            :id "W1"))
-           (entry (flycheck-error-list-make-entry warning))
+           (entry (flycheck-error-table-make-entry warning))
            (cells (cadr entry)))
 
       (it "has the error object as ID"
@@ -128,7 +128,7 @@
 
       (it "has an empty 3rd cell if there is no column number"
         (cl-letf* (((flycheck-error-column warning) nil)
-                   (entry (flycheck-error-list-make-entry warning))
+                   (entry (flycheck-error-table-make-entry warning))
                    (cells (cadr entry)))
           (expect (aref cells 2) :to-equal
                   (list ""
@@ -160,7 +160,7 @@
 
         (it "has a default message in the 6th cell if there is no message"
           (cl-letf* (((flycheck-error-message warning) nil)
-                     (entry (flycheck-error-list-make-entry warning))
+                     (entry (flycheck-error-table-make-entry warning))
                      (cells (cadr entry))
                      (message (format (propertize "Unknown warning (%s)"
                                                   'face 'default)
@@ -182,7 +182,7 @@
             (errors (list (flycheck-error-new-at 10 10 'error)
                           (flycheck-error-new-at 20 20 'warning)
                           (flycheck-error-new-at 30 30 'info))))
-        (expect (flycheck-error-list-apply-filter errors)
+        (expect (flycheck-error-table-filter-errors errors)
                 :to-be-equal-flycheck-errors
                 (list (flycheck-error-new-at 10 10 'error)
                       (flycheck-error-new-at 20 20 'warning)))))
