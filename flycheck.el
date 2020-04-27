@@ -5239,7 +5239,7 @@ nil, if there is no next error."
 (defun flycheck-error-list-highlight-errors (&optional preserve-pos)
   "Highlight errors in the error list.
 
-Highlight all errors in the error lists that are at point in the
+Highlight all errors in the error list that are at point in the
 source buffer, and on the same line as point.  Then recenter the
 error list to the highlighted error, unless PRESERVE-POS is
 non-nil."
