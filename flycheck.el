@@ -3599,6 +3599,33 @@ Slots:
 (gv-define-simple-setter flycheck-error-end-column
                          flycheck-error--set-end-column)
 
+(defun flycheck-error-field-p (field)
+  "Check whether FIELD is a field of the `flycheck-error' struct."
+  (assq field (cdr (cl-struct-slot-info 'flycheck-error))))
+
+(defun flycheck-error-resolve-field-alias (field)
+  "Resolve potentially aliased FIELD of `flycheck-error'.
+
+For technical reasons the end-line and end-column fields of
+`flycheck-struct' are called `-end-line' and `-end-column'; this
+function allows users to refer to them using the unprefixed
+names."
+  (or (cdr (assq field '((end-line . -end-line) (end-column . -end-column))))
+      field))
+
+(defun flycheck-error-field-offset (field)
+  "Return the offset of FIELD in `flycheck-error'.
+
+If FIELD isn't a member of `flycheck-error', return nil."
+  (let ((field (flycheck-error-resolve-field-alias field)))
+    (and (flycheck-error-field-p field)
+         (cl-struct-slot-offset 'flycheck-error field))))
+
+(defun flycheck-error-field-accessor (field)
+  "Create a function to access a given FIELD of a `flycheck-struct'."
+  (-when-let* ((off (flycheck-error-field-offset field)))
+    (lambda (err) (aref err off))))
+
 (defmacro flycheck-error-with-buffer (err &rest forms)
   "Switch to the buffer of ERR and evaluate FORMS.
 
@@ -4843,6 +4870,7 @@ ACTION and ARGS should be as follows:
 
 \(`error-at' POS)
      Return the error, if any, at POS in the error list buffer.
+     POS is a number, a marker, or nil for `point'.
 
 \(`apply-filter')
      Selectively hide errors to obey the value of
@@ -5447,6 +5475,618 @@ INVOCATION is as documented in `flycheck-error-list--invoke'."
      (flycheck-error-list-recenter-at (point-min)))
     (`(next-error-pos ,pos ,n . ,_)
      (flycheck-error-list--nth-error-pos 'tabulated-list-id pos n))))
+
+
+;;; Display errors in a tree
+
+;; FIXME defcustom
+(defvar flycheck-error-tree-groups '(filename checker))
+(defvar flycheck-error-tree-order '(line column level end-line end-column))
+(defvar flycheck-error-tree-columns '(line message id))
+
+;;;; Faces specific to the error tree
+
+(defface flycheck-error-tree-header
+  '((t :height 1.0 :weigth semibold))
+  "Face for error tree headers."
+  :group 'flycheck-faces
+  :package-version '(flycheck . "33"))
+
+(defface flycheck-error-tree-header-link
+  '((t :inherit underline))
+  "Face for links in error tree headers."
+  :group 'flycheck-faces
+  :package-version '(flycheck . "33"))
+
+(defface flycheck-error-tree-filename-prefix
+  '((t :inherit font-lock-comment-face :slant normal))
+  "Face for filename prefixes (…/ or /) in the error list."
+  :group 'flycheck-faces
+  :package-version '(flycheck . "33"))
+
+;;;; Utilities
+
+(defmacro flycheck-error-tree--with-properties (props &rest body)
+  "Apply text PROPS to text inserted by BODY."
+  (declare (indent 1) (debug t))
+  (let ((bv (make-symbol "beg"))
+        (pv (make-symbol "props")))
+    `(let ((,bv (point)) (,pv ,props))
+       (prog1 (progn ,@body)
+         (add-text-properties ,bv (point) ,pv)))))
+
+(defmacro flycheck-error-tree--with-face (face &rest body)
+  "Add FACE to text inserted by BODY."
+  (declare (indent 1) (debug t))
+  (let ((bv (make-symbol "beg"))
+        (fv (make-symbol "face")))
+    `(let ((,bv (point)) (,fv ,face))
+       (prog1 (progn ,@body)
+         (add-face-text-property ,bv (point) ,fv t)))))
+
+(defun flycheck-error-tree--insert-with-face (face str)
+  "Insert STR with FACE, inheriting text properties.
+
+If STR is not a string, it is converted as with `princ'."
+  (declare (indent 1))
+  (unless (stringp str) (setq str (format "%s" str)))
+  (flycheck-error-tree--with-face face
+    (insert-and-inherit str)))
+
+(defun flycheck-error-tree--common-prefix (&rest strings)
+  "Return the longest common prefix of STRINGS."
+  (declare (pure t) (side-effect-free t))
+  (cond
+   ((null strings) "")
+   ((null (cdr strings)) (car strings))
+   (t (let* ((s0 (pop strings))
+             (len (length s0))
+             (s1 nil))
+        (while (setq s1 (pop strings))
+          (let ((cmp (compare-strings s0 0 len s1 0 (length s1))))
+            (setq len (if (eq cmp t) len (1- (abs cmp))))))
+        (substring s0 0 len)))))
+
+;;;; Populating the error tree
+
+(defun flycheck-error-tree--make-tree (group-specs leaf-sort records)
+  "Orgranise a list of records into a tree.
+
+GROUP-SPECS indicates how to structure the tree; each entry
+describes one level of the tree, and should be a list of the
+form (PROJECTION POST-PROCESS PRINTER MAY-COLLAPSE):
+
+- PROJECTION is a grouping function in the sense of
+  `seq-group-by': for each record it should return a key; one
+  branch is created per key, containing a subtree made up of all
+  records with `equal' keys.
+
+- POST-PROCESS is called after grouping; it receives the output
+  of `seq-group-by'.  This function is useful to apply
+  transformations to the keys before printing them.
+
+- PRINTER is a function indicating how to insert each key into
+  the output buffer when printing the tree.  It is not called,
+  but stored in tree nodes.
+
+- MAY-COLLAPSE indicates whether a given key may be printed on
+  the same line as its parent if it is the only child.  It is not
+  used directly in this function, only stored in three nodes.
+
+LEAF-SORT is used at the last level of the tree to sort RECORDS."
+  (if group-specs
+      (pcase-let*
+          ((`(,projection ,post-process ,insert ,may-collapse)
+            (pop group-specs))
+           ;; `seq-group-by' doesn't preserve key order, so use `-group-by'
+           ;; (besides, `-group-by' is faster)
+           (groups (funcall post-process (-group-by projection records))))
+        (dolist (group groups)
+          (setf (cdr group) (flycheck-error-tree--make-tree
+                             group-specs leaf-sort (cdr group))))
+        `((,insert . ,may-collapse) . ,groups))
+    (cons 'leaf (funcall leaf-sort records))))
+
+(define-button-type 'flycheck-error-tree-checker-name
+  :supertype 'help-flycheck-checker-doc
+  'face 'flycheck-error-list-checker-name
+  'mouse-face '(flycheck-error-list-checker-name
+                flycheck-error-tree-header-link)
+  'help-echo nil)
+
+(defun flycheck-error-tree--insert-checker-name-header (checker)
+  "Insert a CHECKER name into an error tree buffer."
+  (insert-text-button
+   (symbol-name checker)
+   :type 'flycheck-error-tree-checker-name
+   'help-args (list checker)
+   ;; Faces inherited from `category' properties are overriden by
+   ;; `add-face-text-property', so we specify the face explicitly here
+   'face 'flycheck-error-list-checker-name))
+
+(defun flycheck-error-tree--sort-error-levels (alist)
+  "Sort an ALIST keyed by error levels by priority."
+  (seq-sort-by
+   (lambda (grp) (flycheck-error-level-severity (car grp))) #'> alist))
+
+(defun flycheck-error-tree--abbreviate-filenames (alist)
+  "Abbreviate the keys of an ALIST keyed by file paths.
+
+The result is an alist keyed by conses (PATH . PREFIX): PATH is
+the original file path, and PREFIX is the directory prefix shared
+by all paths."
+  (let* ((paths (seq-map #'car alist))
+         (common-prefix (apply #'flycheck-error-tree--common-prefix paths))
+         ;; FIXME is this actually a prefix on windows?
+         (dir-prefix (or (file-name-directory common-prefix) "")))
+    (dolist (pair alist)
+      (setf (car pair) (cons (car pair) dir-prefix))))
+  alist)
+
+(define-button-type 'flycheck-error-tree-filename
+  'face nil
+  'mouse-face nil
+  'pointer 'hand
+  'action (lambda (file)
+            (pop-to-buffer (find-file-noselect file) 'other-window))
+  'help-echo nil)
+
+(defun flycheck-error-tree--insert-abbreviated-filename-header (fpath-props)
+  "Insert an abbreviated file path into an error tree buffer.
+
+FPATH-PROPS is as in `flycheck-error-tree--abbreviate-filenames'."
+  (pcase-let* ((`(,fpath . ,dir-prefix) fpath-props)
+               (unique (substring fpath (length dir-prefix)))
+               (abbrev (if (member dir-prefix '("" "/")) dir-prefix "…/")))
+    (make-text-button
+     (point)
+     (progn (flycheck-error-tree--insert-with-face
+                'flycheck-error-tree-filename-prefix
+              abbrev)
+            (flycheck-error-tree--with-properties
+                '(face flycheck-error-list-filename
+                       mouse-face (flycheck-error-list-filename
+                                   flycheck-error-tree-header-link))
+              (insert unique))
+            (point))
+     :type 'flycheck-error-tree-filename
+     'button-data fpath
+     'help-echo fpath)))
+
+(defun flycheck-error-tree--insert-error-level-header (level)
+  "Insert an error LEVEL into an error tree buffer."
+  (flycheck-error-tree--insert-with-face
+      (flycheck-error-level-error-list-face level)
+    level))
+
+(defun flycheck-error-tree--insert-num-header (prefix face number)
+  "Insert a NUMBER with a PREFIX and a FACE into an error tree buffer."
+  (flycheck-error-tree--with-face face
+    (insert prefix (if number (number-to-string number) "?"))))
+
+(defun flycheck-error-tree--insert-line-header (number)
+  "Insert a line NUMBER into an error tree buffer."
+  (flycheck-error-tree--insert-num-header
+   "L" 'flycheck-error-list-line-number number))
+
+(defun flycheck-error-tree--insert-column-header (number)
+  "Insert a column NUMBER into an error tree buffer."
+  (flycheck-error-tree--insert-num-header
+   "C" 'flycheck-error-list-column-number number))
+
+(defun flycheck-error-tree--insert-end-line-header (number)
+  "Insert an end-line NUMBER into an error tree buffer."
+  (flycheck-error-tree--insert-num-header
+   "EL" 'flycheck-error-list-line-number number))
+
+(defun flycheck-error-tree--insert-end-column-header (number)
+  "Insert an end-column NUMBER into an error tree buffer."
+  (flycheck-error-tree--insert-num-header
+   "EC" 'flycheck-error-list-column-number number))
+
+(defun flycheck-error-tree--sort-strings-or-symbols (alist)
+  "Sort an ALIST keyed by strings or symbols according to `string<'."
+  (seq-sort-by #'car #'string< alist))
+
+(defvar flycheck-error-tree-group-by-specs-alist
+  `((checker
+     :post-process identity ;; FIXME sort in chain order
+     :printer flycheck-error-tree--insert-checker-name-header)
+    (filename
+     :post-process flycheck-error-tree--abbreviate-filenames
+     :printer flycheck-error-tree--insert-abbreviated-filename-header
+     :may-collapse nil)
+    (level
+     :post-process flycheck-error-tree--sort-error-levels
+     :printer flycheck-error-tree--insert-error-level-header)
+    (id
+     :post-process flycheck-error-tree--sort-strings-or-symbols
+     :printer flycheck-error-tree-id)
+    (line
+     :printer flycheck-error-tree--insert-line-header)
+    (column
+     :printer flycheck-error-tree--insert-column-header)
+    (end-line
+     :printer flycheck-error-tree--insert-end-line-header)
+    (end-column
+     :printer flycheck-error-tree--insert-end-column-header))
+  "Alist describing how to make groups from supported `flycheck-error' fields.
+
+Each entry maps a key to a plist of properties, each matching one
+of the fields of the tree-building specs used by
+`flycheck-error-tree--make-tree':
+
+- `:projection', which defaults to a function accessing the field
+   of `flycheck-struct' corresponding to the current key.
+- `:post-process', which defaults to `identity'.
+- `:printer', which can also be a face, in which case the
+  function inserts each group header with that face.
+- `:may-collapse', which defaults to t.")
+
+(defun flycheck-error-tree--prepare-group-by-spec (field)
+  "Prepare a grouping specification for FIELD.
+
+The components of the grouping specification are taken from
+`flycheck-error-tree-group-by-specs-alist'."
+  (let* ((props (alist-get field flycheck-error-tree-group-by-specs-alist))
+         (post-process (plist-get props :post-process))
+         (printer (plist-get props :printer)))
+    (list (or (plist-get props :projection)
+              (flycheck-error-field-accessor field)
+              (user-error (format "Missing `:projection' for group %s" field)))
+          (or post-process
+              #'identity)
+          (if (or (null printer) (facep printer))
+              (apply-partially #'flycheck-error-tree--insert-with-face printer)
+            printer)
+          (car (or (plist-member props :may-collapse) '(t))))))
+
+(defun flycheck-error-tree--compare-numbers (n1 n2)
+  "Compare two numbers N1 and N2 (both default to 0)."
+  (- (or n1 0) (or n2 0)))
+
+(defun flycheck-error-tree--compare-strings (s1 s2)
+  "Compare two strings S1 and S2."
+  (let ((cmp (compare-strings s1 0 (length s1) s2 0 (length s2) t)))
+    (if (eq cmp t) 0 cmp)))
+
+(defun flycheck-error-tree--compare-symbols (s1 s2)
+  "Compare two symbols S1 and S2."
+  (flycheck-error-tree--compare-strings
+   (symbol-name s1) (symbol-name s2)))
+
+(defun flycheck-error-tree--compare-levels (l1 l2)
+  "Compare two error levels L1 and L2 by priority."
+  (flycheck-error-tree--compare-numbers
+   (flycheck-error-level-severity l1)
+   (flycheck-error-level-severity l2)))
+
+(defvar flycheck-error-tree-comparisons-alist
+  `(;; FIXME: checkers should be ranked in :next-checker order
+    (checker . flycheck-error-tree--compare-symbols)
+    (filename . flycheck-error-tree--compare-strings)
+    (line . flycheck-error-tree--compare-numbers)
+    (column . flycheck-error-tree--compare-numbers)
+    (message . flycheck-error-tree--compare-strings)
+    (level . flycheck-error-tree--compare-levels)
+    (id . flycheck-error-tree--compare-symbols)
+    (end-line . flycheck-error-tree--compare-numbers)
+    (end-column . flycheck-error-tree--compare-numbers))
+  "Alist mapping `flycheck-error' fields to comparison functions.
+
+Each comparison function should return a negative number if its
+first argument is smaller than its second one, 0 if they are
+equal, and a positive number otherwise.")
+
+(defun flycheck-error-tree--prepare-field-comparison-function (field)
+  "Return a function to compare two errors by FIELD."
+  (-if-let* ((cmp (alist-get field flycheck-error-tree-comparisons-alist)))
+      (-if-let* ((off (flycheck-error-field-offset field)))
+          (lambda (e1 e2) (funcall cmp (aref e1 off) (aref e2 off)))
+        cmp)
+    (user-error (format "Invalid sorting key: %s" field))))
+
+(defsubst flycheck-error-tree--recursive-compare (comparisons e1 e2)
+  "Compare E1 and E2 lexicographically by a list of COMPARISONS."
+  (let ((cmp 0))
+    (while (and comparisons (= cmp 0))
+      (setq cmp (funcall (pop comparisons) e1 e2)))
+    cmp))
+
+(defun flycheck-error-tree--prepare-sort-function (fields)
+  "Return a function to sort errors lexicographically by a list of FIELDS."
+  (let* ((comparisons
+          (seq-map #'flycheck-error-tree--prepare-field-comparison-function
+                   fields))
+         (cmp
+          (lambda (e1 e2)
+            (< (flycheck-error-tree--recursive-compare comparisons e1 e2) 0))))
+    (lambda (errs) (seq-sort cmp errs))))
+
+(defun flycheck-error-tree--partition-errors (group-by sort-by errors)
+  "Partition a list of ERRORS.
+
+GROUP-BY is a list of fields found in
+`flycheck-error-tree-group-by-specs-alist', and SORT-BY a list of
+fields found in `flycheck-error-tree-comparisons-alist'."
+  (flycheck-error-tree--make-tree
+   (seq-map #'flycheck-error-tree--prepare-group-by-spec group-by)
+   (flycheck-error-tree--prepare-sort-function sort-by)
+   errors))
+
+;;;; Formatting individual errors lines
+
+(defvar flycheck-error-tree-indentation 2
+  "Amount of indentation per level in the error tree.")
+
+(defsubst flycheck-error-tree--insert-indent (indent &optional subtract)
+  "Insert spaces at point.
+
+The number of spaces inserted is INDENT times
+`flycheck-error-tree-indentation'.  SUBTRACT indicates that this
+many spaces of the indentation will be used by actual text, so
+don't insert those."
+  (let ((width (- (* indent flycheck-error-tree-indentation) (or subtract 0))))
+    (when (> width 0)
+      (flycheck-error-tree--with-properties `(display (space :width ,width))
+        (insert " ")))))
+
+(defconst flycheck-error-tree--field-separator " "
+  "The string used to delimit error fields in the error tree.")
+
+(defsubst flycheck-error-tree--insert-field-indent
+  (indent needs-spacer &optional subtract)
+  "Insert indentation or inter-field space in an error tree buffer.
+
+If INDENT is non-nil, indent by that much, minus SUBTRACT (see
+`flycheck-error-tree--insert-indent'); otherwise, add a field
+spacer as long as NEEDS-SPACER is non-nil."
+  (if indent (flycheck-error-tree--insert-indent indent subtract)
+    (when needs-spacer
+      (insert-and-inherit flycheck-error-tree--field-separator))))
+
+(defun flycheck-error-tree--insert-field (face indent str)
+  "Insert STR with FACE, indented by INDENT."
+  (declare (indent 2))
+  (flycheck-error-tree--insert-field-indent indent str)
+  (when str (flycheck-error-tree--insert-with-face face str)))
+
+(defun flycheck-error-tree--insert-filename-field (err indent)
+  "Insert the file name of ERR, indented by INDENT."
+  (flycheck-error-tree--insert-field 'flycheck-error-list-filename indent
+    (file-name-nondirectory (flycheck-error-filename err))))
+
+(defun flycheck-error-tree--insert-number-field (number face indent)
+  "Insert a NUMBER with FACE, indented by INDENT.
+
+DIGITS past the first 3 are allowed to bleed into the indent."
+  (let ((snum (and number (format "%3d" number))))
+    (flycheck-error-tree--insert-field-indent indent snum (- (length snum) 3))
+    (flycheck-error-tree--insert-with-face face snum)))
+
+(defun flycheck-error-tree--insert-line-field (err indent)
+  "Insert the line number of ERR, indented by INDENT.
+
+The line number is highlighted using the fringe face of ERROR's
+level; see `flycheck-error-level-fringe-face'."
+  (let ((level (flycheck-error-level err)))
+    (flycheck-error-tree--insert-number-field
+     (flycheck-error-line err)
+     (list 'flycheck-error-list-line-number
+           (flycheck-error-level-fringe-face level))
+     indent)))
+
+(defun flycheck-error-tree--insert-column-field (err indent)
+  "Insert the column number of ERR, indented by INDENT."
+  (flycheck-error-tree--insert-number-field
+   (flycheck-error-column err) 'flycheck-error-list-column indent))
+
+(defun flycheck-error-tree--insert-message-field (err indent)
+  "Insert the error message of ERR, indented with INDENT."
+  (let ((message (flycheck-error-message err)))
+    (flycheck-error-tree--insert-field-indent indent message)
+    (flycheck-error-tree--with-properties
+        (let* ((prefix-w (- (point) (point-at-bol)))
+               (prefix (propertize " " 'display `(space :width ,prefix-w))))
+          ;; `wrap-prefix' is for messages too long to fit on one line;
+          ;; `line-prefix' is for messages containing newlines.
+          (list 'wrap-prefix prefix 'line-prefix prefix
+                'face 'flycheck-error-list-error-message))
+      (insert message))))
+
+(defun flycheck-error-tree--insert-level-field (err indent)
+  "Insert the level of ERR, indented with INDENT."
+  (let ((level (flycheck-error-level err)))
+    (flycheck-error-tree--insert-field (flycheck-error-level-fringe-face level)
+        indent level)))
+
+(defun flycheck-error-tree--insert-id-field (err indent)
+  "Insert the ID of ERR, indented with INDENT."
+  (flycheck-error-tree--insert-field 'flycheck-error-list-id
+      indent (format "[%s]" (flycheck-error-id err))))
+
+(define-button-type 'flycheck-error-tree-entry
+  'action (lambda (pos)
+            (flycheck-jump-to-error (get-text-property pos 'flycheck-error)))
+  'face nil
+  'mouse-face nil
+  'pointer 'hand
+  'help-echo nil)
+
+(defun flycheck-error-tree--insert-error (printers err indent breadcrumbs)
+  "Insert an error ERR into an error tree buffer, indented by INDENT.
+
+PRINTERS is a list of printers; they are called one by one with
+ERR and an indentation amount (INDENT for the first field, then
+nil).  BREADCRUMBS is a list of headers specs that led to this point in
+the tree, in the form (POINT HEADER . PRINTER)."
+  (let ((beg (point))
+        (level (flycheck-error-level err)))
+    (flycheck-error-tree--with-properties
+        (list 'flycheck-breadcrumbs breadcrumbs
+              'flycheck-error err)
+      (dolist (fn printers)
+        (funcall fn err indent)
+        (setq indent nil))
+      (make-text-button beg (point) :type 'flycheck-error-tree-entry)
+      ;; `insert' clears `wrap-prefix' and `line-prefix'
+      (insert "\n"))))
+
+(defun flycheck-error-tree--insert-group-header
+    (header printer collapse indent breadcrumbs)
+  "Insert a group HEADER in an error tree buffer, indented by INDENT.
+
+PRINTER is a function; it should insert its argument (HEADER)
+into the buffer.  If COLLAPSE is non-nil, remove the last
+character (a newline) and insert the header right after the
+previous header.  BREADCRUMBS is as described in
+`flycheck-error-tree-insert-error'."
+  (let ((beg (point)))
+    (if (not collapse)
+        (flycheck-error-tree--insert-indent indent)
+      (delete-char -1) ;; remove previous newline
+      (insert " > "))
+    (funcall printer header)
+    (insert "\n")
+    (put-text-property beg (point) 'flycheck-breadcrumbs breadcrumbs)
+    (add-face-text-property beg (point) 'flycheck-error-tree-header t)))
+
+(defvar flycheck-error-list-collapse-indentation nil
+  "Whether to dedent subtrees after collapsing consecutive tree levels.
+
+When this is non-nil, the tree (a (b (c (d)))) is displayed as
+  a > b > c
+    d
+
+When this is nil, it is displayed as
+  a > b > c
+        d
+
+So that the d lines up as is there had been no collapsing:
+
+  a
+    b
+      c
+        d
+
+The default is nil because changes to the buffer text can cause
+changes in nesting, which cause indentation changes when this
+variable is non-nil (for example, when grouping by filename then
+checker, both levels will be collapsed if there is errors from
+just one checker).")
+
+(defun flycheck-error-tree--insert-tree (tree leaf-fn indent path)
+  "Insert a tree into an error tree buffer.
+
+TREE is a tree, as returned by `flycheck-error-tree--make-tree'.
+LEAF-FN is used to print each leaf of the tree.  PATH is the list
+of headers that lead to this point; INDENT is the accumulated
+amount of indentation."
+  (pcase tree
+    (`(leaf . ,errors)
+     (dolist (err errors)
+       (funcall leaf-fn err indent path)))
+    (`((,printer . ,may-collapse) . ,branches)
+     (pcase-dolist (`(,header . ,subtree) branches)
+       (let* ((collapse
+               (and may-collapse (> indent 0) (null (cdr branches))))
+              (collapse-indent
+               (and flycheck-error-list-collapse-indentation collapse))
+              (subindent (+ indent (if collapse-indent 0 1)))
+              (skip (and collapse (null header)))
+              (subpath
+               (if skip path (cons `(,(point) ,header . ,printer) path))))
+         (unless skip
+           (flycheck-error-tree--insert-group-header
+            header printer collapse indent path))
+         (flycheck-error-tree--insert-tree
+          subtree leaf-fn subindent subpath))))))
+
+(defvar flycheck-error-tree-printers-alist
+  '((checker . flycheck-error-list-checker-name)
+    (filename . flycheck-error-tree--insert-filename-field)
+    (line . flycheck-error-tree--insert-line-field)
+    (column . flycheck-error-tree--insert-column-field)
+    (message . flycheck-error-tree--insert-message-field)
+    (level . flycheck-error-tree--insert-level-field)
+    (id . flycheck-error-tree--insert-id-field))
+  "Alist mapping keys from `flycheck-error-tree-columns' to printers.
+
+Each printer is either a function or a face.  If the printer is a
+face, the key must be a field of `flycheck-error'.  Otherwise,
+the key may be any symbol, and the function should accept an
+error and an indentation amount.")
+
+(defun flycheck-error-tree--prepare-field-printer (field)
+  "Prepare a printing function for FIELD.
+
+The function is found in `flycheck-error-tree-printers-alist'."
+  (-if-let* ((field (flycheck-error-resolve-field-alias field))
+             (printer (alist-get field flycheck-error-tree-printers-alist)))
+      (-if-let* ((off (flycheck-error-field-offset field))
+                 (face (and (facep printer) printer)))
+          (lambda (err indent)
+            (flycheck-error-tree--insert-field printer indent (aref err off)))
+        printer)
+    (user-error (format "No printer specification for %s" field))))
+
+(defun flycheck-error-tree--prepare-printer (fields)
+  "Prepare a function to insert FIELDS.
+
+The resulting function prints each field in FIELDS according to
+`flycheck-error-tree-printers-alist'."
+  (let ((specs (seq-map #'flycheck-error-tree--prepare-field-printer fields)))
+    (lambda (err indent path)
+      (flycheck-error-tree--insert-error specs err indent path))))
+
+(defun flycheck-error-tree--insert-errors (errors)
+  "Build a tree from ERRORS and insert it in the current buffer."
+  (flycheck-error-tree--insert-tree
+   (flycheck-error-tree--partition-errors
+    flycheck-error-tree-groups flycheck-error-tree-order errors)
+   (flycheck-error-tree--prepare-printer flycheck-error-tree-columns)
+   0 nil))
+
+(defun flycheck-error-tree--refresh ()
+  "Erase the buffer and insert a new error tree.
+
+Errors are taken from `flycheck-error-list-source-buffer'."
+  (let ((inhibit-read-only t))
+    (erase-buffer)
+    (flycheck-error-tree--insert-errors (flycheck-error-list-current-errors))
+    (flycheck-error-list-recenter)))
+
+(defvar flycheck-error-tree-mode-map
+  (let ((map (make-sparse-keymap))
+        (parents (list flycheck-error-list-mode-map
+                       button-buffer-map
+                       special-mode-map)))
+    (set-keymap-parent map (make-composed-keymap parents))
+    map)
+  "Mode map used in error tree buffers.")
+
+(define-derived-mode flycheck-error-tree-mode special-mode "Flycheck errors"
+  "Major mode for listing Flycheck errors.
+
+\\{flycheck-error-tree-mode-map}"
+  (setq buffer-read-only t
+        truncate-lines t
+        mode-line-buffer-identification flycheck-error-list-mode-line)
+  (setq-local inhibit-field-text-motion t)
+  (setq-local revert-buffer-function
+              (lambda (&rest _) (flycheck-error-tree--refresh))))
+
+(defun flycheck-error-tree (&rest invocation)
+  "A tree-based backend for the Flycheck error list.
+
+INVOCATION is as documented in `flycheck-error-list--invoke'."
+  (pcase invocation
+    (`(init . ,_)
+     (flycheck-error-tree-mode))
+    (`(error-at ,pos . ,_)
+     (get-text-property (or pos (point)) 'flycheck-error))
+    (`(next-error-pos ,pos ,n . ,_)
+     (flycheck-error-list--nth-error-pos 'flycheck-error pos n))))
 
 
 ;;; Displaying errors in the current buffer
