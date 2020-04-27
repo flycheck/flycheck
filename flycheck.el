@@ -1033,7 +1033,7 @@ is used."
   :package-version '(flycheck . "0.16"))
 
 (defface flycheck-error-list-filename
-  '((t :inherit font-lock-variable-name-face))
+  '((t :inherit mode-line-buffer-id :bold nil))
   "Face for filenames in the error list."
   :group 'flycheck-faces
   :package-version '(flycheck . "32"))
