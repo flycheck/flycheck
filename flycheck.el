@@ -5479,6 +5479,10 @@ INVOCATION is as documented in `flycheck-error-list--invoke'."
 
 ;;; Display errors in a tree
 
+(defvar-local flycheck-error-tree--highlights nil
+  "Overlays used for highlighting in the error tree.")
+(defvar-local flycheck-error-tree--error-positions nil
+  "Hashtable mapping errors to their position in the error tree.")
 (defvar-local flycheck-error-tree--error-levels nil
   "List of all error levels currently present in the error tree.")
 
@@ -5930,6 +5934,7 @@ the tree, in the form (POINT HEADER . PRINTER)."
         (list 'flycheck-breadcrumbs breadcrumbs
               'flycheck-error err
               'invisible level)
+      (puthash err beg flycheck-error-tree--error-positions)
       (cl-pushnew level flycheck-error-tree--error-levels)
       (dolist (fn printers)
         (funcall fn err indent)
@@ -6053,7 +6058,31 @@ The resulting function prints each field in FIELDS according to
    (flycheck-error-tree--prepare-printer flycheck-error-tree-columns)
    0 nil))
 
+(defun flycheck-error-tree--unhighlight-errors ()
+  "Remove all error highlights from the current buffer."
+  (mapc #'delete-overlay flycheck-error-tree--highlights)
+  (setq-local flycheck-error-tree--highlights nil))
+
+(defun flycheck-error-tree--add-error-highlight (err)
+  "Highlight ERR in the current buffer."
+  (-when-let* ((beg (gethash err flycheck-error-tree--error-positions))
+               (end (next-single-char-property-change beg 'flycheck-error)))
+    (cl-assert (eq err (get-text-property beg 'flycheck-error)))
+    (let ((ov (make-overlay beg end)))
+      (overlay-put ov 'category 'flycheck-error-tree--highlight)
+      (push ov flycheck-error-tree--highlights)
+      ov)))
+
+;; Overlay spec
+(put 'flycheck-error-tree--highlight 'face 'flycheck-error-list-highlight)
+
+(defun flycheck-error-tree-highlight-errors (errors _preserve-pos)
+  "Highlight ERRORS in the current buffer."
+  (flycheck-error-tree--unhighlight-errors)
+  (mapc #'flycheck-error-tree--add-error-highlight errors))
+
 (defun flycheck-error-tree--apply-filter ()
+  "Apply `flycheck-error-list-minimum-level' to the current buffer."
   (dolist (level flycheck-error-tree--error-levels)
     (remove-from-invisibility-spec level))
   (-if-let* ((min-level flycheck-error-list-minimum-level)
@@ -6067,7 +6096,10 @@ The resulting function prints each field in FIELDS according to
 
 Errors are taken from `flycheck-error-list-source-buffer'."
   (let ((inhibit-read-only t))
+    (flycheck-error-tree--unhighlight-errors)
     (setq-local flycheck-error-tree--error-levels nil)
+    (setq-local flycheck-error-tree--error-positions
+                (make-hash-table :test 'eq))
     (erase-buffer)
     (flycheck-error-tree--insert-errors (flycheck-error-list-current-errors))
     (flycheck-error-list-recenter)))
@@ -6102,6 +6134,8 @@ INVOCATION is as documented in `flycheck-error-list--invoke'."
      (flycheck-error-tree-mode))
     (`(error-at ,pos . ,_)
      (get-text-property (or pos (point)) 'flycheck-error))
+    (`(highlight-errors ,errors ,preserve-pos . ,_)
+     (flycheck-error-tree-highlight-errors errors preserve-pos))
     (`(apply-filter . ,_)
      (flycheck-error-tree--apply-filter))
     (`(next-error-pos ,pos ,n . ,_)
