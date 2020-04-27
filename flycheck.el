@@ -6104,6 +6104,27 @@ Errors are taken from `flycheck-error-list-source-buffer'."
     (flycheck-error-tree--insert-errors (flycheck-error-list-current-errors))
     (flycheck-error-list-recenter)))
 
+(defun flycheck-error-list--format-breadcrumbs (breadcrumbs)
+  "Format a single-line string summarizing BREADCRUMBS.
+
+BREADCRUMBS is as described in
+`flycheck-error-tree-insert-error'."
+  (with-temp-buffer
+    (flycheck-error-tree--with-properties '(flycheck-error-tree-header t)
+      (let ((sep ""))
+        (pcase-dolist (`(,_ ,header . ,printer) breadcrumbs)
+          (insert sep)
+          (setq sep " > ")
+          (funcall printer header))))
+    (buffer-string)))
+
+(defconst flycheck-error-tree-header-line-format
+  `((:eval
+     (with-current-buffer (window-buffer)
+       (flycheck-error-list--format-breadcrumbs
+        (reverse (get-text-property (window-start) 'flycheck-breadcrumbs))))))
+  "Format of the header line in error tree buffers.")
+
 (defvar flycheck-error-tree-mode-map
   (let ((map (make-sparse-keymap))
         (parents (list flycheck-error-list-mode-map
@@ -6120,7 +6141,8 @@ Errors are taken from `flycheck-error-list-source-buffer'."
   (setq buffer-read-only t
         buffer-invisibility-spec nil
         truncate-lines t
-        mode-line-buffer-identification flycheck-error-list-mode-line)
+        mode-line-buffer-identification flycheck-error-list-mode-line
+        header-line-format flycheck-error-tree-header-line-format)
   (setq-local inhibit-field-text-motion t)
   (setq-local revert-buffer-function
               (lambda (&rest _) (flycheck-error-tree--refresh))))
