@@ -6104,14 +6104,18 @@ If PRESERVE-POS is nil, recenter the error list on the first error."
   "Erase the buffer and insert a new error tree.
 
 Errors are taken from `flycheck-error-list-source-buffer'."
-  (let ((inhibit-read-only t))
+  (let ((inhibit-read-only t)
+        (current-error (flycheck-error-list-error-at (point)))
+        (new-errors (flycheck-error-list-current-errors)))
     (flycheck-error-tree--unhighlight-errors)
     (setq-local flycheck-error-tree--error-levels nil)
     (setq-local flycheck-error-tree--error-positions
                 (make-hash-table :test 'eq))
     (erase-buffer)
-    (flycheck-error-tree--insert-errors (flycheck-error-list-current-errors))
-    (flycheck-error-list-recenter)))
+    (flycheck-error-tree--insert-errors new-errors)
+    (let* ((err (car (member current-error new-errors)))
+           (pos (and err (gethash err flycheck-error-tree--error-positions))))
+      (flycheck-error-list-recenter-at (or pos (point))))))
 
 (defun flycheck-error-list--format-breadcrumbs (breadcrumbs)
   "Format a single-line string summarizing BREADCRUMBS.
