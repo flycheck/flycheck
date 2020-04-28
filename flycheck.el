@@ -5116,23 +5116,23 @@ LEVEL is either an error level symbol, or nil, to remove the filter."
           "Minimum error level (errors at lower levels will be hidden): ")))
   (when (and level (not (flycheck-error-level-p level)))
     (user-error "Invalid level: %s" level))
-  (-when-let (buf (get-buffer flycheck-error-list-buffer))
-    (with-current-buffer buf
-      (setq-local flycheck-error-list-minimum-level level)
-      (flycheck-error-list-refresh)
-      (flycheck-error-list-recenter-at (point-min)))))
+  (flycheck-error-list-with-buffer
+    (setq-local flycheck-error-list-minimum-level level)
+    (force-mode-line-update)
+    (flycheck-error-list-refresh)
+    (flycheck-error-list-recenter-at (point-min))))
 
 (defun flycheck-error-list-reset-filter (&optional refresh)
   "Remove local error filters and reset to the default filter.
 
 Interactively, or with non-nil REFRESH, refresh the error list."
   (interactive '(t))
-  (-when-let (buf (get-buffer flycheck-error-list-buffer))
-    (with-current-buffer buf
-      (kill-local-variable 'flycheck-error-list-minimum-level)
-      (when refresh
-        (flycheck-error-list-refresh)
-        (flycheck-error-list-recenter-at (point-min))))))
+  (flycheck-error-list-with-buffer
+    (kill-local-variable 'flycheck-error-list-minimum-level)
+    (when refresh
+      (flycheck-error-list-refresh)
+      (flycheck-error-list-recenter-at (point-min))
+      (force-mode-line-update))))
 
 (defun flycheck-error-list-apply-filter (errors)
   "Filter ERRORS according to `flycheck-error-list-minimum-level'."
