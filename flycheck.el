@@ -5556,42 +5556,54 @@ If STR is not a string, it is converted as with `princ'."
 
 ;;;; Populating the error tree
 
+(cl-defstruct (flycheck-error-tree--group-spec
+               (:constructor flycheck-error-tree--group-spec-new))
+  "Structure indicating how to structure one level of an error tree.
+
+The following fields are supported:
+
+`projection'
+     A grouping function (in the sense of `seq-group-by'): when
+     given a record to be inserted into an error tree, it should
+     return a key; one branch is created per key, containing a
+     subtree made up of all records with `equal' keys.
+
+`post-process'
+     A function called after grouping with `projection', which
+     receives the output of the grouping stage.  This function is
+     useful to apply transformations to the keys before printing
+     them.
+
+`printer'
+     A function indicating how to insert each key into
+     the output buffer when printing the tree.
+
+`may-collapse'
+     A boolean indicating whether a given key may be printed on
+     the same line as its parent if it is the only child.  It is
+     not used directly in this function, only stored in three
+     nodes."
+  projection post-process printer may-collapse)
+
 (defun flycheck-error-tree--make-tree (group-specs leaf-sort records)
   "Orgranise a list of records into a tree.
 
 GROUP-SPECS indicates how to structure the tree; each entry
-describes one level of the tree, and should be a list of the
-form (PROJECTION POST-PROCESS PRINTER MAY-COLLAPSE):
-
-- PROJECTION is a grouping function in the sense of
-  `seq-group-by': for each record it should return a key; one
-  branch is created per key, containing a subtree made up of all
-  records with `equal' keys.
-
-- POST-PROCESS is called after grouping; it receives the output
-  of `seq-group-by'.  This function is useful to apply
-  transformations to the keys before printing them.
-
-- PRINTER is a function indicating how to insert each key into
-  the output buffer when printing the tree.  It is not called,
-  but stored in tree nodes.
-
-- MAY-COLLAPSE indicates whether a given key may be printed on
-  the same line as its parent if it is the only child.  It is not
-  used directly in this function, only stored in three nodes.
+describes one level of the tree, and should be a
+`flycheck-error-tree--group-spec' object:
 
 LEAF-SORT is used at the last level of the tree to sort RECORDS."
   (if group-specs
-      (pcase-let*
-          ((`(,projection ,post-process ,insert ,may-collapse)
-            (pop group-specs))
-           ;; `seq-group-by' doesn't preserve key order, so use `-group-by'
-           ;; (besides, `-group-by' is faster)
-           (groups (funcall post-process (-group-by projection records))))
+      (let* ((spec (pop group-specs))
+             (projection (flycheck-error-tree--group-spec-projection spec))
+             (post-process (flycheck-error-tree--group-spec-post-process spec))
+             ;; `seq-group-by' doesn't preserve key order, so use `-group-by'
+             ;; (besides, `-group-by' is faster).
+             (groups (funcall post-process (-group-by projection records))))
         (dolist (group groups)
           (setf (cdr group) (flycheck-error-tree--make-tree
                              group-specs leaf-sort (cdr group))))
-        `((,insert . ,may-collapse) . ,groups))
+        (cons spec groups))
     (cons 'leaf (funcall leaf-sort records))))
 
 (define-button-type 'flycheck-error-tree-checker-name
@@ -5735,18 +5747,21 @@ of the fields of the tree-building specs used by
 
 The components of the grouping specification are taken from
 `flycheck-error-tree-group-by-specs-alist'."
-  (let* ((props (alist-get field flycheck-error-tree-group-by-specs-alist))
-         (post-process (plist-get props :post-process))
-         (printer (plist-get props :printer)))
-    (list (or (plist-get props :projection)
-              (flycheck-error-field-accessor field)
-              (user-error (format "Missing `:projection' for group %s" field)))
-          (or post-process
-              #'identity)
-          (if (or (null printer) (facep printer))
-              (apply-partially #'flycheck-error-tree--insert-with-face printer)
-            printer)
-          (car (or (plist-member props :may-collapse) '(t))))))
+  (let* ((props (alist-get field flycheck-error-tree-group-by-specs-alist)))
+    (flycheck-error-tree--group-spec-new
+     :projection
+     (or (plist-get props :projection)
+         (flycheck-error-field-accessor field)
+         (user-error (format "Missing `:projection' for group %s" field)))
+     :post-process
+     (or (plist-get props :post-process) #'identity)
+     :printer
+     (let ((printer (plist-get props :printer)))
+       (if (or (null printer) (facep printer))
+           (apply-partially #'flycheck-error-tree--insert-with-face printer)
+         printer))
+     :may-collapse
+     (car (or (plist-member props :may-collapse) '(t))))))
 
 (defun flycheck-error-tree--compare-numbers (n1 n2)
   "Compare two numbers N1 and N2 (both default to 0)."
@@ -5926,8 +5941,8 @@ level; see `flycheck-error-level-fringe-face'."
 
 PRINTERS is a list of printers; they are called one by one with
 ERR and an indentation amount (INDENT for the first field, then
-nil).  BREADCRUMBS is a list of headers specs that led to this point in
-the tree, in the form (POINT HEADER . PRINTER)."
+nil).  BREADCRUMBS is a list of `flycheck-error-tree--breadcrumb'
+structs that led to this point in the tree."
   (let ((beg (point))
         (level (flycheck-error-level err)))
     (flycheck-error-tree--with-properties
@@ -5986,32 +6001,44 @@ variable is non-nil (for example, when grouping by filename then
 checker, both levels will be collapsed if there is errors from
 just one checker).")
 
+(cl-defstruct (flycheck-error-tree--breadcrumb
+               (:constructor flycheck-error-tree--breadcrumb-new))
+  "Structure indicating one step of a path in an error tree.
+
+`point' is the position at which a given `header' was inserted;
+`spec' is the grouping specification that accompanied that header
+in the tree."
+  point header spec)
+
 (defun flycheck-error-tree--insert-tree (tree leaf-fn indent path)
   "Insert a tree into an error tree buffer.
 
 TREE is a tree, as returned by `flycheck-error-tree--make-tree'.
 LEAF-FN is used to print each leaf of the tree.  PATH is the list
-of headers that lead to this point; INDENT is the accumulated
+of breadcrumbs that lead to this point; INDENT is the accumulated
 amount of indentation."
   (pcase tree
     (`(leaf . ,errors)
      (dolist (err errors)
        (funcall leaf-fn err indent path)))
-    (`((,printer . ,may-collapse) . ,branches)
-     (pcase-dolist (`(,header . ,subtree) branches)
-       (let* ((collapse
-               (and may-collapse (> indent 0) (null (cdr branches))))
-              (collapse-indent
-               (and flycheck-error-list-collapse-indentation collapse))
-              (subindent (+ indent (if collapse-indent 0 1)))
-              (skip (and collapse (null header)))
-              (subpath
-               (if skip path (cons `(,(point) ,header . ,printer) path))))
-         (unless skip
-           (flycheck-error-tree--insert-group-header
-            header printer collapse indent path))
-         (flycheck-error-tree--insert-tree
-          subtree leaf-fn subindent subpath))))))
+    (`(,spec . ,branches)
+     (let ((may-collapse (flycheck-error-tree--group-spec-may-collapse spec))
+           (printer  (flycheck-error-tree--group-spec-printer spec))
+           (single-branch (null (cdr branches))))
+       (pcase-dolist (`(,header . ,subtree) branches)
+         (let* ((collapse (and may-collapse (> indent 0) single-branch))
+                (collapse-indent
+                 (and flycheck-error-list-collapse-indentation collapse))
+                (subindent (+ indent (if collapse-indent 0 1)))
+                (skip (and collapse (null header)))
+                (crumb (flycheck-error-tree--breadcrumb-new
+                        :point (point) :header header :spec spec))
+                (subpath (if skip path (cons crumb path))))
+           (unless skip
+             (flycheck-error-tree--insert-group-header
+              header printer collapse indent path))
+           (flycheck-error-tree--insert-tree
+            subtree leaf-fn subindent subpath)))))))
 
 (defvar flycheck-error-tree-printers-alist
   '((checker . flycheck-error-list-checker-name)
@@ -6118,17 +6145,18 @@ Errors are taken from `flycheck-error-list-source-buffer'."
       (flycheck-error-list-recenter-at (or pos (point))))))
 
 (defun flycheck-error-list--format-breadcrumbs (breadcrumbs)
-  "Format a single-line string summarizing BREADCRUMBS.
-
-BREADCRUMBS is as described in
-`flycheck-error-tree-insert-error'."
+  "Format a single-line string summarizing BREADCRUMBS."
   (with-temp-buffer
     (flycheck-error-tree--with-properties '(flycheck-error-tree-header t)
       (let ((sep ""))
-        (pcase-dolist (`(,_ ,header . ,printer) breadcrumbs)
-          (insert sep)
-          (setq sep " > ")
-          (funcall printer header))))
+        (dolist (crumb breadcrumbs)
+          ;; FIXME (Emacs 25) use pcase-let
+          (let* ((spec (flycheck-error-tree--breadcrumb-spec crumb))
+                 (header (flycheck-error-tree--breadcrumb-header crumb))
+                 (printer (flycheck-error-tree--group-spec-printer spec)))
+            (insert sep)
+            (setq sep " > ")
+            (funcall printer header)))))
     (buffer-string)))
 
 (defconst flycheck-error-tree-header-line-format
