@@ -6064,22 +6064,31 @@ The resulting function prints each field in FIELDS according to
   (setq-local flycheck-error-tree--highlights nil))
 
 (defun flycheck-error-tree--add-error-highlight (err)
-  "Highlight ERR in the current buffer."
+  "Highlight ERR in the current buffer.
+
+Return ERR's position, or nil if ERR couldn't be found."
   (-when-let* ((beg (gethash err flycheck-error-tree--error-positions))
                (end (next-single-char-property-change beg 'flycheck-error)))
     (cl-assert (eq err (get-text-property beg 'flycheck-error)))
     (let ((ov (make-overlay beg end)))
       (overlay-put ov 'category 'flycheck-error-tree--highlight)
       (push ov flycheck-error-tree--highlights)
-      ov)))
+      beg)))
 
 ;; Overlay spec
 (put 'flycheck-error-tree--highlight 'face 'flycheck-error-list-highlight)
 
-(defun flycheck-error-tree-highlight-errors (errors _preserve-pos)
-  "Highlight ERRORS in the current buffer."
+(defun flycheck-error-tree-highlight-errors (errors preserve-pos)
+  "Highlight ERRORS in the current buffer.
+
+If PRESERVE-POS is nil, recenter the error list on the first error."
   (flycheck-error-tree--unhighlight-errors)
-  (mapc #'flycheck-error-tree--add-error-highlight errors))
+  (let ((beg (point-max)))
+    (dolist (err errors)
+      (let ((pos (flycheck-error-tree--add-error-highlight err)))
+        (setq beg (min beg (or pos beg)))))
+    (when (and (not preserve-pos) (< beg (point-max)))
+      (flycheck-error-list-recenter-at beg))))
 
 (defun flycheck-error-tree--apply-filter ()
   "Apply `flycheck-error-list-minimum-level' to the current buffer."
