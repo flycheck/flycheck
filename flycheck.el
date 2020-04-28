@@ -1645,10 +1645,36 @@ FILE-NAME is nil, return `default-directory'."
           (file-name-directory file-name)
         (expand-file-name default-directory)))))
 
+(cl-defstruct (flycheck-line-cache
+               (:constructor flycheck-line-cache-new))
+  "Cache structure used to speed up `flycheck-goto-line'."
+  buffer tick point line)
+
+(defvar flycheck--line-cache
+  (flycheck-line-cache-new
+   :buffer nil :tick 0 :point nil :line nil))
+
+(defsubst flycheck--init-line-cache ()
+  "Initialize or reinitialize `flycheck--line-cache'."
+  (let ((buf (current-buffer))
+        (tick (buffer-modified-tick)))
+    (unless (and (eq (flycheck-line-cache-buffer flycheck--line-cache) buf)
+                 (= (flycheck-line-cache-tick flycheck--line-cache) tick))
+      (setf (flycheck-line-cache-buffer flycheck--line-cache) buf
+            (flycheck-line-cache-tick flycheck--line-cache) tick
+            (flycheck-line-cache-point flycheck--line-cache) 1
+            (flycheck-line-cache-line flycheck--line-cache) 1))))
+
 (defun flycheck-goto-line (line)
-  "Move point to beginning of line number LINE."
-  (goto-char (point-min))
-  (forward-line (- line 1)))
+  "Move point to beginning of line number LINE.
+
+This function assumes that the current buffer is not narrowed."
+  (flycheck--init-line-cache)
+  (goto-char (flycheck-line-cache-point flycheck--line-cache))
+  (let ((delta (- line (flycheck-line-cache-line flycheck--line-cache))))
+    (when (= 0 (forward-line delta))
+      (setf (flycheck-line-cache-point flycheck--line-cache) (point))
+      (setf (flycheck-line-cache-line flycheck--line-cache) line))))
 
 (defun flycheck-line-column-to-position (line column)
   "Return the point closest to LINE, COLUMN on line LINE.
@@ -3825,10 +3851,15 @@ with `flycheck-process-error-functions'."
   (setq flycheck-current-errors (sort (append errors flycheck-current-errors)
                                       #'flycheck-error-<))
   (overlay-recenter (point-max))
+  ;; We can't use `seq-sort-by' because it's not in Emacs 25's built-in `seq',
+  ;; and installing an updated version doesn't help (this is a package.el bug;
+  ;; see https://lists.gnu.org/archive/html/emacs-devel/2020-04/msg01974.html).
   (seq-do (lambda (err)
             (run-hook-with-args-until-success 'flycheck-process-error-functions
                                               err))
-          errors))
+          (seq-sort (lambda (e1 e2)
+                      (< (flycheck-error-line e1) (flycheck-error-line e2)))
+                    errors)))
 
 (defun flycheck-clear-errors ()
   "Remove all error information from the current buffer."
@@ -4634,6 +4665,7 @@ overlays."
   ;; them again using the internal index to guarantee errors are always
   ;; displayed in the same order.
   (seq-sort
+   ;; We can't use `seq-sort-by' here; see above
    (lambda (o1 o2) (< (overlay-get o1 'flycheck-error-index)
                       (overlay-get o2 'flycheck-error-index)))
    (seq-filter (lambda (o) (overlay-get o 'flycheck-overlay)) overlays)))
