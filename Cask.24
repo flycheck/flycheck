@@ -34,10 +34,9 @@
  (depends-on "julia-mode")
  (depends-on "less-css-mode")
  (depends-on "lua-mode")
- (depends-on "markdown-mode")
+ ;; (depends-on "markdown-mode")   ; 25+
  (depends-on "mmm-mode")
- ;; nix-mode requires Emacs 25+.
- ;; (depends-on "nix-mode")
+ ;; (depends-on "nix-mode")        ; 25+
  (depends-on "php-mode")
  (depends-on "processing-mode")
  (depends-on "protobuf-mode")
