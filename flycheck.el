@@ -3955,7 +3955,7 @@ show the icon."
   (let* ((fringe-width (pcase side
                          (`left-fringe (car (window-fringes)))
                          (`right-fringe (cadr (window-fringes)))))
-         (high-res (= 16 fringe-width)))
+         (high-res (>= fringe-width 16)))
     (propertize "!" 'display
                 (list side
                       (flycheck-error-level-fringe-bitmap level high-res)
