@@ -468,10 +468,8 @@ resource directory."
   (when (symbolp modes)
     (setq modes (list modes)))
   (dolist (mode modes)
-    (unless (fboundp mode)
-      (ert-skip (format "%S missing" mode)))
     (flycheck-ert-with-resource-buffer resource-file
-      (funcall mode)
+      (if (fboundp mode) (funcall mode) (setq major-mode mode))
       (apply #'flycheck-ert-should-syntax-check-in-buffer errors))))
 
 (defun flycheck-ert-at-nth-error (n)
