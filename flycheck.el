@@ -86,6 +86,9 @@
 ;; Declare a bunch of dynamic variables that we need from other modes
 (defvar sh-shell)                       ; For shell script checker predicates
 (defvar ess-language)                   ; For r-lintr predicate
+(defvar markdown-hide-markup)                     ;
+(defvar markdown-fontify-code-block-default-mode) ; For rust-error-explainer
+(defvar markdown-fontify-code-blocks-natively)    ;
 
 ;; Tell the byte compiler about autoloaded functions from packages
 (declare-function pkg-info-version-info "pkg-info" (package))
@@ -11194,12 +11197,23 @@ Relative paths are relative to the file being checked."
   :safe #'flycheck-string-list-p
   :package-version '(flycheck . "0.18"))
 
+(defun flycheck--fontify-as-markdown ()
+  "Place current buffer in `markdown-view-mode' and fontify it."
+  (when (fboundp 'markdown-view-mode)
+    (let ((markdown-fontify-code-block-default-mode 'rust-mode)
+          (markdown-fontify-code-blocks-natively t)
+          (markdown-hide-markup t))
+      (markdown-view-mode)
+      (font-lock-flush)
+      (font-lock-ensure))))
+
 (defun flycheck-rust-error-explainer (error)
-  "Return an explanation text for the given `flycheck-error' ERROR."
+  "Return an explanation for the given `flycheck-error' ERROR."
   (-when-let (error-code (flycheck-error-id error))
-    (with-output-to-string
+    (lambda ()
       (flycheck-call-checker-process
-       'rust nil standard-output t "--explain" error-code))))
+       'rust nil standard-output t "--explain" error-code)
+      (flycheck--fontify-as-markdown))))
 
 (defun flycheck-rust-error-filter (errors)
   "Filter ERRORS from rustc output that have no explanatory value."
