@@ -74,7 +74,8 @@ location and error message."
     ;; Switch to Emacs Lisp mode to give checkdoc the proper syntax table, etc.
     (delay-mode-hooks (emacs-lisp-mode))
     (setq delay-mode-hooks nil)
-    (let ((checkdoc-arguments-in-order-flag nil))
+    (let ((checkdoc-arguments-in-order-flag nil)
+          (checkdoc-verb-check-experimental-flag nil))
       (checkdoc-current-buffer 'take-notes))
     (flycheck/checkdoc-get-current-errors)))
 
