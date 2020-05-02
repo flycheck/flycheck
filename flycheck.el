@@ -9709,7 +9709,12 @@ See URL `https://eslint.org/'."
        (flycheck-verification-result-new
         :label "config file"
         :message (if have-config "found" "missing or incorrect")
-        :face (if have-config 'success '(bold error)))))))
+        :face (if have-config 'success '(bold error))))))
+  :error-explainer
+  (lambda (err)
+    (let ((error-code (flycheck-error-id err))
+          (url "https://eslint.org/docs/rules/%s"))
+      (and error-code `(url . ,(format url error-code))))))
 
 (flycheck-define-checker javascript-standard
   "A Javascript code and style checker for the (Semi-)Standard Style.
@@ -10541,6 +10546,13 @@ See URL `https://www.pylint.org/'."
              (or (not (flycheck-python-needs-module-p 'python-pylint))
                  (flycheck-python-find-module 'python-pylint "pylint")))
   :verify (lambda (_) (flycheck-python-verify-module 'python-pylint "pylint"))
+  :error-explainer (lambda (err)
+                     (-when-let (id (flycheck-error-id err))
+                       (with-output-to-string
+                         (flycheck-call-checker-process
+                          'python-pylint nil standard-output t
+                          (flycheck-python-module-args 'python-pylint "pylint")
+                          (format "--help-msg=%s" id)))))
   :modes python-mode
   :next-checkers ((warning . python-mypy)))
 
@@ -11826,7 +11838,12 @@ See URL `https://github.com/koalaman/shellcheck/'."
                (flycheck-verification-result-new
                 :label (format "Shell %s supported" sh-shell)
                 :message (if supports-shell "yes" "no")
-                :face (if supports-shell 'success '(bold warning)))))))
+                :face (if supports-shell 'success '(bold warning))))))
+  :error-explainer
+  (lambda (err)
+    (let ((error-code (flycheck-error-id err))
+          (url "https://github.com/koalaman/shellcheck/wiki/%S"))
+      (and error-code `(url . ,(format url error-code))))))
 
 (flycheck-define-checker slim
   "A Slim syntax checker using the Slim compiler.
