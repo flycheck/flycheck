@@ -1648,22 +1648,21 @@ FILE-NAME is nil, return `default-directory'."
 (cl-defstruct (flycheck-line-cache
                (:constructor flycheck-line-cache-new))
   "Cache structure used to speed up `flycheck-goto-line'."
-  buffer tick point line)
+  tick point line)
 
-(defvar flycheck--line-cache
-  (flycheck-line-cache-new
-   :buffer nil :tick 0 :point nil :line nil))
+(defvar-local flycheck--line-cache nil
+  "Cache used to speed ip `flycheck-goto-line'.")
 
 (defsubst flycheck--init-line-cache ()
   "Initialize or reinitialize `flycheck--line-cache'."
-  (let ((buf (current-buffer))
-        (tick (buffer-modified-tick)))
-    (unless (and (eq (flycheck-line-cache-buffer flycheck--line-cache) buf)
-                 (= (flycheck-line-cache-tick flycheck--line-cache) tick))
-      (setf (flycheck-line-cache-buffer flycheck--line-cache) buf
-            (flycheck-line-cache-tick flycheck--line-cache) tick
-            (flycheck-line-cache-point flycheck--line-cache) 1
-            (flycheck-line-cache-line flycheck--line-cache) 1))))
+  (let ((tick (buffer-modified-tick)))
+    (if flycheck--line-cache
+        (unless (= (flycheck-line-cache-tick flycheck--line-cache) tick)
+          (setf (flycheck-line-cache-tick flycheck--line-cache) tick
+                (flycheck-line-cache-point flycheck--line-cache) 1
+                (flycheck-line-cache-line flycheck--line-cache) 1))
+      (setq-local flycheck--line-cache
+                  (flycheck-line-cache-new :tick tick :point 1 :line 1)))))
 
 (defun flycheck-goto-line (line)
   "Move point to beginning of line number LINE.
