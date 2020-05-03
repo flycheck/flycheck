@@ -104,6 +104,9 @@ attention to case differences."
              (eq t (compare-strings suffix nil nil
                                     string start-pos nil ignore-case))))))
 
+  (defalias 'flycheck--format-message
+    (if (fboundp 'format-message) #'format-message #'format))
+
   ;; TODO: Remove when dropping support for Emacs 24.3 and earlier
   (unless (featurep 'subr-x)
     ;; `subr-x' function for Emacs 24.3 and below
@@ -3473,18 +3476,25 @@ If the buffer of ERR is not live, FORMS are not evaluated."
      (with-current-buffer (flycheck-error-buffer ,err)
        ,@forms)))
 
-(defun flycheck--exact-region (line col end-line end-col)
-  "Get the region of range LINE, COL, END-LINE, END-COL.
+(defun flycheck--exact-region (err)
+  "Get the region of ERR, if ERR specifies a range.
 
 Return a cons cell `(BEG . END)'.  If the input range is empty,
 it is expanded to cover at least one character so that END is
-always greater than BEG."
-  (let ((beg (flycheck-line-column-to-position line col))
-        (end (flycheck-line-column-to-position end-line end-col)))
-    (cond
-     ((< beg end) (cons beg end))
-     ((= end (point-max)) (cons (1- end) end))
-     (t (cons end (1+ end))))))
+always greater than BEG.  If ERR doesn't specify an end-column
+return nil."
+  (-if-let* ((line (flycheck-error-line err))
+             (column (flycheck-error-column err))
+             (end-line (or (flycheck-error-end-line err) line))
+             (end-column (flycheck-error-end-column err)))
+      ;; Ignoring fields speeds up calls to `line-end-position'.
+      (let* ((inhibit-field-text-motion t)
+             (beg (flycheck-line-column-to-position line column))
+             (end (flycheck-line-column-to-position end-line end-column)))
+        (cond
+         ((< beg end) (cons beg end))
+         ((= end (point-max)) (cons (1- end) end))
+         (t (cons end (1+ end)))))))
 
 (defun flycheck--line-region (pos)
   "Get the line region of position POS.
@@ -3530,9 +3540,13 @@ the THING at the column, and END the end of the THING."
     (goto-char pos)
     (bounds-of-thing-at-point thing)))
 
-(defun flycheck--approximate-region (line column mode)
-  "Compute the region of LINE, COLUMN based on MODE."
-  (let* ((beg (flycheck-line-column-to-position line (or column 1))))
+(defun flycheck--approximate-region (err mode)
+  "Compute the region of ERR based on MODE and ERR's line and column."
+  ;; Ignoring fields speeds up calls to `line-end-position'.
+  (let* ((inhibit-field-text-motion t)
+         (line (flycheck-error-line err))
+         (column (flycheck-error-column err))
+         (beg (flycheck-line-column-to-position line (or column 1))))
     (if (or (null column)
             (eq mode 'lines))
         (flycheck--line-region beg)
@@ -3554,18 +3568,10 @@ ERR is a Flycheck error.  If its position is fully specified, use
 that to compute a region; otherwise, use MODE, as documented in
 `flycheck-highlighting-mode'.  If MODE is nil, signal an error."
   (flycheck-error-with-buffer err
-    (save-excursion
-      (save-restriction
-        (widen)
-        ;; Ignoring fields speeds up calls to `line-end-position'.
-        (let* ((inhibit-field-text-motion t)
-               (line (flycheck-error-line err))
-               (column (flycheck-error-column err))
-               (end-line (or (flycheck-error-end-line err) line))
-               (end-column (flycheck-error-end-column err)))
-          (if (and line column end-line end-column)
-              (flycheck--exact-region line column end-line end-column)
-            (flycheck--approximate-region line column mode)))))))
+    (save-restriction
+      (widen)
+      (or (flycheck--exact-region err)
+          (flycheck--approximate-region err mode)))))
 
 (defun flycheck-error-pos (err)
   "Get the buffer position of ERR.
@@ -3576,16 +3582,41 @@ The error position is the error column, or the first
 non-whitespace character of the error line, if ERR has no error column."
   (car (flycheck-error-region-for-mode err 'columns)))
 
-(defun flycheck-error-format-message-and-id (err)
-  "Format the message and id of ERR as human-readable string."
-  (let ((id (flycheck-error-id err))
-        (filename (flycheck-error-filename err)))
-    (concat (when (and filename (not (equal filename (buffer-file-name))))
-              (format "In \"%s\":\n"
-                      (file-relative-name filename default-directory)))
-            (flycheck-error-message err)
-            (when id
-              (format " [%s]" id)))))
+(defun flycheck-error-format-snippet (err &optional max-length)
+  "Extract the text that ERR refers to from the buffer.
+
+Newlines and blanks are replaced by single spaces.  If ERR
+doesn't include an end-position, return nil.
+
+MAX-LENGTH is how many characters to read from the buffer, at
+most.  It defaults to 20."
+  (flycheck-error-with-buffer err
+    (save-restriction
+      (widen)
+      (pcase (flycheck--exact-region err)
+        (`(,beg . ,end)
+         (truncate-string-to-width
+          (replace-regexp-in-string
+           "\\s-+" " " (buffer-substring beg (min end (point-max))))
+          (or max-length 20) nil nil t))))))
+
+(defun flycheck-error-format-message-and-id (err &optional include-snippet)
+  "Format the message and id of ERR as human-readable string.
+
+If INCLUDE-SNIPPET is non-nil, prepend the message with a snippet
+of the text that the error applies to (such text can only be
+determined if the error contains a full span, not just a
+beginning position)."
+  (let* ((id (flycheck-error-id err))
+         (fname (flycheck-error-filename err))
+         (other-file-p (and fname (not (equal fname (buffer-file-name))))))
+    (concat (and other-file-p (format "In %S:\n" (file-relative-name fname)))
+            (and include-snippet
+                 (-when-let* ((snippet (flycheck-error-format-snippet err)))
+                   (flycheck--format-message "`%s': " snippet)))
+            (or (flycheck-error-message err)
+                (format "Unknown %S" (flycheck-error-level err)))
+            (and id (format " [%s]" id)))))
 
 (defun flycheck-error-format-position (err)
   "Format the position of ERR as a human-readable string."
@@ -4339,13 +4370,14 @@ overlays."
 
 (defun flycheck-help-echo-all-error-messages (errs)
   "Concatenate error messages and ids from ERRS."
-  (mapconcat
-   (lambda (err)
-     (when err
-       (if (flycheck-error-message err)
-           (flycheck-error-format-message-and-id err)
-         (format "Unknown %s" (flycheck-error-level err)))))
-   errs "\n\n"))
+  (pcase (delq nil errs) ;; FIXME why would errors be nil here?
+    (`(,err) ;; A single error
+     (flycheck-error-format-message-and-id err))
+    (_ ;; Zero or multiple errors
+     (mapconcat
+      (lambda (err)
+        (flycheck-error-format-message-and-id err 'include-snippet))
+      errs "\n"))))
 
 (defun flycheck-filter-overlays (overlays)
   "Get all Flycheck overlays from OVERLAYS, in original order."
@@ -4663,7 +4695,7 @@ Return a list with the contents of the table cell."
          (line (flycheck-error-line error))
          (column (flycheck-error-column error))
          (message (or (flycheck-error-message error)
-                      (format "Unknown %s" (symbol-name level))))
+                      (format "Unknown %S" level)))
          (flushed-msg (flycheck-flush-multiline-message message))
          (id (flycheck-error-id error))
          (id-str (if id (format "%s" id) ""))
@@ -5091,19 +5123,19 @@ and if the echo area is not occupied by minibuffer input."
 (defun flycheck-display-error-messages (errors)
   "Display the messages of ERRORS.
 
-Concatenate all non-nil messages of ERRORS separated by empty
-lines, and display them with `display-message-or-buffer', which
-shows the messages either in the echo area or in a separate
-buffer, depending on the number of lines.  See Info
-node `(elisp)Displaying Messages' for more information.
+Concatenate all non-nil messages of ERRORS as with
+`flycheck-help-echo-all-error-messages', and display them with
+`display-message-or-buffer', which shows the messages either in
+the echo area or in a separate buffer, depending on the number of
+lines.  See Info node `(elisp)Displaying Messages' for more
+information.
 
 In the latter case, show messages in the buffer denoted by
 variable `flycheck-error-message-buffer'."
   (when (and errors (flycheck-may-use-echo-area-p))
-    (let ((messages (seq-map #'flycheck-error-format-message-and-id errors)))
-      (display-message-or-buffer (string-join messages "\n\n")
-                                 flycheck-error-message-buffer
-                                 'not-this-window)
+    (let ((message (flycheck-help-echo-all-error-messages errors)))
+      (display-message-or-buffer
+       message flycheck-error-message-buffer 'not-this-window)
       ;; We cannot rely on `display-message-or-buffer' returning the right
       ;; window. See URL `https://github.com/flycheck/flycheck/issues/1643'.
       (-when-let ((buf (get-buffer flycheck-error-message-buffer)))

@@ -2126,7 +2126,24 @@
     (flycheck-add-overlay (flycheck-error-new-at 1 1 'info "info"))
     (flycheck-add-overlay (flycheck-error-new-at 1 1 'warning "warning"))
     (flycheck-add-overlay (flycheck-error-new-at 1 1 'error "error"))
-    (should (string= (help-at-pt-string) "info\n\nwarning\n\nerror"))))
+    (should (string= (help-at-pt-string) "info\nwarning\nerror"))))
+
+(ert-deftest flycheck-add-overlay/help-echo-stacks-errors-region ()
+  :tags '(overlay)
+  "Check that help-echo messages include snippets when available."
+  (flycheck-ert-with-temp-buffer
+    (insert "int main() {}")
+    (goto-char 5)
+    (flycheck-add-overlay
+     (flycheck-error-new-at 1 1 'info "info" :end-column 14))
+    (flycheck-add-overlay
+     (flycheck-error-new-at 1 5 'warning "warning" :end-column 9))
+    (flycheck-add-overlay
+     (flycheck-error-new-at 1 5 'error "error" :end-column 11))
+    (let ((text-quoting-style 'grave))
+      (should (string=
+               (help-at-pt-string)
+               "`int main() {}': info\n`main': warning\n`main()': error")))))
 
 
 ;;; Error navigation in the current buffer
