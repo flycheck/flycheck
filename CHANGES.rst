@@ -27,6 +27,13 @@
     fringes and margins.  Additionally, Flycheck's will now use high-resolution
     fringe bitmaps if the fringe is wide enough [GH-1742, GH-1744]
 
+  - Error highlighting is now configurable, using the new
+    ``flycheck-highlighting-style`` variable: instead of applying
+    level-dependent faces (typically with wavy underlines), Flycheck can now
+    insert delimiters around errors, or mix styles depending on how many lines
+    an error covers.  Additionally, stipples are added in the fringes to
+    indicate errors that span multiple lines.
+
 - New features and improvements
 
   - Flycheck can now trigger a syntax check automatically after switching

@@ -6,7 +6,7 @@ When a syntax check in the current buffer has finished Flycheck reports the
 results of the check in the current buffer in two ways:
 
 * Highlight errors, warnings, etc. directly in the buffer according to
-  `flycheck-highlighting-mode`.
+  `flycheck-highlighting-mode` and `flycheck-highlighting-style`.
 * Indicate errors, warnings, etc. in the fringe according to
   `flycheck-indication-mode`.
 
@@ -53,16 +53,17 @@ Error highlights
 ================
 
 Flycheck highlights errors directly in the buffer according to
-`flycheck-highlighting-mode`.  By default these highlights consist of a coloured
-wave underline which spans the whole symbol at the error location as in the
-screenshot above but the highlights are entirely customisable.  You can change
-the extents of highlighting or disable it completely with
-`flycheck-highlighting-mode`, or customise Flycheck’s faces to change the style
-of the underline or use different colours.
+`flycheck-highlighting-mode` and `flycheck-highlighting-style`.
+
+Most checkers report a single error position, not a range, so Flycheck typically
+needs to guess how far to extend the highlighting: by default, it highlights the
+whole symbol at the location reported by the checker, as in the screenshot
+above, but you can change that range (or even disable highlighting completely)
+using `flycheck-highlighting-mode`.
 
 .. defcustom:: flycheck-highlighting-mode
 
-   How Flycheck highlights errors and warnings in the buffer:
+   How Flycheck chooses which buffer region to highlight:
 
    ``nil``
       Do not highlight anything at all.
@@ -84,13 +85,45 @@ of the underline or use different colours.
    .. warning::
 
       In some major modes ``sexps`` is *very* slow, because discovering
-      expression boundaries efficiently is hard.
+      expression boundaries is costly.
 
       The built-in ``python-mode`` is known to suffer from this issue.
 
       Be careful when enabling this mode.
 
-The highlights use the following faces depending on the error level:
+Conversely, when a checker reports a range, Flycheck uses that.
+
+The style of the highlighting is determined by the value of
+`flycheck-highlighting-style`.  By default, Flycheck highlights error text with
+a face indicating the severity of the error (typically, this face applies a
+coloured wavy underline).  Instead of faces, however, Flycheck can also indicate
+erroneous text by inserting delimiters around it (checkers sometimes report
+errors that span a large region of the buffer, making underlines distracting, so
+in fact Flycheck only applies a face if the error spans less than 5 lines; this
+is achieved using the ``conditional`` style described below).
+
+.. defcustom:: flycheck-highlighting-style
+
+   How Flycheck highlights error regions.
+
+   ``nil``
+     Do not indicate error regions.
+
+   ``level-face``
+      Apply a face to erroneous text.
+
+   ``(delimiters BEFORE AFTER)``
+      Bracket the error text between ``BEFORE`` and ``AFTER``, which can be
+      strings, images, etc.  Chars are handled specially: they are repeated
+      twice to form double brackets.
+
+   ``(conditional NLINES S1 S2)``
+      Chose between styles ``S1`` and ``S2``: ``S1`` if the error covers up to
+      ``NLINES``, and ``S2`` otherwise.
+
+To change the style of the underline or use different colours in the
+``level-face`` style, customize the following faces, which are used depending on
+the error level:
 
 .. defface:: flycheck-error
              flycheck-warning
@@ -98,6 +131,18 @@ The highlights use the following faces depending on the error level:
 
    The highlighting face for ``error``, ``warning`` and ``info`` levels
    respectively.
+
+Delimiters use the same faces as the fringe icons described below, in addition
+to the `flycheck-error-delimiter` face; delimited text has the
+`flycheck-delimited-error` face, which is empty by default.
+
+.. defface:: flycheck-error-delimiter
+
+   The face applied to ``BEFORE`` and ``AFTER`` delimiters.
+
+.. defface:: flycheck-delimited-error
+
+   The face applied to error text in ``delimiters`` style.
 
 Fringe and margin icons
 =======================
@@ -163,6 +208,9 @@ The following faces control the colours of fringe and margin indicators.
              flycheck-fringe-info
 
    The icon faces for ``error``, ``warning`` and ``info`` levels respectively.
+
+When an error spans multiple lines, Flycheck displays a hatch pattern in the
+fringes or vertical dots in the margins to indicate the extent of the error.
 
 To change the fringe bitmap or the symbol used in the margins, use the function
 ``flycheck-redefine-standard-error-levels``.

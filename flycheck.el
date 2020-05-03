@@ -605,6 +605,68 @@ especially if you use margins only in Flycheck buffers."
   (when flycheck-current-errors
     (flycheck-buffer)))
 
+(define-widget 'flycheck-highlighting-style 'lazy
+  "A value for `flycheck-highlighting-style'."
+  :offset 2
+  :format "%t: Use %v"
+  :type '(choice
+          :format "%[Value Menu%] %v"
+          (const :tag "no highlighting" nil)
+          (const :tag "a face indicating the error level" level-face)
+          (list :tag "a pair of delimiters"
+                (const :format "" delimiters)
+                (string :tag "Before")
+                (string :tag "After"))
+          (list :tag "a conditional mix of styles"
+                (const :format "" conditional)
+                (integer :tag "Up to this many lines")
+                (flycheck-highlighting-style :format "Use %v")
+                (flycheck-highlighting-style :format "Otherwise, use %v"))))
+
+(defun flycheck--make-highlighting-delimiter (char)
+  "Make a highlighting bracket symbol by repeating CHAR twice."
+  (compose-chars ?\s
+                 ;; '(Bl . Br) ?\s
+                 '(Bc Br 30 0) char
+                 '(Bc Bl -30 0) char))
+
+(defcustom flycheck-highlighting-style
+  `(conditional 4 level-face (delimiters "" ""))
+  "The highlighting style for Flycheck errors and warnings.
+
+The highlighting style controls how Flycheck highlights error
+regions in buffers.  The following styles are supported:
+
+nil
+     Do not highlight errors.  Same as setting
+     `flycheck-highlighting-mode' to nil.
+
+`level-face'
+     Chose a face depending on the severity of the error, and
+     apply it to the whole error text.  See also the
+     `flycheck-define-error-level' and `flycheck-error',
+     `flycheck-warning', and `flycheck-info' faces.
+
+\(`delimiters' BEFORE AFTER)
+     Draw delimiters on each side of the error.  BEFORE and AFTER
+     indicate which delimiters to use.  If they are strings, they
+     are used as-is.  If they are characters, they are repeated
+     twice and composed into a single character.  Delimiters use
+     the fringe face corresponding to the severity of each error,
+     as well as the `flycheck-error-delimiter' face.  Delimited
+     text has the `flycheck-delimited-error' face.
+
+\(`conditional' NLINES S1 S2)
+     Use style S1 for errors spanning up to NLINES lines, and
+     style S2 otherwise.
+
+See also `flycheck-highlighting-mode' and
+`flycheck-indication-mode'."
+  :group 'flycheck
+  :type 'flycheck-highlighting-style
+  :package-version '(flycheck . "32")
+  :safe t)
+
 (defcustom flycheck-check-syntax-automatically '(save
                                                  idle-change
                                                  new-line
@@ -874,6 +936,24 @@ This variable is a normal hook.  See Info node `(elisp)Hooks'."
   :type 'hook
   :risky t
   :package-version '(flycheck . "0.21"))
+
+(defface flycheck-error-delimiter
+  `((t))
+  "Flycheck face for errors spanning multiple lines.
+
+See `flycheck-highlighting-style' for details on when this face
+is used."
+  :package-version '(flycheck . "32")
+  :group 'flycheck-faces)
+
+(defface flycheck-delimited-error
+  `((t))
+  "Flycheck face for errors spanning multiple lines.
+
+See `flycheck-highlighting-style' for details on when this face
+is used."
+  :package-version '(flycheck . "32")
+  :group 'flycheck-faces)
 
 (defface flycheck-error
   '((((supports :underline (:style wave)))
@@ -3909,8 +3989,11 @@ nil."
 Returns MARGIN-STR with FACE applied."
   (propertize margin-str 'face `(,face default)))
 
-(defconst flycheck-default-margin-str
-  "»")
+(defconst flycheck-default-margin-str "»"
+  "String used to indicate errors in the margins.")
+
+(defconst flycheck-default-margin-continuation-str "⋮"
+  "String used to indicate continuation lines in the margins.")
 
 ;;;###autoload
 (defun flycheck-define-error-level (level &rest properties)
@@ -3989,6 +4072,10 @@ The following PROPERTIES constitute an error level:
             (flycheck-make-margin-spec
              flycheck-default-margin-str
              (or (get level 'flycheck-fringe-face) 'default))))
+  (setf (get level 'flycheck-margin-continuation)
+        (flycheck-make-margin-spec
+         flycheck-default-margin-continuation-str
+         (or (get level 'flycheck-fringe-face) 'default)))
   (setf (get level 'flycheck-error-list-face)
         (plist-get properties :error-list-face)))
 
@@ -4012,6 +4099,10 @@ The following PROPERTIES constitute an error level:
   "Get the margin spec for LEVEL."
   (get level 'flycheck-margin-spec))
 
+(defun flycheck-error-level-margin-continuation-spec (level)
+  "Get the margin continuation spec for LEVEL."
+  (get level 'flycheck-margin-continuation))
+
 (defun flycheck-error-level-fringe-bitmap (level &optional hi-res)
   "Get the fringe bitmap for LEVEL.
 
@@ -4028,7 +4119,7 @@ will be the high resolution version."
   "Get the error list face for LEVEL."
   (get level 'flycheck-error-list-face))
 
-(defun flycheck-error-level-make-indicator (level side)
+(defun flycheck-error-level-make-indicator (level side &optional continuation)
   "Create the fringe or margin icon for LEVEL at SIDE.
 
 Return a propertized string that shows an indicator according
@@ -4038,6 +4129,11 @@ LEVEL is a Flycheck error level defined with
 `flycheck-define-error-level', and SIDE is either `left-fringe',
 `right-fringe', `left-margin', or `right-margin'.
 
+CONTINUATION indicates which fringe bitmap or margin spec to use:
+either the `:fringe-bitmap' and `:margin-spec' properties of
+LEVEL when CONTINUATION is nil or omitted, or bitmaps and specs
+indicating an error spanning more than one line.
+
 Return a propertized string representing the fringe icon,
 intended for use as `before-string' of an overlay to actually
 show the indicator."
@@ -4045,15 +4141,21 @@ show the indicator."
    "!" 'display
    (pcase side
      ((or `left-fringe `right-fringe)
-      (let* ((fringe-width (pcase side
-                             (`left-fringe (car (window-fringes)))
-                             (`right-fringe (cadr (window-fringes)))))
-             (high-res (>= fringe-width 16)))
-        (list side (flycheck-error-level-fringe-bitmap level high-res)
-              (flycheck-error-level-fringe-face level))))
+      (list side
+            (if continuation 'flycheck-fringe-bitmap-continuation
+              (let* ((fringe-width
+                      (pcase side
+                        (`left-fringe (car (window-fringes)))
+                        (`right-fringe (cadr (window-fringes)))))
+                     (high-res (>= fringe-width 16)))
+                (flycheck-error-level-fringe-bitmap level high-res)))
+            (flycheck-error-level-fringe-face level)))
      ((or `left-margin `right-margin)
       `((margin ,side)
-        ,(or (flycheck-error-level-margin-spec level) "")))
+        ,(or (if continuation
+                 (flycheck-error-level-margin-continuation-spec level)
+               (flycheck-error-level-margin-spec level))
+             "")))
      (_ (error "Invalid fringe side: %S" side)))))
 
 (define-obsolete-function-alias
@@ -4088,6 +4190,13 @@ show the indicator."
    #b1111001111000000]
   "High-resolution bitmap used to indicate errors in the fringes.")
 
+(defconst flycheck-fringe-bitmap-continuation
+  [#b1000000010000000
+   #b0010000000100000
+   #b0000100000001000
+   #b0000001000000010]
+  "Bitmap used to indicate continuation lines in the fringes.")
+
 (when (fboundp 'define-fringe-bitmap) ;; #ifdef HAVE_WINDOW_SYSTEM
   (define-fringe-bitmap
     'flycheck-fringe-bitmap-double-arrow
@@ -4095,7 +4204,11 @@ show the indicator."
   (define-fringe-bitmap
     'flycheck-fringe-bitmap-double-arrow-hi-res
     flycheck-fringe-bitmap-double-arrow-hi-res
-    nil 16))
+    nil 16)
+  (define-fringe-bitmap
+    'flycheck-fringe-bitmap-continuation
+    flycheck-fringe-bitmap-continuation
+    nil 16 '(top repeat)))
 
 (defun flycheck-redefine-standard-error-levels
     (&optional margin-str fringe-bitmap)
@@ -4408,6 +4521,57 @@ preserve overlay order when calling `overlays-at').")
   "Compute the index to assign to a new Flycheck overlay."
   (cl-incf flycheck--last-overlay-index))
 
+(defun flycheck--highlighting-style (err)
+  "Determine the highlighting style to apply to ERR.
+
+Styles are documented in `flycheck-highlighting-style'; this
+functions resolves `conditional' style specifications."
+  (let* ((style flycheck-highlighting-style)
+         (first-line (flycheck-error-line err))
+         (end-line (or (flycheck-error-end-line err) first-line))
+         (nlines (- end-line first-line)))
+    (while (eq (car-safe style) 'conditional)
+      (pcase-let ((`(,threshold ,s1 ,s2) (cdr style)))
+        (setq style (if (< nlines threshold) s1 s2))))
+    (pcase style
+      (`(delimiters ,before ,after)
+       (when (characterp before)
+         (setq before (flycheck--make-highlighting-delimiter before)))
+       (when (characterp after)
+         (setq after (flycheck--make-highlighting-delimiter after)))
+       (setq style `(delimiters ,before ,after))))
+    style))
+
+(defun flycheck--setup-highlighting (err overlay)
+  "Apply properties to OVERLAY to highlight ERR."
+  (let ((level (flycheck-error-level err)))
+    (unless flycheck-highlighting-mode
+      ;; Erase the highlighting from the overlay if requested by the user
+      (setf (overlay-get overlay 'face) nil))
+    (when flycheck-indication-mode
+      (setf (overlay-get overlay 'before-string)
+            (flycheck-error-level-make-indicator
+             level flycheck-indication-mode))
+      (setf (overlay-get overlay 'line-prefix)
+            (flycheck-error-level-make-indicator
+             level flycheck-indication-mode t)))
+    (pcase (flycheck--highlighting-style err)
+      ((or `nil (guard (null flycheck-highlighting-mode)))
+       ;; Erase the highlighting
+       (setf (overlay-get overlay 'face) nil))
+      (`level-face)
+      (`(delimiters ,before ,after)
+       ;; Replace the highlighting with delimiters
+       (let* ((fringe-face (flycheck-error-level-fringe-face level))
+              (delim-face `(flycheck-error-delimiter ,fringe-face)))
+         (setf (overlay-get overlay 'face) 'flycheck-delimited-error)
+         (setf (overlay-get overlay 'before-string)
+               (concat (propertize before 'face delim-face)
+                       (or (overlay-get overlay 'before-string) "")))
+         (setf (overlay-get overlay 'after-string)
+               (propertize after 'face delim-face))))
+      (other (error "Unsupported highlighting style: %S" other)))))
+
 (defun flycheck-add-overlay (err)
   "Add overlay for ERR.
 
@@ -4433,14 +4597,8 @@ Return the created overlay."
     (setf (overlay-get overlay 'flycheck-overlay) t)
     (setf (overlay-get overlay 'flycheck-error) err)
     (setf (overlay-get overlay 'category) category)
-    (unless flycheck-highlighting-mode
-      ;; Erase the highlighting from the overlay if requested by the user
-      (setf (overlay-get overlay 'face) nil))
-    (when flycheck-indication-mode
-      (setf (overlay-get overlay 'before-string)
-            (flycheck-error-level-make-indicator
-             level flycheck-indication-mode)))
     (setf (overlay-get overlay 'help-echo) #'flycheck-help-echo)
+    (flycheck--setup-highlighting err overlay)
     overlay))
 
 (defun flycheck-help-echo (_window object pos)
