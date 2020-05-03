@@ -2235,7 +2235,8 @@ state using this function."
           (remq checker flycheck--automatically-disabled-checkers)))
   (when (memq checker flycheck--automatically-enabled-checkers)
     (setq flycheck--automatically-enabled-checkers
-          (remq checker flycheck--automatically-enabled-checkers))))
+          (remq checker flycheck--automatically-enabled-checkers)))
+  (flycheck-buffer))
 
 (defun flycheck-may-use-checker (checker)
   "Whether a generic CHECKER may be used.
