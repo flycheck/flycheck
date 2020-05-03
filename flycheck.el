@@ -2206,28 +2206,30 @@ selection for the current buffer.")
   "Whether a generic CHECKER may be enabled for current buffer.
 
 Return non-nil if CHECKER may be used for the current buffer, and
-nil otherwise."
-  (let* ((enabled (flycheck-checker-get checker 'enabled))
-         (shall-enable
-          (and (not (flycheck-disabled-checker-p checker))
-               (or (memq checker flycheck--automatically-enabled-checkers)
-                   (null enabled)
-                   (funcall enabled)))))
-    (if shall-enable
-        (cl-pushnew checker flycheck--automatically-enabled-checkers)
-      (cl-pushnew checker flycheck--automatically-disabled-checkers))
-    shall-enable))
+nil otherwise.  The result of the `:enabled' check, if any, is
+cached."
+  (and
+   ;; Don't run the :enabled check if the checker is already disabled…
+   (not (flycheck-disabled-checker-p checker))
+   (or
+    ;; …or if we've already cached the result
+    (memq checker flycheck--automatically-enabled-checkers)
+    (let* ((enabled (flycheck-checker-get checker 'enabled))
+           (may-enable (or (null enabled) (funcall enabled))))
+      ;; Cache the result
+      (if may-enable
+          (cl-pushnew checker flycheck--automatically-enabled-checkers)
+        (cl-pushnew checker flycheck--automatically-disabled-checkers))
+      may-enable))))
 
 (defun flycheck-reset-enabled-checker (checker)
   "Reset the `:enabled' test of CHECKER.
 
 Forget that CHECKER has been enabled or automatically disabled
-from a previous `:enabled' test.  Once a checker has been enabled
-or automatically disabled, `flycheck-may-enable-checker' will
-always be constant (t or nil respectively).
-
-If you wish to test the `:enabled' predicate again, you must
-first reset its state using this function."
+from a previous `:enabled' test.  The result of the `:enabled'
+test is cached in `flycheck-may-enable-checker': if you wish to
+test the `:enabled' predicate again, you must first reset its
+state using this function."
   (when (memq checker flycheck--automatically-disabled-checkers)
     (setq flycheck--automatically-disabled-checkers
           (remq checker flycheck--automatically-disabled-checkers)))
