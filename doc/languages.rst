@@ -1137,7 +1137,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
    .. syntax-checker:: ruby-standard
 
-      Check syntax and lint with `Standard <https://github.com/testdouble/standard/>`_.
+      Check syntax and lint with `Ruby Standard <https://github.com/testdouble/standard/>`_.
 
       .. note::
 
