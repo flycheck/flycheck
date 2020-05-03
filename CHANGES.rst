@@ -1,6 +1,13 @@
 33-cvs (in development)
 =======================
 
+- New features and improvements
+
+  - The ``flycheck-verify-setup`` UI now includes buttons to re-enable manually
+    disabled checkers and to try to re-enable automatically disabled checkers
+    (command checkers are automatically disabled when their executable cannot be
+    found). [GH-1755]
+
 - **Breaking changes**
 
   - The variable ``flycheck-current-errors`` now contains errors in the order in
