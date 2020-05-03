@@ -1805,12 +1805,16 @@ A checker is registered if it is contained in
        (memq checker flycheck-checkers)))
 
 (defun flycheck-disabled-checker-p (checker)
-  "Determine whether CHECKER is disabled.
-
-A checker is disabled if it is contained in
-`flycheck-disabled-checkers'."
-  (or (memq checker flycheck-disabled-checkers)
+  "Determine whether CHECKER is disabled, manually or automatically."
+  (or (flycheck-manually-disabled-checker-p checker)
       (flycheck-automatically-disabled-checker-p checker)))
+
+(defun flycheck-manually-disabled-checker-p (checker)
+  "Determine whether CHECKER has been manually disabled.
+
+A checker has been manually disabled if it is contained in
+`flycheck-disabled-checkers'."
+  (memq checker flycheck-disabled-checkers))
 
 (defun flycheck-automatically-disabled-checker-p (checker)
   "Determine whether CHECKER has been automatically disabled.
@@ -1818,7 +1822,6 @@ A checker is disabled if it is contained in
 A checker has been automatically disabled if it is contained in
 `flycheck--automatically-disabled-checkers'."
   (memq checker flycheck--automatically-disabled-checkers))
-
 
 
 ;;; Generic syntax checkers
