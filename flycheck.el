@@ -519,19 +519,23 @@ path and tries invoking `executable-find' again."
      (executable-find (expand-file-name executable)))))
 
 (defcustom flycheck-indication-mode 'left-fringe
-  "The indication mode for Flycheck errors and warnings.
+  "The indication mode for Flycheck errors.
 
 This variable controls how Flycheck indicates errors in buffers.
-May either be `left-fringe', `right-fringe', or nil.
+May be `left-fringe', `right-fringe', `left-margin',
+`right-margin', or nil.
 
-If set to `left-fringe' or `right-fringe', indicate errors and
-warnings via icons in the left and right fringe respectively.
+If set to `left-fringe' or `right-fringe', indicate errors via
+icons in the left and right fringe respectively.  If set to
+`left-margin' or `right-margin', use the margins instead.
 
 If set to nil, do not indicate errors and warnings, but just
 highlight them according to `flycheck-highlighting-mode'."
   :group 'flycheck
   :type '(choice (const :tag "Indicate in the left fringe" left-fringe)
                  (const :tag "Indicate in the right fringe" right-fringe)
+                 (const :tag "Indicate in the left margin" left-margin)
+                 (const :tag "Indicate in the right margin" right-margin)
                  (const :tag "Do not indicate" nil))
   :safe #'symbolp)
 
@@ -569,6 +573,37 @@ nil
                  (const :tag "Do not highlight errors" nil))
   :package-version '(flycheck . "0.14")
   :safe #'symbolp)
+
+(defvar flycheck-current-errors)
+(defun flycheck-set-indication-mode (&optional mode)
+  "Set `flycheck-indication-mode' to MODE and adjust margins and fringes.
+
+When MODE is nil, adjust window parameters without changing the
+mode.  This function can be useful as a `flycheck-mode-hook',
+especially if you use margins only in Flycheck buffers."
+  (interactive (list (intern (completing-read
+                              "Mode: " '("left-fringe" "right-fringe"
+                                         "left-margin" "right-margin")
+                              nil t nil nil
+                              (prin1-to-string flycheck-indication-mode)))))
+  (setq mode (or mode flycheck-indication-mode))
+  (pcase mode
+    ((or `left-fringe `right-fringe)
+     (setq left-fringe-width 8 right-fringe-width 8
+           left-margin-width 0 right-margin-width 0))
+    (`left-margin
+     (setq left-fringe-width 1 right-fringe-width 8
+           left-margin-width 1 right-margin-width 0))
+    (`right-margin
+     (setq left-fringe-width 8 right-fringe-width 8
+           left-margin-width 0 right-margin-width 1))
+    (_ (user-error "Invalid indication mode")))
+  (dolist (win (get-buffer-window-list))
+    (set-window-margins win left-margin-width right-margin-width)
+    (set-window-fringes win left-fringe-width right-fringe-width))
+  (setq-local flycheck-indication-mode mode)
+  (when flycheck-current-errors
+    (flycheck-buffer)))
 
 (defcustom flycheck-check-syntax-automatically '(save
                                                  idle-change
@@ -3868,6 +3903,15 @@ nil."
 
 
 ;;; Error levels
+(defun flycheck-make-margin-spec (margin-str face)
+  "Make a display spec to indicate errors in the margins.
+
+Returns MARGIN-STR with FACE applied."
+  (propertize margin-str 'face `(,face default)))
+
+(defconst flycheck-default-margin-str
+  "»")
+
 ;;;###autoload
 (defun flycheck-define-error-level (level &rest properties)
   "Define a new error LEVEL with PROPERTIES.
@@ -3914,6 +3958,13 @@ The following PROPERTIES constitute an error level:
      A face symbol denoting the face to use for fringe indicators
      for this level.
 
+`:margin-spec SPEC'
+     A display specification indicating what to display in the
+     margin when `flycheck-indication-mode' is `left-margin' or
+     `right-margin'.  See Info node `(elisp)Displaying in the
+     Margins'.  If omitted, Flycheck generates an image spec from
+     the fringe bitmap.
+
 `:error-list-face FACE'
      A face symbol denoting the face to use for messages of this
      level in the error list.  See `flycheck-list-errors'."
@@ -3933,6 +3984,11 @@ The following PROPERTIES constitute an error level:
         (car (get level 'flycheck-fringe-bitmaps)))
   (setf (get level 'flycheck-fringe-face)
         (plist-get properties :fringe-face))
+  (setf (get level 'flycheck-margin-spec)
+        (or (plist-get properties :margin-spec)
+            (flycheck-make-margin-spec
+             flycheck-default-margin-str
+             (or (get level 'flycheck-fringe-face) 'default))))
   (setf (get level 'flycheck-error-list-face)
         (plist-get properties :error-list-face)))
 
@@ -3952,6 +4008,10 @@ The following PROPERTIES constitute an error level:
   "Get the overlay category for LEVEL."
   (get level 'flycheck-overlay-category))
 
+(defun flycheck-error-level-margin-spec (level)
+  "Get the margin spec for LEVEL."
+  (get level 'flycheck-margin-spec))
+
 (defun flycheck-error-level-fringe-bitmap (level &optional hi-res)
   "Get the fringe bitmap for LEVEL.
 
@@ -3968,97 +4028,128 @@ will be the high resolution version."
   "Get the error list face for LEVEL."
   (get level 'flycheck-error-list-face))
 
-(defun flycheck-error-level-make-fringe-icon (level side)
-  "Create the fringe icon for LEVEL at SIDE.
+(defun flycheck-error-level-make-indicator (level side)
+  "Create the fringe or margin icon for LEVEL at SIDE.
 
-Return a propertized string that shows a fringe bitmap according
-to LEVEL and the given fringe SIDE.
+Return a propertized string that shows an indicator according
+to LEVEL and the given fringe or margin SIDE.
 
 LEVEL is a Flycheck error level defined with
-`flycheck-define-error-level', and SIDE is either `left-fringe'
-or `right-fringe'.
+`flycheck-define-error-level', and SIDE is either `left-fringe',
+`right-fringe', `left-margin', or `right-margin'.
 
 Return a propertized string representing the fringe icon,
 intended for use as `before-string' of an overlay to actually
-show the icon."
-  (unless (memq side '(left-fringe right-fringe))
-    (error "Invalid fringe side: %S" side))
-  (let* ((fringe-width (pcase side
-                         (`left-fringe (car (window-fringes)))
-                         (`right-fringe (cadr (window-fringes)))))
-         (high-res (>= fringe-width 16)))
-    (propertize "!" 'display
-                (list side
-                      (flycheck-error-level-fringe-bitmap level high-res)
-                      (flycheck-error-level-fringe-face level)))))
+show the indicator."
+  (propertize
+   "!" 'display
+   (pcase side
+     ((or `left-fringe `right-fringe)
+      (let* ((fringe-width (pcase side
+                             (`left-fringe (car (window-fringes)))
+                             (`right-fringe (cadr (window-fringes)))))
+             (high-res (>= fringe-width 16)))
+        (list side (flycheck-error-level-fringe-bitmap level high-res)
+              (flycheck-error-level-fringe-face level))))
+     ((or `left-margin `right-margin)
+      `((margin ,side)
+        ,(or (flycheck-error-level-margin-spec level) "")))
+     (_ (error "Invalid fringe side: %S" side)))))
+
+(define-obsolete-function-alias
+  'flycheck-error-level-make-fringe-icon
+  'flycheck-error-level-make-indicator
+  "33")
 
 
 ;;; Built-in error levels
-(when (fboundp 'define-fringe-bitmap)
-  (define-fringe-bitmap 'flycheck-fringe-bitmap-double-arrow
-    [#b11011000
-     #b01101100
-     #b00110110
-     #b00011011
-     #b00110110
-     #b01101100
-     #b11011000
-     #b00000000])
-  (define-fringe-bitmap 'flycheck-fringe-bitmap-double-arrow-hi-res
-    [#b0000000000000000
-     #b0000000000000000
-     #b1111001111000000
-     #b0111100111100000
-     #b0011110011110000
-     #b0001111001111000
-     #b0000111100111100
-     #b0000011110011110
-     #b0000011110011110
-     #b0000111100111100
-     #b0001111001111000
-     #b0011110011110000
-     #b0111100111100000
-     #b1111001111000000
-     #b0000000000000000
-     #b0000000000000000]
+(defconst flycheck-fringe-bitmap-double-arrow
+  [#b11011000
+   #b01101100
+   #b00110110
+   #b00011011
+   #b00110110
+   #b01101100
+   #b11011000]
+  "Bitmaps used to indicate errors in the fringes.")
+
+(defconst flycheck-fringe-bitmap-double-arrow-hi-res
+  [#b1111001111000000
+   #b0111100111100000
+   #b0011110011110000
+   #b0001111001111000
+   #b0000111100111100
+   #b0000011110011110
+   #b0000011110011110
+   #b0000111100111100
+   #b0001111001111000
+   #b0011110011110000
+   #b0111100111100000
+   #b1111001111000000]
+  "High-resolution bitmap used to indicate errors in the fringes.")
+
+(when (fboundp 'define-fringe-bitmap) ;; #ifdef HAVE_WINDOW_SYSTEM
+  (define-fringe-bitmap
+    'flycheck-fringe-bitmap-double-arrow
+    flycheck-fringe-bitmap-double-arrow)
+  (define-fringe-bitmap
+    'flycheck-fringe-bitmap-double-arrow-hi-res
+    flycheck-fringe-bitmap-double-arrow-hi-res
     nil 16))
 
-(defconst flycheck-default-fringe-bitmaps
-  (cons 'flycheck-fringe-bitmap-double-arrow
-        'flycheck-fringe-bitmap-double-arrow-hi-res))
+(defun flycheck-redefine-standard-error-levels
+    (&optional margin-str fringe-bitmap)
+  "Redefine Flycheck's standard error levels.
 
-(setf (get 'flycheck-error-overlay 'face) 'flycheck-error)
-(setf (get 'flycheck-error-overlay 'priority) 110)
+This is useful to change the character drawn in the
+margins (MARGIN-STR, a string) or the bitmap drawn in the
+fringes (FRINGE-BITMAP, a fringe bitmap symbol or a cons of such
+symbols, as in `flycheck-define-error-level')."
+  (unless margin-str
+    (setq margin-str flycheck-default-margin-str))
 
-(flycheck-define-error-level 'error
-  :severity 100
-  :compilation-level 2
-  :overlay-category 'flycheck-error-overlay
-  :fringe-bitmap flycheck-default-fringe-bitmaps
-  :fringe-face 'flycheck-fringe-error
-  :error-list-face 'flycheck-error-list-error)
+  (unless fringe-bitmap
+    (setq fringe-bitmap
+          (cons 'flycheck-fringe-bitmap-double-arrow
+                'flycheck-fringe-bitmap-double-arrow-hi-res)))
 
-(setf (get 'flycheck-warning-overlay 'face) 'flycheck-warning)
-(setf (get 'flycheck-warning-overlay 'priority) 100)
+  (setf (get 'flycheck-error-overlay 'face) 'flycheck-error)
+  (setf (get 'flycheck-error-overlay 'priority) 110)
 
-(flycheck-define-error-level 'warning
-  :severity 10
-  :compilation-level 1
-  :overlay-category 'flycheck-warning-overlay
-  :fringe-bitmap flycheck-default-fringe-bitmaps
-  :fringe-face 'flycheck-fringe-warning
-  :error-list-face 'flycheck-error-list-warning)
+  (flycheck-define-error-level 'error
+    :severity 100
+    :compilation-level 2
+    :overlay-category 'flycheck-error-overlay
+    :margin-spec (flycheck-make-margin-spec margin-str 'flycheck-fringe-error)
+    :fringe-bitmap fringe-bitmap
+    :fringe-face 'flycheck-fringe-error
+    :error-list-face 'flycheck-error-list-error)
 
-(setf (get 'flycheck-info-overlay 'face) 'flycheck-info)
-(setf (get 'flycheck-info-overlay 'priority) 90)
+  (setf (get 'flycheck-warning-overlay 'face) 'flycheck-warning)
+  (setf (get 'flycheck-warning-overlay 'priority) 100)
 
-(flycheck-define-error-level 'info
-  :severity -10
-  :compilation-level 0
-  :overlay-category 'flycheck-info-overlay
-  :fringe-bitmap flycheck-default-fringe-bitmaps
-  :fringe-face 'flycheck-fringe-info
-  :error-list-face 'flycheck-error-list-info)
+  (flycheck-define-error-level 'warning
+    :severity 10
+    :compilation-level 1
+    :overlay-category 'flycheck-warning-overlay
+    :margin-spec (flycheck-make-margin-spec margin-str 'flycheck-fringe-warning)
+    :fringe-bitmap fringe-bitmap
+    :fringe-face 'flycheck-fringe-warning
+    :error-list-face 'flycheck-error-list-warning)
+
+  (setf (get 'flycheck-info-overlay 'face) 'flycheck-info)
+  (setf (get 'flycheck-info-overlay 'priority) 90)
+
+  (flycheck-define-error-level 'info
+    :severity -10
+    :compilation-level 0
+    :overlay-category 'flycheck-info-overlay
+    :margin-spec (flycheck-make-margin-spec margin-str 'flycheck-fringe-info)
+    :fringe-bitmap fringe-bitmap
+    :fringe-face 'flycheck-fringe-info
+    :error-list-face 'flycheck-error-list-info))
+
+(flycheck-redefine-standard-error-levels)
 
 
 ;;; Error filtering
@@ -4347,7 +4438,7 @@ Return the created overlay."
       (setf (overlay-get overlay 'face) nil))
     (when flycheck-indication-mode
       (setf (overlay-get overlay 'before-string)
-            (flycheck-error-level-make-fringe-icon
+            (flycheck-error-level-make-indicator
              level flycheck-indication-mode)))
     (setf (overlay-get overlay 'help-echo) #'flycheck-help-echo)
     overlay))

@@ -1805,6 +1805,7 @@
 (flycheck-define-error-level 'test-level
   :severity 1337
   :overlay-category 'category
+  :margin-spec ">>"
   :fringe-bitmap 'left-triangle
   :fringe-face 'highlight
   :error-list-face 'font-lock-constant-face)
@@ -1834,35 +1835,54 @@
   (should (eq (flycheck-error-level-error-list-face 'test-level)
               'font-lock-constant-face)))
 
-(ert-deftest flycheck-error-level-make-fringe-icon/has-fringe-bitmap ()
+(ert-deftest flycheck-error-level-make-indicator/has-margin-spec ()
   :tags '(error-level)
-  (pcase-let* ((icon (flycheck-error-level-make-fringe-icon
+  (pcase-let* ((icon (flycheck-error-level-make-indicator
+                      'test-level 'left-margin))
+               (`(_ ,spec) (get-text-property 0 'display icon)))
+    (should (equal spec ">>"))))
+
+(ert-deftest flycheck-error-level-make-indicator/has-fringe-bitmap ()
+  :tags '(error-level)
+  (pcase-let* ((icon (flycheck-error-level-make-indicator
                       'test-level 'left-fringe))
                (`(_ ,bitmap _) (get-text-property 0 'display icon)))
     (should (eq bitmap 'left-triangle))))
 
-(ert-deftest flycheck-error-level-make-fringe-icon/has-fringe-face ()
+(ert-deftest flycheck-error-level-make-indicator/has-fringe-face ()
   :tags '(error-level)
-  (pcase-let* ((icon (flycheck-error-level-make-fringe-icon 'test-level 'left-fringe))
+  (pcase-let* ((icon (flycheck-error-level-make-indicator 'test-level 'left-fringe))
                (`(_ _ ,face) (get-text-property 0 'display icon)))
     (should (eq face 'highlight))))
 
-(ert-deftest flycheck-error-level-make-fringe-icon/left-fringe ()
+(ert-deftest flycheck-error-level-make-indicator/left-fringe ()
   :tags '(error-level)
-  (pcase-let* ((icon (flycheck-error-level-make-fringe-icon 'test-level 'left-fringe))
+  (pcase-let* ((icon (flycheck-error-level-make-indicator 'test-level 'left-fringe))
                (`(,side _ _) (get-text-property 0 'display icon)))
     (should (eq side 'left-fringe))))
 
-(ert-deftest flycheck-error-level-make-fringe-icon/right-fringe ()
+(ert-deftest flycheck-error-level-make-indicator/right-fringe ()
   :tags '(error-level)
-  (pcase-let* ((icon (flycheck-error-level-make-fringe-icon 'test-level 'right-fringe))
+  (pcase-let* ((icon (flycheck-error-level-make-indicator 'test-level 'right-fringe))
                (`(,side _ _) (get-text-property 0 'display icon)))
     (should (eq side 'right-fringe))))
 
-(ert-deftest flycheck-error-level-make-fringe-icon/invalid-side ()
+(ert-deftest flycheck-error-level-make-indicator/left-margin ()
   :tags '(error-level)
-  (let ((err (should-error (flycheck-error-level-make-fringe-icon 'test-level
-                                                                  'up-fringe))))
+  (pcase-let* ((icon (flycheck-error-level-make-indicator 'test-level 'left-margin))
+               (`(,side _ _) (get-text-property 0 'display icon)))
+    (should (equal side '(margin left-margin)))))
+
+(ert-deftest flycheck-error-level-make-indicator/right-margin ()
+  :tags '(error-level)
+  (pcase-let* ((icon (flycheck-error-level-make-indicator 'test-level 'right-margin))
+               (`(,side _ _) (get-text-property 0 'display icon)))
+    (should (equal side '(margin right-margin)))))
+
+(ert-deftest flycheck-error-level-make-indicator/invalid-side ()
+  :tags '(error-level)
+  (let ((err (should-error (flycheck-error-level-make-indicator 'test-level
+                                                                'up-fringe))))
     (should (string= (cadr err) "Invalid fringe side: up-fringe"))))
 
 
