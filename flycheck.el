@@ -4829,6 +4829,7 @@ the beginning of the buffer."
     (define-key map (kbd "g") #'flycheck-error-list-check-source)
     (define-key map (kbd "e") #'flycheck-error-list-explain-error)
     (define-key map (kbd "RET") #'flycheck-error-list-goto-error)
+    (define-key map [follow-link] t)
     map)
   "The keymap shared by all error list backends.")
 
