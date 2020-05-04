@@ -1148,7 +1148,7 @@ to obtain a human-readable status text, including an
 error/warning count.
 
 You may also assemble your own status text.  The current status
-of Flycheck is available in `flycheck-last-status-change'.  The
+of Flycheck is available in `flycheck-last-status-change'.The
 errors in the current buffer are stored in
 `flycheck-current-errors', and the function
 `flycheck-count-errors' may be used to obtain the number of
@@ -2936,11 +2936,13 @@ request features at URL `https://github.com/flycheck/flycheck'.
 Flycheck displays its status in the mode line.  In the default
 configuration, it looks like this:
 
-`FlyC'     This buffer has not been checked yet.
-`FlyC-'    Flycheck doesn't have a checker for this buffer.
-`FlyC*'    Flycheck is running.  Expect results soon!
-`FlyC:3|2' This buffer contains three warnings and two errors.
-           Use `\\[flycheck-list-errors]' to see the list.
+`FlyC'       This buffer has not been checked yet.
+`FlyC-'      Flycheck doesn't have a checker for this buffer.
+`FlyC*'      Flycheck is running.  Expect results soon!
+`FlyC:[3 2]' This buffer contains three errors and two warnings.
+             Use `\\[flycheck-list-errors]' to see the list.
+             The format is [E W I] for E errors, W warnings, and
+             I infos.
 
 You may also see the following icons:
 `FlyC!'    The checker crashed.
@@ -4062,32 +4064,30 @@ report an error STATUS."
   (run-hooks 'flycheck-syntax-check-failed-hook)
   (flycheck-report-status (or status 'errored)))
 
+(defconst flycheck-status-docstrings
+  `((not-checked . "This buffer has not been checked yet; \
+use \\[flycheck-buffer] to start.")
+    (no-checker . "No suitable syntax checker; \
+use \\[flycheck-verify-checker] for details.")
+    (running . "A syntax check is running in this buffer.")
+    (errored . "The last syntax check encountered an error (see *Messages*).")
+    (finished . "The last syntax check completed normally.")
+    (interrupted . "The last syntax check was interrupted.")
+    (suspicious . "The last syntax check returned a suspicious result.")))
+
+(defun flycheck-status-help (status)
+  "Return a help string for STATUS."
+  (substitute-command-keys
+   (or (alist-get status flycheck-status-docstrings)
+       (format "Unknown status: `%s'" status))))
+
 (defun flycheck-report-status (status)
   "Report Flycheck STATUS.
 
-STATUS is one of the following symbols:
-
-`not-checked'
-     The current buffer was not checked.
-
-`no-checker'
-     Automatic syntax checker selection did not find a suitable
-     syntax checker.
-
-`running'
-     A syntax check is now running in the current buffer.
-
-`errored'
-     The current syntax check has errored.
-
-`finished'
-     The current syntax check was finished normally.
-
-`interrupted'
-     The current syntax check was interrupted.
-
-`suspicious'
-     The last syntax check had a suspicious result.
+STATUS is one of the symbols described in
+`flycheck-status-docstrings': `not-checked', `no-checker',
+`running', `errored', `finished', `interrupted', or
+`suspicious' (see also `flycheck-report-buffer-checker-status').
 
 Set `flycheck-last-status-change' and call
 `flycheck-status-changed-functions' with STATUS.  Afterwards
@@ -4096,24 +4096,78 @@ refresh the mode line."
   (run-hook-with-args 'flycheck-status-changed-functions status)
   (force-mode-line-update))
 
-(defun flycheck-mode-line-status-text (&optional status)
-  "Get a text describing STATUS for use in the mode line.
+(defun flycheck-mouse-minor-mode-menu (&rest _)
+  "Display Flycheck's minor mode menu."
+  (interactive)
+  (minor-mode-menu-from-indicator (flycheck-mode-line-status-text)))
+
+(defun flycheck-mode-line-minor-mode-help (&rest _)
+  "Display Flycheck's minor mode help."
+  (interactive)
+  (describe-minor-mode-from-indicator (flycheck-mode-line-status-text)))
+
+(defconst flycheck-mode-line-major-mode-keymap
+  (let ((map (make-sparse-keymap)))
+    (set-keymap-parent map mode-line-minor-mode-keymap)
+    (define-key map [mode-line down-mouse-1] #'flycheck-mouse-minor-mode-menu)
+    (define-key map [mode-line mouse-2] #'flycheck-mode-line-minor-mode-help)
+    map)
+  "Override for `mode-line-minor-mode-keymap'.")
+
+(defconst flycheck-mode-line-help-echo
+  "Flycheck mode
+mouse-1: Display Flycheck's menu
+mouse-2: Show Flycheck's help
+mouse-3: Toggle minor modes")
+
+(defun flycheck-mode-line-status-entry (&optional status)
+  "Get a mode line entry describing STATUS.
 
 STATUS defaults to `flycheck-last-status-change' if omitted or
 nil."
-  (let ((text (pcase (or status flycheck-last-status-change)
-                (`not-checked "")
-                (`no-checker "-")
-                (`running "*")
-                (`errored "!")
-                (`finished
-                 (let-alist (flycheck-count-errors flycheck-current-errors)
-                   (if (or .error .warning)
-                       (format ":%s|%s" (or .error 0) (or .warning 0))
-                     "")))
-                (`interrupted ".")
-                (`suspicious "?"))))
-    (concat " " flycheck-mode-line-prefix text)))
+  (setq status (or status flycheck-last-status-change))
+  ;; We need custom properties here because `mouse-minor-mode-menu' is broken.
+  ;; Clicking on our modelineraises a mouse event whose string is just `FlyC',
+  ;; so `minor-mode-menu-from-indicator' looks for a minor mode whose
+  ;; formatted modeline is `FlyC' (instead of e.g. `FlyC-' or `FlyC[1 0 1]')
+  ;; and raises an error.
+  (let ((separator '(:propertize " " display (space :width 0.5))))
+    `((:propertize (" " ,flycheck-mode-line-prefix)
+                   mouse-face mode-line-highlight
+                   local-map ,flycheck-mode-line-major-mode-keymap
+                   help-echo ,flycheck-mode-line-help-echo)
+      (:propertize
+       ,(pcase status
+          (`not-checked "~")
+          (`no-checker "-")
+          (`running "*")
+          (`errored "!")
+          (`interrupted ".")
+          (`suspicious "?")
+          (`finished
+           (if flycheck-current-errors
+               (let* ((counts (flycheck-count-errors flycheck-current-errors))
+                      (levels '(info warning error))
+                      (elements))
+                 (dolist (level levels)
+                   (let ((count (alist-get level counts 0)))
+                     (when (or (> count 0) elements)
+                       (let* ((help-echo (format "%ss: %d" level count))
+                              (face (flycheck-error-level-error-list-face level))
+                              (entry `(:propertize ,(number-to-string count)
+                                                   help-echo ,help-echo
+                                                   face ,face)))
+                         (push entry elements)
+                         (push separator elements)))))
+                 (pop elements) ;; Remove the last separator
+                 `("[" ,@elements "]"))
+             "")))
+       ,@(unless (eq status 'finished)
+           `(help-echo ,(flycheck-status-help status)))))))
+
+(defun flycheck-mode-line-status-text (&optional status)
+  "Like `flycheck-mode-line-status-entry' with STATUS, but as a string."
+  (format-mode-line (flycheck-mode-line-status-entry status)))
 
 
 ;;; Error levels
