@@ -3975,7 +3975,7 @@ nil."
                 (`finished
                  (let-alist (flycheck-count-errors flycheck-current-errors)
                    (if (or .error .warning)
-                       (format ":%s/%s" (or .error 0) (or .warning 0))
+                       (format ":%s|%s" (or .error 0) (or .warning 0))
                      "")))
                 (`interrupted ".")
                 (`suspicious "?"))))
