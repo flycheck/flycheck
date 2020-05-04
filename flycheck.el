@@ -4851,6 +4851,21 @@ the beginning of the buffer."
      (with-current-buffer flycheck-error-list-buffer
        ,@body)))
 
+(defvar-local flycheck-error-list--last-backend nil
+  "The last backend used to render the error list.")
+
+(defun flycheck-error-list--setup-backend ()
+  "Ensure that the error list is using the right backend.
+
+If not, re-initialize it with BACKEND."
+  (when (and flycheck-error-list--last-backend
+             (not (eq flycheck-error-list--last-backend
+                      flycheck-error-list-backend)))
+    (funcall flycheck-error-list-backend 'init)
+    (revert-buffer))
+  (setq-local flycheck-error-list--last-backend
+              flycheck-error-list-backend))
+
 (defun flycheck-error-list--invoke (action &rest args)
   "Call a function of the current error list backend.
 
@@ -4896,6 +4911,7 @@ instead, FLycheck will call `revert-buffer' with the error list
 buffer current.  Backends should set an appropriate
 `revert-buffer-function' in `init'."
   (flycheck-error-list-with-buffer
+    (flycheck-error-list--setup-backend)
     (apply flycheck-error-list-backend action args)))
 
 (defvar flycheck-error-list-mode-map
