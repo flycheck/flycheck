@@ -1134,7 +1134,7 @@ keybindings.  Changing this variable is at your own risk."
       (define-key flycheck-mode-map key flycheck-command-map))
     (set-default variable key)))
 
-(defcustom flycheck-mode-line '(:eval (flycheck-mode-line-status-text))
+(defcustom flycheck-mode-line '(:eval (flycheck-mode-line-status-entry))
   "Mode line lighter for Flycheck.
 
 The value of this variable is a mode line template as in
@@ -3906,6 +3906,17 @@ omit it."
                     (cl2 (or (flycheck-error-end-column err2) 1)))
                 (< cl1 cl2)))))))))
 
+(defun flycheck-compare-error-levels (l1 l2)
+  "Compare the severities of error levels L1 and L2, then their names."
+  (if (eq l1 l2) 0
+    (let ((cmp (- (flycheck-error-level-severity l1)
+                  (flycheck-error-level-severity l2))))
+      (if (= cmp 0)
+          (let ((cmp (compare-strings (symbol-name l1) nil nil
+                                      (symbol-name l2) nil nil)))
+            (if (eq cmp t) 0 cmp))
+        cmp))))
+
 (defun flycheck-error-level-< (err1 err2)
   "Determine whether ERR1 is less than ERR2 by error level.
 
@@ -3913,14 +3924,10 @@ Like `flycheck-error-<', but compares by error level severity
 first.  Levels of the same severity are compared by name."
   (let* ((level1 (flycheck-error-level err1))
          (level2 (flycheck-error-level err2))
-         (severity1 (flycheck-error-level-severity level1))
-         (severity2 (flycheck-error-level-severity level2)))
-    (cond
-     ((= severity1 severity2)
-      (if (string= level1 level2)
-          (flycheck-error-< err1 err2)
-        (string< level1 level2)))
-     (t (< severity1 severity2)))))
+         (cmp (flycheck-compare-error-levels level1 level2)))
+    (if (= cmp 0)
+        (flycheck-error-< err1 err2)
+      (< cmp 0))))
 
 (defun flycheck-assert-error-list-p (errors)
   "Assert that all items in ERRORS are of `flycheck-error' type.
@@ -4606,12 +4613,11 @@ error level, and whose `cdr' is the number of errors of that
 level."
   (let (counts-by-level)
     (dolist (err errors)
-      (let* ((level (flycheck-error-level err))
-             (item (assq level counts-by-level)))
-        (if item
-            (cl-incf (cdr item))
-          (push (cons level 1) counts-by-level))))
-    counts-by-level))
+      (let* ((level (flycheck-error-level err)))
+        (cl-incf (alist-get level counts-by-level 0))))
+    (seq-sort (lambda (l1 l2)
+                (< (flycheck-compare-error-levels (car l1) (car l2)) 0))
+              counts-by-level)))
 
 (defun flycheck-has-max-errors-p (errors level)
   "Check if there is no error in ERRORS more severe than LEVEL."
