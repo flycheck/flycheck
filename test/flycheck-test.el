@@ -3326,13 +3326,13 @@ The term \"1\" has type \"nat\" while it is expected to have type \"bool\"."
    '(4 14 error "Expected a `FUNCTION` or `IDENT` after colon at line 4, col 14."
        :id "ParsingErrors" :checker css-csslint)))
 
-(flycheck-ert-def-checker-test cuda cuda syntax-error
+(flycheck-ert-def-checker-test cuda-nvcc cuda syntax-error
   (flycheck-ert-should-syntax-check
    "language/cuda/syntax-error.cu" 'cuda-mode
    '(5 0 error "error: identifier \"ac\" is undefined"
        :checker cuda)))
 
-(flycheck-ert-def-checker-test cuda cuda syntax-warning
+(flycheck-ert-def-checker-test cuda-nvcc cuda syntax-warning
   (flycheck-ert-should-syntax-check
    "language/cuda/syntax-warning.cu" 'cuda-mode
    '(3 0 warning "variable \"b\" was set but never used"
@@ -5076,7 +5076,7 @@ The manifest path is relative to
    "language/slim.slim" 'slim-mode
    `(2 1 error "Unexpected indentation" :checker slim)))
 
-(flycheck-ert-def-checker-test sqlint sql nil
+(flycheck-ert-def-checker-test sql-sqlint sql nil
   (flycheck-ert-should-syntax-check
    "language/sql.sql" 'sql-mode
    `(1 15 error "unterminated quoted string at or near \"';\n  \""

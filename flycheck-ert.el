@@ -255,6 +255,10 @@ case, including assertions and setup code."
          (body (cadr keys-and-body))
          (keys (car keys-and-body))
          (default-tags '(syntax-checker external-tool)))
+    (dolist (chk checkers)
+      (unless (flycheck-valid-checker-p chk)
+        (error (format "In (flycheck-ert-def-checker-test %S %S %S …): \
+`%S' is not a Flycheck checker" checker language name chk))))
     `(ert-deftest ,full-name ()
        :expected-result ,(or (plist-get keys :expected-result) :passed)
        :tags (append ',(append default-tags language-tags checker-tags)
