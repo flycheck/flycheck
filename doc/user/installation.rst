@@ -25,7 +25,7 @@ neither answer questions about Windows nor fix bugs that only occur on Windows
 without the help of active Windows users.  Please watch out for `known Windows
 issues`_.
 
-.. _known Windows issues: https://github.com/flycheck/flycheck/labels/B-Windows%20only
+.. _known Windows issues: https://github.com/flycheck/flycheck/labels/arch%3A%20windows%20only
 
 Syntax checking tools
 ---------------------
