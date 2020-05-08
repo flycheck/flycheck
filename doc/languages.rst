@@ -983,11 +983,19 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
    All Python checkers are invoked indirectly using ``python -c ...`` (rather
    than a direct call to ``flake8`` or ``pylint``) to make it easier to switch
-   between Python 2 and 3.  For example, you can use ``(setq-local
+   between Python 2 and 3.  For example, you can use ``(setq
    flycheck-python-pylint-executable "python3")`` to run ``pylint`` using Python
    3, or ``(defvaralias 'flycheck-python-flake8-executable
    'python-shell-interpreter)`` to run ``flake8`` through the executable pointed
    to by ``python-shell-interpreter``.
+
+   .. note::
+
+      If Flycheck complains about a missing Python checker, make sure that the
+      checker is reachable from ``sys.path``, using e.g. ``python -m pylint``:
+      often, the issue is that the checker is installed globally but not in the
+      current virtualenv.  Alternatively, you can invoke the checker script
+      directly, with ``(setq flycheck-python-pylint-executable "pylint")``.
 
    .. seealso::
 
