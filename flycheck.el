@@ -10180,7 +10180,7 @@ Previous versions of Flycheck called pylint and flake8 directly,
 while new version call them through `python -c'.  This check
 ensures that we don't break existing code; it also allows people
 who use virtualenvs to run globally-installed checkers."
-  (not (string-match-p (rx (or "pylint" "flake8")
+  (not (string-match-p (rx (or "pylint" "pylint3" "flake8")
                            (or "-script.pyw" ".exe" ".bat" "")
                            eos)
                        (flycheck-checker-executable checker))))
