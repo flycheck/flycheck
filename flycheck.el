@@ -10154,21 +10154,32 @@ See URL `http://puppet-lint.com/'."
   ;; the buffer is actually linked to a file, and if it is not modified.
   :predicate flycheck-buffer-saved-p)
 
-(defun flycheck-python-find-module (checker module)
-  "Check if a Python MODULE is available.
+(defun flycheck-python-run-snippet (checker snippet)
+  "Run a python SNIPPET and return the output.
+
 CHECKER's executable is assumed to be a Python REPL."
-  (-when-let* ((py (flycheck-find-checker-executable checker))
-               (script (concat "import sys; sys.path.pop(0);"
-                               (format "import %s; print(%s.__file__)"
-                                       module module))))
+  (-when-let* ((py (flycheck-find-checker-executable checker)))
     (with-temp-buffer
-      (and (eq (ignore-errors (call-process py nil t nil "-c" script)) 0)
+      (and (eq (ignore-errors (call-process py nil t nil "-c" snippet)) 0)
            (string-trim (buffer-string))))))
+
+(defun flycheck-python-get-path (checker)
+  "Compute the current Python path (CHECKER is a Python REPL) ."
+  (flycheck-python-run-snippet checker "import sys; print(sys.path[1:])"))
+
+(defun flycheck-python-find-module (checker module)
+  "Check if a Python MODULE is available (CHECKER is a Python REPL)."
+  (flycheck-python-run-snippet
+   checker (concat "import sys; sys.path.pop(0);"
+                   (format "import %s; print(%s.__file__)" module module))))
 
 (defun flycheck-python-needs-module-p (checker)
   "Determines whether CHECKER needs to be invoked through Python.
-Previous versions of Flycheck called pylint and flake8 directly;
-this check ensures that we don't break existing code."
+
+Previous versions of Flycheck called pylint and flake8 directly,
+while new version call them through `python -c'.  This check
+ensures that we don't break existing code; it also allows people
+who use virtualenvs to run globally-installed checkers."
   (not (string-match-p (rx (or "pylint" "flake8")
                            (or "-script.pyw" ".exe" ".bat" "")
                            eos)
@@ -10176,17 +10187,21 @@ this check ensures that we don't break existing code."
 
 (defun flycheck-python-verify-module (checker module)
   "Verify that a Python MODULE is available.
+
 Return nil if CHECKER's executable is not a Python REPL.  This
 function's is suitable for a checker's :verify."
   (when (flycheck-python-needs-module-p checker)
     (let ((mod-path (flycheck-python-find-module checker module)))
       (list (flycheck-verification-result-new
              :label (format "`%s' module" module)
-             :message (if mod-path (format "Found at %S" mod-path) "Missing")
+             :message (if mod-path (format "Found at %S" mod-path)
+                        (format "Missing; sys.path is %s"
+                                (flycheck-python-get-path checker)))
              :face (if mod-path 'success '(bold error)))))))
 
 (defun flycheck-python-module-args (checker module-name)
   "Compute arguments to pass to CHECKER's executable to run MODULE-NAME.
+
 Return nil if CHECKER's executable is not a Python REPL.
 Otherwise, return a list starting with -c (-m is not enough
 because it adds the current directory to Python's path)."
