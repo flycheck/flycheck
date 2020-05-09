@@ -34,7 +34,7 @@
                  (flycheck-error-new-at 2 2 'warning "warning 2")
                  (flycheck-error-new-at 1 1 'error "error"))))
       (expect (flycheck-mode-line-status-text 'finished)
-              :to-equal " FlyC:1/2")))
+              :to-equal " FlyC:1|2")))
 
   (it "does not show the number of infos"
     (let ((flycheck-current-errors
