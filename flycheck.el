@@ -593,7 +593,7 @@ MODE is 'left-margin the left-fringe is hidden to save space."
      (setq left-fringe-width 8 right-fringe-width 8
            left-margin-width 0 right-margin-width 0))
     (`left-margin
-     (setq left-fringe-width 1 right-fringe-width 8
+     (setq left-fringe-width 0 right-fringe-width 8
            left-margin-width 1 right-margin-width 0))
     (`right-margin
      (setq left-fringe-width 8 right-fringe-width 8
