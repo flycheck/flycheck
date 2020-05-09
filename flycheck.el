@@ -9714,7 +9714,11 @@ See URL `https://eslint.org/'."
   (lambda (err)
     (let ((error-code (flycheck-error-id err))
           (url "https://eslint.org/docs/rules/%s"))
-      (and error-code `(url . ,(format url error-code))))))
+      (and error-code
+           ;; skip non-builtin rules
+           (not ;; `seq-contains-p' is only in seq >= 2.21
+            (with-no-warnings (seq-contains error-code ?/)))
+           `(url . ,(format url error-code))))))
 
 (flycheck-define-checker javascript-standard
   "A Javascript code and style checker for the (Semi-)Standard Style.
