@@ -580,7 +580,8 @@ nil
 
 When MODE is nil, adjust window parameters without changing the
 mode.  This function can be useful as a `flycheck-mode-hook',
-especially if you use margins only in Flycheck buffers."
+especially if you use margins only in Flycheck buffers.  When
+MODE is 'left-margin the left-fringe is hidden to save space."
   (interactive (list (intern (completing-read
                               "Mode: " '("left-fringe" "right-fringe"
                                          "left-margin" "right-margin")
