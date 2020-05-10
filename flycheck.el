@@ -10099,7 +10099,8 @@ See URL `https://psalm.dev/'."
             (eval (buffer-file-name)))
   :enabled flycheck-psalm-project-root
   :error-patterns
-  ((error line-start (message) ":" line":" column ":error - " (message) line-end))
+  ((error line-start (message) ":" line":" column
+          ":error - " (message) line-end))
   :modes php-mode)
 
 (flycheck-define-checker pug
