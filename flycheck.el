@@ -10077,6 +10077,31 @@ See URL `https://github.com/uber/prototool'."
   :enabled flycheck-prototool-project-root
   :predicate flycheck-buffer-saved-p)
 
+
+(defun flycheck-psalm-project-root (&optional _checker)
+  "Return the nearest directory with psalm.xml configuration."
+  (and buffer-file-name
+       (locate-dominating-file buffer-file-name "psalm.xml")))
+
+(flycheck-def-option-var flycheck-psalm-threads nil psalm
+  "If greater than one, Psalm will run analysis on multiple
+threads, speeding things up."
+  :type '(integer :tag "Number of threads in use")
+  :safe #'integerp)
+
+(flycheck-define-checker psalm
+  "Flycheck for Psalm, the free software static tool for PHP.
+See URL `https://psalm.dev/'."
+  :command ("psalm.phar " "--no-progress" "--output-format=emacs"
+            (option "--threads=" flycheck-psalm-threads)
+            (eval
+             (concat "--config=" (flycheck-psalm-project-root) "psalm.xml"))
+            (eval (buffer-file-name)))
+  :enabled flycheck-psalm-project-root
+  :error-patterns
+  ((error line-start (message) ":" line":" column ":error - " (message) line-end))
+  :modes php-mode)
+
 (flycheck-define-checker pug
   "A Pug syntax checker using the pug compiler.
 
