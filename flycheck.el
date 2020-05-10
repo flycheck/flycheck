@@ -10077,7 +10077,6 @@ See URL `https://github.com/uber/prototool'."
   :enabled flycheck-prototool-project-root
   :predicate flycheck-buffer-saved-p)
 
-
 (defun flycheck-psalm-project-root (&optional _checker)
   "Return the nearest directory with psalm.xml configuration."
   (and buffer-file-name
