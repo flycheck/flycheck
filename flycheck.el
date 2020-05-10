@@ -229,6 +229,7 @@ attention to case differences."
     php
     php-phpmd
     php-phpcs
+    psalm
     processing
     proselint
     protobuf-protoc

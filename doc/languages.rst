@@ -929,6 +929,14 @@ to view the docstring of the syntax checker.  Likewise, you may use
          The coding standard, either as name of a built-in standard, or as path
          to a standard specification.
 
+   .. syntax-checker:: psalm
+
+      Lint with `Psalm static analysis tool <https://psalm.dev/>`_.
+
+      .. defcustom:: flycheck-psalm-threads
+
+        Number of threads that psalm can use.
+
 .. supported-language:: Processing
 
    .. syntax-checker:: processing
