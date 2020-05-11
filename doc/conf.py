@@ -173,8 +173,8 @@ class SupportedLanguage(Directive):
         language = self.arguments[0]
 
         indexed_languages = self.options.get('index_as') or language
-        index_specs = ['pair: {}; language'.format(l)
-                       for l in indexed_languages.splitlines()]
+        index_specs = ['pair: {}; language'.format(lang)
+                       for lang in indexed_languages.splitlines()]
 
         name = nodes.fully_normalize_name(language)
         target = 'language-{}'.format(name)
