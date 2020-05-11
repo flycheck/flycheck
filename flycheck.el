@@ -1030,21 +1030,20 @@ is used."
   :package-version '(flycheck . "0.16")
   :group 'flycheck-faces)
 
-;; The base faces for the following two faces are inspired by Compilation Mode
 (defface flycheck-error-list-line-number
-  '((t :inherit font-lock-constant-face))
+  '((t))
   "Face for line numbers in the error list."
   :group 'flycheck-faces
   :package-version '(flycheck . "0.16"))
 
 (defface flycheck-error-list-column-number
-  '((t :inherit font-lock-constant-face))
+  '((t))
   "Face for line numbers in the error list."
   :group 'flycheck-faces
   :package-version '(flycheck . "0.16"))
 
 (defface flycheck-error-list-filename
-  '((t :inherit font-lock-variable-name-face))
+  '((t :inherit mode-line-buffer-id :bold nil))
   "Face for filenames in the error list."
   :group 'flycheck-faces
   :package-version '(flycheck . "32"))
@@ -1068,8 +1067,14 @@ is used."
   :group 'flycheck-faces
   :package-version '(flycheck . "0.21"))
 
+(defface flycheck-error-list-error-message
+  '((t))
+  "Face for the error message in the error list."
+  :group 'flycheck-faces
+  :package-version '(flycheck . "33"))
+
 (defface flycheck-error-list-highlight
-  '((t :inherit highlight))
+  '((t :bold t))
   "Flycheck face to highlight errors in the error list."
   :package-version '(flycheck . "0.15")
   :group 'flycheck-faces)
@@ -1295,7 +1300,7 @@ just return nil."
   (browse-url "http://www.flycheck.org"))
 
 (define-obsolete-function-alias 'flycheck-info
-  'flycheck-manual "26" "Open the Flycheck manual.")
+  'flycheck-manual "Flycheck 26" "Open the Flycheck manual.")
 
 
 ;;; Utility functions
@@ -2278,15 +2283,20 @@ Pop up a help buffer with the documentation of CHECKER."
      (list (flycheck-read-checker prompt default))))
   (unless (flycheck-valid-checker-p checker)
     (user-error "You didn't specify a Flycheck syntax checker"))
-  (help-setup-xref (list #'flycheck-describe-checker checker)
-                   (called-interactively-p 'interactive))
-  (save-excursion
-    (with-help-window (help-buffer)
-      (let ((filename (flycheck-checker-get checker 'file))
-            (modes (flycheck-checker-get checker 'modes))
-            (predicate (flycheck-checker-get checker 'predicate))
-            (print-doc (flycheck-checker-get checker 'print-doc))
-            (next-checkers (flycheck-checker-get checker 'next-checkers)))
+  (let ((filename (flycheck-checker-get checker 'file))
+        (modes (flycheck-checker-get checker 'modes))
+        (predicate (flycheck-checker-get checker 'predicate))
+        (print-doc (flycheck-checker-get checker 'print-doc))
+        (next-checkers (flycheck-checker-get checker 'next-checkers))
+        (help-xref-following
+         ;; Ensure that we don't reuse buffers like `flycheck-verify-checker',
+         ;; and that we don't error out if a `help-flycheck-checker-doc' button
+         ;; is added outside of a documentation window.
+         (and help-xref-following (eq major-mode 'help-mode))))
+    (help-setup-xref (list #'flycheck-describe-checker checker)
+                     (called-interactively-p 'interactive))
+    (save-excursion
+      (with-help-window (help-buffer)
         (princ (format "%s is a Flycheck syntax checker" checker))
         (when filename
           (princ (format " in `%s'" (file-name-nondirectory filename)))
@@ -2547,6 +2557,12 @@ to enable disabled checkers.")))
   (princ (format "System:           %s\n" system-configuration))
   (princ (format "Window system:    %S\n" window-system)))
 
+(define-derived-mode flycheck-verify-mode help-mode
+  "Flycheck verification"
+  "Major mode to display Flycheck verification results."
+  ;; `help-mode-finish' will restore `buffer-read-only'
+  (setq buffer-read-only nil))
+
 (defun flycheck-verify-checker (checker)
   "Check whether a CHECKER can be used in this buffer.
 
@@ -2566,8 +2582,9 @@ is applicable from Emacs Lisp code.  Use
     (save-buffer))
 
   (let ((buffer (current-buffer)))
-    (with-help-window (get-buffer-create " *Flycheck checker*")
+    (with-help-window "*Flycheck checker*"
       (with-current-buffer standard-output
+        (flycheck-verify-mode)
         (flycheck--verify-print-header "Syntax checker in buffer " buffer)
         (flycheck--verify-princ-checker checker buffer 'with-mm)
         (if (with-current-buffer buffer (flycheck-may-use-checker checker))
@@ -2605,12 +2622,13 @@ possible problems are shown."
          (other-checkers
           (seq-difference (seq-filter #'flycheck-checker-supports-major-mode-p
                                       flycheck-checkers)
-                          (cons first-checker valid-checkers)))
-         (help-buffer (get-buffer-create " *Flycheck checkers*")))
+                          (cons first-checker valid-checkers))))
 
     ;; Print all applicable checkers for this buffer
-    (with-help-window help-buffer
+    (with-help-window "*Flycheck checkers*"
       (with-current-buffer standard-output
+        (flycheck-verify-mode)
+
         (flycheck--verify-print-header "Syntax checkers for buffer " buffer)
 
         (if first-checker
@@ -2658,12 +2676,11 @@ but will not run until properly configured:\n\n")
             (princ
              "\nTry adding these syntax checkers to `flycheck-checkers'.\n")))
 
-        (flycheck--verify-print-footer buffer)))
+        (flycheck--verify-print-footer buffer)
 
-    (with-current-buffer help-buffer
-      (setq-local revert-buffer-function
-                  (lambda (_ignore-auto _noconfirm)
-                    (with-current-buffer buffer (flycheck-verify-setup)))))))
+        (setq-local revert-buffer-function
+                    (lambda (_ignore-auto _noconfirm)
+                      (with-current-buffer buffer (flycheck-verify-setup))))))))
 
 
 ;;; Predicates for generic syntax checkers
@@ -4038,7 +4055,8 @@ The following PROPERTIES constitute an error level:
 `:severity SEVERITY'
      A number denoting the severity of this level.  The higher
      the number, the more severe is this level compared to other
-     levels.  Defaults to 0.
+     levels.  Defaults to 0; info is -10, warning is 10, and
+     error is 100.
 
      The severity is used by `flycheck-error-level-<' to
      determine the ordering of errors according to their levels.
@@ -4829,6 +4847,13 @@ the beginning of the buffer."
 (defconst flycheck-error-list-buffer "*Flycheck errors*"
   "The name of the buffer to show error lists.")
 
+(defmacro flycheck-error-list-with-buffer (&rest body)
+  "Evaluate BODY in flycheck-error-list-buffer, if it exists."
+  (declare (indent 0) (debug t))
+  `(when (get-buffer flycheck-error-list-buffer)
+     (with-current-buffer flycheck-error-list-buffer
+       ,@body)))
+
 (defvar flycheck-error-list-mode-map
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "f") #'flycheck-error-list-set-filter)
@@ -4847,7 +4872,9 @@ the beginning of the buffer."
 MESSAGE and CHECKER are displayed in a single column to allow the
 message to stretch arbitrarily far."
   (let ((checker-name (propertize (symbol-name checker)
-                                  'face 'flycheck-error-list-checker-name)))
+                                  'face 'flycheck-error-list-checker-name))
+        (message (propertize message
+                             'face 'flycheck-error-list-error-message)))
     (format "%s (%s)" message checker-name)))
 
 (defconst flycheck-error-list-format
@@ -4900,18 +4927,19 @@ message to stretch arbitrarily far."
 
 (defun flycheck-error-list-set-source (buffer)
   "Set BUFFER as the source buffer of the error list."
-  (when (get-buffer flycheck-error-list-buffer)
-    (with-current-buffer flycheck-error-list-buffer
-      ;; Only update the source when required
-      (unless (eq buffer flycheck-error-list-source-buffer)
-        (setq flycheck-error-list-source-buffer buffer)
-        (flycheck-error-list-refresh)))))
+  (flycheck-error-list-with-buffer
+    (setq flycheck-error-list-source-buffer buffer)
+    (flycheck-error-list-refresh)))
 
 (defun flycheck-error-list-update-source ()
-  "Update the source buffer of the error list."
-  (unless (eq (current-buffer) (get-buffer flycheck-error-list-buffer))
-    ;; We must not update the source buffer, if the current buffer is the error
-    ;; list itself.
+  "Make the error list display errors from the current buffer.
+
+The update is skipped if the current buffer is the error list or
+if the error list is already pointing to the current buffer."
+  (unless (memq (current-buffer)
+                (list (get-buffer flycheck-error-list-buffer)
+                      (flycheck-error-list-with-buffer
+                        flycheck-error-list-source-buffer)))
     (flycheck-error-list-set-source (current-buffer))))
 
 (defun flycheck-error-list-check-source ()
@@ -4923,21 +4951,13 @@ message to stretch arbitrarily far."
         (flycheck-buffer)))))
 
 (define-button-type 'flycheck-error-list
-  'action #'flycheck-error-list-button-goto-error
+  'action #'flycheck-error-list-goto-error
   'help-echo "mouse-1, RET: goto error"
   'face nil)
 
-(defun flycheck-error-list-button-goto-error (button)
-  "Go to the error at BUTTON."
-  (flycheck-error-list-goto-error (button-start button)))
-
 (define-button-type 'flycheck-error-list-explain-error
-  'action #'flycheck-error-list-button-explain-error
+  'action #'flycheck-error-list-explain-error
   'help-echo "mouse-1, RET: explain error")
-
-(defun flycheck-error-list-button-explain-error (button)
-  "Explain the error at BUTTON."
-  (flycheck-error-list-explain-error (button-start button)))
 
 (defsubst flycheck-error-list-make-cell (text &optional face help-echo type)
   "Make an error list cell with TEXT and FACE.
@@ -5130,9 +5150,9 @@ LEVEL is either an error level symbol, or nil, to remove the filter."
           "Minimum error level (errors at lower levels will be hidden): ")))
   (when (and level (not (flycheck-error-level-p level)))
     (user-error "Invalid level: %s" level))
-  (-when-let (buf (get-buffer flycheck-error-list-buffer))
-    (with-current-buffer buf
-      (setq-local flycheck-error-list-minimum-level level))
+  (flycheck-error-list-with-buffer
+    (setq-local flycheck-error-list-minimum-level level)
+    (force-mode-line-update)
     (flycheck-error-list-refresh)
     (flycheck-error-list-recenter-at (point-min))))
 
@@ -5141,10 +5161,12 @@ LEVEL is either an error level symbol, or nil, to remove the filter."
 
 Interactively, or with non-nil REFRESH, refresh the error list."
   (interactive '(t))
-  (kill-local-variable 'flycheck-error-list-minimum-level)
-  (when refresh
-    (flycheck-error-list-refresh)
-    (flycheck-error-list-recenter-at (point-min))))
+  (flycheck-error-list-with-buffer
+    (kill-local-variable 'flycheck-error-list-minimum-level)
+    (when refresh
+      (flycheck-error-list-refresh)
+      (flycheck-error-list-recenter-at (point-min))
+      (force-mode-line-update))))
 
 (defun flycheck-error-list-apply-filter (errors)
   "Filter ERRORS according to `flycheck-error-list-minimum-level'."
@@ -5265,7 +5287,7 @@ nil, if there is no next error."
 (defun flycheck-error-list-highlight-errors (&optional preserve-pos)
   "Highlight errors in the error list.
 
-Highlight all errors in the error lists that are at point in the
+Highlight all errors in the error list that are at point in the
 source buffer, and on the same line as point.  Then recenter the
 error list to the highlighted error, unless PRESERVE-POS is
 non-nil."
@@ -5319,13 +5341,12 @@ non-nil."
   (unless (get-buffer flycheck-error-list-buffer)
     (with-current-buffer (get-buffer-create flycheck-error-list-buffer)
       (flycheck-error-list-mode)))
-  (flycheck-error-list-set-source (current-buffer))
   ;; Reset the error filter
   (flycheck-error-list-reset-filter)
   ;; Show the error list in a window, and re-select the old window
   (display-buffer flycheck-error-list-buffer)
-  ;; Finally, refresh the error list to show the most recent errors
-  (flycheck-error-list-refresh))
+  ;; Adjust the source, causing a refresh
+  (flycheck-error-list-set-source (current-buffer)))
 
 (defalias 'list-flycheck-errors 'flycheck-list-errors)
 
@@ -5495,7 +5516,7 @@ this error to produce the explanation to display."
 
 (defun flycheck-display-error-explanation (explanation)
   "Display the EXPLANATION string in a help buffer."
-  (with-help-window (get-buffer-create flycheck-explain-error-buffer)
+  (with-help-window flycheck-explain-error-buffer
     (princ explanation)))
 
 
@@ -8549,7 +8570,7 @@ The checker runs `checkdoc-current-buffer'."
             "--eval" (eval flycheck-emacs-lisp-checkdoc-form)
             "--" source)
   :error-patterns
-  ((warning line-start (file-name) ":" line ": " (message) line-end))
+  ((info line-start (file-name) ":" line ": " (message) line-end))
   :modes (emacs-lisp-mode)
   :enabled flycheck--emacs-lisp-enabled-p)
 
