@@ -201,6 +201,24 @@ margins and fringes for the current buffer.
    (setq-default flycheck-indication-mode 'left-margin)
    (add-hook 'flycheck-mode-hook #'flycheck-set-indication-mode)
 
+That function sets fringes and margins to reasonable (but opinionated) defaults,
+according to ``flycheck-indication-mode``.  To set your own margin and fringe
+widths, use a hook and call ``flycheck-refresh-fringes-and-margins``, like this:
+
+.. code-block:: elisp
+
+   ;; Show indicators in the left margin
+   (setq flycheck-indication-mode 'left-margin)
+
+   ;; Adjust margins and fringe widths…
+   (defun my/set-flycheck-margins ()
+     (setq left-fringe-width 8 right-fringe-width 8
+           left-margin-width 1 right-margin-width 0)
+     (flycheck-refresh-fringes-and-margins))
+
+   ;; …every time Flycheck is activated in a new buffer
+   (add-hook 'flycheck-mode-hook #'my/set-flycheck-margins)
+
 The following faces control the colours of fringe and margin indicators.
 
 .. defface:: flycheck-fringe-error

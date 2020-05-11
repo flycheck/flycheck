@@ -575,6 +575,17 @@ nil
   :safe #'symbolp)
 
 (defvar flycheck-current-errors)
+(defun flycheck-refresh-fringes-and-margins ()
+  "Refresh fringes and margins of all windows displaying the current buffer.
+
+If any errors are currently shown, launch a new check, to adjust
+to a potential new indication mode."
+  (dolist (win (get-buffer-window-list))
+    (set-window-margins win left-margin-width right-margin-width)
+    (set-window-fringes win left-fringe-width right-fringe-width))
+  (when flycheck-current-errors
+    (flycheck-buffer)))
+
 (defun flycheck-set-indication-mode (&optional mode)
   "Set `flycheck-indication-mode' to MODE and adjust margins and fringes.
 
@@ -601,12 +612,8 @@ to save space."
      (setq left-fringe-width 8 right-fringe-width 8
            left-margin-width 0 right-margin-width 1))
     (_ (user-error "Invalid indication mode")))
-  (dolist (win (get-buffer-window-list))
-    (set-window-margins win left-margin-width right-margin-width)
-    (set-window-fringes win left-fringe-width right-fringe-width))
   (setq-local flycheck-indication-mode mode)
-  (when flycheck-current-errors
-    (flycheck-buffer)))
+  (flycheck-refresh-fringes-and-margins))
 
 (define-widget 'flycheck-highlighting-style 'lazy
   "A value for `flycheck-highlighting-style'."
