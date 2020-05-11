@@ -3816,8 +3816,8 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
      '(4 1 warning "Eta reduce
 Found:
   spam eggs = map lines eggs
-Why not:
-  spam = map lines" :checker haskell-hlint)
+Perhaps:
+  spam = map lines" :checker haskell-hlint :end-line 4 :end-column 26)
      '(4 1 warning "Top-level binding with no type signature:
   spam :: [String] -> [[String]]"
          :id "-Wmissing-signatures"
@@ -3825,8 +3825,8 @@ Why not:
      '(7 8 info "Redundant bracket
 Found:
   (putStrLn \"hello world\")
-Why not:
-  putStrLn \"hello world\"" :checker haskell-hlint))))
+Perhaps:
+  putStrLn \"hello world\"" :checker haskell-hlint :end-line 7 :end-column 31))))
 
 (flycheck-ert-def-checker-test
     haskell-stack-ghc haskell nonstandard-stack-yaml-file
@@ -3875,8 +3875,8 @@ Why not:
      '(4 1 warning "Eta reduce
 Found:
   spam eggs = map lines eggs
-Why not:
-  spam = map lines" :checker haskell-hlint)
+Perhaps:
+  spam = map lines" :checker haskell-hlint :end-line 4 :end-column 26)
      '(4 1 warning "Top-level binding with no type signature:
   spam :: [String] -> [[String]]"
          :id "-Wmissing-signatures"
@@ -3884,8 +3884,8 @@ Why not:
      '(7 8 info "Redundant bracket
 Found:
   (putStrLn \"hello world\")
-Why not:
-  putStrLn \"hello world\"" :checker haskell-hlint))))
+Perhaps:
+  putStrLn \"hello world\"" :checker haskell-hlint :end-line 7 :end-column 31))))
 
 (flycheck-ert-def-checker-test html-tidy html nil
   (flycheck-ert-should-syntax-check
