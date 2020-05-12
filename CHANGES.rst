@@ -32,7 +32,7 @@
     level-dependent faces (typically with wavy underlines), Flycheck can now
     insert delimiters around errors, or mix styles depending on how many lines
     an error covers.  Additionally, stipples are added in the fringes to
-    indicate errors that span multiple lines.
+    indicate errors that span multiple lines. [GH-1743]
 
 - New features and improvements
 
