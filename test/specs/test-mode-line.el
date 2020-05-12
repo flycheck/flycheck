@@ -35,6 +35,20 @@
 
 (describe "Mode Line (interactive-only)"
 
+  (describe "flycheck-count-errors"
+    (it "sorts errors by severity"
+      (let ((flycheck-current-errors
+             (list (flycheck-error-new-at 1 1 'warning "warning")
+                   (flycheck-error-new-at 3 1 'info "info")
+                   (flycheck-error-new-at 2 1 'error "error")))
+            (count (flycheck-count-errors flycheck-current-errors)))
+        (expect count :to-equal
+                (seq-sort (lambda (l1 l2)
+                            (< (flycheck-compare-error-levels
+                                (car l1) (car l2))
+                               0))
+                          count)))))
+
   (it "shows the number of errors and warnings"
     (flycheck/skip-if-noninteractive)
     (let ((flycheck-current-errors
