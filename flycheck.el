@@ -3898,8 +3898,7 @@ again."
 
 Add ERRORS to `flycheck-current-errors' and process each error
 with `flycheck-process-error-functions'."
-  (setq flycheck-current-errors (sort (append errors flycheck-current-errors)
-                                      #'flycheck-error-<))
+  (setq flycheck-current-errors (append errors flycheck-current-errors))
   (overlay-recenter (point-max))
   ;; We can't use `seq-sort-by' because it's not in Emacs 25's built-in `seq',
   ;; and installing an updated version doesn't help (this is a package.el bug;

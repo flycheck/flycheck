@@ -1,5 +1,14 @@
-32-cvs (in development)
+33-cvs (in development)
 =======================
+
+- **Breaking changes**
+
+  - The variable ``flycheck-current-errors`` now contains errors in the order in
+    which they were returned by checkers.  In previous versions of Flycheck,
+    this list was sorted by error position and severity. [GH-1749]
+
+32-cvs (frozen on May 3rd, 2020)
+================================
 
 - Highlights
 
