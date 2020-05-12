@@ -134,8 +134,10 @@ PHP
 ---
 
 * :gh:`emacs-php/phpstan.el` adds a PHP static analyzer using PHPStan_.
+* :gh:`emacs-php/psalm.el` adds a PHP static analyzer using Psalm_.
 
-.. _PHPStan: https://github.com/phpstan/phpstan
+.. _PHPStan: https://phpstan.org/
+.. _Psalm: https://psalm.dev/
 
 Python
 ------
