@@ -44,7 +44,10 @@ Flycheck follows this process for all the :ref:`many different syntax checkers
    Specifically, the above describes the process of *command checkers*, i.e.,
    checkers that run external programs.  All the checkers defined in
    ``flycheck-checkers`` are command checkers, but command checkers are actually
-   instances of *generic checkers*.  See :flyc:`flycheck-ocaml` for an example
+   instances of *generic checkers*.  Many external packages, such as
+   ``dafny-mode``, ``fstar-mode``, etc. use generic checkers, which allow you
+   more flexibility, including running Flycheck with persistent subprocess such
+   as language servers.  See :flyc:`flycheck-ocaml` for an example
    of how to use a generic checker.
 
 .. seealso::
@@ -215,10 +218,10 @@ a checker is disabled by user configuration (see
      This is the function that looks through `flycheck-checkers` to find a
      valid checker for the buffer.
 
-A more complex example
-----------------------
+Writing more complex checkers
+-----------------------------
 
-Here is a slightly more complex checker:
+Here are two examples of more complex checkers:
 
 .. code-block:: elisp
 
@@ -242,29 +245,80 @@ Here is a slightly more complex checker:
      :modes protobuf-mode
      :predicate (lambda () (buffer-file-name)))
 
-The ``:command`` is longer, as the checker passes more flags to ``protoc``.
-Note the use of ``eval`` for transforming Flycheck checker options into flags
-for the command.  See the docstring for `flycheck-substitute-argument` for more
-info, and look at other checkers for examples.
+.. code-block:: elisp
 
-Note also that there are three patterns in ``:error-patterns``; the first one
+   (flycheck-define-checker sh-shellcheck
+     "A shell script syntax and style checker using Shellcheck.
+
+   See URL `https://github.com/koalaman/shellcheck/'."
+     :command ("shellcheck"
+               "--format" "checkstyle"
+               "--shell" (eval (symbol-name sh-shell))
+               (option-flag "--external-sources"
+                            flycheck-shellcheck-follow-sources)
+               (option "--exclude" flycheck-shellcheck-excluded-warnings list
+                       flycheck-option-comma-separated-list)
+               "-")
+     :standard-input t
+     :modes sh-mode
+     :error-parser flycheck-parse-checkstyle
+     :error-filter (lambda (errors)
+                     (flycheck-remove-error-file-names "-" errors))
+     :predicate (lambda () (memq sh-shell '(bash ksh88 sh)))
+     :verify
+     (lambda (_)
+       (let ((supported (memq sh-shell '(bash ksh88 sh))))
+         (list (flycheck-verification-result-new
+                :label (format "Shell %s supported" sh-shell)
+                :message (if supported "yes" "no")
+                :face (if supports-shell 'success '(bold warning))))))
+     :error-explainer
+     (lambda (err)
+       (let ((error-code (flycheck-error-id err))
+             (url "https://github.com/koalaman/shellcheck/wiki/%S"))
+         (and error-code `(url . ,(format url error-code))))))
+
+The ``:command`` forms are longer, as the checkers pass more flags to ``protoc``
+and ``shellcheck``.  Note the use of ``eval``, ``option``, and ``option-flag``
+for transforming Flycheck checker options into flags for the command.  See the
+docstring for `flycheck-substitute-argument` for more info, and look at other
+checkers for examples.
+
+The ``shellcheck`` checker does no use ``source`` nor ``source-inplace``:
+instead, it passes the buffer contents on standard input, using
+``:standard-input t``.
+
+The ``protoc`` checker has three patterns in ``:error-patterns``; the first one
 will catch ``notes`` from the compiler and turn them into `flycheck-error`
 objects with the ``info`` severity; the second is for errors from the file being
-checked, and the third one is for errors from other files.
+checked, and the third one is for errors from other files.  In the
+``shellcheck`` checker, on the other hand, ``:error-parser`` replaces
+``:error-patterns``: ``shellcheck`` outputs results in the standard CheckStyle
+XML format, so the definition above uses Flycheck's built-in CheckStyle parser,
+and an ``:error-filter`` to replace ``-`` by the current buffer's filename.
 
-There is a new ``:predicate`` property, that is used to determine when the
-checker can be called.  In addition to the ``:mode`` property which restricts
-the checker to buffer in the ``protobuf-mode``, this checker should be called
-only when there is a file associated to the buffer.  This is necessary since we
-are passing the file associated to the buffer ``protobuf`` using
-``source-inplace`` in ``:command``.
+Both checkers use a new ``:predicate`` property to determine when the checker
+can be called.  In addition to the ``:mode`` property which restricts the
+``protoc`` checker to buffers in ``protobuf-mode``, the ``:predicate`` property
+ensures that ``protoc`` is called only when there is a file associated to the
+buffer (this is necessary since we are passing the file associated to the buffer
+``protobuf`` using ``source-inplace`` in ``:command``; in contrast, the
+``shellcheck`` checker can run in all buffers, because it sends buffer contents
+through a pipe).  The second checker has a more complex ``:predicate`` to make
+sure that the current shell dialect is supported, and a ``:verify`` function to
+help users diagnose configuration issues ( ``:verify`` is helpful for giving
+feedback to users; its output gets included when users invoke
+`flycheck-verify-setup`)
 
-There are other useful properties, depending on your situation.  ``:enabled`` is
-like ``:predicate``, but is run only once; it is used to make sure a checker has
-everything it needs before being allowed to run in a buffer.  ``:verify`` is
-helpful for giving feedback to users.  ``:error-parser`` replaces
-``:error-patterns`` and is for parsing checker output from machine-readable
-formats like XML or JSON.
+Finally, the ``shellcheck`` checker includes an error explainer, which opens the
+relevant page on the ShellCheck wiki when users run
+`flycheck-explain-error-at-point`.
+
+There are other useful properties, depending on your situation.  Most important
+is ``:enabled``, which is like ``:predicate`` but is run only once; it is used
+to make sure a checker has everything it needs before being allowed to run in a
+buffer (this is particularly useful when the checks are costly: running an
+external program and parsing its output, checking for a plugin, etc.).
 
 .. seealso::
 
@@ -276,8 +330,8 @@ formats like XML or JSON.
 .. note::
 
    Don't be afraid to look into the ``flycheck.el`` code.  The existing checkers
-   serve as useful examples you can draw from, and most of core functions are
-   well documented.
+   serve as useful examples you can draw from, and all core functions are
+   documented.
 
 Sharing your checker
 --------------------

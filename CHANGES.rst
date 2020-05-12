@@ -7,6 +7,9 @@
     disabled checkers and to try to re-enable automatically disabled checkers
     (command checkers are automatically disabled when their executable cannot be
     found). [GH-1755]
+  - Error explainers can now return URLs (to show a webpage) or functions (to
+    use custom formatting).  For example, the Rust checker now renders
+    explanations using ``markdown-view-mode``. [GH-1753]
 
 - **Breaking changes**
 
