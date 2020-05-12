@@ -822,7 +822,38 @@
   (flycheck-ert-with-resource-buffer "language/emacs-lisp/warnings.el"
     (emacs-lisp-mode)
     (should (flycheck-may-enable-checker 'emacs-lisp))
-    (should (equal '(emacs-lisp) flycheck-enabled-checkers))))
+    (should (equal '(emacs-lisp) flycheck--automatically-enabled-checkers))))
+
+(ert-deftest flycheck-may-enable-checker/respects-cache ()
+  :tags '(checker-api)
+  (flycheck-ert-with-resource-buffer "language/emacs-lisp/warnings.el"
+    (emacs-lisp-mode)
+    (cl-letf* ((counter 0)
+               (enabled t)
+               ((flycheck-checker-get 'emacs-lisp 'enabled)
+                (lambda (&rest _ignore) (cl-incf counter) enabled)))
+      ;; :enabled isn't called when a positive cached result is available
+      (let ((flycheck--automatically-enabled-checkers '(emacs-lisp)))
+        (should (flycheck-may-enable-checker 'emacs-lisp))
+        (should (= counter 0)))
+      ;; :enabled isn't called when a negative cached result is available
+      (let ((flycheck--automatically-disabled-checkers '(emacs-lisp)))
+        (should (not (flycheck-may-enable-checker 'emacs-lisp)))
+        (should (= counter 0)))
+      ;; Returning a cached result doesn't change caches
+      (should (eq flycheck--automatically-disabled-checkers nil))
+      (should (eq flycheck--automatically-enabled-checkers nil))
+      ;; :enabled should only be called once with positive results
+      (setq enabled t)
+      (dotimes (_ 10) (flycheck-may-enable-checker 'emacs-lisp))
+      (should (equal flycheck--automatically-enabled-checkers '(emacs-lisp)))
+      (setq flycheck--automatically-enabled-checkers nil)
+      (should (= counter 1))
+      ;; :enabled should only be called once with negative results
+      (setq enabled nil counter 0)
+      (dotimes (_ 10) (flycheck-may-enable-checker 'emacs-lisp))
+      (should (equal flycheck--automatically-disabled-checkers '(emacs-lisp)))
+      (should (= counter 1)))))
 
 
 ;;; Generic syntax checkers

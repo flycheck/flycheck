@@ -1805,12 +1805,16 @@ A checker is registered if it is contained in
        (memq checker flycheck-checkers)))
 
 (defun flycheck-disabled-checker-p (checker)
-  "Determine whether CHECKER is disabled.
-
-A checker is disabled if it is contained in
-`flycheck-disabled-checkers'."
-  (or (memq checker flycheck-disabled-checkers)
+  "Determine whether CHECKER is disabled, manually or automatically."
+  (or (flycheck-manually-disabled-checker-p checker)
       (flycheck-automatically-disabled-checker-p checker)))
+
+(defun flycheck-manually-disabled-checker-p (checker)
+  "Determine whether CHECKER has been manually disabled.
+
+A checker has been manually disabled if it is contained in
+`flycheck-disabled-checkers'."
+  (memq checker flycheck-disabled-checkers))
 
 (defun flycheck-automatically-disabled-checker-p (checker)
   "Determine whether CHECKER has been automatically disabled.
@@ -1818,7 +1822,6 @@ A checker is disabled if it is contained in
 A checker has been automatically disabled if it is contained in
 `flycheck--automatically-disabled-checkers'."
   (memq checker flycheck--automatically-disabled-checkers))
-
 
 
 ;;; Generic syntax checkers
@@ -2203,34 +2206,37 @@ selection for the current buffer.")
   "Whether a generic CHECKER may be enabled for current buffer.
 
 Return non-nil if CHECKER may be used for the current buffer, and
-nil otherwise."
-  (let* ((enabled (flycheck-checker-get checker 'enabled))
-         (shall-enable
-          (and (not (flycheck-disabled-checker-p checker))
-               (or (memq checker flycheck--automatically-enabled-checkers)
-                   (null enabled)
-                   (funcall enabled)))))
-    (if shall-enable
-        (cl-pushnew checker flycheck--automatically-enabled-checkers)
-      (cl-pushnew checker flycheck--automatically-disabled-checkers))
-    shall-enable))
+nil otherwise.  The result of the `:enabled' check, if any, is
+cached."
+  (and
+   ;; Don't run the :enabled check if the checker is already disabled…
+   (not (flycheck-disabled-checker-p checker))
+   (or
+    ;; …or if we've already cached the result
+    (memq checker flycheck--automatically-enabled-checkers)
+    (let* ((enabled (flycheck-checker-get checker 'enabled))
+           (may-enable (or (null enabled) (funcall enabled))))
+      ;; Cache the result
+      (if may-enable
+          (cl-pushnew checker flycheck--automatically-enabled-checkers)
+        (cl-pushnew checker flycheck--automatically-disabled-checkers))
+      may-enable))))
 
 (defun flycheck-reset-enabled-checker (checker)
   "Reset the `:enabled' test of CHECKER.
 
 Forget that CHECKER has been enabled or automatically disabled
-from a previous `:enabled' test.  Once a checker has been enabled
-or automatically disabled, `flycheck-may-enable-checker' will
-always be constant (t or nil respectively).
-
-If you wish to test the `:enabled' predicate again, you must
-first reset its state using this function."
+from a previous `:enabled' test.  The result of the `:enabled'
+test is cached in `flycheck-may-enable-checker': if you wish to
+test the `:enabled' predicate again, you must first reset its
+state using this function."
   (when (memq checker flycheck--automatically-disabled-checkers)
     (setq flycheck--automatically-disabled-checkers
           (remq checker flycheck--automatically-disabled-checkers)))
   (when (memq checker flycheck--automatically-enabled-checkers)
     (setq flycheck--automatically-enabled-checkers
-          (remq checker flycheck--automatically-enabled-checkers))))
+          (remq checker flycheck--automatically-enabled-checkers)))
+  (flycheck-buffer))
 
 (defun flycheck-may-use-checker (checker)
   "Whether a generic CHECKER may be used.
@@ -2404,16 +2410,16 @@ Return a list of `flycheck-verification-result' objects."
         (enabled (flycheck-checker-get checker 'enabled))
         (verify (flycheck-checker-get checker 'verify)))
     (when enabled
-      (let ((result (flycheck-may-enable-checker checker)))
+      (let ((result (funcall enabled)))
         (push (flycheck-verification-result-new
-               :label "may enable"
-               :message (if result "yes" "Automatically disabled!")
+               :label (propertize "may enable" 'help-echo ":enable")
+               :message (if result "yes" "no")
                :face (if result 'success '(bold warning)))
               results)))
     (when predicate
       (let ((result (funcall predicate)))
         (push (flycheck-verification-result-new
-               :label "predicate"
+               :label (propertize "may run" 'help-echo ":predicate")
                :message (prin1-to-string (not (null result)))
                :face (if result 'success '(bold warning)))
               results)))
@@ -2425,15 +2431,35 @@ Return a list of `flycheck-verification-result' objects."
   'help-function #'flycheck-describe-checker
   'help-echo "mouse-1, RET: describe Flycheck checker")
 
-(define-button-type 'flycheck-checker-select
-  :supertype 'help-xref
-  'help-function (lambda (buffer checker)
-                   (with-current-buffer buffer
-                     (flycheck-select-checker checker))
-                   ;; Revert the verify-setup buffer since it is now stale
-                   (revert-buffer))
-  'help-echo "mouse-1, RET: select Flycheck checker"
+(define-button-type 'flycheck-button
+  'follow-link t
+  'action (lambda (pos)
+            (apply (get-text-property pos 'flycheck-action)
+                   (get-text-property pos 'flycheck-data))
+            ;; Revert the verify-setup buffer since it is now stale
+            (revert-buffer))
   'face 'flycheck-verify-select-checker)
+
+(define-button-type 'flycheck-checker-select
+  :supertype 'flycheck-button
+  'flycheck-action (lambda (buffer checker)
+                     (with-current-buffer buffer
+                       (flycheck-select-checker checker)))
+  'help-echo "mouse-1, RET: select this checker")
+
+(define-button-type 'flycheck-checker-enable
+  :supertype 'flycheck-button
+  'flycheck-action (lambda (buffer checker)
+                     (with-current-buffer buffer
+                       (flycheck-disable-checker checker t)))
+  'help-echo "mouse-1, RET: re-enable this checker in this buffer")
+
+(define-button-type 'flycheck-checker-reset-enabled
+  :supertype 'flycheck-button
+  'flycheck-action (lambda (buffer checker)
+                     (with-current-buffer buffer
+                       (flycheck-reset-enabled-checker checker)))
+  'help-echo "mouse-1, RET: try to re-enable this checker")
 
 (defun flycheck--verify-princ-checker (checker buffer
                                                &optional with-mm with-select)
@@ -2447,15 +2473,26 @@ When WITH-SELECT is non-nil, add a button to select this checker."
   (insert-button (symbol-name checker)
                  'type 'help-flycheck-checker-doc
                  'help-args (list checker))
-  (when (with-current-buffer buffer (flycheck-disabled-checker-p checker))
-    (insert (propertize " (disabled)" 'face '(bold error))))
+  (cond
+   ((with-current-buffer buffer
+      (flycheck-manually-disabled-checker-p checker))
+    (insert (propertize " (manually disabled) " 'face '(bold error)))
+    (insert-text-button "enable"
+                        'type 'flycheck-checker-enable
+                        'flycheck-data (list buffer checker)))
+   ((with-current-buffer buffer
+      (flycheck-automatically-disabled-checker-p checker))
+    (insert (propertize " (automatically disabled) " 'face '(bold error)))
+    (insert-text-button "reset"
+                        'type 'flycheck-checker-reset-enabled
+                        'flycheck-data (list buffer checker))))
   (when (eq checker (buffer-local-value 'flycheck-checker buffer))
     (insert (propertize " (explicitly selected)" 'face 'bold)))
   (when with-select
     (princ "  ")
     (insert-text-button "select"
                         'type 'flycheck-checker-select
-                        'help-args (list buffer checker)))
+                        'flycheck-data (list buffer checker)))
   (princ "\n")
   (let ((results (with-current-buffer buffer
                    (append (flycheck-verify-generic-checker checker)
@@ -2692,14 +2729,14 @@ but will not run until properly configured:\n\n")
                (seq-difference (flycheck-defined-checkers) flycheck-checkers)))
           (when unregistered-checkers
             (insert (propertize
-                     "\nThe following syntax checkers are not registered:\n\n"
+                     "The following syntax checkers are not registered:\n"
                      'face '(bold warning)))
             (dolist (checker unregistered-checkers)
               (princ "  - ")
               (princ checker)
               (princ "\n"))
             (princ
-             "\nTry adding these syntax checkers to `flycheck-checkers'.\n")))
+             "Try adding these syntax checkers to `flycheck-checkers'.\n\n")))
 
         (flycheck--verify-print-footer buffer)
 
