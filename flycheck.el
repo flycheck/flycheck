@@ -1931,7 +1931,7 @@ are mandatory.
      syntax check in the buffer.
 
      This property is optional.  If omitted, Flycheck won't
-     attempt to interrupt syntax checks wit this syntax checker,
+     attempt to interrupt syntax checks with this syntax checker,
      and simply ignore their results.
 
 `:print-doc FUNCTION'

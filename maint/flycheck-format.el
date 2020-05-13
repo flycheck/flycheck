@@ -101,7 +101,7 @@ long lines or not."
     (= long-lines 0)))
 
 (defun flycheck/can-have-long-lines (filename)
-  "Whether FILENAME can have arbitrarly long lines.
+  "Whether FILENAME can have arbitrarily long lines.
 
 Test files which contain error messages from checkers are allowed
 to have long lines."
