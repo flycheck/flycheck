@@ -66,7 +66,7 @@ requests for improved Windows compatibility. If you know Windows and Emacs,
 please take a look at the list of open Windows issues and try to fix any of
 these.
 
-.. _list of open Windows issues: https://github.com/flycheck/flycheck/labels/windows%20only
+.. _list of open Windows issues: https://github.com/flycheck/flycheck/labels/arch%3A%20windows%20only
 
 Feature requests
 ================

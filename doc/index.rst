@@ -65,7 +65,7 @@ features go through :ref:`Quickstart <flycheck-quickstart>` guide.
    covers some common setup issues and helps you debug and fix problems with
    Flycheck.
 
-.. _`known windows issues`: https://github.com/flycheck/flycheck/labels/B-Windows%20only
+.. _`known windows issues`: https://github.com/flycheck/flycheck/labels/arch%3A%20windows%20only
 
 .. _flycheck-user-guide:
 
