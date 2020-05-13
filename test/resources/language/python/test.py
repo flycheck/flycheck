@@ -1,8 +1,8 @@
 # -*- coding: utf-8; -*-
 
 import sys
-import spam
-from . import antigravit  # Typo intended!
+
+from sys import antigravit  # Typo intended!
 
 class Spam(object):
 
@@ -18,5 +18,5 @@ class Spam(object):
         else:
             return 'foo'
 
-spam.with_eggs()
+
 antigravity()
