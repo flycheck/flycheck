@@ -10553,10 +10553,12 @@ See URL `https://www.pylint.org/'."
   :error-explainer (lambda (err)
                      (-when-let (id (flycheck-error-id err))
                        (with-output-to-string
-                         (flycheck-call-checker-process
+                         (apply
+                          #'flycheck-call-checker-process
                           'python-pylint nil standard-output t
-                          (flycheck-python-module-args 'python-pylint "pylint")
-                          (format "--help-msg=%s" id)))))
+                          (append
+                           (flycheck-python-module-args 'python-pylint "pylint")
+                           (list (format "--help-msg=%s" id)))))))
   :modes python-mode
   :next-checkers ((warning . python-mypy)))
 
