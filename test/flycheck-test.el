@@ -3629,7 +3629,7 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
   (let ((flycheck-disabled-checkers '(eruby-erubis)))
     (flycheck-ert-should-syntax-check
      "language/eruby.erb" '(html-erb-mode rhtml-mode)
-     '(8 1 error "unexpected token $end (Using Ruby 2.3 parser; configure using `TargetRubyVersion` parameter, under `AllCops`)"
+     '(8 1 error "unexpected token $end (Using Ruby 2.4 parser; configure using `TargetRubyVersion` parameter, under `AllCops`)"
          :id "Lint/Syntax"  :checker eruby-ruumba))))
 
 (flycheck-ert-def-checker-test fortran-gfortran fortran error
@@ -4281,7 +4281,7 @@ Why not:
   (let ((flycheck-python-flake8-executable "python3"))
     (flycheck-ert-should-syntax-check
      "language/python/test.py" 'python-mode
-     '(5 1 warning "'.antigravit' imported but unused" :id "F401"
+     '(5 1 warning "'sys.antigravit' imported but unused" :id "F401"
          :checker python-flake8)
      '(7 1 warning "expected 2 blank lines, found 1" :id "E302"
          :checker python-flake8)
@@ -4289,8 +4289,6 @@ Why not:
           :id "E251" :checker python-flake8)
      '(12 31 warning "unexpected spaces around keyword / parameter equals"
           :id "E251" :checker python-flake8)
-     '(21 1 warning "expected 2 blank lines after class or function definition, found 1"
-          :id "E305" :checker python-flake8)
      '(22 1 error "undefined name 'antigravity'" :id "F821"
           :checker python-flake8))))
 
@@ -4309,10 +4307,9 @@ Why not:
     (flycheck-ert-should-syntax-check
      "language/python/test.py" 'python-mode
      '(1 1 info "Missing module docstring" :id "missing-module-docstring" :checker python-pylint)
-     '(4 1 error "Unable to import 'spam'" :id "import-error" :checker python-pylint)
-     '(5 1 error "No name 'antigravit' in module 'python'" :id "no-name-in-module"
+     '(5 1 error "No name 'antigravit' in module 'sys'" :id "no-name-in-module"
          :checker python-pylint)
-     '(5 1 warning "Unused import antigravit" :id "unused-import"
+     '(5 1 warning "Unused antigravit imported from sys" :id "unused-import"
          :checker python-pylint)
      '(7 1 info "Missing class docstring" :id "missing-class-docstring" :checker python-pylint)
      '(7 1 warning "Class 'Spam' inherits from object, can be safely removed from bases in python3"
@@ -4341,10 +4338,9 @@ Why not:
     (flycheck-ert-should-syntax-check
      "language/python/test.py" 'python-mode
      '(1 1 info "Missing module docstring" :id "C0114" :checker python-pylint)
-     '(4 1 error "Unable to import 'spam'" :id "E0401" :checker python-pylint)
-     '(5 1 error "No name 'antigravit' in module 'python'" :id "E0611"
+     '(5 1 error "No name 'antigravit' in module 'sys'" :id "E0611"
          :checker python-pylint)
-     '(5 1 warning "Unused import antigravit" :id "W0611"
+     '(5 1 warning "Unused antigravit imported from sys" :id "W0611"
          :checker python-pylint)
      '(7 1 info "Missing class docstring" :id "C0115" :checker python-pylint)
      '(7 1 warning "Class 'Spam' inherits from object, can be safely removed from bases in python3"
@@ -4509,10 +4505,10 @@ Why not:
 (flycheck-ert-def-checker-test ruby-rubocop ruby syntax-error
   (flycheck-ert-should-syntax-check
    "language/ruby/syntax-error.rb" 'ruby-mode
-   '(5 7 error "unexpected token tCONSTANT (Using Ruby 2.3 parser; configure using `TargetRubyVersion` parameter, under `AllCops`)"
+   '(5 7 error "unexpected token tCONSTANT (Using Ruby 2.4 parser; configure using `TargetRubyVersion` parameter, under `AllCops`)"
        :id "Lint/Syntax"
        :checker ruby-rubocop)
-   '(5 24 error "unterminated string meets end of file (Using Ruby 2.3 parser; configure using `TargetRubyVersion` parameter, under `AllCops`)"
+   '(5 24 error "unterminated string meets end of file (Using Ruby 2.4 parser; configure using `TargetRubyVersion` parameter, under `AllCops`)"
        :id "Lint/Syntax"
        :checker ruby-rubocop)))
 
@@ -4520,10 +4516,10 @@ Why not:
   (let ((flycheck-disabled-checkers '(ruby-rubocop)))
     (flycheck-ert-should-syntax-check
      "language/ruby/syntax-error.rb" 'ruby-mode
-     '(5 7 error "unexpected token tCONSTANT (Using Ruby 2.3 parser; configure using `TargetRubyVersion` parameter, under `AllCops`)"
+     '(5 7 error "unexpected token tCONSTANT (Using Ruby 2.4 parser; configure using `TargetRubyVersion` parameter, under `AllCops`)"
          :id "Lint/Syntax"
          :checker ruby-standard)
-     '(5 24 error "unterminated string meets end of file (Using Ruby 2.3 parser; configure using `TargetRubyVersion` parameter, under `AllCops`)"
+     '(5 24 error "unterminated string meets end of file (Using Ruby 2.4 parser; configure using `TargetRubyVersion` parameter, under `AllCops`)"
          :id "Lint/Syntax"
          :checker ruby-standard))))
 
