@@ -10600,6 +10600,18 @@ which should be used and reported to the user."
                :filename .path)))
           (car (flycheck-parse-json output))))
 
+(defun flycheck-pylint-find-project-root (_checker)
+  "Find the directory to invoke pylint from.
+
+The algorithm is the same as used by epylint: find the first
+directory that doesn't have a __init__.py file."
+  (locate-dominating-file
+   (if buffer-file-name
+       (file-name-directory buffer-file-name)
+     default-directory)
+   (lambda (dir)
+     (not (file-exists-p (expand-file-name "__init__.py" dir))))))
+
 (flycheck-define-checker python-pylint
   "A Python syntax and style checker using Pylint.
 
@@ -10618,6 +10630,7 @@ See URL `https://www.pylint.org/'."
             ;; import bar'), see https://github.com/flycheck/flycheck/issues/280
             source-inplace)
   :error-parser flycheck-parse-pylint
+  :working-directory flycheck-pylint-find-project-root
   :enabled (lambda ()
              (or (not (flycheck-python-needs-module-p 'python-pylint))
                  (flycheck-python-find-module 'python-pylint "pylint")))
