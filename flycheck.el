@@ -5860,6 +5860,31 @@ from INFILE, and its output is sent to DESTINATION, as in
       (user-error "Cannot find `%s' using `flycheck-executable-find'"
                   (flycheck-checker-executable checker)))))
 
+(defun flycheck-call-checker-process-for-output
+    (checker infile error &rest args)
+  "Call CHECKER's executable with ARGS and return its output.
+
+Call `flycheck-call-checker-process' with INFILE, ERROR, and
+ARGS.  If it returns 0, return the process' output.  Otherwise,
+return nil or throw an error.
+
+This function is similar to `flycheck-call-checker-process'
+called in a `with-output-to-string' block, but it takes care of
+the error checking automatically."
+  (let ((temp (generate-new-buffer " *temp*")))
+    (unwind-protect
+        ;; We need to call the checker process in the right buffer, so that it
+        ;; uses the right exec-path, checker executable, etc.  See URL
+        ;; `https://github.com/flycheck/flycheck/issues/1770'.
+        (let ((exit-code (apply #'flycheck-call-checker-process
+                                checker infile temp error args))
+              (output (with-current-buffer temp (buffer-string))))
+          (if (eql 0 exit-code) output
+            (when error
+              (error "Process %s failed with %S (%s)"
+                     checker exit-code output))))
+      (kill-buffer temp))))
+
 (defun flycheck-checker-arguments (checker)
   "Get the command arguments of CHECKER."
   (cdr (flycheck-checker-get checker 'command)))
@@ -10329,9 +10354,9 @@ See URL `http://puppet-lint.com/'."
   "Run a python SNIPPET and return the output.
 
 CHECKER's executable is assumed to be a Python REPL."
-  (with-temp-buffer
-    (and (eql 0 (flycheck-call-checker-process checker nil t nil "-c" snippet))
-         (string-trim (buffer-string)))))
+  (-when-let (output (flycheck-call-checker-process-for-output
+                      checker nil nil "-c" snippet))
+    (string-trim output)))
 
 (defun flycheck-python-get-path (checker)
   "Compute the current Python path (CHECKER is a Python REPL) ."
@@ -10552,13 +10577,12 @@ See URL `https://www.pylint.org/'."
   :verify (lambda (_) (flycheck-python-verify-module 'python-pylint "pylint"))
   :error-explainer (lambda (err)
                      (-when-let (id (flycheck-error-id err))
-                       (with-output-to-string
-                         (apply
-                          #'flycheck-call-checker-process
-                          'python-pylint nil standard-output t
-                          (append
-                           (flycheck-python-module-args 'python-pylint "pylint")
-                           (list (format "--help-msg=%s" id)))))))
+                       (apply
+                        #'flycheck-call-checker-process-for-output
+                        'python-pylint nil t
+                        (append
+                         (flycheck-python-module-args 'python-pylint "pylint")
+                         (list (format "--help-msg=%s" id))))))
   :modes python-mode
   :next-checkers ((warning . python-mypy)))
 
@@ -10758,10 +10782,8 @@ See URL `https://sourceforge.net/projects/rpmlint/'."
                  (message-id (save-match-data
                                (string-match "\\([^ ]+\\)" error-message)
                                (match-string 1 error-message))))
-      (with-output-to-string
-        (flycheck-call-checker-process
-         'rpm-rpmlint nil standard-output t
-         "-I" message-id))))
+      (flycheck-call-checker-process-for-output
+       'rpm-rpmlint nil t "-I" message-id)))
   :modes (sh-mode rpm-spec-mode)
   :predicate (lambda () (or (not (eq major-mode 'sh-mode))
                             ;; In `sh-mode', we need the proper shell
@@ -10890,9 +10912,8 @@ See URL `https://github.com/Synthetica9/nix-linter'."
   :error-explainer
   (lambda (error)
     (-when-let (error-code (flycheck-error-id error))
-      (with-output-to-string
-        (flycheck-call-checker-process
-         'nix-linter nil standard-output t "--help-for" error-code))))
+      (flycheck-call-checker-process-for-output
+       'nix-linter nil t "--help-for" error-code)))
   :modes nix-mode)
 
 (defun flycheck-locate-sphinx-source-directory ()
@@ -11266,10 +11287,9 @@ or if the current buffer has no file name."
 (defun flycheck-rust-cargo-metadata ()
   "Run 'cargo metadata' and return the result as parsed JSON object."
   (car (flycheck-parse-json
-        (with-output-to-string
-          (flycheck-call-checker-process
-           'rust-cargo nil standard-output t
-           "metadata" "--no-deps" "--format-version" "1")))))
+        (flycheck-call-checker-process-for-output
+         'rust-cargo nil t
+         "metadata" "--no-deps" "--format-version" "1"))))
 
 (defun flycheck-rust-cargo-workspace-root ()
   "Return the path to the workspace root of a Rust Cargo project.
@@ -11657,22 +11677,20 @@ See URL `https://github.com/brigade/scss-lint'."
   :modes scss-mode
   :verify
   (lambda (checker)
-    (with-temp-buffer
-      (when (flycheck-call-checker-process
-             checker nil t nil "--require=scss_lint_reporter_checkstyle")
-        (goto-char (point-min))
-        (let ((reporter-missing (re-search-forward
-                                 flycheck-scss-lint-checkstyle-re
-                                 nil 'no-error)))
-          (list
-           (flycheck-verification-result-new
-            :label "checkstyle reporter"
-            :message (if reporter-missing
-                         "scss_lint_reporter_checkstyle plugin missing"
-                       "present")
-            :face (if reporter-missing
-                      '(bold error)
-                    'success))))))))
+    (-when-let
+        (output (flycheck-call-checker-process-for-output
+                 checker nil nil "--require=scss_lint_reporter_checkstyle"))
+      (let ((reporter-missing
+             (string-match-p flycheck-scss-lint-checkstyle-re output)))
+        (list
+         (flycheck-verification-result-new
+          :label "checkstyle reporter"
+          :message (if reporter-missing
+                       "scss_lint_reporter_checkstyle plugin missing"
+                     "present")
+          :face (if reporter-missing
+                    '(bold error)
+                  'success)))))))
 
 (flycheck-define-checker scss-stylelint
   "A SCSS syntax and style checker using stylelint.
