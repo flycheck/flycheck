@@ -10193,9 +10193,11 @@ See URL `http://puppet-lint.com/'."
 
 CHECKER's executable is assumed to be a Python REPL."
   (-when-let* ((py (flycheck-find-checker-executable checker)))
-    (with-temp-buffer
-      (and (eq (ignore-errors (call-process py nil t nil "-c" snippet)) 0)
-           (string-trim (buffer-string))))))
+    (let ((tmp (generate-new-buffer " *temp*")))
+      (unwind-protect
+          (and (eq (ignore-errors (call-process py nil tmp nil "-c" snippet)) 0)
+               (string-trim (with-current-buffer tmp (buffer-string))))
+        (kill-buffer tmp)))))
 
 (defun flycheck-python-get-path (checker)
   "Compute the current Python path (CHECKER is a Python REPL) ."
