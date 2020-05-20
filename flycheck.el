@@ -3818,7 +3818,8 @@ ERR is a Flycheck error whose position to get.
 
 The error position is the error column, or the first
 non-whitespace character of the error line, if ERR has no error column."
-  (car (flycheck-error-region-for-mode err 'columns)))
+  (car (flycheck-error-region-for-mode
+        err flycheck-highlighting-mode)))
 
 (defun flycheck-error-format-snippet (err &optional max-length)
   "Extract the text that ERR refers to from the buffer.
