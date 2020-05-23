@@ -9074,7 +9074,7 @@ See URL `https://golang.org/cmd/go/' and URL
   :command ("go" "vet"
             (option "-printf.funcs=" flycheck-go-vet-print-functions concat
                     flycheck-option-comma-separated-list)
-            source)
+            (source ".go"))
   :error-patterns
   ((warning line-start (file-name) ":" line ": " (message) line-end))
   :modes go-mode
