@@ -4410,8 +4410,12 @@ Why not:
 (flycheck-ert-def-checker-test terraform-tflint terraform nil
   (flycheck-ert-should-syntax-check
    "language/terraform/tflint/error.tf" 'terraform-mode
-   '(3 nil error "instance_type is not a valid value"
-       :id "aws_instance_invalid_type" :checker terraform-tflint)))
+   '(2 12 warning "Module source \"git://hashicorp.com/consul.git\" is not pinned"
+       :id "terraform_module_pinned_source" :checker terraform-tflint
+       :end-line 2 :end-column 44)
+   '(7 19 error "\"t1.2xlarge\" is an invalid value as instance_type"
+       :id "aws_instance_invalid_type" :checker terraform-tflint
+       :end-line 7 :end-column 31)))
 
 (flycheck-ert-def-checker-test markdown-markdownlint-cli markdown nil
   (flycheck-ert-should-syntax-check
