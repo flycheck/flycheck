@@ -11975,18 +11975,20 @@ information about tflint."
   (mapcar (lambda (err)
             (let-alist err
               (flycheck-error-new-at
-               .line
-               nil
-               (pcase .type
-                 ("ERROR"   'error)
-                 ("WARNING" 'warning)
+               .range.start.line
+               .range.start.column
+               (pcase .rule.severity
+                 ("error"   'error)
+                 ("warning" 'warning)
                  (_         'error))
                .message
-               :id .detector
+               :end-line .range.end.line
+               :end-column .range.end.column
+               :id .rule.name
                :checker checker
                :buffer buffer
                :filename (buffer-file-name buffer))))
-          (car (flycheck-parse-json output))))
+          (cdr (assq 'issues (car (flycheck-parse-json output))))))
 
 (flycheck-define-checker terraform-tflint
   "A Terraform checker using tflint.
