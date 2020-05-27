@@ -12167,9 +12167,9 @@ See URL `https://www.veripool.org/wiki/verilator'."
             source)
   :error-patterns
   ((warning line-start "%Warning-" (zero-or-more not-newline) ": "
-            (file-name) ":" line ": " (message) line-end)
+            (file-name) ":" line ":" column ": " (message) line-end)
    (error line-start "%Error: " (file-name) ":"
-          line ": " (message) line-end))
+          line ":" column ": " (message) line-end))
   :modes verilog-mode)
 
 (flycheck-def-option-var flycheck-ghdl-language-standard nil vhdl-ghdl
