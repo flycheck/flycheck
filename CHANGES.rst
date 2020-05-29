@@ -15,6 +15,8 @@ New Features
 Bugs Fixed
 ----------
 
+- [#1793]: Fix flycheck-ruby-rubocop on buffers with no backing file
+
 ----------
 Changes
 ----------
