@@ -11215,6 +11215,12 @@ This is either a parent directory containing a Gemfile, or nil."
    buffer-file-name
    (locate-dominating-file buffer-file-name "Gemfile")))
 
+(defun flycheck-ruby--filter-rubocop-errors (errors)
+  "Filter Rubocop ERRORS attributed to dummy stdin filename."
+  (flycheck-remove-error-file-names
+   (flycheck--file-truename (expand-file-name "stdin"))
+   errors))
+
 (flycheck-def-config-file-var flycheck-rubocoprc ruby-rubocop ".rubocop.yml")
 
 (flycheck-def-option-var flycheck-rubocop-lint-only nil
@@ -11258,11 +11264,14 @@ See URL `https://rubocop.org/'."
              (config-file "--config" flycheck-rubocoprc)
              (option-flag "--lint" flycheck-rubocop-lint-only)
              ;; Rubocop takes the original file name as argument when reading
-             ;; from standard input
-             "--stdin" source-original)
+             ;; from standard input, but it chokes when that name is the empty
+             ;; string, so fall back to "stdin" in order to handle buffers with
+             ;; no backing file (e.g. org-mode snippet buffers)
+             "--stdin" (eval (or (buffer-file-name) "stdin")))
   :standard-input t
   :working-directory #'flycheck-ruby--find-project-root
   :error-patterns flycheck-ruby-rubocop-error-patterns
+  :error-filter #'flycheck-ruby--filter-rubocop-errors
   :modes '(enh-ruby-mode ruby-mode ruby-ts-mode)
   :next-checkers '((warning . ruby-reek)
                    (warning . ruby-rubylint)))
