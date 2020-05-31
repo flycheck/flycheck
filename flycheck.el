@@ -5735,6 +5735,22 @@ of command checkers is `flycheck-sanitize-errors'.
      `flycheck-parse-with-patterns'.  In this case,
      `:error-patterns' is mandatory.
 
+`:handle-suspicious FUNCTION'
+     A function to handle suspicious state: when the process
+     returns non-zero code, but no standard errors (i.e. using
+     `:error-patterns' or `:error-parser') are found.
+
+     The function is called with three arguments: CHECKER,
+     EXIT-STATUS and OUTPUT (as string) with the checked buffer
+     as current.  It should process the output and return a list
+     of non-standard errors that best describe what exactly has
+     failed.  If it cannot do so, it should return symbol
+     `suspicious' to indicate that what has happened is really
+     not expected.
+
+     This property is optional.  If omitted, such state is always
+     treated as suspicious.
+
 `:standard-input t'
      Whether to send the buffer contents on standard input.
 
@@ -5770,6 +5786,7 @@ default `:verify' function of command checkers."
         (patterns (plist-get properties :error-patterns))
         (parser (or (plist-get properties :error-parser)
                     #'flycheck-parse-with-patterns))
+        (handle-suspicious (plist-get properties :handle-suspicious))
         (enabled (plist-get properties :enabled))
         (standard-input (plist-get properties :standard-input)))
     (unless command
@@ -5807,10 +5824,11 @@ default `:verify' function of command checkers."
                                      (car p)))
                              patterns)))
       (pcase-dolist (`(,prop . ,value)
-                     `((command        . ,command)
-                       (error-parser   . ,parser)
-                       (error-patterns . ,patterns)
-                       (standard-input . ,standard-input)))
+                     `((command           . ,command)
+                       (error-parser      . ,parser)
+                       (error-patterns    . ,patterns)
+                       (handle-suspicious . ,handle-suspicious)
+                       (standard-input    . ,standard-input)))
         (setf (flycheck-checker-get symbol prop) value)))))
 
 (eval-and-compile
@@ -6339,16 +6357,22 @@ Parse the OUTPUT and report an appropriate error status.
 Resolve all errors in OUTPUT using CWD as working directory."
   (let ((errors (flycheck-parse-output output checker (current-buffer))))
     (when (and (not (equal exit-status 0)) (null errors))
-      ;; Warn about a suspicious result from the syntax checker.  We do right
-      ;; after parsing the errors, before filtering, because a syntax checker
-      ;; might report errors from other files (e.g. includes) even if there
-      ;; are no errors in the file being checked.
-      (funcall callback 'suspicious
-               (format "Flycheck checker %S returned %S, but \
+      ;; Give the checker a chance to recover from suspicious state:
+      ;; exit status is nonzero, but there are no errors.
+      (let ((recovered (flycheck-handle-suspicious-state checker exit-status
+                                                         output)))
+        (if (listp recovered)
+            (setf errors recovered)
+          ;; Warn about a suspicious result from the syntax checker.  We do
+          ;; right after parsing the errors, before filtering, because a syntax
+          ;; checker might report errors from other files (e.g. includes) even
+          ;; if there are no errors in the file being checked.
+          (funcall callback 'suspicious
+                   (format "Flycheck checker %S returned %S, but \
 its output contained no errors: %s\nTry installing a more \
 recent version of %S, and please open a bug report if the issue \
 persists in the latest release.  Thanks!"  checker exit-status
-output checker)))
+output checker)))))
     (funcall callback 'finished
              ;; Fix error file names, by substituting them backwards from the
              ;; temporaries.
@@ -6740,6 +6764,14 @@ CHECKER.  BUFFER is the buffer which was checked.
 
 Return the errors parsed with the error patterns of CHECKER."
   (funcall (flycheck-checker-get checker 'error-parser) output checker buffer))
+
+(defun flycheck-handle-suspicious-state (checker exit-status output)
+  "Handle suspicious state of given CHECKER.
+EXIT-STATUS and OUTPUT are passed to `:handle-suspicious'
+function of the CHECKER, if any."
+  (-if-let (handle-suspicious (flycheck-checker-get checker 'handle-suspicious))
+      (funcall handle-suspicious checker exit-status output)
+    'suspicious))
 
 (defun flycheck-fix-error-filename (err buffer-files cwd)
   "Fix the file name of ERR from BUFFER-FILES.
@@ -7340,6 +7372,7 @@ SYMBOL with `flycheck-def-executable-var'."
   (let ((command (plist-get properties :command))
         (parser (plist-get properties :error-parser))
         (filter (plist-get properties :error-filter))
+        (handle-suspicious (plist-get properties :handle-suspicious))
         (explainer (plist-get properties :error-explainer))
         (predicate (plist-get properties :predicate))
         (enabled-fn (plist-get properties :enabled))
@@ -7356,6 +7389,8 @@ SYMBOL with `flycheck-def-executable-var'."
          :error-patterns ',(plist-get properties :error-patterns)
          ,@(when filter
              `(:error-filter #',filter))
+         ,@(when handle-suspicious
+             `(:handle-suspicious #',handle-suspicious))
          ,@(when explainer
              `(:error-explainer #',explainer))
          :modes ',(plist-get properties :modes)
