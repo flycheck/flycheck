@@ -5421,10 +5421,13 @@ non-nil."
       (flycheck-error-list-mode)))
   ;; Reset the error filter
   (flycheck-error-list-reset-filter)
-  ;; Show the error list in a window, and re-select the old window
-  (display-buffer flycheck-error-list-buffer)
-  ;; Adjust the source, causing a refresh
-  (flycheck-error-list-set-source (current-buffer)))
+  (let ((source (current-buffer)))
+    ;; Show the error list in a side window.  Under some configurations of
+    ;; `display-buffer', this may select `flycheck-error-list-buffer' (see URL
+    ;; `https://github.com/flycheck/flycheck/issues/1776').
+    (display-buffer flycheck-error-list-buffer)
+    ;; Adjust the source, causing a refresh
+    (flycheck-error-list-set-source source)))
 
 (defalias 'list-flycheck-errors 'flycheck-list-errors)
 
