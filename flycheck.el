@@ -3584,9 +3584,10 @@ Also remove global hooks.  (If optional argument IGNORE-LOCAL is
 non-nil, then only do this and skip per-buffer teardown.)"
   (unless ignore-local
     (dolist (buffer (buffer-list))
-      (with-current-buffer buffer
-        (when flycheck-mode
-          (flycheck-teardown 'ignore-global)))))
+      (when (buffer-live-p buffer)
+        (with-current-buffer buffer
+          (when flycheck-mode
+            (flycheck-teardown 'ignore-global))))))
   (remove-hook 'buffer-list-update-hook #'flycheck-handle-buffer-switch))
 
 ;; Clean up the entire state of Flycheck when Emacs is killed, to get rid of any
