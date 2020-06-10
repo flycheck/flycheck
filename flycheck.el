@@ -5526,7 +5526,7 @@ variable `flycheck-error-message-buffer'."
        message flycheck-error-message-buffer 'not-this-window)
       ;; We cannot rely on `display-message-or-buffer' returning the right
       ;; window. See URL `https://github.com/flycheck/flycheck/issues/1643'.
-      (-when-let ((buf (get-buffer flycheck-error-message-buffer)))
+      (-when-let (buf (get-buffer flycheck-error-message-buffer))
         (with-current-buffer buf
           (unless (derived-mode-p 'flycheck-error-message-mode)
             (flycheck-error-message-mode)))))))
