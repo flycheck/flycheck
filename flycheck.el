@@ -5624,7 +5624,7 @@ this error to produce the explanation to display."
            (flycheck-explain-error-mode))
          (cond
           ((functionp explanation) (funcall explanation))
-          ((stringp explanation) (insert explanation))
+          ((stringp explanation) (princ explanation))
           (t (error "Unsupported error explanation: %S" explanation)))
          (display-message-or-buffer standard-output nil 'not-this-window)))))
 
