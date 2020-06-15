@@ -4452,14 +4452,18 @@ Why not:
   (flycheck-ert-should-syntax-check
    "language/markdown.md" 'markdown-mode
    '(1 nil error "First line in file should be a top level heading [Context: \"## Second Header First\"]"
-       :id "MD041/first-line-heading/first-line-h1" :checker markdown-markdownlint-cli)))
+       :id "MD041/first-line-heading/first-line-h1" :checker markdown-markdownlint-cli)
+   '(3 14 error "Inline HTML [Element: b]"
+       :id "MD033/no-inline-html" :checker markdown-markdownlint-cli)))
 
 (flycheck-ert-def-checker-test markdown-mdl markdown nil
   (let ((flycheck-disabled-checkers '(markdown-markdownlint-cli)))
     (flycheck-ert-should-syntax-check
      "language/markdown.md" 'markdown-mode
      '(1 nil error "First header should be a top level header"
-         :id "MD002" :checker markdown-mdl))))
+         :id "MD002" :checker markdown-mdl)
+     '(3 nil error "Inline HTML"
+         :id "MD033" :checker markdown-mdl))))
 
 (flycheck-ert-def-checker-test nix nix nil
   (flycheck-ert-should-syntax-check
