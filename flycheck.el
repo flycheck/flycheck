@@ -9577,17 +9577,20 @@ See URL `https://github.com/ndmitchell/hlint'."
             source-inplace)
   :error-patterns
   ((info line-start
-         (file-name) ":" line ":" column (optional "-" end-column)
+         (file-name) ":" (or (: line ":" column (optional "-" end-column))
+                             (: "(" line "," column ")-(" end-line "," end-column ")"))
          ": Suggestion: "
          (message (one-or-more (and (one-or-more (not (any ?\n))) ?\n)))
          line-end)
    (warning line-start
-            (file-name) ":" line ":" column (optional "-" end-column)
+            (file-name) ":" (or (: line ":" column (optional "-" end-column))
+                                (: "(" line "," column ")-(" end-line "," end-column ")"))
             ": Warning: "
             (message (one-or-more (and (one-or-more (not (any ?\n))) ?\n)))
             line-end)
    (error line-start
-          (file-name) ":" line ":" column (optional "-" end-column)
+          (file-name) ":" (or (: line ":" column (optional "-" end-column))
+                              (: "(" line "," column ")-(" end-line "," end-column ")"))
           ": Error: "
           (message (one-or-more (and (one-or-more (not (any ?\n))) ?\n)))
           line-end))
