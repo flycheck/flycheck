@@ -3388,16 +3388,17 @@ or a list of them.)
 
 The syntax check is deferred if FORCE-DEFERRED is non-nil, or if
 `flycheck-must-defer-check' returns t."
-  (when (and flycheck-mode (if (listp condition)
-                               (apply #'flycheck-may-check-automatically
-                                      condition)
-                             (flycheck-may-check-automatically condition)))
-    (flycheck--clear-idle-trigger-timer)
-    (setq flycheck--idle-trigger-conditions nil)
-    (if (or force-deferred (flycheck-must-defer-check))
-        (flycheck-buffer-deferred)
-      (with-demoted-errors "Error while checking syntax automatically: %S"
-        (flycheck-buffer)))))
+  (save-match-data
+    (when (and flycheck-mode (if (listp condition)
+                                 (apply #'flycheck-may-check-automatically
+                                        condition)
+                               (flycheck-may-check-automatically condition)))
+      (flycheck--clear-idle-trigger-timer)
+      (setq flycheck--idle-trigger-conditions nil)
+      (if (or force-deferred (flycheck-must-defer-check))
+          (flycheck-buffer-deferred)
+        (with-demoted-errors "Error while checking syntax automatically: %S"
+          (flycheck-buffer))))))
 
 (defun flycheck--clear-idle-trigger-timer ()
   "Clear the idle trigger timer."
@@ -3408,17 +3409,18 @@ The syntax check is deferred if FORCE-DEFERRED is non-nil, or if
 (defun flycheck--handle-idle-trigger (buffer)
   "Run a syntax check in BUFFER if appropriate.
 This function is called by `flycheck--idle-trigger-timer'."
-  (let ((current-buffer (current-buffer)))
-    (when (buffer-live-p buffer)
-      (with-current-buffer buffer
-        (unless (or flycheck-buffer-switch-check-intermediate-buffers
-                    (eq buffer current-buffer))
-          (setq flycheck--idle-trigger-conditions
-                (delq 'idle-buffer-switch
-                      flycheck--idle-trigger-conditions)))
-        (when flycheck--idle-trigger-conditions
-          (flycheck-buffer-automatically flycheck--idle-trigger-conditions)
-          (setq flycheck--idle-trigger-conditions nil))))))
+  (save-match-data
+    (let ((current-buffer (current-buffer)))
+      (when (buffer-live-p buffer)
+        (with-current-buffer buffer
+          (unless (or flycheck-buffer-switch-check-intermediate-buffers
+                      (eq buffer current-buffer))
+            (setq flycheck--idle-trigger-conditions
+                  (delq 'idle-buffer-switch
+                        flycheck--idle-trigger-conditions)))
+          (when flycheck--idle-trigger-conditions
+            (flycheck-buffer-automatically flycheck--idle-trigger-conditions)
+            (setq flycheck--idle-trigger-conditions nil)))))))
 
 (defun flycheck-handle-change (beg end _len)
   "Handle a buffer change between BEG and END.
