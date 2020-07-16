@@ -2095,19 +2095,11 @@ are mandatory.
 Signal an error, if any property has an invalid value."
   (declare (indent 1)
            (doc-string 2))
-  (let ((start (plist-get properties :start))
-        (interrupt (plist-get properties :interrupt))
-        (print-doc (plist-get properties :print-doc))
-        (modes (plist-get properties :modes))
-        (predicate (plist-get properties :predicate))
-        (verify (plist-get properties :verify))
-        (enabled (plist-get properties :enabled))
-        (filter (or (plist-get properties :error-filter) #'identity))
-        (explainer (plist-get properties :error-explainer))
-        (next-checkers (plist-get properties :next-checkers))
-        (file (flycheck-current-load-file))
-        (working-directory (plist-get properties :working-directory)))
-
+  (cl-destructuring-bind (&key enabled explainer interrupt modes next-checkers
+                               predicate print-doc start verify working-directory
+                               ((:error-filter filter) #'identity)
+                               &allow-other-keys)
+      properties
     (unless (listp modes)
       (setq modes (list modes)))
 
@@ -2174,7 +2166,7 @@ Try to reinstall the package defining this syntax checker." symbol)
                        (error-explainer   . ,explainer)
                        (next-checkers     . ,next-checkers)
                        (documentation     . ,docstring)
-                       (file              . ,file)
+                       (file              . ,(flycheck-current-load-file))
                        (working-directory . ,working-directory)))
         (setf (flycheck-checker-get symbol prop) value)))
 
@@ -4183,32 +4175,31 @@ The following PROPERTIES constitute an error level:
      A face symbol denoting the face to use for messages of this
      level in the error list.  See `flycheck-list-errors'."
   (declare (indent 1))
-  (setf (get level 'flycheck-error-level) t)
-  (setf (get level 'flycheck-error-severity)
-        (or (plist-get properties :severity) 0))
-  (setf (get level 'flycheck-compilation-level)
-        (plist-get properties :compilation-level))
-  (setf (get level 'flycheck-overlay-category)
-        (plist-get properties :overlay-category))
-  (setf (get level 'flycheck-fringe-bitmaps)
-        (let ((bitmap (plist-get properties :fringe-bitmap)))
-          (if (consp bitmap) bitmap (cons bitmap bitmap))))
-  ;; Kept for compatibility
-  (setf (get level 'flycheck-fringe-bitmap-double-arrow)
-        (car (get level 'flycheck-fringe-bitmaps)))
-  (setf (get level 'flycheck-fringe-face)
-        (plist-get properties :fringe-face))
-  (setf (get level 'flycheck-margin-spec)
-        (or (plist-get properties :margin-spec)
-            (flycheck-make-margin-spec
-             flycheck-default-margin-str
-             (or (get level 'flycheck-fringe-face) 'default))))
-  (setf (get level 'flycheck-margin-continuation)
-        (flycheck-make-margin-spec
-         flycheck-default-margin-continuation-str
-         (or (get level 'flycheck-fringe-face) 'default)))
-  (setf (get level 'flycheck-error-list-face)
-        (plist-get properties :error-list-face)))
+  (cl-destructuring-bind (&key error-list-face fringe-face margin-spec
+                               compilation-level overlay-category severity
+                               ((:fringe-bitmap bitmap))
+                               &allow-other-keys)
+      properties
+    (setf (get level 'flycheck-error-level) t)
+    (setf (get level 'flycheck-error-severity) (or severity 0))
+    (setf (get level 'flycheck-compilation-level) compilation-level)
+    (setf (get level 'flycheck-overlay-category) overlay-category)
+    (setf (get level 'flycheck-fringe-bitmaps)
+          (if (consp bitmap) bitmap (cons bitmap bitmap)))
+    ;; Kept for compatibility
+    (setf (get level 'flycheck-fringe-bitmap-double-arrow)
+          (car (get level 'flycheck-fringe-bitmaps)))
+    (setf (get level 'flycheck-fringe-face) fringe-face)
+    (setf (get level 'flycheck-margin-spec)
+          (or margin-spec
+              (flycheck-make-margin-spec
+               flycheck-default-margin-str
+               (or (get level 'flycheck-fringe-face) 'default))))
+    (setf (get level 'flycheck-margin-continuation)
+          (flycheck-make-margin-spec
+           flycheck-default-margin-continuation-str
+           (or (get level 'flycheck-fringe-face) 'default)))
+    (setf (get level 'flycheck-error-list-face) error-list-face)))
 
 (defun flycheck-error-level-p (level)
   "Determine whether LEVEL is a Flycheck error level."
@@ -5760,65 +5751,62 @@ default `:verify' function of command checkers."
     (when (plist-get properties prop)
       (error "%s not allowed in definition of command syntax checker %s"
              prop symbol)))
-
-  (unless (plist-get properties :error-filter)
-    ;; Default to `flycheck-sanitize-errors' as error filter
-    (setq properties (plist-put properties :error-filter
-                                #'flycheck-sanitize-errors)))
-  (let ((verify-fn (plist-get properties :verify)))
+  (cl-destructuring-bind (&key command enabled error-filter standard-input
+                               ((:error-parser parser) #'flycheck-parse-with-patterns)
+                               ((:error-patterns patterns))
+                               ((:verify verify-fn))
+                               &allow-other-keys)
+      properties
+    (unless error-filter
+      ;; Default to `flycheck-sanitize-errors' as error filter
+      (setq properties (plist-put properties :error-filter
+                                  #'flycheck-sanitize-errors)))
     (setq properties
           (plist-put properties :verify
                      (lambda (checker)
                        (append (flycheck-verify-command-checker checker)
                                (and verify-fn
-                                    (funcall verify-fn checker)))))))
+                                    (funcall verify-fn checker))))))
+  (unless command
+    (error "Missing :command in syntax checker %s" symbol))
+  (unless (stringp (car command))
+    (error "Command executable for syntax checker %s must be a string: %S"
+           symbol (car command)))
+  (dolist (arg (cdr command))
+    (unless (flycheck-command-argument-p arg)
+      (error "Invalid command argument %S in syntax checker %s" arg symbol)))
+  (when (and (eq parser 'flycheck-parse-with-patterns)
+             (not patterns))
+    (error "Missing :error-patterns in syntax checker %s" symbol))
 
-  (let ((command (plist-get properties :command))
-        (patterns (plist-get properties :error-patterns))
-        (parser (or (plist-get properties :error-parser)
-                    #'flycheck-parse-with-patterns))
-        (enabled (plist-get properties :enabled))
-        (standard-input (plist-get properties :standard-input)))
-    (unless command
-      (error "Missing :command in syntax checker %s" symbol))
-    (unless (stringp (car command))
-      (error "Command executable for syntax checker %s must be a string: %S"
-             symbol (car command)))
-    (dolist (arg (cdr command))
-      (unless (flycheck-command-argument-p arg)
-        (error "Invalid command argument %S in syntax checker %s" arg symbol)))
-    (when (and (eq parser 'flycheck-parse-with-patterns)
-               (not patterns))
-      (error "Missing :error-patterns in syntax checker %s" symbol))
+  (setq properties
+        ;; Automatically disable command checkers if the executable does not
+        ;; exist.
+        (plist-put properties :enabled
+                   (lambda ()
+                     (and (flycheck-find-checker-executable symbol)
+                          (flycheck-temp-files-writable-p symbol)
+                          (or (not enabled) (funcall enabled))))))
 
-    (setq properties
-          ;; Automatically disable command checkers if the executable does not
-          ;; exist.
-          (plist-put properties :enabled
-                     (lambda ()
-                       (and (flycheck-find-checker-executable symbol)
-                            (flycheck-temp-files-writable-p symbol)
-                            (or (not enabled) (funcall enabled))))))
+  (apply #'flycheck-define-generic-checker symbol docstring
+         :start #'flycheck-start-command-checker
+         :interrupt #'flycheck-interrupt-command-checker
+         :print-doc #'flycheck-command-checker-print-doc
+         properties)
 
-    (apply #'flycheck-define-generic-checker symbol docstring
-           :start #'flycheck-start-command-checker
-           :interrupt #'flycheck-interrupt-command-checker
-           :print-doc #'flycheck-command-checker-print-doc
-           properties)
-
-    ;; Pre-compile all errors patterns into strings, so that we don't need to do
-    ;; that on each error parse
-    (let ((patterns (seq-map (lambda (p)
-                               (cons (flycheck-rx-to-string `(and ,@(cdr p))
-                                                            'no-group)
-                                     (car p)))
-                             patterns)))
-      (pcase-dolist (`(,prop . ,value)
-                     `((command        . ,command)
-                       (error-parser   . ,parser)
-                       (error-patterns . ,patterns)
-                       (standard-input . ,standard-input)))
-        (setf (flycheck-checker-get symbol prop) value)))))
+  ;; Pre-compile all errors patterns into strings, so that we don't need to do
+  ;; that on each error parse
+  (let ((patterns (seq-map (lambda (p)
+                             (cons (flycheck-rx-to-string `(and ,@(cdr p))
+                                                          'no-group)
+                                   (car p)))
+                           patterns)))
+    (pcase-dolist (`(,prop . ,value)
+                   `((command        . ,command)
+                     (error-parser   . ,parser)
+                     (error-patterns . ,patterns)
+                     (standard-input . ,standard-input)))
+      (setf (flycheck-checker-get symbol prop) value)))))
 
 (eval-and-compile
   ;; Make this function available during byte-compilation, since we need it
@@ -7344,14 +7332,15 @@ be quoted.  Also, implicitly define the executable variable for
 SYMBOL with `flycheck-def-executable-var'."
   (declare (indent 1)
            (doc-string 2))
-  (let ((command (plist-get properties :command))
-        (parser (plist-get properties :error-parser))
-        (filter (plist-get properties :error-filter))
-        (explainer (plist-get properties :error-explainer))
-        (predicate (plist-get properties :predicate))
-        (enabled-fn (plist-get properties :enabled))
-        (verify-fn (plist-get properties :verify)))
-
+  (cl-destructuring-bind (&key command error-patterns modes next-checkers
+                               predicate standard-input working-directory
+                               ((:enabled         enabled-fn))
+                               ((:error-explainer explainer))
+                               ((:error-filter    filter))
+                               ((:error-parser    parser))
+                               ((:verify          verify-fn))
+                               &allow-other-keys)
+      properties
     `(progn
        (flycheck-def-executable-var ,symbol ,(car command))
 
@@ -7360,21 +7349,21 @@ SYMBOL with `flycheck-def-executable-var'."
          :command ',command
          ,@(when parser
              `(:error-parser #',parser))
-         :error-patterns ',(plist-get properties :error-patterns)
+         :error-patterns ',error-patterns
          ,@(when filter
              `(:error-filter #',filter))
          ,@(when explainer
              `(:error-explainer #',explainer))
-         :modes ',(plist-get properties :modes)
+         :modes ',modes
          ,@(when predicate
              `(:predicate #',predicate))
-         :next-checkers ',(plist-get properties :next-checkers)
+         :next-checkers ',next-checkers
          ,@(when enabled-fn
              `(:enabled #',enabled-fn))
          ,@(when verify-fn
              `(:verify #',verify-fn))
-         :standard-input ',(plist-get properties :standard-input)
-         :working-directory ',(plist-get properties :working-directory)))))
+         :standard-input ',standard-input
+         :working-directory ',working-directory))))
 
 
 ;;; Built-in checkers
