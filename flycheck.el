@@ -10,7 +10,7 @@
 ;; URL: http://www.flycheck.org
 ;; Keywords: convenience, languages, tools
 ;; Version: 32-cvs
-;; Package-Requires: ((dash "2.12.1") (pkg-info "0.4") (let-alist "1.0.4") (seq "1.11") (emacs "24.3"))
+;; Package-Requires: ((dash "2.12.1") (let-alist "1.0.4") (seq "1.11") (emacs "24.3"))
 
 ;; This file is not part of GNU Emacs.
 
@@ -89,9 +89,6 @@
 (defvar markdown-hide-markup)                     ;
 (defvar markdown-fontify-code-block-default-mode) ; For rust-error-explainer
 (defvar markdown-fontify-code-blocks-natively)    ;
-
-;; Tell the byte compiler about autoloaded functions from packages
-(declare-function pkg-info-version-info "pkg-info" (package))
 
 
 ;;; Compatibility
@@ -1283,7 +1280,27 @@ If the version number could not be determined, signal an error,
 if called interactively, or if SHOW-VERSION is non-nil, otherwise
 just return nil."
   (interactive (list t))
-  (let ((version (pkg-info-version-info 'flycheck)))
+  ;; see `describe-package'
+  (require 'package)
+  (unless package--initialized
+    (package-initialize t))
+
+  (let* ((pkg-ver (lambda (desc)
+                    (funcall
+                     (if (fboundp 'package-desc-version)
+                         #'package-desc-version ; Emacs-24.4 or higher
+                       #'package-desc-vers)     ; Emacs-24.1 or lower
+                     desc)))
+         (lib-version (with-temp-buffer
+                        (insert-file-contents (find-library-name "flycheck"))
+                        (funcall pkg-ver (package-buffer-info))))
+         (pkg-version (funcall pkg-ver (cadr (assq 'flycheck package-alist))))
+         (version (if (and pkg-version
+                           (not (version-list-= lib-version pkg-version)))
+                      (format "%s (package: %s)"
+                              (package-version-join lib-version)
+                              (package-version-join pkg-version))
+                    (package-version-join lib-version))))
     (when show-version
       (message "Flycheck version: %s" version))
     version))
