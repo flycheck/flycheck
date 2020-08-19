@@ -4628,7 +4628,7 @@ The manifest path is relative to
      '(4 9 warning "unused variable: `x`"
          :checker rust-cargo :id "unused_variables" :group 2
          :end-line 4 :end-column 10)
-     '(4 9 info "consider prefixing with an underscore: `_x`"
+     '(4 9 info "if this is intentional, prefix it with an underscore: `_x`"
          :checker rust-cargo :id "unused_variables" :group 2
          :end-line 4 :end-column 10))))
 
@@ -4648,7 +4648,7 @@ The manifest path is relative to
      '(4 9 warning "unused variable: `x`"
          :checker rust-cargo :id "unused_variables" :group 2
          :end-line 4 :end-column 10)
-     '(4 9 info "consider prefixing with an underscore: `_x`"
+     '(4 9 info "if this is intentional, prefix it with an underscore: `_x`"
          :checker rust-cargo :id "unused_variables" :group 2
          :end-line 4 :end-column 10))))
 
@@ -4679,7 +4679,7 @@ The manifest path is relative to
        '(6 17 info "`#[warn(unused_variables)]` on by default"
            :checker rust-cargo :id "unused_variables" :group 2
            :end-line 6 :end-column 29)
-       '(6 17 info "consider prefixing with an underscore: `_foo_lib_test`"
+       '(6 17 info "if this is intentional, prefix it with an underscore: `_foo_lib_test`"
            :checker rust-cargo :id "unused_variables" :group 2
            :end-line 6 :end-column 29)))
 
@@ -4696,7 +4696,7 @@ The manifest path is relative to
        '(4 17 warning "unused variable: `foo_a_test`"
            :checker rust-cargo :id "unused_variables" :group 2
            :end-line 4 :end-column 27)
-       '(4 17 info "consider prefixing with an underscore: `_foo_a_test`"
+       '(4 17 info "if this is intentional, prefix it with an underscore: `_foo_a_test`"
            :checker rust-cargo :id "unused_variables" :group 2
            :end-line 4 :end-column 27)))
 
@@ -4711,13 +4711,13 @@ The manifest path is relative to
        '(1 17 info "`#[warn(unused_variables)]` on by default"
            :checker rust-cargo :id "unused_variables" :group 1
            :end-line 1 :end-column 25)
-       '(1 17 info "consider prefixing with an underscore: `_foo_main`"
+       '(1 17 info "if this is intentional, prefix it with an underscore: `_foo_main`"
            :checker rust-cargo :id "unused_variables" :group 1
            :end-line 1 :end-column 25)
        '(4 17 warning "unused variable: `foo_main_test`"
            :checker rust-cargo :id "unused_variables" :group 2
            :end-line 4 :end-column 30)
-       '(4 17 info "consider prefixing with an underscore: `_foo_main_test`"
+       '(4 17 info "if this is intentional, prefix it with an underscore: `_foo_main_test`"
            :checker rust-cargo :id "unused_variables" :group 2
            :end-line 4 :end-column 30)))
 
@@ -4732,13 +4732,13 @@ The manifest path is relative to
        '(1 17 info "`#[warn(unused_variables)]` on by default"
            :checker rust-cargo :id "unused_variables" :group 1
            :end-line 1 :end-column 26)
-       '(1 17 info "consider prefixing with an underscore: `_foo_bin_a`"
+       '(1 17 info "if this is intentional, prefix it with an underscore: `_foo_bin_a`"
            :checker rust-cargo :id "unused_variables" :group 1
            :end-line 1 :end-column 26)
        '(4 17 warning "unused variable: `foo_bin_a_test`"
            :checker rust-cargo :id "unused_variables" :group 2
            :end-line 4 :end-column 31)
-       '(4 17 info "consider prefixing with an underscore: `_foo_bin_a_test`"
+       '(4 17 info "if this is intentional, prefix it with an underscore: `_foo_bin_a_test`"
            :checker rust-cargo :id "unused_variables" :group 2
            :end-line 4 :end-column 31)))
 
@@ -4753,13 +4753,13 @@ The manifest path is relative to
        '(1 17 info "`#[warn(unused_variables)]` on by default"
            :checker rust-cargo :id "unused_variables" :group 1
            :end-line 1 :end-column 28)
-       '(1 17 info "consider prefixing with an underscore: `_foo_bench_a`"
+       '(1 17 info "if this is intentional, prefix it with an underscore: `_foo_bench_a`"
            :checker rust-cargo :id "unused_variables" :group 1
            :end-line 1 :end-column 28)
        '(4 17 warning "unused variable: `foo_bench_a_test`"
            :checker rust-cargo :id "unused_variables" :group 2
            :end-line 4 :end-column 33)
-       '(4 17 info "consider prefixing with an underscore: `_foo_bench_a_test`"
+       '(4 17 info "if this is intentional, prefix it with an underscore: `_foo_bench_a_test`"
            :checker rust-cargo :id "unused_variables" :group 2
            :end-line 4 :end-column 33)))
 
@@ -4774,7 +4774,7 @@ The manifest path is relative to
        '(2 16 info "`#[warn(unused_variables)]` on by default"
            :checker rust-cargo :id "unused_variables" :group 1
            :end-line 2 :end-column 31)
-       '(2 16 info "consider prefixing with an underscore: `_foo_test_a_test`"
+       '(2 16 info "if this is intentional, prefix it with an underscore: `_foo_test_a_test`"
            :checker rust-cargo :id "unused_variables" :group 1
            :end-line 2 :end-column 31)
        '(4 4 warning "function is never used: `foo_test_a`"
@@ -4795,13 +4795,13 @@ The manifest path is relative to
        '(1 17 info "`#[warn(unused_variables)]` on by default"
            :checker rust-cargo :id "unused_variables" :group 1
            :end-line 1 :end-column 25)
-       '(1 17 info "consider prefixing with an underscore: `_foo_ex_a`"
+       '(1 17 info "if this is intentional, prefix it with an underscore: `_foo_ex_a`"
            :checker rust-cargo :id "unused_variables" :group 1
            :end-line 1 :end-column 25)
        '(4 17 warning "unused variable: `foo_ex_a_test`"
            :checker rust-cargo :id "unused_variables" :group 2
            :end-line 4 :end-column 30)
-       '(4 17 info "consider prefixing with an underscore: `_foo_ex_a_test`"
+       '(4 17 info "if this is intentional, prefix it with an underscore: `_foo_ex_a_test`"
            :checker rust-cargo :id "unused_variables" :group 2
            :end-line 4 :end-column 30)))))
 
@@ -4818,7 +4818,7 @@ The manifest path is relative to
      '(2 7 info "`#[warn(unused_variables)]` on by default"
          :checker rust-cargo :id "unused_variables" :group 1
          :end-line 2 :end-column 8)
-     '(2 7 info "consider prefixing with an underscore: `_a`"
+     '(2 7 info "if this is intentional, prefix it with an underscore: `_a`"
          :checker rust-cargo :id "unused_variables" :group 1
          :end-line 2 :end-column 8))))
 
@@ -4841,7 +4841,7 @@ The manifest path is relative to
      '(8 9 info "`#[warn(unused_variables)]` on by default"
          :checker rust-cargo :id "unused_variables" :group 2
          :end-line 8 :end-column 12)
-     '(8 9 info "consider prefixing with an underscore: `_foo`"
+     '(8 9 info "if this is intentional, prefix it with an underscore: `_foo`"
          :checker rust-cargo :id "unused_variables" :group 2
          :end-line 8 :end-column 12))))
 
@@ -4873,7 +4873,7 @@ The manifest path is relative to
      '(4 9 info "`#[warn(unused_variables)]` on by default"
          :checker rust :id "unused_variables" :group 1
          :end-line 4 :end-column 10)
-     '(4 9 info "consider prefixing with an underscore: `_x`"
+     '(4 9 info "if this is intentional, prefix it with an underscore: `_x`"
          :checker rust :id "unused_variables" :group 1
          :end-line 4 :end-column 10))))
 
