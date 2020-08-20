@@ -7138,7 +7138,9 @@ https://github.com/rust-lang/rust/blob/master/src/librustc_errors/json.rs#L154"
     ;; If there are no spans, the error is not associated with a specific
     ;; file but with the project as a whole.  We still need to report it to
     ;; the user by emitting a corresponding flycheck-error object.
-    (unless spans
+    ;; Check whether the code is non-nil because Rust≥1.44 includes the
+    ;; warning count upon completion.
+    (when (and error-code (not spans))
       (push (flycheck-error-new-at
              ;; We have no specific position to attach the error to, so
              ;; let's use the top of the file.
@@ -7219,7 +7221,9 @@ machine_message.rs at URL `https://git.io/vh24R'."
         ;; Errors and warnings from rustc are wrapped by cargo, so we filter and
         ;; unwrap them, and delegate the actual construction of `flycheck-error'
         ;; objects to `flycheck-parse-rustc-diagnostic'.
-        (when (string= .reason "compiler-message")
+        ;; Check whether the code is non-nil because Rust≥1.44 includes the
+        ;; warning count upon completion.
+        (when (and .message.code (string= .reason "compiler-message"))
           (push (flycheck-parse-rustc-diagnostic .message checker buffer)
                 errors))))
     (apply #'nconc errors)))
