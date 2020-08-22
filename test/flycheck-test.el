@@ -4292,6 +4292,16 @@ Why not:
      '(22 1 error "undefined name 'antigravity'" :id "F821"
           :checker python-flake8))))
 
+(flycheck-ert-def-checker-test python-pyright python nil
+  (let ((flycheck-disabled-checkers '(python-mypy))
+        (flycheck-checkers '(python-pyright)))
+    (flycheck-ert-should-syntax-check
+     "language/python/invalid_type.py" 'python-mode
+     '(2 12 error "Expression of type \"str\" cannot be assigned to return type \"int\"\n  \"str\" is incompatible with \"int\""
+         :checker python-pyright
+         :end-line 2
+         :end-column 13))))
+
 (flycheck-ert-def-checker-test python-mypy python nil
   (let ((flycheck-disabled-checkers '(python-flake8))
         (flycheck-checkers '(python-mypy))
