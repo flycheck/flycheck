@@ -3326,13 +3326,13 @@ The term \"1\" has type \"nat\" while it is expected to have type \"bool\"."
    '(4 14 error "Expected a `FUNCTION` or `IDENT` after colon at line 4, col 14."
        :id "ParsingErrors" :checker css-csslint)))
 
-(flycheck-ert-def-checker-test cuda cuda syntax-error
+(flycheck-ert-def-checker-test cuda-nvcc cuda syntax-error
   (flycheck-ert-should-syntax-check
    "language/cuda/syntax-error.cu" 'cuda-mode
    '(5 0 error "error: identifier \"ac\" is undefined"
        :checker cuda)))
 
-(flycheck-ert-def-checker-test cuda cuda syntax-warning
+(flycheck-ert-def-checker-test cuda-nvcc cuda syntax-warning
   (flycheck-ert-should-syntax-check
    "language/cuda/syntax-warning.cu" 'cuda-mode
    '(3 0 warning "variable \"b\" was set but never used"
@@ -3773,11 +3773,14 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
    '(1 nil error "unexpected end-of-input"
        :checker haml)))
 
+(defvar web-mode-engine-file-regexps)
+
 (flycheck-ert-def-checker-test handlebars handlebars nil
-  (flycheck-ert-should-syntax-check
-   "language/handlebars.hbs" '(handlebars-mode web-mode)
-   '(2 nil error "Expecting 'ID', 'STRING', 'NUMBER', 'BOOLEAN', 'UNDEFINED', 'NULL', 'DATA', got 'INVALID'"
-       :checker handlebars)))
+  (let ((web-mode-engine-file-regexps '(("handlebars" . ""))))
+    (flycheck-ert-should-syntax-check
+     "language/handlebars.hbs" '(handlebars-mode web-mode)
+     '(2 nil error "Expecting 'ID', 'STRING', 'NUMBER', 'BOOLEAN', 'UNDEFINED', 'NULL', 'DATA', got 'INVALID'"
+         :checker handlebars))))
 
 (flycheck-ert-def-checker-test haskell-stack-ghc haskell syntax-error
   (skip-unless (file-exists-p (getenv "HOME")))
@@ -4387,11 +4390,14 @@ Why not:
     (flycheck-ert-should-syntax-check
      "language/python/test.py" 'python-mode)))
 
+(defvar ess-language)
+
 (flycheck-ert-def-checker-test r-lintr r nil
   ;; Disable caching in lintr tests to make sure that the file is re-checked
   ;; every time
   (skip-unless (flycheck-r-has-lintr (flycheck-checker-executable 'r-lintr)))
-  (let ((flycheck-lintr-caching nil))
+  (let ((flycheck-lintr-caching nil)
+        (ess-language "S"))
     (flycheck-ert-should-syntax-check
      "language/r.R" 'R-mode
      '(1 28 info "Opening curly braces should never go on their own line and should always be followed by a new line."
@@ -4407,8 +4413,11 @@ Why not:
      "language/racket.rkt" 'racket-mode
      '(4 3 error "read: expected a `)' to close `('" :checker racket))))
 
+(defvar sh-shell)
+
 (flycheck-ert-def-checker-test rpm-rpmlint rpm nil
-  (let ((inhibit-message t))
+  (let ((inhibit-message t)
+        (sh-shell 'rpm))
     (flycheck-ert-should-syntax-check
      "language/rpm.spec" '(sh-mode rpm-spec-mode)
      '(1 nil warning "no-cleaning-of-buildroot %install" :checker rpm-rpmlint)
@@ -4948,7 +4957,7 @@ The manifest path is relative to
   (interactive)
   (scheme-mode)
   (setq-local geiser-impl--implementation 'chicken)
-  (geiser-mode))
+  (when (boundp 'geiser-mode) (geiser-mode)))
 
 (flycheck-ert-def-checker-test scheme-chicken scheme nil
   (skip-unless (version<= "25.1" emacs-version))
@@ -5067,7 +5076,7 @@ The manifest path is relative to
    "language/slim.slim" 'slim-mode
    `(2 1 error "Unexpected indentation" :checker slim)))
 
-(flycheck-ert-def-checker-test sqlint sql nil
+(flycheck-ert-def-checker-test sql-sqlint sql nil
   (flycheck-ert-should-syntax-check
    "language/sql.sql" 'sql-mode
    `(1 15 error "unterminated quoted string at or near \"';\n  \""

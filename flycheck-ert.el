@@ -218,7 +218,7 @@ Call `flycheck-ert-initialize' after defining all tests!"))
   "Define a test case for a syntax CHECKER for LANGUAGE.
 
 CHECKER is a symbol or a list of symbols denoting syntax checkers
-being tested by the test.  The test case is skipped, if any of
+being tested by the test.  The test case is skipped if any of
 these checkers cannot be used.  LANGUAGE is a symbol or a list of
 symbols denoting the programming languages supported by the
 syntax checkers.  This is currently only used for tagging the
@@ -255,6 +255,10 @@ case, including assertions and setup code."
          (body (cadr keys-and-body))
          (keys (car keys-and-body))
          (default-tags '(syntax-checker external-tool)))
+    (dolist (chk checkers)
+      (unless (flycheck-valid-checker-p chk)
+        (error (format "In (flycheck-ert-def-checker-test %S %S %S …): \
+`%S' is not a Flycheck checker" checker language name chk))))
     `(ert-deftest ,full-name ()
        :expected-result ,(or (plist-get keys :expected-result) :passed)
        :tags (append ',(append default-tags language-tags checker-tags)
@@ -306,12 +310,26 @@ failed, and the test aborted with failure.")
       (signal 'flycheck-ert-syntax-check-timed-out nil)))
   (setq flycheck-ert-syntax-checker-finished nil))
 
+(defun flycheck-ert-get-checker-for-buffer ()
+  "Ensure that `flycheck-get-checker-for-buffer' returns non-nil."
+  (-when-let (checker flycheck-checker)
+    ;; In this special case we can inline `flycheck-may-use-checker' to get
+    ;; better debugging information
+    (let* ((predicate (flycheck-checker-get checker 'predicate))
+           (enabled (flycheck-checker-get checker 'enabled)))
+      (should (flycheck-valid-checker-p checker))
+      (should (flycheck-checker-supports-major-mode-p checker))
+      (should (or (null enabled) (funcall enabled)))
+      (should (or (null predicate) (funcall predicate)))
+      (should (not (flycheck-disabled-checker-p checker)))))
+  (should (flycheck-get-checker-for-buffer)))
+
 (defun flycheck-ert-buffer-sync ()
   "Like `flycheck-buffer', but synchronously."
   (setq flycheck-ert-syntax-checker-finished nil)
   (should (not (flycheck-running-p)))
   (flycheck-mode) ;; This will only start a deferred check,
-  (should (flycheck-get-checker-for-buffer))
+  (should (flycheck-ert-get-checker-for-buffer))
   (flycheck-buffer) ;; …so we need an explicit manual check
   ;; After starting the check, the checker should either be running now, or
   ;; already be finished (if it was fast).
@@ -468,10 +486,8 @@ resource directory."
   (when (symbolp modes)
     (setq modes (list modes)))
   (dolist (mode modes)
-    (unless (fboundp mode)
-      (ert-skip (format "%S missing" mode)))
     (flycheck-ert-with-resource-buffer resource-file
-      (funcall mode)
+      (if (fboundp mode) (funcall mode) (setq major-mode mode))
       (apply #'flycheck-ert-should-syntax-check-in-buffer errors))))
 
 (defun flycheck-ert-at-nth-error (n)
