@@ -10881,6 +10881,10 @@ See URL `https://nixos.org/nix/manual/#sec-nix-instantiate'."
   :standard-input t
   :error-patterns
   ((error line-start
+          "at: (" line ":" column ") from stdin"
+          (one-or-more "\n" (zero-or-more space (one-or-more not-newline)))
+          (message) line-end)
+   (error line-start
           "error: " (message) " at " (file-name) ":" line ":" column
           line-end))
   :error-filter
