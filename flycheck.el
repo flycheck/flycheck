@@ -11964,6 +11964,11 @@ See URL `https://www.terraform.io/docs/commands/fmt.html'."
   :standard-input t
   :error-patterns
   ((error line-start "Error: " (one-or-more not-newline)
+          "\n\n  on <stdin> line " line ", in terraform:"
+          (one-or-more "\n" (zero-or-more space (one-or-more not-newline)))
+          (message (one-or-more (and (one-or-more (not (any ?\n))) ?\n)))
+          line-end)
+   (error line-start "Error: " (one-or-more not-newline)
           "\n\n  on <stdin> line " line ":\n  (source code not available)\n\n"
           (message (one-or-more (and (one-or-more (not (any ?\n))) ?\n)))
           line-end))
