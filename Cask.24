@@ -16,7 +16,7 @@
  (depends-on "coffee-mode")
  (depends-on "cperl-mode")
  (depends-on "cwl-mode")
- (depends-on "d-mode")
+ ;; (depends-on "d-mode")          ; requires Emacs 25.1+
  (depends-on "dockerfile-mode")
  (depends-on "erlang")
  ;; Latest ess requires `project' from Emacs 25+.
