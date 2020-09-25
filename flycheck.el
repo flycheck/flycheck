@@ -11109,8 +11109,7 @@ See URL `https://github.com/testdouble/standard' for more information."
   :next-checkers '((warning . ruby-reek)
                    (warning . ruby-rubylint)))
 
-;; Default to `nil' to let Reek find its configuration file by itself
-(flycheck-def-config-file-var flycheck-reekrc ruby-reek nil
+(flycheck-def-config-file-var flycheck-reekrc ruby-reek ".reek.yml"
   :safe #'string-or-null-p
   :package-version '(flycheck . "30"))
 
