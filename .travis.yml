@@ -24,7 +24,6 @@ env:
   - JOB="emacs" EMACS_VERSION="27.1"
   - JOB="emacs" EMACS_VERSION="26.3"
   - JOB="emacs" EMACS_VERSION="25.3"
-  - JOB="emacs" EMACS_VERSION="24.5"
   # A special job to build the manual
   - JOB="build-manual"
   # And another special job to lint our Python code
@@ -37,10 +36,7 @@ install:
 - |
   case $JOB in
     emacs)
-      # We use separate Cask files for Emacs 24 and 25
-      if [[ $EMACS_VERSION == 24.* ]]; then
-        cp Cask.24 Cask
-      fi
+      # We use separate Cask files for Emacs 25
       if [[ $EMACS_VERSION == 25.* ]]; then
         cp Cask.25 Cask
       fi
@@ -63,13 +59,11 @@ script:
   set -e
   case $JOB in
     emacs)
-      # Check formatting (our formatting rules don’t work on Emacs 24).
-      if [[ $EMACS_VERSION != 24.* ]]; then
-        docker run --volume "$TRAVIS_BUILD_DIR":/flycheck \
-                   --workdir /flycheck \
-                   flycheck/emacs-cask:$EMACS_VERSION \
-                   /bin/bash -c "make check"
-      fi
+      # Check formatting
+      docker run --volume "$TRAVIS_BUILD_DIR":/flycheck \
+                 --workdir /flycheck \
+                 flycheck/emacs-cask:$EMACS_VERSION \
+                 /bin/bash -c "make check"
       # Compile and run unit tests.
       docker run --volume "$TRAVIS_BUILD_DIR":/flycheck \
                  --workdir /flycheck \
