@@ -4297,7 +4297,7 @@ Why not:
         (flycheck-checkers '(python-pyright)))
     (flycheck-ert-should-syntax-check
      "language/python/invalid_type.py" 'python-mode
-     '(2 12 error "Expression of type \"str\" cannot be assigned to return type \"int\"\n  \"str\" is incompatible with \"int\""
+     '(2 12 error "Expression of type \"str\" cannot be assigned to return type \"int\"\n  \"str\" is incompatible with \"int\""
          :checker python-pyright
          :end-line 2
          :end-column 13))))
