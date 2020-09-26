@@ -10920,6 +10920,10 @@ See URL `https://nixos.org/nix/manual/#sec-nix-instantiate'."
   :standard-input t
   :error-patterns
   ((error line-start
+          "at: (" line ":" column ") from stdin"
+          (one-or-more "\n" (zero-or-more space (one-or-more not-newline)))
+          (message) line-end)
+   (error line-start
           "error: " (message) " at " (file-name) ":" line ":" column
           line-end))
   :error-filter
@@ -11999,6 +12003,11 @@ See URL `https://www.terraform.io/docs/commands/fmt.html'."
   :standard-input t
   :error-patterns
   ((error line-start "Error: " (one-or-more not-newline)
+          "\n\n  on <stdin> line " line ", in terraform:"
+          (one-or-more "\n" (zero-or-more space (one-or-more not-newline)))
+          (message (one-or-more (and (one-or-more (not (any ?\n))) ?\n)))
+          line-end)
+   (error line-start "Error: " (one-or-more not-newline)
           "\n\n  on <stdin> line " line ":\n  (source code not available)\n\n"
           (message (one-or-more (and (one-or-more (not (any ?\n))) ?\n)))
           line-end))
