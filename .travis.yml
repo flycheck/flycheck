@@ -21,6 +21,7 @@ env:
   matrix:
   # Run our tests on all these Emacs versions
   - JOB="emacs" EMACS_VERSION="master"
+  - JOB="emacs" EMACS_VERSION="27.1"
   - JOB="emacs" EMACS_VERSION="26.3"
   - JOB="emacs" EMACS_VERSION="25.3"
   - JOB="emacs" EMACS_VERSION="24.5"
