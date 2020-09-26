@@ -1029,6 +1029,14 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       .. syntax-checker-config-file:: flycheck-flake8rc
 
+   .. syntax-checker:: python-pyright
+
+      Type check python with  `pyright <https://github.com/microsoft/pyright>`_.
+
+      .. note::
+
+         This syntax checker requires pyright.
+
    .. syntax-checker:: python-mypy
 
       Type check python with  `mypy <http://www.mypy-lang.org/>`_.
