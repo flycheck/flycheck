@@ -7222,9 +7222,10 @@ machine_message.rs at URL `https://git.io/vh24R'."
         ;; Errors and warnings from rustc are wrapped by cargo, so we filter and
         ;; unwrap them, and delegate the actual construction of `flycheck-error'
         ;; objects to `flycheck-parse-rustc-diagnostic'.
-        ;; Check whether the code is non-nil because Rust≥1.44 includes the
-        ;; warning count upon completion.
-        (when (and .message.code (string= .reason "compiler-message"))
+        ;; We put the error record with nil code since flycheck regards
+        ;; the case of nonzero return code without any error report
+        ;; as abnormal result.
+        (when (string= .reason "compiler-message")
           (push (flycheck-parse-rustc-diagnostic .message checker buffer)
                 errors))))
     (apply #'nconc errors)))
