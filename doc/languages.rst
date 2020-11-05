@@ -1138,7 +1138,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
    .. syntax-checker:: ruby-rubocop
 
-      Check syntax and lint with `RuboCop <http://batsov.com/rubocop/>`_.
+      Check syntax and lint with `RuboCop <https://rubocop.org/>`_.
 
       .. note::
 

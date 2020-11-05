@@ -11062,7 +11062,7 @@ report style issues as well."
 
 You need at least RuboCop 0.34 for this syntax checker.
 
-See URL `http://batsov.com/rubocop/'."
+See URL `https://rubocop.org/'."
   ;; ruby-standard is defined based on this checker
   :command '("rubocop"
              "--display-cop-names"
