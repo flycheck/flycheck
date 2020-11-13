@@ -2331,7 +2331,7 @@ Pop up a help buffer with the documentation of CHECKER."
         (modes (flycheck-checker-get checker 'modes))
         (predicate (flycheck-checker-get checker 'predicate))
         (print-doc (flycheck-checker-get checker 'print-doc))
-        (next-checkers (flycheck-checker-get checker 'next-checkers))
+        (next-checkers (flycheck-next-checkers checker))
         (help-xref-following
          ;; Ensure that we don't reuse buffers like `flycheck-verify-checker',
          ;; and that we don't error out if a `help-flycheck-checker-doc' button
@@ -2548,13 +2548,25 @@ NEXT should be either a cons (NEXT-CHECKER . LEVEL) or a
 symbol."
   (if (consp next) (cdr next) next))
 
+(defcustom flycheck-next-checkers-function nil
+  "Variable to hold the function that returns flycheck next checkers."
+  :type '(choice function (const nil)))
+(make-variable-buffer-local 'flycheck-next-checkers-function)
+
+(defun flycheck-next-checkers (checker)
+  "Return next checkers of CHECKER."
+  (if flycheck-next-checkers-function
+      (funcall flycheck-next-checkers-function checker)
+    (flycheck-checker-get checker 'next-checkers))
+  )
+
 (defun flycheck-get-next-checkers (checker)
   "Return the immediate next checkers of CHECKER.
 
 This is a list of checker symbols.  The error levels of the
 `:next-checker' property are ignored."
   (mapcar #'flycheck--get-next-checker-symbol
-          (flycheck-checker-get checker 'next-checkers)))
+          (flycheck-next-checkers checker)))
 
 (defun flycheck-all-next-checkers (checker)
   "Return all checkers that may follow CHECKER.
@@ -3012,7 +3024,7 @@ nil otherwise."
 (defun flycheck-get-next-checker-for-buffer (checker)
   "Get the checker to run after CHECKER for the current buffer."
   (let ((next (seq-find #'flycheck-may-use-next-checker
-                        (flycheck-checker-get checker 'next-checkers))))
+                        (flycheck-next-checkers checker))))
     (when next
       (if (symbolp next) next (cdr next)))))
 
