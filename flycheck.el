@@ -3527,7 +3527,6 @@ Flycheck mode is not enabled for
 - major modes whose `mode-class' property is `special',
 - ephemeral buffers (see `flycheck-ephemeral-buffer-p'),
 - encrypted buffers (see `flycheck-encrypted-buffer-p'),
-- remote files (see `file-remote-p'),
 - and major modes excluded by `flycheck-global-modes'.
 
 Return non-nil if Flycheck mode may be enabled, and nil
