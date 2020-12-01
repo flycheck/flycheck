@@ -510,6 +510,15 @@ sandboxes."
   :package-version '(flycheck . "32")
   :risky t)
 
+;; This can be removed when Emacs 27.1 is the oldest supported version.
+;; See https://github.com/flycheck/flycheck/pull/1842
+(defun executable-find-add-remote (args)
+  "Add optional remote argument t to ARGS when supported."
+  (if (and (not (version< emacs-version "27.1")) (= (length args) 1))
+      (append args '(t))
+    args))
+(advice-add 'executable-find :filter-args 'executable-find-add-remote)
+
 (defun flycheck-default-executable-find (executable)
   "Resolve EXECUTABLE to a full path.
 
@@ -5910,13 +5919,18 @@ Return nil (or raise an error if ERROR is non-nil) when CHECKER's
 executable cannot be found, and return a numeric exit status or a
 signal description string otherwise.  CHECKER's input is taken
 from INFILE, and its output is sent to DESTINATION, as in
-`call-process'."
+`start-file-process'."
   (-if-let (executable (flycheck-find-checker-executable checker))
       (condition-case err
-          (apply #'call-process executable infile destination nil args)
+          ;; `start-file-process' runs synchronously, like `call-process',
+          ;; when let bound.`start-file-process' is required to support remote
+          ;; processes. See https://github.com/flycheck/flycheck/pull/1842
+          (let ((rc (apply #'start-file-process
+                           executable infile destination nil args)))
+            rc)
         (error (when error (signal (car err) (cdr err)))))
     (when error
-      (user-error "Cannot find `%s' using `flycheck-executable-find'"
+      (user-error "Cannot find `%s' using `flycheck-find-checker-executable'"
                   (flycheck-checker-executable checker)))))
 
 (defun flycheck-call-checker-process-for-output
@@ -6224,7 +6238,7 @@ and rely on Emacs' own buffering and chunking."
                ;; can easily use pipes.
                (process-connection-type nil))
           ;; We pass do not associate the process with any buffer, by
-          ;; passing nil for the BUFFER argument of `start-process'.
+          ;; passing nil for the BUFFER argument of `start-file-process'.
           ;; Instead, we just remember the buffer being checked in a
           ;; process property (see below).  This neatly avoids all
           ;; side-effects implied by attached a process to a buffer, which
@@ -6232,8 +6246,13 @@ and rely on Emacs' own buffering and chunking."
           ;;
           ;; See https://github.com/flycheck/flycheck/issues/298 for an
           ;; example for such a conflict.
-          (setq process (apply 'start-process (format "flycheck-%s" checker)
-                               nil command))
+          ;;
+          ;; `start-file-process' runs synchronously, like `call-process',
+          ;; when let bound.`start-file-process' is required to support remote
+          ;; processes. See https://github.com/flycheck/flycheck/pull/1842
+          (let ((rc (apply 'start-file-process
+                           (format "flycheck-%s" checker) nil command)))
+            (setq process rc))
           ;; Process sentinels can be called while sending input to the process.
           ;; We want to record errors raised by process-send before calling
           ;; `flycheck-handle-signal', so initially just accumulate events.
@@ -6734,22 +6753,17 @@ shell execution."
   (let* ((args (flycheck--checker-substituted-shell-command-arguments checker))
          (program
           (or (flycheck-find-checker-executable checker)
-              (user-error "Cannot find `%s' using `flycheck-executable-find'"
-                          (flycheck-checker-executable checker))))
+              (user-error
+               "Cannot find `%s' using `flycheck-find-checker-executable'"
+               (flycheck-checker-executable checker))))
          (wrapped (flycheck--wrap-command program args))
-         (abs-prog
-          ;; The executable path returned by `flycheck-command-wrapper-function'
-          ;; may not be absolute, so expand it here.  See URL
-          ;; `https://github.com/flycheck/flycheck/issues/1461'.
-          (or (executable-find (car wrapped))
-              (user-error "Cannot find `%s' using `executable-find'"
-                          (car wrapped))))
          (command (mapconcat #'shell-quote-argument
-                             (cons abs-prog (cdr wrapped)) " ")))
+                             (cons program (cdr wrapped)) " ")))
     (if (flycheck-checker-get checker 'standard-input)
         ;; If the syntax checker expects the source from standard input add an
         ;; appropriate shell redirection
-        (concat command " < " (shell-quote-argument (buffer-file-name)))
+        (concat command " < " (shell-quote-argument
+                               (file-local-name (buffer-file-name))))
       command)))
 
 (defun flycheck-compile-name (_name)
