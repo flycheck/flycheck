@@ -3092,7 +3092,9 @@ buffer-local value of `flycheck-disabled-checkers'."
 
 ;;; Syntax checks for the current buffer
 (defvar-local flycheck-current-syntax-check nil
-  "The current syntax check in the this buffer.")
+  "The current syntax check in the this buffer.
+
+Nil or a `flycheck-syntax-check' object.")
 (put 'flycheck-current-syntax-check 'permanent-local t)
 
 (defun flycheck-start-current-syntax-check (checker)
