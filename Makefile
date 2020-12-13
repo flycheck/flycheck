@@ -89,7 +89,7 @@ endif
 # Public targets
 .PHONY: init
 init:
-	$(CASK) install
+	$(CASK) --verbose install # --verbose is workaround for Emacs 25.3
 	$(CASK) update
 
 .PHONY: clean

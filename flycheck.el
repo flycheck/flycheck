@@ -1,6 +1,6 @@
 ;;; flycheck.el --- On-the-fly syntax checking -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2017-2019 Flycheck contributors
+;; Copyright (C) 2017-2020 Flycheck contributors
 ;; Copyright (C) 2012-2016 Sebastian Wiesner and Flycheck contributors
 ;; Copyright (C) 2013, 2014 Free Software Foundation, Inc.
 ;;
@@ -10811,7 +10811,7 @@ See URL `https://racket-lang.org/'."
 (flycheck-define-checker rpm-rpmlint
   "A RPM SPEC file syntax checker using rpmlint.
 
-See URL `https://sourceforge.net/projects/rpmlint/'."
+See URL `https://github.com/rpm-software-management/rpmlint'."
   :command ("rpmlint" source)
   :error-patterns
   ((error line-start
@@ -10821,9 +10821,13 @@ See URL `https://sourceforge.net/projects/rpmlint/'."
             (file-name) ":" (optional line ":") " W: " (message)
             line-end))
   :error-filter
-  ;; Add fake line numbers if they are missing in the lint output
+  ;; rpmlint 1.1 outputs a spurious error for the temp file created by flycheck
   (lambda (errors)
-    (dolist (err errors)
+    (dolist (err (seq-remove
+                  (lambda (err)
+                    (string-suffix-p "(none)" (flycheck-error-filename err)))
+                  errors))
+      ;; Add fake line numbers if they are missing in the lint output
       (unless (flycheck-error-line err)
         (setf (flycheck-error-line err) 1)))
     errors)
@@ -11977,7 +11981,9 @@ See URL
   :error-patterns
   ((error line-start (file-name) ":" (optional line ":") (message) line-end)
    (error line-start "[" (file-name) ":" line "]" (message) line-end))
-  :error-filter flycheck-fill-empty-line-numbers
+  :error-filter (lambda (errors)
+                  (flycheck-sanitize-errors
+                   (flycheck-fill-empty-line-numbers errors)))
   :modes (systemd-mode))
 
 (flycheck-def-config-file-var flycheck-chktexrc tex-chktex ".chktexrc")
