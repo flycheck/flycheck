@@ -5947,8 +5947,8 @@ STRING
      Return a unique temporary filename.  The file is *not*
      created.
 
-     To ignore the output of syntax checkers, try `null-device'
-     first.
+     To ignore the output of syntax checkers, try symbol
+     `null-device' first.
 
 `null-device'
      Return the value of `null-device', i.e the system null
