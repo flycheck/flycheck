@@ -1,6 +1,6 @@
 ;;; flycheck-test.el --- Flycheck: Unit test suite   -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2017-2019 Flycheck contributors
+;; Copyright (C) 2017-2020 Flycheck contributors
 ;; Copyright (C) 2013-2016 Sebastian Wiesner and Flycheck contributors
 
 ;; Author: Sebastian Wiesner <swiesner@lunaryorn.com>
@@ -4446,14 +4446,22 @@ Perhaps:
   (flycheck-ert-should-syntax-check
    "language/markdown.md" 'markdown-mode
    '(1 nil error "First line in file should be a top level heading [Context: \"## Second Header First\"]"
-       :id "MD041/first-line-heading/first-line-h1" :checker markdown-markdownlint-cli)))
+       :id "MD041/first-line-heading/first-line-h1" :checker markdown-markdownlint-cli)
+   '(3 nil error "Multiple consecutive blank lines [Expected: 1; Actual: 2]"
+       :id "MD012/no-multiple-blanks" :checker markdown-markdownlint-cli)
+   '(4 15 error "Trailing spaces [Expected: 0 or 2; Actual: 7]"
+       :id "MD009/no-trailing-spaces" :checker markdown-markdownlint-cli)))
 
 (flycheck-ert-def-checker-test markdown-mdl markdown nil
   (let ((flycheck-disabled-checkers '(markdown-markdownlint-cli)))
     (flycheck-ert-should-syntax-check
      "language/markdown.md" 'markdown-mode
      '(1 nil error "First header should be a top level header"
-         :id "MD002" :checker markdown-mdl))))
+         :id "MD002" :checker markdown-mdl)
+     '(3 nil error "Multiple consecutive blank lines"
+         :id "MD012" :checker markdown-mdl)
+     '(4 nil error "Trailing spaces"
+         :id "MD009" :checker markdown-mdl))))
 
 (flycheck-ert-def-checker-test nix nix nil
   (flycheck-ert-should-syntax-check
