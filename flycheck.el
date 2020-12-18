@@ -10755,7 +10755,7 @@ See URL `https://github.com/jimhester/lintr'."
 
 (defun flycheck-racket-has-expand-p (checker)
   "Whether the executable of CHECKER provides the `expand' command."
-  (eql 0 (flycheck-call-checker-process checker nil t nil "expand")))
+  (eql 0 (flycheck-call-checker-process checker nil nil nil "expand")))
 
 (flycheck-define-checker racket
   "A Racket syntax checker with `raco expand'.
