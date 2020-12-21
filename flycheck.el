@@ -5958,9 +5958,9 @@ STRING
      To ignore the output of syntax checkers, try symbol
      `null-device' first.
 
-`null-device'
-     Return the value of `null-device', i.e the system null
-     device.
+symbol `null-device'
+     Return the value of variable `null-device', i.e the system
+     null device.
 
      Use this option to ignore the output of a syntax checker.
      If the syntax checker cannot handle the null device, or
