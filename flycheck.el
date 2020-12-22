@@ -2463,8 +2463,10 @@ Return a list of `flycheck-verification-result' objects."
 (define-button-type 'flycheck-checker-enable
   :supertype 'flycheck-button
   'flycheck-action (lambda (buffer checker)
+                     (interactive)
                      (with-current-buffer buffer
-                       (flycheck-disable-checker checker t)))
+                       (flycheck--toggle-checker checker t)
+                       (flycheck-buffer)))
   'help-echo "mouse-1, RET: re-enable this checker in this buffer")
 
 (define-button-type 'flycheck-checker-reset-enabled
@@ -3047,11 +3049,31 @@ CHECKER will be used, even if it is not contained in
     (when flycheck-mode
       (flycheck-buffer))))
 
+(defun flycheck--toggle-checker (checker enable)
+  "Enable or disable CHECKER for the current buffer.
+
+If ENABLE, re-enable CHECKER by removing it from the buffer-local
+value of `flycheck-disabled-checkers'.  Otherwise, add the syntax
+checker to the buffer-local value of `flycheck-disabled-checkers'."
+  (cond
+   (enable
+    ;; We must use `remq' instead of `delq', because we must _not_ modify the
+    ;; list.  Otherwise we could potentially modify the global default value,
+    ;; in case the list is the global default.
+    (when (memq checker flycheck-disabled-checkers)
+      (setq flycheck-disabled-checkers
+            (remq checker flycheck-disabled-checkers)))
+    (when (memq checker flycheck--automatically-disabled-checkers)
+      (setq flycheck--automatically-disabled-checkers
+            (remq checker flycheck--automatically-disabled-checkers))))
+   (t (unless (memq checker flycheck-disabled-checkers)
+        (push checker flycheck-disabled-checkers)))))
+
 (defun flycheck-disable-checker (checker &optional enable)
   "Interactively disable CHECKER for the current buffer.
 
-Interactively, prompt for a syntax checker to disable, and add
-the syntax checker to the buffer-local value of
+Prompt for a syntax checker to disable, and add the syntax
+checker to the buffer-local value of
 `flycheck-disabled-checkers'.
 
 With non-nil ENABLE or with prefix arg, prompt for a disabled
@@ -3072,22 +3094,8 @@ buffer-local value of `flycheck-disabled-checkers'."
      (list (flycheck-read-checker prompt nil nil candidates) enable)))
   (unless checker
     (user-error "No syntax checker given"))
-  (if enable
-      ;; We must use `remq' instead of `delq', because we must _not_ modify the
-      ;; list.  Otherwise we could potentially modify the global default value,
-      ;; in case the list is the global default.
-      (progn
-        (when (memq checker flycheck-disabled-checkers)
-          (setq flycheck-disabled-checkers
-                (remq checker flycheck-disabled-checkers))
-          (flycheck-buffer))
-        (when (memq checker flycheck--automatically-disabled-checkers)
-          (setq flycheck--automatically-disabled-checkers
-                (remq checker flycheck--automatically-disabled-checkers))
-          (flycheck-buffer)))
-    (unless (memq checker flycheck-disabled-checkers)
-      (push checker flycheck-disabled-checkers)
-      (flycheck-buffer))))
+  (flycheck--toggle-checker checker enable)
+  (flycheck-buffer))
 
 
 ;;; Syntax checks for the current buffer
@@ -5950,9 +5958,9 @@ STRING
      To ignore the output of syntax checkers, try symbol
      `null-device' first.
 
-`null-device'
-     Return the value of `null-device', i.e the system null
-     device.
+symbol `null-device'
+     Return the value of variable `null-device', i.e the system
+     null device.
 
      Use this option to ignore the output of a syntax checker.
      If the syntax checker cannot handle the null device, or
