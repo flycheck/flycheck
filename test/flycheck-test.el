@@ -822,6 +822,7 @@
   (flycheck-ert-with-resource-buffer "language/emacs-lisp/warnings.el"
     (emacs-lisp-mode)
     (should (flycheck-may-enable-checker 'emacs-lisp))
+    (should-not (flycheck-may-enable-checker 'gibberish))
     (should (equal '(emacs-lisp) flycheck--automatically-enabled-checkers))))
 
 (ert-deftest flycheck-may-enable-checker/respects-cache ()

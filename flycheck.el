@@ -2222,6 +2222,8 @@ Return non-nil if CHECKER may be used for the current buffer, and
 nil otherwise.  The result of the `:enabled' check, if any, is
 cached."
   (and
+   ;; May only enable valid checkers
+   (flycheck-valid-checker-p checker)
    ;; Don't run the :enabled check if the checker is already disabled…
    (not (flycheck-disabled-checker-p checker))
    (or
