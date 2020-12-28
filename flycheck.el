@@ -11937,7 +11937,7 @@ See URL `https://github.com/koalaman/shellcheck/'."
   :error-explainer
   (lambda (err)
     (let ((error-code (flycheck-error-id err))
-          (url "https://github.com/koalaman/shellcheck/wiki/%S"))
+          (url "https://github.com/koalaman/shellcheck/wiki/%s"))
       (and error-code `(url . ,(format url error-code))))))
 
 (flycheck-define-checker slim
