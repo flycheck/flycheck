@@ -12376,8 +12376,7 @@ See URL `http://www.ruby-doc.org/stdlib-2.0.0/libdoc/yaml/rdoc/YAML.html'."
   ((error line-start "stdin:" (zero-or-more not-newline) ":" (message)
           "at line " line " column " column line-end))
   :modes yaml-mode
-  :next-checkers ((warning . yaml-jsyaml)
-                  (warning . yaml-yamllint)
+  :next-checkers ((warning . yaml-yamllint)
                   (warning . cwl)))
 
 (flycheck-def-config-file-var flycheck-yamllintrc yaml-yamllint ".yamllint")
