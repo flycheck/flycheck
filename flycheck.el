@@ -12356,7 +12356,8 @@ See URL `https://github.com/nodeca/js-yaml'."
           (message) " at line " line ", column " column ":"
           line-end))
   :modes yaml-mode
-  :next-checkers ((warning . cwl)))
+  :next-checkers ((warning . yaml-yamllint)
+                  (warning . cwl)))
 
 (flycheck-define-checker yaml-ruby
   "A YAML syntax checker using Ruby's YAML parser.
@@ -12375,7 +12376,9 @@ See URL `http://www.ruby-doc.org/stdlib-2.0.0/libdoc/yaml/rdoc/YAML.html'."
   ((error line-start "stdin:" (zero-or-more not-newline) ":" (message)
           "at line " line " column " column line-end))
   :modes yaml-mode
-  :next-checkers ((warning . cwl)))
+  :next-checkers ((warning . yaml-jsyaml)
+                  (warning . yaml-yamllint)
+                  (warning . cwl)))
 
 (flycheck-def-config-file-var flycheck-yamllintrc yaml-yamllint ".yamllint")
 
@@ -12390,7 +12393,8 @@ See URL `https://github.com/adrienverge/yamllint'."
           "stdin:" line ":" column ": [error] " (message) line-end)
    (warning line-start
             "stdin:" line ":" column ": [warning] " (message) line-end))
-  :modes yaml-mode)
+  :modes yaml-mode
+  :next-checkers ((warning . cwl)))
 
 (provide 'flycheck)
 
