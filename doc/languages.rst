@@ -48,6 +48,14 @@ to view the docstring of the syntax checker.  Likewise, you may use
          A list of additional warnings to enable.  Each item is the name of a
          warning category to enable.
 
+.. supported-language:: Ansible
+
+   .. syntax-checker:: ansible-lint
+
+      Check Ansible YAML files with ansible-lint_.
+
+      .. _ansible-lint: https://ansible-lint.readthedocs.io/en/latest
+
 .. supported-language:: AsciiDoc
 
    .. syntax-checker:: asciidoctor
