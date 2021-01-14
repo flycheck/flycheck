@@ -7471,7 +7471,7 @@ Uses the GNAT compiler from GCC.  See URL
 See URL `https://ansible-lint.readthedocs.io/en/latest/'."
   ;; emacs-ansible provides ansible, not ansible-mode
   :enabled (lambda () (seq-find (lambda (elt) (equal 'ansible elt))
-                           (mapcar #'car minor-mode-alist)))
+                                (mapcar #'car minor-mode-alist)))
   :command ("ansible-lint" "--nocolor" "-p" source)
   :error-patterns
   ((error "CRITICAL Couldn't parse task at " (file-name) ":" line " " (message))
@@ -7487,7 +7487,6 @@ See URL `https://ansible-lint.readthedocs.io/en/latest/'."
                         lines t
                         (lambda (elt _)
                           (string-prefix-p id elt)))))
-                          ;(string-prefix-p (number-to-string id) elt)))))
            (next-id (car (seq-filter
                           (lambda (elt)
                             (string-match-p "^[0-9]\\{3,4\\}: " elt))

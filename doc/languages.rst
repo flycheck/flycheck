@@ -50,11 +50,11 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
 .. supported-language:: Ansible
 
-   .. syntax-checker:: ansible-lint
+   .. syntax-checker:: ansible-ansiblelint
 
       Check Ansible YAML files with ansible-lint_.
 
-      .. _ansible-lint: https://ansible-lint.readthedocs.io/en/latest
+      .. _ansible-lint: https://ansible-lint.readthedocs.io
 
 .. supported-language:: AsciiDoc
 
