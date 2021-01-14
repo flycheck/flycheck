@@ -7464,6 +7464,7 @@ Uses the GNAT compiler from GCC.  See URL
    (error line-start (file-name) ":" line ":" column
           ": " (message) line-end))
   :modes ada-mode)
+
 (flycheck-define-checker ansible-ansiblelint
   "An Ansible linter using the Ansible-lint tool."
   ;; emacs-ansible provides ansible, not ansible-mode
