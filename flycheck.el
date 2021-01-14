@@ -7466,7 +7466,9 @@ Uses the GNAT compiler from GCC.  See URL
   :modes ada-mode)
 
 (flycheck-define-checker ansible-ansiblelint
-  "An Ansible linter using the Ansible-lint tool."
+  "An Ansible linter using the ansible-lint tool.
+
+See URL `https://ansible-lint.readthedocs.io/en/latest/'."
   ;; emacs-ansible provides ansible, not ansible-mode
   :enabled (lambda () (seq-find (lambda (elt) (equal 'ansible elt))
                            (mapcar #'car minor-mode-alist)))
