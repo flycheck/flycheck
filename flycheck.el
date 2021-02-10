@@ -270,6 +270,7 @@ attention to case differences."
     sh-posix-dash
     sh-posix-bash
     sh-zsh
+    sh-bashate
     sh-shellcheck
     slim
     slim-lint
@@ -11836,7 +11837,7 @@ See URL `http://www.gnu.org/software/bash/'."
           (message) line-end))
   :modes sh-mode
   :predicate (lambda () (eq sh-shell 'bash))
-  :next-checkers ((warning . sh-shellcheck)))
+  :next-checkers ((warning . sh-bashate) (warning . sh-shellcheck) ))
 
 (flycheck-define-checker sh-posix-dash
   "A POSIX Shell syntax checker using the Dash shell.
@@ -11878,6 +11879,33 @@ See URL `http://www.zsh.org/'."
   :modes sh-mode
   :predicate (lambda () (eq sh-shell 'zsh))
   :next-checkers ((warning . sh-shellcheck)))
+
+(flycheck-def-option-var flycheck-bashate-excluded-warnings nil sh-bashate
+  "A list of excluded warnings for bashate.
+
+The value of this variable is a list of strings, where each
+string is a warning code to be excluded from bash8 reports.
+By default, no warnings are excluded."
+  :type '(repeat :tag "Excluded warnings"
+                 (string :tag "Warning code"))
+  :safe #'flycheck-string-list-p
+  :package-version '(flycheck . "32"))
+
+
+(flycheck-define-checker sh-bashate
+  "Bash linter using bashate.
+
+See URL `https://docs.openstack.org/bashate/latest/'."
+  :command ("bashate"
+            (option "--ignore" flycheck-bashate-excluded-warnings list
+                    flycheck-option-comma-separated-list)
+            source)
+  :error-patterns
+; bash8 follows pycodestyle/pep8 default output format
+; https://github.com/PyCQA/pycodestyle/blob/master/pycodestyle.py#L108
+  ((error line-start (file-name) ":" line ":1: " (message) line-end))
+  :modes sh-mode
+  :predicate (lambda () (eq sh-shell 'bash)))
 
 (defconst flycheck-shellcheck-supported-shells '(bash ksh88 sh)
   "Shells supported by ShellCheck.")
