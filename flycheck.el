@@ -1410,6 +1410,7 @@ If FILENAME is nil, fall back to `flycheck-temp-file-system' with
 the specified SUFFIX.
 
 Return the path of the file."
+;; TODO (async) can this be plugged into `async-start'? maybe it can/should be fetched before ?
   (if filename
       (let* ((tempname (format "%s_%s"
                                flycheck-temp-prefix
