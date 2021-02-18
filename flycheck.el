@@ -2645,7 +2645,7 @@ to enable disabled checkers.")))
   ;; `help-mode-finish' will restore `buffer-read-only'
   (setq buffer-read-only nil))
 
-(defun flycheck-verify-checker (checker) ;; TODO(felipel) re-write this as asynchronous
+(defun flycheck-verify-checker (checker) ;; TODO(async) re-write this as asynchronous
   "Check whether a CHECKER can be used in this buffer.
 
 Show a buffer listing possible problems that prevent CHECKER from
@@ -2679,7 +2679,7 @@ is applicable from Emacs Lisp code.  Use
         (insert "\n")
         (flycheck--verify-print-footer buffer)))))
 
-(defun flycheck-verify-setup () ;; TODO(felipel) rewrite as asynchronous
+(defun flycheck-verify-setup () ;; TODO(async) rewrite as asynchronous
   "Check whether Flycheck can be used in this buffer.
 
 Display a new buffer listing all syntax checkers that could be
@@ -5876,7 +5876,7 @@ from INFILE, and its output is sent to DESTINATION, as in
       (user-error "Cannot find `%s' using `flycheck-executable-find'"
                   (flycheck-checker-executable checker)))))
 
-(defun flycheck-call-checker-process-for-output ;; TODO(felipel) this is used for checking out what a certain checker command can/cannot do (using :verify and :error-explainer)
+(defun flycheck-call-checker-process-for-output ;; TODO(async) this is used for checking out what a certain checker command can/cannot do (using :verify and :error-explainer)
     (checker infile error &rest args)
   "Call CHECKER's executable with ARGS and return its output.
 
