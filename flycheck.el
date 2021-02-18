@@ -6173,64 +6173,94 @@ and rely on Emacs' own buffering and chunking."
 
 (defun flycheck-start-command-checker (checker callback)
   "Start a command CHECKER with CALLBACK."
-  (let (process)
+  (let (process ;; TODO (async) erase this var and `condition-case'… async future should suffice
+        )
     (condition-case err
         (let* ((program (flycheck-find-checker-executable checker))
                (args (flycheck-checker-substituted-arguments checker))
                (command (flycheck--wrap-command program args))
-               (sentinel-events nil)
-               ;; Use pipes to receive output from the syntax checker.  They are
-               ;; more efficient and more robust than PTYs, which Emacs uses by
-               ;; default, and since we don't need any job control features, we
-               ;; can easily use pipes.
-               (process-connection-type nil))
-          ;; We pass do not associate the process with any buffer, by
-          ;; passing nil for the BUFFER argument of `start-process'.
-          ;; Instead, we just remember the buffer being checked in a
-          ;; process property (see below).  This neatly avoids all
-          ;; side-effects implied by attached a process to a buffer, which
-          ;; may cause conflicts with other packages.
-          ;;
-          ;; See https://github.com/flycheck/flycheck/issues/298 for an
-          ;; example for such a conflict.
-          (setq process (apply 'start-process (format "flycheck-%s" checker)
-                               nil command))
-          ;; Process sentinels can be called while sending input to the process.
-          ;; We want to record errors raised by process-send before calling
-          ;; `flycheck-handle-signal', so initially just accumulate events.
-          (setf (process-sentinel process)
-                (lambda (_ event) (push event sentinel-events)))
-          (setf (process-filter process) #'flycheck-receive-checker-output)
-          (set-process-query-on-exit-flag process nil)
-          ;; Remember the syntax checker, the buffer and the callback
-          (process-put process 'flycheck-checker checker)
-          (process-put process 'flycheck-callback callback)
-          (process-put process 'flycheck-buffer (current-buffer))
-          ;; The default directory is bound in the `flycheck-syntax-check-start'
-          ;; function.
-          (process-put process 'flycheck-working-directory default-directory)
-          ;; Track the temporaries created by argument substitution in the
-          ;; process itself, to get rid of the global state ASAP.
-          (process-put process 'flycheck-temporaries flycheck-temporaries)
+               (calling-buffer (current-buffer))
+               ;; Track the temporaries created by argument substitution in the
+               ;; process itself, to get rid of the global state ASAP.
+               (this-flycheck-temporaries ;; TODO (async) maybe get rid of `flycheck-temporaries' (or maybe it not being global)?
+                (copy-sequence
+                 flycheck-temporaries))
+               (checker-name (format "flycheck-%s" checker))
+               (background-process
+                ;; TODO (async) check https://github.com/flycheck/flycheck/issues/298 to see if it applies
+                (async-start
+                 `(lambda ()
+                    (let* ((flycheck-temporaries ,this-flycheck-temporaries)
+                           flycheck-output
+                           flycheck-error
+                           flycheck-process-status
+                           ;; The default directory is bound in the `flycheck-syntax-check-start'
+                           ;; function.
+                           (default-directory ,default-directory)
+                           (tramp-use-ssh-controlmaster-options nil) ;; avoid race conditions
+                           (sentinel-events nil)
+                           ;; Use pipes to receive output from the syntax checker.  They are
+                           ;; more efficient and more robust than PTYs, which Emacs uses by
+                           ;; default, and since we don't need any job control features, we
+                           ;; can easily use pipes.
+                           ;; TODO (async) I don't know if this applies in async future anymore
+                           (process-connection-type nil)
+                           (flycheck-process-done nil)
+                           (flycheck-process-buffer
+                            (get-buffer-create ,checker-name))
+                           (flycheck-process
+                            (start-file-process
+                             ,checker-name
+                             flycheck-process-buffer
+                             ,@command))
+                           (flycheck-buffer-as-list-of-string
+                            ,(when (flycheck-checker-get checker 'standard-input)
+                               (flycheck-buffer-as-list-of-strings))))
+                      (setf (process-sentinel process)
+                            (lambda (proc event)
+                              ;; TODO (async) asign errors to `flycheck-error'
+                              (when (memq (process-status proc) '(signal exit))
+                                (setq flycheck-process-done t)
+                                (setq flycheck-process-status (process-status proc))
+                                )
+                              ))
+
+                      (set-process-query-on-exit-flag process nil)
+                      (error "WIP currently translating at here")
+                      ;; Some checkers exit before reading all input, causing errors
+                      ;; such as a `file-error' for a closed pipe, or a plain “no longer
+                      ;; connected to pipe; closed it” error for a disconnection.  We
+                      ;; report them if needed in `flycheck-finish-checker-process' (see
+                      ;; `https://github.com/flycheck/flycheck/issues/1278').
+                      (error "WIP handle issue 1278")
+
+                      ;; send input string as chunks
+                      (condition-case err
+                          (when flycheck-buffer-as-list-of-string
+                            (dolist (s flycheck-buffer-as-list-of-string)
+                              (process-send-string s))
+                            (process-send-eof process)) ;; even on empty string, send eof
+                        (error (setq flycheck-error err)))
+                      (while (not flycheck-process-done)
+                        (accept-process-output flycheck-process))
+                      (setq flycheck-output
+                            (with-current-buffer flycheck-process-buffer
+                              (buffer-string)))
+                      (list flycheck-output flycheck-error flycheck-process-status))))
+                (pcase-lambda (`(,flycheck-output ,flycheck-error ,flycheck-process-status))
+                  ;; TODO (async) do something with checker
+                  ;; TODO (async) do something with callback
+                  ;; TODO (async) do something with calling-buffer
+                  ;; TODO (async) do something with this-flycheck-temporaries
+                  ;; TODO (async) do something with flycheck-temporaries? (this is passed as a global state (>.<))
+                  ;; TODO (async) forward flychecck-process-status to `flycheck-handle-signal'
+                  )))
+
+          ;; get rid of this variable, already being tracked in `this-flycheck-temporaries'
           (setq flycheck-temporaries nil)
-          ;; Send the buffer to the process on standard input, if enabled.
-          (when (flycheck-checker-get checker 'standard-input)
-            (condition-case err
-                (flycheck-process-send-buffer process)
-              ;; Some checkers exit before reading all input, causing errors
-              ;; such as a `file-error' for a closed pipe, or a plain “no longer
-              ;; connected to pipe; closed it” error for a disconnection.  We
-              ;; report them if needed in `flycheck-finish-checker-process' (see
-              ;; `https://github.com/flycheck/flycheck/issues/1278').
-              (error (process-put process 'flycheck-error err))))
-          ;; Set the actual sentinel and process any events that might have
-          ;; happened while we were sending input.
-          (setf (process-sentinel process) #'flycheck-handle-signal)
-          (dolist (event (nreverse sentinel-events))
-            (flycheck-handle-signal process event))
           ;; Return the process.
           process)
-      (error
+      (error ;; TODO (async) error handling is not necessary for async (we asume It Just Works ™), so this block should be removed
        ;; In case of error, clean up our resources, and report the error back to
        ;; Flycheck.
        (flycheck-safe-delete-temporaries)
@@ -6312,6 +6342,7 @@ CHECKER."
 
 (defun flycheck-get-output (process)
   "Get the complete output of PROCESS."
+;; TODO (async) seems that this is not needed since we can get all the output after collecting the async future
   (with-demoted-errors "Error while retrieving process output: %S"
     (let ((pending-output (process-get process 'flycheck-pending-output)))
       (apply #'concat (nreverse pending-output)))))
