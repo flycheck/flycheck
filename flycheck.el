@@ -6110,18 +6110,23 @@ symbols in the command."
          (seq-map (lambda (arg) (flycheck-substitute-argument arg checker))
                   (flycheck-checker-arguments checker))))
 
-(defun flycheck--process-send-buffer-contents-chunked (process)
-  "Send contents of current buffer to PROCESS in small batches.
+(defun flycheck--buffer-contents-chunked ()
+  "Get contents of current buffer in small batches.
 
-Send the entire buffer to the standard input of PROCESS in chunks
+Get the entire buffer in chunks
 of 4096 characters.  Chunking is done in Emacs Lisp, hence this
 function is probably far less efficient than
 `send-process-region'.  Use only when required."
-  (let ((from (point-min)))
+  (let* (list-of-strings
+         (from (point-min)))
     (while (< from (point-max))
       (let ((to (min (+ from 4096) (point-max))))
-        (process-send-region process from to)
-        (setq from to)))))
+        (setq list-of-strings
+              (append list-of-strings
+                      (list (buffer-substring-no-properties
+                             from to))))
+        (setq from to)))
+    list-of-strings))
 
 (defvar flycheck-chunked-process-input
   ;; Chunk process output on Windows to work around
@@ -6135,19 +6140,19 @@ function is probably far less efficient than
   (and (eq system-type 'windows-nt) (not (boundp 'w32-pipe-buffer-size)))
   "If non-nil send process input in small chunks.
 
-If this variable is non-nil `flycheck-process-send-buffer' sends
+If this variable is non-nil `flycheck-buffer-as-list-of-strings' returns
 buffer contents in small chunks.
 
 Defaults to nil, except on Windows to work around Emacs bug
 #22344.")
 
-(defun flycheck-process-send-buffer (process)
-  "Send all contents of current buffer to PROCESS.
+(defun flycheck-buffer-as-list-of-strings ()
+  "Get all content of current buffer.
 
-Sends all contents of the current buffer to the standard input of
-PROCESS, and terminates standard input with EOF.
+Get all contents of the current buffer to be passed as the standard input of
+checker process.
 
-If `flycheck-chunked-process-input' is non-nil, send buffer
+If `flycheck-chunked-process-input' is non-nil, returns buffer
 contents in chunks via
 `flycheck--process-send-buffer-contents-chunked', which see.
 Otherwise use `process-send-region' to send all contents at once
@@ -6155,9 +6160,8 @@ and rely on Emacs' own buffering and chunking."
   (save-restriction
     (widen)
     (if flycheck-chunked-process-input
-        (flycheck--process-send-buffer-contents-chunked process)
-      (process-send-region process (point-min) (point-max))))
-  (process-send-eof process))
+        (flycheck--buffer-contents-chunked)
+      (list (buffer-substring-no-properties (point-min) (point-max))))))
 
 (defun flycheck--wrap-command (prog args)
   "Wrap PROG and ARGS using `flycheck-command-wrapper-function'."
