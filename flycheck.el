@@ -10,7 +10,7 @@
 ;; URL: http://www.flycheck.org
 ;; Keywords: convenience, languages, tools
 ;; Version: 32-cvs
-;; Package-Requires: ((dash "2.12.1") (pkg-info "0.4") (let-alist "1.0.4") (seq "1.11") (emacs "24.3"))
+;; Package-Requires: ((dash "2.12.1") (pkg-info "0.4") (let-alist "1.0.4") (seq "1.11") (emacs "24.3") (async "1.9.4"))
 
 ;; This file is not part of GNU Emacs.
 
@@ -81,6 +81,7 @@
 (require 'find-func)             ; `find-function-regexp-alist'
 (require 'json)                  ; `flycheck-parse-tslint'
 (require 'ansi-color)            ; `flycheck-parse-with-patterns-without-color'
+(require 'async)                 ; `flycheck-start-command-checker'
 
 
 ;; Declare a bunch of dynamic variables that we need from other modes
