@@ -2052,6 +2052,17 @@ are mandatory.
        be found online at URL.
      - nil if there is no explanation for this error.
 
+     If URL is provided by the checker, and cannot be composed
+     from other elements in the `flycheck-error' object, consider
+     passing the URL via text properties:
+
+       ;; During the error object creation
+       (put-text-property 0 1 'explainer-url .url .check_id)
+
+       ;; In the error-explainer FUNCTION
+       (let ((id (flycheck-error-id err)))
+         (and id `(url . ,(get-text-property 0 'explainer-url id))))
+
      This property is optional.
 
 `:next-checkers NEXT-CHECKERS'
