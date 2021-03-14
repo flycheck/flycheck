@@ -3442,11 +3442,11 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
    "language/dockerfile/Dockerfile.warning" 'dockerfile-mode
    '(1 nil warning "Always tag the version of an image explicitly"
        :id "DL3006" :checker dockerfile-hadolint)
-   '(2 nil warning "Do not use apt-get upgrade or dist-upgrade"
+   '(2 nil error "Do not use apt-get upgrade or dist-upgrade"
        :id "DL3005" :checker dockerfile-hadolint)
-   '(2 nil warning "Delete the apt-get lists after installing something"
+   '(2 nil info "Delete the apt-get lists after installing something"
        :id "DL3009" :checker dockerfile-hadolint)
-   '(3 nil warning "Use absolute WORKDIR"
+   '(3 nil error "Use absolute WORKDIR"
        :id "DL3000" :checker dockerfile-hadolint)))
 
 (flycheck-ert-def-checker-test elixir-credo elixir infos-without-strict-mode
@@ -4446,7 +4446,7 @@ Perhaps:
 (flycheck-ert-def-checker-test markdown-markdownlint-cli markdown nil
   (flycheck-ert-should-syntax-check
    "language/markdown.md" 'markdown-mode
-   '(1 nil error "First line in file should be a top level heading [Context: \"## Second Header First\"]"
+   '(1 nil error "First line in a file should be a top-level heading [Context: \"## Second Header First\"]"
        :id "MD041/first-line-heading/first-line-h1" :checker markdown-markdownlint-cli)
    '(3 nil error "Multiple consecutive blank lines [Expected: 1; Actual: 2]"
        :id "MD012/no-multiple-blanks" :checker markdown-markdownlint-cli)
@@ -4862,7 +4862,7 @@ The manifest path is relative to
      '(7 9 error "mismatched types (expected `u8`, found `i8`)"
          :checker rust :id "E0308" :group 1
          :end-line 7 :end-column 10)
-     '(7 9 info "you can convert an `i8` to `u8` and panic if the converted value wouldn't fit: `i.try_into().unwrap()`"
+     '(7 9 info "you can convert an `i8` to a `u8` and panic if the converted value doesn't fit: `i.try_into().unwrap()`"
          :checker rust :id "E0308" :group 1
          :end-line 7 :end-column 10))))
 

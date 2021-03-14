@@ -8391,16 +8391,21 @@ Requires DMD 2.066 or newer.  See URL `https://dlang.org/'."
   "A Dockerfile syntax checker using the hadolint.
 
 See URL `http://github.com/hadolint/hadolint/'."
-  :command ("hadolint" "-")
+  :command ("hadolint" "--no-color" "-")
   :standard-input t
   :error-patterns
   ((error line-start
-          (file-name) ":" line ":" column " " (message)
+          (file-name) ":" line " " (id (one-or-more alnum)) " error: " (message)
           line-end)
    (warning line-start
-            (file-name) ":" line " " (id (one-or-more alnum)) " " (message)
-            line-end))
-  :error-filter
+            (file-name) ":" line " " (id (one-or-more alnum)) " warning: " (message)
+            line-end)
+   (info line-start
+         (file-name) ":" line " " (id (one-or-more alnum)) " info: " (message)
+         line-end)
+   (error line-start
+          (file-name) ":" line ":" column " " (message)
+          line-end)) :error-filter
   (lambda (errors)
     (flycheck-sanitize-errors
      (flycheck-remove-error-file-names "/dev/stdin" errors)))
@@ -12360,6 +12365,10 @@ See URL `https://github.com/nodeca/js-yaml'."
   ((error line-start
           (or "JS-YAML" "YAMLException") ": "
           (message) " at line " line ", column " column ":"
+          line-end)
+   (error line-start
+          (or "JS-YAML" "YAMLException") ": "
+          (message) " (" line ":" column ")"
           line-end))
   :modes yaml-mode
   :next-checkers ((warning . yaml-yamllint)
