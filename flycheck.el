@@ -8409,8 +8409,8 @@ See URL `http://github.com/hadolint/hadolint/'."
           (file-name) ":" line " " (id (one-or-more alnum)) " error: " (message)
           line-end)
    (warning line-start
-            (file-name) ":" line " " (id (one-or-more alnum)) "
-            warning: " (message) line-end)
+            (file-name) ":" line " " (id (one-or-more alnum))
+            " warning: " (message) line-end)
    (info line-start
          (file-name) ":" line " " (id (one-or-more alnum)) " info: " (message)
          line-end)
