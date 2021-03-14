@@ -8416,7 +8416,8 @@ See URL `http://github.com/hadolint/hadolint/'."
          line-end)
    (error line-start
           (file-name) ":" line ":" column " " (message)
-          line-end)) :error-filter
+          line-end))
+  :error-filter
   (lambda (errors)
     (flycheck-sanitize-errors
      (flycheck-remove-error-file-names "/dev/stdin" errors)))
