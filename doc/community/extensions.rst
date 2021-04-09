@@ -178,7 +178,7 @@ Rust
 Shell scripts
 -------------
 
-* :gh:`Gnouc/flycheck-checkbashisms` adds a shell script syntax checker using
+* :gh:`cuonglm/flycheck-checkbashisms` adds a shell script syntax checker using
   ``checkbashisms`` which is part of `Debian devscripts`_ and checks for common
   Bash constructs in POSIX shell scripts.
 
