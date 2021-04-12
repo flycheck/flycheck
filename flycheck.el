@@ -10132,7 +10132,13 @@ See URL `https://metacpan.org/pod/Perl::Critic'."
           "STDIN/" line "/" column "/" (any "5") "/"
           (id (one-or-more (not (any "/")))) "/" (message)
           line-end))
-  :modes (cperl-mode perl-mode))
+  :modes (cperl-mode perl-mode)
+
+  :error-explainer
+  (lambda (err)
+    (let ((error-code (flycheck-error-id err))
+          (url "https://metacpan.org/pod/Perl::Critic::Policy::%s"))
+      (and error-code `(url . ,(format url error-code))))))
 
 (flycheck-define-checker php
   "A PHP syntax checker using the PHP command line interpreter.
