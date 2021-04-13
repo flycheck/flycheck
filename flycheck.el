@@ -8252,7 +8252,12 @@ See URL `http://stylelint.io/'."
   :standard-input t
   :error-parser flycheck-parse-stylelint
   :predicate flycheck-buffer-nonempty-p
-  :modes (css-mode css-ts-mode))
+  :modes (css-mode css-ts-mode)
+  :error-explainer
+  (lambda (err)
+    (let ((error-code (flycheck-error-id err))
+          (url "https://stylelint.io/user-guide/rules/%s"))
+      (and error-code `(url . ,(format url error-code))))))
 
 (flycheck-def-option-var flycheck-cuda-language-standard nil cuda-nvcc
   "Our CUDA Language Standard."
