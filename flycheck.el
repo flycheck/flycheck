@@ -11020,7 +11020,7 @@ See URL `https://github.com/rpm-software-management/rpmlint'."
 (flycheck-define-checker markdown-markdownlint-cli
   "Markdown checker using markdownlint-cli.
 
-See URL `https://github.com/DavidAnson/markdownlint-cli'."
+See URL `https://github.com/igorshubovych/markdownlint-cli'."
   :command ("markdownlint"
             (config-file "--config" flycheck-markdown-markdownlint-cli-config)
             (option-list "--disable" flycheck-markdown-markdownlint-cli-disable-rules)
@@ -11036,7 +11036,12 @@ See URL `https://github.com/DavidAnson/markdownlint-cli'."
   (lambda (errors)
     (flycheck-sanitize-errors
      (flycheck-remove-error-file-names "(string)" errors)))
-  :modes (markdown-mode gfm-mode))
+  :modes (markdown-mode gfm-mode)
+  :error-explainer
+  (lambda (err)
+    (let ((error-code (substring (flycheck-error-id err) 0 5))
+          (url "https://github.com/DavidAnson/markdownlint/blob/main/doc/Rules.md#%s"))
+      (and error-code `(url . ,(format url error-code))))))
 
 (flycheck-def-option-var flycheck-markdown-mdl-rules nil markdown-mdl
   "Rules to enable for mdl.
