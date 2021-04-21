@@ -4908,14 +4908,14 @@ The manifest path is relative to
          :end-line 2 :end-column 15))))
 
 (flycheck-ert-def-checker-test sass sass nil
-  (let ((flycheck-disabled-checkers '(sass/scss-sass-lint)))
+  (let ((flycheck-disabled-checkers '(sass-stylelint sass/scss-sass-lint)))
     (flycheck-ert-should-syntax-check
      "language/sass/error.sass" 'sass-mode
      '(5 nil error "Inconsistent indentation: 3 spaces were used for indentation, but the rest of the document was indented using 2 spaces."
          :checker sass))))
 
 (flycheck-ert-def-checker-test sass sass warning
-  (let ((flycheck-disabled-checkers '(sass/scss-sass-lint)))
+  (let ((flycheck-disabled-checkers '(sass-stylelint sass/scss-sass-lint)))
     (flycheck-ert-should-syntax-check
      "language/sass/warning.sass" 'sass-mode
      '(2 nil warning "this is deprecated" :checker sass))))
