@@ -10451,7 +10451,7 @@ because it adds the current directory to Python's path)."
     `("-c" ,(concat "import sys;sys.path.pop(0);import runpy;"
                     (format "runpy.run_module(%S)" module-name)))))
 
-(flycheck-def-config-file-var flycheck-flake8rc python-flake8  ".flake8rc")
+(flycheck-def-config-file-var flycheck-flake8rc python-flake8  ".flake8")
 
 (flycheck-def-option-var flycheck-flake8-error-level-alist
     '(("^E9.*$"  . error)               ; Syntax errors from pep8
