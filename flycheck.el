@@ -9285,7 +9285,7 @@ limited features) if `flycheck-go-version' is set. See URL
 `https://staticcheck.io/'."
   :command ("staticcheck" "-f" "json"
             (option "-tags" flycheck-go-build-tags concat
-                         flycheck-option-comma-separated-list)
+                    flycheck-option-comma-separated-list)
             (option "-go" flycheck-go-version))
 
   :error-parser flycheck-parse-go-staticcheck
