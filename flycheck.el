@@ -9178,7 +9178,8 @@ Requires Go 1.6 or newer.  See URL `https://golang.org/cmd/go'."
   :command ("go" "build"
             (option-flag "-i" flycheck-go-build-install-deps)
             ;; multiple tags are listed as "dev debug ..."
-            (option-list "-tags=" flycheck-go-build-tags concat)
+            (option "-tags=" flycheck-go-build-tags concat
+                    flycheck-option-comma-separated-list)
             "-o" null-device)
   :error-patterns
   ((error line-start (file-name) ":" line ":"
@@ -9217,7 +9218,8 @@ Requires Go 1.6 or newer.  See URL `https://golang.org/cmd/go'."
 Requires Go 1.6 or newer.  See URL `https://golang.org/cmd/go'."
   :command ("go" "test"
             (option-flag "-i" flycheck-go-build-install-deps)
-            (option-list "-tags=" flycheck-go-build-tags concat)
+            (option "-tags=" flycheck-go-build-tags concat
+                    flycheck-option-comma-separated-list)
             "-c" "-o" null-device)
   :error-patterns
   ((error line-start (file-name) ":" line ":"
@@ -9241,7 +9243,8 @@ Requires errcheck newer than commit 8515d34 (Aug 28th, 2015).
 See URL `https://github.com/kisielk/errcheck'."
   :command ("errcheck"
             "-abspath"
-            (option-list "-tags=" flycheck-go-build-tags concat)
+            (option "-tags=" flycheck-go-build-tags concat
+                    flycheck-option-comma-separated-list)
             ".")
   :error-patterns
   ((warning line-start
@@ -9281,7 +9284,8 @@ versions of go\". `staticheck' can target earlier versions (with
 limited features) if `flycheck-go-version' is set. See URL
 `https://staticcheck.io/'."
   :command ("staticcheck" "-f" "json"
-            (option-list "-tags" flycheck-go-build-tags concat)
+            (option "-tags" flycheck-go-build-tags concat
+                         flycheck-option-comma-separated-list)
             (option "-go" flycheck-go-version))
 
   :error-parser flycheck-parse-go-staticcheck
