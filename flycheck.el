@@ -10937,7 +10937,7 @@ See URL `https://git.io/vhi2t'."
 See URL `https://github.com/markdownlint/markdownlint'."
   :command ("mdl"
             (config-file "--style" flycheck-markdown-mdl-style)
-            (option "--tags=" flycheck-markdown-mdl-rules concat
+            (option "--tags=" flycheck-markdown-mdl-tags concat
                     flycheck-option-comma-separated-list)
             (option "--rules=" flycheck-markdown-mdl-rules concat
                     flycheck-option-comma-separated-list))
