@@ -10706,6 +10706,19 @@ See URL https://github.com/microsoft/pyright."
   :safe #'flycheck-string-or-nil-p
   :package-version '(flycheck . "32"))
 
+(flycheck-def-option-var flycheck-python-mypy-follow-imports nil python-mypy
+  "Controls how mypy follows and typechecks import statements.
+
+See URL `https://mypy.readthedocs.io/en/stable/running_mypy.html#following-imports' for more details."
+  :type '(choice
+          (const :tag "Default value from configuration" nil)
+          (const :tag "Follow and typecheck all imports" "normal")
+          (const :tag "Follow imports, but only report errors from the current file." "silent")
+          (const :tag "Don't follow imports. Not recommended as it removes type information from imports." "skip")
+          (const :tag "Same as 'skip', but report a log message as well." "error"))
+  :safe (lambda (v) (member v (list nil "normal" "silent" "skip" "error")))
+  :package-version '(flycheck . "32"))
+
 (flycheck-define-checker python-mypy
   "Mypy syntax and type checker.  Requires mypy>=0.580.
 
@@ -10714,6 +10727,7 @@ See URL `http://mypy-lang.org/'."
             "--show-column-numbers"
             (config-file "--config-file" flycheck-python-mypy-config)
             (option "--cache-dir" flycheck-python-mypy-cache-dir)
+            (option "--follow-imports" flycheck-python-mypy-follow-imports)
             source-original)
   :error-patterns
   ((error line-start (file-name) ":" line (optional ":" column)
