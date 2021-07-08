@@ -360,7 +360,7 @@ A syntax checker assigned to this variable must be defined with
 Use the command `flycheck-select-checker' to select a syntax
 checker for the current buffer, or set this variable as file
 local variable to always use a specific syntax checker for a
-file.  See Info Node `(emacs)Specifying File Variables' for more
+file.  See Info Node `(Emacs)Specifying File Variables' for more
 information about file variables.")
 (put 'flycheck-checker 'safe-local-variable 'flycheck-registered-checker-p)
 
@@ -10451,6 +10451,35 @@ because it adds the current directory to Python's path)."
     `("-c" ,(concat "import sys;sys.path.pop(0);import runpy;"
                     (format "runpy.run_module(%S)" module-name)))))
 
+(defcustom flycheck-python-project-files
+  '("pyproject.toml" "setup.cfg" "mypy.ini" "pyrightconfig.json")
+  "Files used to find where to run Python checkers from.
+Currently used for pylint, flake8, and pyright.
+
+The presence of one in these files indicates the root of the
+current project; `.pylintrc' is not part of the list because it
+is commonly found in ~/."
+  :group 'flycheck
+  :type '(repeat (string :tag "File name"))
+  :package-version '(flycheck . "0.33")
+  :safe #'flycheck-string-list-p)
+
+(defun flycheck-python-find-project-root (_checker)
+  "Find the root directory of a Python project.
+
+The root directory is assumed to be the nearest parent directory
+that contains one of `flycheck-python-project-files'.  If no such
+file is found, we use the same heuristic as epylint: the nearest
+parent directory that doesn't have a __init__.py file."
+  (let ((start (if buffer-file-name
+                   (file-name-directory buffer-file-name)
+                 default-directory)))
+    (or (flycheck--locate-dominating-file-matching
+         start (regexp-opt flycheck-python-project-files))
+        (locate-dominating-file
+         start (lambda (dir)
+                 (not (file-exists-p (expand-file-name "__init__.py" dir))))))))
+
 (flycheck-def-config-file-var flycheck-flake8rc python-flake8  ".flake8rc")
 
 (flycheck-def-option-var flycheck-flake8-error-level-alist
@@ -10547,7 +10576,7 @@ Requires Flake8 3.0 or newer. See URL
                     (concat "--stdin-display-name=" buffer-file-name)))
             "-")
   :standard-input t
-  :working-directory flycheck-flake8--find-project-root
+  :working-directory flycheck-python-find-project-root
   :error-filter (lambda (errors)
                   (let ((errors (flycheck-sanitize-errors errors)))
                     (seq-map #'flycheck-flake8-fix-error-level errors)))
@@ -10600,18 +10629,6 @@ which should be used and reported to the user."
                :filename .path)))
           (car (flycheck-parse-json output))))
 
-(defun flycheck-pylint-find-project-root (_checker)
-  "Find the directory to invoke pylint from.
-
-The algorithm is the same as used by epylint: find the first
-directory that doesn't have a __init__.py file."
-  (locate-dominating-file
-   (if buffer-file-name
-       (file-name-directory buffer-file-name)
-     default-directory)
-   (lambda (dir)
-     (not (file-exists-p (expand-file-name "__init__.py" dir))))))
-
 (flycheck-define-checker python-pylint
   "A Python syntax and style checker using Pylint.
 
@@ -10630,7 +10647,7 @@ See URL `https://www.pylint.org/'."
             ;; import bar'), see https://github.com/flycheck/flycheck/issues/280
             source-inplace)
   :error-parser flycheck-parse-pylint
-  :working-directory flycheck-pylint-find-project-root
+  :working-directory flycheck-python-find-project-root
   :enabled (lambda ()
              (or (not (flycheck-python-needs-module-p 'python-pylint))
                  (flycheck-python-find-module 'python-pylint "pylint")))
@@ -10663,6 +10680,7 @@ See URL `https://docs.python.org/3.4/library/py_compile.html'."
    (error line-start "SyntaxError: ('" (message (one-or-more (not (any "'"))))
           "', ('" (file-name (one-or-more (not (any "'")))) "', "
           line ", " column ", " (one-or-more not-newline) line-end))
+  :working-directory flycheck-python-find-project-root
   :modes python-mode
   :next-checkers ((warning . python-mypy)))
 
@@ -10688,11 +10706,6 @@ the BUFFER that was checked respectively."
         :filename (buffer-file-name buffer))))
    (cdr (nth 2 (car (flycheck-parse-json output))))))
 
-(defun flycheck-pyright--find-project-root (_checker)
-  "Find project root by searching for pyright config file."
-  (locate-dominating-file
-   (or buffer-file-name default-directory) "pyrightconfig.json"))
-
 (flycheck-define-checker python-pyright
   "Static type checker for Python
 
@@ -10700,7 +10713,7 @@ See URL https://github.com/microsoft/pyright."
   :command ("pyright"
             "--outputjson"
             source-inplace)
-  :working-directory flycheck-pyright--find-project-root
+  :working-directory flycheck-python-find-project-root
   :error-parser flycheck-pyright--parse-error
   :modes python-mode)
 
@@ -10735,6 +10748,7 @@ See URL `http://mypy-lang.org/'."
             ": warning:" (message) line-end)
    (info line-start (file-name) ":" line (optional ":" column)
          ": note:" (message) line-end))
+  :working-directory flycheck-python-find-project-root
   :modes python-mode
   ;; Ensure the file is saved, to work around
   ;; https://github.com/python/mypy/issues/4746.
