@@ -3196,7 +3196,8 @@ DATA.  STATUS may be one of the following symbols:
      This report finishes the current syntax check.
 
 `interrupted'
-     The syntax checker was interrupted.  DATA is ignored.
+     The syntax checker was interrupted.  DATA is an optional error
+     message.
 
      This report finishes the current syntax check.
 
@@ -6326,7 +6327,7 @@ CHECKER."
     (let ((pending-output (process-get process 'flycheck-pending-output)))
       (apply #'concat (nreverse pending-output)))))
 
-(defun flycheck-handle-signal (process _event)
+(defun flycheck-handle-signal (process event)
   "Handle a signal from the syntax checking PROCESS.
 
 _EVENT is ignored."
@@ -6343,7 +6344,7 @@ _EVENT is ignored."
           (condition-case err
               (pcase (process-status process)
                 (`signal
-                 (funcall callback 'interrupted))
+                 (funcall callback 'interrupted event))
                 (`exit
                  (flycheck-finish-checker-process
                   (process-get process 'flycheck-checker)
