@@ -262,6 +262,7 @@ attention to case differences."
     scala-scalastyle
     scheme-chicken
     scss-lint
+    sass-stylelint
     scss-stylelint
     sass/scss-sass-lint
     sass
@@ -8148,10 +8149,10 @@ See URL `https://github.com/CSSLint/csslint'."
   "Common arguments to stylelint invocations.")
 
 (flycheck-def-config-file-var flycheck-stylelintrc
-    (css-stylelint scss-stylelint less-stylelint) nil)
+    (css-stylelint scss-stylelint sass-stylelint less-stylelint) nil)
 
 (flycheck-def-option-var flycheck-stylelint-quiet
-    nil (css-stylelint scss-stylelint less-stylelint)
+    nil (css-stylelint scss-stylelint sass-stylelint less-stylelint)
   "Whether to run stylelint in quiet mode.
 
 When non-nil, enable quiet mode, via `--quiet'."
@@ -11803,6 +11804,20 @@ See URL `http://stylelint.io/'."
   :error-parser flycheck-parse-stylelint
   :predicate flycheck-buffer-nonempty-p
   :modes (scss-mode))
+
+(flycheck-define-checker sass-stylelint
+  "A Sass syntax and style checker using stylelint.
+
+See URL `http://stylelint.io/'."
+  :command ("stylelint"
+            (eval flycheck-stylelint-args)
+            "--syntax" "sass"
+            (option-flag "--quiet" flycheck-stylelint-quiet)
+            (config-file "--config" flycheck-stylelintrc))
+  :standard-input t
+  :error-parser flycheck-parse-stylelint
+  :predicate flycheck-buffer-nonempty-p
+  :modes (sass-mode))
 
 (flycheck-def-option-var flycheck-scss-compass nil scss
   "Whether to enable the Compass CSS framework.
