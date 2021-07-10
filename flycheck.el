@@ -507,6 +507,20 @@ sandboxes."
   :package-version '(flycheck . "32")
   :risky t)
 
+;; This can be removed when Emacs 27.1 is the oldest supported version.
+;; See https://github.com/flycheck/flycheck/pull/1842
+(defun executable-find-add-remote (args)
+  "Add optional remote argument t to ARGS when supported."
+  (if (and (not (version< emacs-version "27.1")) (= (length args) 1))
+      (append args '(t))
+    args))
+(advice-add 'executable-find :filter-args 'executable-find-add-remote)
+
+(defun buffer-file-local-name (&optional buffer)
+  "Return the local file-name of the current buffer or BUFFER when specified."
+  (let ((file-name (buffer-file-name (or buffer (current-buffer)))))
+    (when file-name (file-local-name file-name))))
+
 (defun flycheck-default-executable-find (executable)
   "Resolve EXECUTABLE to a full path.
 
@@ -1453,7 +1467,7 @@ Return t if CHECKER does not use temporary files."
   "Save buffer to temp file returned by TEMP-FILE-FN.
 
 Return the name of the temporary file."
-  (let ((filename (funcall temp-file-fn (buffer-file-name))))
+  (let ((filename (funcall temp-file-fn (buffer-file-local-name))))
     ;; Do not flush short-lived temporary files onto disk
     (let ((write-region-inhibit-fsync t))
       (flycheck-save-buffer-to-file filename))
@@ -1621,7 +1635,7 @@ Return nil, if the currently loaded file cannot be determined."
   (-when-let* ((this-file (cond
                            (load-in-progress load-file-name)
                            ((bound-and-true-p byte-compile-current-file))
-                           (t (buffer-file-name))))
+                           (t (buffer-file-local-name))))
                ;; A best guess for the source file of a compiled library. Works
                ;; well in most cases, and especially for ELPA packages
                (source-file (concat (file-name-sans-extension this-file)
@@ -1645,7 +1659,7 @@ along each part of MODULE.
 If the MODULE name does not match the directory hierarchy upwards
 from FILE-NAME, return the directory containing FILE-NAME.  When
 FILE-NAME is nil, return `default-directory'."
-  (let ((file-name (or file-name (buffer-file-name)))
+  (let ((file-name (or file-name (buffer-file-local-name)))
         (module-components (if (stringp module)
                                (split-string module (rx "."))
                              (copy-sequence module))))
@@ -2668,7 +2682,7 @@ is applicable from Emacs Lisp code.  Use
 
   ;; Save the buffer to make sure that all predicates are good
   ;; FIXME: this may be surprising to users, with unintended side-effects.
-  (when (and (buffer-file-name) (buffer-modified-p))
+  (when (and (buffer-file-local-name) (buffer-modified-p))
     (save-buffer))
 
   (let ((buffer (current-buffer)))
@@ -2696,7 +2710,7 @@ possible problems are shown."
   (interactive)
   ;; Save to make sure checkers that only work on saved buffers will pass the
   ;; verification
-  (when (and (buffer-file-name) (buffer-modified-p))
+  (when (and (buffer-file-local-name) (buffer-modified-p))
     (save-buffer))
 
   (let* ((buffer (current-buffer))
@@ -2782,7 +2796,7 @@ current buffer as BUFFER.
 
 Return non-nil if the BUFFER is backed by a file, and not
 modified, or nil otherwise."
-  (let ((file-name (buffer-file-name buffer)))
+  (let ((file-name (buffer-file-local-name buffer)))
     (and file-name (file-exists-p file-name) (not (buffer-modified-p buffer)))))
 
 
@@ -3623,14 +3637,14 @@ non-nil, then only do this and skip per-buffer teardown.)"
                  column
                  &optional level message
                  &key end-line end-column checker id group
-                 (filename (buffer-file-name)) (buffer (current-buffer))
+                 (filename (buffer-file-local-name)) (buffer (current-buffer))
                  &aux (-end-line end-line) (-end-column end-column)))
                (:constructor
                 flycheck-error-new-at-pos
                 (pos
                  &optional level message
                  &key end-pos checker id group
-                 (filename (buffer-file-name)) (buffer (current-buffer))
+                 (filename (buffer-file-local-name)) (buffer (current-buffer))
                  &aux
                  ((line . column)
                   (if pos (flycheck-line-column-at-pos pos)
@@ -3873,7 +3887,8 @@ determined if the error contains a full span, not just a
 beginning position)."
   (let* ((id (flycheck-error-id err))
          (fname (flycheck-error-filename err))
-         (other-file-p (and fname (not (equal fname (buffer-file-name))))))
+         (other-file-p (and fname
+                            (not (equal fname (buffer-file-local-name))))))
     (concat (and other-file-p (format "In %S:\n" (file-relative-name fname)))
             (and include-snippet
                  (-when-let* ((snippet (flycheck-error-format-snippet err)))
@@ -4000,7 +4015,7 @@ Return ERRORS, modified in-place."
             (setf (flycheck-error-filename err)
                   (-if-let (filename (flycheck-error-filename err))
                       (expand-file-name filename directory)
-                    (buffer-file-name))))
+                    (buffer-file-local-name))))
           errors)
   errors)
 
@@ -5881,13 +5896,18 @@ Return nil (or raise an error if ERROR is non-nil) when CHECKER's
 executable cannot be found, and return a numeric exit status or a
 signal description string otherwise.  CHECKER's input is taken
 from INFILE, and its output is sent to DESTINATION, as in
-`call-process'."
+`start-file-process'."
   (-if-let (executable (flycheck-find-checker-executable checker))
       (condition-case err
-          (apply #'call-process executable infile destination nil args)
+          ;; `start-file-process' runs synchronously, like `call-process',
+          ;; when let bound.`start-file-process' is required to support remote
+          ;; processes. See https://github.com/flycheck/flycheck/pull/1842
+          (let ((rc (apply #'start-file-process
+                           executable infile destination nil args)))
+            rc)
         (error (when error (signal (car err) (cdr err)))))
     (when error
-      (user-error "Cannot find `%s' using `flycheck-executable-find'"
+      (user-error "Cannot find `%s' using `flycheck-find-checker-executable'"
                   (flycheck-checker-executable checker)))))
 
 (defun flycheck-call-checker-process-for-output
@@ -6053,7 +6073,7 @@ are substituted within the body of cells!"
     (`(source-inplace ,suffix)
      (list (flycheck-save-buffer-to-temp
             (lambda (filename) (flycheck-temp-file-inplace filename suffix)))))
-    (`source-original (list (or (buffer-file-name) "")))
+    (`source-original (list (or (buffer-file-local-name) "")))
     (`temporary-directory (list (flycheck-temp-dir-system)))
     (`temporary-file-name
      (let ((directory (flycheck-temp-dir-system)))
@@ -6195,7 +6215,7 @@ and rely on Emacs' own buffering and chunking."
                ;; can easily use pipes.
                (process-connection-type nil))
           ;; We pass do not associate the process with any buffer, by
-          ;; passing nil for the BUFFER argument of `start-process'.
+          ;; passing nil for the BUFFER argument of `start-file-process'.
           ;; Instead, we just remember the buffer being checked in a
           ;; process property (see below).  This neatly avoids all
           ;; side-effects implied by attached a process to a buffer, which
@@ -6203,8 +6223,13 @@ and rely on Emacs' own buffering and chunking."
           ;;
           ;; See https://github.com/flycheck/flycheck/issues/298 for an
           ;; example for such a conflict.
-          (setq process (apply 'start-process (format "flycheck-%s" checker)
-                               nil command))
+          ;;
+          ;; `start-file-process' runs synchronously, like `call-process',
+          ;; when let bound.`start-file-process' is required to support remote
+          ;; processes. See https://github.com/flycheck/flycheck/pull/1842
+          (let ((rc (apply 'start-file-process
+                           (format "flycheck-%s" checker) nil command)))
+            (setq process rc))
           ;; Process sentinels can be called while sending input to the process.
           ;; We want to record errors raised by process-send before calling
           ;; `flycheck-handle-signal', so initially just accumulate events.
@@ -6538,7 +6563,7 @@ directory of the current buffer and all ancestors thereof (see
 absolute path.  Otherwise return nil.
 
 _CHECKER is ignored."
-  (-when-let* ((basefile (buffer-file-name))
+  (-when-let* ((basefile (buffer-file-local-name))
                (directory (locate-dominating-file basefile filename)))
     (expand-file-name filename directory)))
 
@@ -6705,29 +6730,23 @@ shell execution."
   (let* ((args (flycheck--checker-substituted-shell-command-arguments checker))
          (program
           (or (flycheck-find-checker-executable checker)
-              (user-error "Cannot find `%s' using `flycheck-executable-find'"
-                          (flycheck-checker-executable checker))))
+              (user-error
+               "Cannot find `%s' using `flycheck-find-checker-executable'"
+               (flycheck-checker-executable checker))))
          (wrapped (flycheck--wrap-command program args))
-         (abs-prog
-          ;; The executable path returned by `flycheck-command-wrapper-function'
-          ;; may not be absolute, so expand it here.  See URL
-          ;; `https://github.com/flycheck/flycheck/issues/1461'.
-          (or (executable-find (car wrapped))
-              (user-error "Cannot find `%s' using `executable-find'"
-                          (car wrapped))))
          (command (mapconcat #'shell-quote-argument
-                             (cons abs-prog (cdr wrapped)) " ")))
+                             (cons program (cdr wrapped)) " ")))
     (if (flycheck-checker-get checker 'standard-input)
         ;; If the syntax checker expects the source from standard input add an
         ;; appropriate shell redirection
-        (concat command " < " (shell-quote-argument (buffer-file-name)))
+        (concat command " < " (shell-quote-argument (buffer-file-local-name)))
       command)))
 
 (defun flycheck-compile-name (_name)
   "Get a name for a Flycheck compilation buffer.
 
 _NAME is ignored."
-  (format "*Flycheck %s*" (buffer-file-name)))
+  (format "*Flycheck %s*" (buffer-file-local-name)))
 
 (defun flycheck-compile (checker)
   "Run CHECKER via `compile'.
@@ -6746,7 +6765,7 @@ tool, just like `compile' (\\[compile])."
                                   'command))))
   (unless (flycheck-valid-checker-p checker)
     (user-error "%S is not a valid syntax checker" checker))
-  (unless (buffer-file-name)
+  (unless (buffer-file-local-name)
     (user-error "Cannot compile a buffer without a backing file"))
   (unless (flycheck-may-use-checker checker)
     (user-error "Cannot use syntax checker %S in this buffer" checker))
@@ -7320,7 +7339,7 @@ set, since checkers often omit redundant end lines (as in
          :id (unless (string-empty-p id) id)
          :checker checker
          :filename (if (or (null filename) (string-empty-p filename))
-                       (buffer-file-name)
+                       (buffer-file-local-name)
                      filename)
          :end-line (or end-line (and end-column line))
          :end-column end-column)))))
@@ -7709,7 +7728,7 @@ explicitly determine the directory for quoted includes.
 
 This function determines the directory by looking at function
 `buffer-file-name', or if that is nil, at `default-directory'."
-  (-if-let (fn (buffer-file-name))
+  (-if-let (fn (buffer-file-local-name))
       (file-name-directory fn)
     ;; If the buffer has no file name, fall back to its default directory
     default-directory))
@@ -8187,7 +8206,7 @@ If the CHECKER throws an Error it returns an Error message with a stacktrace."
               :id (match-string 5 output)
               :checker checker
               :buffer buffer
-              :filename (buffer-file-name buffer)))))))
+              :filename (buffer-file-local-name buffer)))))))
 
 (defun flycheck-parse-stylelint-json (output checker buffer)
   "Parse stylelint JSON errors from OUTPUT.
@@ -8202,7 +8221,7 @@ about the JSON format of stylelint."
     ;; stylelint returns a vector of result objects
     ;; Since we only passed one file, the first element is enough
     (let* ((stylelint-output (elt (json-read-from-string output) 0))
-           (filename (buffer-file-name buffer))
+           (filename (buffer-file-local-name buffer))
 
            ;; Turn all deprecations into warnings
            (deprecations
@@ -8256,7 +8275,8 @@ See URL `http://stylelint.io/'."
             (eval flycheck-stylelint-args)
             (option-flag "--quiet" flycheck-stylelint-quiet)
             (config-file "--config" flycheck-stylelintrc)
-            "--stdin-filename" (eval (or (buffer-file-name) "style.css")))
+            "--stdin-filename" (eval (or (buffer-file-local-name)
+                                         "style.css")))
   :standard-input t
   :error-parser flycheck-parse-stylelint
   :predicate flycheck-buffer-nonempty-p
@@ -8352,7 +8372,7 @@ See URL `https://www.commonwl.org/v1.0/SchemaSalad.html'."
 
 (defun flycheck-d-base-directory ()
   "Get the relative base directory path for this module."
-  (let* ((file-name (buffer-file-name))
+  (let* ((file-name (buffer-file-local-name))
          (module-file (if (and file-name
                                (string= (file-name-nondirectory file-name)
                                         "package.d"))
@@ -8625,8 +8645,8 @@ This variable has no effect, if
     (flycheck-autoloads-file-p)
     ;; Cask/Carton and dir-locals files contain data, not code, and don't need
     ;; to follow Checkdoc conventions either.
-    (and (buffer-file-name)
-         (member (file-name-nondirectory (buffer-file-name))
+    (and (buffer-file-local-name)
+         (member (file-name-nondirectory (buffer-file-local-name))
                  '("Cask" "Carton" ".dir-locals.el" ".dir-locals-2.el"))))))
 
 (defun flycheck--emacs-lisp-checkdoc-enabled-p ()
@@ -8782,7 +8802,7 @@ the BUFFER that was checked respectively."
                :id .rule
                :checker checker
                :buffer buffer
-               :filename (buffer-file-name buffer))))
+               :filename (buffer-file-local-name buffer))))
           (cdr (car (car (flycheck-parse-json output))))))
 
 (flycheck-def-config-file-var flycheck-ember-template-lintrc
@@ -8835,7 +8855,7 @@ See URL `http://www.erlang.org/'."
   ((warning line-start (file-name) ":" line ": Warning:" (message) line-end)
    (error line-start (file-name) ":" line ": " (message) line-end))
   :modes erlang-mode
-  :enabled (lambda () (string-suffix-p ".erl" (buffer-file-name))))
+  :enabled (lambda () (string-suffix-p ".erl" (buffer-file-local-name))))
 
 (defun flycheck--contains-rebar-config (dir-name)
   "Return DIR-NAME if rebar config file exists in DIR-NAME, nil otherwise."
@@ -9206,7 +9226,8 @@ Requires Go 1.6 or newer.  See URL `https://golang.org/cmd/go'."
   :modes go-mode
   :predicate (lambda ()
                (and (flycheck-buffer-saved-p)
-                    (not (string-suffix-p "_test.go" (buffer-file-name)))))
+                    (not (string-suffix-p "_test.go"
+                                          (buffer-file-local-name)))))
   :next-checkers ((warning . go-errcheck)
                   (warning . go-unconvert)
                   (warning . go-staticcheck)))
@@ -9228,7 +9249,7 @@ Requires Go 1.6 or newer.  See URL `https://golang.org/cmd/go'."
   :modes go-mode
   :predicate
   (lambda () (and (flycheck-buffer-saved-p)
-                  (string-suffix-p "_test.go" (buffer-file-name))))
+                  (string-suffix-p "_test.go" (buffer-file-local-name))))
   :next-checkers ((warning . go-errcheck)
                   (warning . go-unconvert)
                   (warning . go-staticcheck)))
@@ -9338,8 +9359,8 @@ See URL `http://handlebarsjs.com/'."
         ;; non-canonical engine name
         (let* ((regexp-alist (bound-and-true-p web-mode-engine-file-regexps))
                (pattern (cdr (assoc "handlebars" regexp-alist))))
-          (and pattern (buffer-file-name)
-               (string-match-p pattern (buffer-file-name))))
+          (and pattern (buffer-file-local-name)
+               (string-match-p pattern (buffer-file-local-name))))
       t)))
 
 (defconst flycheck-haskell-module-re
@@ -9440,9 +9461,9 @@ containing a file that matches REGEXP."
 Return a parent directory with a stack*.y[a]ml file, or the
 directory returned by \"stack path --project-root\"."
   (or
-   (when (buffer-file-name)
+   (when (buffer-file-local-name)
      (flycheck--locate-dominating-file-matching
-      (file-name-directory (buffer-file-name))
+      (file-name-directory (buffer-file-local-name))
       (rx "stack" (* any) "." (or "yml" "yaml") eos)))
    (-when-let* ((stack (funcall flycheck-executable-find "stack"))
                 (output (ignore-errors
@@ -9454,9 +9475,9 @@ directory returned by \"stack path --project-root\"."
 
 (defun flycheck-haskell--ghc-find-default-directory (_checker)
   "Find a parent directory containing a cabal or package.yaml file."
-  (when (buffer-file-name)
+  (when (buffer-file-local-name)
     (flycheck--locate-dominating-file-matching
-     (file-name-directory (buffer-file-name))
+     (file-name-directory (buffer-file-local-name))
      "\\.cabal\\'\\|\\`package\\.yaml\\'")))
 
 (flycheck-define-checker haskell-stack-ghc
@@ -9735,7 +9756,7 @@ See URL `https://eslint.org' for more information about ESLint."
                :id .ruleId
                :checker checker
                :buffer buffer
-               :filename (buffer-file-name buffer)
+               :filename (buffer-file-local-name buffer)
                :end-line .endLine
                :end-column .endColumn)))
           (let-alist (caar (flycheck-parse-json output))
@@ -10175,8 +10196,8 @@ See URL `http://pear.php.net/package/PHP_CodeSniffer/'."
             ;; Pass original file name to phpcs.  We need to concat explicitly
             ;; here, because phpcs really insists to get option and argument as
             ;; a single command line argument :|
-            (eval (when (buffer-file-name)
-                    (concat "--stdin-path=" (buffer-file-name))))
+            (eval (when (buffer-file-local-name)
+                    (concat "--stdin-path=" (buffer-file-local-name))))
             ;; Read from standard input
             "-")
   :standard-input t
@@ -10197,7 +10218,8 @@ See https://github.com/processing/processing/wiki/Command-Line"
   :command ("processing-java" "--force"
             ;; Don't change the order of these arguments, processing is pretty
             ;; picky
-            (eval (concat "--sketch=" (file-name-directory (buffer-file-name))))
+            (eval (concat "--sketch=" (file-name-directory
+                                       (buffer-file-local-name))))
             (eval (concat "--output=" (flycheck-temp-dir-system)))
             "--build")
   :error-patterns
@@ -10205,7 +10227,7 @@ See https://github.com/processing/processing/wiki/Command-Line"
           (zero-or-more (or digit ":")) (message) line-end))
   :modes processing-mode
   ;; This syntax checker needs a file name
-  :predicate (lambda () (buffer-file-name)))
+  :predicate (lambda () (buffer-file-local-name)))
 
 (defun flycheck-proselint-parse-errors (output checker buffer)
   "Parse proselint json output errors from OUTPUT.
@@ -10260,7 +10282,7 @@ See URL `https://developers.google.com/protocol-buffers/'."
             (eval (concat "--java_out=" (flycheck-temp-dir-system)))
             ;; Add the current directory to resolve imports
             (eval (concat "--proto_path="
-                          (file-name-directory (buffer-file-name))))
+                          (file-name-directory (buffer-file-local-name))))
             ;; Add other import paths; this needs to be after the current
             ;; directory to produce the right output.  See URL
             ;; `https://github.com/flycheck/flycheck/pull/1655'
@@ -10275,7 +10297,7 @@ See URL `https://developers.google.com/protocol-buffers/'."
           (message "In file included from") " " (file-name) ":" line ":"
           column ":" line-end))
   :modes protobuf-mode
-  :predicate (lambda () (buffer-file-name)))
+  :predicate (lambda () (buffer-file-local-name)))
 
 (defun flycheck-prototool-project-root (&optional _checker)
   "Return the nearest directory holding the prototool.yaml configuration."
@@ -10297,7 +10319,7 @@ See URL `https://github.com/uber/prototool'."
   "A Pug syntax checker using the pug compiler.
 
 See URL `https://pugjs.org/'."
-  :command ("pug" "-p" (eval (expand-file-name (buffer-file-name))))
+  :command ("pug" "-p" (eval (expand-file-name (buffer-file-local-name))))
   :standard-input t
   :error-patterns
   ;; errors with includes/extends (e.g. missing files)
@@ -10672,7 +10694,7 @@ the BUFFER that was checked respectively."
         :end-column (+ 1 .range.end.character)
         :checker checker
         :buffer buffer
-        :filename (buffer-file-name buffer))))
+        :filename (buffer-file-local-name buffer))))
    (cdr (nth 2 (car (flycheck-parse-json output))))))
 
 (defun flycheck-pyright--find-project-root (_checker)
@@ -10995,7 +11017,7 @@ information about nix-linter."
                :id .offense
                :checker checker
                :buffer buffer
-               :filename (buffer-file-name buffer)
+               :filename (buffer-file-local-name buffer)
                :end-line .pos.spanEnd.sourceLine
                :end-column .pos.spanEnd.sourceColumn)))
           (flycheck-parse-json output)))
@@ -11019,7 +11041,7 @@ See URL `https://github.com/Synthetica9/nix-linter'."
 
 Return the source directory, or nil, if the current buffer is not
 part of a Sphinx project."
-  (-when-let* ((filename (buffer-file-name))
+  (-when-let* ((filename (buffer-file-local-name))
                (dir (locate-dominating-file filename "conf.py")))
     (expand-file-name dir)))
 
@@ -11748,7 +11770,7 @@ missing checkstyle reporter from SCSS-Lint."
 Please run gem install scss_lint_reporter_checkstyle"
              :checker checker
              :buffer buffer
-             :filename (buffer-file-name buffer)))
+             :filename (buffer-file-local-name buffer)))
     (flycheck-parse-checkstyle output checker buffer)))
 
 (flycheck-def-config-file-var flycheck-scss-lintrc scss-lint ".scss-lint.yml"
@@ -12092,7 +12114,7 @@ information about tflint."
                :id .rule.name
                :checker checker
                :buffer buffer
-               :filename (buffer-file-name buffer))))
+               :filename (buffer-file-local-name buffer))))
           (cdr (assq 'issues (car (flycheck-parse-json output))))))
 
 (flycheck-define-checker terraform-tflint
