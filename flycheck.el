@@ -4652,15 +4652,32 @@ level."
   (flycheck-has-max-errors-p flycheck-current-errors level))
 
 (defun flycheck-has-errors-p (errors level)
-  "Determine if there are any ERRORS with LEVEL."
+  "Determine if there are any ERRORS with exactly LEVEL."
   (seq-some (lambda (e) (eq (flycheck-error-level e) level)) errors))
 
-(defun flycheck-has-current-errors-p (&optional level)
-  "Determine if the current buffer has errors with LEVEL.
+(defun flycheck-has-errors-atleast-p (errors level)
+  "Determine if there are any ERRORS with at least LEVEL."
+  (seq-some (lambda (e)
+              (>= (flycheck-error-level-severity (flycheck-error-level e))
+                  (flycheck-error-level-severity level)))
+            errors))
 
-If LEVEL is omitted if the current buffer has any errors at all."
+(defun flycheck-has-current-errors-p (&optional level)
+  "Determine if the current buffer has any errors with exactly LEVEL.
+
+If LEVEL is omitted, then return whether the current buffer has any errors at
+all."
   (if level
       (flycheck-has-errors-p flycheck-current-errors level)
+    (and flycheck-current-errors t)))
+
+(defun flycheck-has-current-errors-atleast-p (&optional level)
+  "Determine if the current buffer has any errors with at least LEVEL.
+
+If LEVEL is omitted, then return whether the current buffer has any errors at
+all."
+  (if level
+      (flycheck-has-errors-atleast-p flycheck-current-errors level)
     (and flycheck-current-errors t)))
 
 
@@ -4851,7 +4868,7 @@ no errors as or more severe than `flycheck-navigation-minimum-level'."
     (-if-let (min-level flycheck-navigation-minimum-level)
         (or (<= (flycheck-error-level-severity min-level)
                 (flycheck-error-level-severity (flycheck-error-level err)))
-            (not (flycheck-has-current-errors-p min-level)))
+            (not (flycheck-has-current-errors-atleast-p min-level)))
       t)))
 
 (defun flycheck-next-error-pos (n &optional reset)
