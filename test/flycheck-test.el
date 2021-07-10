@@ -3102,6 +3102,22 @@ evaluating BODY."
    '(   6 4 warning "variable \"Name\" is not referenced" :checker ada-gnat)
    '(8  11 warning "unrecognized pragma \"Foo\"" :checker ada-gnat)))
 
+(flycheck-ert-def-checker-test ansible-ansiblelint ansible errors
+  (flycheck-ert-should-syntax-check
+   "language/ansible/error.yml" 'yaml-mode
+   '(3 nil error "(conflicting action statements: debug, command)"
+       :checker ansible-ansiblelint)))
+
+(flycheck-ert-def-checker-test ansible-ansiblelint ansible warnings
+  (flycheck-ert-should-syntax-check
+   "language/ansible/warnings.yml" 'yaml-mode
+   '(5 nil warning "Commands should not change things if nothing needs doing"
+       :checker ansible-ansiblelint)
+   '(5 nil warning "service used in place of service module"
+       :checker ansible-ansiblelint)
+   '(9 nil warning "variables should have spaces before and after: {{ varname }}"
+       :checker ansible-ansiblelint)))
+
 (flycheck-ert-def-checker-test asciidoc asciidoc nil
   (let ((flycheck-disabled-checkers '(asciidoctor)))
     (flycheck-ert-should-syntax-check
