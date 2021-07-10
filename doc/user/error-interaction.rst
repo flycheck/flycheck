@@ -170,7 +170,8 @@ Explain errors
 
 Flycheck also has the ability to display explanations for errors, provided the
 error checker is capable of producing these explanations.  Currently, only the
-`rust` and `rust-cargo` checkers produce explanations.
+`javascript-eslint `, `nix-linter`, `python-pylint`, `rust`, `rust-cargo`,
+`rust-clippy`, and `sh-shellcheck` checkers produce explanations.
 
 .. define-key:: C-c ! e
                 M-x flycheck-explain-error-at-point
