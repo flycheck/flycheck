@@ -2,7 +2,7 @@
 
 import sys
 
-from sys import antigravit  # Typo intended!
+from . import antigravit  # Typo intended!
 
 class Spam(object):
 
