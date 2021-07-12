@@ -10594,7 +10594,9 @@ Requires Flake8 3.0 or newer. See URL
   :next-checkers ((warning . python-pylint)
                   (warning . python-mypy)))
 
-(flycheck-def-config-file-var flycheck-pylintrc python-pylint ".pylintrc")
+(flycheck-def-config-file-var
+    flycheck-pylintrc python-pylint
+    '("pylintrc" ".pylintrc" "pyproject.toml" "setup.cfg"))
 
 (flycheck-def-option-var flycheck-pylint-use-symbolic-id t python-pylint
   "Whether to use pylint message symbols or message codes.
@@ -10721,7 +10723,7 @@ See URL https://github.com/microsoft/pyright."
   'flycheck-python-mypy-config "32")
 
 (flycheck-def-config-file-var flycheck-python-mypy-config python-mypy
-                              '("mypy.ini" "setup.cfg"))
+                              '("mypy.ini" "pyproject.toml" "setup.cfg"))
 
 (flycheck-def-option-var flycheck-python-mypy-cache-dir nil python-mypy
   "Directory used to write .mypy_cache directories."
