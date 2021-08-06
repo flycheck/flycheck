@@ -12027,11 +12027,33 @@ See URL
 
 (flycheck-def-config-file-var flycheck-chktexrc tex-chktex ".chktexrc")
 
+(flycheck-def-args-var flycheck-tcl-nagelfar-args tcl-nagelfar
+  :package-version '(flycheck . "0.32"))
+
+(flycheck-def-option-var flycheck-tcl-nagelfar-headers nil tcl-nagelfar
+  "A list of additional header files for nagelfar.
+A header file is created by executing nagelfar with the -header option.
+A use case for this is if you are working on a large TCL project with
+functions spanning across multiple files & directories. You scan the
+project first and create the header(s) then load it when checking
+against an individual TCL file so as to avoid false-positive
+\"unknown command\" messages.
+The value of this variable is a list of strings, where each
+string is a file to include before syntax checking.  Relative
+paths are relative to the file being checked."
+  :type '(repeat (file :tag "Include file"))
+  :safe #'flycheck-string-list-p
+  :package-version '(flycheck . "0.32"))
+
 (flycheck-define-checker tcl-nagelfar
   "An extensible tcl syntax checker
 
 See URL `http://nagelfar.sourceforge.net/'."
-  :command ("nagelfar" "-H" source)
+  :command ("nagelfar"
+            "-H"
+            (option-list "" flycheck-tcl-nagelfar-headers)
+            (eval flycheck-tcl-nagelfar-args)
+            source)
   :error-patterns
   ;; foo.tcl: 29: E Wrong number of arguments (4) to "set"
   ;; foo.tcl: 29: W Expr without braces
