@@ -10,7 +10,7 @@
 ;; URL: http://www.flycheck.org
 ;; Keywords: convenience, languages, tools
 ;; Version: 32-cvs
-;; Package-Requires: ((dash "2.12.1") (pkg-info "0.4") (let-alist "1.0.4") (seq "1.11") (emacs "24.3"))
+;; Package-Requires: ((dash "2.12.1") (let-alist "1.0.4") (seq "1.11") (emacs "24.3"))
 
 ;; This file is not part of GNU Emacs.
 
@@ -79,6 +79,7 @@
 (require 'rx)                    ; Regexp fanciness in `flycheck-define-checker'
 (require 'help-mode)             ; `define-button-type'
 (require 'find-func)             ; `find-function-regexp-alist'
+(require 'lisp-mnt)              ; `lm-version'
 (require 'json)                  ; `flycheck-parse-tslint'
 (require 'ansi-color)            ; `flycheck-parse-with-patterns-without-color'
 
@@ -89,9 +90,6 @@
 (defvar markdown-hide-markup)                     ;
 (defvar markdown-fontify-code-block-default-mode) ; For rust-error-explainer
 (defvar markdown-fontify-code-blocks-natively)    ;
-
-;; Tell the byte compiler about autoloaded functions from packages
-(declare-function pkg-info-version-info "pkg-info" (package))
 
 
 ;;; Compatibility
@@ -1284,7 +1282,7 @@ If the version number could not be determined, signal an error,
 if called interactively, or if SHOW-VERSION is non-nil, otherwise
 just return nil."
   (interactive (list t))
-  (let ((version (pkg-info-version-info 'flycheck)))
+  (let ((version (lm-version (find-library-name "flycheck"))))
     (when show-version
       (message "Flycheck version: %s" version))
     version))
