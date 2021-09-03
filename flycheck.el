@@ -868,6 +868,12 @@ function."
   :package-version '(flycheck . "0.19")
   :risky t)
 
+(defcustom flycheck-temp-suffix "flycheck"
+  "Sufffix for temporary files created by Flycheck."
+  :group 'flycheck
+  :type 'string
+  :risky t)
+
 (defcustom flycheck-mode-hook nil
   "Hooks to run after command `flycheck-mode' is toggled."
   :group 'flycheck
@@ -1410,9 +1416,10 @@ the specified SUFFIX.
 
 Return the path of the file."
   (if filename
-      (let* ((tempname (format "%s_%s"
+      (let* ((tempname (format "%s_%s%s"
                                flycheck-temp-prefix
-                               (file-name-nondirectory filename)))
+                               (file-name-nondirectory filename)
+                               flycheck-temp-suffix))
              (tempfile (convert-standard-filename
                         (expand-file-name tempname
                                           (file-name-directory filename)))))
