@@ -8905,9 +8905,10 @@ directory name is \"test\" or \"eqc\", or else \"default\"."
   :command ("rebar3" "as" (eval (flycheck-erlang-rebar3-get-profile)) "compile")
   :error-parser flycheck-parse-with-patterns-without-color
   :error-patterns
-  ((warning line-start
-            (file-name) ":" line ":" column ": Warning:" (message) line-end)
-   (error line-start (file-name) ":" line ":" column ": " (message) line-end))
+  ((warning line-start (file-name) ":" line ":" (optional column ":")
+            " Warning:" (message) line-end)
+   (error line-start (file-name) ":" line ":" (optional column ":") " "
+          (message) line-end))
   :modes erlang-mode
   :enabled flycheck-rebar3-project-root
   :predicate flycheck-buffer-saved-p
