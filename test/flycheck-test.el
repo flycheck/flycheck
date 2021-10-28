@@ -3593,26 +3593,26 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
   (shut-up
     (flycheck-ert-should-syntax-check
      "language/erlang/erlang/error.erl" 'erlang-mode
-     '(3 nil warning "export_all flag enabled - all functions will be exported" :checker erlang)
-     '(7 nil error "head mismatch" :checker erlang))))
+     '(3 2 warning "export_all flag enabled - all functions will be exported" :checker erlang)
+     '(7 1 error "head mismatch" :checker erlang))))
 
 (flycheck-ert-def-checker-test erlang erlang warning
   (flycheck-ert-should-syntax-check
    "language/erlang/erlang/warning.erl" 'erlang-mode
-   '(3 nil warning "export_all flag enabled - all functions will be exported" :checker erlang)
-   '(6 nil warning "wrong number of arguments in format call" :checker erlang)))
+   '(3 2 warning "export_all flag enabled - all functions will be exported" :checker erlang)
+   '(6 37 warning "wrong number of arguments in format call" :checker erlang)))
 
 (flycheck-ert-def-checker-test erlang-rebar3 erlang error
   (flycheck-ert-should-syntax-check
    "language/erlang/rebar3/src/erlang-error.erl" 'erlang-mode
-   '(3 nil warning "export_all flag enabled - all functions will be exported" :checker erlang-rebar3)
-   '(7 nil error "head mismatch" :checker erlang-rebar3)))
+   '(3 2 warning "export_all flag enabled - all functions will be exported" :checker erlang-rebar3)
+   '(7 1 error "head mismatch" :checker erlang-rebar3)))
 
 (flycheck-ert-def-checker-test erlang-rebar3 erlang build
   (shut-up
     (flycheck-ert-should-syntax-check
      "language/erlang/rebar3/_checkouts/dependency/src/dependency.erl" 'erlang-mode
-     `(7 nil error "head mismatch" :checker erlang-rebar3
+     `(7 1 error "head mismatch" :checker erlang-rebar3
          :filename ,(flycheck-ert-resource-filename "language/erlang/rebar3/src/erlang-error.erl"))))
   ;; Ensure that the dependency file wasn't built as standalone
   ;; project which would create a separate _build directory
