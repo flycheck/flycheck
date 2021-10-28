@@ -3589,11 +3589,14 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
    "language/ember-template-lint/ember-template-lint/warning.hbs" 'web-mode
    '(1 nil warning "Non-translated string used" :id "no-bare-strings" :checker ember-template)))
 
-(defun flycheck-ert-erlang-shows-column ()
+(defun flycheck-ert-erlang-shows-column (mode-sym)
   ;; erl -version shows the version of the "erts" application in the current otp
   ;; release. This is the "Erlang RunTime System" and has nothing to do with
   ;; flycheck-ert!
-  (let* ((erts-version (string-trim (shell-command-to-string "erl -version")))
+  (let* ((cmd (cond ((eq mode-sym 'erlang) "erl -version")
+                    ((eq mode-sym 'erlang-rebar3) "rebar3 version")
+                    (t (error "unknown erlang mode symbol"))))
+         (erts-version (string-trim (shell-command-to-string cmd)))
          (version-string (car (last (split-string erts-version))))
          (major-version-str (car (split-string version-string "\\.")))
          (major-version (string-to-number major-version-str)))
@@ -3604,7 +3607,7 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
       (error "failed to check the version of erlang's erts application"))))
 
 (flycheck-ert-def-checker-test erlang erlang error
-  (let ((col (flycheck-ert-erlang-shows-column)))
+  (let ((col (flycheck-ert-erlang-shows-column 'erlang)))
     (shut-up
       (flycheck-ert-should-syntax-check
        "language/erlang/erlang/error.erl" 'erlang-mode
@@ -3612,21 +3615,21 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
        '(7 (when col 1) error "head mismatch" :checker erlang)))))
 
 (flycheck-ert-def-checker-test erlang erlang warning
-  (let ((col (flycheck-ert-erlang-shows-column)))
+  (let ((col (flycheck-ert-erlang-shows-column 'erlang)))
     (flycheck-ert-should-syntax-check
      "language/erlang/erlang/warning.erl" 'erlang-mode
      '(3 (when col 2) warning "export_all flag enabled - all functions will be exported" :checker erlang)
      '(6 (when col 37) warning "wrong number of arguments in format call" :checker erlang)))
 
 (flycheck-ert-def-checker-test erlang-rebar3 erlang error
-  (let ((col (flycheck-ert-erlang-shows-column)))
+  (let ((col (flycheck-ert-erlang-shows-column 'erlang-rebar3)))
     (flycheck-ert-should-syntax-check
      "language/erlang/rebar3/src/erlang-error.erl" 'erlang-mode
      '(3 (when col 2) warning "export_all flag enabled - all functions will be exported" :checker erlang-rebar3)
      '(7 (when col 1) error "head mismatch" :checker erlang-rebar3)))
 
 (flycheck-ert-def-checker-test erlang-rebar3 erlang build
-  (let ((col (flycheck-ert-erlang-shows-column)))
+  (let ((col (flycheck-ert-erlang-shows-column 'erlang-rebar3)))
     (shut-up
       (flycheck-ert-should-syntax-check
        "language/erlang/rebar3/_checkouts/dependency/src/dependency.erl" 'erlang-mode
