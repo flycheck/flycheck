@@ -13,6 +13,7 @@ New Features
   - [#2052]: Sass with Stylelint
   - [#2013]: Nix with ``statix``
   - [#1935]: Chef (Ruby) with ``cookstyle``
+  - [#1915]: Markdown with ``pymarkdown``
 
 - [#1873]: Add error explainer to ``perl-perlcritic``.
 - [#1875]: Add error-explainer to ``css-stylelint``.

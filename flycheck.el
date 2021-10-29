@@ -180,6 +180,7 @@
     lua
     markdown-markdownlint-cli
     markdown-mdl
+    markdown-pymarkdown
     nix
     nix-linter
     opam
@@ -11051,6 +11052,29 @@ See URL `https://github.com/markdownlint/markdownlint'."
   (lambda (errors)
     (flycheck-sanitize-errors
      (flycheck-remove-error-file-names "(stdin)" errors)))
+  :modes (markdown-mode gfm-mode))
+
+(flycheck-def-config-file-var flycheck-markdown-pymarkdown-config
+    markdown-pymarkdown nil
+  :package-version '(flycheck . "34"))
+
+(flycheck-define-checker markdown-pymarkdown
+  "Markdown checker using PyMarkdown.
+
+See URL `https://pypi.org/project/pymarkdownlnt/'."
+  :command ("pymarkdown"
+            (config-file "--config" flycheck-markdown-markdownlint-cli-config)
+            "scan"
+            source)
+  :error-patterns
+  ((error line-start
+          (file-name) ":" line
+          (? ":" column) ": " (id (one-or-more alnum))
+          ": " (message) line-end))
+  :error-filter
+  (lambda (errors)
+    (flycheck-sanitize-errors
+     (flycheck-remove-error-file-names "(string)" errors)))
   :modes (markdown-mode gfm-mode))
 
 (flycheck-define-checker nix

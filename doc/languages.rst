@@ -840,6 +840,13 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       .. syntax-checker-config-file:: flycheck-markdown-mdl-style
 
+   .. syntax-checker:: markdown-pymarkdown
+
+      Check Markdown with `PyMarkdown
+      <https://pypi.org/project/pymarkdownlnt/>`_.
+
+      .. syntax-checker-config-file:: flycheck-markdown-pymarkdown-config
+
 .. supported-language:: Nix
 
    .. syntax-checker:: nix
