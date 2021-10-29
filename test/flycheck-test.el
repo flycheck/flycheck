@@ -4130,7 +4130,7 @@ Perhaps:
   ;; because Click, used by ProseLint, when running with python 3 will refuse to
   ;; work unless an Unicode locale is exported. See:
   ;; http://click.pocoo.org/5/python3/#python-3-surrogate-handling
-  (let ((flycheck-disabled-checkers '(markdown-markdownlint-cli markdown-mdl)))
+  (let ((flycheck-disabled-checkers '(markdown-markdownlint-cli markdown-mdl markdown-pymarkdown)))
     (flycheck-ert-with-env '(("LC_ALL" . nil))
       (flycheck-ert-should-syntax-check
        "language/text/text.txt" '(text-mode markdown-mode)
@@ -4424,7 +4424,7 @@ Perhaps:
        :id "MD009/no-trailing-spaces" :checker markdown-markdownlint-cli)))
 
 (flycheck-ert-def-checker-test markdown-mdl markdown nil
-  (let ((flycheck-disabled-checkers '(markdown-markdownlint-cli)))
+  (let ((flycheck-disabled-checkers '(markdown-markdownlint-cli markdown-pymarkdown)))
     (flycheck-ert-should-syntax-check
      "language/markdown.md" 'markdown-mode
      '(1 nil error "First header should be a top level header"
@@ -4433,6 +4433,19 @@ Perhaps:
          :id "MD012" :checker markdown-mdl)
      '(4 nil error "Trailing spaces"
          :id "MD009" :checker markdown-mdl))))
+
+(flycheck-ert-def-checker-test markdown-pymarkdown markdown nil
+  (let ((flycheck-disabled-checkers '(markdown-markdownlint-cli markdown-mdl)))
+    (flycheck-ert-should-syntax-check
+     "language/markdown.md" 'markdown-mode
+     '(1 nil error "Headings should be surrounded by blank lines. [Expected: 1; Actual: 2; Below] (blanks-around-headings,blanks-around-headers)"
+         :id "MD022" :checker markdown-pymarkdown)
+     '(1 nil error "First line in file should be a top level heading (first-line-heading,first-line-h1)"
+         :id "MD041" :checker markdown-pymarkdown)
+     '(3 nil error "Multiple consecutive blank lines [Expected: 1, Actual: 2] (no-multiple-blanks)"
+         :id "MD012" :checker markdown-pymarkdown)
+     '(4 nil error "Trailing spaces [Expected: 0 or 2; Actual: 7] (no-trailing-spaces)"
+         :id "MD009" :checker markdown-pymarkdown))))
 
 (flycheck-ert-def-checker-test nix nix nil
   (flycheck-ert-should-syntax-check
