@@ -3597,14 +3597,10 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
                     ((eq mode-sym 'erlang-rebar3) "rebar3 version")
                     (t (error "unknown erlang mode symbol"))))
          (erts-version (string-trim (shell-command-to-string cmd)))
-         (version-string (car (last (split-string erts-version))))
-         (major-version-str (car (split-string version-string "\\.")))
-         (major-version (string-to-number major-version-str)))
-    (if (> major-version 0)
-        ;; The version of erts released with OTP 24 is 12.1.0. This is the first
-        ;; time columns were added to compile warnings/errors.
-        (>= major-version 12)
-      (error "failed to check the version of erlang's erts application"))))
+         (version-string (car (last (split-string erts-version)))))
+    ;; The version of erts released with OTP 24 is 12.0. This is the first
+    ;; time columns were added to compile warnings/errors.
+    (version<= "12" version-string)))
 
 (flycheck-ert-def-checker-test erlang erlang error
   (let ((col (flycheck-ert-erlang-shows-column 'erlang)))
