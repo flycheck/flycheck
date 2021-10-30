@@ -11431,7 +11431,8 @@ versions inferior to 1.25)."
 
 Execute `cargo --list' to find out whether COMMAND is present."
   (let ((cargo (funcall flycheck-executable-find "cargo")))
-    (member command (mapcar #'string-trim-left
+    (cl-some (lambda (x) (string-prefix-p command x))
+             (mapcar #'string-trim-left
                             (ignore-errors (process-lines cargo "--list"))))))
 
 (defun flycheck-rust-valid-crate-type-p (crate-type)
