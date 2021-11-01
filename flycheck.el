@@ -5977,18 +5977,13 @@ Return nil (or raise an error if ERROR is non-nil) when CHECKER's
 executable cannot be found, and return a numeric exit status or a
 signal description string otherwise.  CHECKER's input is taken
 from INFILE, and its output is sent to DESTINATION, as in
-`start-file-process'."
+`call-process'."
   (if-let (executable (flycheck-find-checker-executable checker))
       (condition-case err
-          ;; `start-file-process' runs synchronously, like `call-process',
-          ;; when let bound.`start-file-process' is required to support remote
-          ;; processes. See https://github.com/flycheck/flycheck/pull/1842
-          (let ((rc (apply #'start-file-process
-                           executable infile destination nil args)))
-            rc)
+          (apply #'process-file executable infile destination nil args)
         (error (when error (signal (car err) (cdr err)))))
     (when error
-      (user-error "Cannot find `%s' using `flycheck-find-checker-executable'"
+      (user-error "Cannot find `%s' using `flycheck-executable-find'"
                   (flycheck-checker-executable checker)))))
 
 (defun flycheck-call-checker-process-for-output
@@ -6305,12 +6300,10 @@ and rely on Emacs' own buffering and chunking."
           ;; See https://github.com/flycheck/flycheck/issues/298 for an
           ;; example for such a conflict.
           ;;
-          ;; `start-file-process' runs synchronously, like `call-process',
-          ;; when let bound.`start-file-process' is required to support remote
-          ;; processes. See https://github.com/flycheck/flycheck/pull/1842
-          (let ((rc (apply 'start-file-process
-                           (format "flycheck-%s" checker) nil command)))
-            (setq process rc))
+          ;; Use `start-file-process' instead of `start-process' to run the
+          ;; process in a remote directory.
+          (setq process (apply 'start-file-process
+                               (format "flycheck-%s" checker) nil command))
           ;; Process sentinels can be called while sending input to the process.
           ;; We want to record errors raised by process-send before calling
           ;; `flycheck-handle-signal', so initially just accumulate events.
