@@ -4065,7 +4065,7 @@ Return ERRORS, modified in-place."
     (and file-name
          flycheck-relevant-error-other-file-show
          (or (null buffer-file-name)
-             (not (flycheck-same-files-p buffer-file-name file-name)))
+             (not (flycheck-same-files-p (buffer-file-local-name) file-name)))
          (<= (flycheck-error-level-severity
               flycheck-relevant-error-other-file-minimum-level)
              (flycheck-error-level-severity (flycheck-error-level err))))))
@@ -4084,7 +4084,7 @@ otherwise."
         (and (not file-name) (not buffer-file-name))
         ;; Both have files, and they match
         (and buffer-file-name file-name
-             (flycheck-same-files-p file-name buffer-file-name))
+             (flycheck-same-files-p file-name (buffer-file-local-name)))
         ;; This is a significant error from another file
         (flycheck-relevant-error-other-file-p err))
        message
@@ -5388,7 +5388,9 @@ POS defaults to `point'."
   (let* ((error-copy (copy-flycheck-error error))
          (filename (flycheck-error-filename error))
          (other-file-error (flycheck-relevant-error-other-file-p error))
-         (buffer (if filename
+         (remote (file-remote-p (buffer-file-name
+                                 (flycheck-error-buffer error))))
+         (buffer (if (and filename (not remote))
                      (find-file-noselect filename)
                    (flycheck-error-buffer error))))
     (when (buffer-live-p buffer)
@@ -9869,7 +9871,7 @@ for more information about the custom directories."
   "Whether there is a valid eslint config for the current buffer."
   (eql 0 (flycheck-call-checker-process
           'javascript-eslint nil nil nil
-          "--print-config" (or buffer-file-name "index.js"))))
+          "--print-config" (or (buffer-file-local-name) "index.js"))))
 
 (defun flycheck-parse-eslint (output checker buffer)
   "Parse ESLint errors/warnings from JSON OUTPUT.
