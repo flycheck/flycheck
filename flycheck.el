@@ -1432,7 +1432,8 @@ Use `flycheck-temp-prefix' as prefix, and add the directory to
 `flycheck-temporaries'.
 
 Return the path of the directory"
-  (let* ((tempdir (make-temp-file flycheck-temp-prefix 'directory)))
+  (let* ((temporary-file-directory (temporary-file-directory))
+         (tempdir (make-temp-file flycheck-temp-prefix 'directory)))
     (push tempdir flycheck-temporaries)
     tempdir))
 
@@ -6140,20 +6141,20 @@ are substituted within the body of cells!"
   (pcase arg
     ((pred stringp) (list arg))
     (`source
-     (list (flycheck-save-buffer-to-temp #'flycheck-temp-file-system)))
+     (list (file-local-name (flycheck-save-buffer-to-temp #'flycheck-temp-file-system))))
     (`source-inplace
      (list (flycheck-save-buffer-to-temp #'flycheck-temp-file-inplace)))
     (`(source ,suffix)
      (list (flycheck-save-buffer-to-temp
-            (lambda (filename) (flycheck-temp-file-system filename suffix)))))
+            (lambda (filename) (file-local-name (flycheck-temp-file-system filename suffix))))))
     (`(source-inplace ,suffix)
      (list (flycheck-save-buffer-to-temp
             (lambda (filename) (flycheck-temp-file-inplace filename suffix)))))
     (`source-original (list (or (buffer-file-local-name) "")))
-    (`temporary-directory (list (flycheck-temp-dir-system)))
+    (`temporary-directory (list (file-local-name (flycheck-temp-dir-system))))
     (`temporary-file-name
      (let ((directory (flycheck-temp-dir-system)))
-       (list (make-temp-name (expand-file-name "flycheck" directory)))))
+       (list (file-local-name (make-temp-name (expand-file-name "flycheck" directory))))))
     (`null-device (list null-device))
     (`(config-file ,option-name ,file-name-var)
      (when-let* ((value (symbol-value file-name-var))
@@ -10379,7 +10380,7 @@ See https://github.com/processing/processing/wiki/Command-Line"
             ;; picky
             (eval (concat "--sketch=" (file-name-directory
                                        (buffer-file-local-name))))
-            (eval (concat "--output=" (flycheck-temp-dir-system)))
+            (eval (concat "--output=" (file-local-name (flycheck-temp-dir-system))))
             "--build")
   :error-patterns
   ((error line-start (file-name) ":" line ":" column
@@ -10438,7 +10439,7 @@ are relative to the file being checked."
 
 See URL `https://developers.google.com/protocol-buffers/'."
   :command ("protoc" "--error_format" "gcc"
-            (eval (concat "--java_out=" (flycheck-temp-dir-system)))
+            (eval (concat "--java_out=" (file-local-name (flycheck-temp-dir-system))))
             ;; Add the current directory to resolve imports
             (eval (concat "--proto_path="
                           (file-name-directory (buffer-file-local-name))))
