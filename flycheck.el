@@ -7419,7 +7419,7 @@ set, since checkers often omit redundant end lines (as in
          :checker checker
          :filename (if (or (null filename) (string-empty-p filename))
                        (buffer-file-local-name)
-                     filename)
+                     (file-local-name filename))
          :end-line (or end-line (and end-column line))
          :end-column end-column)))))
 
