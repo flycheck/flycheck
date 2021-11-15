@@ -1512,11 +1512,11 @@ Return t if CHECKER does not use temporary files."
   "Save buffer to temp file returned by TEMP-FILE-FN.
 
 Return the name of the temporary file."
-  (let ((filename (funcall temp-file-fn (buffer-file-local-name))))
+  (let ((filename (funcall temp-file-fn (buffer-file-name))))
     ;; Do not flush short-lived temporary files onto disk
     (let ((write-region-inhibit-fsync t))
       (flycheck-save-buffer-to-file filename))
-    filename))
+    (file-local-name filename)))
 
 (defun flycheck-prepend-with-option (option items &optional prepend-fn)
   "Prepend OPTION to each item in ITEMS, using PREPEND-FN.
