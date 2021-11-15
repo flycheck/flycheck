@@ -4055,7 +4055,7 @@ Return ERRORS, modified in-place."
   (seq-do (lambda (err)
             (setf (flycheck-error-filename err)
                   (if-let (filename (flycheck-error-filename err))
-                      (expand-file-name filename directory)
+                      (file-local-name (expand-file-name filename directory))
                     (buffer-file-local-name))))
           errors)
   errors)
