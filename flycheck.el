@@ -6158,11 +6158,11 @@ are substituted within the body of cells!"
     (`null-device (list null-device))
     (`(config-file ,option-name ,file-name-var)
      (when-let* ((value (symbol-value file-name-var))
-                 (file-name (flycheck-locate-config-file value checker)))
+                 (file-name (file-local-name (flycheck-locate-config-file value checker))))
        (flycheck-prepend-with-option option-name (list file-name))))
     (`(config-file ,option-name ,file-name-var ,prepend-fn)
      (when-let* ((value (symbol-value file-name-var))
-                 (file-name (flycheck-locate-config-file value checker)))
+                 (file-name (file-local-name (flycheck-locate-config-file value checker))))
        (flycheck-prepend-with-option option-name (list file-name) prepend-fn)))
     (`(option ,option-name ,variable)
      (when-let (value (symbol-value variable))
@@ -6638,7 +6638,7 @@ directory of the current buffer and all ancestors thereof (see
 absolute path.  Otherwise return nil.
 
 _CHECKER is ignored."
-  (when-let* ((basefile (buffer-file-local-name))
+  (when-let* ((basefile (buffer-file-name))
               (directory (locate-dominating-file basefile filename)))
     (expand-file-name filename directory)))
 
@@ -6647,7 +6647,8 @@ _CHECKER is ignored."
 
 Return the absolute path, if FILENAME exists in the user's home
 directory, or nil otherwise."
-  (let ((path (expand-file-name filename "~")))
+  (let* ((home (or (file-remote-p (buffer-file-name)) "~"))
+         (path (expand-file-name filename home)))
     (when (file-exists-p path)
       path)))
 
