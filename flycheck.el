@@ -8358,7 +8358,8 @@ See URL `https://stylelint.io/'."
             (option-flag "--quiet" flycheck-stylelint-quiet)
             (config-file "--config" flycheck-stylelintrc)
             "--stdin-filename" (eval (or (buffer-file-local-name)
-                                         "style.css")))
+                                         "style.css"))
+            source)
   :standard-input t
   :verify (lambda (_) (flycheck--stylelint-verify 'css-stylelint))
   :error-parser flycheck-parse-stylelint
@@ -10063,7 +10064,8 @@ See URL `https://stylelint.io/'."
   :command ("stylelint"
             (eval flycheck-stylelint-args)
             (option-flag "--quiet" flycheck-stylelint-quiet)
-            (config-file "--config" flycheck-stylelintrc))
+            (config-file "--config" flycheck-stylelintrc)
+            source)
   :standard-input t
   :verify (lambda (_) (flycheck--stylelint-verify 'less-stylelint))
   :error-parser flycheck-parse-stylelint
@@ -12173,7 +12175,8 @@ See URL `https://stylelint.io/'."
   :command ("stylelint"
             (eval flycheck-stylelint-args)
             (option-flag "--quiet" flycheck-stylelint-quiet)
-            (config-file "--config" flycheck-stylelintrc))
+            (config-file "--config" flycheck-stylelintrc)
+            source)
   :standard-input t
   :verify (lambda (_) (flycheck--stylelint-verify 'scss-stylelint))
   :error-parser flycheck-parse-stylelint
