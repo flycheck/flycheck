@@ -483,6 +483,11 @@ sandboxes."
   :risky t)
 
 (defun file-local-name-pass-nil (file)
+  "Return the local name component of FILE.
+This function is a wrapper for `file-local-name' function.
+if `file-local-name' is available, this function invokes it only if
+FILE is not nil.
+If FILEL is nil or `file-local-name' is not available, returns FILE."
   (if (fboundp 'file-local-name)
       (and file (file-local-name file))
     file))
