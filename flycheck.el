@@ -482,6 +482,9 @@ sandboxes."
   :package-version '(flycheck . "32")
   :risky t)
 
+(defun file-local-name-pass-nil (file)
+  (and file (file-local-name file)))
+
 ;; This can be removed when Emacs 27.1 is the oldest supported version.
 ;; See https://github.com/flycheck/flycheck/pull/1842
 (defun executable-find-add-remote (args)
