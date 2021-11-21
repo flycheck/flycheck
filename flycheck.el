@@ -483,7 +483,9 @@ sandboxes."
   :risky t)
 
 (defun file-local-name-pass-nil (file)
-  (and file (file-local-name file)))
+  (if (fboundp 'file-local-name)
+      (and file (file-local-name file))
+    file))
 
 ;; This can be removed when Emacs 27.1 is the oldest supported version.
 ;; See https://github.com/flycheck/flycheck/pull/1842
@@ -1435,7 +1437,10 @@ Use `flycheck-temp-prefix' as prefix, and add the directory to
 `flycheck-temporaries'.
 
 Return the path of the directory"
-  (let* ((temporary-file-directory (temporary-file-directory))
+  (let* ((temporary-file-directory
+          (if (fboundp 'temporary-file-directory)
+              (temporary-file-directory)
+            temporary-file-directory))
          (tempdir (make-temp-file flycheck-temp-prefix 'directory)))
     (push tempdir flycheck-temporaries)
     tempdir))
