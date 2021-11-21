@@ -497,7 +497,7 @@ sandboxes."
 (defun buffer-file-local-name (&optional buffer)
   "Return the local file-name of the current buffer or BUFFER when specified."
   (let ((file-name (buffer-file-name (or buffer (current-buffer)))))
-    (when file-name (file-local-name file-name))))
+    (when file-name (file-local-name-pass-nil file-name))))
 
 (defun flycheck-default-executable-find (executable)
   "Resolve EXECUTABLE to a full path.
@@ -1519,7 +1519,7 @@ Return the name of the temporary file."
     ;; Do not flush short-lived temporary files onto disk
     (let ((write-region-inhibit-fsync t))
       (flycheck-save-buffer-to-file filename))
-    (file-local-name filename)))
+    (file-local-name-pass-nil filename)))
 
 (defun flycheck-prepend-with-option (option items &optional prepend-fn)
   "Prepend OPTION to each item in ITEMS, using PREPEND-FN.
@@ -4058,7 +4058,8 @@ Return ERRORS, modified in-place."
   (seq-do (lambda (err)
             (setf (flycheck-error-filename err)
                   (if-let (filename (flycheck-error-filename err))
-                      (file-local-name (expand-file-name filename directory))
+                      (file-local-name-pass-nil
+                       (expand-file-name filename directory))
                     (buffer-file-local-name))))
           errors)
   errors)
@@ -6144,28 +6145,34 @@ are substituted within the body of cells!"
   (pcase arg
     ((pred stringp) (list arg))
     (`source
-     (list (file-local-name (flycheck-save-buffer-to-temp #'flycheck-temp-file-system))))
+     (list (file-local-name-pass-nil
+            (flycheck-save-buffer-to-temp #'flycheck-temp-file-system))))
     (`source-inplace
      (list (flycheck-save-buffer-to-temp #'flycheck-temp-file-inplace)))
     (`(source ,suffix)
      (list (flycheck-save-buffer-to-temp
-            (lambda (filename) (file-local-name (flycheck-temp-file-system filename suffix))))))
+            (lambda (filename) (file-local-name-pass-nil
+                                (flycheck-temp-file-system filename suffix))))))
     (`(source-inplace ,suffix)
      (list (flycheck-save-buffer-to-temp
             (lambda (filename) (flycheck-temp-file-inplace filename suffix)))))
     (`source-original (list (or (buffer-file-local-name) "")))
-    (`temporary-directory (list (file-local-name (flycheck-temp-dir-system))))
+    (`temporary-directory
+     (list (file-local-name-pass-nil (flycheck-temp-dir-system))))
     (`temporary-file-name
      (let ((directory (flycheck-temp-dir-system)))
-       (list (file-local-name (make-temp-name (expand-file-name "flycheck" directory))))))
+       (list (file-local-name-pass-nil
+              (make-temp-name (expand-file-name "flycheck" directory))))))
     (`null-device (list null-device))
     (`(config-file ,option-name ,file-name-var)
      (when-let* ((value (symbol-value file-name-var))
-                 (file-name (file-local-name (flycheck-locate-config-file value checker))))
+                 (file-name (file-local-name-pass-nil
+                             (flycheck-locate-config-file value checker))))
        (flycheck-prepend-with-option option-name (list file-name))))
     (`(config-file ,option-name ,file-name-var ,prepend-fn)
      (when-let* ((value (symbol-value file-name-var))
-                 (file-name (file-local-name (flycheck-locate-config-file value checker))))
+                 (file-name (file-local-name-pass-nil
+                             (flycheck-locate-config-file value checker))))
        (flycheck-prepend-with-option option-name (list file-name) prepend-fn)))
     (`(option ,option-name ,variable)
      (when-let (value (symbol-value variable))
@@ -7423,7 +7430,7 @@ set, since checkers often omit redundant end lines (as in
          :checker checker
          :filename (if (or (null filename) (string-empty-p filename))
                        (buffer-file-local-name)
-                     (file-local-name filename))
+                     (file-local-name-pass-nil filename))
          :end-line (or end-line (and end-column line))
          :end-column end-column)))))
 
@@ -10386,7 +10393,8 @@ See https://github.com/processing/processing/wiki/Command-Line"
             ;; picky
             (eval (concat "--sketch=" (file-name-directory
                                        (buffer-file-local-name))))
-            (eval (concat "--output=" (file-local-name (flycheck-temp-dir-system))))
+            (eval (concat "--output=" (file-local-name-pass-nil
+                                       (flycheck-temp-dir-system))))
             "--build")
   :error-patterns
   ((error line-start (file-name) ":" line ":" column
@@ -10445,7 +10453,8 @@ are relative to the file being checked."
 
 See URL `https://developers.google.com/protocol-buffers/'."
   :command ("protoc" "--error_format" "gcc"
-            (eval (concat "--java_out=" (file-local-name (flycheck-temp-dir-system))))
+            (eval (concat "--java_out=" (file-local-name-pass-nil
+                                         (flycheck-temp-dir-system))))
             ;; Add the current directory to resolve imports
             (eval (concat "--proto_path="
                           (file-name-directory (buffer-file-local-name))))
