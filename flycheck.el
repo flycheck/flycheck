@@ -6657,7 +6657,8 @@ _CHECKER is ignored."
 
 Return the absolute path, if FILENAME exists in the user's home
 directory, or nil otherwise."
-  (let* ((home (or (file-remote-p (buffer-file-name)) "~"))
+  (let* ((home (or (and (buffer-file-name) (file-remote-p (buffer-file-name)))
+                   "~"))
          (path (expand-file-name filename home)))
     (when (file-exists-p path)
       path)))
