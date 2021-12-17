@@ -8270,6 +8270,12 @@ See URL `http://stylelint.io/'."
   :package-version '(flycheck . "32"))
 (make-variable-buffer-local 'flycheck-cuda-language-standard)
 
+(flycheck-def-option-var flycheck-cuda-gencodes nil cuda-nvcc
+  "Our real and virtual GPU architectures to pass to nvcc."
+  :type '(repeat (file :tag "GPU architecture"))
+  :safe #'flycheck-string-list-p
+  :package-version '(flycheck . "32"))
+
 (flycheck-def-option-var flycheck-cuda-includes nil cuda-nvcc
   "Our include directories to pass to nvcc."
   :type '(repeat (file :tag "Include file"))
@@ -8299,6 +8305,7 @@ See URL `https://developer.nvidia.com/cuda-llvm-compiler'."
             "--x=cu" ;; explicitly specify it's a CUDA language file
             (option "-std=" flycheck-cuda-language-standard concat)
             (option-list "-include" flycheck-cuda-includes)
+            (option-list "-gencode" flycheck-cuda-gencodes)
             (option-list "-D" flycheck-cuda-definitions concat)
             (option-list "-I" flycheck-cuda-include-path)
             source)
