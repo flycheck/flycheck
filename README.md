@@ -2,6 +2,7 @@
 
 [![License GPL 3](https://img.shields.io/github/license/flycheck/flycheck.svg)][COPYING]
 [![Join the chat](https://img.shields.io/gitter/room/flycheck/flycheck.svg)](https://gitter.im/flycheck/flycheck)
+[![MELPA](https://melpa.org/packages/flycheck-badge.svg)](https://melpa.org/#/flycheck)
 [![MELPA stable version](http://stable.melpa.org/packages/flycheck-badge.svg)](https://stable.melpa.org/#/flycheck)
 [![Build Status](https://img.shields.io/travis/flycheck/flycheck/master.svg)](https://travis-ci.org/flycheck/flycheck)
 
