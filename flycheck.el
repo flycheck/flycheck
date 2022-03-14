@@ -10779,14 +10779,14 @@ expression, which selects linters for lintr."
   "Whether CHECKER (R) has installed the `lintr' library."
   (eql 0 (flycheck-call-checker-process
           checker nil nil nil
-          "--slave" "--restore" "--no-save" "-e"
+          "--slave" "--no-restore" "--no-save" "-e"
           "library('lintr')")))
 
 (flycheck-define-checker r-lintr
   "An R style and syntax checker using the lintr package.
 
 See URL `https://github.com/jimhester/lintr'."
-  :command ("R" "--slave" "--restore" "--no-save" "-e"
+  :command ("R" "--slave" "--no-restore" "--no-save" "-e"
             (eval (concat
                    "library(lintr);"
                    "try(lint(commandArgs(TRUE)"
