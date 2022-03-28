@@ -17,8 +17,8 @@
     which they were returned by checkers.  In previous versions of Flycheck,
     this list was sorted by error position and severity. [GH-1749]
 
-32-cvs (frozen on May 3rd, 2020)
-================================
+32 (frozen on May 3rd, 2020, released Mar 28, 2022)
+===================================================
 
 - Highlights
 
