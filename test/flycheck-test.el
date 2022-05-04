@@ -5136,7 +5136,7 @@ The manifest path is relative to
   (flycheck-ert-should-syntax-check
    "language/verilog/verilator_warning.v" 'verilog-mode
    '(2 nil warning "Signal is not driven, nor used: 'val'"
-       :checker verilog-verilator)))
+       :checker verilog-verilator :id "UNUSED")))
 
 (flycheck-ert-def-checker-test vhdl-ghdl vhdl error
   (flycheck-ert-should-syntax-check

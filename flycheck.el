@@ -7282,7 +7282,7 @@ Split the output into error tokens, using all regular expressions
 from the error PATTERNS.  An error token is simply a string
 containing a single error from OUTPUT.  Such a token can then be
 parsed into a structured error by applying the PATTERNS again,
-see `flycheck-parse-errors-with-patterns'.
+see `flycheck-parse-error-with-patterns'.
 
 Return a list of error tokens."
   (let ((regexp (flycheck-get-regexp patterns))
@@ -12296,14 +12296,18 @@ Relative paths are relative to the file being checked."
   "A Verilog syntax checker using the Verilator Verilog HDL simulator.
 
 See URL `https://www.veripool.org/wiki/verilator'."
-  :command ("verilator" "--lint-only" "-Wall"
+  :command ("verilator" "--lint-only" "-Wall" "--quiet-exit"
             (option-list "-I" flycheck-verilator-include-path concat)
             source)
   :error-patterns
-  ((warning line-start "%Warning-" (zero-or-more not-newline) ": "
-            (file-name) ":" line ": " (message) line-end)
-   (error line-start "%Error: " (file-name) ":"
-          line ": " (message) line-end))
+  ((warning line-start "%Warning"
+            (? "-" (id (+ (any "0-9A-Z_")))) ": "
+            (? (file-name) ":" line ":" (? column ":") " ")
+            (message) line-end)
+   (error line-start "%Error"
+          (? "-" (id (+ (any "0-9A-Z_")))) ": "
+          (? (file-name) ":" line ":" (? column ":") " ")
+          (message) line-end))
   :modes verilog-mode)
 
 (flycheck-def-option-var flycheck-ghdl-language-standard nil vhdl-ghdl
