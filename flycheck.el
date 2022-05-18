@@ -8303,6 +8303,7 @@ See URL `https://developer.nvidia.com/cuda-llvm-compiler'."
             "-c" ;; Compile Only
             "--output-file" "/dev/null" ;; avoid creating output .o
             "--x=cu" ;; explicitly specify it's a CUDA language file
+            "-rdc=true" ;; Allow linking with external cuda funcions
             (option "-std=" flycheck-cuda-language-standard concat)
             (option-list "-include" flycheck-cuda-includes)
             (option-list "-gencode" flycheck-cuda-gencodes)
