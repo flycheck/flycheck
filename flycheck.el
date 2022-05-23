@@ -9933,7 +9933,10 @@ See URL `https://lesscss.org'."
 See URL `https://stylelint.io/'."
   :command ("stylelint"
             (eval flycheck-stylelint-args)
-            "--syntax" "less"
+            (eval (when (< (flycheck-stylelint-get-major-version
+                            'less-stylelint)
+                           14)
+                    (list "--syntax" "less")))
             (option-flag "--quiet" flycheck-stylelint-quiet)
             (config-file "--config" flycheck-stylelintrc))
   :standard-input t
@@ -12021,13 +12024,26 @@ See URL `https://github.com/brigade/scss-lint'."
                     '(bold error)
                   'success)))))))
 
+(defun flycheck-stylelint-get-major-version (checker)
+  "Return major version of stylelint."
+  (let ((cb (current-buffer)))
+    (with-temp-buffer
+      (let ((temp-buffer (current-buffer)))
+        (with-current-buffer cb
+          (flycheck-call-checker-process
+           checker nil temp-buffer nil "--version"))
+        (string-to-number (car (split-string (buffer-string) "\\.")))))))
+
 (flycheck-define-checker scss-stylelint
   "A SCSS syntax and style checker using stylelint.
 
 See URL `https://stylelint.io/'."
   :command ("stylelint"
             (eval flycheck-stylelint-args)
-            "--syntax" "scss"
+            (eval (when (< (flycheck-stylelint-get-major-version
+                            'scss-stylelint)
+                           14)
+                    (list "--syntax" "scss")))
             (option-flag "--quiet" flycheck-stylelint-quiet)
             (config-file "--config" flycheck-stylelintrc))
   :standard-input t
