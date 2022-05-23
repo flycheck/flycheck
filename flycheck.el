@@ -8235,6 +8235,7 @@ See URL `https://stylelint.io/'."
             (config-file "--config" flycheck-stylelintrc)
             "--stdin-filename" (eval (or (buffer-file-name) "style.css")))
   :standard-input t
+  :verify (lambda (_) (flycheck-stylelint-verify 'css-stylelint))
   :error-parser flycheck-parse-stylelint
   :predicate flycheck-buffer-nonempty-p
   :modes (css-mode css-ts-mode)
@@ -9940,6 +9941,7 @@ See URL `https://stylelint.io/'."
             (option-flag "--quiet" flycheck-stylelint-quiet)
             (config-file "--config" flycheck-stylelintrc))
   :standard-input t
+  :verify (lambda (_) (flycheck-stylelint-verify 'less-stylelint))
   :error-parser flycheck-parse-stylelint
   :predicate flycheck-buffer-nonempty-p
   :modes (less-css-mode))
@@ -12024,6 +12026,25 @@ See URL `https://github.com/brigade/scss-lint'."
                     '(bold error)
                   'success)))))))
 
+(defun flycheck-stylelint-config-exists-p (checker)
+  "Whether there is a valid stylelint config for the current buffer."
+  (eql 0 (flycheck-call-checker-process
+          checker nil nil nil
+          "--print-config" (or buffer-file-name "index.js"))))
+
+(defun flycheck-stylelint-verify (checker)
+  "Verify stylelint setup for CHECKER."
+  (let ((have-config (flycheck-stylelint-config-exists-p checker)))
+    (list
+     (flycheck-verification-result-new
+      :label "configuration available"
+      :message (if have-config "yes" "no config file found")
+      :face (if have-config 'success '(bold error)))
+     (flycheck-verification-result-new
+      :label "stylecheck version"
+      :message (number-to-string (flycheck-stylelint-get-major-version checker))
+      :face 'success))))
+
 (defun flycheck-stylelint-get-major-version (checker)
   "Return major version of stylelint."
   (let ((cb (current-buffer)))
@@ -12047,6 +12068,7 @@ See URL `https://stylelint.io/'."
             (option-flag "--quiet" flycheck-stylelint-quiet)
             (config-file "--config" flycheck-stylelintrc))
   :standard-input t
+  :verify (lambda (_) (flycheck-stylelint-verify 'scss-stylelint))
   :error-parser flycheck-parse-stylelint
   :predicate flycheck-buffer-nonempty-p
   :modes (scss-mode))
