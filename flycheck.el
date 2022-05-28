@@ -10772,8 +10772,8 @@ disables caching in case there are problems."
 (flycheck-def-option-var flycheck-lintr-linters "default_linters" r-lintr
   "Linters to use with lintr.
 
-The value of this variable is a string containing an R
-expression, which selects linters for lintr."
+The value of this variable is a string which is the argument `linters = `
+passing to the lintr::lint() function,"
   :type 'string
   :risky t
   :package-version '(flycheck . "0.23"))
@@ -10794,7 +10794,7 @@ See URL `https://github.com/jimhester/lintr'."
                    "library(lintr);"
                    "try(lint(commandArgs(TRUE)"
                    ", cache=" (if flycheck-lintr-caching "TRUE" "FALSE")
-                   ", " flycheck-lintr-linters
+                   ", linters=" flycheck-lintr-linters
                    "))"))
             "--args" source)
   :error-patterns
