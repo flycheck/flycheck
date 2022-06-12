@@ -4327,7 +4327,17 @@ show the indicator."
    #b00110110
    #b01101100
    #b11011000]
-  "Bitmaps used to indicate errors in the fringes.")
+  "Bitmaps used to indicate errors in the left fringes.")
+
+(defconst flycheck-fringe-bitmap-double-left-arrow
+  [#b00011011
+   #b00110110
+   #b01101100
+   #b11011000
+   #b01101100
+   #b00110110
+   #b00011011]
+  "Bitmaps used to indicate errors in the right fringes.")
 
 (defconst flycheck-fringe-bitmap-double-arrow-hi-res
   [#b1111001111000000
@@ -4342,7 +4352,22 @@ show the indicator."
    #b0011110011110000
    #b0111100111100000
    #b1111001111000000]
-  "High-resolution bitmap used to indicate errors in the fringes.")
+  "High-resolution bitmap used to indicate errors in the left fringes.")
+
+(defconst flycheck-fringe-bitmap-double-left-arrow-hi-res
+  [#b0000001111001111
+   #b0000011110011110
+   #b0000111100111100
+   #b0001111001111000
+   #b0011110011110000
+   #b0111100111100000
+   #b0111100111100000
+   #b0011110011110000
+   #b0001111001111000
+   #b0000111100111100
+   #b0000011110011110
+   #b0000001111001111]
+  "High-resolution bitmap used to indicate errors in the right fringes.")
 
 (defconst flycheck-fringe-bitmap-continuation
   [#b1000000010000000
@@ -4358,6 +4383,13 @@ show the indicator."
   (define-fringe-bitmap
     'flycheck-fringe-bitmap-double-arrow-hi-res
     flycheck-fringe-bitmap-double-arrow-hi-res
+    nil 16)
+  (define-fringe-bitmap
+    'flycheck-fringe-bitmap-double-left-arrow
+    flycheck-fringe-bitmap-double-left-arrow)
+  (define-fringe-bitmap
+    'flycheck-fringe-bitmap-double-left-arrow-hi-res
+    flycheck-fringe-bitmap-double-left-arrow-hi-res
     nil 16)
   (define-fringe-bitmap
     'flycheck-fringe-bitmap-continuation
