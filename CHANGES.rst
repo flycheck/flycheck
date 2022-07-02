@@ -82,7 +82,7 @@
 - New syntax checkers:
 
   - Awk with ``gawk`` [GH-1708]
-  - Bazel with ``bazel-buildifier`` [GH-1613]
+  - Bazel with ``buildifier`` [GH-1613]
   - CUDA with ``cuda-nvcc`` [GH-1508]
   - CWL with ``schema-salad-tool`` [GH-1361]
   - Elixir with ``credo`` [GH-1062]

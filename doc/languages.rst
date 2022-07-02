@@ -72,7 +72,10 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
 .. supported-language:: Bazel
 
-   .. syntax-checker:: bazel-buildifier
+   .. syntax-checker:: bazel-build-buildifier
+                       bazel-module-buildifier
+                       bazel-starlark-buildifier
+                       bazel-workspace-buildifier
 
       Check Bazel with buildifier_.
 

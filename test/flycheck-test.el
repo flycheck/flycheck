@@ -3121,15 +3121,45 @@ evaluating BODY."
    "language/awk/syntax-error.awk" 'awk-mode
    '(2 nil warning "x=|\n  ^ syntax error" :checker awk-gawk)))
 
-(flycheck-ert-def-checker-test bazel-buildifier bazel error
+(flycheck-ert-def-checker-test bazel-build-buildifier bazel error
   (flycheck-ert-should-syntax-check
-   "language/bazel/syntax-error.bazel" 'bazel-mode
-   '(1 11 error "syntax error near !" :checker bazel-buildifier)))
+   "language/bazel/BUILD.bazel-error" 'bazel-build-mode
+   '(1 11 error "syntax error near !" :checker bazel-build-buildifier)))
 
-(flycheck-ert-def-checker-test bazel-buildifier bazel nil
+(flycheck-ert-def-checker-test bazel-build-buildifier bazel nil
   (flycheck-ert-should-syntax-check
-   "language/bazel/warnings.bazel" 'bazel-mode
-   '(1 nil warning "The file has no module docstring. (https://github.com/bazelbuild/buildtools/blob/master/WARNINGS.md#module-docstring)" :id "module-docstring" :checker bazel-buildifier)))
+   "language/bazel/BUILD.bazel-warning" 'bazel-build-mode
+   '(1 nil warning "Variable \"foo\" is unused. Please remove it. (https://github.com/bazelbuild/buildtools/blob/master/WARNINGS.md#unused-variable)" :id "unused-variable" :checker bazel-build-buildifier)))
+
+(flycheck-ert-def-checker-test bazel-module-buildifier bazel error
+  (flycheck-ert-should-syntax-check
+   "language/bazel/MODULE.bazel-error" 'bazel-module-mode
+   '(1 11 error "syntax error near !" :checker bazel-module-buildifier)))
+
+(flycheck-ert-def-checker-test bazel-module-buildifier bazel nil
+  (flycheck-ert-should-syntax-check
+   "language/bazel/MODULE.bazel-warning" 'bazel-module-mode
+   '(1 nil warning "The file has no module docstring." :id "module-docstring" :checker bazel-module-buildifier)))
+
+(flycheck-ert-def-checker-test bazel-starlark-buildifier bazel error
+  (flycheck-ert-should-syntax-check
+   "language/bazel/rules.bzl-error" 'bazel-starlark-mode
+   '(1 11 error "syntax error near !" :checker bazel-starlark-buildifier)))
+
+(flycheck-ert-def-checker-test bazel-starlark-buildifier bazel nil
+  (flycheck-ert-should-syntax-check
+   "language/bazel/rules.bzl-warning" 'bazel-starlark-mode
+   '(1 nil warning "The file has no module docstring." :id "module-docstring" :checker bazel-starlark-buildifier)))
+
+(flycheck-ert-def-checker-test bazel-workspace-buildifier bazel error
+  (flycheck-ert-should-syntax-check
+   "language/bazel/WORKSPACE.bazel-error" 'bazel-workspace-mode
+   '(1 11 error "syntax error near !" :checker bazel-workspace-buildifier)))
+
+(flycheck-ert-def-checker-test bazel-workspace-buildifier bazel nil
+  (flycheck-ert-should-syntax-check
+   "language/bazel/WORKSPACE.bazel-warning" 'bazel-workspace-mode
+   '(1 nil warning "Variable \"foo\" is unused. Please remove it. (https://github.com/bazelbuild/buildtools/blob/master/WARNINGS.md#unused-variable)" :id "unused-variable" :checker bazel-workspace-buildifier)))
 
 (flycheck-ert-def-checker-test c/c++-clang (c c++) error
   (let ((flycheck-disabled-checkers '(c/c++-gcc)))

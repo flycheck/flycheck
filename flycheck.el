@@ -171,7 +171,10 @@ attention to case differences."
     asciidoctor
     asciidoc
     awk-gawk
-    bazel-buildifier
+    bazel-build-buildifier
+    bazel-module-buildifier
+    bazel-starlark-buildifier
+    bazel-workspace-buildifier
     c/c++-clang
     c/c++-gcc
     c/c++-cppcheck
@@ -7582,11 +7585,11 @@ See URL `http://asciidoctor.org'."
   :error-filter flycheck-awk-gawk-error-filter
   :modes awk-mode)
 
-(flycheck-define-checker bazel-buildifier
-  "An Bazel checker using the buildifier.
+(flycheck-define-checker bazel-build-buildifier
+  "A checker for Bazel BUILD and BUILD.bazel files using buildifier.
 
 See URL `https://github.com/bazelbuild/buildtools/blob/master/buildifier'."
-  :command ("buildifier" "-lint=warn")
+  :command ("buildifier" "-lint=warn" "--type=build")
   :standard-input t
   :error-patterns
   ((error line-start
@@ -7595,7 +7598,52 @@ See URL `https://github.com/bazelbuild/buildtools/blob/master/buildifier'."
    (warning line-start
             "<stdin>:" line ": " (id (one-or-more (in word "-"))) ": " (message)
             line-end))
-  :modes bazel-mode)
+  :modes bazel-build-mode)
+
+(flycheck-define-checker bazel-module-buildifier
+  "A checker for Bazel MODULE.bazel files using buildifier.
+
+See URL `https://github.com/bazelbuild/buildtools/blob/master/buildifier'."
+  :command ("buildifier" "-lint=warn" "--type=default")
+  :standard-input t
+  :error-patterns
+  ((error line-start
+          "<stdin>:" line ":" column ": " (message)
+          line-end)
+   (warning line-start
+            "<stdin>:" line ": " (id (one-or-more (in word "-"))) ": " (message)
+            line-end))
+  :modes bazel-module-mode)
+
+(flycheck-define-checker bazel-starlark-buildifier
+  "A checker for Starlark bzl files using buildifier.
+
+See URL `https://github.com/bazelbuild/buildtools/blob/master/buildifier'."
+  :command ("buildifier" "-lint=warn" "--type=bzl")
+  :standard-input t
+  :error-patterns
+  ((error line-start
+          "<stdin>:" line ":" column ": " (message)
+          line-end)
+   (warning line-start
+            "<stdin>:" line ": " (id (one-or-more (in word "-"))) ": " (message)
+            line-end))
+  :modes bazel-starlark-mode)
+
+(flycheck-define-checker bazel-workspace-buildifier
+  "A checker for Bazel WORKSPACE and WORKSPACE.bazel files using buildifier.
+
+See URL `https://github.com/bazelbuild/buildtools/blob/master/buildifier'."
+  :command ("buildifier" "-lint=warn" "--type=workspace")
+  :standard-input t
+  :error-patterns
+  ((error line-start
+          "<stdin>:" line ":" column ": " (message)
+          line-end)
+   (warning line-start
+            "<stdin>:" line ": " (id (one-or-more (in word "-"))) ": " (message)
+            line-end))
+  :modes bazel-workspace-mode)
 
 (flycheck-def-args-var flycheck-clang-args c/c++-clang
   :package-version '(flycheck . "0.22"))
