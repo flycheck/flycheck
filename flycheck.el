@@ -10578,7 +10578,8 @@ parent directory that doesn't have a __init__.py file."
          start (lambda (dir)
                  (not (file-exists-p (expand-file-name "__init__.py" dir))))))))
 
-(flycheck-def-config-file-var flycheck-flake8rc python-flake8  ".flake8rc")
+(flycheck-def-config-file-var flycheck-flake8rc python-flake8
+                              '(".flake8" "setup.cfg" "tox.ini"))
 
 (flycheck-def-option-var flycheck-flake8-error-level-alist
     '(("^E9.*$"  . error)               ; Syntax errors from pep8
