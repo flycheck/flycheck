@@ -1061,6 +1061,11 @@ to view the docstring of the syntax checker.  Likewise, you may use
          Set to ``null-device`` to disable writing cache directories
          entirely.
 
+      .. defcustom:: flycheck-python-mypy-python-executable
+
+         Python executable to collect the type information from PEP 561
+         compliant packages.
+
    .. syntax-checker:: python-pylint
 
       Check syntax and lint with `Pylint <https://pylint.org/>`_.

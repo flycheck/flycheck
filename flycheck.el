@@ -10828,6 +10828,13 @@ See URL https://github.com/microsoft/pyright."
   :safe #'flycheck-string-or-nil-p
   :package-version '(flycheck . "32"))
 
+(flycheck-def-option-var flycheck-python-mypy-python-executable nil python-mypy
+  "Python executable to find the installed PEP 561 packages."
+  :type '(choice (const :tag "Same as mypy's" nil)
+                 (string :tag "Path"))
+  :safe #'flycheck-string-or-nil-p
+  :package-version '(flycheck . "33"))
+
 (flycheck-define-checker python-mypy
   "Mypy syntax and type checker.  Requires mypy>=0.730.
 
@@ -10837,6 +10844,7 @@ See URL `http://mypy-lang.org/'."
             "--no-pretty"
             (config-file "--config-file" flycheck-python-mypy-config)
             (option "--cache-dir" flycheck-python-mypy-cache-dir)
+            (option "--python-executable" flycheck-python-mypy-python-executable)
             source-original)
   :error-patterns
   ((error line-start (file-name) ":" line (optional ":" column)
