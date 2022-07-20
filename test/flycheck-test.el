@@ -3589,36 +3589,53 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
    "language/ember-template-lint/ember-template-lint/warning.hbs" 'web-mode
    '(1 nil warning "Non-translated string used" :id "no-bare-strings" :checker ember-template)))
 
+(defun flycheck-ert-erlang-shows-column (mode-sym)
+  ;; erl -version shows the version of the "erts" application in the current otp
+  ;; release. This is the "Erlang RunTime System" and has nothing to do with
+  ;; flycheck-ert!
+  (let* ((cmd (cond ((eq mode-sym 'erlang) "erl -version")
+                    ((eq mode-sym 'erlang-rebar3) "rebar3 version")
+                    (t (error "unknown erlang mode symbol"))))
+         (erts-version (string-trim (shell-command-to-string cmd)))
+         (version-string (car (last (split-string erts-version)))))
+    ;; The version of erts released with OTP 24 is 12.0. This is the first
+    ;; time columns were added to compile warnings/errors.
+    (version<= "12" version-string)))
+
 (flycheck-ert-def-checker-test erlang erlang error
-  (shut-up
-    (flycheck-ert-should-syntax-check
-     "language/erlang/erlang/error.erl" 'erlang-mode
-     '(3 nil warning "export_all flag enabled - all functions will be exported" :checker erlang)
-     '(7 nil error "head mismatch" :checker erlang))))
+  (let ((col (flycheck-ert-erlang-shows-column 'erlang)))
+    (shut-up
+      (flycheck-ert-should-syntax-check
+       "language/erlang/erlang/error.erl" 'erlang-mode
+       '(3 (when col 2) warning "export_all flag enabled - all functions will be exported" :checker erlang)
+       '(7 (when col 1) error "head mismatch" :checker erlang)))))
 
 (flycheck-ert-def-checker-test erlang erlang warning
-  (flycheck-ert-should-syntax-check
-   "language/erlang/erlang/warning.erl" 'erlang-mode
-   '(3 nil warning "export_all flag enabled - all functions will be exported" :checker erlang)
-   '(6 nil warning "wrong number of arguments in format call" :checker erlang)))
+  (let ((col (flycheck-ert-erlang-shows-column 'erlang)))
+    (flycheck-ert-should-syntax-check
+     "language/erlang/erlang/warning.erl" 'erlang-mode
+     '(3 (when col 2) warning "export_all flag enabled - all functions will be exported" :checker erlang)
+     '(6 (when col 37) warning "wrong number of arguments in format call" :checker erlang)))
 
 (flycheck-ert-def-checker-test erlang-rebar3 erlang error
-  (flycheck-ert-should-syntax-check
-   "language/erlang/rebar3/src/erlang-error.erl" 'erlang-mode
-   '(3 nil warning "export_all flag enabled - all functions will be exported" :checker erlang-rebar3)
-   '(7 nil error "head mismatch" :checker erlang-rebar3)))
+  (let ((col (flycheck-ert-erlang-shows-column 'erlang-rebar3)))
+    (flycheck-ert-should-syntax-check
+     "language/erlang/rebar3/src/erlang-error.erl" 'erlang-mode
+     '(3 (when col 2) warning "export_all flag enabled - all functions will be exported" :checker erlang-rebar3)
+     '(7 (when col 1) error "head mismatch" :checker erlang-rebar3)))
 
 (flycheck-ert-def-checker-test erlang-rebar3 erlang build
-  (shut-up
-    (flycheck-ert-should-syntax-check
-     "language/erlang/rebar3/_checkouts/dependency/src/dependency.erl" 'erlang-mode
-     `(7 nil error "head mismatch" :checker erlang-rebar3
-         :filename ,(flycheck-ert-resource-filename "language/erlang/rebar3/src/erlang-error.erl"))))
-  ;; Ensure that the dependency file wasn't built as standalone
-  ;; project which would create a separate _build directory
-  (should (not (file-exists-p
-                (flycheck-ert-resource-filename
-                 "language/erlang/rebar3/_build/default/lib/dependency/_build")))))
+  (let ((col (flycheck-ert-erlang-shows-column 'erlang-rebar3)))
+    (shut-up
+      (flycheck-ert-should-syntax-check
+       "language/erlang/rebar3/_checkouts/dependency/src/dependency.erl" 'erlang-mode
+       `(7 (when col 1) error "head mismatch" :checker erlang-rebar3
+           :filename ,(flycheck-ert-resource-filename "language/erlang/rebar3/src/erlang-error.erl"))))
+      ;; Ensure that the dependency file wasn't built as standalone
+      ;; project which would create a separate _build directory
+      (should (not (file-exists-p
+                    (flycheck-ert-resource-filename
+                     "language/erlang/rebar3/_build/default/lib/dependency/_build")))))
 
 (flycheck-ert-def-checker-test eruby-erubis eruby nil
   (let ((flycheck-disabled-checkers '(eruby-ruumba)))
