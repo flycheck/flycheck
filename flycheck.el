@@ -1,6 +1,6 @@
 ;;; flycheck.el --- On-the-fly syntax checking -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2017-2020 Flycheck contributors
+;; Copyright (C) 2017-2021 Flycheck contributors
 ;; Copyright (C) 2012-2016 Sebastian Wiesner and Flycheck contributors
 ;; Copyright (C) 2013, 2014 Free Software Foundation, Inc.
 ;;
@@ -8754,7 +8754,7 @@ See Info Node `(elisp)Byte Compilation'."
             (kill-buffer)))))))
 
 (defconst flycheck-emacs-lisp-checkdoc-variables
-  '(checkdoc-symbol-words
+  `(checkdoc-symbol-words
     checkdoc-arguments-in-order-flag
     checkdoc-force-history-flag
     checkdoc-permit-comma-termination-flag
@@ -8763,7 +8763,9 @@ See Info Node `(elisp)Byte Compilation'."
     checkdoc-spellcheck-documentation-flag
     checkdoc-verb-check-experimental-flag
     checkdoc-max-keyref-before-warn
-    sentence-end-double-space)
+    sentence-end-double-space
+    ,@(and (>= emacs-major-version 28)
+           '(checkdoc-column-zero-backslash-before-paren)))
   "Variables inherited by the checkdoc subprocess.")
 
 (defun flycheck-emacs-lisp-checkdoc-variables-form ()
