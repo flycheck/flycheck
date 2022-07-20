@@ -8430,25 +8430,38 @@ Requires DMD 2.066 or newer.  See URL `https://dlang.org/'."
          (one-or-more " ") (message) line-end))
   :modes d-mode)
 
+(defun flycheck-parse-hadolint (output checker buffer)
+  "Parse hadolint errors from JSON OUTPUT.
+
+CHECKER and BUFFER denoted the CHECKER that returned OUTPUT and
+the BUFFER that was checked respectively.
+
+See URL
+`https://github.com/hadolint/hadolint/blob/master/src/Hadolint/Formatter/Json.hs'
+for more information about the hadolint JSON format."
+  (seq-map (lambda (message)
+             (let-alist message
+               (flycheck-error-new-at
+                .line
+                .column
+                (pcase .level
+                  ("error"   'error)
+                  ("warning" 'warning)
+                  ("info"    'info)
+                  ("style"   'info))
+                .message
+                :id .code
+                :checker checker
+                :buffer buffer)))
+           (car (flycheck-parse-json output))))
+
 (flycheck-define-checker dockerfile-hadolint
   "A Dockerfile syntax checker using the hadolint.
 
 See URL `http://github.com/hadolint/hadolint/'."
-  :command ("hadolint" "--no-color" "-")
+  :command ("hadolint" "--no-color" "--format" "json" source)
   :standard-input t
-  :error-patterns
-  ((error line-start
-          (file-name) ":" line " " (id (one-or-more alnum)) " error: " (message)
-          line-end)
-   (warning line-start
-            (file-name) ":" line " " (id (one-or-more alnum))
-            " warning: " (message) line-end)
-   (info line-start
-         (file-name) ":" line " " (id (one-or-more alnum)) " info: " (message)
-         line-end)
-   (error line-start
-          (file-name) ":" line ":" column " " (message)
-          line-end))
+  :error-parser flycheck-parse-hadolint
   :error-filter
   (lambda (errors)
     (flycheck-sanitize-errors
