@@ -8490,7 +8490,7 @@ Requires DMD 2.066 or newer.  See URL `https://dlang.org/'."
   "A Dockerfile syntax checker using the hadolint.
 
 See URL `http://github.com/hadolint/hadolint/'."
-  :command ("hadolint" "--no-color" "-")
+  :command ("hadolint" "--no-color" source)
   :standard-input t
   :error-patterns
   ((error line-start
