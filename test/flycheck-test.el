@@ -3634,11 +3634,11 @@ MODE-SYM is the Erlang mode name, one of ‘erlang’ and
        "language/erlang/rebar3/_checkouts/dependency/src/dependency.erl" 'erlang-mode
        `(7 (when col 1) error "head mismatch" :checker erlang-rebar3
            :filename ,(flycheck-ert-resource-filename "language/erlang/rebar3/src/erlang-error.erl"))))
-      ;; Ensure that the dependency file wasn't built as standalone
-      ;; project which would create a separate _build directory
-      (should (not (file-exists-p
-                    (flycheck-ert-resource-filename
-                     "language/erlang/rebar3/_build/default/lib/dependency/_build"))))))
+    ;; Ensure that the dependency file wasn't built as standalone
+    ;; project which would create a separate _build directory
+    (should (not (file-exists-p
+                  (flycheck-ert-resource-filename
+                   "language/erlang/rebar3/_build/default/lib/dependency/_build"))))))
 
 (flycheck-ert-def-checker-test eruby-erubis eruby nil
   (let ((flycheck-disabled-checkers '(eruby-ruumba)))
