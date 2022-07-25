@@ -3590,12 +3590,15 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
    '(1 nil warning "Non-translated string used" :id "no-bare-strings" :checker ember-template)))
 
 (defun flycheck-ert-erlang-shows-column (mode-sym)
+  "Return whether Erlang error messages contain columns.
+MODE-SYM is the Erlang mode name, one of ‘erlang’ and
+‘erlang-rebar3’."
   ;; erl -version shows the version of the "erts" application in the current otp
   ;; release. This is the "Erlang RunTime System" and has nothing to do with
   ;; flycheck-ert!
   (let* ((cmd (cond ((eq mode-sym 'erlang) "erl -version")
                     ((eq mode-sym 'erlang-rebar3) "rebar3 version")
-                    (t (error "unknown erlang mode symbol"))))
+                    (t (error "Unknown erlang mode symbol"))))
          (erts-version (string-trim (shell-command-to-string cmd)))
          (version-string (car (last (split-string erts-version)))))
     ;; The version of erts released with OTP 24 is 12.0. This is the first

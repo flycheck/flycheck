@@ -10455,7 +10455,7 @@ CHECKER's executable is assumed to be a Python REPL."
                    (format "import %s; print(%s.__file__)" module module))))
 
 (defun flycheck-python-needs-module-p (checker)
-  "Determines whether CHECKER needs to be invoked through Python.
+  "Determine whether CHECKER needs to be invoked through Python.
 
 Previous versions of Flycheck called pylint and flake8 directly,
 while new version call them through `python -c'.  This check
