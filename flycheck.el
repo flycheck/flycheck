@@ -1,6 +1,6 @@
 ;;; flycheck.el --- On-the-fly syntax checking -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2017-2021 Flycheck contributors
+;; Copyright (C) 2017-2022 Flycheck contributors
 ;; Copyright (C) 2012-2016 Sebastian Wiesner and Flycheck contributors
 ;; Copyright (C) 2013, 2014 Free Software Foundation, Inc.
 ;;
@@ -9653,20 +9653,23 @@ See URL `https://github.com/ndmitchell/hlint'."
             source-inplace)
   :error-patterns
   ((info line-start
-         (file-name) ":" (or (seq line ":" column (optional "-" end-column))
-                             (seq "(" line "," column ")-(" end-line "," end-column ")"))
+         (file-name) ":"
+         (or (seq line ":" column (optional "-" end-column))
+             (seq "(" line "," column ")-(" end-line "," end-column ")"))
          ": Suggestion: "
          (message (one-or-more (and (one-or-more (not (any ?\n))) ?\n)))
          line-end)
    (warning line-start
-            (file-name) ":" (or (seq line ":" column (optional "-" end-column))
-                                (seq "(" line "," column ")-(" end-line "," end-column ")"))
+            (file-name) ":"
+            (or (seq line ":" column (optional "-" end-column))
+                (seq "(" line "," column ")-(" end-line "," end-column ")"))
             ": Warning: "
             (message (one-or-more (and (one-or-more (not (any ?\n))) ?\n)))
             line-end)
    (error line-start
-          (file-name) ":" (or (seq line ":" column (optional "-" end-column))
-                              (seq "(" line "," column ")-(" end-line "," end-column ")"))
+          (file-name) ":"
+          (or (seq line ":" column (optional "-" end-column))
+              (seq "(" line "," column ")-(" end-line "," end-column ")"))
           ": Error: "
           (message (one-or-more (and (one-or-more (not (any ?\n))) ?\n)))
           line-end))
