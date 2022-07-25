@@ -1,6 +1,6 @@
 ;;; flycheck-test.el --- Flycheck: Unit test suite   -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2017-2020 Flycheck contributors
+;; Copyright (C) 2017-2020, 2022 Flycheck contributors
 ;; Copyright (C) 2013-2016 Sebastian Wiesner and Flycheck contributors
 
 ;; Author: Sebastian Wiesner <swiesner@lunaryorn.com>
@@ -3615,14 +3615,14 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
     (flycheck-ert-should-syntax-check
      "language/erlang/erlang/warning.erl" 'erlang-mode
      '(3 (when col 2) warning "export_all flag enabled - all functions will be exported" :checker erlang)
-     '(6 (when col 37) warning "wrong number of arguments in format call" :checker erlang)))
+     '(6 (when col 37) warning "wrong number of arguments in format call" :checker erlang))))
 
 (flycheck-ert-def-checker-test erlang-rebar3 erlang error
   (let ((col (flycheck-ert-erlang-shows-column 'erlang-rebar3)))
     (flycheck-ert-should-syntax-check
      "language/erlang/rebar3/src/erlang-error.erl" 'erlang-mode
      '(3 (when col 2) warning "export_all flag enabled - all functions will be exported" :checker erlang-rebar3)
-     '(7 (when col 1) error "head mismatch" :checker erlang-rebar3)))
+     '(7 (when col 1) error "head mismatch" :checker erlang-rebar3))))
 
 (flycheck-ert-def-checker-test erlang-rebar3 erlang build
   (let ((col (flycheck-ert-erlang-shows-column 'erlang-rebar3)))
@@ -3635,7 +3635,7 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
       ;; project which would create a separate _build directory
       (should (not (file-exists-p
                     (flycheck-ert-resource-filename
-                     "language/erlang/rebar3/_build/default/lib/dependency/_build")))))
+                     "language/erlang/rebar3/_build/default/lib/dependency/_build"))))))
 
 (flycheck-ert-def-checker-test eruby-erubis eruby nil
   (let ((flycheck-disabled-checkers '(eruby-ruumba)))
