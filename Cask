@@ -12,7 +12,7 @@
 
  ;; Various modes for use in the unit tests
  (depends-on "adoc-mode")
- (depends-on "bazel-mode")
+ (depends-on "bazel")
  (depends-on "coffee-mode")
  (depends-on "cperl-mode")
  (depends-on "cwl-mode")
