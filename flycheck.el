@@ -10547,7 +10547,7 @@ Otherwise, return a list starting with -c (-m is not enough
 because it adds the current directory to Python's path)."
   (when (flycheck-python-needs-module-p checker)
     `("-c" ,(concat "import sys;sys.path.pop(0);import runpy;"
-                    (format "runpy.run_module(%S)" module-name)))))
+                    (format "runpy.run_module(%S, run_name='__main__')" module-name )))))
 
 (defcustom flycheck-python-project-files
   '("pyproject.toml" "setup.cfg" "mypy.ini" "pyrightconfig.json")
