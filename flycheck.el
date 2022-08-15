@@ -428,6 +428,18 @@ If set to nil, do not display errors at all."
   :package-version '(flycheck . "0.13")
   :risky t)
 
+(defcustom flycheck-clear-displayed-errors-function #'flycheck-clear-displayed-error-messages
+  "Function to hide error message displayed by `flycheck-display-errors-function'.
+
+If set to a function, it will be called with no arguments to
+clear all displayed errors at point."
+  :group 'flycheck
+  :type '(choice (const :tag "Clear displayed error messages"
+                        flycheck-clear-displayed-error-messages)
+                 (function :tag "Clear displayed errors function"))
+  :package-version '(flycheck . "34.2")
+  :risky t)
+
 (defcustom flycheck-help-echo-function #'flycheck-help-echo-all-error-messages
   "Function to compute the contents of the error tooltips.
 
@@ -2968,7 +2980,7 @@ Slots:
     ;; the focus hooks only work on Emacs 24.4 and upwards, but since undefined
     ;; hooks are perfectly ok we don't need a version guard here.  They'll just
     ;; not work silently.
-    (post-command-hook . flycheck-maybe-display-error-at-point-soon)
+    (post-command-hook . flycheck-display-error-at-point-soon)
     (focus-in-hook     . flycheck-display-error-at-point-soon)
     (focus-out-hook    . flycheck-cancel-error-display-error-at-point-timer)
     (post-command-hook . flycheck-hide-error-buffer)
@@ -3374,6 +3386,7 @@ current syntax check."
     (flycheck-stop))
   (flycheck-delete-all-overlays)
   (flycheck-clear-errors)
+  (flycheck-clear-displayed-error-messages)
   (flycheck-error-list-refresh)
   (flycheck-hide-error-buffer))
 
@@ -5545,6 +5558,11 @@ non-nil."
   (when flycheck-display-errors-function
     (funcall flycheck-display-errors-function errors)))
 
+(defun flycheck-clear-displayed-errors ()
+  "Clear errors using `flycheck-clear-displayed-errors-function'."
+  (when flycheck-clear-displayed-errors-function
+    (funcall flycheck-clear-displayed-errors-function)))
+
 (defvar-local flycheck-display-error-at-point-timer nil
   "Timer to automatically show errors.")
 
@@ -5554,40 +5572,27 @@ non-nil."
     (cancel-timer flycheck-display-error-at-point-timer)
     (setq flycheck-display-error-at-point-timer nil)))
 
-(defun flycheck--error-display-tick ()
-  "Return point and tick counter of current buffer."
-  (cons (point) (buffer-modified-tick)))
-
-(defvar-local flycheck--last-error-display-tick nil
-  "Value of `flycheck--error-display-tick' when errors were last displayed.")
-
 (defun flycheck-display-error-at-point ()
-  "Display all the error messages at point."
+  "Display all the error messages at point.
+
+If there are no errors, clears the error messages at point."
   (interactive)
   ;; This function runs from a timer, so we must take care to not ignore any
   ;; errors
   (with-demoted-errors "Flycheck error display error: %s"
     (flycheck-cancel-error-display-error-at-point-timer)
-    (setq flycheck--last-error-display-tick (flycheck--error-display-tick))
     (when flycheck-mode
-      (when-let (errors (flycheck-overlay-errors-at (point)))
-        (flycheck-display-errors errors)))))
+      (let ((errors (flycheck-overlay-errors-at (point))))
+        (if errors
+            (flycheck-display-errors errors)
+          (flycheck-clear-displayed-errors))))))
 
 (defun flycheck-display-error-at-point-soon ()
   "Display error messages at point, with a delay."
-  (setq flycheck--last-error-display-tick nil)
-  (flycheck-maybe-display-error-at-point-soon))
-
-(defun flycheck-maybe-display-error-at-point-soon ()
-  "Display error message at point with a delay, unless already displayed."
   (flycheck-cancel-error-display-error-at-point-timer)
-  (when (and (not (equal flycheck--last-error-display-tick
-                         (setq flycheck--last-error-display-tick
-                               (flycheck--error-display-tick))))
-             (flycheck-overlays-at (point)))
-    (setq flycheck-display-error-at-point-timer
-          (run-at-time flycheck-display-errors-delay nil
-                       'flycheck-display-error-at-point))))
+  (setq flycheck-display-error-at-point-timer
+        (run-at-time flycheck-display-errors-delay nil
+                     'flycheck-display-error-at-point)))
 
 
 ;;; Functions to display errors
@@ -5612,6 +5617,14 @@ and if the echo area is not occupied by minibuffer input."
   "Flycheck error messages"
   "Major mode for extended error messages.")
 
+(defvar flycheck--last-displayed-message nil
+  "Reference to the last displayed message so it can be cleared.
+
+This value is the return value from `display-message-or-buffer',
+thus it can be a string or a window.
+
+See `flycheck-clear-displayed-error-messages'.")
+
 (defun flycheck-display-error-messages (errors)
   "Display the messages of ERRORS.
 
@@ -5625,15 +5638,17 @@ information.
 In the latter case, show messages in the buffer denoted by
 variable `flycheck-error-message-buffer'."
   (when (and errors (flycheck-may-use-echo-area-p))
-    (let ((message (flycheck-help-echo-all-error-messages errors)))
-      (display-message-or-buffer
-       message flycheck-error-message-buffer 'not-this-window)
+    (let* ((message (flycheck-help-echo-all-error-messages errors))
+           (retval (display-message-or-buffer
+                    message flycheck-error-message-buffer 'not-this-window)))
       ;; We cannot rely on `display-message-or-buffer' returning the right
       ;; window. See URL `https://github.com/flycheck/flycheck/issues/1643'.
       (when-let (buf (get-buffer flycheck-error-message-buffer))
         (with-current-buffer buf
           (unless (derived-mode-p 'flycheck-error-message-mode)
-            (flycheck-error-message-mode)))))))
+            (flycheck-error-message-mode))))
+      (setq flycheck--last-displayed-message retval)
+      retval)))
 
 (defun flycheck-display-error-messages-unless-error-list (errors)
   "Show messages of ERRORS unless the error list is visible.
@@ -5655,6 +5670,14 @@ Hide the error buffer if there is no error under point."
       ;; buffer (see https://github.com/flycheck/flycheck/issues/648).
       (save-selected-window
         (quit-window nil window)))))
+
+(defun flycheck-clear-displayed-error-messages ()
+  "Clear error messages displayed by `flycheck-display-error-messages'."
+  (when flycheck--last-displayed-message
+    (if (and (stringp flycheck--last-displayed-message)
+             (equal (current-message) flycheck--last-displayed-message))
+        (message nil)
+      (flycheck-hide-error-buffer))))
 
 
 ;;; Working with errors

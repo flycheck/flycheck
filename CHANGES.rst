@@ -14,12 +14,15 @@ New Features
 - [#2070]: Add a new syntax checker ``r`` for R with the builtin ``parse`` function.
 - [#2073]: Add new syntax checker ``salt-lint`` for the salt infrastructure-as-code language.
 - [#2071]: Add a new checker ``perl-perlimports``, for cleaning up Perl import statements.
+- [#1972]: New defcustom ``flycheck-clear-displayed-errors-function`` to
+  customize how error messages are to be cleared.
 
 -----------
 Bugs fixed
 -----------
 
 - [#2057]: Revert the extraction of ``flycheck-version`` with ``lm-version``.
+- [#1972]: Refine flycheck-display-errors lifecycle so error messages can be cleared.
 
 ----------
 Changes

@@ -134,6 +134,24 @@ Flycheck provides two built-in functions for this option:
       (setq flycheck-display-errors-function
             #'flycheck-display-error-messages-unless-error-list)
 
+Along the same vein, Flycheck provides a way to customise how a error message is
+cleared, this is especially useful if you use a Flycheck extension to display
+error messages differently from the default.
+
+.. defcustom:: flycheck-clear-displayed-errors-function
+
+   Function to hide error message displayed by `flycheck-display-errors-function`.
+
+   If set to a function, it will be called with no arguments to
+   clear all displayed errors at point.
+
+By default, Flycheck only provides `flycheck-clear-displayed-error-messages` to
+clear the last Flycheck error message from the minibuffer:
+
+.. defun:: flycheck-clear-displayed-error-messages
+
+   Clear error messages displayed by `flycheck-display-error-messages`.
+
 .. seealso::
 
    :flyc:`flycheck-pos-tip`
