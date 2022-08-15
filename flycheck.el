@@ -3581,13 +3581,7 @@ Command `flycheck-mode' is only enabled if
 (define-globalized-minor-mode global-flycheck-mode flycheck-mode
   flycheck-mode-on-safe
   :init-value nil
-  ;; Do not expose Global Flycheck Mode on customize interface, because the
-  ;; interaction between package.el and customize is currently broken.  See
-  ;; https://github.com/flycheck/flycheck/issues/595
-
-  ;; :require 'flycheck :group
-  ;; 'flycheck
-  )
+  :group 'flycheck)
 
 (defun flycheck-global-teardown (&optional ignore-local)
   "Teardown Flycheck in all buffers.
