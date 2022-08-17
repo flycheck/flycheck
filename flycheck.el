@@ -3368,6 +3368,7 @@ buffer), and if so then clean up global hooks."
   (flycheck-cancel-error-display-error-at-point-timer)
   (flycheck--clear-idle-trigger-timer)
   (flycheck--empty-variables)
+  (flycheck-clear-displayed-errors)
   (unless (or ignore-global
               (seq-some (lambda (buf)
                           (and (not (equal buf (current-buffer)))
