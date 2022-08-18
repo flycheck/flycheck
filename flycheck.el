@@ -5553,8 +5553,7 @@ If there are no errors, clears the error messages at point."
   (flycheck-cancel-error-display-error-at-point-timer)
   (when (and (not (equal flycheck--last-error-display-tick
                          (setq flycheck--last-error-display-tick
-                               (flycheck--error-display-tick))))
-             (flycheck-overlays-at (point)))
+                               (flycheck--error-display-tick)))))
     (setq flycheck-display-error-at-point-timer
           (run-at-time flycheck-display-errors-delay nil
                        'flycheck-display-error-at-point))))
