@@ -3342,6 +3342,7 @@ current syntax check."
     (flycheck-stop))
   (flycheck-delete-all-overlays)
   (flycheck-clear-errors)
+  (flycheck-clear-displayed-error-messages)
   (flycheck-error-list-refresh)
   (flycheck-hide-error-buffer))
 
@@ -3368,7 +3369,6 @@ buffer), and if so then clean up global hooks."
   (flycheck-cancel-error-display-error-at-point-timer)
   (flycheck--clear-idle-trigger-timer)
   (flycheck--empty-variables)
-  (flycheck-clear-displayed-errors)
   (unless (or ignore-global
               (seq-some (lambda (buf)
                           (and (not (equal buf (current-buffer)))
