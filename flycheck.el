@@ -5616,7 +5616,8 @@ Hide the error buffer if there is no error under point."
 (defun flycheck-clear-displayed-error-messages ()
   "Clear error messages displayed by `flycheck-display-error-messages'."
   (unless (null flycheck--last-displayed-message)
-    (if (stringp flycheck--last-displayed-message)
+    (if (and (stringp flycheck--last-displayed-message)
+             (equal (current-message) flycheck--last-displayed-message))
         (message nil)
       (flycheck-hide-error-buffer))))
 
