@@ -3857,15 +3857,6 @@ non-whitespace character of the error line, if ERR has no error column."
   (car (flycheck-error-region-for-mode
         err flycheck-highlighting-mode)))
 
-(defun flycheck-errors-at-pos (pos)
-  "Find all current errors at POS."
-  (seq-filter (lambda (err)
-                (pcase-let ((`(,beg . ,end)
-                             (flycheck-error-region-for-mode
-                              err flycheck-highlighting-mode)))
-                  (and (>= pos beg) (<= pos end))))
-              flycheck-current-errors))
-
 (defun flycheck-error-format-snippet (err &optional max-length)
   "Extract the text that ERR refers to from the buffer.
 
