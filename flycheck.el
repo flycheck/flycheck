@@ -8272,6 +8272,15 @@ A list of strings to pass to cuda, a la flycheck-clang"
   :safe #'flycheck-string-list-p
   :package-version '(flycheck . "32"))
 
+(flycheck-def-option-var flycheck-cuda-relaxed-constexpr nil cuda-nvcc
+  "Enable calling host constexpr from device function for nvcc.
+
+When non-nil, enable experimental calling of a constexpr __host__
+function from a __device__ function."
+  :type 'boolean
+  :safe #'booleanp
+  :package-version '(flycheck . "35"))
+
 (flycheck-define-checker cuda-nvcc
   "A CUDA C/C++ syntax checker using nvcc.
 
@@ -8282,6 +8291,7 @@ See URL `https://developer.nvidia.com/cuda-llvm-compiler'."
             "--x=cu" ;; explicitly specify it's a CUDA language file
             "-rdc=true" ;; Allow linking with external cuda funcions
             (option "-std=" flycheck-cuda-language-standard concat)
+            (option-flag "--expt-relaxed-constexpr" flycheck-cuda-relaxed-constexpr)
             (option-list "-include" flycheck-cuda-includes)
             (option-list "-gencode" flycheck-cuda-gencodes)
             (option-list "-D" flycheck-cuda-definitions concat)
