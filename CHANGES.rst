@@ -1,6 +1,12 @@
 ``master`` (unreleased)
 ======================
 
+------------
+New Features
+------------
+
+- [#1975]: Add support for --expt-relaxed-constexpr flag to ``cuda`` checker.
+
 34.1 (2024-02-18)
 ======================
 

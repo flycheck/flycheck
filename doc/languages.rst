@@ -292,6 +292,10 @@ to view the docstring of the syntax checker.  Likewise, you may use
          Additional preprocessor definitions for nvcc. Is passed unaltered to both
          GPU compiler and underlying C/C++ compiler.
 
+      .. defcustom:: flycheck-cuda-relaxed-constexpr
+
+         Enable calling host constexpr from device function for nvcc.
+
 .. supported-language:: CWL
 
    .. syntax-checker:: cwl
