@@ -8502,7 +8502,7 @@ See URL `http://github.com/hadolint/hadolint/'."
   :error-filter
   (lambda (errors)
     (flycheck-sanitize-errors
-     (flycheck-remove-error-file-names "/dev/stdin" errors)))
+     (flycheck-remove-error-file-names "-" errors)))
   :modes dockerfile-mode)
 
 (defun flycheck-credo--working-directory (&rest _ignored)
