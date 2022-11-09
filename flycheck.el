@@ -10828,11 +10828,12 @@ See URL https://github.com/microsoft/pyright."
   :package-version '(flycheck . "32"))
 
 (flycheck-define-checker python-mypy
-  "Mypy syntax and type checker.  Requires mypy>=0.580.
+  "Mypy syntax and type checker.  Requires mypy>=0.730.
 
 See URL `http://mypy-lang.org/'."
   :command ("mypy"
             "--show-column-numbers"
+            "--no-pretty"
             (config-file "--config-file" flycheck-python-mypy-config)
             (option "--cache-dir" flycheck-python-mypy-cache-dir)
             source-original)
