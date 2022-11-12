@@ -8878,7 +8878,7 @@ the BUFFER that was checked respectively."
   :command ("ember-template-lint"
             (config-file "--config-path" flycheck-ember-template-lintrc)
             "--filename" source-original
-            "--json")
+            "--format=json")
   :standard-input t
   :error-parser flycheck-ember-template--parse-error
   :modes web-mode
