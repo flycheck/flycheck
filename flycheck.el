@@ -428,6 +428,14 @@ node `(elisp)Hooks'."
   :package-version '(flycheck . "0.13")
   :risky t)
 
+(defcustom flycheck-display-errors-at-point-after-checking t
+  "Whether to always display errors at the current point after
+syntax checking."
+  :group 'flycheck
+  :type 'boolean
+  :package-version '(flycheck . "0.15")
+  :safe #'booleanp)
+
 (defcustom flycheck-display-errors-delay 0.9
   "Delay in seconds before displaying errors at point.
 
@@ -3290,7 +3298,8 @@ WORKING-DIR."
         (flycheck-delete-marked-overlays)
         (flycheck-error-list-refresh)
         (run-hooks 'flycheck-after-syntax-check-hook)
-        (when (eq (current-buffer) (window-buffer))
+        (when (and flycheck-display-errors-at-point-after-checking
+                   (eq (current-buffer) (window-buffer)))
           (flycheck-display-error-at-point))
         ;; Immediately try to run any pending deferred syntax check, which
         ;; were triggered by intermediate automatic check event, to make sure
