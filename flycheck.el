@@ -11525,8 +11525,10 @@ versions inferior to 1.25)."
 
 Execute `cargo --list' to find out whether COMMAND is present."
   (let ((cargo (funcall flycheck-executable-find "cargo")))
-    (member command (mapcar #'string-trim-left
-                            (ignore-errors (process-lines cargo "--list"))))))
+    (member command 
+      (mapcar (lambda (line)
+                (replace-regexp-in-string "\\s-*\\(\\S-+\\).*\\'" "\\1" line))
+              (ignore-errors (process-lines cargo "--list"))))))
 
 (defun flycheck-rust-valid-crate-type-p (crate-type)
   "Whether CRATE-TYPE is a valid target type for Cargo.
