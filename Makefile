@@ -1,4 +1,4 @@
-# Copyright (c) 2018 Flycheck contributors
+# Copyright (c) 2018, 2020 Flycheck contributors
 # Copyright (c) 2012-2016 Sebastian Wiesner and Flycheck contributors
 
 # This program is free software: you can redistribute it and/or modify it under
@@ -48,6 +48,10 @@ HAVE_CONVERT := $(shell sh -c "command -v $(CONVERT)")
 HAVE_OPTIPNG := $(shell sh -c "command -v $(OPTIPNG)")
 
 RUNTEST = $(RUNEMACS) --load test/flycheck-test --load test/run.el \
+	-f flycheck-run-tests-main
+
+RUN_REGEN = $(RUNEMACS) --load test/flycheck-test --load test/run.el \
+	--load test/setup-regen.el \
 	-f flycheck-run-tests-main
 
 # Export Emacs to goals, mainly for CASK
@@ -131,6 +135,10 @@ unit: compile
 integ: compile
 	$(RUNTEST) '(and (tag external-tool) $(SELECTOR))'
 
+.PHONY: integ-regen
+integ-regen: compile
+	$(RUN_REGEN) '(and (tag external-tool) $(SELECTOR))'
+
 .PHONY: images
 images: $(IMGS)
 
@@ -139,23 +147,24 @@ help:
 	@echo 'Run `make init` first to install and update all local dependencies.'
 	@echo ''
 	@echo 'Available targets:'
-	@echo '  init:    Initialise the project.  RUN FIRST!'
-	@echo '  check:   Check all Emacs Lisp sources (needs Emacs 25)'
-	@echo '  compile: Byte-compile Emacs Lisp sources'
-	@echo '  format:  Format all Emacs Lisp sources'
-	@echo '  specs:   Run all buttercup specs for Flycheck'
-	@echo '  unit:    Run all ERT unit tests for Flycheck (legacy)'
-	@echo '  integ:   Run all integration tests for Flycheck'
-	@echo '  images:  Generate PNG images from SVG sources'
-	@echo '  clean:   Clean compiled files'
-	@echo '  purge:   Clean everything'
+	@echo '  init:          Initialise the project.  RUN FIRST!'
+	@echo '  check:         Check all Emacs Lisp sources (needs Emacs 25)'
+	@echo '  compile:       Byte-compile Emacs Lisp sources'
+	@echo '  format:        Format all Emacs Lisp sources'
+	@echo '  specs:         Run all buttercup specs for Flycheck'
+	@echo '  unit:          Run all ERT unit tests for Flycheck (legacy)'
+	@echo '  integ:         Run all integration tests for Flycheck'
+	@echo '  integ-regen:   Regenerate expected integration tests results'
+	@echo '  images:        Generate PNG images from SVG sources'
+	@echo '  clean:         Clean compiled files'
+	@echo '  purge:         Clean everything'
 	@echo ''
 	@echo 'Available make variables:'
-	@echo '  PATTERN:  A regular expression matching spec names to run with `specs`'
-	@echo '  SELECTOR: An ERT selector expression for `unit` and `integ`'
-	@echo '  LANGUAGE: The name of a language for `integ`.  Overrides `SELECTOR`'
+	@echo '  PATTERN:   A regular expression matching spec names to run with `specs`'
+	@echo '  SELECTOR:  An ERT selector expression for `unit` and `integ`'
+	@echo '  LANGUAGE:  The name of a language for `integ`.  Overrides `SELECTOR`'
 	@echo '  EMACSOPTS: Additional options to pass to `emacs`'
-	@echo '  EMACS:    The path or name of the Emacs to use for tests and compilation'
+	@echo '  EMACS:     The path or name of the Emacs to use for tests and compilation'
 	@echo ''
 	@echo 'Available programs:'
 	@echo '  $(CASK): $(if $(HAVE_CASK),yes,no)'
