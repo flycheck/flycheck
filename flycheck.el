@@ -4668,6 +4668,18 @@ level."
           (push (cons level 1) counts-by-level))))
     counts-by-level))
 
+(defun flycheck-has-at-least-errors-p (errors level)
+  "Check if there are ERRORS at least as severe as LEVEL."
+  (let ((severity (flycheck-error-level-severity level)))
+    (seq-some (lambda (e) (>= (flycheck-error-level-severity
+                                  (flycheck-error-level e))
+                                 severity))
+                 errors)))
+
+(defun flycheck-has-at-least-current-errors-p (level)
+  "Check if there are current errors at least as severe as LEVEL."
+  (flycheck-has-at-least-errors-p flycheck-current-errors level))
+
 (defun flycheck-has-max-errors-p (errors level)
   "Check if there is no error in ERRORS more severe than LEVEL."
   (let ((severity (flycheck-error-level-severity level)))
@@ -4880,7 +4892,7 @@ no errors as or more severe than `flycheck-navigation-minimum-level'."
     (-if-let (min-level flycheck-navigation-minimum-level)
         (or (<= (flycheck-error-level-severity min-level)
                 (flycheck-error-level-severity (flycheck-error-level err)))
-            (not (flycheck-has-current-errors-p min-level)))
+            (not (flycheck-has-at-least-current-errors-p min-level)))
       t)))
 
 (defun flycheck-next-error-pos (n &optional reset)
