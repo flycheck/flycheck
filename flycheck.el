@@ -7815,8 +7815,8 @@ See URL `http://clang.llvm.org/'."
             (eval flycheck-clang-args)
             "-x" (eval
                   (pcase major-mode
-                    (`c++-mode "c++")
-                    (`c-mode "c")))
+                    ((or `c++-mode `c++-ts-mode) "c++")
+                    ((or `c-mode `c-ts-mode) "c")))
             ;; Read from standard input
             "-")
   :standard-input t
@@ -7837,7 +7837,7 @@ See URL `http://clang.llvm.org/'."
         (setf (flycheck-error-message err)
               (or (flycheck-error-message err) "no message")))
       errors))
-  :modes (c-mode c++-mode)
+  :modes (c-mode c++-mode c-ts-mode c++-ts-mode)
   :next-checkers ((warning . c/c++-cppcheck)))
 
 (flycheck-def-args-var flycheck-gcc-args c/c++-gcc
@@ -7968,8 +7968,8 @@ Requires GCC 4.4 or newer.  See URL `https://gcc.gnu.org/'."
             (eval flycheck-gcc-args)
             "-x" (eval
                   (pcase major-mode
-                    (`c++-mode "c++")
-                    (`c-mode "c")))
+                    ((or `c++-mode `c++-ts-mode) "c++")
+                    ((or `c-mode `c-ts-mode) "c")))
             ;; GCC performs full checking only when actually compiling, so
             ;; `-fsyntax-only' is not enough. Just let it generate assembly
             ;; code.
@@ -7988,7 +7988,7 @@ Requires GCC 4.4 or newer.  See URL `https://gcc.gnu.org/'."
    (error line-start (or "<stdin>" (file-name))
           ":" line (optional ":" column)
           ": " (or "fatal error" "error") ": " (message) line-end))
-  :modes (c-mode c++-mode)
+  :modes (c-mode c++-mode c-ts-mode c++-ts-mode)
   :next-checkers ((warning . c/c++-cppcheck)))
 
 (flycheck-def-option-var flycheck-cppcheck-checks '("style") c/c++-cppcheck
@@ -8081,11 +8081,11 @@ See URL `http://cppcheck.sourceforge.net/'."
                     flycheck-cppcheck-suppressions-file concat)
             "-x" (eval
                   (pcase major-mode
-                    (`c++-mode "c++")
-                    (`c-mode "c")))
+                    ((or `c++-mode `c++-ts-mode) "c++")
+                    ((or `c-mode `c-ts-mode) "c")))
             source)
   :error-parser flycheck-parse-cppcheck
-  :modes (c-mode c++-mode))
+  :modes (c-mode c++-mode c-ts-mode c++-ts-mode))
 
 (flycheck-define-checker cfengine
   "A CFEngine syntax checker using cf-promises.
@@ -8126,7 +8126,7 @@ See URL `http://www.foodcritic.io'."
   :error-patterns
   ((error line-start (id (one-or-more alnum)) ": "
           (message) ": " (file-name) ":" line line-end))
-  :modes (enh-ruby-mode ruby-mode)
+  :modes (enh-ruby-mode ruby-mode ruby-ts-mode)
   :predicate
   (lambda ()
     (let ((parent-dir (file-name-directory
@@ -8216,7 +8216,7 @@ See URL `https://github.com/CSSLint/csslint'."
   :command ("csslint" "--format=checkstyle-xml" source)
   :error-parser flycheck-parse-checkstyle
   :error-filter flycheck-dequalify-error-ids
-  :modes css-mode)
+  :modes (css-mode css-ts-mode))
 
 (defconst flycheck-stylelint-args '("--formatter" "json")
   "Common arguments to stylelint invocations.")
@@ -8334,7 +8334,7 @@ See URL `http://stylelint.io/'."
   :standard-input t
   :error-parser flycheck-parse-stylelint
   :predicate flycheck-buffer-nonempty-p
-  :modes (css-mode))
+  :modes (css-mode css-ts-mode))
 
 (flycheck-def-option-var flycheck-cuda-language-standard nil cuda-nvcc
   "Our CUDA Language Standard."
@@ -8503,7 +8503,7 @@ See URL `http://github.com/hadolint/hadolint/'."
   (lambda (errors)
     (flycheck-sanitize-errors
      (flycheck-remove-error-file-names "-" errors)))
-  :modes dockerfile-mode)
+  :modes (dockerfile-mode dockerfile-ts-mode))
 
 (defun flycheck-credo--working-directory (&rest _ignored)
   "Check if `credo' is installed as dependency in the application."
@@ -9160,7 +9160,7 @@ See URL `https://golang.org/cmd/gofmt/'."
   :error-patterns
   ((error line-start "<standard input>:" line ":" column ": "
           (message) line-end))
-  :modes go-mode
+  :modes (go-mode go-ts-mode)
   :next-checkers ((warning . go-golint)
                   ;; Fall back, if go-golint doesn't exist
                   (warning . go-vet)
@@ -9177,7 +9177,7 @@ See URL `https://github.com/golang/lint'."
   :command ("golint" source)
   :error-patterns
   ((warning line-start (file-name) ":" line ":" column ": " (message) line-end))
-  :modes go-mode
+  :modes (go-mode go-ts-mode)
   :next-checkers (go-vet
                   ;; Fall back, if go-vet doesn't exist
                   go-build go-test go-errcheck go-unconvert))
@@ -9210,7 +9210,7 @@ See URL `https://golang.org/cmd/go/' and URL
             (source ".go"))
   :error-patterns
   ((warning line-start (file-name) ":" line ": " (message) line-end))
-  :modes go-mode
+  :modes (go-mode go-ts-mode)
   :next-checkers (go-build
                   go-test
                   ;; Fall back if `go build' or `go test' can be used
@@ -9289,7 +9289,7 @@ Requires Go 1.6 or newer.  See URL `https://golang.org/cmd/go'."
         ;; line number, so inject a fake one.
         (setf (flycheck-error-line error) 1)))
     errors)
-  :modes go-mode
+  :modes (go-mode go-ts-mode)
   :predicate (lambda ()
                (and (flycheck-buffer-saved-p)
                     (not (string-suffix-p "_test.go" (buffer-file-name)))))
@@ -9311,7 +9311,7 @@ Requires Go 1.6 or newer.  See URL `https://golang.org/cmd/go'."
           (message (one-or-more not-newline)
                    (zero-or-more "\n\t" (one-or-more not-newline)))
           line-end))
-  :modes go-mode
+  :modes (go-mode go-ts-mode)
   :predicate
   (lambda () (and (flycheck-buffer-saved-p)
                   (string-suffix-p "_test.go" (buffer-file-name))))
@@ -9343,7 +9343,7 @@ See URL `https://github.com/kisielk/errcheck'."
           (setf (flycheck-error-message err)
                 (format "Ignored `error` returned from `%s`" message)))))
     errors)
-  :modes go-mode
+  :modes (go-mode go-ts-mode)
   :predicate (lambda () (flycheck-buffer-saved-p))
   :next-checkers ((warning . go-unconvert)
                   (warning . go-staticcheck)))
@@ -9355,7 +9355,7 @@ See URL `https://github.com/mdempsky/unconvert'."
   :command ("unconvert" ".")
   :error-patterns
   ((warning line-start (file-name) ":" line ":" column ": " (message) line-end))
-  :modes go-mode
+  :modes (go-mode go-ts-mode)
   :predicate (lambda () (flycheck-buffer-saved-p)))
 
 (flycheck-define-checker go-staticcheck
@@ -9371,7 +9371,7 @@ limited features) if `flycheck-go-version' is set. See URL
             (option "-go" flycheck-go-version))
 
   :error-parser flycheck-parse-go-staticcheck
-  :modes go-mode)
+  :modes (go-mode go-ts-mode))
 
 (flycheck-define-checker groovy
   "A groovy syntax checker using groovy compiler API.
@@ -9783,7 +9783,7 @@ See URL `http://www.jshint.com'."
   (lambda (errors)
     (flycheck-remove-error-file-names
      "stdin" (flycheck-dequalify-error-ids errors)))
-  :modes (js-mode js2-mode js3-mode rjsx-mode))
+  :modes (js-mode js2-mode js3-mode rjsx-mode js-ts-mode))
 
 (flycheck-def-args-var flycheck-eslint-args javascript-eslint
   :package-version '(flycheck . "32"))
@@ -9862,7 +9862,7 @@ See URL `https://eslint.org/'."
   :error-parser flycheck-parse-eslint
   :enabled (lambda () (flycheck-eslint-config-exists-p))
   :modes (js-mode js-jsx-mode js2-mode js2-jsx-mode js3-mode rjsx-mode
-                  typescript-mode)
+                  typescript-mode js-ts-mode typescript-ts-mode tsx-ts-mode)
   :working-directory flycheck-eslint--find-working-directory
   :verify
   (lambda (_)
@@ -9897,7 +9897,8 @@ See URL `https://github.com/standard/standard' and URL
   :standard-input t
   :error-patterns
   ((error line-start "  <text>:" line ":" column ":" (message) line-end))
-  :modes (js-mode js-jsx-mode js2-mode js2-jsx-mode js3-mode rjsx-mode))
+  :modes (js-mode js-jsx-mode js2-mode js2-jsx-mode js3-mode rjsx-mode
+                  js-ts-mode))
 
 (flycheck-define-checker json-jsonlint
   "A JSON syntax and style checker using jsonlint.
@@ -9915,7 +9916,7 @@ See URL `https://github.com/zaach/jsonlint'."
   :error-filter
   (lambda (errors)
     (flycheck-sanitize-errors (flycheck-increment-error-columns errors)))
-  :modes (json-mode js-json-mode))
+  :modes (json-mode js-json-mode json-ts-mode))
 
 (flycheck-define-checker json-python-json
   "A JSON syntax checker using Python json.tool module.
@@ -9930,7 +9931,7 @@ See URL `https://docs.python.org/3.5/library/json.html#command-line-interface'."
           ;; Ignore the rest of the line which shows the char position.
           (one-or-more not-newline)
           line-end))
-  :modes (json-mode js-json-mode)
+  :modes (json-mode js-json-mode json-ts-mode)
   ;; The JSON parser chokes if the buffer is empty and has no JSON inside
   :predicate flycheck-buffer-nonempty-p)
 
@@ -9949,7 +9950,7 @@ See URL `https://stedolan.github.io/jq/'."
           (optional "parse error: ")
           (message) "at line " line ", column " column
           (zero-or-more not-newline) line-end))
-  :modes (json-mode js-json-mode))
+  :modes (json-mode js-json-mode json-ts-mode))
 
 (flycheck-define-checker jsonnet
   "A Jsonnet syntax checker using the jsonnet binary.
@@ -10683,7 +10684,7 @@ Requires Flake8 3.0 or newer. See URL
              (or (not (flycheck-python-needs-module-p 'python-flake8))
                  (flycheck-python-find-module 'python-flake8 "flake8")))
   :verify (lambda (_) (flycheck-python-verify-module 'python-flake8 "flake8"))
-  :modes python-mode
+  :modes (python-mode python-ts-mode)
   :next-checkers ((warning . python-pylint)
                   (warning . python-mypy)))
 
@@ -10755,7 +10756,7 @@ See URL `https://www.pylint.org/'."
                         (append
                          (flycheck-python-module-args 'python-pylint "pylint")
                          (list (format "--help-msg=%s" id))))))
-  :modes python-mode
+  :modes (python-mode python-ts-mode)
   :next-checkers ((warning . python-mypy)))
 
 (flycheck-define-checker python-pycompile
@@ -10776,7 +10777,7 @@ See URL `https://docs.python.org/3.4/library/py_compile.html'."
           "', ('" (file-name (one-or-more (not (any "'")))) "', "
           line ", " column ", " (one-or-more not-newline) line-end))
   :working-directory flycheck-python-find-project-root
-  :modes python-mode
+  :modes (python-mode python-ts-mode)
   :next-checkers ((warning . python-mypy)))
 
 (defun flycheck-pyright--parse-error (output checker buffer)
@@ -10810,7 +10811,7 @@ See URL https://github.com/microsoft/pyright."
             source-inplace)
   :working-directory flycheck-python-find-project-root
   :error-parser flycheck-pyright--parse-error
-  :modes python-mode)
+  :modes (python-mode python-ts-mode))
 
 (define-obsolete-variable-alias 'flycheck-python-mypy-ini
   'flycheck-python-mypy-config "32")
@@ -10845,7 +10846,7 @@ See URL `http://mypy-lang.org/'."
    (info line-start (file-name) ":" line (optional ":" column)
          ": note:" (message) line-end))
   :working-directory flycheck-python-find-project-root
-  :modes python-mode
+  :modes (python-mode python-ts-mode)
   ;; Ensure the file is saved, to work around
   ;; https://github.com/python/mypy/issues/4746.
   :predicate flycheck-buffer-saved-p)
@@ -11248,7 +11249,7 @@ See URL `https://rubocop.org/'."
   :standard-input t
   :working-directory #'flycheck-ruby--find-project-root
   :error-patterns flycheck-ruby-rubocop-error-patterns
-  :modes '(enh-ruby-mode ruby-mode)
+  :modes '(enh-ruby-mode ruby-mode ruby-ts-mode)
   :next-checkers '((warning . ruby-reek)
                    (warning . ruby-rubylint)))
 
@@ -11272,7 +11273,7 @@ See URL `https://github.com/testdouble/standard' for more information."
   :standard-input t
   :working-directory #'flycheck-ruby--find-project-root
   :error-patterns flycheck-ruby-rubocop-error-patterns
-  :modes '(enh-ruby-mode ruby-mode)
+  :modes '(enh-ruby-mode ruby-mode ruby-ts-mode)
   :next-checkers '((warning . ruby-reek)
                    (warning . ruby-rubylint)))
 
@@ -11288,7 +11289,7 @@ See URL `https://github.com/troessner/reek'."
             (config-file "--config" flycheck-reekrc)
             source)
   :error-parser flycheck-parse-reek
-  :modes (enh-ruby-mode ruby-mode)
+  :modes (enh-ruby-mode ruby-mode ruby-ts-mode)
   :next-checkers ((warning . ruby-rubylint)))
 
 ;; Default to `nil' to let Rubylint find its configuration file by itself, and
@@ -11311,7 +11312,7 @@ Requires ruby-lint 2.0.2 or newer.  See URL
             (file-name) ":W:" line ":" column ": " (message) line-end)
    (error line-start
           (file-name) ":E:" line ":" column ": " (message) line-end))
-  :modes (enh-ruby-mode ruby-mode))
+  :modes (enh-ruby-mode ruby-mode ruby-ts-mode))
 
 (flycheck-define-checker ruby
   "A Ruby syntax checker using the standard Ruby interpreter.
@@ -11333,7 +11334,7 @@ See URL `https://www.ruby-lang.org/'."
    (warning line-start "-:" line ":" (optional column ":")
             " warning: " (message) line-end)
    (error line-start "-:" line ": " (message) line-end))
-  :modes (enh-ruby-mode ruby-mode)
+  :modes (enh-ruby-mode ruby-mode ruby-ts-mode)
   :next-checkers ((warning . ruby-rubylint)))
 
 (flycheck-define-checker ruby-jruby
@@ -11351,7 +11352,7 @@ See URL `http://jruby.org/'."
   ((error   line-start "SyntaxError in -:" line ": " (message) line-end)
    (warning line-start "-:" line ": warning: " (message) line-end)
    (error   line-start "-:" line ": "          (message) line-end))
-  :modes (enh-ruby-mode ruby-mode)
+  :modes (enh-ruby-mode ruby-mode ruby-ts-mode)
   :next-checkers ((warning . ruby-rubylint)))
 
 (flycheck-def-args-var flycheck-cargo-check-args (rust-cargo)
@@ -11572,7 +11573,7 @@ This syntax checker requires Rust 1.17 or newer.  See URL
                                        (flycheck-error-filename err) root))))
                             (flycheck-rust-error-filter errors))))
   :error-explainer flycheck-rust-error-explainer
-  :modes rust-mode
+  :modes (rust-mode rust-ts-mode)
   :predicate flycheck-buffer-saved-p
   :enabled flycheck-rust-manifest-directory
   :working-directory (lambda (_) (flycheck-rust-manifest-directory))
@@ -11626,7 +11627,7 @@ This syntax checker needs Rust 1.18 or newer.  See URL
   :error-parser flycheck-parse-rustc
   :error-filter flycheck-rust-error-filter
   :error-explainer flycheck-rust-error-explainer
-  :modes rust-mode
+  :modes (rust-mode rust-ts-mode)
   :predicate flycheck-buffer-saved-p)
 
 (flycheck-define-checker rust-clippy
@@ -11637,7 +11638,7 @@ See URL `https://github.com/rust-lang-nursery/rust-clippy'."
   :error-parser flycheck-parse-cargo-rustc
   :error-filter flycheck-rust-error-filter
   :error-explainer flycheck-rust-error-explainer
-  :modes rust-mode
+  :modes (rust-mode rust-ts-mode)
   :predicate flycheck-buffer-saved-p
   :enabled (lambda ()
              (and (flycheck-rust-cargo-has-command-p "clippy")
@@ -11986,7 +11987,7 @@ See URL `http://www.gnu.org/software/bash/'."
           (one-or-more (not (any digit)))
           line (zero-or-more " ") ":" (zero-or-more " ")
           (message) line-end))
-  :modes sh-mode
+  :modes (sh-mode bash-ts-mode)
   :predicate (lambda () (eq sh-shell 'bash))
   :next-checkers ((warning . sh-shellcheck)))
 
@@ -12076,7 +12077,7 @@ See URL `https://github.com/koalaman/shellcheck/'."
   (lambda (errors)
     (flycheck-remove-error-file-names
      "-" (flycheck-dequalify-error-ids errors)))
-  :modes sh-mode
+  :modes (sh-mode bash-ts-mode)
   :predicate (lambda () (memq sh-shell flycheck-shellcheck-supported-shells))
   :verify (lambda (_)
             (let ((supports-shell (memq sh-shell
@@ -12376,7 +12377,7 @@ See URL `https://github.com/palantir/tslint'."
             (eval flycheck-tslint-args)
             source-inplace)
   :error-parser flycheck-parse-tslint
-  :modes (typescript-mode))
+  :modes (typescript-mode typescript-ts-mode tsx-ts-mode))
 
 (flycheck-def-option-var flycheck-verilator-include-path nil verilog-verilator
   "A list of include directories for Verilator.
@@ -12515,7 +12516,7 @@ See URL `https://github.com/nodeca/js-yaml'."
           (or "JS-YAML" "YAMLException") ": "
           (message) " (" line ":" column ")"
           line-end))
-  :modes yaml-mode
+  :modes (yaml-mode yaml-ts-mode)
   :next-checkers ((warning . yaml-yamllint)
                   (warning . cwl)))
 
@@ -12535,7 +12536,7 @@ See URL `http://www.ruby-doc.org/stdlib-2.0.0/libdoc/yaml/rdoc/YAML.html'."
   :error-patterns
   ((error line-start "stdin:" (zero-or-more not-newline) ":" (message)
           "at line " line " column " column line-end))
-  :modes yaml-mode
+  :modes (yaml-mode yaml-ts-mode)
   :next-checkers ((warning . yaml-yamllint)
                   (warning . cwl)))
 
@@ -12552,7 +12553,7 @@ See URL `https://github.com/adrienverge/yamllint'."
           "stdin:" line ":" column ": [error] " (message) line-end)
    (warning line-start
             "stdin:" line ":" column ": [warning] " (message) line-end))
-  :modes yaml-mode
+  :modes (yaml-mode yaml-ts-mode)
   :next-checkers ((warning . cwl)))
 
 (provide 'flycheck)
