@@ -1088,7 +1088,7 @@ is used."
 
 (defface flycheck-verify-select-checker
   '((t :box (:style released-button)))
-  "Flycheck face for the 'select' button in the verify setup buffer."
+  "Flycheck face for the `select' button in the verify setup buffer."
   :package-version '(flycheck . "32")
   :group 'flycheck-faces)
 
@@ -2060,11 +2060,11 @@ are mandatory.
      passing the URL via text properties:
 
        ;; During the error object creation
-       (put-text-property 0 1 'explainer-url .url .check_id)
+       (put-text-property 0 1 \\='explainer-url .url .check_id)
 
        ;; In the error-explainer FUNCTION
        (let ((id (flycheck-error-id err)))
-         (and id `(url . ,(get-text-property 0 'explainer-url id))))
+         (and id `(url . ,(get-text-property 0 \\='explainer-url id))))
 
      This property is optional.
 
@@ -4767,7 +4767,7 @@ Return the created overlay."
                     ;; Display overlays for other-file errors on the first line
                     (cons (point-min)
                           (save-excursion (goto-char (point-min))
-                                          (point-at-eol)))
+                                          (line-end-position)))
                   (flycheck-error-region-for-mode
                    err (or flycheck-highlighting-mode 'lines))))
                (overlay (make-overlay beg end))
@@ -4791,7 +4791,7 @@ Most of the actual work is done by calling
 `flycheck-help-echo-function' with the appropriate list of
 errors.  Arguments WINDOW, OBJECT and POS are as described in
 info node `(elisp)Special properties', as this function is
-intended to be used as the 'help-echo property of flycheck error
+intended to be used as the \\='help-echo property of flycheck error
 overlays."
   (-when-let (buf (cond ((bufferp object) object)
                         ((overlayp object) (overlay-buffer object))))
@@ -10128,7 +10128,7 @@ Relative paths are relative to the file being checked."
   "A list of modules to use for Perl.
 
 The value of this variable is a list of strings, where each
-string is a module to 'use' in Perl."
+string is a module to `use' in Perl."
   :type '(repeat :tag "Module")
   :safe #'flycheck-string-list-p
   :package-version '(flycheck . "32"))
@@ -11506,7 +11506,7 @@ or if the current buffer has no file name."
        (locate-dominating-file buffer-file-name "Cargo.toml")))
 
 (defun flycheck-rust-cargo-metadata ()
-  "Run 'cargo metadata' and return the result as parsed JSON object."
+  "Run `cargo metadata' and return the result as parsed JSON object."
   (car (flycheck-parse-json
         (flycheck-call-checker-process-for-output
          'rust-cargo nil t
@@ -11525,7 +11525,7 @@ versions inferior to 1.25)."
 
 Execute `cargo --list' to find out whether COMMAND is present."
   (let ((cargo (funcall flycheck-executable-find "cargo")))
-    (member command 
+    (member command
       (mapcar (lambda (line)
                 (replace-regexp-in-string "\\s-*\\(\\S-+\\).*\\'" "\\1" line))
               (ignore-errors (process-lines cargo "--list"))))))
