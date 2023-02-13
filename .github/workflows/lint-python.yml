@@ -1,4 +1,4 @@
-name: Docs
+name: Lint Python
 
 on:
   push:
@@ -15,24 +15,11 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build-manual:
+  lint-python:
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        emacs-version:
-          - 28.2
 
     steps:
     - uses: actions/checkout@v3
-
-    - uses: jcs090218/setup-emacs@master
-      with:
-        version: ${{ matrix.emacs-version }}
-
-    - uses: emacs-eask/setup-eask@master
-      with:
-        version: 'snapshot'
         
     - uses: actions/setup-python@v4
       with:
@@ -40,5 +27,6 @@ jobs:
         
     - name: Run tests
       run: |
-        pip install -r doc/requirements.txt
-        make -C doc SPHINXOPTS=-n html
+        pip install -r maint/requirements.txt
+        make -C maint check
+

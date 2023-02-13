@@ -86,7 +86,7 @@ endif
 # Public targets
 .PHONY: init
 init:
-	$(EASK) install-deps --dev  # --verbose is workaround for Emacs 25.3
+	$(EASK) install-deps --dev
 	$(EASK) upgrade
 
 .PHONY: clean
