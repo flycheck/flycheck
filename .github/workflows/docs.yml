@@ -1,0 +1,44 @@
+name: Docs
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - '**.yml'
+      - docs/**
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        emacs-version:
+          - 28.2
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - uses: jcs090218/setup-emacs@master
+      with:
+        version: ${{ matrix.emacs-version }}
+
+    - uses: emacs-eask/setup-eask@master
+      with:
+        version: 'snapshot'
+        
+    - uses: actions/setup-python@v4
+      with:
+        python-version: '3.10' 
+        
+    - name: Run tests
+      run: |
+        pip install -r doc/requirements.txt
+        make -C doc SPHINXOPTS=-n html
