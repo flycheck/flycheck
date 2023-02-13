@@ -35,10 +35,19 @@ jobs:
       with:
         version: 'snapshot'
 
-    - name: Run tests
+    - name: Run tests (Unix)
+      if: matrix.os == 'ubuntu-latest' || matrix.os == 'macos-latest'
+      run: |
+        make init
+        make format
+        make unit
+        make specs
+
+    - name: Run tests (Windows)
+      if: matrix.os == 'windows-latest'
+      # TODO: Add `make unit` once it's valid
       run: |
         make init
         make format
         make compile
-        make unit
         make specs

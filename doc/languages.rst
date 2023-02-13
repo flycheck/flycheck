@@ -291,6 +291,10 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
          The C or C++ Language standard that you want the CUDA compiler to enforce.
 
+      .. defcustom:: flycheck-cuda-gencodes
+
+         A list of include real and virtual GPU architectures for nvcc.
+
       .. defcustom:: flycheck-cuda-includes
 
          A list of cuda includes.

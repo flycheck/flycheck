@@ -17,22 +17,9 @@ concurrency:
 jobs:
   build-manual:
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        emacs-version:
-          - 28.2
-
+    
     steps:
     - uses: actions/checkout@v3
-
-    - uses: jcs090218/setup-emacs@master
-      with:
-        version: ${{ matrix.emacs-version }}
-
-    - uses: emacs-eask/setup-eask@master
-      with:
-        version: 'snapshot'
         
     - uses: actions/setup-python@v4
       with:
