@@ -43,11 +43,14 @@
         (-when-let (match (match-string 2))
           (cl-pushnew (intern match) matches))
         (-when-let (match (match-string 3))
+          (cl-pushnew (intern match) matches))
+        (-when-let (match (match-string 4))
           (cl-pushnew (intern match) matches))))
     matches))
 
 (defconst flycheck/checker-re
   (rx bol "   .. syntax-checker:: " (group (1+ nonl)) "\n"
+      (? "                       " (group (1+ nonl)) "\n")
       (? "                       " (group (1+ nonl)) "\n")
       (? "                       " (group (1+ nonl))) eol))
 
