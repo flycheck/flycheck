@@ -4,7 +4,9 @@
 [![Join the chat](https://img.shields.io/gitter/room/flycheck/flycheck.svg)](https://gitter.im/flycheck/flycheck)
 [![MELPA](https://melpa.org/packages/flycheck-badge.svg)](https://melpa.org/#/flycheck)
 [![MELPA stable version](http://stable.melpa.org/packages/flycheck-badge.svg)](https://stable.melpa.org/#/flycheck)
-[![Build Status](https://img.shields.io/travis/flycheck/flycheck/master.svg)](https://travis-ci.org/flycheck/flycheck)
+[![CI](https://github.com/flycheck/flycheck/actions/workflows/test.yml/badge.svg)](https://github.com/flycheck/flycheck/actions/workflows/test.yml)
+[![Docs](https://github.com/flycheck/flycheck/actions/workflows/docs.yml/badge.svg)](https://github.com/flycheck/flycheck/actions/workflows/docs.yml)
+[![Lint Python](https://github.com/flycheck/flycheck/actions/workflows/lint-python.yml/badge.svg)](https://github.com/flycheck/flycheck/actions/workflows/lint-python.yml)
 
 <https://www.flycheck.org>
 
