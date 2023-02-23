@@ -29,3 +29,16 @@ jobs:
       run: |
         pip install -r doc/requirements.txt
         make -C doc SPHINXOPTS=-n html
+
+    # TODO: Generate better commit message
+    - name: Publish doc artifacts
+      if: github.ref == 'refs/heads/master'
+      run: |
+        git config user.name github-actions
+        git config user.email github-actions@github.com
+        git add .
+        git commit -F- <<-_UBLT_COMMIT_MSG_
+        auto: ${{ github.event.head_commit.message }}
+        SourceCommit: https://github.com/flycheck/flycheck/commit/${{ github.sha }}
+        _UBLT_COMMIT_MSG_
+        git push
