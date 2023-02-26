@@ -119,15 +119,15 @@ compile:
 
 .PHONY: specs
 specs: compile
-	$(EASK) exec buttercup -L . --pattern "'$(PATTERN)'" test/specs
+	$(EASK) exec buttercup -L . test/specs
 
 .PHONY: unit
 unit: compile
-	$(RUNTEST) "'(and (not (tag external-tool)) $(SELECTOR))'"
+	$(RUNTEST) '(and (not (tag external-tool)) $(SELECTOR))'
 
 .PHONY: integ
 integ: compile
-	$(RUNTEST) "'(and (tag external-tool) $(SELECTOR))'"
+	$(RUNTEST) '(and (tag external-tool) $(SELECTOR))'
 
 .PHONY: images
 images: $(IMGS)
