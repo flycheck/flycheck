@@ -119,6 +119,14 @@ Haskell
 * :flyc:`flycheck-haskell` (*official*) configures Flycheck from the Cabal
   settings and sandbox in Haskell projects.
 
+Kotlin
+------
+
+* :gh:`whirm/flycheck-kotlin` adds a Kotlin_ syntax checker using ktlint_.
+
+.. _Kotlin: https://kotlinlang.org/
+.. _ktlint: https://pinterest.github.io/ktlint/
+
 Ledger
 ------
 
