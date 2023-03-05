@@ -834,6 +834,14 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       .. syntax-checker-config-file:: flycheck-markdown-markdownlint-cli-config
 
+      .. defcustom:: flycheck-markdown-markdownlint-cli-disable-rules
+
+         A list of disabled rules.
+
+      .. defcustom:: flycheck-markdown-markdownlint-cli-enable-rules
+
+         A list of enabled rules.
+
    .. syntax-checker:: markdown-mdl
 
       Check Markdown with `markdownlint <https://github.com/markdownlint/markdownlint/>`_.
