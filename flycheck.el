@@ -11011,8 +11011,9 @@ See URL `https://github.com/rpm-software-management/rpmlint'."
                             (eq sh-shell 'rpm))))
 
 (flycheck-def-config-file-var flycheck-markdown-markdownlint-cli-config
-    markdown-markdownlint-cli nil
-  :package-version '(flycheck . "32"))
+    markdown-markdownlint-cli
+    '(".markdownlint.json" ".markdownlint.jsonc" ".markdownlint.yaml")
+  :package-version '(flycheck . "33"))
 
 (flycheck-define-checker markdown-markdownlint-cli
   "Markdown checker using markdownlint-cli.
