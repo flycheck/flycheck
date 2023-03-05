@@ -11015,12 +11015,31 @@ See URL `https://github.com/rpm-software-management/rpmlint'."
     '(".markdownlint.json" ".markdownlint.jsonc" ".markdownlint.yaml")
   :package-version '(flycheck . "33"))
 
+(flycheck-def-option-var flycheck-markdown-markdownlint-cli-disable-rules
+    nil markdown-markdownlint-cli
+  "Rules to disable for markdownlint-cli."
+  :type '(repeat :tag "Disabled rule"
+                 (string :tag "Rule name"))
+  :safe #'flycheck-string-list-p
+  :package-version '(flycheck . "33"))
+
+(flycheck-def-option-var flycheck-markdown-markdownlint-cli-enable-rules
+    nil markdown-markdownlint-cli
+  "Rules to enable for markdownlint-cli."
+  :type '(repeat :tag "Enabled rule"
+                 (string :tag "Rule name"))
+  :safe #'flycheck-string-list-p
+  :package-version '(flycheck . "33"))
+
 (flycheck-define-checker markdown-markdownlint-cli
   "Markdown checker using markdownlint-cli.
 
 See URL `https://github.com/DavidAnson/markdownlint-cli'."
   :command ("markdownlint"
             (config-file "--config" flycheck-markdown-markdownlint-cli-config)
+            (option-list "--disable" flycheck-markdown-markdownlint-cli-disable-rules)
+            (option-list "--enable" flycheck-markdown-markdownlint-cli-enable-rules)
+            "--"
             source)
   :error-patterns
   ((error line-start
