@@ -11017,7 +11017,7 @@ See URL `https://github.com/rpm-software-management/rpmlint'."
 (flycheck-define-checker markdown-markdownlint-cli
   "Markdown checker using markdownlint-cli.
 
-See URL `https://github.com/igorshubovych/markdownlint-cli'."
+See URL `https://github.com/DavidAnson/markdownlint-cli'."
   :command ("markdownlint"
             (config-file "--config" flycheck-markdown-markdownlint-cli-config)
             source)
