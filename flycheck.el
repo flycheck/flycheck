@@ -2163,7 +2163,7 @@ Signal an error, if any property has an invalid value."
                 (lambda ()
                   ;; Run predicate in the checker's default directory
                   (let ((default-directory
-                          (flycheck-compute-working-directory symbol)))
+                         (flycheck-compute-working-directory symbol)))
                     (funcall predicate)))))
           (real-enabled
            (lambda ()
@@ -2171,7 +2171,7 @@ Signal an error, if any property has an invalid value."
                  (or (null enabled)
                      ;; Run enabled in the checker's default directory
                      (let ((default-directory
-                             (flycheck-compute-working-directory symbol)))
+                            (flycheck-compute-working-directory symbol)))
                        (funcall enabled)))
                (lwarn 'flycheck
                       :warning "%S is no valid Flycheck syntax checker.
@@ -2873,7 +2873,7 @@ Slots:
   "Start a SYNTAX-CHECK with CALLBACK."
   (let ((checker (flycheck-syntax-check-checker syntax-check))
         (default-directory
-          (flycheck-syntax-check-working-directory syntax-check)))
+         (flycheck-syntax-check-working-directory syntax-check)))
     (setf (flycheck-syntax-check-context syntax-check)
           (funcall (flycheck-checker-get checker 'start) checker callback))))
 
@@ -4140,7 +4140,11 @@ Returns MARGIN-STR with FACE applied."
   (propertize margin-str 'face `(,face default)))
 
 (defconst flycheck-default-margin-str "»"
-  "String used to indicate errors in the margins.")
+  "String used to indicate errors in the margins pointing right.")
+
+(defconst flycheck-default-margin-str-left "«"
+  "String used to indicate errors in the margins pointing left.")
+
 
 (defconst flycheck-default-margin-continuation-str "⋮"
   "String used to indicate continuation lines in the margins.")
@@ -4402,12 +4406,18 @@ margins (MARGIN-STR, a string) or the bitmap drawn in the
 fringes (FRINGE-BITMAP, a fringe bitmap symbol or a cons of such
 symbols, as in `flycheck-define-error-level')."
   (unless margin-str
-    (setq margin-str flycheck-default-margin-str))
+    (setq margin-str
+          (if (string-equal flycheck-indication-mode "left-margin")
+              (setq margin-str flycheck-default-margin-str)
+            (setq margin-str flycheck-default-margin-str-left))))
 
   (unless fringe-bitmap
     (setq fringe-bitmap
-          (cons 'flycheck-fringe-bitmap-double-arrow
-                'flycheck-fringe-bitmap-double-arrow-hi-res)))
+          (if (string-equal flycheck-indication-mode "left-fringe")
+              (cons 'flycheck-fringe-bitmap-double-arrow
+                    'flycheck-fringe-bitmap-double-arrow-hi-res)
+            (cons 'flycheck-fringe-bitmap-double-left-arrow
+                  'flycheck-fringe-bitmap-double-left-arrow-hi-res))))
 
   (setf (get 'flycheck-error-overlay 'face) 'flycheck-error)
   (setf (get 'flycheck-error-overlay 'priority) 110)
@@ -5196,7 +5206,7 @@ See `flycheck-error-level-<'."
 (defvar flycheck-error-list-mode-line-map
   (let ((map (make-sparse-keymap)))
     (define-key map [mode-line mouse-1]
-      #'flycheck-error-list-mouse-switch-to-source)
+                #'flycheck-error-list-mouse-switch-to-source)
     map)
   "Keymap for error list mode line.")
 
@@ -9867,7 +9877,7 @@ See URL `https://eslint.org/'."
   :verify
   (lambda (_)
     (let* ((default-directory
-             (flycheck-compute-working-directory 'javascript-eslint))
+            (flycheck-compute-working-directory 'javascript-eslint))
            (have-config (flycheck-eslint-config-exists-p)))
       (list
        (flycheck-verification-result-new
@@ -11555,9 +11565,9 @@ versions inferior to 1.25)."
 Execute `cargo --list' to find out whether COMMAND is present."
   (let ((cargo (funcall flycheck-executable-find "cargo")))
     (member command
-      (mapcar (lambda (line)
-                (replace-regexp-in-string "\\s-*\\(\\S-+\\).*\\'" "\\1" line))
-              (ignore-errors (process-lines cargo "--list"))))))
+            (mapcar (lambda (line)
+                      (replace-regexp-in-string "\\s-*\\(\\S-+\\).*\\'" "\\1" line))
+                    (ignore-errors (process-lines cargo "--list"))))))
 
 (defun flycheck-rust-valid-crate-type-p (crate-type)
   "Whether CRATE-TYPE is a valid target type for Cargo.

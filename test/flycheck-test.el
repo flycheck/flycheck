@@ -1655,11 +1655,11 @@
 (ert-deftest flycheck-error-format-position ()
   :tags '(error-api)
   (cl-flet ((fmt
-             (l c el ec)
-             (flycheck-error-format-position
-              (flycheck-error-new-at
-               l c 'error "err" :end-line el :end-column ec
-               :checker 'emacs-lisp))))
+              (l c el ec)
+              (flycheck-error-format-position
+               (flycheck-error-new-at
+                l c 'error "err" :end-line el :end-column ec
+                :checker 'emacs-lisp))))
     (should (string= (fmt 14 nil nil nil) "14"))
     (should (string= (fmt 14 nil nil 1)   "14"))
     (should (string= (fmt 14 nil 14  nil) "14"))
