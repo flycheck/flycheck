@@ -11,6 +11,7 @@ New Features
   - [#2017]: HAML with ``haml-lint``
   - [#2030]: Add ``yaml-actionlint`` checker for GitHub yaml action workflows.
   - [#2052]: Sass with Stylelint
+  - [#2013]: Nix with ``statix``
 
 - [#1873]: Add error explainer to ``perl-perlcritic``.
 - [#1875]: Add error-explainer to ``css-stylelint``.

@@ -869,6 +869,12 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       .. _nix-linter: https://github.com/Synthetica9/nix-linter
 
+   .. syntax-checker:: statix
+
+      Check Nix with statix_.
+
+      .. _statix: https://github.com/nerdypepper/statix
+
 .. supported-language:: Opam
 
    .. syntax-checker:: opam

@@ -235,6 +235,7 @@
     slim
     slim-lint
     sql-sqlint
+    statix
     systemd-analyze
     tcl-nagelfar
     terraform
@@ -11168,6 +11169,52 @@ See URL `https://github.com/Synthetica9/nix-linter'."
       (flycheck-call-checker-process-for-output
        'nix-linter nil t "--help-for" error-code)))
   :modes (nix-mode nix-ts-mode))
+
+(defun flycheck-parse-statix (output checker buffer)
+  "Parse statix warnings from JSON OUTPUT.
+
+CHECKER and BUFFER denote the CHECKER that returned OUTPUT and
+the BUFFER that was checked respectively.
+
+See URL `https://github.com/nerdypepper/statix' for more
+information about statix."
+  (mapcar (lambda (err)
+            ;; Diagnostic information is a (seemingly always) 1 element array.
+            ;; Set the values here to avoid nesting `let-alist'.
+            (let-alist (car (alist-get 'diagnostics err))
+              (setf message .message
+                    start-line .at.from.line
+                    start-column .at.from.column
+                    end-line .at.to.line
+                    end-column .at.to.column))
+
+            (let-alist err
+              (let ((diagnostic (car .diagnostics)))
+                (flycheck-error-new-at
+                 start-line
+                 start-column
+                 (pcase .severity ("Error" 'error)
+                        ("Warn" 'warning)
+                        (_ 'warning))
+                 (format "%s: %s" .note message)
+                 :id (format "%s%02d" (pcase .severity
+                                        ("Error" "E")
+                                        ("Warn" "W")
+                                        (_ "")) .code)
+                 :checker checker
+                 :buffer buffer
+                 :filename (buffer-file-name buffer)
+                 :end-line end-line
+                 :end-column end-column))))
+          (alist-get 'report (car (flycheck-parse-json output)))))
+
+(flycheck-define-checker statix
+  "Nix checker using statix.
+
+See URL `https://github.com/nerdypepper/statix'."
+  :command ("statix" "check" "-o=json" source)
+  :error-parser flycheck-parse-statix
+  :modes nix-mode)
 
 (defun flycheck-locate-sphinx-source-directory ()
   "Locate the Sphinx source directory for the current buffer.
