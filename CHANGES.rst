@@ -56,6 +56,10 @@ Changes
     which they were returned by checkers.  In previous versions of Flycheck,
     this list was sorted by error position and severity. [GH-1749]
 
+- New syntax checkers:
+
+  - PHP with ``phpcs-changed`` [GH-2015]
+
 32 (frozen on May 3rd, 2020, released Mar 28, 2022)
 ===================================================
 
