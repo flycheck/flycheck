@@ -912,7 +912,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
 .. supported-language:: PHP
 
-   Flycheck checks PHP with `php`, `php-phpmd` and `php-phpcs`.
+   Flycheck checks PHP with `php`, `php-phpmd`, `php-phpcs` and `php-phpcs-changed`.
 
    .. syntax-checker:: php
 
@@ -938,6 +938,22 @@ to view the docstring of the syntax checker.  Likewise, you may use
          This syntax checker requires PHP Code Sniffer 2.6 or newer.
 
       .. _PHP Code Sniffer: http://pear.php.net/package/PHP_CodeSniffer
+
+      .. defcustom:: flycheck-phpcs-standard
+
+         The coding standard, either as name of a built-in standard, or as path
+         to a standard specification.
+
+   .. syntax-checker:: php-phpcs-changed
+
+      Check style with `PHPCS Changed`_.
+
+      .. note::
+
+         This syntax checker requires PHP Code Sniffer 2.6 or newer.
+
+      .. _PHP Code Sniffer: http://pear.php.net/package/PHP_CodeSniffer
+      .. _PHPCS-Changed: https://github.com/sirbrillig/phpcs-changed
 
       .. defcustom:: flycheck-phpcs-standard
 

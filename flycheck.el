@@ -235,6 +235,7 @@ attention to case differences."
     php
     php-phpmd
     php-phpcs
+    php-phpcs-changed
     processing
     proselint
     protobuf-protoc
@@ -10272,6 +10273,28 @@ See URL `http://pear.php.net/package/PHP_CodeSniffer/'."
                     (concat "--stdin-path=" (buffer-file-name))))
             ;; Read from standard input
             "-")
+  :standard-input t
+  :error-parser flycheck-parse-checkstyle
+  :error-filter
+  (lambda (errors)
+    (flycheck-sanitize-errors
+     (flycheck-remove-error-file-names "STDIN" errors)))
+  :modes (php-mode php+-mode)
+  ;; phpcs seems to choke on empty standard input, hence skip phpcs if the
+  ;; buffer is empty, see https://github.com/flycheck/flycheck/issues/907
+  :predicate flycheck-buffer-nonempty-p)
+
+(flycheck-define-checker php-phpcs-changed
+  "A PHP style checker using PHPCS-Changed.
+   Needs PHP Code Sniffer 2.6 or newer.
+   See `https://github.com/sirbrillig/phpcs-changed'."
+  :command ("phpcs-changed"
+            "--git"
+            "--git-base trunk"
+            "--git-unstaged"
+            (option "--standard=" flycheck-phpcs-standard concat)
+            (eval (buffer-file-name))
+            )
   :standard-input t
   :error-parser flycheck-parse-checkstyle
   :error-filter
