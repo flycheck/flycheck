@@ -615,6 +615,11 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       Check syntax with the `Haml <http://haml.info/>`_ compiler.
 
+   .. syntax-checker:: haml-lint
+
+      Check style and syntax with the
+      `HAML-Lint <https://github.com/sds/haml-lint/>`_ linter.
+
 .. supported-language:: Handlebars
 
    .. syntax-checker:: handlebars
