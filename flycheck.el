@@ -208,6 +208,7 @@ attention to case differences."
     go-staticcheck
     groovy
     haml
+    haml-lint
     handlebars
     haskell-stack-ghc
     haskell-ghc
@@ -9403,6 +9404,16 @@ See URL `http://haml.info'."
   :error-patterns
   ((error line-start "Syntax error on line " line ": " (message) line-end)
    (error line-start ":" line ": syntax error, " (message) line-end))
+  :modes haml-mode)
+
+(flycheck-define-checker haml-lint
+  "HAML-Lint style checker.
+
+See URL `https://github.com/sds/haml-lint'."
+  :command ("haml-lint" "--no-color" "--no-summary" source)
+  :error-patterns
+  ((error line-start (file-name) ":" line " [E]" (message) line-end)
+   (warning line-start (file-name) ":" line " [W]" (message) line-end))
   :modes haml-mode)
 
 (flycheck-define-checker handlebars

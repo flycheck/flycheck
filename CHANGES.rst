@@ -88,6 +88,7 @@
   - Elixir with ``credo`` [GH-1062]
   - JSON with ``json-jq`` [GH-1568]
   - Jsonnet with ``jsonnet`` [GH-1345]
+  - HAML-Lint with ``haml-lint`` [GH-2017]
   - MarkdownLint CLI with ``markdownlint`` [GH-1366]
   - mypy with ``python-mypy`` [GH-1354]
   - Nix with ``nix-linter`` [GH-1530]
