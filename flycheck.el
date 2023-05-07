@@ -12588,6 +12588,13 @@ See URL `http://xmlstar.sourceforge.net/'."
   :safe #'flycheck-string-or-nil-p
   :package-version '(flycheck . "31"))
 
+(flycheck-def-option-var flycheck-xml-xmllint-relaxng-path nil xml-xmllint
+  "An RELAX NG schema to validate against."
+  :type '(choice (const :tag "None" nil)
+                 (file :tag "RELAX NG schema"))
+  :safe #'flycheck-string-or-nil-p
+  :package-version '(flycheck . "34"))
+
 (flycheck-define-checker xml-xmllint
   "A XML syntax checker and validator using the xmllint utility.
 
@@ -12595,6 +12602,7 @@ The xmllint is part of libxml2, see URL
 `http://www.xmlsoft.org/'."
   :command ("xmllint" "--noout"
             (option "--schema" flycheck-xml-xmllint-xsd-path)
+            (option "--relaxng" flycheck-xml-xmllint-relaxng-path)
             "-")
   :standard-input t
   :error-patterns

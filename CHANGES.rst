@@ -16,6 +16,7 @@ New Features
 - [#1873]: Add error explainer to ``perl-perlcritic``.
 - [#1875]: Add error-explainer to ``css-stylelint``.
 - [#1876]: Add error-explainer for ``markdownlint checker``.
+- [#2019]: Add support for RELAX NG schema in ``xmllint``.
 
 ----------
 Bugs Fixed
