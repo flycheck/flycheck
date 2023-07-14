@@ -12573,7 +12573,12 @@ See URL `http://www.ruby-doc.org/stdlib-2.0.0/libdoc/yaml/rdoc/YAML.html'."
   :next-checkers ((warning . yaml-yamllint)
                   (warning . cwl)))
 
-(flycheck-def-config-file-var flycheck-yamllintrc yaml-yamllint ".yamllint")
+(flycheck-def-config-file-var flycheck-yamllintrc
+    yaml-yamllint
+    '(".yamllint"
+      ".yamllint.yaml"
+      ".yamllint.yml"
+      "~/.config/yamllint/config"))
 
 (flycheck-define-checker yaml-yamllint
   "A YAML syntax checker using YAMLLint.
