@@ -9,6 +9,8 @@
 
 (files "flycheck-ert.el" "flycheck-buttercup.el")
 
+(script "test" "echo \"Error: no test specified\" && exit 1")
+
 (source 'gnu)
 (source 'melpa)
 
