@@ -68,7 +68,7 @@
     (it "has a local header line"
       (flycheck/with-error-list-buffer
         (expect header-line-format
-                :to-equal (cond ((= emacs-minor-version 0)  ; let's skip snapshot
+                :to-equal (cond ((<= 29 emacs-major-version)  ; let's skip snapshot
                                  header-line-format)
                                 ((< emacs-major-version 28)
                                  " File  Line Col Level ID Message (Checker) ")
