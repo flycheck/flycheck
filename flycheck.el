@@ -12229,7 +12229,7 @@ Relative files are relative to the file being checked."
 CHECKER and BUFFER denote the CHECKER that returned OUTPUT and
 the BUFFER that was checked respectively.
 
-See URL `https://github.com/wata727/tflint' for more
+See URL `https://github.com/terraform-linters/tflint' for more
 information about tflint."
   (mapcar (lambda (err)
             (let-alist err
@@ -12252,7 +12252,7 @@ information about tflint."
 (flycheck-define-checker terraform-tflint
   "A Terraform checker using tflint.
 
-See URL `https://github.com/wata727/tflint'."
+See URL `https://github.com/terraform-linters/tflint'."
   :command ("tflint" "--format=json"
             (option-list "--var-file=" flycheck-tflint-variable-files concat)
             source-original)
