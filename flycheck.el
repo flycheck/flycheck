@@ -292,7 +292,8 @@ attention to case differences."
     xml-xmllint
     yaml-jsyaml
     yaml-ruby
-    yaml-yamllint)
+    yaml-yamllint
+    yaml-actionlint)
   "Syntax checkers available for automatic selection.
 
 A list of Flycheck syntax checkers to choose from when syntax
@@ -9150,6 +9151,14 @@ Uses GCC's Fortran compiler gfortran.  See URL
             (or (= 3 (zero-or-more not-newline) "\n") "")
             "Warning: " (message) line-end))
   :modes (fortran-mode f90-mode))
+
+(flycheck-define-checker yaml-actionlint
+  "A YAML syntax checker using actionlint.
+
+See URL https://github.com/rhysd/actionlint/."
+  :command ("actionlint" "-oneline" source)
+  :error-patterns ((error line-start (file-name) ":" line ":" column ": " (message) line-end))
+  :modes yaml-mode)
 
 (flycheck-define-checker go-gofmt
   "A Go syntax and style checker using the gofmt utility.
