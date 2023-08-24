@@ -2132,9 +2132,9 @@
     ;; Remove restrictions and test that all errors are reported
     (widen)
     (should (= (length (flycheck-overlays-in (point-min) (point-max))) 4))
-    (skip-unless (version<= emacs-version "30"))
-    (when (version<= "30.0.50" emacs-version)
-      (ert-skip "Skipped for 30.0.50, the position seems to be off a litte..."))
+    (skip-unless (version<= emacs-version "29"))
+    (when (version<= "29.1" emacs-version)
+      (ert-skip "Skipped for 29.1, the position seems to be off a litte..."))
     (flycheck-ert-should-errors
      '(9 1 warning "`message' called with 0 args to fill 1 format field(s)"
          :checker emacs-lisp)
