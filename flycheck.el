@@ -3861,6 +3861,14 @@ most.  It defaults to 20."
            "\\s-+" " " (buffer-substring beg (min end (point-max))))
           (or max-length 20) nil nil t))))))
 
+;; use isolates and direction markers to make it less likely for text
+;; taken from the source to render the error message unreable
+;; (sdrawkcab).
+(defconst flycheck--format-snippet
+  (concat "`\N{LEFT-TO-RIGHT MARK}\N{FIRST STRONG ISOLATE}"
+          "%s\N{POP DIRECTIONAL ISOLATE}\N{LEFT-TO-RIGHT MARK}': ")
+  "Format string to use on a snippet of source code related to the error.")
+
 (defun flycheck-error-format-message-and-id (err &optional include-snippet)
   "Format the message and id of ERR as human-readable string.
 
@@ -3874,7 +3882,7 @@ beginning position)."
     (concat (and other-file-p (format "In %S:\n" (file-relative-name fname)))
             (and include-snippet
                  (-when-let* ((snippet (flycheck-error-format-snippet err)))
-                   (flycheck--format-message "`%s': " snippet)))
+                   (flycheck--format-message flycheck--format-snippet snippet)))
             (or (flycheck-error-message err)
                 (format "Unknown %S" (flycheck-error-level err)))
             (and id (format " [%s]" id)))))
