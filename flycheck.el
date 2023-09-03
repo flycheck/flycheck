@@ -10146,24 +10146,24 @@ See URL `https://orgmode.org/'."
   ((error line-start line ": " (message) line-end))
   :modes (org-mode))
 
-  (defconst flycheck-org-lint-form
-    (flycheck-prepare-emacs-lisp-form
-      (require 'org)
-      (require 'org-attach)
-      (let ((source (car command-line-args-left))
-            (process-default-directory default-directory))
-        (with-temp-buffer
-          (insert-file-contents source 'visit)
-          (setq buffer-file-name source)
-          (setq default-directory process-default-directory)
-          (delay-mode-hooks (org-mode))
-          (setq delayed-mode-hooks nil)
-          (dolist (err (org-lint))
-            (let ((inf (cl-second err)))
-              (princ (elt inf 0))
-              (princ ": ")
-              (princ (elt inf 2))
-              (terpri)))))))
+(defconst flycheck-org-lint-form
+  (flycheck-prepare-emacs-lisp-form
+   (require 'org)
+   (require 'org-attach)
+   (let ((source (car command-line-args-left))
+   (process-default-directory default-directory))
+   (with-temp-buffer
+   (insert-file-contents source 'visit)
+   (setq buffer-file-name source)
+   (setq default-directory process-default-directory)
+   (delay-mode-hooks (org-mode))
+   (setq delayed-mode-hooks nil)
+   (dolist (err (org-lint))
+   (let ((inf (cl-second err)))
+   (princ (elt inf 0))
+   (princ ": ")
+   (princ (elt inf 2))
+   (terpri)))))))
 
 (defconst flycheck-org-lint-variables
     '(org-directory
