@@ -10180,7 +10180,8 @@ See URL `https://orgmode.org/'."
               "--" source)
   :error-patterns
   ((error line-start line ": " (message) line-end))
-  :modes (org-mode))
+  :modes (org-mode)
+  :next-checkers (proselint))
 
 (flycheck-define-checker perl
   "A Perl syntax checker using the Perl interpreter.
