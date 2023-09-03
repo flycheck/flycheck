@@ -230,6 +230,7 @@ attention to case differences."
     nix
     nix-linter
     opam
+    org-lint
     perl
     perl-perlcritic
     php
