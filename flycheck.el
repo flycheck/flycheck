@@ -10172,24 +10172,12 @@ See URL `https://orgmode.org/'."
       org-attach-use-inheritance
       org-attach-id-to-path-function-list)
     "Variables inherited by the org-lint subprocess.")
-  (defun flycheck-org-lint-variables-form ()
+
+(defun flycheck-org-lint-variables-form ()
     (require 'org-attach)  ; Needed to make variables available
     `(progn
        ,@(seq-map (lambda (opt) `(setq-default ,opt ',(symbol-value opt)))
                   (seq-filter #'boundp flycheck-org-lint-variables))))
-  (flycheck-define-checker org-lint
-    "Org buffer checker using `org-lint'."
-    :command ("emacs" (eval flycheck-emacs-args)
-              "--eval" (eval (concat "(add-to-list 'load-path \""
-                                     (file-name-directory (locate-library "org"))
-                                     "\")"))
-              "--eval" (eval (flycheck-sexp-to-string
-                              (flycheck-org-lint-variables-form)))
-              "--eval" (eval flycheck-org-lint-form)
-              "--" source)
-    :error-patterns
-    ((error line-start line ": " (message) line-end))
-    :modes (org-mode))
 
 (flycheck-define-checker perl
   "A Perl syntax checker using the Perl interpreter.
