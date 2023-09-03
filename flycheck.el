@@ -10135,16 +10135,6 @@ string is a module to `use' in Perl."
   :safe #'flycheck-string-list-p
   :package-version '(flycheck . "32"))
 
-(flycheck-define-checker org-lint
-  "Org buffer checker using `org-lint'.
-
-See URL `https://orgmode.org/'."
-  :command ("emacs" (eval flycheck-emacs-args)
-              "--eval" (eval flycheck-org-lint-form)
-              "--" source)
-  :error-patterns
-  ((error line-start line ": " (message) line-end))
-  :modes (org-mode))
 
 (defconst flycheck-org-lint-form
   (flycheck-prepare-emacs-lisp-form
@@ -10180,6 +10170,17 @@ See URL `https://orgmode.org/'."
     `(progn
        ,@(seq-map (lambda (opt) `(setq-default ,opt ',(symbol-value opt)))
                   (seq-filter #'boundp flycheck-org-lint-variables))))
+
+(flycheck-define-checker org-lint
+  "Org buffer checker using `org-lint'.
+
+See URL `https://orgmode.org/'."
+  :command ("emacs" (eval flycheck-emacs-args)
+              "--eval" (eval flycheck-org-lint-form)
+              "--" source)
+  :error-patterns
+  ((error line-start line ": " (message) line-end))
+  :modes (org-mode))
 
 (flycheck-define-checker perl
   "A Perl syntax checker using the Perl interpreter.
