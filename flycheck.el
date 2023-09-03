@@ -10164,7 +10164,8 @@ See URL `https://orgmode.org/'."
               (princ ": ")
               (princ (elt inf 2))
               (terpri)))))))
-  (defconst flycheck-org-lint-variables
+
+(defconst flycheck-org-lint-variables
     '(org-directory
       org-id-locations
       org-id-locations-file
