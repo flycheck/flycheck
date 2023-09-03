@@ -10135,7 +10135,9 @@ string is a module to `use' in Perl."
   :package-version '(flycheck . "32"))
 
   (flycheck-define-checker org-lint
-    "Org buffer checker using `org-lint'."
+    "Org buffer checker using `org-lint'.
+
+See URL `https://orgmode.org/'."
     :command ("emacs" (eval flycheck-emacs-args)
               "--eval" (eval flycheck-org-lint-form)
               "--" source)
