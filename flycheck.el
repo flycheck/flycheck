@@ -10134,6 +10134,16 @@ string is a module to `use' in Perl."
   :safe #'flycheck-string-list-p
   :package-version '(flycheck . "32"))
 
+  (flycheck-define-checker org-lint
+    "Org buffer checker using `org-lint'."
+    :command ("emacs" (eval flycheck-emacs-args)
+              "--eval" (eval flycheck-org-lint-form)
+              "--" source)
+    :error-patterns
+    ((error line-start line ": " (message) line-end))
+    :modes (org-mode))
+
+
 (flycheck-define-checker perl
   "A Perl syntax checker using the Perl interpreter.
 
