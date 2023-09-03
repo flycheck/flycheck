@@ -10135,7 +10135,7 @@ string is a module to `use' in Perl."
   :safe #'flycheck-string-list-p
   :package-version '(flycheck . "32"))
 
-  (flycheck-define-checker org-lint
+(flycheck-define-checker org-lint
     "Org buffer checker using `org-lint'.
 
 See URL `https://orgmode.org/'."
@@ -10175,7 +10175,8 @@ See URL `https://orgmode.org/'."
     "Variables inherited by the org-lint subprocess.")
 
 (defun flycheck-org-lint-variables-form ()
-    (require 'org-attach)  ; Needed to make variables available
+  "Make org-lint availables available."
+    (require 'org-attach)
     `(progn
        ,@(seq-map (lambda (opt) `(setq-default ,opt ',(symbol-value opt)))
                   (seq-filter #'boundp flycheck-org-lint-variables))))
