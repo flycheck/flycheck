@@ -1,4 +1,5 @@
 *.elc
+*autoloads.el
 
 # Packages installed for development
 /.cask/
