@@ -10701,7 +10701,7 @@ See URL `https://beta.ruff.rs/docs/'."
   :command ("ruff"
             "check"
             (config-file "--config" flycheck-python-ruff-config)
-            "--format=text"
+            "--output-format=text"
             "--stdin-filename" source-original
             "-")
   :standard-input t
