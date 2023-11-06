@@ -12255,7 +12255,7 @@ information about tflint."
 See URL `https://github.com/terraform-linters/tflint'."
   :command ("tflint" "--format=json"
             (option-list "--var-file=" flycheck-tflint-variable-files concat)
-            source-original)
+            (option-list "--chdir=" source-directory concat))
   :error-parser flycheck-parse-tflint-linter
   :predicate flycheck-buffer-saved-p
   :modes terraform-mode)
