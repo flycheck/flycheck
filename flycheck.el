@@ -12253,10 +12253,8 @@ information about tflint."
   "A Terraform checker using tflint.
 
 See URL `https://github.com/terraform-linters/tflint'."
-  :command ("tflint" "--format=json"
-            (option-list "--var-file=" flycheck-tflint-variable-files concat)
-            (option-list "--chdir=" source-directory concat)
-            (option-list "--filter=" source-original concat))
+  :command ("tflint" "--format=json" "--force"
+            (option-list "--var-file=" flycheck-tflint-variable-files concat))
   :error-parser flycheck-parse-tflint-linter
   :predicate flycheck-buffer-saved-p
   :modes terraform-mode)
