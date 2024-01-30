@@ -10207,7 +10207,7 @@ See URL `http://php.net/manual/en/features.commandline.php'."
   :error-patterns
   ((error line-start (or "Parse" "Fatal" "syntax") " error" (any ":" ",") " "
           (message) " in " (file-name) " on line " line line-end))
-  :modes (php-mode php+-mode)
+  :modes (php-mode php-ts-mode php+-mode)
   :next-checkers ((warning . php-phpmd)
                   (warning . php-phpcs)))
 
@@ -10232,7 +10232,7 @@ See URL `https://phpmd.org/'."
             (eval (flycheck-option-comma-separated-list
                    flycheck-phpmd-rulesets)))
   :error-parser flycheck-parse-phpmd
-  :modes (php-mode php+-mode)
+  :modes (php-mode php-ts-mode php+-mode)
   :next-checkers (php-phpcs))
 
 (flycheck-def-option-var flycheck-phpcs-standard nil php-phpcs
@@ -10278,7 +10278,7 @@ See URL `http://pear.php.net/package/PHP_CodeSniffer/'."
   (lambda (errors)
     (flycheck-sanitize-errors
      (flycheck-remove-error-file-names "STDIN" errors)))
-  :modes (php-mode php+-mode)
+  :modes (php-mode php-ts-mode php+-mode)
   ;; phpcs seems to choke on empty standard input, hence skip phpcs if the
   ;; buffer is empty, see https://github.com/flycheck/flycheck/issues/907
   :predicate flycheck-buffer-nonempty-p)
