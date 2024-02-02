@@ -11127,7 +11127,7 @@ See URL `https://nixos.org/nix/manual/#sec-nix-instantiate'."
     (flycheck-sanitize-errors
      (flycheck-remove-error-file-names "(string)" errors)))
   :next-checkers ((warning . nix-linter))
-  :modes nix-mode)
+  :modes (nix-mode nix-ts-mode))
 
 (defun flycheck-parse-nix-linter (output checker buffer)
   "Parse nix-linter warnings from JSON OUTPUT.
@@ -11164,7 +11164,7 @@ See URL `https://github.com/Synthetica9/nix-linter'."
     (-when-let (error-code (flycheck-error-id error))
       (flycheck-call-checker-process-for-output
        'nix-linter nil t "--help-for" error-code)))
-  :modes nix-mode)
+  :modes (nix-mode nix-ts-mode))
 
 (defun flycheck-locate-sphinx-source-directory ()
   "Locate the Sphinx source directory for the current buffer.
