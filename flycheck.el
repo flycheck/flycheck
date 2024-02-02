@@ -10068,7 +10068,7 @@ See URL `https://github.com/mpeterv/luacheck'."
           ;; the ID is optional here
           (optional " (" (id "E" (one-or-more digit)) ") ")
           (message) line-end))
-  :modes lua-mode)
+  :modes (lua-mode lua-ts-mode))
 
 (flycheck-define-checker lua
   "A Lua syntax checker using the Lua compiler.
@@ -10081,7 +10081,7 @@ See URL `http://www.lua.org/'."
           ;; Skip the name of the luac executable.
           (minimal-match (zero-or-more not-newline))
           ": stdin:" line ": " (message) line-end))
-  :modes lua-mode)
+  :modes (lua-mode lua-ts-mode))
 
 (flycheck-define-checker opam
   "A Opam syntax and style checker using opam lint.
