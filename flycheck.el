@@ -70,6 +70,8 @@
   (require 'pcase)          ; `pcase-dolist' (`pcase' itself is autoloaded)
   )
 
+;; TODO: Remove dash dep
+;; All of the features we're using from it are available in Emacs now
 (require 'dash)
 
 (require 'seq)                   ; Sequence functions
