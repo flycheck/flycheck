@@ -1,11 +1,11 @@
-33.1 (04-02-2024)
+33.1 (2024-02-04)
 ======================
 
 - Bugs Fixed
 
   - Fixed an usage of the removed ``flycheck--format-message`` function.
 
-33.0 (04-02-2024)
+33.0 (2024-02-04)
 =======================
 
 .. note:: The changelog for this release is incomplete.
