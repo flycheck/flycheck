@@ -8,6 +8,7 @@ New Features
 - New syntax checkers
 
   - `#2027 <https://github.com/flycheck/flycheck/pull/2017>`_: HAML-Lint with ``haml-lint``
+  - `#2030 <https://github.com/flycheck/flycheck/pull/2030>`_: Add yaml-actionlint checker for GitHub yaml action workflows.
 
 ----------
 Bugs Fixed
