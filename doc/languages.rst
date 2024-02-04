@@ -1044,6 +1044,12 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       .. syntax-checker-config-file:: flycheck-flake8rc
 
+   .. syntax-checker:: python-ruff
+
+      Lint with `ruff <https://beta.ruff.rs/>`_.
+
+      .. syntax-checker-config-file:: flycheck-python-ruff-config
+
    .. syntax-checker:: python-pyright
 
       Type check python with  `pyright <https://github.com/microsoft/pyright>`_.
