@@ -18,6 +18,8 @@ Bugs Fixed
 Changes
 ----------
 
+- `#2026 <https://github.com/flycheck/flycheck/pull/2026>`_:[yamllint] update possible locations for configuration file.
+
 ----------------------
 
 33.1 (2024-02-04)
