@@ -7,9 +7,10 @@
 ;; Author: Sebastian Wiesner <swiesner@lunaryorn.com>
 ;; Maintainer: Clément Pit-Claudel <clement.pitclaudel@live.com>
 ;;             fmdkdd <fmdkdd@gmail.com>
+;;             Bozhidar Batsov <bozhidar@batsov.dev>
 ;; URL: http://www.flycheck.org
 ;; Keywords: convenience, languages, tools
-;; Version: 33-cvs
+;; Version: 33.0-snapshot
 ;; Package-Requires: ((emacs "25.1") (dash "2.12.1") (pkg-info "0.4") (let-alist "1.0.4") (seq "1.11"))
 
 ;; This file is not part of GNU Emacs.
@@ -29,7 +30,7 @@
 
 ;;; Commentary:
 
-;; On-the-fly syntax checking for GNU Emacs 24.
+;; On-the-fly syntax checking for GNU Emacs.
 ;;
 ;; Flycheck is a modern on-the-fly syntax checking extension for GNU Emacs,
 ;; intended as replacement for the older Flymake extension which is part of GNU
