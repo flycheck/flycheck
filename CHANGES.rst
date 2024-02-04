@@ -1,5 +1,7 @@
-33-cvs (in development)
+33.0 (04-02-2024)
 =======================
+
+.. note:: The changelog for this release is incomplete.
 
 - New features and improvements
 
@@ -10,9 +12,15 @@
   - Error explainers can now return URLs (to show a webpage) or functions (to
     use custom formatting).  For example, the Rust checker now renders
     explanations using ``markdown-view-mode``. [GH-1753]
+  - Enable checkers in many newer TreeSitter-based major modes (think ``*-ts-mode``).
+
+- New syntax checkers
+
+  - Python with ``ruff``. [GH-2033]
 
 - **Breaking changes**
 
+  - Drop support for Emacs 25.
   - The variable ``flycheck-current-errors`` now contains errors in the order in
     which they were returned by checkers.  In previous versions of Flycheck,
     this list was sorted by error position and severity. [GH-1749]

@@ -1,5 +1,5 @@
 (package "flycheck"
-         "33-cvs"
+         "33.0"
          "On-the-fly syntax checking")
 
 (website-url "http://www.flycheck.org")
