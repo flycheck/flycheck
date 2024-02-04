@@ -17,8 +17,12 @@ Modern on-the-fly syntax checking extension for GNU Emacs.  [Try it][]!
 For a more gentle introduction read the [Installation][] instructions and go
 through [Quickstart][] guide.
 
+## Getting Help
+
 Please ask questions about Flycheck on [Stack Exchange][sx] or in our
 [Gitter chat][gitter], and report bugs to our [issue tracker][].
+
+## Contributing
 
 We welcome all kinds of contributions, whether you write patches, open pull
 requests, write documentation, help others with Flycheck issues, or just tell
@@ -26,11 +30,15 @@ other people about your experiences with Flycheck.  Please take a look at our
 [Contributor’s Guide][contrib] for help and guidance about contributing to
 Flycheck.
 
+## Code of Conduct
+
 We strive to create a safe, friendly and welcoming environment in the Flycheck
 community and have a [Code of Conduct][coc] that defines acceptable and welcome
 behaviour as well as sanctions for violations.  All contributors and all
 participants are expected to follow it, on Github, Gitter, Emacs.SX or any other
 place that’s part of Flycheck’s broader community.
+
+## License
 
 Flycheck is free software: you can redistribute it and/or modify it under the
 terms of the [GNU General Public License][copying] as published by the Free
