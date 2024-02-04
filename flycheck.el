@@ -3832,7 +3832,7 @@ beginning position)."
     (concat (and other-file-p (format "In %S:\n" (file-relative-name fname)))
             (and include-snippet
                  (-when-let* ((snippet (flycheck-error-format-snippet err)))
-                   (flycheck--format-message "`%s': " snippet)))
+                   (format-message "`%s': " snippet)))
             (or (flycheck-error-message err)
                 (format "Unknown %S" (flycheck-error-level err)))
             (and id (format " [%s]" id)))))
