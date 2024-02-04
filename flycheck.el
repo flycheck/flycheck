@@ -95,50 +95,6 @@
 (declare-function pkg-info-version-info "pkg-info" (package))
 
 
-;;; Compatibility
-(eval-and-compile
-  (unless (fboundp 'string-suffix-p)
-    ;; TODO: Remove when dropping support for Emacs 24.3 and earlier
-    (defun string-suffix-p (suffix string &optional ignore-case)
-      "Return non-nil if SUFFIX is a suffix of STRING.
-If IGNORE-CASE is non-nil, the comparison is done without paying
-attention to case differences."
-      (let ((start-pos (- (length string) (length suffix))))
-        (and (>= start-pos 0)
-             (eq t (compare-strings suffix nil nil
-                                    string start-pos nil ignore-case))))))
-
-  (defalias 'flycheck--format-message
-    (if (fboundp 'format-message) #'format-message #'format))
-
-  ;; TODO: Remove when dropping support for Emacs 24.3 and earlier
-  (unless (featurep 'subr-x)
-    ;; `subr-x' function for Emacs 24.3 and below
-    (defsubst string-join (strings &optional separator)
-      "Join all STRINGS using SEPARATOR."
-      (mapconcat 'identity strings separator))
-
-    (defsubst string-trim-left (string)
-      "Remove leading whitespace from STRING."
-      (if (string-match "\\`[ \t\n\r]+" string)
-          (replace-match "" t t string)
-        string))
-
-    (defsubst string-trim-right (string)
-      "Remove trailing whitespace from STRING."
-      (if (string-match "[ \t\n\r]+\\'" string)
-          (replace-match "" t t string)
-        string))
-
-    (defsubst string-trim (string)
-      "Remove leading and trailing whitespace from STRING."
-      (string-trim-left (string-trim-right string)))
-
-    (defsubst string-empty-p (string)
-      "Check whether STRING is empty."
-      (string= string ""))))
-
-
 ;;; Customization
 (defgroup flycheck nil
   "Modern on-the-fly syntax checking for GNU Emacs."
