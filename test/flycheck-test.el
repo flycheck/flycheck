@@ -480,7 +480,7 @@
 (ert-deftest flycheck-autoloads-file-p/a-plain-file ()
   :tags '(utility)
   (flycheck-ert-with-file-buffer
-      (expand-file-name "Cask" flycheck-test-source-directory)
+      (expand-file-name "Eask" flycheck-test-source-directory)
     (should-not (flycheck-autoloads-file-p))))
 
 (ert-deftest flycheck-in-user-emacs-directory-p/no-child-of-user-emacs-directory ()
