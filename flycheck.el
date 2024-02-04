@@ -10556,7 +10556,7 @@ current project; `.pylintrc' is not part of the list because it
 is commonly found in ~/."
   :group 'flycheck
   :type '(repeat (string :tag "File name"))
-  :package-version '(flycheck . "0.33")
+  :package-version '(flycheck . "33")
   :safe #'flycheck-string-list-p)
 
 (defun flycheck-python-find-project-root (_checker)
