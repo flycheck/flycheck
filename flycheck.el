@@ -10,7 +10,7 @@
 ;;             Bozhidar Batsov <bozhidar@batsov.dev>
 ;; URL: http://www.flycheck.org
 ;; Keywords: convenience, languages, tools
-;; Version: 33.1
+;; Version: 34.0-snapshot
 ;; Package-Requires: ((emacs "26") (dash "2.12.1") (pkg-info "0.4") (let-alist "1.0.4") (seq "1.11"))
 
 ;; This file is not part of GNU Emacs.
@@ -250,10 +250,10 @@
     vhdl-ghdl
     xml-xmlstarlet
     xml-xmllint
+    yaml-actionlint
     yaml-jsyaml
     yaml-ruby
-    yaml-yamllint
-    yaml-actionlint)
+    yaml-yamllint)
   "Syntax checkers available for automatic selection.
 
 A list of Flycheck syntax checkers to choose from when syntax

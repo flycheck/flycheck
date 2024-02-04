@@ -1,5 +1,5 @@
 (package "flycheck"
-         "33.0"
+         "34.0-snapshot"
          "On-the-fly syntax checking")
 
 (website-url "http://www.flycheck.org")
