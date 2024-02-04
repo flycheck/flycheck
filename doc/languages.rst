@@ -958,7 +958,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
          This syntax checker requires PHP Code Sniffer 2.6 or newer.
 
       .. _PHP Code Sniffer: http://pear.php.net/package/PHP_CodeSniffer
-      .. _PHPCS-Changed: https://github.com/sirbrillig/phpcs-changed
+      .. _PHPCS Changed: https://github.com/sirbrillig/phpcs-changed
 
       .. defcustom:: flycheck-phpcs-standard
 

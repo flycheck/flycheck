@@ -9,6 +9,7 @@ New Features
 
   - `#2027 <https://github.com/flycheck/flycheck/pull/2017>`_: HAML-Lint with ``haml-lint``
   - `#2030 <https://github.com/flycheck/flycheck/pull/2030>`_: Add yaml-actionlint checker for GitHub yaml action workflows.
+  - `#2015 <https://github.com/flycheck/flycheck/pull/2015>`_: PHP with ``phpcs-changed``
 
 ----------
 Bugs Fixed
@@ -55,10 +56,6 @@ Changes
   - The variable ``flycheck-current-errors`` now contains errors in the order in
     which they were returned by checkers.  In previous versions of Flycheck,
     this list was sorted by error position and severity. [GH-1749]
-
-- New syntax checkers:
-
-  - PHP with ``phpcs-changed`` [GH-2015]
 
 32 (frozen on May 3rd, 2020, released Mar 28, 2022)
 ===================================================
