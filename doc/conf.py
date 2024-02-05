@@ -228,7 +228,7 @@ class SyntaxCheckerConfigurationFile(Directive):
 
 class IssueReferences(Transform):
 
-    ISSUE_PATTERN = re.compile(r'\[GH-(\d+)\]')
+    ISSUE_PATTERN = re.compile(r'\[(?:GH-|#)(\d+)\]')
     ISSUE_URL_TEMPLATE = 'https://github.com/flycheck/flycheck/issues/{}'
 
     default_priority = 999

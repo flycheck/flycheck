@@ -7,9 +7,9 @@ New Features
 
 - New syntax checkers
 
-  - `#2027 <https://github.com/flycheck/flycheck/pull/2017>`_: HAML-Lint with ``haml-lint``
-  - `#2030 <https://github.com/flycheck/flycheck/pull/2030>`_: Add yaml-actionlint checker for GitHub yaml action workflows.
-  - `#2015 <https://github.com/flycheck/flycheck/pull/2015>`_: PHP with ``phpcs-changed``
+  - #2017: HAML-Lint with ``haml-lint``
+  - #2030: Add yaml-actionlint checker for GitHub yaml action workflows.
+  - #2015: PHP with ``phpcs-changed``
 
 ----------
 Bugs Fixed
@@ -19,9 +19,9 @@ Bugs Fixed
 Changes
 ----------
 
-- `#2026 <https://github.com/flycheck/flycheck/pull/2026>`_:[yamllint] update possible locations for configuration file.
-- **(Breaking)** `#1697 <https://github.com/flycheck/flycheck/pull/1697>`_: Remove the ``coq`` checker.
-- `#1704 <https://github.com/flycheck/flycheck/pull/1704>`_: The ``tslint`` checker is deprecated; it will go away in a future release.
+- #2026:[yamllint] update possible locations for configuration file.
+- **(Breaking)** #1697: Remove the ``coq`` checker.
+- #1704: The ``tslint`` checker is deprecated; it will go away in a future release.
 
 ----------------------
 
