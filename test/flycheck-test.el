@@ -2711,7 +2711,7 @@ evaluating BODY."
       (flycheck-copy-errors-as-kill 10 #'flycheck-error-id)
       (should (equal (seq-take kill-ring 1) '("foo")))
       (flycheck-copy-errors-as-kill 10 #'flycheck-error-format-message-and-id)
-      (should (equal (seq-take kill-ring 1)
+      (should (equal (seq-take kill-ring 2)
                      '("1st message" "2nd message [foo]"))))))
 
 
