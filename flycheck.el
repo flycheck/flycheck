@@ -141,7 +141,6 @@
     chef-foodcritic
     coffee
     coffee-coffeelint
-    coq
     css-csslint
     css-stylelint
     cuda-nvcc
@@ -8134,43 +8133,6 @@ See URL `http://www.coffeelint.org/'."
                    "stdin" (flycheck-remove-error-ids
                             (flycheck-sanitize-errors errors))))
   :modes coffee-mode)
-
-(defun flycheck-coq-error-filter (errors)
-  "Sanitize Coq ERRORS and compute end-lines and end-columns."
-  (flycheck-increment-error-columns errors)
-  (dolist (err errors)
-    (setf (flycheck-error-message err)
-          (replace-regexp-in-string (rx (1+ (syntax whitespace)) line-end)
-                                    "" (flycheck-error-message err)
-                                    'fixedcase 'literal))
-    (-when-let* ((end-col (flycheck-error-end-column err)))
-      ;; Coq reports an offset (potentially past eol), not an end column
-      (let* ((line (flycheck-error-line err))
-             (end-lc (save-excursion
-                       (flycheck-goto-line line)
-                       (goto-char (+ (point) (1- end-col)))
-                       (flycheck-line-column-at-point))))
-        (setf (flycheck-error-end-line err) (car end-lc))
-        (setf (flycheck-error-end-column err) (cdr end-lc)))))
-  (flycheck-sanitize-errors errors))
-
-(flycheck-define-checker coq
-  "A Coq syntax checker using the Coq compiler.
-
-See URL `https://coq.inria.fr/'."
-  ;; We use coqtop in batch mode, because coqc is picky about file names.
-  :command ("coqtop" "-batch" "-load-vernac-source" source)
-  :error-patterns
-  ((error line-start "File \"" (file-name) "\", line " line
-          ", characters " column "-" end-column ":\n"
-          (or "Syntax error:" "Error:")
-          ;; Most Coq error messages span multiple lines, and end with a dot.
-          ;; There are simple one-line messages, too, though.
-          (message (or (and (one-or-more (or not-newline "\n")) ".")
-                       (one-or-more not-newline)))
-          line-end))
-  :error-filter flycheck-coq-error-filter
-  :modes coq-mode)
 
 (flycheck-define-checker css-csslint
   "A CSS syntax and style checker using csslint.

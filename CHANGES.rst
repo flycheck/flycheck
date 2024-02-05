@@ -56,6 +56,7 @@ Changes
   - The variable ``flycheck-current-errors`` now contains errors in the order in
     which they were returned by checkers.  In previous versions of Flycheck,
     this list was sorted by error position and severity. [GH-1749]
+  - Remove the ``coq`` checker. [GH-1697]
   - The ``tslint`` checker is deprecated; it will go away in a future
     release. [GH-1704]
 
