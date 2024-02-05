@@ -15,7 +15,6 @@
 (source 'melpa)
 
 (depends-on "emacs" "26.1")
-(depends-on "dash")
 
 (development
  (depends-on "f")                       ; For some maintenance tools

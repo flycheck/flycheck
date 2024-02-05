@@ -11,7 +11,7 @@
 ;; URL: http://www.flycheck.org
 ;; Keywords: convenience, languages, tools
 ;; Version: 34.0-snapshot
-;; Package-Requires: ((emacs "26") (dash "2.12.1") (pkg-info "0.4") (seq "1.11"))
+;; Package-Requires: ((emacs "26") (pkg-info "0.4") (seq "1.11"))
 
 ;; This file is not part of GNU Emacs.
 
@@ -69,10 +69,6 @@
   (require 'jka-compr)      ; To inhibit compression of temp files
   (require 'pcase)          ; `pcase-dolist' (`pcase' itself is autoloaded)
   )
-
-;; TODO: Remove dash dep
-;; All of the features we're using from it are available in Emacs now
-(require 'dash)
 
 (require 'seq)                   ; Sequence functions
 (require 'subr-x)                ; Additional utilities

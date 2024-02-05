@@ -2707,11 +2707,11 @@ evaluating BODY."
                                                :id "foo"))))
       (mapc #'flycheck-add-overlay errors)
       (flycheck-copy-errors-as-kill 10)
-      (should (equal (-take 2 kill-ring) '("1st message" "2nd message")))
+      (should (equal (seq-take kill-ring 2) '("1st message" "2nd message")))
       (flycheck-copy-errors-as-kill 10 #'flycheck-error-id)
-      (should (equal (-take 1 kill-ring) '("foo")))
+      (should (equal (seq-take kill-ring 1) '("foo")))
       (flycheck-copy-errors-as-kill 10 #'flycheck-error-format-message-and-id)
-      (should (equal (-take 2 kill-ring)
+      (should (equal (seq-take kill-ring 1)
                      '("1st message" "2nd message [foo]"))))))
 
 
