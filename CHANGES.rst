@@ -20,6 +20,8 @@ Changes
 ----------
 
 - `#2026 <https://github.com/flycheck/flycheck/pull/2026>`_:[yamllint] update possible locations for configuration file.
+- **(Breaking)** `#1697 <https://github.com/flycheck/flycheck/pull/1697>`_: Remove the ``coq`` checker.
+- `#1704 <https://github.com/flycheck/flycheck/pull/1704>`_: The ``tslint`` checker is deprecated; it will go away in a future release.
 
 ----------------------
 
@@ -56,9 +58,6 @@ Changes
   - The variable ``flycheck-current-errors`` now contains errors in the order in
     which they were returned by checkers.  In previous versions of Flycheck,
     this list was sorted by error position and severity. [GH-1749]
-  - Remove the ``coq`` checker. [GH-1697]
-  - The ``tslint`` checker is deprecated; it will go away in a future
-    release. [GH-1704]
 
 32 (frozen on May 3rd, 2020, released Mar 28, 2022)
 ===================================================
