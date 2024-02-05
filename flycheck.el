@@ -1583,14 +1583,14 @@ Always return the name of the corresponding source file, never
 any byte-compiled file.
 
 Return nil, if the currently loaded file cannot be determined."
-  (-when-let* ((this-file (cond
-                           (load-in-progress load-file-name)
-                           ((bound-and-true-p byte-compile-current-file))
-                           (t (buffer-file-name))))
-               ;; A best guess for the source file of a compiled library. Works
-               ;; well in most cases, and especially for ELPA packages
-               (source-file (concat (file-name-sans-extension this-file)
-                                    ".el")))
+  (when-let* ((this-file (cond
+                          (load-in-progress load-file-name)
+                          ((bound-and-true-p byte-compile-current-file))
+                          (t (buffer-file-name))))
+              ;; A best guess for the source file of a compiled library. Works
+              ;; well in most cases, and especially for ELPA packages
+              (source-file (concat (file-name-sans-extension this-file)
+                                   ".el")))
     (when (file-exists-p source-file)
       source-file)))
 
@@ -2555,7 +2555,7 @@ return value is a list of checkers, not including CHECKER."
 
 (defun flycheck--verify-next-checkers (checker)
   "Return a verification result for the next checkers of CHECKER."
-  (-when-let (next (flycheck-get-next-checkers checker))
+  (when-let (next (flycheck-get-next-checkers checker))
     (list
      (flycheck-verification-result-new
       :label "next checkers"
@@ -3705,10 +3705,10 @@ Return a cons cell `(BEG . END)'.  If the input range is empty,
 it is expanded to cover at least one character so that END is
 always greater than BEG.  If ERR doesn't specify an end-column
 return nil."
-  (-if-let* ((line (flycheck-error-line err))
-             (column (flycheck-error-column err))
-             (end-line (or (flycheck-error-end-line err) line))
-             (end-column (flycheck-error-end-column err)))
+  (if-let* ((line (flycheck-error-line err))
+            (column (flycheck-error-column err))
+            (end-line (or (flycheck-error-end-line err) line))
+            (end-column (flycheck-error-end-column err)))
       ;; Ignoring fields speeds up calls to `line-end-position'.
       (let* ((inhibit-field-text-motion t)
              (beg (flycheck-line-column-to-position line column))
@@ -3835,7 +3835,7 @@ beginning position)."
          (other-file-p (and fname (not (equal fname (buffer-file-name))))))
     (concat (and other-file-p (format "In %S:\n" (file-relative-name fname)))
             (and include-snippet
-                 (-when-let* ((snippet (flycheck-error-format-snippet err)))
+                 (when-let* ((snippet (flycheck-error-format-snippet err)))
                    (format-message "`%s': " snippet)))
             (or (flycheck-error-message err)
                 (format "Unknown %S" (flycheck-error-level err)))
@@ -3957,7 +3957,7 @@ name of an error is nil fill in the result of function
 Return ERRORS, modified in-place."
   (seq-do (lambda (err)
             (setf (flycheck-error-filename err)
-                  (-if-let (filename (flycheck-error-filename err))
+                  (if-let (filename (flycheck-error-filename err))
                       (expand-file-name filename directory)
                     (buffer-file-name))))
           errors)
@@ -4478,7 +4478,7 @@ Return ERRORS."
 
 Return ERRORS."
   (dolist (err errors)
-    (-when-let (message (flycheck-error-message err))
+    (when-let (message (flycheck-error-message err))
       (setf (flycheck-error-message err)
             (replace-regexp-in-string (rx (one-or-more (any space "\n" "\r")))
                                       " " message 'fixed-case 'literal))))
@@ -4493,7 +4493,7 @@ lines accordingly.
 
 Return ERRORS, with in-place modifications."
   (dolist (err errors)
-    (-when-let (message (flycheck-error-message err))
+    (when-let (message (flycheck-error-message err))
       (with-temp-buffer
         (insert message)
         ;; Determine the indentation offset
@@ -4755,11 +4755,11 @@ errors.  Arguments WINDOW, OBJECT and POS are as described in
 info node `(elisp)Special properties', as this function is
 intended to be used as the \\='help-echo property of flycheck error
 overlays."
-  (-when-let (buf (cond ((bufferp object) object)
-                        ((overlayp object) (overlay-buffer object))))
+  (when-let (buf (cond ((bufferp object) object)
+                       ((overlayp object) (overlay-buffer object))))
     (with-current-buffer buf
-      (-when-let* ((fn flycheck-help-echo-function)
-                   (errs (flycheck-overlay-errors-at pos)))
+      (when-let* ((fn flycheck-help-echo-function)
+                  (errs (flycheck-overlay-errors-at pos)))
         (propertize (funcall fn errs) 'help-echo-inhibit-substitution t)))))
 
 (defun flycheck-help-echo-all-error-messages (errs)
@@ -4839,7 +4839,7 @@ overlays."
 ERR is also interesting (the function returns true) if there are
 no errors as or more severe than `flycheck-navigation-minimum-level'."
   (when (flycheck-error-p err)
-    (-if-let (min-level flycheck-navigation-minimum-level)
+    (if-let (min-level flycheck-navigation-minimum-level)
         (or (<= (flycheck-error-level-severity min-level)
                 (flycheck-error-level-severity (flycheck-error-level err)))
             (not (flycheck-has-current-errors-p min-level)))
@@ -4901,8 +4901,8 @@ beginning of the buffer, otherwise advance from the current
 position.
 
 Intended for use with `next-error-function'."
-  (-if-let* ((pos (flycheck-next-error-pos n reset))
-             (err (get-char-property pos 'flycheck-error)))
+  (if-let* ((pos (flycheck-next-error-pos n reset))
+            (err (get-char-property pos 'flycheck-error)))
       (flycheck-jump-to-error err)
     (user-error "No more Flycheck errors")))
 
@@ -5136,8 +5136,8 @@ ensure that they line up properly once the message is displayed."
 
 (defun flycheck-error-list-entries ()
   "Create the entries for the error list."
-  (-when-let* ((errors (flycheck-error-list-current-errors))
-               (filtered (flycheck-error-list-apply-filter errors)))
+  (when-let* ((errors (flycheck-error-list-current-errors))
+              (filtered (flycheck-error-list-apply-filter errors)))
     (seq-map #'flycheck-error-list-make-entry filtered)))
 
 (defun flycheck-error-list-entry-< (entry1 entry2)
@@ -5187,7 +5187,7 @@ mode line indication of `flycheck-error-list-mode'."
 
 ALL-FRAMES specifies the frames to consider, as in
 `get-buffer-window-list'."
-  (-when-let (buf (get-buffer flycheck-error-list-buffer))
+  (when-let (buf (get-buffer flycheck-error-list-buffer))
     (get-buffer-window-list buf nil all-frames)))
 
 (defun flycheck-get-error-list-window (&optional all-frames)
@@ -5195,7 +5195,7 @@ ALL-FRAMES specifies the frames to consider, as in
 
 ALL-FRAMES specifies the frames to consider, as in
 `get-buffer-window'."
-  (-when-let (buf (get-buffer flycheck-error-list-buffer))
+  (when-let (buf (get-buffer flycheck-error-list-buffer))
     (get-buffer-window buf all-frames)))
 
 (defun flycheck-error-list-recenter-at (pos)
@@ -5216,7 +5216,7 @@ list."
   ;; select this window while reverting, because Tabulated List mode attempts to
   ;; recenter the error at the old location, so it must have the proper window
   ;; selected.
-  (-when-let (window (flycheck-get-error-list-window t))
+  (when-let (window (flycheck-get-error-list-window t))
     (with-selected-window window
       (revert-buffer))
     (run-hooks 'flycheck-error-list-after-refresh-hook)
@@ -5261,8 +5261,8 @@ Interactively, or with non-nil REFRESH, refresh the error list."
 
 (defun flycheck-error-list-apply-filter (errors)
   "Filter ERRORS according to `flycheck-error-list-minimum-level'."
-  (-if-let* ((min-level flycheck-error-list-minimum-level)
-             (min-severity (flycheck-error-level-severity min-level)))
+  (if-let* ((min-level flycheck-error-list-minimum-level)
+            (min-severity (flycheck-error-level-severity min-level)))
       (seq-filter (lambda (err) (>= (flycheck-error-level-severity
                                      (flycheck-error-level err))
                                     min-severity))
@@ -5274,7 +5274,7 @@ Interactively, or with non-nil REFRESH, refresh the error list."
 
 POS defaults to `point'."
   (interactive)
-  (-when-let* ((error (tabulated-list-get-id pos)))
+  (when-let* ((error (tabulated-list-get-id pos)))
     (flycheck-jump-to-error error)))
 
 (defun flycheck-jump-to-error (error)
@@ -5324,11 +5324,11 @@ POS defaults to `point'."
 
 POS defaults to `point'."
   (interactive)
-  (-when-let* ((error (tabulated-list-get-id pos))
-               (explainer (flycheck-checker-get (flycheck-error-checker error)
-                                                'error-explainer)))
+  (when-let* ((error (tabulated-list-get-id pos))
+              (explainer (flycheck-checker-get (flycheck-error-checker error)
+                                               'error-explainer)))
     (flycheck-error-with-buffer error
-      (-when-let (explanation (funcall explainer error))
+      (when-let (explanation (funcall explainer error))
         (flycheck-display-error-explanation explanation)))))
 
 (defun flycheck-error-list-next-error-pos (pos &optional n)
@@ -5477,7 +5477,7 @@ non-nil."
     (flycheck-cancel-error-display-error-at-point-timer)
     (setq flycheck--last-error-display-tick (flycheck--error-display-tick))
     (when flycheck-mode
-      (-when-let (errors (flycheck-overlay-errors-at (point)))
+      (when-let (errors (flycheck-overlay-errors-at (point)))
         (flycheck-display-errors errors)))))
 
 (defun flycheck-display-error-at-point-soon ()
@@ -5537,7 +5537,7 @@ variable `flycheck-error-message-buffer'."
        message flycheck-error-message-buffer 'not-this-window)
       ;; We cannot rely on `display-message-or-buffer' returning the right
       ;; window. See URL `https://github.com/flycheck/flycheck/issues/1643'.
-      (-when-let (buf (get-buffer flycheck-error-message-buffer))
+      (when-let (buf (get-buffer flycheck-error-message-buffer))
         (with-current-buffer buf
           (unless (derived-mode-p 'flycheck-error-message-mode)
             (flycheck-error-message-mode)))))))
@@ -5555,8 +5555,8 @@ the current frame."
   "Hide the Flycheck error buffer if necessary.
 
 Hide the error buffer if there is no error under point."
-  (-when-let* ((buffer (flycheck-error-message-buffer))
-               (window (get-buffer-window buffer)))
+  (when-let* ((buffer (flycheck-error-message-buffer))
+              (window (get-buffer-window buffer)))
     (unless (flycheck-overlays-at (point))
       ;; save-selected-window prevents `quit-window' from changing the current
       ;; buffer (see https://github.com/flycheck/flycheck/issues/648).
@@ -5594,16 +5594,16 @@ with a non-nil `:error-explainer' function defined in its
 checker.  The `:error-explainer' function is then called with
 this error to produce the explanation to display."
   (interactive)
-  (-when-let* ((first-error
-                ;; Get the first error at point that has an `error-explainer'.
-                (seq-find (lambda (error)
-                            (flycheck-checker-get
-                             (flycheck-error-checker error) 'error-explainer))
-                          (flycheck-overlay-errors-at (point))))
-               (explainer
-                (flycheck-checker-get (flycheck-error-checker first-error)
-                                      'error-explainer))
-               (explanation (funcall explainer first-error)))
+  (when-let* ((first-error
+               ;; Get the first error at point that has an `error-explainer'.
+               (seq-find (lambda (error)
+                           (flycheck-checker-get
+                            (flycheck-error-checker error) 'error-explainer))
+                         (flycheck-overlay-errors-at (point))))
+              (explainer
+               (flycheck-checker-get (flycheck-error-checker first-error)
+                                     'error-explainer))
+              (explanation (funcall explainer first-error)))
     (flycheck-display-error-explanation explanation)))
 
 (defconst flycheck-explain-error-buffer "*Flycheck error explanation*"
@@ -5870,7 +5870,7 @@ executable cannot be found, and return a numeric exit status or a
 signal description string otherwise.  CHECKER's input is taken
 from INFILE, and its output is sent to DESTINATION, as in
 `call-process'."
-  (-if-let (executable (flycheck-find-checker-executable checker))
+  (if-let (executable (flycheck-find-checker-executable checker))
       (condition-case err
           (apply #'call-process executable infile destination nil args)
         (error (when error (signal (car err) (cdr err)))))
@@ -6048,27 +6048,27 @@ are substituted within the body of cells!"
        (list (make-temp-name (expand-file-name "flycheck" directory)))))
     (`null-device (list null-device))
     (`(config-file ,option-name ,file-name-var)
-     (-when-let* ((value (symbol-value file-name-var))
-                  (file-name (flycheck-locate-config-file value checker)))
+     (when-let* ((value (symbol-value file-name-var))
+                 (file-name (flycheck-locate-config-file value checker)))
        (flycheck-prepend-with-option option-name (list file-name))))
     (`(config-file ,option-name ,file-name-var ,prepend-fn)
-     (-when-let* ((value (symbol-value file-name-var))
-                  (file-name (flycheck-locate-config-file value checker)))
+     (when-let* ((value (symbol-value file-name-var))
+                 (file-name (flycheck-locate-config-file value checker)))
        (flycheck-prepend-with-option option-name (list file-name) prepend-fn)))
     (`(option ,option-name ,variable)
-     (-when-let (value (symbol-value variable))
+     (when-let (value (symbol-value variable))
        (unless (stringp value)
          (error "Value %S of %S for option %s is not a string"
                 value variable option-name))
        (flycheck-prepend-with-option option-name (list value))))
     (`(option ,option-name ,variable ,prepend-fn)
-     (-when-let (value (symbol-value variable))
+     (when-let (value (symbol-value variable))
        (unless (stringp value)
          (error "Value %S of %S for option %s is not a string"
                 value variable option-name))
        (flycheck-prepend-with-option option-name (list value) prepend-fn)))
     (`(option ,option-name ,variable ,prepend-fn ,filter)
-     (-when-let (value (funcall filter (symbol-value variable)))
+     (when-let (value (funcall filter (symbol-value variable)))
        (unless (stringp value)
          (error "Value %S of %S (filter: %S) for option %s is not a string"
                 value variable filter option-name))
@@ -6526,8 +6526,8 @@ directory of the current buffer and all ancestors thereof (see
 absolute path.  Otherwise return nil.
 
 _CHECKER is ignored."
-  (-when-let* ((basefile (buffer-file-name))
-               (directory (locate-dominating-file basefile filename)))
+  (when-let* ((basefile (buffer-file-name))
+              (directory (locate-dominating-file basefile filename)))
     (expand-file-name filename directory)))
 
 (defun flycheck-locate-config-file-home (filename _checker)
@@ -6616,7 +6616,7 @@ SEPARATOR is ignored in this case."
   (let ((filter (or filter #'identity))
         (separator (or separator ",")))
     (if (listp value)
-        (-when-let (value (delq nil (seq-map filter value)))
+        (when-let (value (delq nil (seq-map filter value)))
           (string-join value separator))
       (funcall filter value))))
 
@@ -6768,7 +6768,7 @@ Make the file name of ERR absolute.  If the absolute file name of
 ERR is in BUFFER-FILES, replace it with the value of variable
 `buffer-file-name'."
   (flycheck-error-with-buffer err
-    (-when-let (filename (flycheck-error-filename err))
+    (when-let (filename (flycheck-error-filename err))
       (when (seq-some (apply-partially #'flycheck-same-files-p
                                        (expand-file-name filename cwd))
                       buffer-files)
@@ -7742,7 +7742,7 @@ explicitly determine the directory for quoted includes.
 
 This function determines the directory by looking at function
 `buffer-file-name', or if that is nil, at `default-directory'."
-  (-if-let (fn (buffer-file-name))
+  (if-let (fn (buffer-file-name))
       (file-name-directory fn)
     ;; If the buffer has no file name, fall back to its default directory
     default-directory))
@@ -9268,7 +9268,7 @@ See URL `https://github.com/kisielk/errcheck'."
   (lambda (errors)
     (let ((errors (flycheck-sanitize-errors errors)))
       (dolist (err errors)
-        (-when-let (message (flycheck-error-message err))
+        (when-let (message (flycheck-error-message err))
           ;; Improve the messages reported by errcheck to make them more clear.
           (setf (flycheck-error-message err)
                 (format "Ignored `error` returned from `%s`" message)))))
@@ -9470,12 +9470,12 @@ directory returned by \"stack path --project-root\"."
      (flycheck--locate-dominating-file-matching
       (file-name-directory (buffer-file-name))
       (rx "stack" (* any) "." (or "yml" "yaml") eos)))
-   (-when-let* ((stack (funcall flycheck-executable-find "stack"))
-                (output (ignore-errors
-                          (process-lines stack
-                                         "--no-install-ghc"
-                                         "path" "--project-root")))
-                (stack-dir (car output)))
+   (when-let* ((stack (funcall flycheck-executable-find "stack"))
+               (output (ignore-errors
+                         (process-lines stack
+                                        "--no-install-ghc"
+                                        "path" "--project-root")))
+               (stack-dir (car output)))
      (and (file-directory-p stack-dir) stack-dir))))
 
 (defun flycheck-haskell--ghc-find-default-directory (_checker)
@@ -10201,8 +10201,8 @@ See URL `http://pear.php.net/package/PHP_CodeSniffer/'."
             ;; Some files are not detected correctly
             ;; so it is necessary to pass the extension.
             (eval
-             (-when-let* ((fname buffer-file-name)
-                          (ext (file-name-extension fname)))
+             (when-let* ((fname buffer-file-name)
+                         (ext (file-name-extension fname)))
                (concat "--extensions=" ext)))
 
             ;; Pass original file name to phpcs.  We need to concat explicitly
@@ -10456,8 +10456,8 @@ See URL `http://puppet-lint.com/'."
   "Run a python SNIPPET and return the output.
 
 CHECKER's executable is assumed to be a Python REPL."
-  (-when-let (output (flycheck-call-checker-process-for-output
-                      checker nil nil "-c" snippet))
+  (when-let (output (flycheck-call-checker-process-for-output
+                     checker nil nil "-c" snippet))
     (string-trim output)))
 
 (defun flycheck-python-get-path (checker)
@@ -10739,7 +10739,7 @@ See URL `https://www.pylint.org/'."
                  (flycheck-python-find-module 'python-pylint "pylint")))
   :verify (lambda (_) (flycheck-python-verify-module 'python-pylint "pylint"))
   :error-explainer (lambda (err)
-                     (-when-let (id (flycheck-error-id err))
+                     (when-let (id (flycheck-error-id err))
                        (apply
                         #'flycheck-call-checker-process-for-output
                         'python-pylint nil t
@@ -10989,10 +10989,10 @@ See URL `https://github.com/rpm-software-management/rpmlint'."
     errors)
   :error-explainer
   (lambda (error)
-    (-when-let* ((error-message (flycheck-error-message error))
-                 (message-id (save-match-data
-                               (string-match "\\([^ ]+\\)" error-message)
-                               (match-string 1 error-message))))
+    (when-let* ((error-message (flycheck-error-message error))
+                (message-id (save-match-data
+                              (string-match "\\([^ ]+\\)" error-message)
+                              (match-string 1 error-message))))
       (flycheck-call-checker-process-for-output
        'rpm-rpmlint nil t "-I" message-id)))
   :modes (sh-mode rpm-spec-mode)
@@ -11151,7 +11151,7 @@ See URL `https://github.com/Synthetica9/nix-linter'."
   :error-parser flycheck-parse-nix-linter
   :error-explainer
   (lambda (error)
-    (-when-let (error-code (flycheck-error-id error))
+    (when-let (error-code (flycheck-error-id error))
       (flycheck-call-checker-process-for-output
        'nix-linter nil t "--help-for" error-code)))
   :modes (nix-mode nix-ts-mode))
@@ -11161,8 +11161,8 @@ See URL `https://github.com/Synthetica9/nix-linter'."
 
 Return the source directory, or nil, if the current buffer is not
 part of a Sphinx project."
-  (-when-let* ((filename (buffer-file-name))
-               (dir (locate-dominating-file filename "conf.py")))
+  (when-let* ((filename (buffer-file-name))
+              (dir (locate-dominating-file filename "conf.py")))
     (expand-file-name dir)))
 
 (flycheck-define-checker rst
@@ -11487,7 +11487,7 @@ Relative paths are relative to the file being checked."
 
 (defun flycheck-rust-error-explainer (error)
   "Return an explanation for the given `flycheck-error' ERROR."
-  (-when-let (error-code (flycheck-error-id error))
+  (when-let (error-code (flycheck-error-id error))
     (lambda ()
       (flycheck-call-checker-process
        'rust nil standard-output t "--explain" error-code)
@@ -11501,10 +11501,10 @@ Relative paths are relative to the file being checked."
      (or
       ;; Macro errors emit a diagnostic in a phony file,
       ;; e.g. "<println macros>".
-      (-when-let (filename (flycheck-error-filename err))
+      (when-let (filename (flycheck-error-filename err))
         (string-match-p (rx "macros>" line-end) filename))
       ;; Redundant message giving the number of failed errors
-      (-when-let (msg (flycheck-error-message err))
+      (when-let (msg (flycheck-error-message err))
         (string-match-p
          (rx
           (or (: "aborting due to " (optional (one-or-more num) " ")
@@ -11545,9 +11545,9 @@ versions inferior to 1.25)."
 Execute `cargo --list' to find out whether COMMAND is present."
   (let ((cargo (funcall flycheck-executable-find "cargo")))
     (member command
-      (mapcar (lambda (line)
-                (replace-regexp-in-string "\\s-*\\(\\S-+\\).*\\'" "\\1" line))
-              (ignore-errors (process-lines cargo "--list"))))))
+            (mapcar (lambda (line)
+                      (replace-regexp-in-string "\\s-*\\(\\S-+\\).*\\'" "\\1" line))
+                    (ignore-errors (process-lines cargo "--list"))))))
 
 (defun flycheck-rust-valid-crate-type-p (crate-type)
   "Whether CRATE-TYPE is a valid target type for Cargo.
@@ -11919,7 +11919,7 @@ See URL `https://github.com/brigade/scss-lint'."
   :modes scss-mode
   :verify
   (lambda (checker)
-    (-when-let
+    (when-let
         (output (flycheck-call-checker-process-for-output
                  checker nil nil "--require=scss_lint_reporter_checkstyle"))
       (let ((reporter-missing
