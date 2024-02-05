@@ -5006,11 +5006,8 @@ message to stretch arbitrarily far."
         ;; `revert-buffer' updates the mode line for us, so all we need to do is
         ;; set the corresponding mode line construct.
         mode-line-buffer-identification flycheck-error-list-mode-line)
-  ;; Guard `truncate-string-ellipsis' for Emacs 24.
-  ;; TODO: Remove when dropping Emacs 24 compatibility
-  (when (boundp 'truncate-string-ellipsis)
-    ;; See https://github.com/flycheck/flycheck/issues/1101
-    (setq-local truncate-string-ellipsis "…"))
+  ;; See https://github.com/flycheck/flycheck/issues/1101
+  (setq-local truncate-string-ellipsis "…")
   (tabulated-list-init-header))
 
 (defvar-local flycheck-error-list-source-buffer nil
