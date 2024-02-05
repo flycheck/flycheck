@@ -72,7 +72,10 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
 .. supported-language:: Bazel
 
-   .. syntax-checker:: bazel-buildifier
+   .. syntax-checker:: bazel-build-buildifier
+                       bazel-module-buildifier
+                       bazel-starlark-buildifier
+                       bazel-workspace-buildifier
 
       Check Bazel with buildifier_.
 
@@ -281,6 +284,10 @@ to view the docstring of the syntax checker.  Likewise, you may use
       .. defcustom:: flycheck-cuda-language-standard
 
          The C or C++ Language standard that you want the CUDA compiler to enforce.
+
+      .. defcustom:: flycheck-cuda-gencodes
+
+         A list of include real and virtual GPU architectures for nvcc.
 
       .. defcustom:: flycheck-cuda-includes
 
@@ -602,6 +609,11 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       Check syntax with the `Haml <http://haml.info/>`_ compiler.
 
+   .. syntax-checker:: haml-lint
+
+      Check style and syntax with the
+      `HAML-Lint <https://github.com/sds/haml-lint/>`_ linter.
+
 .. supported-language:: Handlebars
 
    .. syntax-checker:: handlebars
@@ -821,6 +833,14 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       .. syntax-checker-config-file:: flycheck-markdown-markdownlint-cli-config
 
+      .. defcustom:: flycheck-markdown-markdownlint-cli-disable-rules
+
+         A list of disabled rules.
+
+      .. defcustom:: flycheck-markdown-markdownlint-cli-enable-rules
+
+         A list of enabled rules.
+
    .. syntax-checker:: markdown-mdl
 
       Check Markdown with `markdownlint <https://github.com/markdownlint/markdownlint/>`_.
@@ -891,7 +911,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
 .. supported-language:: PHP
 
-   Flycheck checks PHP with `php`, `php-phpmd` and `php-phpcs`.
+   Flycheck checks PHP with `php`, `php-phpmd`, `php-phpcs` and `php-phpcs-changed`.
 
    .. syntax-checker:: php
 
@@ -917,6 +937,22 @@ to view the docstring of the syntax checker.  Likewise, you may use
          This syntax checker requires PHP Code Sniffer 2.6 or newer.
 
       .. _PHP Code Sniffer: http://pear.php.net/package/PHP_CodeSniffer
+
+      .. defcustom:: flycheck-phpcs-standard
+
+         The coding standard, either as name of a built-in standard, or as path
+         to a standard specification.
+
+   .. syntax-checker:: php-phpcs-changed
+
+      Check style with `PHPCS Changed`_.
+
+      .. note::
+
+         This syntax checker requires PHP Code Sniffer 2.6 or newer.
+
+      .. _PHP Code Sniffer: http://pear.php.net/package/PHP_CodeSniffer
+      .. _PHPCS Changed: https://github.com/sirbrillig/phpcs-changed
 
       .. defcustom:: flycheck-phpcs-standard
 
@@ -1023,13 +1059,27 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       .. syntax-checker-config-file:: flycheck-flake8rc
 
+   .. syntax-checker:: python-ruff
+
+      Lint with `ruff <https://beta.ruff.rs/>`_.
+
+      .. syntax-checker-config-file:: flycheck-python-ruff-config
+
+   .. syntax-checker:: python-pyright
+
+      Type check python with  `pyright <https://github.com/microsoft/pyright>`_.
+
+      .. note::
+
+         This syntax checker requires pyright.
+
    .. syntax-checker:: python-mypy
 
       Type check python with  `mypy <http://www.mypy-lang.org/>`_.
 
       .. note::
 
-         This syntax checker requires mypy 0.580 or newer.
+         This syntax checker requires mypy 0.730 or newer.
 
       .. syntax-checker-config-file:: flycheck-python-mypy-config
 
@@ -1039,6 +1089,11 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
          Set to ``null-device`` to disable writing cache directories
          entirely.
+
+      .. defcustom:: flycheck-python-mypy-python-executable
+
+         Python executable to collect the type information from PEP 561
+         compliant packages.
 
    .. syntax-checker:: python-pylint
 
@@ -1124,7 +1179,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
    .. syntax-checker:: ruby-rubocop
 
-      Check syntax and lint with `RuboCop <http://batsov.com/rubocop/>`_.
+      Check syntax and lint with `RuboCop <https://rubocop.org/>`_.
 
       .. note::
 
@@ -1457,7 +1512,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
    .. syntax-checker:: terraform-tflint
 
-      Check Terraform with `tflint <https://github.com/wata727/tflint>`_
+      Check Terraform with `tflint <https://github.com/terraform-linters/tflint>`_
 
       .. defcustom:: flycheck-tflint-variable-files
 
@@ -1515,9 +1570,15 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
 .. supported-language:: TypeScript
 
+   .. syntax-checker:: javascript-eslint
+      :noindex:
+
+      See `javascript-eslint`.
+
    .. syntax-checker:: typescript-tslint
 
       Check syntax and style with `TSLint <https://github.com/palantir/tslint>`_.
+      This checker is deprecated.
 
       .. syntax-checker-config-file:: flycheck-typescript-tslint-config
 
@@ -1580,7 +1641,11 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
 .. supported-language:: YAML
 
-   Flycheck checks YAML with `yaml-jsyaml`, `yaml-ruby` or 'yaml-yamllint'.
+   Flycheck checks YAML with `yaml-actionlint`, `yaml-jsyaml`, `yaml-ruby` or `yaml-yamllint`.
+
+   .. syntax-checker:: yaml-actionlint
+
+      Check syntax with `actionlint <https://github.com/rhysd/actionlint>`_.
 
    .. syntax-checker:: yaml-jsyaml
 

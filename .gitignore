@@ -2,6 +2,7 @@
 
 # Packages installed for development
 /.cask/
+/.eask/
 
 # Bundler configuration and lock file
 /.bundle/

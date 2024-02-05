@@ -352,7 +352,8 @@ ERROR is a Flycheck error object."
           ;; Overlays of errors from other files are on the first line
           (if (flycheck-relevant-error-other-file-p error)
               (cons (point-min)
-                    (save-excursion (goto-char (point-min)) (point-at-eol)))
+                    (save-excursion (goto-char (point-min))
+                                    (line-end-position)))
             (flycheck-error-region-for-mode error 'symbols)))
          (level (flycheck-error-level error))
          (category (flycheck-error-level-overlay-category level))
@@ -492,7 +493,11 @@ current buffer.  Otherwise return nil."
         (format "Expected to be at error %s, but no error at point %s"
                 n (point))
       (let ((pos (cl-position (car errors) flycheck-current-errors)))
-        (format "Expected to be at error %s, but point %s is at error %s"
+        (format "Expected to be at point %s and error %s, \
+but point %s is at error %s"
+                (car (flycheck-error-region-for-mode
+                      (nth (1- n) flycheck-current-errors)
+                      flycheck-highlighting-mode))
                 n (point) (1+ pos))))))
 
 (put 'flycheck-ert-at-nth-error 'ert-explainer

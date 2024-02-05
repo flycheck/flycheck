@@ -37,7 +37,7 @@
 
 Return the version as string, or nil if we failed to obtain the
 version."
-  (let ((buffer (with-timeout (5)
+  (let ((buffer (with-timeout (30)
                   (url-retrieve-synchronously
                    "http://melpa.org/archive.json" 'silent))))
     (when (and buffer (buffer-live-p buffer))
@@ -63,7 +63,7 @@ version."
           (when version
             (let* ((name (format "flycheck-%s" version))
                    (url (format "http://melpa.org/packages/%s.tar" name)))
-              (with-timeout (5)
+              (with-timeout (30)
                 (url-copy-file url filename)))
 
             (when (file-exists-p filename)

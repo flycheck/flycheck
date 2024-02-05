@@ -66,7 +66,7 @@ requests for improved Windows compatibility. If you know Windows and Emacs,
 please take a look at the list of open Windows issues and try to fix any of
 these.
 
-.. _list of open Windows issues: https://github.com/flycheck/flycheck/labels/windows%20only
+.. _list of open Windows issues: https://github.com/flycheck/flycheck/labels/arch%3A%20windows%20only
 
 Feature requests
 ================
@@ -79,7 +79,7 @@ The build system
 ================
 
 Flycheck provides a :file:`Makefile` with some convenient targets to compile and
-test Flycheck.  The Makefile requires Cask_, the Emacs Lisp dependency manager.
+test Flycheck.  The Makefile requires Eask_, the Emacs Lisp dependency manager.
 Run ``make help`` to see a list of all available targets.  Some common ones are:
 
 - ``make init`` initialises the project by installing local Emacs Lisp
@@ -103,7 +103,7 @@ Run ``make help`` to see a list of all available targets.  Some common ones are:
   If you want to replicate the integration tests that are run on the CI,
   continue reading.
 
-.. _Cask: http://cask.readthedocs.io/
+.. _Eask: https://emacs-eask.github.io/
 .. _Buttercup: https://github.com/jorgenschaefer/emacs-buttercup
 
 Running all the integration tests

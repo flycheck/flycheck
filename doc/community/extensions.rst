@@ -78,6 +78,14 @@ D
 * :flyc:`flycheck-d-unittest` (*official*) adds a Flycheck checker to run unit
   tests for D programs on the fly.
 
+Deno
+----
+
+* :flyc:`flycheck-deno` (*official*) makes linting for Deno_ project available via deno-lint_.
+
+.. _Deno: https://deno.land/
+.. _deno-lint: https://deno.land/manual@v1.15.2/tools/linter
+
 Elixir
 ------
 
@@ -89,10 +97,13 @@ Emacs Lisp
 
 * :flyc:`flycheck-cask` (*official*) makes Flycheck use Cask packages for Emacs
   Lisp syntax checking in Cask_ projects.
+* :flyc:`flycheck-eask` (*official*) makes Flycheck use Eask packages for Emacs
+  Lisp syntax checking in Eask_ projects. (Similar to Cask)
 * :gh:`purcell/flycheck-package` checks Emacs Lisp packages for common problems
   with package metadata.
 
 .. _Cask: https://github.com/cask/cask
+.. _Eask: https://github.com/emacs-eask/cli
 
 Julia
 -----
@@ -107,6 +118,14 @@ Haskell
 
 * :flyc:`flycheck-haskell` (*official*) configures Flycheck from the Cabal
   settings and sandbox in Haskell projects.
+
+Kotlin
+------
+
+* :gh:`whirm/flycheck-kotlin` adds a Kotlin_ syntax checker using ktlint_.
+
+.. _Kotlin: https://kotlinlang.org/
+.. _ktlint: https://pinterest.github.io/ktlint/
 
 Ledger
 ------

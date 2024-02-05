@@ -1,15 +1,67 @@
-33-cvs (in development)
+``master`` (unreleased)
+======================
+
+------------
+New Features
+------------
+
+- New syntax checkers
+
+  - `#2027 <https://github.com/flycheck/flycheck/pull/2017>`_: HAML-Lint with ``haml-lint``
+  - `#2030 <https://github.com/flycheck/flycheck/pull/2030>`_: Add yaml-actionlint checker for GitHub yaml action workflows.
+  - `#2015 <https://github.com/flycheck/flycheck/pull/2015>`_: PHP with ``phpcs-changed``
+
+----------
+Bugs Fixed
+----------
+
+----------
+Changes
+----------
+
+- `#2026 <https://github.com/flycheck/flycheck/pull/2026>`_:[yamllint] update possible locations for configuration file.
+
+----------------------
+
+33.1 (2024-02-04)
+======================
+
+- Bugs Fixed
+
+  - Fixed an usage of the removed ``flycheck--format-message`` function.
+
+33.0 (2024-02-04)
 =======================
+
+.. note:: The changelog for this release is incomplete.
+
+- New features and improvements
+
+  - The ``flycheck-verify-setup`` UI now includes buttons to re-enable manually
+    disabled checkers and to try to re-enable automatically disabled checkers
+    (command checkers are automatically disabled when their executable cannot be
+    found). [GH-1755]
+  - Error explainers can now return URLs (to show a webpage) or functions (to
+    use custom formatting).  For example, the Rust checker now renders
+    explanations using ``markdown-view-mode``. [GH-1753]
+  - Enable checkers in many newer TreeSitter-based major modes (think ``*-ts-mode``).
+
+- New syntax checkers
+
+  - Python with ``ruff``. [GH-2033]
 
 - **Breaking changes**
 
+  - Drop support for Emacs 25.
   - The variable ``flycheck-current-errors`` now contains errors in the order in
     which they were returned by checkers.  In previous versions of Flycheck,
     this list was sorted by error position and severity. [GH-1749]
   - Remove the ``coq`` checker. [GH-1697]
+  - The ``tslint`` checker is deprecated; it will go away in a future
+    release. [GH-1704]
 
-32-cvs (frozen on May 3rd, 2020)
-================================
+32 (frozen on May 3rd, 2020, released Mar 28, 2022)
+===================================================
 
 - Highlights
 
@@ -73,7 +125,7 @@
 - New syntax checkers:
 
   - Awk with ``gawk`` [GH-1708]
-  - Bazel with ``bazel-buildifier`` [GH-1613]
+  - Bazel with ``buildifier`` [GH-1613]
   - CUDA with ``cuda-nvcc`` [GH-1508]
   - CWL with ``schema-salad-tool`` [GH-1361]
   - Elixir with ``credo`` [GH-1062]
