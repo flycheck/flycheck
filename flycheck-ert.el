@@ -270,8 +270,8 @@ failed, and the test aborted with failure.")
 Raise an assertion error if the buffer is not clear afterwards."
   (flycheck-clear)
   (should (not flycheck-current-errors))
-  (should (not (-any? (lambda (ov) (overlay-get ov 'flycheck-overlay))
-                      (overlays-in (point-min) (point-max))))))
+  (should (not (seq-find (lambda (ov) (overlay-get ov 'flycheck-overlay))
+                         (overlays-in (point-min) (point-max))))))
 
 
 ;;; Test assertions
@@ -286,11 +286,11 @@ Raise an assertion error if the buffer is not clear afterwards."
   "Test that ERROR has a proper overlay in the current buffer.
 
 ERROR is a Flycheck error object."
-  (let* ((overlay (-first (lambda (ov)
-                            (equal (flycheck-error-without-group
-                                    (overlay-get ov 'flycheck-error))
-                                   (flycheck-error-without-group error)))
-                          (flycheck-overlays-in 0 (+ 1 (buffer-size)))))
+  (let* ((overlay (seq-find (lambda (ov)
+                              (equal (flycheck-error-without-group
+                                      (overlay-get ov 'flycheck-error))
+                                     (flycheck-error-without-group error)))
+                            (flycheck-overlays-in 0 (+ 1 (buffer-size)))))
          (region
           ;; Overlays of errors from other files are on the first line
           (if (flycheck-relevant-error-other-file-p error)

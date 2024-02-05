@@ -43,8 +43,8 @@
 
 ;;; Requirements
 
-(require 'dash)
 (require 'cl-lib)
+(require 'seq)
 (require 'ert)                          ; Unit test library
 (require 'shut-up)                      ; Silence Emacs and intercept `message'
 
@@ -618,7 +618,7 @@
   :tags '(checker-api)
   (dolist (checker flycheck-checkers)
     (should (listp (flycheck-checker-get checker 'modes)))
-    (should (-all? #'symbolp (flycheck-checker-get checker 'modes)))))
+    (should (seq-every-p #'symbolp (flycheck-checker-get checker 'modes)))))
 
 (ert-deftest flycheck-substitute-argument/source ()
   :tags '(checker-api)
@@ -1161,23 +1161,23 @@
 (ert-deftest flycheck-may-check-automatically/not-in-ephemeral-buffers ()
   :tags '(automatic)
   (flycheck-ert-with-temp-buffer
-    (should-not (-any? #'flycheck-may-check-automatically
-                       '(save idle-change new-line mode-enabled)))
+    (should-not (seq-find #'flycheck-may-check-automatically
+                          '(save idle-change new-line mode-enabled)))
     (should-not (flycheck-may-check-automatically))))
 
 (ert-deftest flycheck-may-check-automatically/in-normal-buffers ()
   :tags '(automatic)
   (flycheck-ert-with-resource-buffer "automatic-check-dummy.el"
-    (should (-all? #'flycheck-may-check-automatically
-                   '(save idle-change new-line mode-enabled)))
+    (should (seq-every-p #'flycheck-may-check-automatically
+                         '(save idle-change new-line mode-enabled)))
     (should (flycheck-may-check-automatically))))
 
 (ert-deftest flycheck-may-check-automatically/automatic-checking-disabled ()
   :tags '(automatic)
   (flycheck-ert-with-resource-buffer "automatic-check-dummy.el"
     (let ((flycheck-check-syntax-automatically nil))
-      (should-not (-any? #'flycheck-may-check-automatically
-                         '(save idle-change new-line mode-enabled)))
+      (should-not (seq-find #'flycheck-may-check-automatically
+                            '(save idle-change new-line mode-enabled)))
       (should (flycheck-may-check-automatically)))))
 
 (ert-deftest flycheck-may-check-automatically/specific-event-disabled ()
@@ -1189,8 +1189,8 @@
              (remq event flycheck-check-syntax-automatically)))
         (should flycheck-check-syntax-automatically)
         (should-not (flycheck-may-check-automatically event))
-        (should (-all? #'flycheck-may-check-automatically
-                       flycheck-check-syntax-automatically))
+        (should (seq-every-p #'flycheck-may-check-automatically
+                             flycheck-check-syntax-automatically))
         (should (flycheck-may-check-automatically))))))
 
 (ert-deftest flycheck-check-syntax-automatically/mode-enabled-is-disabled ()

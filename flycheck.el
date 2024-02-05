@@ -12318,7 +12318,7 @@ published on NPM."
 
 (defun flycheck--textlint-get-plugin ()
   "Return the textlint plugin for the current mode."
-  (cdr (-first
+  (cdr (seq-find
         (lambda (arg)
           (pcase-let ((`(,mode . _) arg))
             (or (and (booleanp mode) mode) ; mode is t
