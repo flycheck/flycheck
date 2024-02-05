@@ -75,7 +75,7 @@
 (require 'dash)
 
 (require 'seq)                   ; Sequence functions
-(require 'subr-x nil 'no-error)  ; Additional utilities, Emacs 24.4 and upwards
+(require 'subr-x)                ; Additional utilities
 (require 'cl-lib)                ; `cl-defstruct' and CL utilities
 (require 'tabulated-list)        ; To list errors
 (require 'easymenu)              ; Flycheck Mode menu definition
