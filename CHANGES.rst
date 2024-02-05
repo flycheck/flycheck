@@ -11,6 +11,10 @@ New Features
   - [#2017]: HAML with ``haml-lint``
   - [#2030]: Add ``yaml-actionlint`` checker for GitHub yaml action workflows.
 
+- [#1873]: Add error explainer to ``perl-perlcritic``.
+- [#1875]: Add error-explainer to ``css-stylelint``.
+- [#1876]: Add error-explainer for ``markdownlint checker``.
+
 ----------
 Bugs Fixed
 ----------
