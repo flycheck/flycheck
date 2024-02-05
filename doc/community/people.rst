@@ -12,8 +12,9 @@ Teams
 Maintainers
 -----------
 
-* **Clément Pit-Claudel** (:gh:`cpitclaudel`, owner)
-* **fmdkdd** (:gh:`fmdkdd`, owner)
+- **Bozhidar Batsov** (:gh:`bbatsov`, owner)
+- **Clément Pit-Claudel** (:gh:`cpitclaudel`, owner)
+- **fmdkdd** (:gh:`fmdkdd`, owner)
 
 We maintain Flycheck and all official extensions within the `Flycheck
 organisation`_, and set the direction and scope of Flycheck.  We review and
