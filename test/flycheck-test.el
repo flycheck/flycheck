@@ -3349,18 +3349,12 @@ evaluating BODY."
 
 (ert-deftest flycheck-d-module-re/matches-module-name ()
   :tags '(language-d)
-  (unless (version<= "24.4" emacs-version)
-    (ert-skip "Skipped because CC Mode is broken on 24.3.
-See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
   (let ((s "module spam.with.eggs ;"))
     (should (string-match flycheck-d-module-re s))
     (should (string= "spam.with.eggs" (match-string 1 s)))))
 
 (ert-deftest flycheck-d-base-directory/no-module-declaration ()
   :tags '(language-d)
-  (unless (version<= "24.4" emacs-version)
-    (ert-skip "Skipped because CC Mode is broken on 24.3.
-See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
   (flycheck-ert-with-resource-buffer "language/d/src/dmd/no_module.d"
     (should (flycheck-same-files-p
              (flycheck-d-base-directory)
@@ -3368,9 +3362,6 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
 
 (ert-deftest flycheck-d-base-directory/with-module-declaration ()
   :tags '(language-d)
-  (unless (version<= "24.4" emacs-version)
-    (ert-skip "Skipped because CC Mode is broken on 24.3.
-See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
   (flycheck-ert-with-resource-buffer "language/d/src/dmd/warning.d"
     (should (flycheck-same-files-p
              (flycheck-d-base-directory)
@@ -3378,18 +3369,12 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
 
 (ert-deftest flycheck-d-base-directory/package-file ()
   :tags '(language-d)
-  (unless (version<= "24.4" emacs-version)
-    (ert-skip "Skipped because CC Mode is broken on 24.3.
-See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
   (flycheck-ert-with-resource-buffer "language/d/src/dmd/package.d"
     (should (flycheck-same-files-p
              (flycheck-d-base-directory)
              (flycheck-ert-resource-filename "language/d/src")))))
 
 (flycheck-ert-def-checker-test d-dmd d warning-include-path
-  (unless (version<= "24.4" emacs-version)
-    (ert-skip "Skipped because CC Mode is broken on 24.3.
-See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
   (let ((flycheck-dmd-include-path '("../../lib")))
     (flycheck-ert-should-syntax-check
      "language/d/src/dmd/warning.d" 'd-mode
@@ -3398,18 +3383,12 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
           :checker d-dmd))))
 
 (flycheck-ert-def-checker-test d-dmd d missing-import
-  (unless (version<= "24.4" emacs-version)
-    (ert-skip "Skipped because CC Mode is broken on 24.3.
-See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
   (flycheck-ert-should-syntax-check
    "language/d/src/dmd/warning.d" 'd-mode
    '(4 8 error "module `external_library` is in file 'external_library.d' which cannot be read"
        :checker d-dmd)))
 
 (flycheck-ert-def-checker-test d-dmd d continuation-line
-  (unless (version<= "24.4" emacs-version)
-    (ert-skip "Skipped because CC Mode is broken on 24.3.
-See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
   (flycheck-ert-should-syntax-check
    "language/d/src/dmd/continuation.d" 'd-mode
    '(5 12 error "undefined identifier `invalid`"
@@ -3421,9 +3400,6 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
 
 (flycheck-ert-def-checker-test d-dmd d non-d-extension
   (skip-unless (fboundp 'd-mode))
-  (unless (version<= "24.4" emacs-version)
-    (ert-skip "Skipped because CC Mode is broken on 24.3.
-See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
   (flycheck-ert-with-temp-buffer
     (insert "!invalid")
     (d-mode)
@@ -3492,9 +3468,6 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
 
 (flycheck-ert-def-checker-test (emacs-lisp-checkdoc) emacs-lisp
                                inherits-checkdoc-variables
-  ;; This test doesn't run on 24.3 and earlier because the corresponding
-  ;; checkdoc variables were only introduced in 24.4.
-  (skip-unless (version<= "24.4" emacs-version))
   (flycheck-ert-should-syntax-check
    "language/emacs-lisp/local-checkdoc-variables.el" 'emacs-lisp-mode))
 
