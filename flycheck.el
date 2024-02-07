@@ -11,7 +11,7 @@
 ;; URL: http://www.flycheck.org
 ;; Keywords: convenience, languages, tools
 ;; Version: 34.0-snapshot
-;; Package-Requires: ((emacs "26") (pkg-info "0.4") (seq "2.24"))
+;; Package-Requires: ((emacs "26.1") (pkg-info "0.4") (seq "2.24"))
 
 ;; This file is not part of GNU Emacs.
 
