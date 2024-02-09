@@ -115,7 +115,7 @@ Ruby
 
 * Saša Jovanić (:gh:`Simplify`)
 
-Mention with ``@flycheck/javascript``.
+Mention with ``@flycheck/ruby``.
 
 Rust
 ~~~~
