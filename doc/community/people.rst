@@ -144,7 +144,7 @@ patches and their testing:
 
 .. _Debian Emacs addon team: https://pkg-emacsen.alioth.debian.org/
 
-Acknowledgements
+Acknowledgments
 ================
 
 We would also like to thank the following people and projects:
