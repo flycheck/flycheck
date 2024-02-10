@@ -60,6 +60,7 @@ Cadence
 Clojure
 -------
 
+* :gh:`borkdude/flycheck-clj-kondo` adds a Flycheck checker using ``clj-kondo``.
 * :gh:`clojure-emacs/squiggly-clojure` adds syntax checking for Clojure.
 
 C/C++/Objective C
