@@ -14,10 +14,12 @@ to `edit this page`_ and improve it.
 
 .. note::
 
-   This comparison was updated at the time of the Emacs 26.1 release, which
-   contains an overhaul of Flymake.  If you are using Emacs 25.3 or below, you
-   can still access the comparison between Flycheck and the legacy Flymake
-   `here`_.
+   This comparison is being updated periodically and reflects the major overhaul
+   of Flymake in Emacs 26.1.  As Flycheck and Flymake are moving targets
+   we can't guarantee that the data here will always reflect the current state
+   of both projects. If you notice that something is incorrect, please let our
+   team know. If you are using Emacs 25.3 or below, you can still access the
+   comparison between Flycheck and the legacy Flymake `here`_.
 
 .. _flymake-easy: https://github.com/purcell/flymake-easy
 .. _edit this page: https://github.com/flycheck/flycheck/edit/master/doc/user/flycheck-versus-flymake.rst
@@ -82,9 +84,9 @@ detail.
 |List of all errors         |yes; filterable by     |yes                    |
 |                           |error level            |                       |
 +---------------------------+-----------------------+-----------------------+
-|Supported by Eglot         |no                     |yes                    |
+|`Supported by Eglot`_      |no                     |yes                    |
 +---------------------------+-----------------------+-----------------------+
-|Supported by lsp-mode      |yes                    |yes                    |
+|`Supported by lsp-mode`_   |yes                    |yes                    |
 +---------------------------+-----------------------+-----------------------+
 
 Detailed review
@@ -287,6 +289,31 @@ messages in the echo area if the point is at an error location.  This feature is
 fully customizable via `flycheck-display-errors-function`, and several
 `extensions <flycheck-extensions>` already provide alternative way to display
 errors.
+
+Supported by Eglot
+~~~~~~~~~~~~~~~~~~
+
+`Eglot https://github.com/joaotavora/eglot`_ is the built-in LSP package in
+Emacs, starting with version 29. It uses internally Flymake to render
+diagnostics received by the LSP server.
+
+It seems that many people were forced to move to Flymake, because they wanted to
+use Eglot and its maintainer (who's also the maintainter of Flymake) didn't want
+to provide Flycheck integration for it. (see the relevant `discussion
+https://github.com/joaotavora/eglot/issues/42`_))
+
+It'd be great if we can do something about this, as Eglot is quite popular (like
+most built-in packages). This episode is also a great reminder about how hard it
+is to compete with built-in packages.
+
+Supported by lsp-mode
+~~~~~~~~~~~~~~~~~~~~~
+
+`lsp-mode https://github.com/emacs-lsp/lsp-mode`_ is a popular alternative to
+Eglot that supports both Flycheck and Flymake.
+
+As you might imagine we encourage Flycheck to use ``lsp-mode`` until we find
+some solution for the existing limitations in Eglot.
 
 .. rubric:: Footnotes
 
