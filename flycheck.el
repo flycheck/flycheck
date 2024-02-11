@@ -11265,12 +11265,6 @@ See URL `https://rubocop.org/'."
              "--display-cop-names"
              "--force-exclusion"
              "--format" "emacs"
-             ;; Explicitly disable caching to prevent Rubocop 0.35.1 and earlier
-             ;; from caching standard input.  Later versions of Rubocop
-             ;; automatically disable caching with --stdin, see
-             ;; https://github.com/flycheck/flycheck/issues/844 and
-             ;; https://github.com/bbatsov/rubocop/issues/2576
-             "--cache" "false"
              (config-file "--config" flycheck-rubocoprc)
              (option-flag "--lint" flycheck-rubocop-lint-only)
              ;; RuboCop takes the original file name as argument when reading
@@ -11297,12 +11291,6 @@ See URL `https://github.com/chef/cookstyle'."
              "--display-cop-names"
              "--force-exclusion"
              "--format" "emacs"
-             ;; Explicitly disable caching to prevent Rubocop 0.35.1 and earlier
-             ;; from caching standard input.  Later versions of Rubocop
-             ;; automatically disable caching with --stdin, see
-             ;; https://github.com/flycheck/flycheck/issues/844 and
-             ;; https://github.com/bbatsov/rubocop/issues/2576
-             "--cache" "false"
              (config-file "--config" flycheck-rubocoprc)
              (option-flag "--lint" flycheck-rubocop-lint-only)
              ;; RuboCop takes the original file name as argument when reading
