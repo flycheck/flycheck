@@ -11234,8 +11234,8 @@ This is either a parent directory containing a Gemfile, or nil."
 (flycheck-def-config-file-var flycheck-rubocoprc ruby-rubocop ".rubocop.yml")
 
 (flycheck-def-option-var flycheck-rubocop-lint-only nil
-                         (ruby-rubocop ruby-standard)
-  "Whether to only report code issues in Rubocop and Standard.
+                         (ruby-rubocop ruby-standard ruby-chef-cookstyle)
+  "Whether to only report code issues in Rubocop, Cookstyle and Standard.
 
 When non-nil, only report code issues, via `--lint'.  Otherwise
 report style issues as well."
@@ -11286,6 +11286,7 @@ See URL `https://rubocop.org/'."
   :next-checkers '((warning . ruby-reek)
                    (warning . ruby-rubylint)))
 
+(flycheck-def-executable-var ruby-chef-cookstyle "cookstyle")
 (flycheck-define-command-checker 'ruby-chef-cookstyle
   "A Chef (Ruby) syntax and style checker using the Cookstyle tool.
 Basically Cookstyle is a thin wrapper around RuboCop, so this
