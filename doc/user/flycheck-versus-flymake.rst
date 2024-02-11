@@ -293,14 +293,14 @@ errors.
 Supported by Eglot
 ~~~~~~~~~~~~~~~~~~
 
-`Eglot https://github.com/joaotavora/eglot`_ is the built-in LSP package in
+`Eglot <https://github.com/joaotavora/eglot>`_ is the built-in LSP package in
 Emacs, starting with version 29. It uses internally Flymake to render
 diagnostics received by the LSP server.
 
 It seems that many people were forced to move to Flymake, because they wanted to
 use Eglot and its maintainer (who's also the maintainter of Flymake) didn't want
 to provide Flycheck integration for it. (see the relevant `discussion
-https://github.com/joaotavora/eglot/issues/42`_))
+<https://github.com/joaotavora/eglot/issues/42>`_))
 
 It'd be great if we can do something about this, as Eglot is quite popular (like
 most built-in packages). This episode is also a great reminder about how hard it
@@ -309,7 +309,7 @@ is to compete with built-in packages.
 Supported by lsp-mode
 ~~~~~~~~~~~~~~~~~~~~~
 
-`lsp-mode https://github.com/emacs-lsp/lsp-mode`_ is a popular alternative to
+`lsp-mode <https://github.com/emacs-lsp/lsp-mode>`_ is a popular alternative to
 Eglot that supports both Flycheck and Flymake.
 
 As you might imagine we encourage Flycheck to use ``lsp-mode`` until we find
