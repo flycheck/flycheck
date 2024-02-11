@@ -3641,24 +3641,17 @@ MODE-SYM is the Erlang mode name, one of ‘erlang’ and
    '(5 9 error "expected '(', found ta" :checker go-gofmt)
    '(6 1 error "expected declaration, found '}'" :checker go-gofmt)))
 
-(flycheck-ert-def-checker-test (go-build go-golint go-vet) go complete-chain
+(flycheck-ert-def-checker-test (go-build go-vet) go complete-chain
   (flycheck-ert-with-env
       `(("GOPATH" . ,(flycheck-ert-resource-filename "language/go")))
     (flycheck-ert-should-syntax-check
      "language/go/src/warnings.go" 'go-mode
      '(4 2 error "imported and not used: \"fmt\"" :checker go-build)
-     '(4 2 warning "should not use dot imports" :checker go-golint)
-     '(7 1 warning "exported function Warn should have comment or be unexported"
-         :checker go-golint)
      '(8 2 error "undefined: fmt" :checker go-build)
-     '(11 1 warning "exported function Warnf should have comment or be unexported"
-          :checker go-golint)
      '(12 2 error "undefined: fmt" :checker go-build)
      '(17 2 error "undefined: fmt" :checker go-build)
      '(19 13 error "cannot use 1 (type untyped int) as type string in argument to Warnf"
-          :checker go-build)
-     '(25 9 warning "if block ends with a return statement, so drop this else and outdent its block"
-          :checker go-golint))))
+          :checker go-build))))
 
 (flycheck-ert-def-checker-test go-build go handles-packages
   (flycheck-ert-with-env
@@ -3703,7 +3696,7 @@ MODE-SYM is the Erlang mode name, one of ‘erlang’ and
 
 (flycheck-ert-def-checker-test go-staticcheck go nil
   :tags '(language-go external-tool)
-  (let ((flycheck-disabled-checkers '(go-golint go-unconvert)))
+  (let ((flycheck-disabled-checkers '(go-unconvert)))
     (flycheck-ert-with-env
         `(("GOPATH" . ,(flycheck-ert-resource-filename "language/go")))
       (flycheck-ert-should-syntax-check

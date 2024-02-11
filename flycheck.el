@@ -152,7 +152,6 @@
     eruby-ruumba
     fortran-gfortran
     go-gofmt
-    go-golint
     go-vet
     go-build
     go-test
@@ -9055,26 +9054,12 @@ See URL `https://golang.org/cmd/gofmt/'."
   ((error line-start "<standard input>:" line ":" column ": "
           (message) line-end))
   :modes (go-mode go-ts-mode)
-  :next-checkers ((warning . go-golint)
-                  ;; Fall back, if go-golint doesn't exist
-                  (warning . go-vet)
+  :next-checkers ((warning . go-vet)
                   ;; Fall back, if go-vet doesn't exist
                   (warning . go-build) (warning . go-test)
                   (warning . go-errcheck)
                   (warning . go-unconvert)
                   (warning . go-staticcheck)))
-
-(flycheck-define-checker go-golint
-  "A Go style checker using Golint.
-
-See URL `https://github.com/golang/lint'."
-  :command ("golint" source)
-  :error-patterns
-  ((warning line-start (file-name) ":" line ":" column ": " (message) line-end))
-  :modes (go-mode go-ts-mode)
-  :next-checkers (go-vet
-                  ;; Fall back, if go-vet doesn't exist
-                  go-build go-test go-errcheck go-unconvert))
 
 (flycheck-def-option-var flycheck-go-vet-print-functions nil go-vet
   "A list of print-like functions for `go vet'.

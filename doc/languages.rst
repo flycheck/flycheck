@@ -486,20 +486,15 @@ to view the docstring of the syntax checker.  Likewise, you may use
    Flycheck checks Go with the following checkers:
 
    1. `go-gofmt`
-   2. `go-golint`
-   3. `go-vet`
-   4. `go-build` or `go-test`
-   5. `go-errcheck`
-   6. `go-unconvert`
-   7. `go-staticcheck`
+   2. `go-vet`
+   3. `go-build` or `go-test`
+   4. `go-errcheck`
+   5. `go-unconvert`
+   6. `go-staticcheck`
 
    .. syntax-checker:: go-gofmt
 
       Check Go syntax with `gofmt <https://golang.org/cmd/gofmt/>`_.
-
-   .. syntax-checker:: go-golint
-
-      Check Go code style with `Golint <https://github.com/golang/lint>`_.
 
    .. syntax-checker:: go-vet
 

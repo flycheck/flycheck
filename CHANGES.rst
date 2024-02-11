@@ -32,6 +32,7 @@ Changes
 - [#2026]:Update the possible locations for ``yamllint``'s configuration file.
 - **(Breaking)** [#1697]: Remove the ``coq`` checker.
 - **(Breaking)** [#1935]: Remove the ``chef-foodcritic`` checker. (it's now replaced by ``ruby-chef-cookstyle``)
+- **(Breaking)** [#2018]: Remove the ``golint`` checker.
 - [#1704]: The ``tslint`` checker is deprecated; it will go away in a future release.
 
 ----------------------
