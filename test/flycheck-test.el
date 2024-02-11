@@ -4500,15 +4500,8 @@ Perhaps:
          :id "Lint/Syntax"
          :checker ruby-standard))))
 
-(flycheck-ert-def-checker-test ruby-rubylint ruby syntax-error
-  (ert-skip "Pending: https://github.com/YorickPeterse/ruby-lint/issues/202")
-  (let ((flycheck-disabled-checkers '(ruby-rubocop ruby-reek)))
-    (flycheck-ert-should-syntax-check
-     "language/ruby/syntax-error.rb" 'ruby-mode
-     '(5 7 error "unexpected token tCONSTANT" :checker ruby-rubylint))))
-
 (flycheck-ert-def-checker-test ruby ruby syntax-error
-  (let ((flycheck-disabled-checkers '(ruby-rubocop ruby-reek ruby-rubylint)))
+  (let ((flycheck-disabled-checkers '(ruby-rubocop ruby-reek)))
     (flycheck-ert-should-syntax-check
      "language/ruby/syntax-error.rb" 'ruby-mode
      '(4 nil warning "assigned but unused variable - days" :checker ruby)
@@ -4516,12 +4509,12 @@ Perhaps:
          :checker ruby))))
 
 (flycheck-ert-def-checker-test ruby-jruby ruby syntax-error
-  (let ((flycheck-disabled-checkers '(ruby-rubocop ruby-reek ruby-rubylint ruby)))
+  (let ((flycheck-disabled-checkers '(ruby-rubocop ruby-reek ruby)))
     (flycheck-ert-should-syntax-check
      "language/ruby/syntax-error.rb" 'ruby-mode
      '(5 nil error "syntax error, unexpected tCONSTANT" :checker ruby-jruby))))
 
-(flycheck-ert-def-checker-test (ruby-rubocop ruby-reek ruby-rubylint) ruby with-rubylint
+(flycheck-ert-def-checker-test (ruby-rubocop ruby-reek) ruby warnings
   (flycheck-ert-should-syntax-check
    "language/ruby/warnings.rb" 'ruby-mode
    '(1 1 info "Missing frozen string literal comment."
@@ -4530,14 +4523,12 @@ Perhaps:
        :id "InstanceVariableAssumption" :checker ruby-reek)
    '(3 1 info "Missing top-level class documentation comment."
        :id "Style/Documentation" :checker ruby-rubocop)
-   '(5 5 warning "unused local variable arr" :checker ruby-rubylint)
    '(5 5 warning "Useless assignment to variable - `arr`."
        :id "Lint/UselessAssignment" :checker ruby-rubocop)
    '(5 11 info "Use `%i` or `%I` for an array of symbols."
        :id "[Correctable] Style/SymbolArray" :checker ruby-rubocop)
    '(6 10 info "Prefer single-quoted strings when you don't need string interpolation or special symbols."
        :id "[Correctable] Style/StringLiterals" :checker ruby-rubocop)
-   '(10 5 info "the use of then/do is not needed here" :checker ruby-rubylint)
    '(10 5 info "Use a guard clause (`return unless true`) instead of wrapping the code inside a conditional expression."
         :id "Style/GuardClause":checker ruby-rubocop)
    '(10 5 info "Favor modifier `if` usage when having a single-line body. Another good alternative is the usage of control flow `&&`/`||`."
@@ -4547,20 +4538,17 @@ Perhaps:
    '(10 13 info "Do not use `then` for multi-line `if`."
         :id "[Correctable] Style/MultilineIfThen" :checker ruby-rubocop)
    '(11 7 info "Redundant `return` detected."
-        :id "[Correctable] Style/RedundantReturn" :checker ruby-rubocop)
-   '(11 24 error "undefined instance variable @name" :checker ruby-rubylint)
-   '(16 1 error "wrong number of arguments for 'test' (expected 2..3 but got 0)"
-        :checker ruby-rubylint)))
+        :id "[Correctable] Style/RedundantReturn" :checker ruby-rubocop)))
 
 (flycheck-ert-def-checker-test ruby-reek ruby warnings
-  (let ((flycheck-disabled-checkers '(ruby-rubocop ruby-rubylint)))
+  (let ((flycheck-disabled-checkers '(ruby-rubocop)))
     (flycheck-ert-should-syntax-check
      "language/ruby/warnings.rb" 'ruby-mode
      '(3 nil warning "Person assumes too much for instance variable '@name'"
          :id "InstanceVariableAssumption" :checker ruby-reek))))
 
 (flycheck-ert-def-checker-test ruby ruby warnings
-  (let ((flycheck-disabled-checkers '(ruby-rubocop ruby-reek ruby-rubylint)))
+  (let ((flycheck-disabled-checkers '(ruby-rubocop ruby-reek)))
     (flycheck-ert-should-syntax-check
      "language/ruby/warnings.rb" 'ruby-mode
      '(5 nil warning "assigned but unused variable - arr" :checker ruby)
@@ -4568,7 +4556,7 @@ Perhaps:
           :checker ruby))))
 
 (flycheck-ert-def-checker-test ruby-jruby ruby nil
-  (let ((flycheck-disabled-checkers '(ruby-rubocop ruby-reek ruby-rubylint ruby)))
+  (let ((flycheck-disabled-checkers '(ruby-rubocop ruby-reek ruby)))
     (flycheck-ert-should-syntax-check
      "language/ruby/warnings.rb" 'ruby-mode
      '(16 nil warning "Useless use of == in void context."

@@ -33,6 +33,7 @@ Changes
 - **(Breaking)** [#1697]: Remove the ``coq`` checker.
 - **(Breaking)** [#1935]: Remove the ``chef-foodcritic`` checker. (it's now replaced by ``ruby-chef-cookstyle``)
 - **(Breaking)** [#2018]: Remove the ``golint`` checker.
+- **(Breaking)** Remove the ``ruby-rubylint`` checker.
 - [#1704]: The ``tslint`` checker is deprecated; it will go away in a future release.
 
 ----------------------

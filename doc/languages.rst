@@ -1164,9 +1164,10 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
 .. supported-language:: Ruby
 
-   Flycheck checks Ruby with `ruby-rubocop`, `ruby-reek` and `ruby-rubylint`,
+   Flycheck checks Ruby with `ruby-rubocop` and `ruby-reek`,
    falling back to `ruby` or `ruby-jruby` for basic syntax checking if those
-   are not available.
+   are not available. There's also `ruby-chef-cookstyle`, which is only
+   used for Chef cookbooks.
 
    .. syntax-checker:: ruby-rubocop
 
@@ -1210,18 +1211,6 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
          ``flycheck-reekrc`` defaults to ``nil``, because Reek can find its own
          configuration.
-
-   .. syntax-checker:: ruby-rubylint
-
-      Check syntax and lint with ruby-lint_.
-
-      .. note::
-
-         This syntax checker requires ruby-lint 2.0.2 or newer.
-
-      .. _ruby-lint: http://code.yorickpeterse.com/ruby-lint/latest/
-
-      .. syntax-checker-config-file:: flycheck-rubylintrc
 
    .. syntax-checker:: ruby
 

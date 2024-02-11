@@ -211,7 +211,6 @@
     ruby-chef-cookstyle
     ruby-standard
     ruby-reek
-    ruby-rubylint
     ruby
     ruby-jruby
     rust-cargo
@@ -11278,7 +11277,7 @@ See URL `https://rubocop.org/'."
   :error-filter #'flycheck-ruby--filter-rubocop-errors
   :modes '(enh-ruby-mode ruby-mode ruby-ts-mode)
   :next-checkers '((warning . ruby-reek)
-                   (warning . ruby-rubylint)))
+                   (warning . ruby-chef-cookstyle)))
 
 (flycheck-def-executable-var ruby-chef-cookstyle "cookstyle")
 (flycheck-define-command-checker 'ruby-chef-cookstyle
@@ -11315,8 +11314,7 @@ p       ;; Chef CookBook
        ;; Knife Solo
        ;; http://matschaffer.github.io/knife-solo/#label-Init+command
        (locate-dominating-file parent-dir "cookbooks"))))
-  :next-checkers '((warning . ruby-reek)
-                   (warning . ruby-rubylint)))
+  :next-checkers '((warning . ruby-reek)))
 
 (flycheck-def-config-file-var flycheck-ruby-standardrc ruby-standard
                               ".standard.yml")
@@ -11341,7 +11339,7 @@ See URL `https://github.com/testdouble/standard' for more information."
   :error-filter #'flycheck-ruby--filter-rubocop-errors
   :modes '(enh-ruby-mode ruby-mode ruby-ts-mode)
   :next-checkers '((warning . ruby-reek)
-                   (warning . ruby-rubylint)))
+                   (warning . ruby-chef-cookstyle)))
 
 (flycheck-def-config-file-var flycheck-reekrc ruby-reek ".reek.yml"
   :safe #'string-or-null-p
@@ -11355,29 +11353,6 @@ See URL `https://github.com/troessner/reek'."
             (config-file "--config" flycheck-reekrc)
             source)
   :error-parser flycheck-parse-reek
-  :modes (enh-ruby-mode ruby-mode ruby-ts-mode)
-  :next-checkers ((warning . ruby-rubylint)))
-
-;; Default to `nil' to let Rubylint find its configuration file by itself, and
-;; to maintain backwards compatibility with older Rubylint and Flycheck releases
-(flycheck-def-config-file-var flycheck-rubylintrc ruby-rubylint nil)
-
-(flycheck-define-checker ruby-rubylint
-  "A Ruby syntax and code analysis checker using ruby-lint.
-
-Requires ruby-lint 2.0.2 or newer.  See URL
-`https://github.com/YorickPeterse/ruby-lint'."
-  :command ("ruby-lint" "--presenter=syntastic"
-            (config-file "--config" flycheck-rubylintrc)
-            source)
-  ;; Ruby Lint can't read from standard input
-  :error-patterns
-  ((info line-start
-         (file-name) ":I:" line ":" column ": " (message) line-end)
-   (warning line-start
-            (file-name) ":W:" line ":" column ": " (message) line-end)
-   (error line-start
-          (file-name) ":E:" line ":" column ": " (message) line-end))
   :modes (enh-ruby-mode ruby-mode ruby-ts-mode))
 
 (flycheck-define-checker ruby
@@ -11401,7 +11376,7 @@ See URL `https://www.ruby-lang.org/'."
             " warning: " (message) line-end)
    (error line-start "-:" line ": " (message) line-end))
   :modes (enh-ruby-mode ruby-mode ruby-ts-mode)
-  :next-checkers ((warning . ruby-rubylint)))
+  :next-checkers ((warning . ruby-chef-cookstyle)))
 
 (flycheck-define-checker ruby-jruby
   "A Ruby syntax checker using the JRuby interpreter.
@@ -11409,7 +11384,7 @@ See URL `https://www.ruby-lang.org/'."
 This syntax checker is very primitive, and may break on future
 versions of JRuby.
 
-Please consider using `ruby-rubocop' or `ruby-rubylint' instead.
+Please consider using `ruby-rubocop' instead.
 
 See URL `http://jruby.org/'."
   :command ("jruby" "-w" "-c")
@@ -11418,8 +11393,7 @@ See URL `http://jruby.org/'."
   ((error   line-start "SyntaxError in -:" line ": " (message) line-end)
    (warning line-start "-:" line ": warning: " (message) line-end)
    (error   line-start "-:" line ": "          (message) line-end))
-  :modes (enh-ruby-mode ruby-mode ruby-ts-mode)
-  :next-checkers ((warning . ruby-rubylint)))
+  :modes (enh-ruby-mode ruby-mode ruby-ts-mode))
 
 (flycheck-def-args-var flycheck-cargo-check-args (rust-cargo)
   :package-version '(flycheck . "32"))
