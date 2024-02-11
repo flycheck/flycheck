@@ -134,7 +134,6 @@
     c/c++-gcc
     c/c++-cppcheck
     cfengine
-    chef-foodcritic
     coffee
     coffee-coffeelint
     css-csslint
@@ -210,6 +209,7 @@
     rst-sphinx
     rst
     ruby-rubocop
+    ruby-chef-cookstyle
     ruby-standard
     ruby-reek
     ruby-rubylint
@@ -8058,45 +8058,6 @@ See URL `https://cfengine.com/'."
           ": error: " (message) line-end))
   :modes (cfengine-mode cfengine3-mode))
 
-(flycheck-def-option-var flycheck-foodcritic-tags nil chef-foodcritic
-  "A list of tags to select for Foodcritic.
-
-The value of this variable is a list of strings where each string
-is a tag expression describing Foodcritic rules to enable or
-disable, via the `--tags' option.  To disable a tag, prefix it
-with `~'."
-  :type '(repeat :tag "Tags" (string :tag "Tag expression"))
-  :safe #'flycheck-string-list-p
-  :package-version '(flycheck . "0.23"))
-
-(flycheck-define-checker chef-foodcritic
-  "A Chef cookbooks syntax checker using Foodcritic.
-
-See URL `http://www.foodcritic.io'."
-  ;; Use `source-inplace' to allow resource discovery with relative paths.
-  ;; foodcritic interprets these as relative to the source file, so we need to
-  ;; stay within the source tree.  See
-  ;; https://github.com/flycheck/flycheck/pull/556
-  :command ("foodcritic"
-            (option-list "--tags" flycheck-foodcritic-tags)
-            source-inplace)
-  :error-patterns
-  ((error line-start (id (one-or-more alnum)) ": "
-          (message) ": " (file-name) ":" line line-end))
-  :modes (enh-ruby-mode ruby-mode ruby-ts-mode)
-  :predicate
-  (lambda ()
-    (let ((parent-dir (file-name-directory
-                       (directory-file-name
-                        (expand-file-name default-directory)))))
-      (or
-       ;; Chef CookBook
-       ;; http://docs.opscode.com/chef/knife.html#id38
-       (locate-dominating-file parent-dir "recipes")
-       ;; Knife Solo
-       ;; http://matschaffer.github.io/knife-solo/#label-Init+command
-       (locate-dominating-file parent-dir "cookbooks")))))
-
 (flycheck-define-checker coffee
   "A CoffeeScript syntax checker using coffee.
 
@@ -11337,6 +11298,49 @@ See URL `https://rubocop.org/'."
   :error-patterns flycheck-ruby-rubocop-error-patterns
   :error-filter #'flycheck-ruby--filter-rubocop-errors
   :modes '(enh-ruby-mode ruby-mode ruby-ts-mode)
+  :next-checkers '((warning . ruby-reek)
+                   (warning . ruby-rubylint)))
+
+(flycheck-define-command-checker 'ruby-chef-cookstyle
+  "A Chef (Ruby) syntax and style checker using the Cookstyle tool.
+Basically Cookstyle is a thin wrapper around RuboCop, so this
+checker is essentially the same.
+
+See URL `https://github.com/chef/cookstyle'."
+  :command '("cookstyle"
+             "--display-cop-names"
+             "--force-exclusion"
+             "--format" "emacs"
+             ;; Explicitly disable caching to prevent Rubocop 0.35.1 and earlier
+             ;; from caching standard input.  Later versions of Rubocop
+             ;; automatically disable caching with --stdin, see
+             ;; https://github.com/flycheck/flycheck/issues/844 and
+             ;; https://github.com/bbatsov/rubocop/issues/2576
+             "--cache" "false"
+             (config-file "--config" flycheck-rubocoprc)
+             (option-flag "--lint" flycheck-rubocop-lint-only)
+             ;; RuboCop takes the original file name as argument when reading
+             ;; from standard input, but it chokes when that name is the empty
+             ;; string, so fall back to "stdin" in order to handle buffers with
+             ;; no backing file (e.g. org-mode snippet buffers)
+             "--stdin" (eval (or (buffer-file-name) "stdin")))
+  :standard-input t
+  :working-directory #'flycheck-ruby--find-project-root
+  :error-patterns flycheck-ruby-rubocop-error-patterns
+  :error-filter #'flycheck-ruby--filter-rubocop-errors
+  :modes '(enh-ruby-mode ruby-mode ruby-ts-mode)
+  :predicate
+  (lambda ()
+    (let ((parent-dir (file-name-directory
+                       (directory-file-name
+                        (expand-file-name default-directory)))))
+      (or
+p       ;; Chef CookBook
+       ;; http://docs.opscode.com/chef/knife.html#id38
+       (locate-dominating-file parent-dir "recipes")
+       ;; Knife Solo
+       ;; http://matschaffer.github.io/knife-solo/#label-Init+command
+       (locate-dominating-file parent-dir "cookbooks"))))
   :next-checkers '((warning . ruby-reek)
                    (warning . ruby-rubylint)))
 

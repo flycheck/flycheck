@@ -12,6 +12,7 @@ New Features
   - [#2030]: Add ``yaml-actionlint`` checker for GitHub yaml action workflows.
   - [#2052]: Sass with Stylelint
   - [#2013]: Nix with ``statix``
+  - [#1935]: Chef (Ruby) with ``cookstyle``
 
 - [#1873]: Add error explainer to ``perl-perlcritic``.
 - [#1875]: Add error-explainer to ``css-stylelint``.
@@ -30,6 +31,7 @@ Changes
 
 - [#2026]:Update the possible locations for ``yamllint``'s configuration file.
 - **(Breaking)** [#1697]: Remove the ``coq`` checker.
+- **(Breaking)** [#1935]: Remove the ``chef-foodcritic`` checker. (it's now replaced by ``ruby-chef-cookstyle``)
 - [#1704]: The ``tslint`` checker is deprecated; it will go away in a future release.
 
 ----------------------

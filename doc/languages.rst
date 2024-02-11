@@ -223,16 +223,6 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       Check syntax with `CFEngine <https://cfengine.com/>`_.
 
-.. supported-language:: Chef
-
-   .. syntax-checker:: chef-foodcritic
-
-      Check style in Chef recipes with `foodcritic <http://www.foodcritic.io>`_.
-
-      .. defcustom:: flycheck-foodcritic-tags
-
-         A list of tags to select.
-
 .. supported-language:: Coffeescript
 
    Flycheck checks Coffeescript syntax with `coffee` and then lints with
@@ -1245,6 +1235,22 @@ to view the docstring of the syntax checker.  Likewise, you may use
    .. syntax-checker:: ruby-jruby
 
       Check syntax with the `JRuby <http://jruby.org/>`_ interpreter.
+
+   .. syntax-checker:: ruby-chef-cookstyle
+
+      Check syntax and lint with `Cookstyle <https://github.com/chef/cookstyle>`_.
+
+      .. note::
+
+         Cookstyle is just a wrapper around RuboCop, so this checker is almost
+         the same as ``ruby-rubocop``.
+
+      .. defcustom:: flycheck-rubocop-lint-only
+
+         Whether to suppress warnings about style issues, via the ``--lint``
+         option.
+
+      .. syntax-checker-config-file:: flycheck-rubocoprc
 
 .. supported-language:: Rust
 
