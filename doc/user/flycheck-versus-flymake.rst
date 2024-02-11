@@ -84,7 +84,9 @@ detail.
 |List of all errors         |yes; filterable by     |yes                    |
 |                           |error level            |                       |
 +---------------------------+-----------------------+-----------------------+
-|`Supported by Eglot`_      |no                     |yes                    |
+|`Supported by Eglot`_      |no, but a compatibility|yes                    |
+|                           |package exists         |                       |
+|                           |(``flycheck-eglot``)   |                       |
 +---------------------------+-----------------------+-----------------------+
 |`Supported by lsp-mode`_   |yes                    |yes                    |
 +---------------------------+-----------------------+-----------------------+
@@ -302,9 +304,8 @@ use Eglot and its maintainer (who's also the maintainter of Flymake) didn't want
 to provide Flycheck integration for it. (see the relevant `discussion
 <https://github.com/joaotavora/eglot/issues/42>`_))
 
-It'd be great if we can do something about this, as Eglot is quite popular (like
-most built-in packages). This episode is also a great reminder about how hard it
-is to compete with built-in packages.
+`flycheck-eglot <https://github.com/intramurz/flycheck-eglot>`_ is the best workaround for this unfortunate situation that
+exists today.
 
 Supported by lsp-mode
 ~~~~~~~~~~~~~~~~~~~~~
