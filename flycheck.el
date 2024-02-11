@@ -12599,7 +12599,7 @@ See URL `http://xmlstar.sourceforge.net/'."
   "A XML syntax checker and validator using the xmllint utility.
 
 The xmllint is part of libxml2, see URL
-`http://www.xmlsoft.org/'."
+`https://gitlab.gnome.org/GNOME/libxml2/-/wikis/home'."
   :command ("xmllint" "--noout"
             (option "--schema" flycheck-xml-xmllint-xsd-path)
             (option "--relaxng" flycheck-xml-xmllint-relaxng-path)

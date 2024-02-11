@@ -1655,8 +1655,10 @@ to view the docstring of the syntax checker.  Likewise, you may use
    .. syntax-checker:: xml-xmllint
 
       Check syntax with :program:`xmllint` from Libxml2_.
+      .. defcustom:: flycheck-xml-xmllint-xsd-path
+                     flycheck-xml-xmllint-relaxng-path
 
-      .. _Libxml2: http://www.xmlsoft.org/
+      .. _Libxml2: https://gitlab.gnome.org/GNOME/libxml2/-/wikis/home
 
 .. supported-language:: YAML
 
