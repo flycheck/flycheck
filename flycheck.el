@@ -11338,6 +11338,7 @@ See URL `https://github.com/testdouble/standard' for more information."
   :standard-input t
   :working-directory #'flycheck-ruby--find-project-root
   :error-patterns flycheck-ruby-rubocop-error-patterns
+  :error-filter #'flycheck-ruby--filter-rubocop-errors
   :modes '(enh-ruby-mode ruby-mode ruby-ts-mode)
   :next-checkers '((warning . ruby-reek)
                    (warning . ruby-rubylint)))
