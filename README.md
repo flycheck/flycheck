@@ -14,6 +14,33 @@ Modern on-the-fly syntax checking extension for GNU Emacs.  [Try it][]!
 
 ![](https://raw.githubusercontent.com/flycheck/flycheck/master/doc/images/flycheck-annotated.png)
 
+## Getting Started
+
+Flycheck is available for installation with `package.el` on
+[MELPA Stable](http://stable.melpa.org)
+and [MELPA](http://melpa.org).
+
+You can install Flycheck with the following command:
+
+<kbd>M-x</kbd> `package-install` <kbd>[RET]</kbd> `flycheck` <kbd>[RET]</kbd>
+
+Finally add this to your Emacs config:
+
+```elisp
+(global-flycheck-mode +1)
+```
+
+Alternatively, if you're into `use-package` you can do the following:
+
+``` emacs-lisp
+(use-package flycheck
+  :ensure t
+  :config
+  (add-hook 'after-init-hook #'global-flycheck-mode))
+```
+
+Now you can start using any of the [bundled checkers](https://www.flycheck.org/en/latest/languages.html) or install additional checkers.
+
 For a more gentle introduction read the [Installation][] instructions and go
 through [Quickstart][] guide.
 
