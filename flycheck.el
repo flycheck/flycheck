@@ -11,7 +11,7 @@
 ;; URL: http://www.flycheck.org
 ;; Keywords: convenience, languages, tools
 ;; Version: 34.0-snapshot
-;; Package-Requires: ((emacs "26.1") (pkg-info "0.4") (seq "2.24"))
+;; Package-Requires: ((emacs "26.1") (seq "2.24"))
 
 ;; This file is not part of GNU Emacs.
 
@@ -1232,6 +1232,16 @@ Only has effect when variable `global-flycheck-mode' is non-nil."
 (easy-menu-add-item nil '("Tools") flycheck-mode-menu-map "Spell Checking")
 
 
+
+(defun flycheck--pkg-version ()
+  "Extract FLYCHECK's package version from its package metadata."
+  ;; Use `cond' below to avoid a compiler unused return value warning
+  ;; when `package-get-version' returns nil. See #3181.
+  (cond ((fboundp 'package-get-version)
+         (package-get-version))
+        ((fboundp 'pkg-info-version-info)
+         (pkg-info-version-info 'flycheck))))
+
 ;;; Version information, manual and loading of Flycheck
 (defun flycheck-version (&optional show-version)
   "Get the Flycheck version as string.
@@ -1246,7 +1256,7 @@ If the version number could not be determined, signal an error,
 if called interactively, or if SHOW-VERSION is non-nil, otherwise
 just return nil."
   (interactive (list t))
-  (let ((version (pkg-info-version-info 'flycheck)))
+  (let ((version (flycheck--pkg-version)))
     (when show-version
       (message "Flycheck version: %s" version))
     version))
@@ -2604,7 +2614,7 @@ to enable disabled checkers.")))
       (fill-region-as-paragraph (point) end)))
 
   (princ "\n\n--------------------\n\n")
-  (princ (format "Flycheck version: %s\n" (flycheck-version)))
+  (princ (format "Flycheck version: %s\n" (flycheck--pkg-version)))
   (princ (format "Emacs version:    %s\n" emacs-version))
   (princ (format "System:           %s\n" system-configuration))
   (princ (format "Window system:    %S\n" window-system)))

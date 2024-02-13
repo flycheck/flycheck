@@ -1,4 +1,5 @@
 *.elc
+*autoloads.el
 
 # autoloads
 /flycheck-autoloads.el
