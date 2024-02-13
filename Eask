@@ -1,5 +1,5 @@
 (package "flycheck"
-         "33-cvs"
+         "34.0-snapshot"
          "On-the-fly syntax checking")
 
 (website-url "http://www.flycheck.org")
@@ -15,7 +15,7 @@
 (source 'melpa)
 
 (depends-on "emacs" "26.1")
-(depends-on "dash")
+(depends-on "seq" "2.24")
 
 (development
  (depends-on "f")                       ; For some maintenance tools

@@ -8,6 +8,7 @@ assignees: ''
 ---
 
 ## Checklist
+
 - [ ] I have read the [Contributor's guide][].
 - [ ] I have documented this checker in the [manual][].
 - [ ] I have added a test for this checker in [flycheck-test.el][].
@@ -16,9 +17,11 @@ assignees: ''
 - [ ] I have mentioned the checker in the [Changelog][].
 
 ## Description
+
 Describe the checker you added.
 
 ## Additional context
+
 Additional relevant information about the checker and its integration into Flycheck.
 
 [Changelog]: https://github.com/flycheck/flycheck/blob/master/CHANGES.rst

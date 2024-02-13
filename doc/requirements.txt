@@ -1,5 +1,5 @@
 # Sphinx
-Sphinx~=6.0
+Sphinx~=5.3
 # Automatically build documentation on changes
 sphinx-autobuild
 # Sphinx theme
