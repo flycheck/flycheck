@@ -1233,6 +1233,9 @@ Only has effect when variable `global-flycheck-mode' is non-nil."
 
 
 
+(defconst flycheck-version "34.0-snapshot"
+  "The current version of Flycheck.")
+
 (defun flycheck--pkg-version ()
   "Extract FLYCHECK's package version from its package metadata."
   ;; Use `cond' below to avoid a compiler unused return value warning
@@ -1240,7 +1243,9 @@ Only has effect when variable `global-flycheck-mode' is non-nil."
   (cond ((fboundp 'package-get-version)
          (package-get-version))
         ((fboundp 'pkg-info-version-info)
-         (pkg-info-version-info 'flycheck))))
+         (pkg-info-version-info 'flycheck))
+        (t
+         flycheck-version)))
 
 ;;; Version information, manual and loading of Flycheck
 (defun flycheck-version (&optional show-version)
