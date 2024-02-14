@@ -297,15 +297,17 @@ Supported by Eglot
 
 `Eglot <https://github.com/joaotavora/eglot>`_ is the built-in LSP package in
 Emacs, starting with version 29. It uses internally Flymake to render
-diagnostics received by the LSP server.
+diagnostics received by the LSP server (by providing a Flymake backend).
 
 It seems that many people were forced to move to Flymake, because they wanted to
-use Eglot and its maintainer (who's also the maintainter of Flymake) didn't want
-to provide Flycheck integration for it. (see the relevant `discussion
+use Eglot and its maintainer (who's also the maintainer of Flymake) didn't want
+to provide Flycheck integration (backend) for it. (see the relevant `discussion
 <https://github.com/joaotavora/eglot/issues/42>`_))
 
-`flycheck-eglot <https://github.com/intramurz/flycheck-eglot>`_ is the best workaround for this unfortunate situation that
-exists today.
+.. note:
+
+   `flycheck-eglot <https://github.com/flycheck/flycheck-eglot>`_ is the best
+   workaround for this unfortunate situation that exists today.
 
 Supported by lsp-mode
 ~~~~~~~~~~~~~~~~~~~~~
