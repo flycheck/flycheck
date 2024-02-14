@@ -10,7 +10,7 @@
 ;;             Bozhidar Batsov <bozhidar@batsov.dev>
 ;; URL: http://www.flycheck.org
 ;; Keywords: convenience, languages, tools
-;; Version: 34.0-snapshot
+;; Version: 34.0
 ;; Package-Requires: ((emacs "26.1") (seq "2.24"))
 
 ;; This file is not part of GNU Emacs.
@@ -1233,7 +1233,7 @@ Only has effect when variable `global-flycheck-mode' is non-nil."
 
 
 
-(defconst flycheck-version "34.0-snapshot"
+(defconst flycheck-version "34.0"
   "The current version of Flycheck.")
 
 (defun flycheck--pkg-version ()
