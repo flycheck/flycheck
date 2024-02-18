@@ -8,7 +8,7 @@
 ;; Maintainer: Clément Pit-Claudel <clement.pitclaudel@live.com>
 ;;             fmdkdd <fmdkdd@gmail.com>
 ;;             Bozhidar Batsov <bozhidar@batsov.dev>
-;; URL: http://www.flycheck.org
+;; URL: https://www.flycheck.org
 ;; Keywords: convenience, languages, tools
 ;; Version: 34.1
 ;; Package-Requires: ((emacs "26.1"))
@@ -26,7 +26,7 @@
 ;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+;; along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 
@@ -43,7 +43,7 @@
 ;; It comes with a rich interface for custom syntax checkers and other
 ;; extensions, and has already many 3rd party extensions adding new features.
 ;;
-;; Please read the online manual at http://www.flycheck.org for more
+;; Please read the online manual at https://www.flycheck.org for more
 ;; information.  You can open the manual directly from Emacs with `M-x
 ;; flycheck-manual'.
 ;;
@@ -99,7 +99,7 @@
   "Modern on-the-fly syntax checking for GNU Emacs."
   :prefix "flycheck-"
   :group 'tools
-  :link '(url-link :tag "Website" "http://www.flycheck.org")
+  :link '(url-link :tag "Website" "https://www.flycheck.org")
   :link '(url-link :tag "Github" "https://github.com/flycheck/flycheck"))
 
 (defgroup flycheck-config-files nil
@@ -1185,7 +1185,7 @@ Only has effect when variable `global-flycheck-mode' is non-nil."
 ;; Add built-in functions to our hooks, via `add-hook', to make sure that our
 ;; functions are really present, even if the variable was implicitly defined by
 ;; another call to `add-hook' that occurred before Flycheck was loaded.  See
-;; http://lists.gnu.org/archive/html/emacs-devel/2015-02/msg01271.html for why
+;; https://lists.gnu.org/archive/html/emacs-devel/2015-02/msg01271.html for why
 ;; we don't initialize the hook variables right away.  We append our own
 ;; functions, because a user likely expects that their functions come first,
 ;; even if they added them before Flycheck was loaded.
@@ -1281,7 +1281,7 @@ just return nil."
 (defun flycheck-manual ()
   "Open the Flycheck manual."
   (interactive)
-  (browse-url "http://www.flycheck.org"))
+  (browse-url "https://www.flycheck.org"))
 
 (define-obsolete-function-alias 'flycheck-info
   'flycheck-manual "Flycheck 26" "Open the Flycheck manual.")
@@ -6846,7 +6846,7 @@ checkers that have an option to output errors in this format.
 CHECKER and BUFFER denoted the CHECKER that returned OUTPUT and
 the BUFFER that was checked respectively.
 
-See URL `http://checkstyle.sourceforge.net/' for information
+See URL `https://checkstyle.sourceforge.net/' for information
 about Checkstyle."
   (pcase (flycheck-parse-xml-string output)
     (`(checkstyle ,_ . ,file-nodes)
@@ -6882,7 +6882,7 @@ Parse Cppcheck XML v2 output.
 CHECKER and BUFFER denoted the CHECKER that returned OUTPUT and
 the BUFFER that was checked respectively.
 
-See URL `http://cppcheck.sourceforge.net/' for more information
+See URL `https://cppcheck.sourceforge.net/' for more information
 about Cppcheck."
   (pcase (flycheck-parse-xml-string output)
     (`(results ,_ . ,body)
@@ -6924,7 +6924,7 @@ about Cppcheck."
 CHECKER and BUFFER denoted the CHECKER that returned OUTPUT and
 the BUFFER that was checked respectively.
 
-See URL `http://phpmd.org/' for more information about phpmd."
+See URL `https://phpmd.org/' for more information about phpmd."
   (pcase (flycheck-parse-xml-string output)
     (`(pmd ,_ . ,body)
      (let (errors)
@@ -7481,7 +7481,7 @@ Uses the GNAT compiler from GCC.  See URL
 (flycheck-define-checker asciidoc
   "A AsciiDoc syntax checker using the AsciiDoc compiler.
 
-See URL `http://www.methods.co.nz/asciidoc'."
+See URL `https://www.methods.co.nz/asciidoc'."
   :command ("asciidoc" "-o" null-device "-")
   :standard-input t
   :error-patterns
@@ -7499,7 +7499,7 @@ See URL `http://www.methods.co.nz/asciidoc'."
 (flycheck-define-checker asciidoctor
   "An AsciiDoc syntax checker using the Asciidoctor compiler.
 
-See URL `http://asciidoctor.org'."
+See URL `https://asciidoctor.org'."
   :command ("asciidoctor" "-o" null-device "-")
   :standard-input t
   :error-patterns
@@ -7620,7 +7620,7 @@ See URL `https://github.com/bazelbuild/buildtools/blob/master/buildifier'."
   "Enable blocks in Clang.
 
 When non-nil, enable blocks in Clang with `-fblocks'.  See URL
-`http://clang.llvm.org/docs/BlockLanguageSpec.html' for more
+`https://clang.llvm.org/docs/BlockLanguageSpec.html' for more
 information about blocks."
   :type 'boolean
   :safe #'booleanp
@@ -7721,7 +7721,7 @@ The value of this variable is the name of a standard library as
 string, or nil to use the default standard library.
 
 Refer to the Clang manual at URL
-`http://clang.llvm.org/docs/UsersManual.html' for more
+`https://clang.llvm.org/docs/UsersManual.html' for more
 information about the standard library."
   :type '(choice (const :tag "Default standard library" nil)
                  (const "libc++")
@@ -7739,7 +7739,7 @@ recommended warnings and some extra warnings are enabled (as by
 `-Wall' and `-Wextra' respectively).
 
 Refer to the Clang manual at URL
-`http://clang.llvm.org/docs/UsersManual.html' for more
+`https://clang.llvm.org/docs/UsersManual.html' for more
 information about warnings."
   :type '(choice (const :tag "No additional warnings" nil)
                  (repeat :tag "Additional warnings"
@@ -7765,7 +7765,7 @@ This function determines the directory by looking at function
 (flycheck-define-checker c/c++-clang
   "A C/C++ syntax checker using Clang.
 
-See URL `http://clang.llvm.org/'."
+See URL `https://clang.llvm.org/'."
   :command ("clang"
             "-fsyntax-only"
             "-fno-color-diagnostics"    ; Do not include color codes in output
@@ -7973,7 +7973,7 @@ string is the name of an additional check to enable.  By default,
 all coding style checks are enabled.
 
 See section \"Enable message\" in the Cppcheck manual at URL
-`http://cppcheck.sourceforge.net/manual.pdf', and the
+`https://cppcheck.sourceforge.net/manual.pdf', and the
 documentation of the `--enable' option for more information,
 including a list of supported checks."
   :type '(repeat :tag "Additional checks"
@@ -8043,7 +8043,7 @@ Relative paths are relative to the file being checked."
 (flycheck-define-checker c/c++-cppcheck
   "A C/C++ checker using cppcheck.
 
-See URL `http://cppcheck.sourceforge.net/'."
+See URL `https://cppcheck.sourceforge.net/'."
   :command ("cppcheck" "--quiet" "--xml-version=2" "--inline-suppr"
             (option "--enable=" flycheck-cppcheck-checks concat
                     flycheck-option-comma-separated-list)
@@ -8094,7 +8094,7 @@ See URL `https://coffeescript.org/'."
 (flycheck-define-checker coffee-coffeelint
   "A CoffeeScript style checker using coffeelint.
 
-See URL `http://www.coffeelint.org/'."
+See URL `https://www.coffeelint.org/'."
   :command
   ("coffeelint"
    (config-file "--file" flycheck-coffeelintrc)
@@ -8167,7 +8167,7 @@ If the CHECKER throws an Error it returns an Error message with a stacktrace."
 CHECKER and BUFFER denoted the CHECKER that returned OUTPUT and
 the BUFFER that was checked respectively.
 
-See URL `http://stylelint.io/developer-guide/formatters/' for information
+See URL `https://stylelint.io/developer-guide/formatters/' for information
 about the JSON format of stylelint."
   (let ((json-object-type 'plist))
 
@@ -8223,7 +8223,7 @@ about the JSON format of stylelint."
 (flycheck-define-checker css-stylelint
   "A CSS syntax and style checker using stylelint.
 
-See URL `http://stylelint.io/'."
+See URL `https://stylelint.io/'."
   :command ("stylelint"
             (eval flycheck-stylelint-args)
             (option-flag "--quiet" flycheck-stylelint-quiet)
@@ -8386,7 +8386,7 @@ Requires DMD 2.066 or newer.  See URL `https://dlang.org/'."
 (flycheck-define-checker dockerfile-hadolint
   "A Dockerfile syntax checker using the hadolint.
 
-See URL `http://github.com/hadolint/hadolint/'."
+See URL `https://github.com/hadolint/hadolint/'."
   :command ("hadolint" "--no-color" "-")
   :standard-input t
   :error-patterns
@@ -8424,7 +8424,7 @@ When non-nil, pass the `--strict' flag to credo."
 (flycheck-define-checker elixir-credo
   "An Elixir checker for static code analysis using Credo.
 
-See `http://credo-ci.org/'."
+See `https://credo-ci.org/'."
   :command ("mix" "credo"
             (option-flag "--strict" flycheck-elixir-credo-strict)
             "--format" "flycheck"
@@ -8811,7 +8811,7 @@ Relative paths are relative to the file being checked."
 (flycheck-define-checker erlang
   "An Erlang syntax checker using the Erlang interpreter.
 
-See URL `http://www.erlang.org/'."
+See URL `https://www.erlang.org/'."
   :command ("erlc"
             "-o" temporary-directory
             (option-list "-I" flycheck-erlang-include-path)
@@ -8904,7 +8904,7 @@ directory name is \"test\" or \"eqc\", or else \"default\"."
 (flycheck-define-checker eruby-erubis
   "An eRuby syntax checker using the `erubis' command.
 
-See URL `http://www.kuwata-lab.com/erubis/'."
+See URL `https://www.kuwata-lab.com/erubis/'."
   :command ("erubis" "-z" source)
   :error-patterns
   ((error line-start (file-name) ":" line ": " (message) line-end))
@@ -9273,7 +9273,7 @@ limited features) if `flycheck-go-version' is set. See URL
 (flycheck-define-checker groovy
   "A groovy syntax checker using groovy compiler API.
 
-See URL `http://www.groovy-lang.org'."
+See URL `https://www.groovy-lang.org'."
   :command ("groovy" "-e"
             "import org.codehaus.groovy.control.*
 
@@ -9294,7 +9294,7 @@ try {
 (flycheck-define-checker haml
   "A Haml syntax checker using the Haml compiler.
 
-See URL `http://haml.info'."
+See URL `https://haml.info'."
   :command ("haml" "-c" "--stdin")
   :standard-input t
   :error-patterns
@@ -9315,7 +9315,7 @@ See URL `https://github.com/sds/haml-lint'."
 (flycheck-define-checker handlebars
   "A Handlebars syntax checker using the Handlebars compiler.
 
-See URL `http://handlebarsjs.com/'."
+See URL `https://handlebarsjs.com/'."
   :command ("handlebars" "-i-")
   :standard-input t
   :error-patterns
@@ -9664,7 +9664,7 @@ extract Javascript if a HTML file is detected.  If `always' or
 `never' extract Javascript always or never respectively.
 
 Refer to the jshint manual at the URL
-`http://jshint.com/docs/cli/#flags' for more information."
+`https://jshint.com/docs/cli/#flags' for more information."
   :type
   '(choice (const :tag "No extraction rule" nil)
            (const :tag "Try to extract Javascript when detecting HTML files"
@@ -9677,7 +9677,7 @@ Refer to the jshint manual at the URL
 (flycheck-define-checker javascript-jshint
   "A Javascript syntax and style checker using jshint.
 
-See URL `http://www.jshint.com'."
+See URL `https://www.jshint.com'."
   :command ("jshint" "--reporter=checkstyle"
             "--filename" source-original
             (config-file "--config" flycheck-jshintrc)
@@ -9702,7 +9702,7 @@ The value of this variable is a list of strings, where each
 string is a directory with custom rules for ESLint.
 
 Refer to the ESLint manual at URL
-`http://eslint.org/docs/user-guide/command-line-interface#--rulesdir'
+`https://eslint.org/docs/user-guide/command-line-interface#--rulesdir'
 for more information about the custom directories."
   :type '(repeat (directory :tag "Custom rules directory"))
   :safe #'flycheck-string-list-p
@@ -9890,7 +9890,7 @@ See URL `https://jsonnet.org'."
 
 Requires lessc 1.4 or newer.
 
-See URL `http://lesscss.org'."
+See URL `https://lesscss.org'."
   :command ("lessc" "--lint" "--no-color"
             "-")
   :standard-input t
@@ -9905,7 +9905,7 @@ See URL `http://lesscss.org'."
 (flycheck-define-checker less-stylelint
   "A LESS syntax and style checker using stylelint.
 
-See URL `http://stylelint.io/'."
+See URL `https://stylelint.io/'."
   :command ("stylelint"
             (eval flycheck-stylelint-args)
             "--syntax" "less"
@@ -9919,7 +9919,7 @@ See URL `http://stylelint.io/'."
 (flycheck-define-checker llvm-llc
   "Flycheck LLVM IR checker using llc.
 
-See URL `http://llvm.org/docs/CommandGuide/llc.html'."
+See URL `https://llvm.org/docs/CommandGuide/llc.html'."
   :command ("llc" "-o" null-device source)
   :error-patterns
   ((error line-start
@@ -9980,7 +9980,7 @@ See URL `https://github.com/mpeterv/luacheck'."
 (flycheck-define-checker lua
   "A Lua syntax checker using the Lua compiler.
 
-See URL `http://www.lua.org/'."
+See URL `https://www.lua.org/'."
   :command ("luac" "-p" "-")
   :standard-input t
   :error-patterns
@@ -10114,7 +10114,7 @@ See URL `https://metacpan.org/pod/Perl::Critic'."
 (flycheck-define-checker php
   "A PHP syntax checker using the PHP command line interpreter.
 
-See URL `http://php.net/manual/en/features.commandline.php'."
+See URL `https://php.net/manual/en/features.commandline.php'."
   :command ("php" "-l" "-d" "error_reporting=E_ALL" "-d" "display_errors=1"
             "-d" "log_errors=0" source)
   :error-patterns
@@ -10164,7 +10164,7 @@ or as path to a standard specification."
 
 Needs PHP Code Sniffer 2.6 or newer.
 
-See URL `http://pear.php.net/package/PHP_CodeSniffer/'."
+See URL `https://pear.php.net/package/PHP_CodeSniffer/'."
   :command ("phpcs" "--report=checkstyle"
             ;; Use -q flag to force quiet mode
             ;; Quiet mode prevents errors from extra output when phpcs has
@@ -10241,7 +10241,7 @@ See https://github.com/processing/processing/wiki/Command-Line"
 CHECKER and BUFFER denoted the CHECKER that returned OUTPUT and
 the BUFFER that was checked respectively.
 
-See URL `http://proselint.com/' for more information about proselint."
+See URL `https://proselint.com/' for more information about proselint."
   (mapcar (lambda (err)
             (let-alist err
               (flycheck-error-new-at-pos
@@ -10264,7 +10264,7 @@ See URL `http://proselint.com/' for more information about proselint."
 (flycheck-define-checker proselint
   "Flycheck checker using Proselint.
 
-See URL `http://proselint.com/'."
+See URL `https://proselint.com/'."
   :command ("proselint" "--json" "-")
   :standard-input t
   :error-parser flycheck-proselint-parse-errors
@@ -10392,7 +10392,7 @@ The value of this variable is a list of strings, where each
 string is the name of a check to disable (e.g. \"80chars\" or
 \"double_quoted_strings\").
 
-See URL `http://puppet-lint.com/checks/' for a list of all checks
+See URL `https://puppet-lint.com/checks/' for a list of all checks
 and their names."
   :type '(repeat (string :tag "Check Name"))
   :package-version '(flycheck . "26"))
@@ -10404,7 +10404,7 @@ and their names."
 (flycheck-define-checker puppet-lint
   "A Puppet DSL style checker using puppet-lint.
 
-See URL `http://puppet-lint.com/'."
+See URL `https://puppet-lint.com/'."
   ;; We must check the original file, because Puppetlint is quite picky on the
   ;; names of files and there place in the directory structure, to comply with
   ;; Puppet's autoload directory layout.  For instance, a class foo::bar is
@@ -10801,7 +10801,7 @@ See URL https://github.com/microsoft/pyright."
 (flycheck-define-checker python-mypy
   "Mypy syntax and type checker.  Requires mypy>=0.730.
 
-See URL `http://mypy-lang.org/'."
+See URL `https://mypy-lang.org/'."
   :command ("mypy"
             "--show-column-numbers"
             "--no-pretty"
@@ -11215,7 +11215,7 @@ part of a Sphinx project."
 (flycheck-define-checker rst
   "A ReStructuredText (RST) syntax checker using Docutils.
 
-See URL `http://docutils.sourceforge.net/'."
+See URL `https://docutils.sourceforge.net/'."
   ;; include:: directives
   :command ("rst2pseudoxml.py" "--report=2" "--halt=5"
             ;; Read from standard input and throw output away
@@ -11240,7 +11240,7 @@ Sphinx via `-n'."
 (flycheck-define-checker rst-sphinx
   "A ReStructuredText (RST) syntax checker using Sphinx.
 
-Requires Sphinx 1.2 or newer.  See URL `http://sphinx-doc.org'."
+Requires Sphinx 1.2 or newer.  See URL `https://sphinx-doc.org'."
   :command ("sphinx-build" "-b" "pseudoxml"
             "-q" "-N"                   ; Reduced output and no colors
             (option-flag "-n" flycheck-sphinx-warn-on-missing-references)
@@ -11351,10 +11351,10 @@ See URL `https://github.com/chef/cookstyle'."
                         (expand-file-name default-directory)))))
       (or
 p       ;; Chef CookBook
-       ;; http://docs.opscode.com/chef/knife.html#id38
+       ;; https://docs.opscode.com/chef/knife.html#id38
        (locate-dominating-file parent-dir "recipes")
        ;; Knife Solo
-       ;; http://matschaffer.github.io/knife-solo/#label-Init+command
+       ;; https://matschaffer.github.io/knife-solo/#label-Init+command
        (locate-dominating-file parent-dir "cookbooks"))))
   :next-checkers '((warning . ruby-reek)))
 
@@ -11428,7 +11428,7 @@ versions of JRuby.
 
 Please consider using `ruby-rubocop' instead.
 
-See URL `http://jruby.org/'."
+See URL `https://jruby.org/'."
   :command ("jruby" "-w" "-c")
   :standard-input t
   :error-patterns
@@ -11765,7 +11765,7 @@ When non-nil, enable the Compass CSS framework, via `--compass'."
 (flycheck-define-checker sass
   "A Sass syntax checker using the Sass compiler.
 
-See URL `http://sass-lang.com'."
+See URL `https://sass-lang.com'."
   :command ("sass"
             "--cache-location" (eval (flycheck-sass-scss-cache-location))
             (option-flag "--compass" flycheck-sass-compass)
@@ -11828,7 +11828,7 @@ See URL `https://www.scala-lang.org/'."
 Note that this syntax checker is not used if
 `flycheck-scalastylerc' is nil or refers to a non-existing file.
 
-See URL `http://www.scalastyle.org'."
+See URL `https://www.scalastyle.org'."
   :command ("scalastyle"
             (config-file "-c" flycheck-scalastylerc)
             source)
@@ -11871,7 +11871,7 @@ See URL `http://www.scalastyle.org'."
 (flycheck-define-checker scheme-chicken
   "A CHICKEN Scheme syntax checker using the CHICKEN compiler `csc'.
 
-See URL `http://call-cc.org/'."
+See URL `https://call-cc.org/'."
   :command ("csc" "-analyze-only" "-local"
             (eval flycheck-scheme-chicken-args)
             source)
@@ -12001,7 +12001,7 @@ See URL `https://github.com/brigade/scss-lint'."
 (flycheck-define-checker scss-stylelint
   "A SCSS syntax and style checker using stylelint.
 
-See URL `http://stylelint.io/'."
+See URL `https://stylelint.io/'."
   :command ("stylelint"
             (eval flycheck-stylelint-args)
             "--syntax" "scss"
@@ -12015,7 +12015,7 @@ See URL `http://stylelint.io/'."
 (flycheck-define-checker sass-stylelint
   "A Sass syntax and style checker using stylelint.
 
-See URL `http://stylelint.io/'."
+See URL `https://stylelint.io/'."
   :command ("stylelint"
             (eval flycheck-stylelint-args)
             "--syntax" "sass"
@@ -12037,7 +12037,7 @@ When non-nil, enable the Compass CSS framework, via `--compass'."
 (flycheck-define-checker scss
   "A SCSS syntax checker using the SCSS compiler.
 
-See URL `http://sass-lang.com'."
+See URL `https://sass-lang.com'."
   :command ("scss"
             "--cache-location" (eval (flycheck-sass-scss-cache-location))
             (option-flag "--compass" flycheck-scss-compass)
@@ -12070,7 +12070,7 @@ See URL `http://sass-lang.com'."
 (flycheck-define-checker sh-bash
   "A Bash syntax checker using the Bash shell.
 
-See URL `http://www.gnu.org/software/bash/'."
+See URL `https://www.gnu.org/software/bash/'."
   :command ("bash" "--norc" "-n"
             (eval flycheck-sh-bash-args)
             "--")
@@ -12090,7 +12090,7 @@ See URL `http://www.gnu.org/software/bash/'."
 (flycheck-define-checker sh-posix-dash
   "A POSIX Shell syntax checker using the Dash shell.
 
-See URL `http://gondor.apana.org.au/~herbert/dash/'."
+See URL `https://gondor.apana.org.au/~herbert/dash/'."
   :command ("dash" "-n")
   :standard-input t
   :error-patterns
@@ -12102,7 +12102,7 @@ See URL `http://gondor.apana.org.au/~herbert/dash/'."
 (flycheck-define-checker sh-posix-bash
   "A POSIX Shell syntax checker using the Bash shell.
 
-See URL `http://www.gnu.org/software/bash/'."
+See URL `https://www.gnu.org/software/bash/'."
   :command ("bash" "--posix" "--norc" "-n" "--")
   :standard-input t
   :error-patterns
@@ -12120,7 +12120,7 @@ See URL `http://www.gnu.org/software/bash/'."
 (flycheck-define-checker sh-zsh
   "A Zsh syntax checker using the Zsh shell.
 
-See URL `http://www.zsh.org/'."
+See URL `https://www.zsh.org/'."
   :command ("zsh" "--no-exec" "--no-globalrcs" "--no-rcs" source)
   :error-patterns
   ((error line-start (file-name) ":" line ": " (message) line-end))
@@ -12192,7 +12192,7 @@ See URL `https://github.com/koalaman/shellcheck/'."
 (flycheck-define-checker slim
   "A Slim syntax checker using the Slim compiler.
 
-See URL `http://slim-lang.com'."
+See URL `https://slim-lang.com'."
   :command ("slimrb" "--compile")
   :standard-input t
   :error-patterns
@@ -12252,7 +12252,7 @@ See URL
 (flycheck-define-checker tcl-nagelfar
   "An extensible tcl syntax checker
 
-See URL `http://nagelfar.sourceforge.net/'."
+See URL `https://nagelfar.sourceforge.net/'."
   :command ("nagelfar" "-H" source)
   :error-patterns
   ;; foo.tcl: 29: E Wrong number of arguments (4) to "set"
@@ -12330,7 +12330,7 @@ See URL `https://github.com/terraform-linters/tflint'."
 (flycheck-define-checker tex-chktex
   "A TeX and LaTeX syntax and style checker using chktex.
 
-See URL `http://www.nongnu.org/chktex/'."
+See URL `https://www.nongnu.org/chktex/'."
   :command ("chktex"
             (config-file "--localrc" flycheck-chktexrc)
             ;; Compact error messages, and no version information, and execute
@@ -12348,7 +12348,7 @@ See URL `http://www.nongnu.org/chktex/'."
 (flycheck-define-checker tex-lacheck
   "A LaTeX syntax and style checker using lacheck.
 
-See URL `http://www.ctan.org/pkg/lacheck'."
+See URL `https://www.ctan.org/pkg/lacheck'."
   :command ("lacheck" source-inplace)
   :error-patterns
   ((warning line-start
@@ -12359,7 +12359,7 @@ See URL `http://www.ctan.org/pkg/lacheck'."
 (flycheck-define-checker texinfo
   "A Texinfo syntax checker using makeinfo.
 
-See URL `http://www.gnu.org/software/texinfo/'."
+See URL `https://www.gnu.org/software/texinfo/'."
   :command ("makeinfo" "-o" null-device "-")
   :standard-input t
   :error-patterns
@@ -12448,7 +12448,7 @@ to a directory with custom rules, or nil, to not give any custom
 rules to TSLint.
 
 Refer to the TSLint manual at URL
-`http://palantir.github.io/tslint/usage/cli/'
+`https://palantir.github.io/tslint/usage/cli/'
 for more information about the custom directory."
   :type '(choice (const :tag "No custom rules directory" nil)
                  (directory :tag "Custom rules directory"))
@@ -12565,7 +12565,7 @@ See URL `https://github.com/ghdl/ghdl'."
 (flycheck-define-checker xml-xmlstarlet
   "A XML syntax checker and validator using the xmlstarlet utility.
 
-See URL `http://xmlstar.sourceforge.net/'."
+See URL `https://xmlstar.sourceforge.net/'."
   ;; Validate standard input with verbose error messages, and do not dump
   ;; contents to standard output
   :command ("xmlstarlet" "val" "--err" "--quiet"
@@ -12629,7 +12629,7 @@ See URL `https://github.com/nodeca/js-yaml'."
 This syntax checker uses the YAML parser from Ruby's standard
 library.
 
-See URL `http://www.ruby-doc.org/stdlib-2.0.0/libdoc/yaml/rdoc/YAML.html'."
+See URL `https://www.ruby-doc.org/stdlib-2.0.0/libdoc/yaml/rdoc/YAML.html'."
   :command ("ruby" "-ryaml" "-e" "begin;
    YAML.load(STDIN); \
  rescue Exception => e; \

@@ -2,7 +2,7 @@
          "34.1"
          "On-the-fly syntax checking")
 
-(website-url "http://www.flycheck.org")
+(website-url "https://www.flycheck.org")
 (keywords "convenience" "languages" "tools")
 
 (package-file "flycheck.el")

@@ -402,9 +402,9 @@ include a Info manual in Flycheck’s MELPA packages.
 From this release onward Flycheck will use a single continuously increasing
 version number.  Breaking changes may occur at any point.
 
-.. _Code of Conduct: http://www.flycheck.org/en/latest/community/conduct.html
+.. _Code of Conduct: https://www.flycheck.org/en/latest/community/conduct.html
 .. _Gitter channel: https://gitter.im/flycheck/flycheck
-.. _Sphinx: http://sphinx-doc.org
+.. _Sphinx: https://sphinx-doc.org
 
 - **Breaking changes**:
 
