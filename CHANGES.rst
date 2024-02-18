@@ -1,6 +1,12 @@
 ``master`` (unreleased)
 ======================
 
+-----------
+Bugs fixed
+-----------
+
+- [#2054]: Remove explicit dep on a built-in package.
+
 34.0 (2024-02-14)
 ======================
 
