@@ -8281,6 +8281,14 @@ function from a __device__ function."
   :safe #'booleanp
   :package-version '(flycheck . "35"))
 
+(flycheck-def-option-var flycheck-cuda-extended-lambda nil cuda-nvcc
+  "Enable annotating lambda functions with __host__ or __device__.
+
+When non-nil, enable experimental compilation of __host__ and __device__ lambda functions."
+  :type 'boolean
+  :safe #'booleanp
+  :package-version '(flycheck . "35"))
+
 (flycheck-define-checker cuda-nvcc
   "A CUDA C/C++ syntax checker using nvcc.
 
@@ -8292,6 +8300,7 @@ See URL `https://developer.nvidia.com/cuda-llvm-compiler'."
             "-rdc=true" ;; Allow linking with external cuda funcions
             (option "-std=" flycheck-cuda-language-standard concat)
             (option-flag "--expt-relaxed-constexpr" flycheck-cuda-relaxed-constexpr)
+            (option-flag "--expt-extended-lambda" flycheck-cuda-extended-lambda)
             (option-list "-include" flycheck-cuda-includes)
             (option-list "-gencode" flycheck-cuda-gencodes)
             (option-list "-D" flycheck-cuda-definitions concat)
