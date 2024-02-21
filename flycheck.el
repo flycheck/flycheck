@@ -11369,7 +11369,7 @@ See URL `https://github.com/chef/cookstyle'."
                        (directory-file-name
                         (expand-file-name default-directory)))))
       (or
-p       ;; Chef CookBook
+       ;; Chef CookBook
        ;; https://docs.opscode.com/chef/knife.html#id38
        (locate-dominating-file parent-dir "recipes")
        ;; Knife Solo
