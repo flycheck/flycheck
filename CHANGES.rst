@@ -5,8 +5,8 @@
 New Features
 ------------
 
-- [#1975]: Add support for --expt-relaxed-constexpr flag to ``cuda`` checker.
-- [#2055]: Add support for --expt-extended-lambda flag to ``cuda`` checker.
+- [#1975]: Add support for ``--expt-relaxed-constexpr`` flag to ``cuda`` checker.
+- [#2055]: Add support for ``--expt-extended-lambda`` flag to ``cuda`` checker.
 
 -----------
 Bugs fixed
@@ -21,7 +21,7 @@ Bugs fixed
 Bugs fixed
 -----------
 
-- [#2054]: Remove explicit dep on a built-in package.
+- [#2054]: Remove explicit dep on the built-in package ``seq.el``.
 
 34.0 (2024-02-14)
 ======================
