@@ -80,7 +80,6 @@
 (require 'find-func)             ; `find-function-regexp-alist'
 (require 'json)                  ; `flycheck-parse-json'
 (require 'ansi-color)            ; `flycheck-parse-with-patterns-without-color'
-(require 'lisp-mnt)              ; `lm-version'
 
 
 ;; Declare a bunch of dynamic variables that we need from other modes
@@ -1234,9 +1233,7 @@ Only has effect when variable `global-flycheck-mode' is non-nil."
 
 
 
-(defconst flycheck-version
-  (eval-when-compile
-    (lm-version (or load-file-name buffer-file-name)))
+(defconst flycheck-version "34.0"
   "The current version of Flycheck.")
 
 (defun flycheck--pkg-version ()
