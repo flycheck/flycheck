@@ -1123,6 +1123,12 @@ Set this variable to nil to disable the mode line completely."
   :risky t
   :package-version '(flycheck . "0.20"))
 
+(defcustom flycheck-mode-line-color t
+  "Use colors for Flycheck mode line status."
+  :group 'flycheck
+  :type 'boolean
+  :package-version '(flycheck . "35"))
+
 (defcustom flycheck-mode-line-prefix "FlyC"
   "Base mode line lighter for Flycheck.
 
@@ -4154,7 +4160,7 @@ nil."
                               ":0")))
                          (`interrupted ".")
                          (`suspicious "?"))))
-    (when face
+    (when (and face flycheck-mode-line-color)
       (setq text (propertize text 'face face)))
     text))
 
