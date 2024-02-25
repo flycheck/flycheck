@@ -1,8 +1,15 @@
 *.elc
+*autoloads.el
+
+# autoloads
+/flycheck-autoloads.el
 
 # Packages installed for development
 /.cask/
 /.eask/
+
+# linters
+/.elsa/
 
 # Bundler configuration and lock file
 /.bundle/

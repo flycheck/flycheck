@@ -29,7 +29,6 @@
 (require 'flycheck-buttercup)
 (require 'cl-lib)
 (require 'seq)
-(require 'dash)
 
 (defun flycheck/collect-matches (pattern filename)
   "Collect all instances matching PATTERN from FILENAME."
@@ -40,11 +39,11 @@
       (while (re-search-forward pattern nil 'noerror)
         (let ((match (intern (match-string 1))))
           (cl-pushnew match matches))
-        (-when-let (match (match-string 2))
+        (when-let (match (match-string 2))
           (cl-pushnew (intern match) matches))
-        (-when-let (match (match-string 3))
+        (when-let (match (match-string 3))
           (cl-pushnew (intern match) matches))
-        (-when-let (match (match-string 4))
+        (when-let (match (match-string 4))
           (cl-pushnew (intern match) matches))))
     matches))
 

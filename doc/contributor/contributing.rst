@@ -164,7 +164,7 @@ changes, too.
    implications of contributing to Flycheck and to obtain your explicit approval
    of our licenses for your contribution.
 
-   .. _CLA: https://gist.github.com/lunaryorn/c9c0d656fe7e704da2f734779242ec99
+   .. _CLA: https://gist.github.com/swsnr/c9c0d656fe7e704da2f734779242ec99
 
 All pull requests go through a two-stage review process:
 

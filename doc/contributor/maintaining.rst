@@ -199,7 +199,7 @@ these services so in case of an issue just contact them.
 .. _ReadTheDocs: https://readthedocs.org/projects/flycheck/
 .. _Travis CI: https://travis-ci.org/flycheck/flycheck
 .. _CLA assistant: https://cla-assistant.io
-.. _CLA: https://gist.github.com/lunaryorn/c9c0d656fe7e704da2f734779242ec99
+.. _CLA: https://gist.github.com/swsnr/c9c0d656fe7e704da2f734779242ec99
 
 .. _flycheck-maintenance-scripts:
 

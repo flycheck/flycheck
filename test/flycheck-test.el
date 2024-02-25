@@ -1,6 +1,6 @@
 ;;; flycheck-test.el --- Flycheck: Unit test suite   -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2017-2020, 2022 Flycheck contributors
+;; Copyright (C) 2017-2024 Flycheck contributors
 ;; Copyright (C) 2013-2016 Sebastian Wiesner and Flycheck contributors
 
 ;; Author: Sebastian Wiesner <swiesner@lunaryorn.com>
@@ -43,25 +43,13 @@
 
 ;;; Requirements
 
-(require 'dash)
 (require 'cl-lib)
+(require 'seq)
 (require 'ert)                          ; Unit test library
 (require 'shut-up)                      ; Silence Emacs and intercept `message'
 
 (require 'flycheck)
 (require 'flycheck-ert)
-
-;; Make a best effort to make Coq Mode available.
-;; If we run Emacs with the `-Q` flag (which we do in the CI), this prevents
-;; site-lisp directories to be added to `load-path'.  In addition, in the Docker
-;; images we use in the CI Emacs is installed under /opt/emacs and cannot pick
-;; up site-lisp directories under /usr/share/emacs.  This is why we add the
-;; site-lisp directories manually for coq.
-(mapc (lambda (dir)
-        (add-to-list 'load-path (expand-file-name "coq/" dir)))
-      '("/usr/share/emacs/site-lisp/"
-        "/usr/local/share/emacs/site-lisp/"))
-(autoload 'coq-mode "gallina")
 
 ;; Load ESS for R-mode (its autoloads are broken)
 (require 'ess-site nil 'noerror)
@@ -480,7 +468,7 @@
 (ert-deftest flycheck-autoloads-file-p/a-plain-file ()
   :tags '(utility)
   (flycheck-ert-with-file-buffer
-      (expand-file-name "Cask" flycheck-test-source-directory)
+      (expand-file-name "Eask" flycheck-test-source-directory)
     (should-not (flycheck-autoloads-file-p))))
 
 (ert-deftest flycheck-in-user-emacs-directory-p/no-child-of-user-emacs-directory ()
@@ -630,7 +618,7 @@
   :tags '(checker-api)
   (dolist (checker flycheck-checkers)
     (should (listp (flycheck-checker-get checker 'modes)))
-    (should (-all? #'symbolp (flycheck-checker-get checker 'modes)))))
+    (should (seq-every-p #'symbolp (flycheck-checker-get checker 'modes)))))
 
 (ert-deftest flycheck-substitute-argument/source ()
   :tags '(checker-api)
@@ -1173,23 +1161,23 @@
 (ert-deftest flycheck-may-check-automatically/not-in-ephemeral-buffers ()
   :tags '(automatic)
   (flycheck-ert-with-temp-buffer
-    (should-not (-any? #'flycheck-may-check-automatically
-                       '(save idle-change new-line mode-enabled)))
+    (should-not (seq-find #'flycheck-may-check-automatically
+                          '(save idle-change new-line mode-enabled)))
     (should-not (flycheck-may-check-automatically))))
 
 (ert-deftest flycheck-may-check-automatically/in-normal-buffers ()
   :tags '(automatic)
   (flycheck-ert-with-resource-buffer "automatic-check-dummy.el"
-    (should (-all? #'flycheck-may-check-automatically
-                   '(save idle-change new-line mode-enabled)))
+    (should (seq-every-p #'flycheck-may-check-automatically
+                         '(save idle-change new-line mode-enabled)))
     (should (flycheck-may-check-automatically))))
 
 (ert-deftest flycheck-may-check-automatically/automatic-checking-disabled ()
   :tags '(automatic)
   (flycheck-ert-with-resource-buffer "automatic-check-dummy.el"
     (let ((flycheck-check-syntax-automatically nil))
-      (should-not (-any? #'flycheck-may-check-automatically
-                         '(save idle-change new-line mode-enabled)))
+      (should-not (seq-find #'flycheck-may-check-automatically
+                            '(save idle-change new-line mode-enabled)))
       (should (flycheck-may-check-automatically)))))
 
 (ert-deftest flycheck-may-check-automatically/specific-event-disabled ()
@@ -1201,8 +1189,8 @@
              (remq event flycheck-check-syntax-automatically)))
         (should flycheck-check-syntax-automatically)
         (should-not (flycheck-may-check-automatically event))
-        (should (-all? #'flycheck-may-check-automatically
-                       flycheck-check-syntax-automatically))
+        (should (seq-every-p #'flycheck-may-check-automatically
+                             flycheck-check-syntax-automatically))
         (should (flycheck-may-check-automatically))))))
 
 (ert-deftest flycheck-check-syntax-automatically/mode-enabled-is-disabled ()
@@ -2719,11 +2707,11 @@ evaluating BODY."
                                                :id "foo"))))
       (mapc #'flycheck-add-overlay errors)
       (flycheck-copy-errors-as-kill 10)
-      (should (equal (-take 2 kill-ring) '("1st message" "2nd message")))
+      (should (equal (seq-take kill-ring 2) '("1st message" "2nd message")))
       (flycheck-copy-errors-as-kill 10 #'flycheck-error-id)
-      (should (equal (-take 1 kill-ring) '("foo")))
+      (should (equal (seq-take kill-ring 1) '("foo")))
       (flycheck-copy-errors-as-kill 10 #'flycheck-error-format-message-and-id)
-      (should (equal (-take 2 kill-ring)
+      (should (equal (seq-take kill-ring 2)
                      '("1st message" "2nd message [foo]"))))))
 
 
@@ -3289,23 +3277,6 @@ evaluating BODY."
    '(3 35 warning "Removed constraint 'host_licenses_paid' in promise type 'common' [-Wremoved]"
        :checker cfengine)))
 
-(flycheck-ert-def-checker-test chef-foodcritic chef nil
-  (flycheck-ert-should-syntax-check
-   "language/chef/recipes/error.rb" 'ruby-mode
-   `(1 nil error "Missing README in markdown format"
-       :checker chef-foodcritic :id "FC011"
-       :filename ,(flycheck-ert-resource-filename "language/chef/README.md"))
-   `(1 nil error "Cookbook without metadata.rb file"
-       :checker chef-foodcritic :id "FC031"
-       :filename ,(flycheck-ert-resource-filename "language/chef/metadata.rb"))
-   `(1 nil error "Missing LICENSE file"
-       :checker chef-foodcritic :id "FC071"
-       :filename ,(flycheck-ert-resource-filename "language/chef/LICENSE"))
-   '(3 nil error "Avoid string interpolation where not required"
-       :checker chef-foodcritic :id "FC002")
-   '(11 nil error "Use a service resource to start and stop services"
-        :checker chef-foodcritic :id "FC004")))
-
 (flycheck-ert-def-checker-test coffee coffee syntax-error
   (flycheck-ert-should-syntax-check
    "language/coffee/syntax-error.coffee" 'coffee-mode
@@ -3325,29 +3296,6 @@ evaluating BODY."
      "language/coffee/error.coffee" 'coffee-mode
      '(4 nil warning "Throwing strings is forbidden; context:"
          :checker coffee-coffeelint))))
-
-(flycheck-ert-def-checker-test coq coq syntax-error
-  (skip-unless (shut-up (load "gallina" 'noerror 'nomessage)))
-  (flycheck-ert-should-syntax-check
-   "language/coq/syntax-error.v" 'coq-mode
-   '(6 12 error "\'end\' expected after [branches] (in [match_constr])."
-       :checker coq
-       :end-line 6
-       :end-column 14)))
-
-(flycheck-ert-def-checker-test coq coq error
-  (skip-unless (shut-up (load "gallina" 'noerror 'nomessage)))
-  (flycheck-ert-should-syntax-check
-   "language/coq/error.v" 'coq-mode
-   '(7 21 error "In environment
-evenb : nat -> bool
-n : nat
-n0 : nat
-n' : nat
-The term \"1\" has type \"nat\" while it is expected to have type \"bool\"."
-       :checker coq
-       :end-line 7
-       :end-column 22)))
 
 (flycheck-ert-def-checker-test css-csslint css nil
   :tags '(checkstyle-xml)
@@ -3384,18 +3332,12 @@ The term \"1\" has type \"nat\" while it is expected to have type \"bool\"."
 
 (ert-deftest flycheck-d-module-re/matches-module-name ()
   :tags '(language-d)
-  (unless (version<= "24.4" emacs-version)
-    (ert-skip "Skipped because CC Mode is broken on 24.3.
-See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
   (let ((s "module spam.with.eggs ;"))
     (should (string-match flycheck-d-module-re s))
     (should (string= "spam.with.eggs" (match-string 1 s)))))
 
 (ert-deftest flycheck-d-base-directory/no-module-declaration ()
   :tags '(language-d)
-  (unless (version<= "24.4" emacs-version)
-    (ert-skip "Skipped because CC Mode is broken on 24.3.
-See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
   (flycheck-ert-with-resource-buffer "language/d/src/dmd/no_module.d"
     (should (flycheck-same-files-p
              (flycheck-d-base-directory)
@@ -3403,9 +3345,6 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
 
 (ert-deftest flycheck-d-base-directory/with-module-declaration ()
   :tags '(language-d)
-  (unless (version<= "24.4" emacs-version)
-    (ert-skip "Skipped because CC Mode is broken on 24.3.
-See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
   (flycheck-ert-with-resource-buffer "language/d/src/dmd/warning.d"
     (should (flycheck-same-files-p
              (flycheck-d-base-directory)
@@ -3413,18 +3352,12 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
 
 (ert-deftest flycheck-d-base-directory/package-file ()
   :tags '(language-d)
-  (unless (version<= "24.4" emacs-version)
-    (ert-skip "Skipped because CC Mode is broken on 24.3.
-See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
   (flycheck-ert-with-resource-buffer "language/d/src/dmd/package.d"
     (should (flycheck-same-files-p
              (flycheck-d-base-directory)
              (flycheck-ert-resource-filename "language/d/src")))))
 
 (flycheck-ert-def-checker-test d-dmd d warning-include-path
-  (unless (version<= "24.4" emacs-version)
-    (ert-skip "Skipped because CC Mode is broken on 24.3.
-See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
   (let ((flycheck-dmd-include-path '("../../lib")))
     (flycheck-ert-should-syntax-check
      "language/d/src/dmd/warning.d" 'd-mode
@@ -3433,18 +3366,12 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
           :checker d-dmd))))
 
 (flycheck-ert-def-checker-test d-dmd d missing-import
-  (unless (version<= "24.4" emacs-version)
-    (ert-skip "Skipped because CC Mode is broken on 24.3.
-See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
   (flycheck-ert-should-syntax-check
    "language/d/src/dmd/warning.d" 'd-mode
    '(4 8 error "module `external_library` is in file 'external_library.d' which cannot be read"
        :checker d-dmd)))
 
 (flycheck-ert-def-checker-test d-dmd d continuation-line
-  (unless (version<= "24.4" emacs-version)
-    (ert-skip "Skipped because CC Mode is broken on 24.3.
-See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
   (flycheck-ert-should-syntax-check
    "language/d/src/dmd/continuation.d" 'd-mode
    '(5 12 error "undefined identifier `invalid`"
@@ -3456,9 +3383,6 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
 
 (flycheck-ert-def-checker-test d-dmd d non-d-extension
   (skip-unless (fboundp 'd-mode))
-  (unless (version<= "24.4" emacs-version)
-    (ert-skip "Skipped because CC Mode is broken on 24.3.
-See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
   (flycheck-ert-with-temp-buffer
     (insert "!invalid")
     (d-mode)
@@ -3527,9 +3451,6 @@ See https://github.com/flycheck/flycheck/issues/531 and Emacs bug #19206"))
 
 (flycheck-ert-def-checker-test (emacs-lisp-checkdoc) emacs-lisp
                                inherits-checkdoc-variables
-  ;; This test doesn't run on 24.3 and earlier because the corresponding
-  ;; checkdoc variables were only introduced in 24.4.
-  (skip-unless (version<= "24.4" emacs-version))
   (flycheck-ert-should-syntax-check
    "language/emacs-lisp/local-checkdoc-variables.el" 'emacs-lisp-mode))
 
@@ -3720,24 +3641,17 @@ MODE-SYM is the Erlang mode name, one of ‘erlang’ and
    '(5 9 error "expected '(', found ta" :checker go-gofmt)
    '(6 1 error "expected declaration, found '}'" :checker go-gofmt)))
 
-(flycheck-ert-def-checker-test (go-build go-golint go-vet) go complete-chain
+(flycheck-ert-def-checker-test (go-build go-vet) go complete-chain
   (flycheck-ert-with-env
       `(("GOPATH" . ,(flycheck-ert-resource-filename "language/go")))
     (flycheck-ert-should-syntax-check
      "language/go/src/warnings.go" 'go-mode
      '(4 2 error "imported and not used: \"fmt\"" :checker go-build)
-     '(4 2 warning "should not use dot imports" :checker go-golint)
-     '(7 1 warning "exported function Warn should have comment or be unexported"
-         :checker go-golint)
      '(8 2 error "undefined: fmt" :checker go-build)
-     '(11 1 warning "exported function Warnf should have comment or be unexported"
-          :checker go-golint)
      '(12 2 error "undefined: fmt" :checker go-build)
      '(17 2 error "undefined: fmt" :checker go-build)
      '(19 13 error "cannot use 1 (type untyped int) as type string in argument to Warnf"
-          :checker go-build)
-     '(25 9 warning "if block ends with a return statement, so drop this else and outdent its block"
-          :checker go-golint))))
+          :checker go-build))))
 
 (flycheck-ert-def-checker-test go-build go handles-packages
   (flycheck-ert-with-env
@@ -3782,7 +3696,7 @@ MODE-SYM is the Erlang mode name, one of ‘erlang’ and
 
 (flycheck-ert-def-checker-test go-staticcheck go nil
   :tags '(language-go external-tool)
-  (let ((flycheck-disabled-checkers '(go-golint go-unconvert)))
+  (let ((flycheck-disabled-checkers '(go-unconvert)))
     (flycheck-ert-with-env
         `(("GOPATH" . ,(flycheck-ert-resource-filename "language/go")))
       (flycheck-ert-should-syntax-check
@@ -4216,7 +4130,7 @@ Perhaps:
   ;; because Click, used by ProseLint, when running with python 3 will refuse to
   ;; work unless an Unicode locale is exported. See:
   ;; http://click.pocoo.org/5/python3/#python-3-surrogate-handling
-  (let ((flycheck-disabled-checkers '(markdown-markdownlint-cli markdown-mdl)))
+  (let ((flycheck-disabled-checkers '(markdown-markdownlint-cli markdown-mdl markdown-pymarkdown)))
     (flycheck-ert-with-env '(("LC_ALL" . nil))
       (flycheck-ert-should-syntax-check
        "language/text/text.txt" '(text-mode markdown-mode)
@@ -4510,7 +4424,7 @@ Perhaps:
        :id "MD009/no-trailing-spaces" :checker markdown-markdownlint-cli)))
 
 (flycheck-ert-def-checker-test markdown-mdl markdown nil
-  (let ((flycheck-disabled-checkers '(markdown-markdownlint-cli)))
+  (let ((flycheck-disabled-checkers '(markdown-markdownlint-cli markdown-pymarkdown)))
     (flycheck-ert-should-syntax-check
      "language/markdown.md" 'markdown-mode
      '(1 nil error "First header should be a top level header"
@@ -4519,6 +4433,19 @@ Perhaps:
          :id "MD012" :checker markdown-mdl)
      '(4 nil error "Trailing spaces"
          :id "MD009" :checker markdown-mdl))))
+
+(flycheck-ert-def-checker-test markdown-pymarkdown markdown nil
+  (let ((flycheck-disabled-checkers '(markdown-markdownlint-cli markdown-mdl)))
+    (flycheck-ert-should-syntax-check
+     "language/markdown.md" 'markdown-mode
+     '(1 nil error "Headings should be surrounded by blank lines. [Expected: 1; Actual: 2; Below] (blanks-around-headings,blanks-around-headers)"
+         :id "MD022" :checker markdown-pymarkdown)
+     '(1 nil error "First line in file should be a top level heading (first-line-heading,first-line-h1)"
+         :id "MD041" :checker markdown-pymarkdown)
+     '(3 nil error "Multiple consecutive blank lines [Expected: 1, Actual: 2] (no-multiple-blanks)"
+         :id "MD012" :checker markdown-pymarkdown)
+     '(4 nil error "Trailing spaces [Expected: 0 or 2; Actual: 7] (no-trailing-spaces)"
+         :id "MD009" :checker markdown-pymarkdown))))
 
 (flycheck-ert-def-checker-test nix nix nil
   (flycheck-ert-should-syntax-check
@@ -4586,15 +4513,8 @@ Perhaps:
          :id "Lint/Syntax"
          :checker ruby-standard))))
 
-(flycheck-ert-def-checker-test ruby-rubylint ruby syntax-error
-  (ert-skip "Pending: https://github.com/YorickPeterse/ruby-lint/issues/202")
-  (let ((flycheck-disabled-checkers '(ruby-rubocop ruby-reek)))
-    (flycheck-ert-should-syntax-check
-     "language/ruby/syntax-error.rb" 'ruby-mode
-     '(5 7 error "unexpected token tCONSTANT" :checker ruby-rubylint))))
-
 (flycheck-ert-def-checker-test ruby ruby syntax-error
-  (let ((flycheck-disabled-checkers '(ruby-rubocop ruby-reek ruby-rubylint)))
+  (let ((flycheck-disabled-checkers '(ruby-rubocop ruby-reek)))
     (flycheck-ert-should-syntax-check
      "language/ruby/syntax-error.rb" 'ruby-mode
      '(4 nil warning "assigned but unused variable - days" :checker ruby)
@@ -4602,12 +4522,12 @@ Perhaps:
          :checker ruby))))
 
 (flycheck-ert-def-checker-test ruby-jruby ruby syntax-error
-  (let ((flycheck-disabled-checkers '(ruby-rubocop ruby-reek ruby-rubylint ruby)))
+  (let ((flycheck-disabled-checkers '(ruby-rubocop ruby-reek ruby)))
     (flycheck-ert-should-syntax-check
      "language/ruby/syntax-error.rb" 'ruby-mode
      '(5 nil error "syntax error, unexpected tCONSTANT" :checker ruby-jruby))))
 
-(flycheck-ert-def-checker-test (ruby-rubocop ruby-reek ruby-rubylint) ruby with-rubylint
+(flycheck-ert-def-checker-test (ruby-rubocop ruby-reek) ruby warnings
   (flycheck-ert-should-syntax-check
    "language/ruby/warnings.rb" 'ruby-mode
    '(1 1 info "Missing frozen string literal comment."
@@ -4616,14 +4536,12 @@ Perhaps:
        :id "InstanceVariableAssumption" :checker ruby-reek)
    '(3 1 info "Missing top-level class documentation comment."
        :id "Style/Documentation" :checker ruby-rubocop)
-   '(5 5 warning "unused local variable arr" :checker ruby-rubylint)
    '(5 5 warning "Useless assignment to variable - `arr`."
        :id "Lint/UselessAssignment" :checker ruby-rubocop)
    '(5 11 info "Use `%i` or `%I` for an array of symbols."
        :id "[Correctable] Style/SymbolArray" :checker ruby-rubocop)
    '(6 10 info "Prefer single-quoted strings when you don't need string interpolation or special symbols."
        :id "[Correctable] Style/StringLiterals" :checker ruby-rubocop)
-   '(10 5 info "the use of then/do is not needed here" :checker ruby-rubylint)
    '(10 5 info "Use a guard clause (`return unless true`) instead of wrapping the code inside a conditional expression."
         :id "Style/GuardClause":checker ruby-rubocop)
    '(10 5 info "Favor modifier `if` usage when having a single-line body. Another good alternative is the usage of control flow `&&`/`||`."
@@ -4633,20 +4551,17 @@ Perhaps:
    '(10 13 info "Do not use `then` for multi-line `if`."
         :id "[Correctable] Style/MultilineIfThen" :checker ruby-rubocop)
    '(11 7 info "Redundant `return` detected."
-        :id "[Correctable] Style/RedundantReturn" :checker ruby-rubocop)
-   '(11 24 error "undefined instance variable @name" :checker ruby-rubylint)
-   '(16 1 error "wrong number of arguments for 'test' (expected 2..3 but got 0)"
-        :checker ruby-rubylint)))
+        :id "[Correctable] Style/RedundantReturn" :checker ruby-rubocop)))
 
 (flycheck-ert-def-checker-test ruby-reek ruby warnings
-  (let ((flycheck-disabled-checkers '(ruby-rubocop ruby-rubylint)))
+  (let ((flycheck-disabled-checkers '(ruby-rubocop)))
     (flycheck-ert-should-syntax-check
      "language/ruby/warnings.rb" 'ruby-mode
      '(3 nil warning "Person assumes too much for instance variable '@name'"
          :id "InstanceVariableAssumption" :checker ruby-reek))))
 
 (flycheck-ert-def-checker-test ruby ruby warnings
-  (let ((flycheck-disabled-checkers '(ruby-rubocop ruby-reek ruby-rubylint)))
+  (let ((flycheck-disabled-checkers '(ruby-rubocop ruby-reek)))
     (flycheck-ert-should-syntax-check
      "language/ruby/warnings.rb" 'ruby-mode
      '(5 nil warning "assigned but unused variable - arr" :checker ruby)
@@ -4654,7 +4569,7 @@ Perhaps:
           :checker ruby))))
 
 (flycheck-ert-def-checker-test ruby-jruby ruby nil
-  (let ((flycheck-disabled-checkers '(ruby-rubocop ruby-reek ruby-rubylint ruby)))
+  (let ((flycheck-disabled-checkers '(ruby-rubocop ruby-reek ruby)))
     (flycheck-ert-should-syntax-check
      "language/ruby/warnings.rb" 'ruby-mode
      '(16 nil warning "Useless use of == in void context."
@@ -4970,14 +4885,14 @@ The manifest path is relative to
          :end-line 2 :end-column 15))))
 
 (flycheck-ert-def-checker-test sass sass nil
-  (let ((flycheck-disabled-checkers '(sass/scss-sass-lint)))
+  (let ((flycheck-disabled-checkers '(sass-stylelint sass/scss-sass-lint)))
     (flycheck-ert-should-syntax-check
      "language/sass/error.sass" 'sass-mode
      '(5 nil error "Inconsistent indentation: 3 spaces were used for indentation, but the rest of the document was indented using 2 spaces."
          :checker sass))))
 
 (flycheck-ert-def-checker-test sass sass warning
-  (let ((flycheck-disabled-checkers '(sass/scss-sass-lint)))
+  (let ((flycheck-disabled-checkers '(sass-stylelint sass/scss-sass-lint)))
     (flycheck-ert-should-syntax-check
      "language/sass/warning.sass" 'sass-mode
      '(2 nil warning "this is deprecated" :checker sass))))
