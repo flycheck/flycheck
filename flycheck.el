@@ -11196,23 +11196,22 @@ information about statix."
                     end-column .at.to.column))
 
             (let-alist err
-              (let ((diagnostic (car .diagnostics)))
-                (flycheck-error-new-at
-                 start-line
-                 start-column
-                 (pcase .severity ("Error" 'error)
-                        ("Warn" 'warning)
-                        (_ 'warning))
-                 (format "%s: %s" .note message)
-                 :id (format "%s%02d" (pcase .severity
-                                        ("Error" "E")
-                                        ("Warn" "W")
-                                        (_ "")) .code)
-                 :checker checker
-                 :buffer buffer
-                 :filename (buffer-file-name buffer)
-                 :end-line end-line
-                 :end-column end-column))))
+              (flycheck-error-new-at
+               start-line
+               start-column
+               (pcase .severity ("Error" 'error)
+                      ("Warn" 'warning)
+                      (_ 'warning))
+               (format "%s: %s" .note message)
+               :id (format "%s%02d" (pcase .severity
+                                      ("Error" "E")
+                                      ("Warn" "W")
+                                      (_ "")) .code)
+               :checker checker
+               :buffer buffer
+               :filename (buffer-file-name buffer)
+               :end-line end-line
+               :end-column end-column)))
           (alist-get 'report (car (flycheck-parse-json output)))))
 
 (flycheck-define-checker statix
