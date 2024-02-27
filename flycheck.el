@@ -1305,7 +1305,7 @@ just return nil."
 Mode line status for the current buffer:
   FlyC        Not been checked yet
   FlyC*       Flycheck is running
-  FlyC:0      Last check resulted and no errors and no warnings
+  FlyC:0      Last check resulted in no errors and no warnings
   FlyC:3|5    Checker reported three errors and five warnings
   FlyC-       No checker available
   FlyC!       The checker crashed
@@ -2981,7 +2981,7 @@ configuration, it looks like this:
 
 `FlyC'     This buffer has not been checked yet.
 `FlyC*'    Flycheck is running.  Expect results soon!
-`FlyC:0'   Last check resulted and no errors and no warnings.
+`FlyC:0'   Last check resulted in no errors and no warnings.
 `FlyC:3|5' This buffer contains three errors and five warnings.
            Use `\\[flycheck-list-errors]' to see the list.
 `FlyC-'    Flycheck doesn't have a checker for this buffer.
