@@ -11246,32 +11246,30 @@ See URL `https://github.com/nerdypepper/statix' for more
 information about statix."
   (mapcar (lambda (err)
             ;; Diagnostic information is a (seemingly always) 1 element array.
-            ;; Set the values here to avoid nesting `let-alist'.
             (let-alist (car (alist-get 'diagnostics err))
-              (setf message .message
-                    start-line .at.from.line
-                    start-column .at.from.column
-                    end-line .at.to.line
-                    end-column .at.to.column))
+              (let ((message .message)
+                    (start-line .at.from.line)
+                    (start-column .at.from.column)
+                    (end-line .at.to.line)
+                    (end-column .at.to.column))
 
-            (let-alist err
-              (let ((diagnostic (car .diagnostics)))
-                (flycheck-error-new-at
-                 start-line
-                 start-column
-                 (pcase .severity ("Error" 'error)
-                        ("Warn" 'warning)
-                        (_ 'warning))
-                 (format "%s: %s" .note message)
-                 :id (format "%s%02d" (pcase .severity
-                                        ("Error" "E")
-                                        ("Warn" "W")
-                                        (_ "")) .code)
-                 :checker checker
-                 :buffer buffer
-                 :filename (buffer-file-name buffer)
-                 :end-line end-line
-                 :end-column end-column))))
+                (let-alist err
+                  (flycheck-error-new-at
+                   start-line
+                   start-column
+                   (pcase .severity ("Error" 'error)
+                          ("Warn" 'warning)
+                          (_ 'warning))
+                   (format "%s: %s" .note message)
+                   :id (format "%s%02d" (pcase .severity
+                                          ("Error" "E")
+                                          ("Warn" "W")
+                                          (_ "")) .code)
+                   :checker checker
+                   :buffer buffer
+                   :filename (buffer-file-name buffer)
+                   :end-line end-line
+                   :end-column end-column)))))
           (alist-get 'report (car (flycheck-parse-json output)))))
 
 (flycheck-define-checker statix
