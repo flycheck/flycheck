@@ -8120,8 +8120,9 @@ See URL `https://github.com/CSSLint/csslint'."
 (defconst flycheck-stylelint-args '("--formatter" "json")
   "Common arguments to stylelint invocations.")
 
-(flycheck-def-config-file-var flycheck-stylelintrc
-    (css-stylelint scss-stylelint sass-stylelint less-stylelint) nil)
+(let ((print-length 3))
+  (flycheck-def-config-file-var flycheck-stylelintrc
+      (css-stylelint scss-stylelint sass-stylelint less-stylelint) nil))
 
 (flycheck-def-option-var flycheck-stylelint-quiet
     nil (css-stylelint scss-stylelint sass-stylelint less-stylelint)
@@ -8285,7 +8286,8 @@ function from a __device__ function."
 (flycheck-def-option-var flycheck-cuda-extended-lambda nil cuda-nvcc
   "Enable annotating lambda functions with __host__ or __device__.
 
-When non-nil, enable experimental compilation of __host__ and __device__ lambda functions."
+When non-nil, enable experimental compilation of __host__ and
+__device__ lambda functions."
   :type 'boolean
   :safe #'booleanp
   :package-version '(flycheck . "35"))
