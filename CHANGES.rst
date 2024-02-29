@@ -7,6 +7,7 @@ New Features
 
 - [#1975]: Add support for ``--expt-relaxed-constexpr`` flag to ``cuda`` checker.
 - [#2055]: Add support for ``--expt-extended-lambda`` flag to ``cuda`` checker.
+- [#2059]: Enable checkers for new AUCTeX 14 modes.
 
 -----------
 Bugs fixed

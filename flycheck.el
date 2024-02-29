@@ -12361,7 +12361,7 @@ See URL `https://www.nongnu.org/chktex/'."
   :error-filter
   (lambda (errors)
     (flycheck-sanitize-errors (flycheck-increment-error-columns errors)))
-  :modes (latex-mode plain-tex-mode))
+  :modes (latex-mode LaTeX-mode plain-tex-mode plain-TeX-mode))
 
 (flycheck-define-checker tex-lacheck
   "A LaTeX syntax and style checker using lacheck.
@@ -12372,7 +12372,7 @@ See URL `https://www.ctan.org/pkg/lacheck'."
   ((warning line-start
             "\"" (file-name) "\", line " line ": " (message)
             line-end))
-  :modes latex-mode)
+  :modes (latex-mode LaTeX-mode))
 
 (flycheck-define-checker texinfo
   "A Texinfo syntax checker using makeinfo.
@@ -12387,7 +12387,7 @@ See URL `https://www.gnu.org/software/texinfo/'."
    (error line-start
           "-:" line (optional ":" column) ": " (message)
           line-end))
-  :modes texinfo-mode)
+  :modes (texinfo-mode Texinfo-mode))
 
 (flycheck-def-config-file-var flycheck-textlint-config
     textlint "textlintrc.json")
@@ -12441,7 +12441,7 @@ See URL `https://textlint.github.io/'."
   ;; `flycheck-textlint-plugin-alist'.
   :modes
   (text-mode markdown-mode gfm-mode message-mode adoc-mode
-             mhtml-mode latex-mode org-mode rst-mode)
+             mhtml-mode latex-mode LaTeX-mode org-mode rst-mode)
   :enabled
   (lambda () (flycheck--textlint-get-plugin))
   :verify
