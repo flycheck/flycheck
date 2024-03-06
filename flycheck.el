@@ -8120,6 +8120,9 @@ See URL `https://github.com/CSSLint/csslint'."
 (defconst flycheck-stylelint-args '("--formatter" "json")
   "Common arguments to stylelint invocations.")
 
+;; Limit the length of the generated docstring by including only the first three
+;; checker symbols, otherwise emacs will complain about the docstring length
+;; and may refuse to compile the package.
 (let ((print-length 3))
   (flycheck-def-config-file-var flycheck-stylelintrc
       (css-stylelint scss-stylelint sass-stylelint less-stylelint) nil))
