@@ -5775,6 +5775,21 @@ of command checkers is `flycheck-sanitize-errors'.
      If this property is given and has a non-nil value, send the
      contents of the buffer on standard input.
 
+     Some checkers that support reading from standard input have
+     a separate flag to indicate the name of the file whose
+     contents are being passed on standard input (typically
+     `stdin-filename').  In that case, use the `(option)' form in
+     `:command' to pass the value of variable `buffer-file-name'
+     when the current buffer has a file name (that is,
+     use `option \"--stdin-file-name\" buffer-file-name').
+
+     For buffers not backed by files, checkers that support input
+     on stdin typically report a file name like `-' or `<stdin>'.
+     Make sure your error parser or patterns expect these file
+     names (for example, use `(or \"<stdin>\" (file-name))') or
+     call `flycheck-remove-error-file-names' in a custom
+     `:error-filter'.
+
      Defaults to nil.
 
 Note that you may not give `:start', `:interrupt', and
@@ -10654,7 +10669,7 @@ See URL `https://beta.ruff.rs/docs/'."
             "check"
             (config-file "--config" flycheck-python-ruff-config)
             "--output-format=text"
-            "--stdin-filename" source-original
+            (option "--stdin-filename" buffer-file-name)
             "-")
   :standard-input t
   :error-filter (lambda (errors)
@@ -10662,7 +10677,7 @@ See URL `https://beta.ruff.rs/docs/'."
                     (seq-map #'flycheck-flake8-fix-error-level errors)))
   :error-patterns
   ((warning line-start
-            (file-name) ":" line ":" (optional column ":") " "
+            (or "-" (file-name)) ":" line ":" (optional column ":") " "
             (id (one-or-more (any alpha)) (one-or-more digit)) " "
             (message (one-or-more not-newline))
             line-end))
