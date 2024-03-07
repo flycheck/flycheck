@@ -10808,9 +10808,7 @@ Requires Flake8 3.0 or newer. See URL
                               '("pyproject.toml" "ruff.toml" ".ruff.toml"))
 
 (flycheck-define-checker python-ruff
-  "A Python syntax and style checker using the ruff.
-To override the path to the ruff executable, set
-`flycheck-python-ruff-executable'.
+  "A Python syntax and style checker using Ruff.
 
 See URL `https://beta.ruff.rs/docs/'."
   :command ("ruff"
