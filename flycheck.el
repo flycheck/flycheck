@@ -9934,10 +9934,6 @@ See URL `https://lesscss.org'."
 See URL `https://stylelint.io/'."
   :command ("stylelint"
             (eval flycheck-stylelint-args)
-            (eval (when (< (flycheck-stylelint-get-major-version
-                            'less-stylelint)
-                           14)
-                    (list "--syntax" "less")))
             (option-flag "--quiet" flycheck-stylelint-quiet)
             (config-file "--config" flycheck-stylelintrc))
   :standard-input t
@@ -12061,10 +12057,6 @@ See URL `https://github.com/brigade/scss-lint'."
 See URL `https://stylelint.io/'."
   :command ("stylelint"
             (eval flycheck-stylelint-args)
-            (eval (when (< (flycheck-stylelint-get-major-version
-                            'scss-stylelint)
-                           14)
-                    (list "--syntax" "scss")))
             (option-flag "--quiet" flycheck-stylelint-quiet)
             (config-file "--config" flycheck-stylelintrc))
   :standard-input t
@@ -12079,10 +12071,10 @@ See URL `https://stylelint.io/'."
 See URL `https://stylelint.io/'."
   :command ("stylelint"
             (eval flycheck-stylelint-args)
-            "--syntax" "sass"
             (option-flag "--quiet" flycheck-stylelint-quiet)
             (config-file "--config" flycheck-stylelintrc))
   :standard-input t
+  :verify (lambda (_) (flycheck--stylelint-verify 'sass-stylelint))
   :error-parser flycheck-parse-stylelint
   :predicate flycheck-buffer-nonempty-p
   :modes (sass-mode))
