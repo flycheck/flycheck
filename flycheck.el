@@ -8225,6 +8225,35 @@ about the JSON format of stylelint."
       ;; Return the combined errors (deprecations, invalid options, warnings)
       (append deprecations invalid-options warnings))))
 
+(defun flycheck--stylelint-config-exists-p (checker)
+  "Whether there is a valid stylelint CHECKER config for the current buffer."
+  (eql 0 (flycheck-call-checker-process
+          checker nil nil nil
+          "--print-config" (or buffer-file-name "index.js"))))
+
+(defun flycheck--stylelint-get-major-version (checker)
+  "Return major version of stylelint CHECKER."
+  (let ((cb (current-buffer)))
+    (with-temp-buffer
+      (let ((temp-buffer (current-buffer)))
+        (with-current-buffer cb
+          (flycheck-call-checker-process
+           checker nil temp-buffer nil "--version"))
+        (string-to-number (car (split-string (buffer-string) "\\.")))))))
+
+(defun flycheck--stylelint-verify (checker)
+  "Verify stylelint setup for CHECKER."
+  (let ((have-config (flycheck--stylelint-config-exists-p checker)))
+    (list
+     (flycheck-verification-result-new
+      :label "configuration available"
+      :message (if have-config "yes" "no config file found")
+      :face (if have-config 'success '(bold error)))
+     (flycheck-verification-result-new
+      :label "stylecheck version"
+      :message (number-to-string (flycheck--stylelint-get-major-version checker))
+      :face 'success))))
+
 (flycheck-define-checker css-stylelint
   "A CSS syntax and style checker using stylelint.
 
@@ -12021,35 +12050,6 @@ See URL `https://github.com/brigade/scss-lint'."
           :face (if reporter-missing
                     '(bold error)
                   'success)))))))
-
-(defun flycheck--stylelint-config-exists-p (checker)
-  "Whether there is a valid stylelint config for the current buffer."
-  (eql 0 (flycheck-call-checker-process
-          checker nil nil nil
-          "--print-config" (or buffer-file-name "index.js"))))
-
-(defun flycheck--stylelint-verify (checker)
-  "Verify stylelint setup for CHECKER."
-  (let ((have-config (flycheck--stylelint-config-exists-p checker)))
-    (list
-     (flycheck-verification-result-new
-      :label "configuration available"
-      :message (if have-config "yes" "no config file found")
-      :face (if have-config 'success '(bold error)))
-     (flycheck-verification-result-new
-      :label "stylecheck version"
-      :message (number-to-string (flycheck--stylelint-get-major-version checker))
-      :face 'success))))
-
-(defun flycheck--stylelint-get-major-version (checker)
-  "Return major version of stylelint."
-  (let ((cb (current-buffer)))
-    (with-temp-buffer
-      (let ((temp-buffer (current-buffer)))
-        (with-current-buffer cb
-          (flycheck-call-checker-process
-           checker nil temp-buffer nil "--version"))
-        (string-to-number (car (split-string (buffer-string) "\\.")))))))
 
 (flycheck-define-checker scss-stylelint
   "A SCSS syntax and style checker using stylelint.
