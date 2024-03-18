@@ -1123,6 +1123,12 @@ Set this variable to nil to disable the mode line completely."
   :risky t
   :package-version '(flycheck . "0.20"))
 
+(defcustom flycheck-mode-line-color t
+  "Use colors for Flycheck mode line status."
+  :group 'flycheck
+  :type 'boolean
+  :package-version '(flycheck . "35"))
+
 (defcustom flycheck-mode-line-prefix "FlyC"
   "Base mode line lighter for Flycheck.
 
@@ -1134,6 +1140,12 @@ function must be updated to use this variable."
   :group 'flycheck
   :type 'string
   :package-version '(flycheck . "26"))
+
+(defcustom flycheck-mode-success-indicator ":0"
+  "Success indicator appended to `flycheck-mode-line-prefix'."
+  :group 'flycheck
+  :type 'string
+  :package-version '(flycheck . "35"))
 
 (defcustom flycheck-error-list-mode-line
   `(,(propertized-buffer-identification "%12b")
@@ -1209,6 +1221,7 @@ Only has effect when variable `global-flycheck-mode' is non-nil."
                             flycheck-checkers))]
      ["Check current buffer" flycheck-buffer flycheck-mode]
      ["Clear errors in buffer" flycheck-clear t]
+     ["Run checker as compile command" flycheck-compile flycheck-mode]
      "---"
      ["Go to next error" flycheck-next-error flycheck-mode]
      ["Go to previous error" flycheck-previous-error flycheck-mode]
@@ -1226,7 +1239,8 @@ Only has effect when variable `global-flycheck-mode' is non-nil."
      ["Describe syntax checker" flycheck-describe-checker t]
      ["Verify setup" flycheck-verify-setup t]
      ["Show Flycheck version" flycheck-version t]
-     ["Read the Flycheck manual" flycheck-info t]))
+     ["Flycheck quick help" flycheck-quick-help t]
+     ["Read the Flycheck manual" flycheck-manual t]))
   "Menu of command `flycheck-mode'.")
 
 (easy-menu-add-item nil '("Tools") flycheck-mode-menu-map "Spell Checking")
@@ -1283,6 +1297,42 @@ just return nil."
   "Open the Flycheck manual."
   (interactive)
   (browse-url "https://www.flycheck.org"))
+
+;;;###autoload
+(defun flycheck-quick-help ()
+  "Display brief Flycheck help."
+  (interactive)
+  (with-current-buffer (get-buffer-create "*flycheck-quick-help*")
+    (with-help-window (current-buffer)
+      (flycheck-mode) ;; so that we can exapnd \\[flycheck-<function>]
+      (let ((help
+             (substitute-command-keys
+        "Flycheck automatically runs checks on writable files when changed.
+Mode line status for the current buffer:
+  FlyC        Not been checked yet
+  FlyC*       Flycheck is running
+  FlyC:0      Last check resulted in no errors and no warnings
+  FlyC:3|5    Checker reported three errors and five warnings
+  FlyC-       No checker available
+  FlyC!       The checker crashed
+  FlyC.       The last syntax check was manually interrupted
+  FlyC?       The checker did something unexpected
+
+Key bindings:
+  \\[flycheck-buffer]     Check current buffer
+  \\[flycheck-clear]     Clear errors in current buffer
+  \\[flycheck-compile]   Run checker as compile command
+
+  \\[flycheck-next-error]     Next error
+  \\[flycheck-previous-error]     Previous error
+  \\[flycheck-list-errors]     List all errors
+
+  \\[flycheck-copy-errors-as-kill]   Copy error messages at point
+  \\[flycheck-display-error-at-point]     Explain error at point
+")))
+        (help-mode)
+        (read-only-mode 0)
+        (insert help)))))
 
 (define-obsolete-function-alias 'flycheck-info
   'flycheck-manual "Flycheck 26" "Open the Flycheck manual.")
@@ -2936,10 +2986,11 @@ Flycheck displays its status in the mode line.  In the default
 configuration, it looks like this:
 
 `FlyC'     This buffer has not been checked yet.
-`FlyC-'    Flycheck doesn't have a checker for this buffer.
 `FlyC*'    Flycheck is running.  Expect results soon!
-`FlyC:3|2' This buffer contains three warnings and two errors.
+`FlyC:0'   Last check resulted in no errors and no warnings.
+`FlyC:3|5' This buffer contains three errors and five warnings.
            Use `\\[flycheck-list-errors]' to see the list.
+`FlyC-'    Flycheck doesn't have a checker for this buffer.
 
 You may also see the following icons:
 `FlyC!'    The checker crashed.
@@ -4095,19 +4146,29 @@ refresh the mode line."
 
 STATUS defaults to `flycheck-last-status-change' if omitted or
 nil."
-  (let ((text (pcase (or status flycheck-last-status-change)
-                (`not-checked "")
-                (`no-checker "-")
-                (`running "*")
-                (`errored "!")
-                (`finished
-                 (let-alist (flycheck-count-errors flycheck-current-errors)
-                   (if (or .error .warning)
-                       (format ":%s|%s" (or .error 0) (or .warning 0))
-                     "")))
-                (`interrupted ".")
-                (`suspicious "?"))))
-    (concat " " flycheck-mode-line-prefix text)))
+  (let* ((current-status (or status flycheck-last-status-change))
+         (indicator (pcase current-status
+                      (`not-checked "")
+                      (`no-checker "-")
+                      (`running "*")
+                      (`errored "!")
+                      (`finished
+                       (let-alist (flycheck-count-errors flycheck-current-errors)
+                         (if (or .error .warning)
+                             (format ":%s|%s" (or .error 0) (or .warning 0))
+                           flycheck-mode-success-indicator)))
+                      (`interrupted ".")
+                      (`suspicious "?")))
+         (face (when flycheck-mode-line-color
+                 (pcase current-status
+                   (`errored 'error)
+                   (`finished
+                    (let-alist (flycheck-count-errors flycheck-current-errors)
+                      (if (or .error .warning) 'error 'success))))))
+         (text (format " %s%s" flycheck-mode-line-prefix indicator)))
+    (when face
+      (setq text (propertize text 'face face)))
+    text))
 
 
 ;;; Error levels
@@ -6743,8 +6804,12 @@ Instead of highlighting errors in the buffer, this command pops
 up a separate buffer with the entire output of the syntax checker
 tool, just like `compile' (\\[compile])."
   (interactive
-   (let ((default (flycheck-get-checker-for-buffer)))
-     (list (flycheck-read-checker "Run syntax checker as compile command: "
+   (let* ((default (flycheck-get-checker-for-buffer))
+          (prompt (concat
+                   "Run syntax checker as compile command"
+                   (when default (concat " [" (format "%S" default) "]"))
+                   ": ")))
+     (list (flycheck-read-checker prompt
                                   (when (flycheck-checker-get default 'command)
                                     default)
                                   'command))))
