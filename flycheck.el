@@ -1141,6 +1141,12 @@ function must be updated to use this variable."
   :type 'string
   :package-version '(flycheck . "26"))
 
+(defcustom flycheck-mode-success-indicator ":0"
+  "Success indicator appended to `flycheck-mode-line-prefix'."
+  :group 'flycheck
+  :type 'string
+  :package-version '(flycheck . "35"))
+
 (defcustom flycheck-error-list-mode-line
   `(,(propertized-buffer-identification "%12b")
     " for buffer "
@@ -4140,27 +4146,27 @@ refresh the mode line."
 
 STATUS defaults to `flycheck-last-status-change' if omitted or
 nil."
-  (let (text
-        face)
-    (setq text (concat " " flycheck-mode-line-prefix
-                       (pcase (or status flycheck-last-status-change)
-                         (`not-checked "")
-                         (`no-checker "-")
-                         (`running "*")
-                         (`errored (progn
-                                     (setq face 'error)
-                                     "!"))
-                         (`finished
-                          (let-alist (flycheck-count-errors flycheck-current-errors)
-                            (if (or .error .warning)
-                                (progn
-                                  (setq face 'error)
-                                  (format ":%s|%s" (or .error 0) (or .warning 0)))
-                              (setq face 'success)
-                              ":0")))
-                         (`interrupted ".")
-                         (`suspicious "?"))))
-    (when (and face flycheck-mode-line-color)
+  (let* ((current-status (or status flycheck-last-status-change))
+         (indicator (pcase current-status
+                      (`not-checked "")
+                      (`no-checker "-")
+                      (`running "*")
+                      (`errored "!")
+                      (`finished
+                       (let-alist (flycheck-count-errors flycheck-current-errors)
+                         (if (or .error .warning)
+                             (format ":%s|%s" (or .error 0) (or .warning 0))
+                           flycheck-mode-success-indicator)))
+                      (`interrupted ".")
+                      (`suspicious "?")))
+         (face (when flycheck-mode-line-color
+                 (pcase current-status
+                   (`errored 'error)
+                   (`finished
+                    (let-alist (flycheck-count-errors flycheck-current-errors)
+                      (if (or .error .warning) 'error 'success))))))
+         (text (format " %s%s" flycheck-mode-line-prefix indicator)))
+    (when face
       (setq text (propertize text 'face face)))
     text))
 
