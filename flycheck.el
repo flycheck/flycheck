@@ -8179,8 +8179,12 @@ See URL `https://github.com/CSSLint/csslint'."
 (defconst flycheck-stylelint-args '("--formatter" "json")
   "Common arguments to stylelint invocations.")
 
-(flycheck-def-config-file-var flycheck-stylelintrc
-    (css-stylelint scss-stylelint sass-stylelint less-stylelint) nil)
+;; Limit the length of the generated docstring by including only the first three
+;; checker symbols, otherwise emacs will complain about the docstring length
+;; and may refuse to compile the package.
+(let ((print-length 3))
+  (flycheck-def-config-file-var flycheck-stylelintrc
+      (css-stylelint scss-stylelint sass-stylelint less-stylelint) nil))
 
 (flycheck-def-option-var flycheck-stylelint-quiet
     nil (css-stylelint scss-stylelint sass-stylelint less-stylelint)
@@ -8280,6 +8284,35 @@ about the JSON format of stylelint."
       ;; Return the combined errors (deprecations, invalid options, warnings)
       (append deprecations invalid-options warnings))))
 
+(defun flycheck--stylelint-config-exists-p (checker)
+  "Whether there is a valid stylelint CHECKER config for the current buffer."
+  (eql 0 (flycheck-call-checker-process
+          checker nil nil nil
+          "--print-config" (or buffer-file-name "index.js"))))
+
+(defun flycheck--stylelint-get-major-version (checker)
+  "Return major version of stylelint CHECKER."
+  (let ((cb (current-buffer)))
+    (with-temp-buffer
+      (let ((temp-buffer (current-buffer)))
+        (with-current-buffer cb
+          (flycheck-call-checker-process
+           checker nil temp-buffer nil "--version"))
+        (string-to-number (car (split-string (buffer-string) "\\.")))))))
+
+(defun flycheck--stylelint-verify (checker)
+  "Verify stylelint setup for CHECKER."
+  (let ((have-config (flycheck--stylelint-config-exists-p checker)))
+    (list
+     (flycheck-verification-result-new
+      :label "configuration available"
+      :message (if have-config "yes" "no config file found")
+      :face (if have-config 'success '(bold error)))
+     (flycheck-verification-result-new
+      :label "stylecheck version"
+      :message (number-to-string (flycheck--stylelint-get-major-version checker))
+      :face 'success))))
+
 (flycheck-define-checker css-stylelint
   "A CSS syntax and style checker using stylelint.
 
@@ -8290,6 +8323,7 @@ See URL `https://stylelint.io/'."
             (config-file "--config" flycheck-stylelintrc)
             "--stdin-filename" (eval (or (buffer-file-name) "style.css")))
   :standard-input t
+  :verify (lambda (_) (flycheck--stylelint-verify 'css-stylelint))
   :error-parser flycheck-parse-stylelint
   :predicate flycheck-buffer-nonempty-p
   :modes (css-mode css-ts-mode)
@@ -8344,7 +8378,8 @@ function from a __device__ function."
 (flycheck-def-option-var flycheck-cuda-extended-lambda nil cuda-nvcc
   "Enable annotating lambda functions with __host__ or __device__.
 
-When non-nil, enable experimental compilation of __host__ and __device__ lambda functions."
+When non-nil, enable experimental compilation of __host__ and
+__device__ lambda functions."
   :type 'boolean
   :safe #'booleanp
   :package-version '(flycheck . "35"))
@@ -9139,7 +9174,7 @@ Uses GCC's Fortran compiler gfortran.  See URL
 See URL https://github.com/rhysd/actionlint/."
   :command ("actionlint" "-oneline" source)
   :error-patterns ((error line-start (file-name) ":" line ":" column ": " (message) line-end))
-  :modes yaml-mode)
+  :modes (yaml-mode yaml-ts-mode))
 
 (flycheck-define-checker go-gofmt
   "A Go syntax and style checker using the gofmt utility.
@@ -9987,10 +10022,10 @@ See URL `https://lesscss.org'."
 See URL `https://stylelint.io/'."
   :command ("stylelint"
             (eval flycheck-stylelint-args)
-            "--syntax" "less"
             (option-flag "--quiet" flycheck-stylelint-quiet)
             (config-file "--config" flycheck-stylelintrc))
   :standard-input t
+  :verify (lambda (_) (flycheck--stylelint-verify 'less-stylelint))
   :error-parser flycheck-parse-stylelint
   :predicate flycheck-buffer-nonempty-p
   :modes (less-css-mode))
@@ -12081,10 +12116,10 @@ See URL `https://github.com/brigade/scss-lint'."
 See URL `https://stylelint.io/'."
   :command ("stylelint"
             (eval flycheck-stylelint-args)
-            "--syntax" "scss"
             (option-flag "--quiet" flycheck-stylelint-quiet)
             (config-file "--config" flycheck-stylelintrc))
   :standard-input t
+  :verify (lambda (_) (flycheck--stylelint-verify 'scss-stylelint))
   :error-parser flycheck-parse-stylelint
   :predicate flycheck-buffer-nonempty-p
   :modes (scss-mode))
@@ -12095,10 +12130,10 @@ See URL `https://stylelint.io/'."
 See URL `https://stylelint.io/'."
   :command ("stylelint"
             (eval flycheck-stylelint-args)
-            "--syntax" "sass"
             (option-flag "--quiet" flycheck-stylelint-quiet)
             (config-file "--config" flycheck-stylelintrc))
   :standard-input t
+  :verify (lambda (_) (flycheck--stylelint-verify 'sass-stylelint))
   :error-parser flycheck-parse-stylelint
   :predicate flycheck-buffer-nonempty-p
   :modes (sass-mode))
@@ -12420,7 +12455,7 @@ See URL `https://www.nongnu.org/chktex/'."
   :error-filter
   (lambda (errors)
     (flycheck-sanitize-errors (flycheck-increment-error-columns errors)))
-  :modes (latex-mode plain-tex-mode))
+  :modes (latex-mode LaTeX-mode plain-tex-mode plain-TeX-mode))
 
 (flycheck-define-checker tex-lacheck
   "A LaTeX syntax and style checker using lacheck.
@@ -12431,7 +12466,7 @@ See URL `https://www.ctan.org/pkg/lacheck'."
   ((warning line-start
             "\"" (file-name) "\", line " line ": " (message)
             line-end))
-  :modes latex-mode)
+  :modes (latex-mode LaTeX-mode))
 
 (flycheck-define-checker texinfo
   "A Texinfo syntax checker using makeinfo.
@@ -12446,7 +12481,7 @@ See URL `https://www.gnu.org/software/texinfo/'."
    (error line-start
           "-:" line (optional ":" column) ": " (message)
           line-end))
-  :modes texinfo-mode)
+  :modes (texinfo-mode Texinfo-mode))
 
 (flycheck-def-config-file-var flycheck-textlint-config
     textlint "textlintrc.json")
@@ -12500,7 +12535,7 @@ See URL `https://textlint.github.io/'."
   ;; `flycheck-textlint-plugin-alist'.
   :modes
   (text-mode markdown-mode gfm-mode message-mode adoc-mode
-             mhtml-mode latex-mode org-mode rst-mode)
+             mhtml-mode latex-mode LaTeX-mode org-mode rst-mode)
   :enabled
   (lambda () (flycheck--textlint-get-plugin))
   :verify

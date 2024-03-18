@@ -8,12 +8,19 @@ New Features
 - [#1975]: Add support for ``--expt-relaxed-constexpr`` flag to ``cuda`` checker.
 - [#2055]: Add support for ``--expt-extended-lambda`` flag to ``cuda`` checker.
 - [#2035]: Added colors to FlyC mode line and updated mode line menu.
+- [#2059]: Enable checkers for new AUCTeX 14 modes.
 
 -----------
 Bugs fixed
 -----------
 
 - [#2057]: Revert the extraction of ``flycheck-version`` with ``lm-version``.
+
+----------
+Changes
+----------
+
+- **(Breaking)** [#2066]: Remove support for versions of ``stylelint`` older than v14.
 
 34.1 (2024-02-18)
 ======================
