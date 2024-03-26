@@ -9619,6 +9619,7 @@ See URL `https://github.com/commercialhaskell/stack'."
                            (one-or-more (not (any ?\n ?|)))))
             line-end)
    (error line-start (file-name) ":" line ":" column ":" (optional " error:")
+          (optional " " "[" (id (one-or-more not-newline)) "]")
           (or (message (one-or-more not-newline))
               (and "\n"
                    (message
@@ -9678,6 +9679,7 @@ See URL `https://www.haskell.org/ghc/'."
                            (one-or-more (not (any ?\n ?|)))))
             line-end)
    (error line-start (file-name) ":" line ":" column ":" (optional " error:")
+          (optional " " "[" (id (one-or-more not-newline)) "]")
           (or (message (one-or-more not-newline))
               (and "\n"
                    (message
