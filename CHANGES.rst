@@ -1,5 +1,87 @@
-33-cvs (in development)
+``master`` (unreleased)
+======================
+
+------------
+New Features
+------------
+
+- [#1975]: Add support for ``--expt-relaxed-constexpr`` flag to ``cuda`` checker.
+- [#2055]: Add support for ``--expt-extended-lambda`` flag to ``cuda`` checker.
+- [#2059]: Enable checkers for new AUCTeX 14 modes.
+
+-----------
+Bugs fixed
+-----------
+
+- [#2057]: Revert the extraction of ``flycheck-version`` with ``lm-version``.
+
+----------
+Changes
+----------
+
+- **(Breaking)** [#2066]: Remove support for versions of ``stylelint`` older than v14.
+
+34.1 (2024-02-18)
+======================
+
+-----------
+Bugs fixed
+-----------
+
+- [#2054]: Remove explicit dep on the built-in package ``seq.el``.
+
+34.0 (2024-02-14)
+======================
+
+------------
+New Features
+------------
+
+- New syntax checkers
+
+  - [#2015]: PHP with ``phpcs-changed``
+  - [#2017]: HAML with ``haml-lint``
+  - [#2030]: Add ``yaml-actionlint`` checker for GitHub yaml action workflows.
+  - [#2052]: Sass with Stylelint
+  - [#2013]: Nix with ``statix``
+  - [#1935]: Chef (Ruby) with ``cookstyle``
+  - [#1915]: Markdown with ``pymarkdown``
+
+- [#1873]: Add error explainer to ``perl-perlcritic``.
+- [#1875]: Add error-explainer to ``css-stylelint``.
+- [#1876]: Add error-explainer for ``markdownlint checker``.
+- [#2019]: Add support for RELAX NG schema in ``xmllint``.
+
+----------
+Bugs Fixed
+----------
+
+- [#1793]: Fix ``flycheck-ruby-rubocop`` on buffers with no backing file.
+
+----------
+Changes
+----------
+
+- [#2026]:Update the possible locations for ``yamllint``'s configuration file.
+- **(Breaking)** [#1697]: Remove the ``coq`` checker.
+- **(Breaking)** [#1935]: Remove the ``chef-foodcritic`` checker. (it's now replaced by ``ruby-chef-cookstyle``)
+- **(Breaking)** [#2018]: Remove the ``golint`` checker.
+- **(Breaking)** Remove the ``ruby-rubylint`` checker.
+- [#1704]: The ``tslint`` checker is deprecated; it will go away in a future release.
+
+----------------------
+
+33.1 (2024-02-04)
+======================
+
+- Bugs Fixed
+
+  - Fixed an usage of the removed ``flycheck--format-message`` function.
+
+33.0 (2024-02-04)
 =======================
+
+.. note:: The changelog for this release is incomplete.
 
 - New features and improvements
 
@@ -10,9 +92,15 @@
   - Error explainers can now return URLs (to show a webpage) or functions (to
     use custom formatting).  For example, the Rust checker now renders
     explanations using ``markdown-view-mode``. [GH-1753]
+  - Enable checkers in many newer TreeSitter-based major modes (think ``*-ts-mode``).
+
+- New syntax checkers
+
+  - Python with ``ruff``. [GH-2033]
 
 - **Breaking changes**
 
+  - Drop support for Emacs 25.
   - The variable ``flycheck-current-errors`` now contains errors in the order in
     which they were returned by checkers.  In previous versions of Flycheck,
     this list was sorted by error position and severity. [GH-1749]
@@ -334,9 +422,9 @@ include a Info manual in Flycheck’s MELPA packages.
 From this release onward Flycheck will use a single continuously increasing
 version number.  Breaking changes may occur at any point.
 
-.. _Code of Conduct: http://www.flycheck.org/en/latest/community/conduct.html
+.. _Code of Conduct: https://www.flycheck.org/en/latest/community/conduct.html
 .. _Gitter channel: https://gitter.im/flycheck/flycheck
-.. _Sphinx: http://sphinx-doc.org
+.. _Sphinx: https://sphinx-doc.org
 
 - **Breaking changes**:
 

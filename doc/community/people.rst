@@ -12,8 +12,9 @@ Teams
 Maintainers
 -----------
 
-* **Clément Pit-Claudel** (:gh:`cpitclaudel`, owner)
-* **fmdkdd** (:gh:`fmdkdd`, owner)
+- **Bozhidar Batsov** (:gh:`bbatsov`, owner)
+- **Clément Pit-Claudel** (:gh:`cpitclaudel`, owner)
+- **fmdkdd** (:gh:`fmdkdd`, owner)
 
 We maintain Flycheck and all official extensions within the `Flycheck
 organisation`_, and set the direction and scope of Flycheck.  We review and
@@ -114,7 +115,7 @@ Ruby
 
 * Saša Jovanić (:gh:`Simplify`)
 
-Mention with ``@flycheck/javascript``.
+Mention with ``@flycheck/ruby``.
 
 Rust
 ~~~~
@@ -143,12 +144,12 @@ patches and their testing:
 
 .. _Debian Emacs addon team: https://pkg-emacsen.alioth.debian.org/
 
-Acknowledgements
+Acknowledgments
 ================
 
 We would also like to thank the following people and projects:
 
-* Sebastian Wiesner (:gh:`lunaryorn`) for creating Flycheck in the first place,
+* Sebastian Wiesner (:gh:`swsnr`) for creating Flycheck in the first place,
   for taking the time and dedication to maintain it for over 4 years, while
   maintaining high standards of code quality and nurturing a healthy, active
   community around it, giving Flycheck the best chances to thrive after his
@@ -261,7 +262,7 @@ to Flycheck:
 * Sean Salmon (:gh:`phatcabbage`)
 * Sean Whitton (:gh:`spwhitton`)
 * Sebastian Beyer (:gh:`sebastianbeyer`)
-* Sebastian Wiesner (:gh:`lunaryorn`, founder, former maintainer, former owner)
+* Sebastian Wiesner (:gh:`swsnr`, founder, former maintainer, former owner)
 * Sebastian Schlueppel (:gh:`s3bs`)
 * Sergey Vinokurov (:gh:`sergv`)
 * Stephen Lewis (:gh:`stephenjlewis`)

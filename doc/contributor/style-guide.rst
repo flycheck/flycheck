@@ -100,12 +100,12 @@ Libraries
 
   * Use built-in Emacs libraries freely.
   * Introduce external dependencies with care.  Prefer built-in
-    libraries. ``dash.el`` is fine, though.
+    libraries.
   * Avoid dependencies on language-specific libraries.
 
 * Avoid ``cl-lib``:
 
-  * Prefer ``seq`` over ``dash`` over ``cl-lib``.  Use list functions from
+  * Prefer ``seq`` over ``cl-lib``.  Use list functions from
     ``cl-lib`` only as the very last resort.
   * Prefer ``let-alist`` and ``pcase`` over ``cl-destructuring-bind``.
 

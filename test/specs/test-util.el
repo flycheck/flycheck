@@ -100,8 +100,11 @@
         (before-each
           (setq temp-dir (make-temp-file "flycheck-exec-find-root" 'dir-flag)
                 program-path (expand-file-name
-                              "dir/flycheck-testprog.program" temp-dir))
-          (make-directory (expand-file-name "dir" temp-dir))
+                              (if (memq system-type '(cygwin windows-nt ms-dos))
+                                  "dir/flycheck-testprog.bat"
+                                "dir/flycheck-testprog.program")
+                              temp-dir))
+          (make-directory (expand-file-name "dir" temp-dir) t)
           (write-region "" nil program-path)
           (set-file-modes program-path
                           (logior 73 (file-modes program-path))))
@@ -111,21 +114,21 @@
         (it "resolves the path when given an existing program name"
           (let* ((default-directory temp-dir)
                  (exec-path (list (expand-file-name "dir" temp-dir)))
-                 (exec-suffixes '(".program"))
+                 (exec-suffixes '(".program" ".bat"))
                  (result (flycheck-default-executable-find
                           "flycheck-testprog")))
             (expect result :to-equal program-path)))
 
         (it "resolves the path when given an existing relative program path"
           (let* ((default-directory temp-dir)
-                 (exec-suffixes '(".program"))
+                 (exec-suffixes '(".program" ".bat"))
                  (result (flycheck-default-executable-find
                           "dir/flycheck-testprog")))
             (expect result :to-equal program-path)))
 
         (it "resolves the path when given an existing absolute program path"
           (let* ((default-directory temp-dir)
-                 (exec-suffixes '(".program"))
+                 (exec-suffixes '(".program" ".bat"))
                  (result (flycheck-default-executable-find
                           (expand-file-name "dir/flycheck-testprog" temp-dir))))
             (expect result :to-equal program-path)))))))
