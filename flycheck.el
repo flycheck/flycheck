@@ -388,7 +388,12 @@ node `(elisp)Hooks'."
   :risky t)
 
 (defcustom flycheck-auto-display-errors-after-checking t
-  "Whether to automatically display errors at the current point after checking."
+  "Whether to automatically display errors at the current point after checking.
+
+When being set to `nil', it will prevent Flycheck from automatically displaying
+error messages. This setting is useful when `flycheck' is used together with
+`flycheck-posframe', to prevent `flycheck-posframe' from repeatedly displaying
+errors at point."
   :group 'flycheck
   :type 'boolean
   :package-version '(flycheck . "0.15")
