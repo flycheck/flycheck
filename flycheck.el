@@ -387,6 +387,18 @@ node `(elisp)Hooks'."
   :package-version '(flycheck . "0.13")
   :risky t)
 
+(defcustom flycheck-auto-display-errors-after-checking t
+  "Whether to automatically display errors at the current point after checking.
+
+When being set to `nil', it will prevent Flycheck from automatically displaying
+error messages. This setting is useful when Flycheck is used together with
+`flycheck-posframe', to prevent `flycheck-posframe' from repeatedly displaying
+errors at point."
+  :group 'flycheck
+  :type 'boolean
+  :package-version '(flycheck . "35")
+  :safe #'booleanp)
+
 (defcustom flycheck-display-errors-delay 0.9
   "Delay in seconds before displaying errors at point.
 
@@ -3319,7 +3331,8 @@ WORKING-DIR."
         (flycheck-delete-marked-overlays)
         (flycheck-error-list-refresh)
         (run-hooks 'flycheck-after-syntax-check-hook)
-        (when (eq (current-buffer) (window-buffer))
+        (when (and flycheck-auto-display-errors-after-checking
+                   (eq (current-buffer) (window-buffer)))
           (flycheck-display-error-at-point))
         ;; Immediately try to run any pending deferred syntax check, which
         ;; were triggered by intermediate automatic check event, to make sure

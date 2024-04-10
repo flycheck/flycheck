@@ -96,6 +96,18 @@ Flycheck errors at point after a short delay which you can customise:
    The number of seconds to wait before displaying the error at point. Floating
    point numbers can express fractions of seconds.
 
+You can also disable Flycheck from automatically displaying errors at point by
+customising:
+
+.. defcustom:: flycheck-auto-display-errors-after-checking
+
+   Whether to automatically display errors at the current point after checking.
+
+   When being set to `nil`, it will prevent Flycheck from automatically displaying
+   error messages. This setting is useful when Flycheck is used together with
+   `flycheck-posframe`, to prevent `flycheck-posframe` from repeatedly displaying
+   errors at point.
+
 By default Flycheck shows the error messages in the minibuffer or in a separate
 buffer if the minibuffer is too small to hold the whole error message but this
 behaviour is entirely customisable:
