@@ -204,6 +204,7 @@
     python-pyright
     python-mypy
     r-lintr
+    r
     racket
     rpm-rpmlint
     rst-sphinx
@@ -11016,6 +11017,21 @@ See URL `https://github.com/jimhester/lintr'."
                 :label "lintr library"
                 :message (if has-lintr "present" "missing")
                 :face (if has-lintr 'success '(bold error)))))))
+
+(flycheck-define-checker r
+  "An R syntax checker using the builtin `parse' function.
+
+See URL: `https://www.r-project.org/'."
+  :command ("R" "--slave" "--no-restore" "--no-save" "-e"
+            "parse(file=file('stdin'), srcfile='<stdin>')")
+  :standard-input t
+  :error-patterns
+  ((error line-start (zero-or-more space) "<stdin>:" line ":" column ": "
+          (message) line-end))
+  :modes (ess-mode ess-r-mode)
+  :predicate
+  ;; Don't check ESS files which do not contain R
+  (lambda () (equal ess-language "S")))
 
 (defun flycheck-racket-has-expand-p (checker)
   "Whether the executable of CHECKER provides the `expand' command."

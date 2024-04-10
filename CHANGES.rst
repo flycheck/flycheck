@@ -10,6 +10,7 @@ New Features
 - [#2035]: Added colors to FlyC mode line and updated mode line menu.
 - [#2059]: Enable checkers for new AUCTeX 14 modes.
 - [#1987]: Add a flag ``flycheck-auto-display-errors-after-checking`` control whether to display errors automatically after checking.
+- [#2070]: Add a new syntax checker ``r`` for R with the builtin ``parse`` function.
 
 -----------
 Bugs fixed
