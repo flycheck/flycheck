@@ -4365,6 +4365,12 @@ Perhaps:
      '(4 6 warning "Do not use absolute paths." :checker r-lintr)
      '(7 5 error "unexpected end of input" :checker r-lintr))))
 
+(flycheck-ert-def-checker-test r r nil
+  (let ((flycheck-disabled-checkers '(r-lintr)))
+    (flycheck-ert-should-syntax-check
+     "language/r.R" 'R-mode
+     '(8 0 error "unexpected end of input" :checker r))))
+
 (flycheck-ert-def-checker-test racket racket nil
   (skip-unless (funcall (flycheck-checker-get 'racket 'predicate)))
   (let ((inhibit-message t))

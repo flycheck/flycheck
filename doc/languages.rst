@@ -1136,6 +1136,10 @@ to view the docstring of the syntax checker.  Likewise, you may use
          Linters to use as a string with an R expression which selects the
          linters to use.
 
+   .. syntax-checker:: r
+
+      Check syntax with R's builtin ``parse`` function.
+
 .. supported-language:: Racket
 
    .. syntax-checker:: racket
