@@ -8,7 +8,7 @@ New Features
 - [#1975]: Add support for ``--expt-relaxed-constexpr`` flag to ``cuda`` checker.
 - [#2055]: Add support for ``--expt-extended-lambda`` flag to ``cuda`` checker.
 - [#1987]: Add a flag ``flycheck-auto-display-errors-after-checking`` control whether to display errors automatically after checking.
-- [#2035]: Added colors to FlyC mode line and updated mode line menu.
+- [#2035]: Add colors to FlyC mode line and update mode line menu. Introduce ``flycheck-mode-success-indicator``.
 - [#2059]: Enable checkers for new AUCTeX 14 modes.
 - [#2067]: Handle correctly GHC 9.6 error output format.
 - [#2070]: Add a new syntax checker ``r`` for R with the builtin ``parse`` function.
