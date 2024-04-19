@@ -186,6 +186,7 @@
     opam
     perl
     perl-perlcritic
+    perl-perlimports
     php
     php-phpmd
     php-phpcs
