@@ -218,6 +218,7 @@
     rust-cargo
     rust
     rust-clippy
+    salt-lint
     scala
     scala-scalastyle
     scheme-chicken
@@ -11890,6 +11891,43 @@ See URL `https://github.com/rust-lang-nursery/rust-clippy'."
              :label "Cargo.toml"
              :message (if has-toml "Found" "Missing")
              :face (if has-toml 'success '(bold warning))))))))
+
+(flycheck-define-checker salt-lint
+  "A salt linter which apply common best practices for SaltStack.
+
+See URL `https://salt-lint.readthedocs.io/en/latest/'."
+  :command ("python" "-m" "saltlint" "--json")
+  :standard-input t
+  :error-parser flycheck-salt-lint-parser
+  :error-filter (lambda (errors) (flycheck-sanitize-errors errors))
+  :modes salt-mode)
+
+(defun flycheck-salt-lint-parser (output checker buffer)
+  "Parse salt lint JSON errors from OUTPUT.
+
+The arguments CHECKER and BUFFER are only passed through."
+  (condition-case nil
+      (let* ((json-array-type 'list)
+             (json-object-type 'plist)
+            (filename (buffer-file-name buffer))
+            (errors (json-read-from-string output)))
+        ;(message "%s errors in  %s" errors filename)
+        (mapcar (lambda (e)
+                  (flycheck-error-new
+                   :checker checker
+                   :buffer buffer
+                   :filename filename
+                   :level (pcase (plist-get e :severity)
+                            ("HIGH" 'error)
+                            ("MEDIUM" 'warning)
+                            ("LOW" 'warning)
+                            ("INFO" 'info)
+                            (_ 'info))
+                   :line (plist-get e :linenumber)
+                   :column 0
+                   :message (concat (plist-get e :message) (plist-get e :line))
+                   :id (plist-get e :id))) errors))
+    (json-error nil)))
 
 (defvar flycheck-sass-scss-cache-directory nil
   "The cache directory for `sass' and `scss'.")
