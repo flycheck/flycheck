@@ -10775,6 +10775,7 @@ Requires Flake8 3.0 or newer. See URL
   ;; Python versions; see https://github.com/flycheck/flycheck/issues/1055.
   :command ("python3"
             (eval (flycheck-python-module-args 'python-flake8 "flake8"))
+            "--color=never"
             "--format=default"
             (config-file "--append-config" flycheck-flake8rc)
             (option "--max-complexity" flycheck-flake8-maximum-complexity nil
