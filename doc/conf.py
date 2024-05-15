@@ -47,7 +47,7 @@ extensions = [
 
 # Project metadata
 project = 'Flycheck'
-copyright = ' 2014-2017, Sebastian Wiesner and Flycheck contributors'
+copyright = ' 2014-2024, Sebastian Wiesner and Flycheck contributors'
 author = 'Sebastian Wiesner'
 
 
@@ -151,8 +151,8 @@ intersphinx_mapping = {
 }
 
 extlinks = {
-    'gh': ('https://github.com/%s', ''),
-    'flyc': ('https://github.com/flycheck/%s', '')
+    'gh': ('https://github.com/%s', None),
+    'flyc': ('https://github.com/flycheck/%s', None)
 }
 
 # While still have work to do :)
@@ -228,7 +228,7 @@ class SyntaxCheckerConfigurationFile(Directive):
 
 class IssueReferences(Transform):
 
-    ISSUE_PATTERN = re.compile(r'\[GH-(\d+)\]')
+    ISSUE_PATTERN = re.compile(r'\[(?:GH-|#)(\d+)\]')
     ISSUE_URL_TEMPLATE = 'https://github.com/flycheck/flycheck/issues/{}'
 
     default_priority = 999

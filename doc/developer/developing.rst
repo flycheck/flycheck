@@ -284,7 +284,7 @@ for transforming Flycheck checker options into flags for the command.  See the
 docstring for `flycheck-substitute-argument` for more info, and look at other
 checkers for examples.
 
-The ``shellcheck`` checker does no use ``source`` nor ``source-inplace``:
+The ``shellcheck`` checker does not use ``source`` nor ``source-inplace``:
 instead, it passes the buffer contents on standard input, using
 ``:standard-input t``.
 

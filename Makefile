@@ -15,12 +15,13 @@
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # Programs
-CASK = cask
+EASK = eask
 EMACS = emacs
 GIT = git
 INKSCAPE = inkscape
 CONVERT = convert
 OPTIPNG = optipng
+
 # Program options
 EMACSOPTS =
 PATTERN = .*
@@ -34,11 +35,11 @@ EMACSBATCH = $(EMACS) -Q --batch -L . $(EMACSOPTS)
 RUNEMACS =
 
 # Program availability
-ifdef CASK
-RUNEMACS = $(CASK) exec $(EMACSBATCH)
-HAVE_CASK := $(shell sh -c "command -v $(CASK)")
-ifndef HAVE_CASK
-$(warning "$(CASK) is not available.  Please run make help")
+ifdef EASK
+RUNEMACS = $(EASK) exec $(EMACSBATCH)
+HAVE_EASK := $(shell sh -c "command -v $(EASK)")
+ifndef HAVE_EASK
+$(warning "$(EASK) is not available.  Please run make help")
 endif
 else
 RUNEMACS = $(EMACSBATCH)
@@ -50,17 +51,16 @@ HAVE_OPTIPNG := $(shell sh -c "command -v $(OPTIPNG)")
 RUNTEST = $(RUNEMACS) --load test/flycheck-test --load test/run.el \
 	-f flycheck-run-tests-main
 
-# Export Emacs to goals, mainly for CASK
-CASK_EMACS = $(EMACS)
+# Export Emacs to goals, mainly for EASK
+EASK_EMACS = $(EMACS)
 export EMACS
-export CASK_EMACS
+export EASK_EMACS
 
 # Run make help by default
 .DEFAULT_GOAL = help
 
 # File lists
 SRCS = flycheck.el flycheck-ert.el
-OBJS = $(SRCS:.el=.elc)
 IMGS = doc/_static/logo.png
 TEST_SRCS = flycheck.el flycheck-ert.el test/flycheck-test.el
 
@@ -68,9 +68,6 @@ TEST_SRCS = flycheck.el flycheck-ert.el test/flycheck-test.el
 flycheck-ert.elc: flycheck.elc
 
 flycheck-buttercup.elc: flycheck.elc
-
-$(OBJS): %.elc: %.el
-	$(RUNEMACS) -l maint/flycheck-compile.el -f flycheck/batch-byte-compile $<
 
 doc/_static/logo.png: flycheck.svg
 ifndef HAVE_CONVERT
@@ -89,12 +86,12 @@ endif
 # Public targets
 .PHONY: init
 init:
-	$(CASK) --verbose install # --verbose is workaround for Emacs 25.3
-	$(CASK) update
+	$(EASK) install-deps --dev
+	$(EASK) upgrade
 
 .PHONY: clean
 clean:
-	rm -rf $(OBJS)
+	$(EASK) clean elc
 	$(MAKE) -C doc clean
 
 .PHONY: purge
@@ -111,17 +108,18 @@ check-format:
 
 .PHONY: checkdoc
 checkdoc:
-	$(RUNEMACS) -l maint/flycheck-checkdoc.el -f flycheck/batch-checkdoc
+	$(EASK) lint checkdoc
 
 .PHONY: check
 check: check-format checkdoc
 
 .PHONY: compile
-compile: $(OBJS)
+compile:
+	$(EASK) compile
 
 .PHONY: specs
 specs: compile
-	$(CASK) exec buttercup -L . --pattern '$(PATTERN)' test/specs
+	$(EASK) exec buttercup -L . test/specs
 
 .PHONY: unit
 unit: compile
@@ -158,7 +156,7 @@ help:
 	@echo '  EMACS:    The path or name of the Emacs to use for tests and compilation'
 	@echo ''
 	@echo 'Available programs:'
-	@echo '  $(CASK): $(if $(HAVE_CASK),yes,no)'
+	@echo '  $(EASK): $(if $(HAVE_EASK),yes,no)'
 	@echo ''
-	@echo 'You need $(CASK) to develop Flycheck.'
-	@echo 'See http://cask.readthedocs.io/ for more information.'
+	@echo 'You need $(EASK) to develop Flycheck.'
+	@echo 'See https://emacs-eask.github.io/ for more information.'

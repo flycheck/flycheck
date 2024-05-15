@@ -92,7 +92,6 @@ html:
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."
 
 .PHONY: html-auto
-html-auto: SPHINXOPTS = -B
 html-auto:
 ifndef HAVE_SPHINXAUTOBUILD
 	$(error "sphinx-autobuild not available.  Run make help.")

@@ -1,9 +1,20 @@
-(source gnu)
-(source melpa)
+(package "flycheck"
+         "34.1"
+         "On-the-fly syntax checking")
+
+(website-url "https://www.flycheck.org")
+(keywords "convenience" "languages" "tools")
 
 (package-file "flycheck.el")
 
-(files "flycheck.el" "flycheck-ert.el" "flycheck-buttercup.el")
+(files "flycheck-ert.el" "flycheck-buttercup.el")
+
+(script "test" "echo \"Error: no test specified\" && exit 1")
+
+(source 'gnu)
+(source 'melpa)
+
+(depends-on "emacs" "26.1")
 
 (development
  (depends-on "f")                       ; For some maintenance tools
@@ -12,12 +23,13 @@
 
  ;; Various modes for use in the unit tests
  (depends-on "adoc-mode")
- ;; (depends-on "bazel-mode")      ; requires Emacs 26+
+ (depends-on "bazel")
  (depends-on "coffee-mode")
  (depends-on "cperl-mode")
  (depends-on "cwl-mode")
  (depends-on "d-mode")
  (depends-on "dockerfile-mode")
+ (depends-on "elixir-mode")
  (depends-on "erlang")
  (depends-on "ess")
  (depends-on "geiser")
@@ -54,5 +66,4 @@
  (depends-on "tuareg")
  (depends-on "typescript-mode")
  (depends-on "web-mode")
- (depends-on "yaml-mode")
- )
+ (depends-on "yaml-mode"))

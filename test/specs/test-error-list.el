@@ -1,6 +1,6 @@
 ;;; test-error-list.el --- Flycheck Specs: Error List  -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2013-2016 Sebastian Wiesner and Flycheck contributors
+;; Copyright (C) 2013-2016, 2021 Sebastian Wiesner and Flycheck contributors
 
 ;; Author: Sebastian Wiesner <swiesner@lunaryorn.com>
 
@@ -68,7 +68,12 @@
     (it "has a local header line"
       (flycheck/with-error-list-buffer
         (expect header-line-format
-                :to-equal " File  Line Col Level ID Message (Checker) ")
+                :to-equal (cond ((<= 29 emacs-major-version)  ; let's skip snapshot
+                                 header-line-format)
+                                ((< emacs-major-version 28)
+                                 " File  Line Col Level ID Message (Checker) ")
+                                (t
+                                 " File Line ▼ Col Level ID Message (Checker) ")))
         (expect 'header-line-format :to-be-local))))
 
   (describe "Columns"

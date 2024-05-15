@@ -120,7 +120,7 @@ Node `(ert)Test Selectors' for information about test selectors."
 (defun flycheck-run-tests-main ()
   "Main entry point of the test runner."
   (let* ((load-prefer-newer t)
-         (source-directory (locate-dominating-file flycheck-runner-file "Cask"))
+         (source-directory (locate-dominating-file flycheck-runner-file "Eask"))
          (pkg-rel-dir (format ".cask/%s.%S/elpa"
                               emacs-major-version
                               emacs-minor-version)))

@@ -39,11 +39,11 @@
   (it "does not show the number of infos"
     (let ((flycheck-current-errors
            (list (flycheck-error-new-at 1 1 'info "info"))))
-      (expect (flycheck-mode-line-status-text 'finished) :to-equal " FlyC")))
+      (expect (flycheck-mode-line-status-text 'finished) :to-equal " FlyC:0")))
 
   (it "includes the prefix"
     (let ((flycheck-mode-line-prefix "foobar")
           flycheck-current-errors)
-      (expect (flycheck-mode-line-status-text 'finished) :to-equal " foobar"))))
+      (expect (flycheck-mode-line-status-text 'finished) :to-equal " foobar:0"))))
 
 ;;; test-mode-line.el ends here

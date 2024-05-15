@@ -241,9 +241,11 @@ the bottom right corner of the above screenshot.  By default the indicator shows
 Flycheck’s current state via one of the following texts:
 
 +-------------+----------------------------------------------------------------+
+|``FlyC``     |Current buffer has not been checked.                            |
++-------------+----------------------------------------------------------------+
 |``FlyC*``    |Flycheck is checking the buffer currently.                      |
 +-------------+----------------------------------------------------------------+
-|``FlyC``     |There are no errors or warnings in the current buffer.          |
+|``FlyC:0``   |Last check resulted in no errors and no warnings.               |
 +-------------+----------------------------------------------------------------+
 |``FlyC:3/5`` |There are three errors and five warnings in the current buffer. |
 +-------------+----------------------------------------------------------------+
@@ -256,6 +258,8 @@ Flycheck’s current state via one of the following texts:
 |             |look for error messages, and consider :ref:`reporting a bug     |
 |             |<flycheck-bug-reports>`.                                        |
 +-------------+----------------------------------------------------------------+
+|``FlyC.``    |The last syntax check was manually interrupted.                 |
++-------------+----------------------------------------------------------------+
 |``FlyC?``    |The last syntax check had a dubious result.  The definition of a|
 |             |syntax checker may have a bug.  Inspect the ``*Messages*``      |
 |             |buffer and consider :ref:`reporting a bug                       |
@@ -267,6 +271,12 @@ You can entirely customise the mode line indicator with `flycheck-mode-line`:
 .. defcustom:: flycheck-mode-line
 
    A “mode line construct” for Flycheck’s mode line indicator.
+
+You can also customize the indicator for a successful run (no errors/warnings found) with `flycheck-mode-success-indicator`:
+
+.. defcustom:: flycheck-mode-success-indicator
+
+   Success indicator appended to `flycheck-mode-line-prefix'. Set to ":0" by default.
 
 .. seealso::
 

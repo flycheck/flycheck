@@ -79,7 +79,7 @@ The build system
 ================
 
 Flycheck provides a :file:`Makefile` with some convenient targets to compile and
-test Flycheck.  The Makefile requires Cask_, the Emacs Lisp dependency manager.
+test Flycheck.  The Makefile requires Eask_, the Emacs Lisp dependency manager.
 Run ``make help`` to see a list of all available targets.  Some common ones are:
 
 - ``make init`` initialises the project by installing local Emacs Lisp
@@ -103,7 +103,7 @@ Run ``make help`` to see a list of all available targets.  Some common ones are:
   If you want to replicate the integration tests that are run on the CI,
   continue reading.
 
-.. _Cask: http://cask.readthedocs.io/
+.. _Eask: https://emacs-eask.github.io/
 .. _Buttercup: https://github.com/jorgenschaefer/emacs-buttercup
 
 Running all the integration tests
@@ -164,7 +164,7 @@ changes, too.
    implications of contributing to Flycheck and to obtain your explicit approval
    of our licenses for your contribution.
 
-   .. _CLA: https://gist.github.com/lunaryorn/c9c0d656fe7e704da2f734779242ec99
+   .. _CLA: https://gist.github.com/swsnr/c9c0d656fe7e704da2f734779242ec99
 
 All pull requests go through a two-stage review process:
 
