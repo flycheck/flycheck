@@ -16,6 +16,7 @@ New Features
 - [#2071]: Add a new checker ``perl-perlimports``, for cleaning up Perl import statements.
 - [#1972]: New defcustom ``flycheck-clear-displayed-errors-function`` to
   customize how error messages are to be cleared.
+- [#2075]: Add the ``flycheck-chktex-extra-flags`` option to the ``tex-chktex`` checker.
 
 -----------
 Bugs fixed
