@@ -12602,12 +12602,25 @@ See URL `https://github.com/terraform-linters/tflint'."
   :predicate flycheck-buffer-saved-p
   :modes terraform-mode)
 
+(flycheck-def-option-var flycheck-chktex-extra-flags nil tex-chktex
+  "A list of extra arguments to give to chktex.
+This variable works the same way as `tex-chktex-extra-flags': its value
+is a list of strings, where each string is an argument added to chktex.
+
+For example, to ignore warnings 8 and 18, you would set this option to
+
+  '(\"-n8\" \"-n18\")."
+  :type '(repeat string)
+  :safe #'flycheck-string-list-p
+  :package-version '(flycheck . "35"))
+
 (flycheck-define-checker tex-chktex
   "A TeX and LaTeX syntax and style checker using chktex.
 
 See URL `https://www.nongnu.org/chktex/'."
   :command ("chktex"
             (config-file "--localrc" flycheck-chktexrc)
+            (option-list "" flycheck-chktex-extra-flags concat)
             ;; Compact error messages, and no version information, and execute
             ;; \input statements
             "--verbosity=0" "--quiet" "--inputfiles")
