@@ -23,7 +23,7 @@ jobs:
           - 26.3
           - 27.2
           - 28.2
-          - 29.1
+          - 29.3
         experimental: [false]
         include:
           - os: ubuntu-latest
@@ -35,6 +35,11 @@ jobs:
           - os: windows-latest
             emacs-version: snapshot
             experimental: true
+        exclude:
+          - os: macos-latest
+            emacs-version: 26.3
+          - os: macos-latest
+            emacs-version: 27.2
 
     steps:
     - uses: actions/checkout@v3
