@@ -11911,7 +11911,6 @@ The arguments CHECKER and BUFFER are only passed through."
              (json-object-type 'plist)
             (filename (buffer-file-name buffer))
             (errors (json-read-from-string output)))
-        ;(message "%s errors in  %s" errors filename)
         (mapcar (lambda (e)
                   (flycheck-error-new
                    :checker checker
