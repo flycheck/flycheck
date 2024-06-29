@@ -186,6 +186,7 @@
     opam
     perl
     perl-perlcritic
+    perl-perlimports
     php
     php-phpmd
     php-phpcs
@@ -218,6 +219,7 @@
     rust-cargo
     rust
     rust-clippy
+    salt-lint
     scala
     scala-scalastyle
     scheme-chicken
@@ -424,6 +426,18 @@ If set to nil, do not display errors at all."
                         flycheck-display-error-messages-unless-error-list)
                  (function :tag "Error display function"))
   :package-version '(flycheck . "0.13")
+  :risky t)
+
+(defcustom flycheck-clear-displayed-errors-function #'flycheck-clear-displayed-error-messages
+  "Function to hide error message displayed by `flycheck-display-errors-function'.
+
+If set to a function, it will be called with no arguments to
+clear all displayed errors at point."
+  :group 'flycheck
+  :type '(choice (const :tag "Clear displayed error messages"
+                        flycheck-clear-displayed-error-messages)
+                 (function :tag "Clear displayed errors function"))
+  :package-version '(flycheck . "34.2")
   :risky t)
 
 (defcustom flycheck-help-echo-function #'flycheck-help-echo-all-error-messages
@@ -2966,7 +2980,7 @@ Slots:
     ;; the focus hooks only work on Emacs 24.4 and upwards, but since undefined
     ;; hooks are perfectly ok we don't need a version guard here.  They'll just
     ;; not work silently.
-    (post-command-hook . flycheck-maybe-display-error-at-point-soon)
+    (post-command-hook . flycheck-display-error-at-point-soon)
     (focus-in-hook     . flycheck-display-error-at-point-soon)
     (focus-out-hook    . flycheck-cancel-error-display-error-at-point-timer)
     (post-command-hook . flycheck-hide-error-buffer)
@@ -3372,6 +3386,7 @@ current syntax check."
     (flycheck-stop))
   (flycheck-delete-all-overlays)
   (flycheck-clear-errors)
+  (flycheck-clear-displayed-error-messages)
   (flycheck-error-list-refresh)
   (flycheck-hide-error-buffer))
 
@@ -5543,6 +5558,11 @@ non-nil."
   (when flycheck-display-errors-function
     (funcall flycheck-display-errors-function errors)))
 
+(defun flycheck-clear-displayed-errors ()
+  "Clear errors using `flycheck-clear-displayed-errors-function'."
+  (when flycheck-clear-displayed-errors-function
+    (funcall flycheck-clear-displayed-errors-function)))
+
 (defvar-local flycheck-display-error-at-point-timer nil
   "Timer to automatically show errors.")
 
@@ -5552,40 +5572,27 @@ non-nil."
     (cancel-timer flycheck-display-error-at-point-timer)
     (setq flycheck-display-error-at-point-timer nil)))
 
-(defun flycheck--error-display-tick ()
-  "Return point and tick counter of current buffer."
-  (cons (point) (buffer-modified-tick)))
-
-(defvar-local flycheck--last-error-display-tick nil
-  "Value of `flycheck--error-display-tick' when errors were last displayed.")
-
 (defun flycheck-display-error-at-point ()
-  "Display all the error messages at point."
+  "Display all the error messages at point.
+
+If there are no errors, clears the error messages at point."
   (interactive)
   ;; This function runs from a timer, so we must take care to not ignore any
   ;; errors
   (with-demoted-errors "Flycheck error display error: %s"
     (flycheck-cancel-error-display-error-at-point-timer)
-    (setq flycheck--last-error-display-tick (flycheck--error-display-tick))
     (when flycheck-mode
-      (when-let (errors (flycheck-overlay-errors-at (point)))
-        (flycheck-display-errors errors)))))
+      (let ((errors (flycheck-overlay-errors-at (point))))
+        (if errors
+            (flycheck-display-errors errors)
+          (flycheck-clear-displayed-errors))))))
 
 (defun flycheck-display-error-at-point-soon ()
   "Display error messages at point, with a delay."
-  (setq flycheck--last-error-display-tick nil)
-  (flycheck-maybe-display-error-at-point-soon))
-
-(defun flycheck-maybe-display-error-at-point-soon ()
-  "Display error message at point with a delay, unless already displayed."
   (flycheck-cancel-error-display-error-at-point-timer)
-  (when (and (not (equal flycheck--last-error-display-tick
-                         (setq flycheck--last-error-display-tick
-                               (flycheck--error-display-tick))))
-             (flycheck-overlays-at (point)))
-    (setq flycheck-display-error-at-point-timer
-          (run-at-time flycheck-display-errors-delay nil
-                       'flycheck-display-error-at-point))))
+  (setq flycheck-display-error-at-point-timer
+        (run-at-time flycheck-display-errors-delay nil
+                     'flycheck-display-error-at-point)))
 
 
 ;;; Functions to display errors
@@ -5610,6 +5617,14 @@ and if the echo area is not occupied by minibuffer input."
   "Flycheck error messages"
   "Major mode for extended error messages.")
 
+(defvar flycheck--last-displayed-message nil
+  "Reference to the last displayed message so it can be cleared.
+
+This value is the return value from `display-message-or-buffer',
+thus it can be a string or a window.
+
+See `flycheck-clear-displayed-error-messages'.")
+
 (defun flycheck-display-error-messages (errors)
   "Display the messages of ERRORS.
 
@@ -5623,15 +5638,17 @@ information.
 In the latter case, show messages in the buffer denoted by
 variable `flycheck-error-message-buffer'."
   (when (and errors (flycheck-may-use-echo-area-p))
-    (let ((message (flycheck-help-echo-all-error-messages errors)))
-      (display-message-or-buffer
-       message flycheck-error-message-buffer 'not-this-window)
+    (let* ((message (flycheck-help-echo-all-error-messages errors))
+           (retval (display-message-or-buffer
+                    message flycheck-error-message-buffer 'not-this-window)))
       ;; We cannot rely on `display-message-or-buffer' returning the right
       ;; window. See URL `https://github.com/flycheck/flycheck/issues/1643'.
       (when-let (buf (get-buffer flycheck-error-message-buffer))
         (with-current-buffer buf
           (unless (derived-mode-p 'flycheck-error-message-mode)
-            (flycheck-error-message-mode)))))))
+            (flycheck-error-message-mode))))
+      (setq flycheck--last-displayed-message retval)
+      retval)))
 
 (defun flycheck-display-error-messages-unless-error-list (errors)
   "Show messages of ERRORS unless the error list is visible.
@@ -5653,6 +5670,14 @@ Hide the error buffer if there is no error under point."
       ;; buffer (see https://github.com/flycheck/flycheck/issues/648).
       (save-selected-window
         (quit-window nil window)))))
+
+(defun flycheck-clear-displayed-error-messages ()
+  "Clear error messages displayed by `flycheck-display-error-messages'."
+  (when flycheck--last-displayed-message
+    (if (and (stringp flycheck--last-displayed-message)
+             (equal (current-message) flycheck--last-displayed-message))
+        (message nil)
+      (flycheck-hide-error-buffer))))
 
 
 ;;; Working with errors
@@ -5849,6 +5874,21 @@ of command checkers is `flycheck-sanitize-errors'.
 
      If this property is given and has a non-nil value, send the
      contents of the buffer on standard input.
+
+     Some checkers that support reading from standard input have
+     a separate flag to indicate the name of the file whose
+     contents are being passed on standard input (typically
+     `stdin-filename').  In that case, use the `(option)' form in
+     `:command' to pass the value of variable `buffer-file-name'
+     when the current buffer has a file name (that is,
+     use `option \"--stdin-file-name\" buffer-file-name').
+
+     For buffers not backed by files, checkers that support input
+     on stdin typically report a file name like `-' or `<stdin>'.
+     Make sure your error parser or patterns expect these file
+     names (for example, use `(or \"<stdin>\" (file-name))') or
+     call `flycheck-remove-error-file-names' in a custom
+     `:error-filter'.
 
      Defaults to nil.
 
@@ -10240,12 +10280,55 @@ See URL `https://metacpan.org/pod/Perl::Critic'."
           (id (one-or-more (not (any "/")))) "/" (message)
           line-end))
   :modes (cperl-mode perl-mode)
+  :next-checkers (perl-perlimports)
 
   :error-explainer
   (lambda (err)
     (let ((error-code (flycheck-error-id err))
           (url "https://metacpan.org/pod/Perl::Critic::Policy::%s"))
       (and error-code `(url . ,(format url error-code))))))
+
+(defun flycheck-perl-perlimports-parse-errors (output checker buffer)
+  "Parse perlimports json output errors from OUTPUT.
+
+CHECKER and BUFFER denoted the CHECKER that returned OUTPUT and
+the BUFFER that was checked respectively.
+
+See URL `https://metacpan.org/dist/App-perlimports/view/script/perlimports'
+for more information about perlimports."
+  (mapcar (lambda (err)
+            (let-alist err
+              (flycheck-error-new-at
+               .location.start.line
+               .location.start.column
+               'info
+               (concat .module " " .reason ":"
+                       (with-temp-buffer
+                         (insert (substring .diff (string-match-p "\n" .diff)))
+                         (diff-mode)
+                         (font-lock-ensure)
+                         (buffer-string)))
+               :end-line .location.end.line
+               :end-column .location.end.column
+               :checker checker
+               :buffer buffer)))
+          (flycheck-parse-json output)))
+
+(flycheck-define-checker perl-perlimports
+  "A checker for cleaning up Perl import statements.
+
+See URL `https://metacpan.org/dist/App-perlimports/view/script/perlimports'."
+  :command ("perlimports"
+            "--filename" source
+            "--json"
+            "--lint"
+            "--no-preserve-duplicates"
+            "--no-preserve-unused"
+            "--no-tidy-whitespace"
+            "--read-stdin")
+  :standard-input t
+  :error-parser flycheck-perl-perlimports-parse-errors
+  :modes (cperl-mode perl-mode))
 
 (flycheck-define-checker php
   "A PHP syntax checker using the PHP command line interpreter.
@@ -10763,27 +10846,34 @@ Requires Flake8 3.0 or newer. See URL
                               '("pyproject.toml" "ruff.toml" ".ruff.toml"))
 
 (flycheck-define-checker python-ruff
-  "A Python syntax and style checker using the ruff.
-To override the path to the ruff executable, set
-`flycheck-python-ruff-executable'.
+  "A Python syntax and style checker using Ruff.
 
 See URL `https://docs.astral.sh/ruff/'."
   :command ("ruff"
             "check"
             (config-file "--config" flycheck-python-ruff-config)
             "--output-format=concise"
-            "--stdin-filename" source-original
+            (option "--stdin-filename" buffer-file-name)
             "-")
   :standard-input t
   :error-filter (lambda (errors)
-                  (let ((errors (flycheck-sanitize-errors errors)))
-                    (seq-map #'flycheck-flake8-fix-error-level errors)))
+                  (let* ((errors (flycheck-sanitize-errors errors))
+                         (errors-with-ids (seq-filter #'flycheck-error-id errors)))
+                    (seq-union
+                     (seq-difference errors errors-with-ids)
+                     (seq-map #'flycheck-flake8-fix-error-level errors-with-ids))))
   :error-patterns
-  ((warning line-start
-            (file-name) ":" line ":" (optional column ":") " "
-            (id (one-or-more (any alpha)) (one-or-more digit)) " "
+  ((error line-start
+          (or "-" (file-name)) ":" line ":" (optional column ":") " "
+          "SyntaxError: "
+          (message (one-or-more not-newline))
+          line-end)
+   (warning line-start
+            (or "-" (file-name)) ":" line ":" (optional column ":") " "
+            (id (one-or-more (any alpha)) (one-or-more digit) " ")
             (message (one-or-more not-newline))
             line-end))
+  :working-directory flycheck-python-find-project-root 
   :modes (python-mode python-ts-mode)
   :next-checkers ((warning . python-mypy)))
 
@@ -11891,6 +11981,42 @@ See URL `https://github.com/rust-lang-nursery/rust-clippy'."
              :message (if has-toml "Found" "Missing")
              :face (if has-toml 'success '(bold warning))))))))
 
+(flycheck-define-checker salt-lint
+  "A salt linter which apply common best practices for SaltStack.
+
+See URL `https://salt-lint.readthedocs.io/en/latest/'."
+  :command ("python" "-m" "saltlint" "--json")
+  :standard-input t
+  :error-parser flycheck-salt-lint-parser
+  :error-filter (lambda (errors) (flycheck-sanitize-errors errors))
+  :modes salt-mode)
+
+(defun flycheck-salt-lint-parser (output checker buffer)
+  "Parse salt lint JSON errors from OUTPUT.
+
+The arguments CHECKER and BUFFER are only passed through."
+  (condition-case nil
+      (let* ((json-array-type 'list)
+             (json-object-type 'plist)
+            (filename (buffer-file-name buffer))
+            (errors (json-read-from-string output)))
+        (mapcar (lambda (e)
+                  (flycheck-error-new
+                   :checker checker
+                   :buffer buffer
+                   :filename filename
+                   :level (pcase (plist-get e :severity)
+                            ("HIGH" 'error)
+                            ("MEDIUM" 'warning)
+                            ("LOW" 'warning)
+                            ("INFO" 'info)
+                            (_ 'info))
+                   :line (plist-get e :linenumber)
+                   :column 0
+                   :message (concat (plist-get e :message) (plist-get e :line))
+                   :id (plist-get e :id))) errors))
+    (json-error nil)))
+
 (defvar flycheck-sass-scss-cache-directory nil
   "The cache directory for `sass' and `scss'.")
 
@@ -12701,7 +12827,8 @@ See URL `https://github.com/ghdl/ghdl'."
             (option "--ieee=" flycheck-ghdl-ieee-library concat)
             source)
   :error-patterns
-  ((error line-start (file-name) ":" line ":" column ": " (message) line-end))
+  ((warning line-start (file-name) ":" line ":" column ":warning: " (message) line-end)
+   (error line-start (file-name) ":" line ":" column ":error: " (message) line-end))
   :modes vhdl-mode)
 
 (flycheck-def-option-var flycheck-xml-xmlstarlet-xsd-path nil xml-xmlstarlet
