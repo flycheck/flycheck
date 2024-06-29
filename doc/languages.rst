@@ -885,7 +885,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
 .. supported-language:: Perl
 
-   Flycheck checks Perl with `perl` and `perl-perlcritic`.
+   Flycheck checks Perl with `perl`, `perl-perlcritic`, and `perl-perlimports`.
 
    .. syntax-checker:: perl
 
@@ -914,6 +914,12 @@ to view the docstring of the syntax checker.  Likewise, you may use
          The theme expression, passed as the ``--theme`` to ``perlcritic``.
 
       .. syntax-checker-config-file:: flycheck-perlcriticrc
+
+   .. syntax-checker:: perl-perlimports
+
+      Clean up Perl import statements with `perlimports`_.
+
+      .. _perlimports: https://metacpan.org/dist/App-perlimports/view/script/perlimports
 
 .. supported-language:: PHP
 
