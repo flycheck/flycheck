@@ -26,6 +26,7 @@ Changes
 ----------
 
 - **(Breaking)** [#2066]: Remove support for versions of ``stylelint`` older than v14.
+- Update error-patterns for ghdl 4.1.0
 
 34.1 (2024-02-18)
 ======================
