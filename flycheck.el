@@ -186,6 +186,7 @@
     opam
     perl
     perl-perlcritic
+    perl-perlimports
     php
     php-phpmd
     php-phpcs
@@ -10241,12 +10242,55 @@ See URL `https://metacpan.org/pod/Perl::Critic'."
           (id (one-or-more (not (any "/")))) "/" (message)
           line-end))
   :modes (cperl-mode perl-mode)
+  :next-checkers (perl-perlimports)
 
   :error-explainer
   (lambda (err)
     (let ((error-code (flycheck-error-id err))
           (url "https://metacpan.org/pod/Perl::Critic::Policy::%s"))
       (and error-code `(url . ,(format url error-code))))))
+
+(defun flycheck-perl-perlimports-parse-errors (output checker buffer)
+  "Parse perlimports json output errors from OUTPUT.
+
+CHECKER and BUFFER denoted the CHECKER that returned OUTPUT and
+the BUFFER that was checked respectively.
+
+See URL `https://metacpan.org/dist/App-perlimports/view/script/perlimports'
+for more information about perlimports."
+  (mapcar (lambda (err)
+            (let-alist err
+              (flycheck-error-new-at
+               .location.start.line
+               .location.start.column
+               'info
+               (concat .module " " .reason ":"
+                       (with-temp-buffer
+                         (insert (substring .diff (string-match-p "\n" .diff)))
+                         (diff-mode)
+                         (font-lock-ensure)
+                         (buffer-string)))
+               :end-line .location.end.line
+               :end-column .location.end.column
+               :checker checker
+               :buffer buffer)))
+          (flycheck-parse-json output)))
+
+(flycheck-define-checker perl-perlimports
+  "A checker for cleaning up Perl import statements.
+
+See URL `https://metacpan.org/dist/App-perlimports/view/script/perlimports'."
+  :command ("perlimports"
+            "--filename" source
+            "--json"
+            "--lint"
+            "--no-preserve-duplicates"
+            "--no-preserve-unused"
+            "--no-tidy-whitespace"
+            "--read-stdin")
+  :standard-input t
+  :error-parser flycheck-perl-perlimports-parse-errors
+  :modes (cperl-mode perl-mode))
 
 (flycheck-define-checker php
   "A PHP syntax checker using the PHP command line interpreter.

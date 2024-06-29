@@ -13,6 +13,7 @@ New Features
 - [#2067]: Handle correctly GHC 9.6 error output format.
 - [#2070]: Add a new syntax checker ``r`` for R with the builtin ``parse`` function.
 - [#2073]: Add new syntax checker ``salt-lint`` for the salt infrastructure-as-code language.
+- [#2071]: Add a new checker ``perl-perlimports``, for cleaning up Perl import statements.
 
 -----------
 Bugs fixed
