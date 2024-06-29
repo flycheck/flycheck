@@ -1351,6 +1351,14 @@ to view the docstring of the syntax checker.  Likewise, you may use
          A list of additional library directories. Relative paths are relative
          to the buffer being checked.
 
+.. supported-language:: SaltStack
+
+   .. syntax-checker:: salt-lint
+
+      Flycheck checks SaltStack YAML files with SALT-Lint_.
+
+      .. _SALT-Lint: https://salt-lint.readthedocs.io/en/latest/
+
 .. supported-language:: Sass/SCSS
 
    Flycheck checks SASS with `sass/scss-sass-lint` or
