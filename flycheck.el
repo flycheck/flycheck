@@ -10834,12 +10834,20 @@ See URL `https://beta.ruff.rs/docs/'."
             "-")
   :standard-input t
   :error-filter (lambda (errors)
-                  (let ((errors (flycheck-sanitize-errors errors)))
-                    (seq-map #'flycheck-flake8-fix-error-level errors)))
+                  (let* ((errors (flycheck-sanitize-errors errors))
+                         (errors-with-ids (seq-filter #'flycheck-error-id errors)))
+                    (seq-union
+                     (seq-difference errors errors-with-ids)
+                     (seq-map #'flycheck-flake8-fix-error-level errors-with-ids))))
   :error-patterns
-  ((warning line-start
+  ((error line-start
+          (or "-" (file-name)) ":" line ":" (optional column ":") " "
+          "SyntaxError: "
+          (message (one-or-more not-newline))
+          line-end)
+   (warning line-start
             (or "-" (file-name)) ":" line ":" (optional column ":") " "
-            (id (one-or-more (any alpha)) (one-or-more digit)) " "
+            (id (one-or-more (any alpha)) (one-or-more digit) " ")
             (message (one-or-more not-newline))
             line-end))
   :working-directory flycheck-python-find-project-root 
