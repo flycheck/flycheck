@@ -10848,11 +10848,11 @@ Requires Flake8 3.0 or newer. See URL
 (flycheck-define-checker python-ruff
   "A Python syntax and style checker using Ruff.
 
-See URL `https://beta.ruff.rs/docs/'."
+See URL `https://docs.astral.sh/ruff/'."
   :command ("ruff"
             "check"
             (config-file "--config" flycheck-python-ruff-config)
-            "--output-format=text"
+            "--output-format=concise"
             (option "--stdin-filename" buffer-file-name)
             "-")
   :standard-input t
