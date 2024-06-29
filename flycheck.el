@@ -12701,7 +12701,8 @@ See URL `https://github.com/ghdl/ghdl'."
             (option "--ieee=" flycheck-ghdl-ieee-library concat)
             source)
   :error-patterns
-  ((error line-start (file-name) ":" line ":" column ": " (message) line-end))
+  ((warning line-start (file-name) ":" line ":" column ":warning: " (message) line-end)
+   (error line-start (file-name) ":" line ":" column ":error: " (message) line-end))
   :modes vhdl-mode)
 
 (flycheck-def-option-var flycheck-xml-xmlstarlet-xsd-path nil xml-xmlstarlet
