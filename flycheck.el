@@ -12610,7 +12610,7 @@ is a list of strings, where each string is an argument added to chktex.
 
 For example, to ignore warnings 8 and 18, you would set this option to
 
-  '(\"-n8\" \"-n18\")."
+  \\='(\"-n8\" \"-n18\")."
   :type '(repeat string)
   :safe #'flycheck-string-list-p
   :package-version '(flycheck . "35"))
