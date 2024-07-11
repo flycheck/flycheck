@@ -10,7 +10,6 @@ New Features
 - [#1987]: Add a flag ``flycheck-auto-display-errors-after-checking`` control whether to display errors automatically after checking.
 - [#2035]: Add colors to FlyC mode line and update mode line menu. Introduce ``flycheck-mode-success-indicator``.
 - [#2059]: Enable checkers for new AUCTeX 14 modes.
-- [#2067]: Handle correctly GHC 9.6 error output format.
 - [#2070]: Add a new syntax checker ``r`` for R with the builtin ``parse`` function.
 - [#2073]: Add new syntax checker ``salt-lint`` for the salt infrastructure-as-code language.
 - [#2071]: Add a new checker ``perl-perlimports``, for cleaning up Perl import statements.
@@ -24,13 +23,17 @@ Bugs fixed
 
 - [#2057]: Revert the extraction of ``flycheck-version`` with ``lm-version``.
 - [#1972]: Refine flycheck-display-errors lifecycle so error messages can be cleared.
+- [#2067]: Handle correctly GHC 9.6 error output format.
+- [#2079]: Fix ruff ``error-patterns`` and ``error-filter``.
 
 ----------
 Changes
 ----------
 
 - **(Breaking)** [#2066]: Remove support for versions of ``stylelint`` older than v14.
-- Update error-patterns for ghdl 4.1.0
+- Update ``error-patterns`` for ghdl 4.1.0.
+- [#2078]: ruff: ``--output-format=text`` replaced with ``--output-format=concise`` due to upstream changes in ruff.
+
 
 34.1 (2024-02-18)
 ======================
