@@ -1598,6 +1598,10 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       .. syntax-checker-config-file:: flycheck-chktexrc
 
+      .. defcustom:: flycheck-chktex-extra-flags
+
+         A list of extra arguments to give to chktex.
+
    .. syntax-checker:: tex-lacheck
 
       Check style with `Lacheck <http://www.ctan.org/pkg/lacheck>`_.
