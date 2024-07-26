@@ -9234,7 +9234,11 @@ Uses GCC's Fortran compiler gfortran.  See URL
 See URL https://github.com/rhysd/actionlint/."
   :command ("actionlint" "-oneline" source)
   :error-patterns ((error line-start (file-name) ":" line ":" column ": " (message) line-end))
-  :modes (yaml-mode yaml-ts-mode))
+  :modes (yaml-mode yaml-ts-mode)
+  :predicate (lambda ()
+               (string-match-p
+                (rx (or ".github/workflows" ".github\\workflows"))
+                (buffer-file-name))))
 
 (flycheck-define-checker go-gofmt
   "A Go syntax and style checker using the gofmt utility.
