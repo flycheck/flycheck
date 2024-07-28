@@ -36,7 +36,7 @@ RUNEMACS =
 
 # Program availability
 ifdef EASK
-RUNEMACS = $(EASK) exec $(EMACSBATCH)
+RUNEMACS = $(EASK) $(EMACSBATCH)
 HAVE_EASK := $(shell sh -c "command -v $(EASK)")
 ifndef HAVE_EASK
 $(warning "$(EASK) is not available.  Please run make help")
