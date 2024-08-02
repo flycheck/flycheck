@@ -10040,11 +10040,27 @@ See URL `https://stedolan.github.io/jq/'."
           (zero-or-more not-newline) line-end))
   :modes (json-mode js-json-mode json-ts-mode))
 
+(flycheck-def-option-var flycheck-jsonnet-library-search-paths nil jsonnet
+  "A list of directories to use as jsonnet library search paths."
+  :type '(repeat (directory :tag "Library search path"))
+  :safe #'flycheck-string-list-p
+  :package-version '(flycheck . "32"))
+
+(flycheck-def-option-var flycheck-jsonnet-external-code-files nil jsonnet
+  "A list of `var=file' mappings. The contents of `file' is
+assigned to the variable `var'."
+  :type '(repeat (directory :tag "var=file"))
+  :safe #'flycheck-string-list-p
+  :package-version '(flycheck . "32"))
+
 (flycheck-define-checker jsonnet
   "A Jsonnet syntax checker using the jsonnet binary.
 
 See URL `https://jsonnet.org'."
-  :command ("jsonnet" source-inplace)
+  :command ("jsonnet"
+            (option-list "-J" flycheck-jsonnet-library-search-paths)
+            (option-list "--ext-code-file" flycheck-jsonnet-external-code-files)
+            source-inplace)
   :error-patterns
   ((error line-start "STATIC ERROR: " (file-name) ":"
           (or (seq line ":" column (zero-or-one (seq "-" end-column)))
