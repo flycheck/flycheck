@@ -1682,6 +1682,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
    .. syntax-checker:: xml-xmllint
 
       Check syntax with :program:`xmllint` from Libxml2_.
+
       .. defcustom:: flycheck-xml-xmllint-xsd-path
                      flycheck-xml-xmllint-relaxng-path
 
@@ -1705,6 +1706,6 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
    .. syntax-checker:: yaml-yamllint
 
-      Check syntax with yamllint.
+      Check syntax with :program:`yamllint`.
 
       .. syntax-checker-config-file:: flycheck-yamllintrc
