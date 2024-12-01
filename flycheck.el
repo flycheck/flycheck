@@ -11956,11 +11956,38 @@ This syntax checker needs Rust 1.18 or newer.  See URL
   :modes (rust-mode rust-ts-mode)
   :predicate flycheck-buffer-saved-p)
 
+(flycheck-def-option-var flycheck-rust-clippy-tests nil rust-clippy
+  "Whether to lint tests.
+
+When non-nil, run clippy with the --tests argument"
+  :type 'boolean
+  :safe #'booleanp
+  :package-version '(flycheck . "0.16"))
+
+(flycheck-def-option-var flycheck-rust-clippy-all-targets nil rust-clippy
+  "Whether to lint all targets.
+
+When non-nil, run clippy with the --all-targets argument"
+  :type 'boolean
+  :safe #'booleanp
+  :package-version '(flycheck . "0.16"))
+
+(flycheck-def-option-var flycheck-rust-clippy-all-features nil rust-clippy
+  "Whether to lint all features.
+
+When non-nil, run clippy with the --all-features argument"
+  :type 'boolean
+  :safe #'booleanp
+  :package-version '(flycheck . "0.16"))
+
 (flycheck-define-checker rust-clippy
   "A Rust syntax checker using clippy.
 
 See URL `https://github.com/rust-lang-nursery/rust-clippy'."
-  :command ("cargo" "clippy" "--message-format=json")
+  :command ("cargo" "clippy" "--message-format=json"
+            (option-flag "--tests" flycheck-rust-clippy-tests)
+            (option-flag "--all-targets" flycheck-rust-clippy-all-targets)
+            (option-flag "--all-features" flycheck-rust-clippy-all-features))
   :error-parser flycheck-parse-cargo-rustc
   :error-filter flycheck-rust-error-filter
   :error-explainer flycheck-rust-error-explainer
