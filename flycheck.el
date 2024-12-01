@@ -5699,8 +5699,10 @@ universal prefix arg, and only the id with normal prefix arg."
   (let ((messages (delq nil (seq-map (or formatter #'flycheck-error-message)
                                      (flycheck-overlay-errors-at pos)))))
     (when messages
-      (seq-do #'kill-new (reverse messages))
-      (message (string-join messages "\n")))))
+      (let ((full-message (string-join messages "\n"))
+      (kill-new full-message)
+      (message full-message)
+      )))))
 
 (defun flycheck-explain-error-at-point ()
   "Display an explanation for the first explainable error at point.
