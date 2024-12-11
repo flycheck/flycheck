@@ -8467,12 +8467,18 @@ See URL `https://developer.nvidia.com/cuda-llvm-compiler'."
           " " (or "<stdin>" (file-name))
           ":" line ":" line-end)
    (error line-start (or "<stdin>" (file-name))
-          "(" line "): error: " (message) line-end)
+          "(" line "): error"
+          (optional " #" (id (one-or-more digit) (optional "-D")))
+          ": " (message) line-end)
    (error line-start (or "<stdin>" (file-name))
           ":" line ":" column
-          ": fatal error: " (optional (message)) line-end)
+          ": fatal error"
+          (optional " #" (id (one-or-more digit) (optional "-D")))
+          ": " (optional (message)) line-end)
    (warning line-start (or "<stdin>" (file-name))
-            "(" line "): warning: " (message) line-end))
+            "(" line "): warning"
+            (optional " #" (id (one-or-more digit) (optional "-D")))
+            ": " (message) line-end))
   :modes cuda-mode)
 
 
