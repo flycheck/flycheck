@@ -8797,7 +8797,9 @@ This variable has no effect, if
 (flycheck-define-checker emacs-lisp
   "An Emacs Lisp syntax checker using the Emacs Lisp Byte compiler.
 
-See Info Node `(elisp)Byte Compilation'."
+See Info Node `(elisp)Byte Compilation'.
+
+Runs only for files we trust.  See `trusted-content' in Emacs 30 and newer."
   :command ("emacs" (eval flycheck-emacs-args)
             (eval
              (let ((path (pcase flycheck-emacs-lisp-load-path
@@ -8846,7 +8848,8 @@ See Info Node `(elisp)Byte Compilation'."
   (lambda ()
     ;; Do not check buffers that should not be byte-compiled.  The checker
     ;; process will refuse to compile these, which would confuse Flycheck
-    (not (bound-and-true-p no-byte-compile)))
+    (and (not (bound-and-true-p no-byte-compile))
+         (and (fboundp #'trusted-content-p) (trusted-content-p))))
   :next-checkers (emacs-lisp-checkdoc))
 
 (defconst flycheck-emacs-lisp-checkdoc-form
