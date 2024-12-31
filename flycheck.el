@@ -10059,7 +10059,7 @@ See URL `https://jsonnet.org'."
   ("jsonnet"
    (option-list "-J" flycheck-jsonnet-include-paths)
    (eval flycheck-jsonnet-command-args)
-   source-inplace))
+   source-inplace)
   :error-patterns
   ((error line-start "STATIC ERROR: " (file-name) ":"
           (or (seq line ":" column (zero-or-one (seq "-" end-column)))
