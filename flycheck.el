@@ -11319,7 +11319,8 @@ See URL `https://github.com/markdownlint/markdownlint'."
   :modes (markdown-mode gfm-mode))
 
 (flycheck-def-config-file-var flycheck-markdown-pymarkdown-config
-    markdown-pymarkdown nil
+    markdown-pymarkdown
+    '(".pymarkdown" ".pymarkdown.yml" "pyproject.toml")
   :package-version '(flycheck . "34"))
 
 (flycheck-define-checker markdown-pymarkdown
@@ -11327,7 +11328,7 @@ See URL `https://github.com/markdownlint/markdownlint'."
 
 See URL `https://pypi.org/project/pymarkdownlnt/'."
   :command ("pymarkdown"
-            (config-file "--config" flycheck-markdown-markdownlint-cli-config)
+            (config-file "--config" flycheck-markdown-markdown-config)
             "scan"
             source)
   :error-patterns
