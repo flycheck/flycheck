@@ -12093,7 +12093,7 @@ See URL `https://github.com/sasstools/sass-lint'."
   "A Scala syntax checker using the Scala compiler.
 
 See URL `https://www.scala-lang.org/'."
-  :command ("scalac" "-Ystop-after:parser" source)
+  :command ("scalac" "-Ystop-after:parser" "-color" "never" source)
   :error-patterns
   ((error line-start (file-name) ":" line ": error: " (message) line-end))
   :modes scala-mode
