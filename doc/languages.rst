@@ -300,6 +300,10 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
         Allows for ``__host__ __device__`` lambdas as described (`here <https://developer.nvidia.com/blog/new-compiler-features-cuda-8/>`_).
 
+      .. defcustom:: flycheck-cuda-compiler-options
+
+        Specify options directly to the compiler/preprocessor.
+
 .. supported-language:: CWL
 
    .. syntax-checker:: cwl
