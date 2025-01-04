@@ -17,6 +17,7 @@ New Features
 - [#1972]: New defcustom ``flycheck-clear-displayed-errors-function`` to
   customize how error messages are to be cleared.
 - [#2075]: Add the ``flycheck-chktex-extra-flags`` option to the ``tex-chktex`` checker.
+- [#2107]: Add ``-Xcompiler`` option for ``cuda-nvcc``.
 
 -----------
 Bugs fixed

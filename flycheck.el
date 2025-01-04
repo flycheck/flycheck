@@ -8401,6 +8401,14 @@ See URL `https://stylelint.io/'."
   :package-version '(flycheck . "32"))
 (make-variable-buffer-local 'flycheck-cuda-language-standard)
 
+(flycheck-def-option-var flycheck-cuda-compiler-options '("-Wall" "-Wextra") cuda-nvcc
+  "Specify options directly to the compiler/preprocessor."
+  :type '(choice (const :tag "No additional compiler options" nil)
+                 (repeat :tag "Addition compiler options"
+                         (string :tag "Compiler option")))
+  :safe #'flycheck-string-list-p
+  :package-version '(flycheck . "35"))
+
 (flycheck-def-option-var flycheck-cuda-gencodes nil cuda-nvcc
   "Our real and virtual GPU architectures to pass to nvcc."
   :type '(repeat (file :tag "GPU architecture"))
@@ -8458,6 +8466,7 @@ See URL `https://developer.nvidia.com/cuda-llvm-compiler'."
             (option-flag "--expt-extended-lambda" flycheck-cuda-extended-lambda)
             (option-list "-include" flycheck-cuda-includes)
             (option-list "-gencode" flycheck-cuda-gencodes)
+            (option-list "-Xcompiler" flycheck-cuda-compiler-options)
             (option-list "-D" flycheck-cuda-definitions concat)
             (option-list "-I" flycheck-cuda-include-path)
             source)
