@@ -8799,7 +8799,7 @@ This variable has no effect, if
 
 See Info Node `(elisp)Byte Compilation'.
 
-Runs only for files we trust.  See `trusted-content' in Emacs 30 and newer."
+In Emacs 30 and newer, runs only for files we trust.  See `trusted-content'."
   :command ("emacs" (eval flycheck-emacs-args)
             (eval
              (let ((path (pcase flycheck-emacs-lisp-load-path
@@ -8849,7 +8849,7 @@ Runs only for files we trust.  See `trusted-content' in Emacs 30 and newer."
     ;; Do not check buffers that should not be byte-compiled.  The checker
     ;; process will refuse to compile these, which would confuse Flycheck
     (and (not (bound-and-true-p no-byte-compile))
-         (and (fboundp #'trusted-content-p) (trusted-content-p))))
+         (if (fboundp #'trusted-content-p) (trusted-content-p) t)))
   :next-checkers (emacs-lisp-checkdoc))
 
 (defconst flycheck-emacs-lisp-checkdoc-form
