@@ -10046,10 +10046,10 @@ See URL `https://stedolan.github.io/jq/'."
 For example (\"./lib\") ."
   :type '(repeat (directory :tag "Include directory"))
   :safe #'flycheck-string-list-p
-  :package-version '(flycheck . "35.0-snapshot"))
+  :package-version '(flycheck . "35.0"))
 
 (flycheck-def-args-var flycheck-jsonnet-command-args jsonnet
-  :package-version '(flycheck . "35.0-snapshot"))
+  :package-version '(flycheck . "35.0"))
 
 (flycheck-define-checker jsonnet
   "A Jsonnet syntax checker using the jsonnet binary.
