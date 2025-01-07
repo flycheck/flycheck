@@ -5,6 +5,7 @@
 New Features
 ------------
 
+- [#2105]: Add options for configuring the ``jsonnet`` checker.
 - [#1975]: Add support for ``--expt-relaxed-constexpr`` flag to ``cuda`` checker.
 - [#2055]: Add support for ``--expt-extended-lambda`` flag to ``cuda`` checker.
 - [#1987]: Add a flag ``flycheck-auto-display-errors-after-checking`` control whether to display errors automatically after checking.
