@@ -71,7 +71,8 @@ contents FILE-NAME."
   `(let ((file-name ,file-name))
      (unless (file-exists-p file-name)
        (error "%s does not exist" file-name))
-     (let ((trusted-content (or trusted-content (list file-name))))
+     (let ((trusted-content (or (when (boundp 'trusted-content) trusted-content)
+                                (list file-name))))
        (flycheck-ert-with-temp-buffer
         (insert-file-contents file-name 'visit)
         (set-visited-file-name file-name 'no-query)
