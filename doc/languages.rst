@@ -767,7 +767,17 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
    .. syntax-checker:: jsonnet
 
-      Checks `Jsonnet <https://jsonnet.org>`_ with `jsonnet`.
+      Checks `Jsonnet <https://jsonnet.org>`_ with the `jsonnet` binary published at `https://github.com/google/go-jsonnet`_.
+
+      .. defcustom:: flycheck-jsonnet-command-args
+
+         A list of additional arguments that are passed to `jsonnet`.
+
+      .. defcustom:: flycheck-jsonnet-include-paths
+
+         A list of include directories. These are passed to the `jsonnet`
+         binary via ``-J``. Relative paths are resolved relative to the path
+         of the buffer being checked.
 
 .. supported-language:: Less
 
