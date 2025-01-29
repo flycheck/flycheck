@@ -183,6 +183,10 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       .. _cppcheck: http://cppcheck.sourceforge.net/
 
+      .. defcustom:: flycheck-cppcheck-args
+
+         A list of additional arguments.
+
       .. defcustom:: flycheck-cppcheck-checks
 
          A list of enabled checks.  Each item is the name of a check for the
