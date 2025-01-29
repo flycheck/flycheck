@@ -1,6 +1,6 @@
 ;;; flycheck.el --- On-the-fly syntax checking -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2017-2024 Flycheck contributors
+;; Copyright (C) 2017-2025 Flycheck contributors
 ;; Copyright (C) 2012-2016 Sebastian Wiesner and Flycheck contributors
 ;; Copyright (C) 2013, 2014 Free Software Foundation, Inc.
 ;;
@@ -8085,6 +8085,9 @@ Requires GCC 4.4 or newer.  See URL `https://gcc.gnu.org/'."
   :modes (c-mode c++-mode c-ts-mode c++-ts-mode)
   :next-checkers ((warning . c/c++-cppcheck)))
 
+(flycheck-def-args-var flycheck-cppcheck-args c/c++-cppcheck
+  :package-version '(flycheck . "35"))
+
 (flycheck-def-option-var flycheck-cppcheck-checks '("style") c/c++-cppcheck
   "Enabled checks for Cppcheck.
 
@@ -8177,6 +8180,7 @@ See URL `https://cppcheck.sourceforge.net/'."
                   (pcase major-mode
                     ((or `c++-mode `c++-ts-mode) "c++")
                     ((or `c-mode `c-ts-mode) "c")))
+            (eval flycheck-cppcheck-args)
             source)
   :error-parser flycheck-parse-cppcheck
   :modes (c-mode c++-mode c-ts-mode c++-ts-mode))
