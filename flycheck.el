@@ -11690,7 +11690,8 @@ See URL `https://www.ruby-lang.org/'."
   ((error line-start "SyntaxError in -:" line ": " (message) line-end)
    (warning line-start "-:" line ":" (optional column ":")
             " warning: " (message) line-end)
-   (error line-start "-:" line ": " (message) line-end))
+   ;; Ruby 3.4 includes the interpreter path when emitting syntax errors
+   (error line-start (optional (one-or-more (not (any ":"))) ": ") "-:" line ": " (message) line-end))
   :modes (enh-ruby-mode ruby-mode ruby-ts-mode)
   :next-checkers ((warning . ruby-chef-cookstyle)))
 
