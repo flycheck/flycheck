@@ -3,8 +3,7 @@ Sphinx~=5.3
 # Automatically build documentation on changes
 sphinx-autobuild
 # Sphinx theme
-furo
-# alabaster>=0.7.8
+alabaster>=0.7.8
 # Syntax highlighting
 Pygments>=2.1
 # Network access
