@@ -839,8 +839,9 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
    .. syntax-checker:: markdown-markdownlint-cli
 
-      Check Markdown with `markdownlint-cli
-      <https://github.com/igorshubovych/markdownlint-cli>`_.
+      Check Markdown with markdownlint-cli_.
+
+      .. _markdownlint-cli: https://github.com/igorshubovych/markdownlint-cli
 
       .. syntax-checker-config-file:: flycheck-markdown-markdownlint-cli-config
 
@@ -854,7 +855,9 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
    .. syntax-checker:: markdown-mdl
 
-      Check Markdown with `markdownlint <https://github.com/markdownlint/markdownlint/>`_.
+      Check Markdown with markdownlint_ (a.k.a. ``mdl``).
+
+      .. _markdownlint: https://github.com/markdownlint/markdownlint/
 
       .. defcustom:: flycheck-markdown-mdl-rules
 
@@ -868,8 +871,9 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
    .. syntax-checker:: markdown-pymarkdown
 
-      Check Markdown with `PyMarkdown
-      <https://pypi.org/project/pymarkdownlnt/>`_.
+      Check Markdown with PyMarkdown_.
+
+      .. _PyMarkdown: https://pypi.org/project/pymarkdownlnt/
 
       .. syntax-checker-config-file:: flycheck-markdown-pymarkdown-config
 
