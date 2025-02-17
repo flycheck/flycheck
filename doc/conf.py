@@ -119,7 +119,7 @@ nitpick_ignore = [
 ]
 
 # HTML settings
-html_theme = 'alabaster'
+html_theme = 'furo'
 html_theme_options = {
     'logo': 'logo.png',
     'logo_name': False,
