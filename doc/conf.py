@@ -47,7 +47,7 @@ extensions = [
 
 # Project metadata
 project = 'Flycheck'
-copyright = ' 2014-2024, Sebastian Wiesner and Flycheck contributors'
+copyright = ' 2014-2025, Sebastian Wiesner and Flycheck contributors'
 author = 'Sebastian Wiesner'
 
 

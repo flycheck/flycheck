@@ -1,6 +1,6 @@
 ;;; flycheck-buttercup.el --- Flycheck: Extensions to Buttercup -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2017 Flycheck contributors
+;; Copyright (C) 2017-2025 Flycheck contributors
 ;; Copyright (C) 2016 Sebastian Wiesner and Flycheck contributors
 
 ;; Author: Sebastian Wiesner <swiesner@lunaryorn.com>
