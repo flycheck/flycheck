@@ -2119,7 +2119,10 @@
     (should (= (length (flycheck-overlays-in (point-min) (point-max))) 2))
     ;; Remove restrictions and test that all errors are reported
     (widen)
-    (should (= (length (flycheck-overlays-in (point-min) (point-max))) 4))
+    (should (= (length (flycheck-overlays-in (point-min) (point-max)))
+               (if (< emacs-major-version 30)
+                   4
+                 5)))
     (skip-unless (version<= emacs-version "29"))
     (when (version<= "29.1" emacs-version)
       (ert-skip "Skipped for 29.1, the position seems to be off a litte..."))
