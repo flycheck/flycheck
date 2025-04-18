@@ -1,4 +1,4 @@
-.. _flycheck-extensions:
+add.. _flycheck-extensions:
 
 ========================
  Recommended extensions
