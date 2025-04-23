@@ -1,0 +1,27 @@
+name: Create GitHub Release
+
+on:
+  push:
+    tags:
+      - "v*"  # Trigger when a version tag is pushed (e.g., v1.0.0)
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Create GitHub Release with Auto-Generated Notes
+        uses: ncipollo/release-action@v1
+        with:
+          tag: ${{ github.ref_name }}
+          name: Flycheck ${{ github.ref_name }}
+          prerelease: ${{ contains(github.ref, '-rc') || contains(github.ref, '-alpha') || contains(github.ref, '-beta') }}
+          generateReleaseNotes: true  # Auto-generate release notes based on PRs and commits
+          # TODO: Use bodyFile to get the contents from changelog
+          token: ${{ secrets.GITHUB_TOKEN }}
