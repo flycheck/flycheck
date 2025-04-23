@@ -853,6 +853,14 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
          A list of enabled rules.
 
+   .. syntax-checker:: markdown-markdownlint-cli2
+
+      Check Markdown with markdownlint-cli2_.
+
+      .. _markdownlint-cli2: https://github.com/DavidAnson/markdownlint-cli2
+
+      .. syntax-checker-config-file:: flycheck-markdown-markdownlint-cli2-config
+
    .. syntax-checker:: markdown-mdl
 
       Check Markdown with markdownlint_ (a.k.a. ``mdl``).

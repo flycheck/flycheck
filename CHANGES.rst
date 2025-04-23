@@ -18,6 +18,7 @@ New Features
   customize how error messages are to be cleared.
 - [#2075]: Add the ``flycheck-chktex-extra-flags`` option to the ``tex-chktex`` checker.
 - [#2107]: Add ``-Xcompiler`` option for ``cuda-nvcc``.
+- Add support for ``markdownlint-cli2`` checker.
 
 -----------
 Bugs fixed

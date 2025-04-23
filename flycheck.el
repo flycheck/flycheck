@@ -11300,6 +11300,35 @@ See URL `https://github.com/igorshubovych/markdownlint-cli'."
           (url "https://github.com/DavidAnson/markdownlint/blob/main/doc/Rules.md#%s"))
       (and error-code `(url . ,(format url error-code))))))
 
+(flycheck-def-config-file-var flycheck-markdown-markdownlint-cli2-config
+    markdown-markdownlint-cli2
+    '(".markdownlint-cli2.json" ".markdownlint-cli2.jsonc" ".markdownlint-cli2.yaml")
+  :package-version '(flycheck . "35"))
+
+(flycheck-define-checker markdown-markdownlint-cli2
+  "Markdown checker using markdownlint-cli2.
+
+See URL `https://github.com/DavidAnson/markdownlint-cli2'."
+  :command ("markdownlint-cli2"
+            (config-file "--config" flycheck-markdown-markdownlint-cli2-config)
+            "--"
+            source)
+  :error-patterns
+  ((error line-start
+          (file-name) ":" line
+          (? ":" column) " " (id (one-or-more (not (any space))))
+          " " (message) line-end))
+  :error-filter
+  (lambda (errors)
+    (flycheck-sanitize-errors
+     (flycheck-remove-error-file-names "(string)" errors)))
+  :modes (markdown-mode gfm-mode)
+  :error-explainer
+  (lambda (err)
+    (let ((error-code (substring (flycheck-error-id err) 0 5))
+          (url "https://github.com/DavidAnson/markdownlint/blob/main/doc/Rules.md#%s"))
+      (and error-code `(url . ,(format url error-code))))))
+
 (flycheck-def-option-var flycheck-markdown-mdl-rules nil markdown-mdl
   "Rules to enable for mdl.
 
