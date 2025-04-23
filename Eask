@@ -1,3 +1,5 @@
+;; -*- mode: eask; lexical-binding: t -*-
+
 (package "flycheck"
          "35.0"
          "On-the-fly syntax checking")
