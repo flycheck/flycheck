@@ -1,4 +1,4 @@
-# [![Flycheck][logo]](https://www.flycheck.org) #
+# [![Flycheck][logo]](https://www.flycheck.org)
 
 [![License GPL 3](https://img.shields.io/github/license/flycheck/flycheck.svg)][COPYING]
 [![Join the chat](https://img.shields.io/gitter/room/flycheck/flycheck.svg)](https://gitter.im/flycheck/flycheck)
