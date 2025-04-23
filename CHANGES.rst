@@ -1,6 +1,12 @@
 ``master`` (unreleased)
 ======================
 
+-----------
+Bugs fixed
+-----------
+
+- [#2086]: Fix the name of the PyMarkdown config.
+
 35.0 (2025-04-23)
 ======================
 

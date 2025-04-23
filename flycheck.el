@@ -11391,7 +11391,7 @@ See URL `https://github.com/markdownlint/markdownlint'."
 
 See URL `https://pypi.org/project/pymarkdownlnt/'."
   :command ("pymarkdown"
-            (config-file "--config" flycheck-markdown-markdownlint-cli-config)
+            (config-file "--config" flycheck-markdown-pymarkdown-config)
             "scan"
             source)
   :error-patterns
