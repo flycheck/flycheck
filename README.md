@@ -158,7 +158,6 @@ PARTICULAR PURPOSE.  See the [GNU General Public License][copying] for more
 details.
 
 [COPYING]: https://github.com/flycheck/flycheck/blob/master/COPYING
-[manual]: https://www.flycheck.org/en/latest/index.html#the-user-guide
 [logo]: https://raw.githubusercontent.com/flycheck/flycheck/master/doc/_static/logo.png
 [try it]: https://www.flycheck.org/en/latest/#try-out
 [Installation]: https://www.flycheck.org/en/latest/user/installation.html
