@@ -179,6 +179,7 @@
     lua-luacheck
     lua
     markdown-markdownlint-cli
+    markdown-markdownlint-cli2
     markdown-mdl
     markdown-pymarkdown
     nix
