@@ -837,6 +837,11 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
 .. supported-language:: Markdown
 
+   Flycheck checks Markdown with `markdownlint-cli`, `markdownlint-cli2`,
+   `mdl` (that's the binary of the Ruby project `markdownlint`) or `pymarkdown`.
+   `markdownlint-cli` and `markdownlint-cli2` are different command-line interfaces
+   for the same `markdownlint` library (written in JavaScript).
+
    .. syntax-checker:: markdown-markdownlint-cli
 
       Check Markdown with markdownlint-cli_.
