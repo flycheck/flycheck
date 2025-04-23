@@ -87,12 +87,6 @@ Deno
 .. _Deno: https://deno.land/
 .. _deno-lint: https://deno.land/manual@v1.15.2/tools/linter
 
-Elixir
-------
-
-* :gh:`tomekowal/flycheck-mix` adds an Elixir syntax checker using the ``mix``
-  build tool.
-
 Emacs Lisp
 ----------
 
