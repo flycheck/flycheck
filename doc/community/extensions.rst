@@ -39,6 +39,24 @@ These extensions change Flycheck’s user interface:
 * :flyc:`flycheck-inline` shows Flycheck error messages in the buffer, directly
   below their origin.
 
+Eglot
+=====
+
+`Eglot <https://github.com/joaotavora/eglot>`_ is the built-in LSP package in
+Emacs, starting with version 29. It uses internally Flymake to render
+diagnostics received by the LSP server (by providing a Flymake backend).
+
+It seems that many people were forced to move to Flymake, because they wanted to
+use Eglot and its maintainer (who's also the maintainer of Flymake) didn't want
+to provide Flycheck integration (backend) for it. (see the relevant `discussion
+<https://github.com/joaotavora/eglot/issues/42>`_))
+
+Fortunately, you have options if you want to stick with Flycheck:
+
+* :flyc:`flycheck-eglot` (*official*) provides a simple “glue” minor mode that allows Flycheck and Eglot to work together.
+* :gh:`doomemacs/doomemacs` has built-in integration for Flycheck and Eglot (that served as foundation for ``flycheck-eglot``)
+* You can use :gh:`emacs-lsp/lsp-mode` (an alternative to Eglot) which has built-in support for Flycheck.
+
 Language support
 ================
 
