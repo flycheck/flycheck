@@ -188,7 +188,7 @@ to Flycheck:
 * Alex Reed (:gh:`acr4`)
 * Atila Neves (:gh:`atilaneves`)
 * Ben Sless (:gh:`bsless`)
-* Bozhidar Batsov (:gh:`bbatsov`)
+* Bozhidar Batsov (:gh:`bbatsov`, maintainer, owner)
 * Clément Pit-Claudel (:gh:`cpitclaudel`, maintainer, owner)
 * Colin Marquardt (:gh:`cmarqu`)
 * Cristian Capdevila (:gh:`capdevc`)
