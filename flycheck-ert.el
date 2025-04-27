@@ -71,14 +71,16 @@ contents FILE-NAME."
   `(let ((file-name ,file-name))
      (unless (file-exists-p file-name)
        (error "%s does not exist" file-name))
-     (flycheck-ert-with-temp-buffer
-       (insert-file-contents file-name 'visit)
-       (set-visited-file-name file-name 'no-query)
-       (cd (file-name-directory file-name))
-       ;; Mark the buffer as not modified, because we just loaded the file up to
-       ;; now.
-       (set-buffer-modified-p nil)
-       ,@body)))
+     (let ((trusted-content (or (when (boundp 'trusted-content) trusted-content)
+                                (list file-name))))
+       (flycheck-ert-with-temp-buffer
+        (insert-file-contents file-name 'visit)
+        (set-visited-file-name file-name 'no-query)
+        (cd (file-name-directory file-name))
+        ;; Mark the buffer as not modified, because we just loaded the file up to
+        ;; now.
+        (set-buffer-modified-p nil)
+        ,@body))))
 
 (defmacro flycheck-ert-with-help-buffer (&rest body)
   "Execute BODY and kill the help buffer afterwards.
