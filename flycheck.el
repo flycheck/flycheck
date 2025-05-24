@@ -10892,7 +10892,7 @@ See URL `https://docs.astral.sh/ruff/'."
   :command ("ruff"
             "check"
             (config-file "--config" flycheck-python-ruff-config)
-            "--output-format=concise"
+            "--output-format=text"
             (option "--stdin-filename" buffer-file-name)
             "-")
   :standard-input t
