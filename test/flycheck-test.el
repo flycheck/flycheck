@@ -3519,6 +3519,14 @@ evaluating BODY."
               :checker emacs-lisp-checkdoc))
       (remove-hook 'emacs-lisp-mode-hook disable-byte-comp))))
 
+(flycheck-ert-def-checker-test emacs-lisp emacs-lisp
+                               does-not-check-non-trusted-content
+  (skip-unless (fboundp 'trusted-content-p))
+  (let ((trusted-content (list "no-such-file")))
+    (flycheck-ert-with-resource-buffer
+     "language/emacs-lisp/warnings.el"
+     (should-not (flycheck-may-use-checker 'emacs-lisp)))))
+
 (flycheck-ert-def-checker-test emacs-lisp emacs-lisp check-declare-warnings
   (let ((flycheck-emacs-lisp-check-declare t))
     (flycheck-ert-should-syntax-check
