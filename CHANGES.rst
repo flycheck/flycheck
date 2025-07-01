@@ -1,6 +1,12 @@
 ``master`` (unreleased)
 ======================
 
+------------
+New Features
+------------
+
+- [#2125]: Add ``flycheck-rust-clippy-args`` for configuring the ``rust-clippy`` checker.
+
 36.0 (2026-02-19)
 ======================
 
