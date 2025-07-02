@@ -11876,6 +11876,8 @@ See URL `https://github.com/rust-lang/rust-clippy'."
   :command ("cargo"
             "clippy"
             "--message-format=json"
+            (option "--features=" flycheck-rust-features concat
+                    flycheck-option-comma-separated-list)
             (eval flycheck-rust-clippy-args))
   :error-parser flycheck-parse-cargo-rustc
   :error-filter flycheck-rust-error-filter
