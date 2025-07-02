@@ -11872,7 +11872,7 @@ This syntax checker needs Rust 1.18 or newer.  See URL
 (flycheck-define-checker rust-clippy
   "A Rust syntax checker using clippy.
 
-See URL `https://github.com/rust-lang-nursery/rust-clippy'."
+See URL `https://github.com/rust-lang/rust-clippy'."
   :command ("cargo"
             "clippy"
             "--message-format=json"
