@@ -11827,7 +11827,7 @@ ignored."
   :package-version '(flycheck . "28"))
 (make-variable-buffer-local 'flycheck-rust-binary-name)
 
-(flycheck-def-option-var flycheck-rust-features nil rust-cargo
+(flycheck-def-option-var flycheck-rust-features nil (rust-cargo rust-clippy)
   "List of features to activate during build or check.
 
 The value of this variable is a list of strings denoting features
@@ -12032,6 +12032,8 @@ See URL `https://github.com/rust-lang/rust-clippy'."
   :command ("cargo"
             "clippy"
             "--message-format=json"
+            (option "--features=" flycheck-rust-features concat
+                    flycheck-option-comma-separated-list)
             (eval flycheck-rust-clippy-args))
   :error-parser flycheck-parse-cargo-rustc
   :error-filter flycheck-rust-error-filter
