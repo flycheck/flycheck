@@ -1284,7 +1284,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
          `rust-cargo` requires Rust 1.17 or newer.
          `rust` requires Rust 1.18 or newer.
-         `rust-clippy` requires the nightly version of Rust.
+         `rust-clippy` requires Rust 1.29 or newer.
 
       .. _Cargo: http://doc.crates.io/index.html
 
