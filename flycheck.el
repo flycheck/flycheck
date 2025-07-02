@@ -11981,7 +11981,7 @@ This syntax checker requires Rust 1.17 or newer.  See URL
            (list
             (flycheck-verification-result-new
              :label "Cargo.toml"
-             :message (if has-toml "Found" "Missing")
+             :message (if has-toml (format "Found in %s" has-toml) "Missing")
              :face (if has-toml 'success '(bold warning)))
             (flycheck-verification-result-new
              :label "Crate type"
@@ -12057,7 +12057,7 @@ See URL `https://github.com/rust-lang/rust-clippy'."
              :face (if has-clippy 'success '(bold warning)))
             (flycheck-verification-result-new
              :label "Cargo.toml"
-             :message (if has-toml "Found" "Missing")
+             :message (if has-toml (format "Found in %s" has-toml) "Missing")
              :face (if has-toml 'success '(bold warning))))))))
 
 (flycheck-define-checker salt-lint
