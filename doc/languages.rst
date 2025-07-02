@@ -1278,8 +1278,6 @@ to view the docstring of the syntax checker.  Likewise, you may use
       compiler is invoked through ``cargo check`` to take Cargo dependencies
       into account.
 
-      `rust-clippy` has no configurable options.
-
       .. note::
 
          `rust-cargo` requires Rust 1.17 or newer.
@@ -1304,6 +1302,11 @@ to view the docstring of the syntax checker.  Likewise, you may use
          A list of additional arguments passed to the ``cargo check``
          subcommand.
 
+      .. defcustom:: flycheck-rust-clippy-args
+
+         A list of additional arguments passed to the ``cargo clippy``
+         subcommand.
+
       .. defcustom:: flycheck-rust-check-tests
 
          Whether to check test code in Rust.
@@ -1324,6 +1327,8 @@ to view the docstring of the syntax checker.  Likewise, you may use
          For `rust`, the type of the crate to check, as a string for the
          ``--crate-type`` option.
 
+         Ignored by `rust-clippy`.
+
       .. defcustom:: flycheck-rust-binary-name
 
          The name of the binary to pass to ``cargo check --TARGET-TYPE``, as a
@@ -1332,15 +1337,16 @@ to view the docstring of the syntax checker.  Likewise, you may use
          For `rust-cargo`, always required unless `flycheck-rust-crate-type` is
          ``lib`` or nil, in which case it is ignored.
 
-         Ignored by `rust`.
+         Ignored by `rust` and `rust-clippy`.
 
       .. defcustom:: flycheck-rust-features
 
-         List of features to activate during build or check.
+         List of features to activate during build, check, and Clippy.
 
          The value of this variable is a list of strings denoting features
          that will be activated to build the target to check. Features will
-         be passed to ``cargo check --features=FEATURES``.
+         be passed to ``cargo check --features=FEATURES`` and
+         ``cargo clippy --features=FEATURES``.
 
          Empty by default.
 
