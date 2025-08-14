@@ -304,7 +304,7 @@ use Eglot and its maintainer (who's also the maintainer of Flymake) didn't want
 to provide Flycheck integration (backend) for it. (see the relevant `discussion
 <https://github.com/joaotavora/eglot/issues/42>`_))
 
-.. note:
+.. note::
 
    `flycheck-eglot <https://github.com/flycheck/flycheck-eglot>`_ is the best
    workaround for this unfortunate situation that exists today.
