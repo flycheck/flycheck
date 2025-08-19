@@ -11827,7 +11827,7 @@ ignored."
   :package-version '(flycheck . "28"))
 (make-variable-buffer-local 'flycheck-rust-binary-name)
 
-(flycheck-def-option-var flycheck-rust-features nil rust-cargo
+(flycheck-def-option-var flycheck-rust-features nil (rust-cargo rust-clippy)
   "List of features to activate during build or check.
 
 The value of this variable is a list of strings denoting features
@@ -11981,7 +11981,7 @@ This syntax checker requires Rust 1.17 or newer.  See URL
            (list
             (flycheck-verification-result-new
              :label "Cargo.toml"
-             :message (if has-toml "Found" "Missing")
+             :message (if has-toml (format "Found in %s" has-toml) "Missing")
              :face (if has-toml 'success '(bold warning)))
             (flycheck-verification-result-new
              :label "Crate type"
@@ -12022,11 +12022,19 @@ This syntax checker needs Rust 1.18 or newer.  See URL
   :modes (rust-mode rust-ts-mode)
   :predicate flycheck-buffer-saved-p)
 
+(flycheck-def-args-var flycheck-rust-clippy-args rust-clippy
+  :package-version '(flycheck . "35.1"))
+
 (flycheck-define-checker rust-clippy
   "A Rust syntax checker using clippy.
 
-See URL `https://github.com/rust-lang-nursery/rust-clippy'."
-  :command ("cargo" "clippy" "--message-format=json")
+See URL `https://github.com/rust-lang/rust-clippy'."
+  :command ("cargo"
+            "clippy"
+            "--message-format=json"
+            (option "--features=" flycheck-rust-features concat
+                    flycheck-option-comma-separated-list)
+            (eval flycheck-rust-clippy-args))
   :error-parser flycheck-parse-cargo-rustc
   :error-filter flycheck-rust-error-filter
   :error-explainer flycheck-rust-error-explainer
@@ -12049,7 +12057,7 @@ See URL `https://github.com/rust-lang-nursery/rust-clippy'."
              :face (if has-clippy 'success '(bold warning)))
             (flycheck-verification-result-new
              :label "Cargo.toml"
-             :message (if has-toml "Found" "Missing")
+             :message (if has-toml (format "Found in %s" has-toml) "Missing")
              :face (if has-toml 'success '(bold warning))))))))
 
 (flycheck-define-checker salt-lint
