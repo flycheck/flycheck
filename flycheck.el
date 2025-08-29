@@ -10909,7 +10909,7 @@ See URL `https://docs.astral.sh/ruff/'."
   :error-patterns
   ((error line-start
           (or "-" (file-name)) ":" line ":" (optional column ":") " "
-          "SyntaxError: "
+          (or "SyntaxError: " "invalid-syntax: ")
           (message (one-or-more not-newline))
           line-end)
    (warning line-start
