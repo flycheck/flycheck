@@ -10903,7 +10903,7 @@ See URL `https://docs.astral.sh/ruff/'."
   :error-filter (lambda (errors)
                   (let* ((errors (flycheck-sanitize-errors errors))
                          (errors-with-ids (seq-filter #'flycheck-error-id errors)))
-                    (seq-union
+                    (append
                      (seq-difference errors errors-with-ids)
                      (seq-map #'flycheck-flake8-fix-error-level errors-with-ids))))
   :error-patterns
