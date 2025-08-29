@@ -10914,7 +10914,7 @@ See URL `https://docs.astral.sh/ruff/'."
           line-end)
    (warning line-start
             (or "-" (file-name)) ":" line ":" (optional column ":") " "
-            (id (one-or-more (any alpha)) (one-or-more digit) " ")
+            (id (one-or-more (any alpha)) (one-or-more digit)) " "
             (message (one-or-more not-newline))
             line-end))
   :working-directory flycheck-python-find-project-root
