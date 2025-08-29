@@ -8912,7 +8912,9 @@ See Info Node `(elisp)Byte Compilation'."
     checkdoc-max-keyref-before-warn
     sentence-end-double-space
     ,@(and (>= emacs-major-version 28)
-           '(checkdoc-column-zero-backslash-before-paren)))
+           '(checkdoc-column-zero-backslash-before-paren))
+    ,@(and (>= emacs-major-version 31)
+           '(checkdoc-allow-quoting-nil-and-t checkdoc-arguments-missing-flag)))
   "Variables inherited by the checkdoc subprocess.")
 
 (defun flycheck-emacs-lisp-checkdoc-variables-form ()
