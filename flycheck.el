@@ -10893,6 +10893,7 @@ Requires Flake8 3.0 or newer. See URL
 See URL `https://docs.astral.sh/ruff/'."
   :command ("ruff"
             "check"
+            "--no-fix"
             (config-file "--config" flycheck-python-ruff-config)
             ;; older versions of ruff (before 0.2) used "text" instead of "concise"
             "--output-format=concise"
