@@ -5033,6 +5033,16 @@ The manifest path is relative to
      '(4 12 info "which is non-standard. Use builtin 'command -v' instead."
          :checker sh-shellcheck :id "SC2230"))))
 
+(flycheck-ert-def-checker-test sh-shellcheck-infer-shell sh nil
+  :tags '(checkstyle-xml)
+  (let ((inhibit-message t)
+        (flycheck-shellcheck-supported-shells '(bash ksh88 sh zsh))
+        (flycheck-shellcheck-infer-shell t))
+    (flycheck-ert-should-syntax-check
+     "language/sh/shellcheck-infer.sh" 'sh-mode
+     '(4 15 warning "Remove quotes from right-hand side of =~ to match as a regex rather than literally."
+         :checker sh-shellcheck :id "SC2076"))))
+
 (flycheck-ert-def-checker-test slim slim nil
   (flycheck-ert-should-syntax-check
    "language/slim.slim" 'slim-mode
