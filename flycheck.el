@@ -10885,6 +10885,15 @@ Requires Flake8 3.0 or newer. See URL
 (flycheck-def-config-file-var flycheck-python-ruff-config python-ruff
                               '("pyproject.toml" "ruff.toml" ".ruff.toml"))
 
+(defun flycheck-python-ruff-explainer (err)
+  "Return documentation for the ruff `flycheck-error' ERR."
+  (when-let (error-code (flycheck-error-id err))
+    (lambda ()
+      (flycheck-call-checker-process
+       'python-ruff nil standard-output t "rule" error-code)
+      (with-current-buffer standard-output
+        (flycheck--fontify-as-markdown)))))
+
 (flycheck-define-checker python-ruff
   "A Python syntax and style checker using Ruff.
 
@@ -10914,6 +10923,7 @@ See URL `https://docs.astral.sh/ruff/'."
             (id (one-or-more (any alpha)) (one-or-more digit)) " "
             (message (one-or-more not-newline))
             line-end))
+  :error-explainer flycheck-python-ruff-explainer
   :working-directory flycheck-python-find-project-root
   :modes (python-mode python-ts-mode)
   :next-checkers ((warning . python-mypy)))
