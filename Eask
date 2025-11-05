@@ -17,6 +17,7 @@
 (source 'melpa)
 
 (depends-on "emacs" "27.1")
+(depends-on "seq" "2.24")
 
 (development
  (depends-on "f")                       ; For some maintenance tools
