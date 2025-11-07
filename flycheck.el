@@ -185,6 +185,7 @@
     nix
     nix-linter
     opam
+    org-lint
     perl
     perl-perlcritic
     perl-perlimports
@@ -10256,6 +10257,54 @@ string is a module to `use' in Perl."
   :type '(repeat :tag "Module")
   :safe #'flycheck-string-list-p
   :package-version '(flycheck . "32"))
+
+
+(defconst flycheck-org-lint-form
+  (flycheck-prepare-emacs-lisp-form
+   (require 'org)
+   (require 'org-attach)
+   (let ((source (car command-line-args-left))
+   (process-default-directory default-directory))
+   (with-temp-buffer
+   (insert-file-contents source 'visit)
+   (setq buffer-file-name source)
+   (setq default-directory process-default-directory)
+   (delay-mode-hooks (org-mode))
+   (setq delayed-mode-hooks nil)
+   (dolist (err (org-lint))
+   (let ((inf (cl-second err)))
+   (princ (elt inf 0))
+   (princ ": ")
+   (princ (elt inf 2))
+   (terpri)))))))
+
+(defconst flycheck-org-lint-variables
+    '(org-directory
+      org-id-locations
+      org-id-locations-file
+      org-attach-id-dir
+      org-attach-use-inheritance
+      org-attach-id-to-path-function-list)
+    "Variables inherited by the org-lint subprocess.")
+
+(defun flycheck-org-lint-variables-form ()
+  "Make org-lint availables available."
+    (require 'org-attach)
+    `(progn
+       ,@(seq-map (lambda (opt) `(setq-default ,opt ',(symbol-value opt)))
+                  (seq-filter #'boundp flycheck-org-lint-variables))))
+
+(flycheck-define-checker org-lint
+  "Org buffer checker using `org-lint'.
+
+See URL `https://orgmode.org/'."
+  :command ("emacs" (eval flycheck-emacs-args)
+              "--eval" (eval flycheck-org-lint-form)
+              "--" source)
+  :error-patterns
+  ((error line-start line ": " (message) line-end))
+  :modes (org-mode)
+  :next-checkers (proselint))
 
 (flycheck-define-checker perl
   "A Perl syntax checker using the Perl interpreter.
