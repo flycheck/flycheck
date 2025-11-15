@@ -12501,13 +12501,25 @@ or added as a shellcheck directive before the source command:
   :safe #'booleanp
   :package-version '(flycheck . "31"))
 
+(flycheck-def-option-var flycheck-shellcheck-infer-shell nil sh-shellcheck
+  "Whether to let ShellCheck infer the shell from the script.
+
+When non-nil, the --shell flag is not passed to ShellCheck,
+allowing it to infer the shell from the shebang line or
+shellcheck directives in the script."
+  :type 'boolean
+  :safe #'booleanp
+  :package-version '(flycheck . "36"))
+
 (flycheck-define-checker sh-shellcheck
   "A shell script syntax and style checker using Shellcheck.
 
 See URL `https://github.com/koalaman/shellcheck/'."
   :command ("shellcheck"
             "--format" "checkstyle"
-            "--shell" (eval (symbol-name sh-shell))
+            (eval
+             (unless flycheck-shellcheck-infer-shell
+               (list "--shell" (symbol-name sh-shell))))
             (option-flag "--external-sources"
                          flycheck-shellcheck-follow-sources)
             (option "--exclude" flycheck-shellcheck-excluded-warnings list

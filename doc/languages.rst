@@ -1548,6 +1548,10 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
          Allow shellcheck to read sourced files.
 
+      .. defcustom:: flycheck-shellcheck-infer-shell
+
+         Whether to let ShellCheck infer the shell from the script.
+
 .. supported-language:: Slim
 
    .. syntax-checker:: slim
