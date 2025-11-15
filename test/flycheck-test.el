@@ -5022,16 +5022,17 @@ The manifest path is relative to
   (let ((inhibit-message t))
     (flycheck-ert-should-syntax-check
      "language/sh/shellcheck.sh" 'sh-mode
+     ;; Matches output from shellcheck 0.11.0:
      '(2 5 warning "Tilde does not expand in quotes. Use $HOME."
          :checker sh-shellcheck :id "SC2088")
      '(3 7 error "Double quote array expansions to avoid re-splitting elements."
          :checker sh-shellcheck :id "SC2068")
      '(4 8 warning "Declare and assign separately to avoid masking return values."
          :checker sh-shellcheck :id "SC2155")
-     '(4 11 info "Use $(...) notation instead of legacy backticked `...`."
-         :checker sh-shellcheck :id "SC2006")
-     '(4 12 info "which is non-standard. Use builtin 'command -v' instead."
-         :checker sh-shellcheck :id "SC2230"))))
+     '(4 11 warning "Quote this to prevent word splitting."
+         :checker sh-shellcheck :id "SC2046")
+     '(4 11 info "Use $(...) notation instead of legacy backticks `...`."
+         :checker sh-shellcheck :id "SC2006"))))
 
 (flycheck-ert-def-checker-test sh-shellcheck sh infer-shell
   :tags '(checkstyle-xml)
