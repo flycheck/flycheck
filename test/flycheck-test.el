@@ -5033,7 +5033,7 @@ The manifest path is relative to
      '(4 12 info "which is non-standard. Use builtin 'command -v' instead."
          :checker sh-shellcheck :id "SC2230"))))
 
-(flycheck-ert-def-checker-test sh-shellcheck-infer-shell sh nil
+(flycheck-ert-def-checker-test sh-shellcheck sh infer-shell
   :tags '(checkstyle-xml)
   (let ((inhibit-message t)
         (flycheck-shellcheck-supported-shells '(bash ksh88 sh zsh))
