@@ -1,6 +1,12 @@
 ``master`` (unreleased)
 ======================
 
+------------
+New Features
+------------
+
+- [#2132]: Add the ``flycheck-shellcheck-infer-shell`` option to the ``sh-shellcheck`` checker.
+
 -----------
 Bugs fixed
 -----------
