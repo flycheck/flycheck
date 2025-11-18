@@ -4254,6 +4254,22 @@ Perhaps:
      '(22 1 error "undefined name 'antigravity'" :id "F821"
           :checker python-flake8))))
 
+(flycheck-ert-def-checker-test python-ruff python syntax-error
+  (flycheck-ert-should-syntax-check
+   "language/python/syntax-error.py" 'python-mode
+   '(3 7 error "Expected an identifier, but found a keyword 'import' that cannot be used here"
+       :checker python-ruff)
+   '(3 14 error "Simple statements must be separated by newlines or semicolons"
+       :checker python-ruff)))
+
+(flycheck-ert-def-checker-test python-ruff python nil
+  (flycheck-ert-should-syntax-check
+   "language/python/test.py" 'python-mode
+   '(5 15 warning "[*] `.antigravit` imported but unused" :id "F401"
+       :checker python-ruff)
+   '(22 1 error "Undefined name `antigravity`" :id "F821"
+        :checker python-ruff)))
+
 (flycheck-ert-def-checker-test python-pyright python nil
   (let ((flycheck-disabled-checkers '(python-mypy))
         (flycheck-checkers '(python-pyright)))

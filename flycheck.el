@@ -8912,7 +8912,9 @@ See Info Node `(elisp)Byte Compilation'."
     checkdoc-max-keyref-before-warn
     sentence-end-double-space
     ,@(and (>= emacs-major-version 28)
-           '(checkdoc-column-zero-backslash-before-paren)))
+           '(checkdoc-column-zero-backslash-before-paren))
+    ,@(and (>= emacs-major-version 31)
+           '(checkdoc-allow-quoting-nil-and-t checkdoc-arguments-missing-flag)))
   "Variables inherited by the checkdoc subprocess.")
 
 (defun flycheck-emacs-lisp-checkdoc-variables-form ()
@@ -10900,6 +10902,7 @@ Requires Flake8 3.0 or newer. See URL
 See URL `https://docs.astral.sh/ruff/'."
   :command ("ruff"
             "check"
+            "--no-fix"
             (config-file "--config" flycheck-python-ruff-config)
             ;; older versions of ruff (before 0.2) used "text" instead of "concise"
             "--output-format=concise"
@@ -10909,13 +10912,13 @@ See URL `https://docs.astral.sh/ruff/'."
   :error-filter (lambda (errors)
                   (let* ((errors (flycheck-sanitize-errors errors))
                          (errors-with-ids (seq-filter #'flycheck-error-id errors)))
-                    (seq-union
+                    (append
                      (seq-difference errors errors-with-ids)
                      (seq-map #'flycheck-flake8-fix-error-level errors-with-ids))))
   :error-patterns
   ((error line-start
           (or "-" (file-name)) ":" line ":" (optional column ":") " "
-          "SyntaxError: "
+          (or "SyntaxError: " "invalid-syntax: ")
           (message (one-or-more not-newline))
           line-end)
    (warning line-start

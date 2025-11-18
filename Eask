@@ -26,7 +26,6 @@
 
  ;; Various modes for use in the unit tests
  (depends-on "adoc-mode")
- (depends-on "bazel")
  (depends-on "coffee-mode")
  (depends-on "cperl-mode")
  (depends-on "cwl-mode")
@@ -48,9 +47,7 @@
  (depends-on "julia-mode")
  (depends-on "less-css-mode")
  (depends-on "lua-mode")
- (depends-on "markdown-mode")
  (depends-on "mmm-mode")
- (depends-on "nix-mode")
  (depends-on "php-mode")
  (depends-on "processing-mode")
  (depends-on "protobuf-mode")
