@@ -6,6 +6,7 @@ New Features
 ------------
 
 - [#2132]: Add the ``flycheck-shellcheck-infer-shell`` option to the ``sh-shellcheck`` checker.
+- [#2139]: Add compatibility with Proselint 0.16.
 
 -----------
 Bugs fixed

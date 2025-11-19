@@ -10501,30 +10501,54 @@ CHECKER and BUFFER denoted the CHECKER that returned OUTPUT and
 the BUFFER that was checked respectively.
 
 See URL `https://proselint.com/' for more information about proselint."
-  (mapcar (lambda (err)
-            (let-alist err
-              (flycheck-error-new-at-pos
-               .start
-               (pcase .severity
-                 (`"suggestion" 'info)
-                 (`"warning"    'warning)
-                 (`"error"      'error)
-                 ;; Default to error
-                 (_             'error))
-               .message
-               :id .check
-               :buffer buffer
-               :checker checker
-               ;; See https://github.com/amperser/proselint/issues/1048
-               :end-pos .end)))
-          (let-alist (car (flycheck-parse-json output))
-            .data.errors)))
+  (let ((response (flycheck-parse-json output)))
+    (if (eq (caaar response) 'data)
+        ;; Proselint versions <= 0.14.0:
+        (mapcar (lambda (err)
+                  (let-alist err
+                    (flycheck-error-new-at-pos
+                     .start
+                     (pcase .severity
+                       (`"suggestion" 'info)
+                       (`"warning"    'warning)
+                       (`"error"      'error)
+                       ;; Default to error
+                       (_             'error))
+                     .message
+                     :id .check
+                     :buffer buffer
+                     :checker checker
+                     ;; See https://github.com/amperser/proselint/issues/1048
+                     :end-pos .end)))
+                (let-alist (car response)
+                  .data.errors))
+      ;; Proselint versions >= 0.16.0
+      (mapcar (lambda (err)
+                (let-alist err
+                  (flycheck-error-new-at-pos
+                   (nth 0 .span)
+                   'warning
+                   .message
+                   :id .check_path
+                   :buffer buffer
+                   :checker checker
+                   :end-pos (nth 1 .span))))
+              (let-alist (car response)
+                .result.<stdin>.diagnostics)))))
 
 (flycheck-define-checker proselint
   "Flycheck checker using Proselint.
 
 See URL `https://proselint.com/'."
-  :command ("proselint" "--json" "-")
+  :command ("proselint"
+            (eval
+             (if (= (call-process (or flycheck-proselint-executable "proselint")
+                                  nil nil nil "--version")
+                    0)
+                 ;; Proselint versions <= 0.14.0:
+                 (list "--json" "-")
+               ;; Proselint versions >= 0.16.0
+               (list "check" "--output-format=json"))))
   :standard-input t
   :error-parser flycheck-proselint-parse-errors
   :modes (text-mode markdown-mode gfm-mode message-mode org-mode))
