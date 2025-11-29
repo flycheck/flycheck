@@ -4805,8 +4805,10 @@ functions resolves `conditional' style specifications."
             (flycheck-error-level-make-indicator
              level flycheck-indication-mode))
       (setf (overlay-get overlay 'line-prefix)
-            (flycheck-error-level-make-indicator
-             level flycheck-indication-mode t)))
+            (concat (flycheck-error-level-make-indicator
+                     level flycheck-indication-mode t)
+                    (get-text-property (overlay-start overlay)
+                                       'line-prefix))))
     (pcase (flycheck--highlighting-style err)
       ((or `nil (guard (null flycheck-highlighting-mode)))
        ;; Erase the highlighting
