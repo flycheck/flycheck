@@ -1611,21 +1611,6 @@ Safely delete all files and directories listed in
   (seq-do #'flycheck-safe-delete flycheck-temporaries)
   (setq flycheck-temporaries nil))
 
-(defun flycheck-rx-file-name (form)
-  "Translate the `(file-name)' FORM into a regular expression."
-  (let ((body (or (cdr form) '((minimal-match
-                                (one-or-more not-newline))))))
-    (rx-to-string `(group-n 1 ,@body) t)))
-
-(defun flycheck-rx-message (form)
-  "Translate the `(message)' FORM into a regular expression."
-  (let ((body (or (cdr form) '((one-or-more not-newline)))))
-    (rx-to-string `(group-n 4 ,@body) t)))
-
-(defun flycheck-rx-id (form)
-  "Translate the `(id)' FORM into a regular expression."
-  (rx-to-string `(group-n 5 ,@(cdr form)) t))
-
 (defun flycheck-rx-to-string (form &optional no-group)
   "Like `rx-to-string' for FORM, but with special keywords:
 
@@ -1658,16 +1643,18 @@ Safely delete all files and directories listed in
 NO-GROUP is passed to `rx-to-string'.
 
 See `rx' for a complete list of all built-in `rx' forms."
-  (let ((rx-constituents
-         (append
-          `((file-name flycheck-rx-file-name 0 nil) ;; group 1
-            (line . ,(rx (group-n 2 (one-or-more digit))))
-            (column . ,(rx (group-n 3 (one-or-more digit))))
-            (message flycheck-rx-message 0 nil) ;; group 4
-            (id flycheck-rx-id 0 nil) ;; group 5
-            (end-line . ,(rx (group-n 6 (one-or-more digit))))
-            (end-column . ,(rx (group-n 7 (one-or-more digit)))))
-          rx-constituents nil)))
+  (rx-let-eval
+      `((file-name (&rest pat) (group-n 1
+                                 ,(or '(minimal-match (one-or-more not-newline))
+                                      'pat)))
+        (line (group-n 2 (one-or-more digit)))
+        (column (group-n 3 (one-or-more digit)))
+        (message (&rest pat) (group-n 4
+                               ,(or '(one-or-more not-newline)
+                                    'pat)))
+        (id (&rest pat) (group-n 5 pat))
+        (end-line (group-n 6 (one-or-more digit)))
+        (end-column (group-n 7 (one-or-more digit))))
     (rx-to-string form no-group)))
 
 (defun flycheck-current-load-file ()
@@ -10253,7 +10240,7 @@ Relative paths are relative to the file being checked."
 
 The value of this variable is a list of strings, where each
 string is a module to `use' in Perl."
-  :type '(repeat :tag "Module")
+  :type '(repeat (string :tag "Module"))
   :safe #'flycheck-string-list-p
   :package-version '(flycheck . "32"))
 
