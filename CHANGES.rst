@@ -118,6 +118,7 @@ Changes
 
 - New features and improvements
 
+  - New checker for Ansible YAML using ``ansible-lint``.
   - The ``flycheck-verify-setup`` UI now includes buttons to re-enable manually
     disabled checkers and to try to re-enable automatically disabled checkers
     (command checkers are automatically disabled when their executable cannot be
