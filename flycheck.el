@@ -1611,6 +1611,16 @@ Safely delete all files and directories listed in
   (seq-do #'flycheck-safe-delete flycheck-temporaries)
   (setq flycheck-temporaries nil))
 
+(rx-define flycheck-rx-file-name (&rest pat)
+  (eval (if (not '(pat))
+            '(minimal-match (one-or-more not-newline))
+          '(seq pat))))
+
+(rx-define flycheck-rx-message (&rest pat)
+  (eval (if (not '(pat))
+            '(one-or-more not-newline)
+          '(seq pat))))
+
 (defun flycheck-rx-to-string (form &optional no-group)
   "Like `rx-to-string' for FORM, but with special keywords:
 
@@ -1644,14 +1654,10 @@ NO-GROUP is passed to `rx-to-string'.
 
 See `rx' for a complete list of all built-in `rx' forms."
   (rx-let-eval
-      `((file-name (&rest pat) (group-n 1
-                                 ,(or '(minimal-match (one-or-more not-newline))
-                                      'pat)))
+      `((file-name (&rest pat) (group-n 1 (flycheck-rx-file-name pat)))
         (line (group-n 2 (one-or-more digit)))
         (column (group-n 3 (one-or-more digit)))
-        (message (&rest pat) (group-n 4
-                               ,(or '(one-or-more not-newline)
-                                    'pat)))
+        (message (&rest pat) (group-n 4 (flycheck-rx-message pat)))
         (id (&rest pat) (group-n 5 pat))
         (end-line (group-n 6 (one-or-more digit)))
         (end-column (group-n 7 (one-or-more digit))))
