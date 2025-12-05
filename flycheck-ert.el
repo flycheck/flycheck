@@ -342,7 +342,7 @@ check that the buffer has all ERRORS, and no other errors."
     (should (equal (mapcar #'flycheck-error-without-group expected)
                    (mapcar #'flycheck-error-without-group current)))
     ;; Check that related errors are the same
-    (cl-mapcar
+    (cl-mapc
      (lambda (err1 err2)
        (should (equal (flycheck-ert-sort-errors
                        (mapcar #'flycheck-error-without-group
