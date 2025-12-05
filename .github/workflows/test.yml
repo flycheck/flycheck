@@ -42,15 +42,6 @@ jobs:
       with:
         version: ${{ matrix.emacs-version }}
 
-    # Remove expired DST Root CA X3 certificate. Workaround for
-    # https://debbugs.gnu.org/cgi/bugreport.cgi?bug=51038 bug on Emacs 27.x or lower.
-    # https://github.com/jcs090218/setup-emacs-windows/issues/156#issuecomment-1126671598
-    - name: Workaround for Emacs 27.x or lower's Windows build from GNU FTP
-      if: ${{ runner.os == 'Windows' && (matrix.emacs-version == '26.3' || matrix.emacs-version == '27.2') }}
-      run: |
-        gci cert:\LocalMachine\Root\DAC9024F54D8F6DF94935FB1732638CA6AD77C13
-        gci cert:\LocalMachine\Root\DAC9024F54D8F6DF94935FB1732638CA6AD77C13 | Remove-Item
-
     - uses: emacs-eask/setup-eask@master
       with:
         version: 'snapshot'
