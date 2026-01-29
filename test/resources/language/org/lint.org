@@ -1,0 +1,40 @@
+;; This file contains various Org lint issues for testing the org-lint checker.
+;;
+;; Test Coverage:
+;; - Invalid file links (nonexistent files)
+;; - Duplicate CUSTOM_ID properties (same CUSTOM_ID used multiple times)
+;; - Links with special characters
+;;
+;; Limitations:
+;; - Due to org-lint's duplicate CUSTOM_ID detection, only the first occurrence of
+;;   duplicate-id-123 can be tested (org-lint reports subsequent duplicates)
+;; - Exact line numbers may vary if file is modified
+;; - Error messages depend on org-lint version and enabled checkers
+;;
+;; Expected Errors:
+;; - Line 21: Invalid link to nonexistent.org
+;; - Line 24: Invalid link to /tmp/does-not-exist.org (absolute path)
+;; - Line 33: Duplicate CUSTOM_ID (second occurrence of duplicate-id-123)
+;; - Line 40: Invalid link with spaces and quotes
+
+* Invalid Link Test
+This link is invalid: [[file:nonexistent.org]]
+
+* Dead Link Test
+This link points to a dead file: [[file:/tmp/does-not-exist.org]]
+
+* Duplicate CUSTOM_ID Test
+:PROPERTIES:
+:CUSTOM_ID: duplicate-id-123
+:END:
+
+* Another Duplicate CUSTOM_ID Test
+:PROPERTIES:
+:CUSTOM_ID: duplicate-id-123
+:END:
+
+* Valid Link
+This link is valid: [[https://www.gnu.org/software/emacs/]]
+
+* Invalid Special Characters
+Link with invalid chars: [[file:file with spaces and "quotes".org]]

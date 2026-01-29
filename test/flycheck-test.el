@@ -5187,6 +5187,30 @@ The manifest path is relative to
    '(2 6 "Field does not exist: flat" :checker jsonnet
        :end-line 2 :end-column 14)))
 
+;; Test org-lint checker with various Org mode issues
+;; Note: org-lint reports issues at info level (not error/warning)
+;; The exact error messages may vary depending on org-lint version
+(flycheck-ert-def-checker-test org-lint org nil
+  (let ((inhibit-message t))
+    (flycheck-ert-should-syntax-check
+     "language/org/lint.org" 'org-mode
+     ;; Line 21: Invalid link to nonexistent file
+     '(21 nil info "Link to non-existent local file \"nonexistent.org\"" :checker org-lint)
+     ;; Line 24: Invalid link to non-existent absolute path
+     '(24 nil info "Link to non-existent local file \"/tmp/does-not-exist.org\"" :checker org-lint)
+     ;; Line 28: First duplicate CUSTOM_ID property
+     '(28 nil info "Duplicate CUSTOM_ID property \"duplicate-id-123\"" :checker org-lint)
+     ;; Line 33: Second duplicate CUSTOM_ID property
+     '(33 nil info "Duplicate CUSTOM_ID property \"duplicate-id-123\"" :checker org-lint)
+     ;; Line 40: Invalid link with special characters
+     '(40 nil info "Link to non-existent local file \"file with spaces and \\\"quotes\\\".org\"" :checker org-lint))))
+
+;; Negative test: Verify that valid.org produces no errors
+(flycheck-ert-def-checker-test org-lint-valid org nil
+  (let ((inhibit-message t))
+    (flycheck-ert-should-syntax-check
+     "language/org/valid.org" 'org-mode)))
+
 (flycheck-ert-initialize flycheck-test-resources-directory)
 
 (provide 'flycheck-test)

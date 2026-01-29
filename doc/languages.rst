@@ -910,6 +910,44 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       .. _statix: https://github.com/nerdypepper/statix
 
+.. supported-language:: Org mode
+
+   Flycheck supports checking Org mode files with the built-in ``org-lint`` command.
+
+   .. syntax-checker:: org-lint
+
+      .. _flycheck-checkers-org-lint:
+
+      An Org mode syntax and style checker using ``org-lint``.
+
+      The checker runs ``org-lint`` in an Emacs subprocess to detect issues such
+      as:
+
+      - Invalid links
+      - Dead links
+      - Duplicate IDs
+      - Invalid keywords
+      - Special characters in links
+      - And more...
+
+      The checker automatically inherits your Org mode configuration, including
+      ``org-directory`` and ``org-id-locations-file``. Note that ``load-path`` is
+      not inherited for security reasons to prevent potential code injection.
+      Org should be installed in a standard location that Emacs can find without
+      a custom ``load-path``.
+
+      The checker is enabled by default when ``org-lint`` is available (Org mode
+      9.0 or later).
+
+      See the ``org-lint`` documentation in Org mode for details about the checks
+      performed.
+
+      .. note::
+
+         The checker does not inherit ``org-id-locations`` because this variable
+         can contain thousands of entries and exceed shell argument limits. The
+         ``org-id-locations-file`` is used instead.
+
 .. supported-language:: Opam
 
    .. syntax-checker:: opam

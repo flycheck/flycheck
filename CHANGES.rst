@@ -7,6 +7,9 @@ New Features
 
 - [#2132]: Add the ``flycheck-shellcheck-infer-shell`` option to the ``sh-shellcheck`` checker.
 - [#2139]: Add compatibility with Proselint 0.16.
+- [#1757]: Add :ref:`org-lint <flycheck-checkers-org-lint>` checker for Org mode files.
+  The checker uses Emacs' built-in ``org-lint`` command to detect issues such
+  as invalid links, dead links, and duplicate IDs.
 
 -----------
 Bugs fixed

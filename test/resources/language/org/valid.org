@@ -1,0 +1,20 @@
+;; Valid Org file for negative testing.
+;;
+;; This file is used to verify that org-lint produces no errors for
+;; well-formed Org files with:
+;; - Proper heading structure
+;; - Valid external links (HTTPS URLs)
+;; - Correct list formatting
+;; - Proper text markup (bold/italic)
+;;
+;; Expected: No errors from org-lint checker
+
+* Test Heading
+This is a valid Org file with no lint errors.
+
+- Item 1
+- Item 2
+
+Some *bold text* and /italic text/ with proper Org syntax.
+
+[[https://www.example.org][Valid external link]]
