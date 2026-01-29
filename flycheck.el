@@ -185,6 +185,7 @@
     nix
     nix-linter
     opam
+    org-lint
     perl
     perl-perlcritic
     perl-perlimports
@@ -8923,6 +8924,24 @@ Variables are taken from `flycheck-emacs-lisp-checkdoc-variables'."
      ,@(seq-map (lambda (opt) `(setq-default ,opt ',(symbol-value opt)))
                 (seq-filter #'boundp flycheck-emacs-lisp-checkdoc-variables))))
 
+(defconst flycheck-org-lint-variables
+  '(org-directory
+    org-id-locations-file)  ; File path only, not contents
+  "Variables inherited by the org-lint subprocess.
+
+Note: We do NOT include `load-path' to prevent potential code injection
+and information disclosure. Org should be installed in a standard
+location that Emacs can find without a custom load-path.
+
+We also do not include `org-id-locations' because it can contain
+thousands of entries and exceed shell argument limits (ARG_MAX).")
+
+(defun flycheck-org-lint-variables-form ()
+  "Make a sexp to pass relevant variables to an org-lint subprocess."
+  `(progn
+     ,@(seq-map (lambda (opt) `(setq-default ,opt ',(symbol-value opt)))
+                (seq-filter #'boundp flycheck-org-lint-variables))))
+
 (flycheck-define-checker emacs-lisp-checkdoc
   "An Emacs Lisp style checker using CheckDoc.
 
@@ -8937,9 +8956,60 @@ The checker runs `checkdoc-current-buffer'."
   :modes (emacs-lisp-mode)
   :enabled flycheck--emacs-lisp-checkdoc-enabled-p)
 
+(defconst flycheck-org-lint-form
+  (flycheck-prepare-emacs-lisp-form
+    (with-demoted-errors "Org-lint error: %S"
+      (require 'org)
+      (let ((source (car command-line-args-left))
+            (process-default-directory default-directory))
+        (with-temp-buffer
+          (insert-file-contents source 'visit)
+          (setq buffer-file-name source)
+          (setq default-directory process-default-directory)
+          (delay-mode-hooks (org-mode))
+          (setq delayed-mode-hooks nil)
+          (dolist (err (org-lint))
+            (pcase err
+              (`(,_n [,line ,_trust ,desc ,_checker])
+               (princ (format "%s:%s: %s\n" source line desc)))
+              (_
+               (princ (format "%s:1: Unexpected org-lint format: %S\n" source err))))))))))
+
+(defun flycheck-org-lint-available-p ()
+  "Check if org-lint is available."
+  (and (fboundp 'org-lint)
+       (require 'org nil 'no-error)))
+
 (dolist (checker '(emacs-lisp emacs-lisp-checkdoc))
   (setf (car (flycheck-checker-get checker 'command))
         flycheck-this-emacs-executable))
+
+(flycheck-define-checker org-lint
+  "An Org mode syntax checker using `org-lint'.
+
+The checker runs `org-lint' in an Emacs subprocess."
+  :command ("emacs" (eval flycheck-emacs-args)
+            "--eval" (eval (flycheck-sexp-to-string
+                            (flycheck-org-lint-variables-form)))
+            "--eval" (eval flycheck-org-lint-form)
+            "--" source)
+  :error-patterns
+  ((info line-start (file-name) ":" line ": " (message) line-end))
+  :modes (org-mode)
+  :enabled (lambda () (flycheck-org-lint-available-p))
+  :verify (lambda (_)
+            (let ((org-version (when (require 'org nil 'no-error)
+                                  (org-version))))
+              (list (flycheck-verification-result-new
+                     :label "Org-lint available"
+                     :message (if (fboundp 'org-lint)
+                                 (format "yes (Org %s)" org-version)
+                               "no")
+                     :face (if (fboundp 'org-lint) 'success 'warning))))))
+
+;; Set org-lint to use the current Emacs
+(setf (car (flycheck-checker-get 'org-lint 'command))
+      flycheck-this-emacs-executable)
 
 (defun flycheck-ember-template--check-for-config (&rest _ignored)
   "Check the required config file is available up the file system."
