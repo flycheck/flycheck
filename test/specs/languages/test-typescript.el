@@ -27,6 +27,7 @@
 ;;; Code:
 
 (require 'flycheck-buttercup)
+(require 'test-helpers)
 
 (describe "Language TypeScript"
   (describe "The TSLint error parser"
@@ -90,6 +91,21 @@
                                         :buffer 'buffer
                                         :filename "sample.ts"
                                         :end-line 1
-                                        :end-column 26)))))))
+                                        :end-column 26))))))
+
+  (describe "Checker tests"
+    (flycheck-buttercup-def-checker-test typescript-tslint typescript nil
+      (let ((flycheck-disabled-checkers '(javascript-eslint)))
+        (flycheck-buttercup-should-syntax-check
+         "language/typescript/sample.ts" 'typescript-mode
+         '(2 23 warning "Module 'chai' is not listed as dependency in package.json"
+             :checker typescript-tslint :id "no-implicit-dependencies"
+             :end-line 2 :end-column 29)
+         '(5 3 warning "Forbidden 'var' keyword, use 'let' or 'const' instead"
+             :checker typescript-tslint :id "no-var-keyword"
+             :end-line 5 :end-column 6)
+         '(6 15 warning "Missing semicolon"
+             :checker typescript-tslint :id "semicolon"
+             :end-line 6 :end-column 15))))))
 
 ;;; test-typescript.el ends here
