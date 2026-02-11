@@ -24,6 +24,7 @@
 ;;; Code:
 
 (require 'flycheck-buttercup)
+(require 'test-helpers)
 
 (describe "Language PHP"
   (describe "The PHDMD error parser"
@@ -72,6 +73,53 @@
                                         :id "UnusedFormalParameter"
                                         :checker 'checker
                                         :buffer 'buffer
-                                        :filename "foo.php")))))))
+                                        :filename "foo.php"))))))
+
+  (describe "Checker tests"
+    (flycheck-buttercup-def-checker-test php php syntax-error
+      (when (version<= emacs-version "25")
+        (buttercup-skip "PHP mode (via CC mode) seems broken on 24.5."))
+      (flycheck-buttercup-should-syntax-check
+       "language/php/syntax-error.php" 'php-mode
+       '(8 nil error "Assignments can only happen to writable values" :checker php)))
+
+    (flycheck-buttercup-def-checker-test (php php-phpcs php-phpmd) php nil
+      (flycheck-buttercup-should-syntax-check
+       "language/php/warnings.php" 'php-mode
+       '(1 1 error "Missing file doc comment"
+           :id "PEAR.Commenting.FileComment.Missing" :checker php-phpcs)
+       '(21 nil warning "Avoid unused private fields such as '$FOO'."
+            :id "UnusedPrivateField" :checker php-phpmd)
+       '(21 20 error "Private member variable \"FOO\" must be prefixed with an underscore"
+            :id "PEAR.NamingConventions.ValidVariableName.PrivateNoUnderscore"
+            :checker php-phpcs)
+       '(23 5 error "The open comment tag must be the only content on the line"
+            :id "Generic.Commenting.DocComment.ContentAfterOpen"
+            :checker php-phpcs)
+       '(23 5 error "Doc comment for parameter \"$baz\" missing"
+            :id "PEAR.Commenting.FunctionComment.MissingParamTag"
+            :checker php-phpcs)
+       '(23 9 error "Doc comment short description must be on the first line"
+            :id "Generic.Commenting.DocComment.SpacingBeforeShort"
+            :checker php-phpcs)
+       '(23 29 error "The close comment tag must be the only content on the line"
+            :id "Generic.Commenting.DocComment.ContentBeforeClose"
+            :checker php-phpcs)
+       '(23 29 error "Missing @return tag in function comment"
+            :id "PEAR.Commenting.FunctionComment.MissingReturn"
+            :checker php-phpcs)
+       '(24 nil warning "Avoid unused private methods such as 'bar'."
+            :id "UnusedPrivateMethod" :checker php-phpmd)
+       '(24 nil warning "Avoid unused parameters such as '$baz'."
+            :id "UnusedFormalParameter" :checker php-phpmd)
+       '(24 13 error "Private method name \"A::bar\" must be prefixed with an underscore"
+            :id "PEAR.NamingConventions.ValidFunctionName.PrivateNoUnderscore"
+            :checker php-phpcs)
+       '(26 nil warning "Avoid variables with short names like $i. Configured minimum length is 3."
+            :id "ShortVariable" :checker php-phpmd)
+       '(26 nil warning "Avoid unused local variables such as '$i'."
+            :id "UnusedLocalVariable" :checker php-phpmd)
+       '(26 12 error "TRUE, FALSE and NULL must be lowercase; expected \"false\" but found \"FALSE\""
+            :id "Generic.PHP.LowerCaseConstant.Found" :checker php-phpcs)))))
 
 ;;; test-php.el ends here
