@@ -63,8 +63,7 @@
                   (list
                    (flycheck-error-new-at 1 1 'error "foo" :filename "hello")
                    (flycheck-error-new-at 2 2 'warning "bar")
-                   (flycheck-error-new-at 3 3 'info "spam"))))))))
-
+                   (flycheck-error-new-at 3 3 'info "spam")))))))
   (describe "flycheck-increment-error-columns"
     (it "ignores nil columns"
       (let ((errors (list (flycheck-error-new-at 4 nil))))
