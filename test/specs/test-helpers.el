@@ -30,17 +30,20 @@
 
 ;;; Directories
 
-(defconst flycheck-test-directory
+(defconst flycheck-test-specs-directory
   (file-name-directory (or load-file-name (buffer-file-name)))
   "The specs directory.")
 
+(defconst flycheck-test-directory
+  (expand-file-name "../" flycheck-test-specs-directory)
+  "The test directory.")
+
 (defconst flycheck-test-resources-directory
-  (expand-file-name "resources/" (expand-file-name "../" flycheck-test-directory))
+  (expand-file-name "resources/" flycheck-test-directory)
   "Directory of test resources.")
 
 (defconst flycheck-test-source-directory
-  (file-name-directory (directory-file-name
-                        (expand-file-name "../" flycheck-test-directory)))
+  (file-name-directory (directory-file-name flycheck-test-directory))
   "The source directory.")
 
 

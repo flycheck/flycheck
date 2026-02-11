@@ -173,33 +173,34 @@
 
     (it "positions overlays correctly in a narrowed buffer"
       (flycheck-buttercup-with-resource-buffer "narrowing.el"
-        (emacs-lisp-mode)
-        (flycheck-mode)
-        ;; Narrow to the function and check the buffer
-        (re-search-forward "(defun .*")
-        (forward-line 1)
-        (narrow-to-defun)
-        (expect (buffer-narrowed-p) :to-be-truthy)
-        (flycheck-buttercup-buffer-sync)
-        ;; We should have two errors highlighted between point min and max now
-        (expect (length (flycheck-overlays-in (point-min) (point-max)))
-                :to-equal 2)
-        ;; Remove restrictions and test that all errors are reported
-        (widen)
-        (expect (length (flycheck-overlays-in (point-min) (point-max)))
-                :to-equal (if (< emacs-major-version 30) 4 5))
-        (assume (version<= emacs-version "29"))
-        (when (version<= "29.1" emacs-version)
-          (buttercup-skip "Skipped for 29.1, the position seems to be off a little..."))
-        (flycheck-buttercup-should-errors
-         '(9 1 warning "`message' called with 0 args to fill 1 format field(s)"
-             :checker emacs-lisp)
-         '(11 8 warning "`message' called with 0 args to fill 1 format field(s)"
-              :checker emacs-lisp)
-         '(12 nil info "First sentence should end with punctuation"
-              :checker emacs-lisp-checkdoc)
-         '(15 1 warning "`message' called with 0 args to fill 1 format field(s)"
-              :checker emacs-lisp)))))
+        (let ((text-quoting-style 'grave))
+          (emacs-lisp-mode)
+          (flycheck-mode)
+          ;; Narrow to the function and check the buffer
+          (re-search-forward "(defun .*")
+          (forward-line 1)
+          (narrow-to-defun)
+          (expect (buffer-narrowed-p) :to-be-truthy)
+          (flycheck-buttercup-buffer-sync)
+          ;; We should have two errors highlighted between point min and max now
+          (expect (length (flycheck-overlays-in (point-min) (point-max)))
+                  :to-equal 2)
+          ;; Remove restrictions and test that all errors are reported
+          (widen)
+          (expect (length (flycheck-overlays-in (point-min) (point-max)))
+                  :to-equal (if (< emacs-major-version 30) 4 5))
+          (assume (version<= emacs-version "29"))
+          (when (version<= "29.1" emacs-version)
+            (buttercup-skip "Skipped for 29.1, the position seems to be off a little..."))
+          (flycheck-buttercup-should-errors
+           '(9 1 warning "`message' called with 0 args to fill 1 format field(s)"
+               :checker emacs-lisp)
+           '(11 8 warning "`message' called with 0 args to fill 1 format field(s)"
+                :checker emacs-lisp)
+           '(12 nil info "First sentence should end with punctuation"
+                :checker emacs-lisp-checkdoc)
+           '(15 1 warning "`message' called with 0 args to fill 1 format field(s)"
+                :checker emacs-lisp))))))
 
   (describe "Error message overlays"
     (it "shows the error message as help echo"

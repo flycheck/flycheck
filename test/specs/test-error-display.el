@@ -30,6 +30,7 @@
   (describe "flycheck-display-error-messages"
 
     (it "displays error messages"
+      (assume (not (eq system-type 'windows-nt)))
       (let ((err (flycheck-error-new-at 10 20 'warning
                                         "This is a Flycheck error."
                                         :id "spam")))

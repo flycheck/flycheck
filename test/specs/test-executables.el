@@ -14,6 +14,8 @@
                                              "bin/dummy-emacs")))
         (when (eq system-type 'darwin)
           (buttercup-skip "Skipped because macOS will take forever to complete the task"))
+        (when (eq system-type 'windows-nt)
+          (buttercup-skip "Skipped on Windows due to platform-specific checker differences"))
         (flycheck-buttercup-should-syntax-check
          "language/emacs-lisp/warnings.el" 'emacs-lisp-mode
          '(12 nil info "First sentence should end with punctuation"
@@ -24,6 +26,7 @@
   (describe "flycheck-set-checker-executable"
 
     (it "real executable"
+      (assume (not (eq system-type 'windows-nt)))
       (flycheck-buttercup-with-temp-buffer
         ;; Create a temporary buffer to restrict the scope of
         ;; `flycheck-emacs-lisp-executable'

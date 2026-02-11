@@ -239,7 +239,7 @@
 
         (insert "Hello")
         (switch-to-buffer "*scratch*")
-        (sleep-for 0.015)
+        (sleep-for 0.1)
         ;; Since the buffer is not visible, the check will be automatically deferred
         (set-buffer "automatic-check-dummy.el")
         (expect (flycheck-deferred-check-p) :to-be-truthy)
