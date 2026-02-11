@@ -31,7 +31,7 @@ SELECTOR = (language $(LANGUAGE))
 endif
 
 # Internal variables
-EMACSBATCH = $(EMACS) -Q --batch -L . $(EMACSOPTS)
+EMACSBATCH = $(EMACS) -Q --batch -L . -L test/specs $(EMACSOPTS)
 RUNEMACS =
 
 # Program availability
@@ -119,7 +119,7 @@ compile:
 
 .PHONY: specs
 specs: compile
-	$(EASK) exec buttercup -L . test/specs
+	$(EASK) exec buttercup -L . -L test/specs test/specs
 
 .PHONY: unit
 unit: compile
