@@ -9,7 +9,7 @@
 
 (package-file "flycheck.el")
 
-(files "flycheck-ert.el" "flycheck-buttercup.el")
+(files "flycheck-buttercup.el")
 
 (script "test" "echo \"Error: no test specified\" && exit 1")
 

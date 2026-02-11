@@ -25,11 +25,6 @@ OPTIPNG = optipng
 # Program options
 EMACSOPTS =
 PATTERN = .*
-LANGUAGE =
-ifdef LANGUAGE
-SELECTOR = (language $(LANGUAGE))
-endif
-
 # Internal variables
 EMACSBATCH = $(EMACS) -Q --batch -L . -L test/specs $(EMACSOPTS)
 RUNEMACS =
@@ -48,9 +43,6 @@ HAVE_INKSCAPE := $(shell sh -c "command -v $(INKSCAPE)")
 HAVE_CONVERT := $(shell sh -c "command -v $(CONVERT)")
 HAVE_OPTIPNG := $(shell sh -c "command -v $(OPTIPNG)")
 
-RUNTEST = $(RUNEMACS) --load test/flycheck-test --load test/run.el \
-	-f flycheck-run-tests-main
-
 # Export Emacs to goals, mainly for EASK
 EASK_EMACS = $(EMACS)
 export EMACS
@@ -60,13 +52,10 @@ export EASK_EMACS
 .DEFAULT_GOAL = help
 
 # File lists
-SRCS = flycheck.el flycheck-ert.el
+SRCS = flycheck.el
 IMGS = doc/_static/logo.png
-TEST_SRCS = flycheck.el flycheck-ert.el test/flycheck-test.el
 
 # File rules
-flycheck-ert.elc: flycheck.elc
-
 flycheck-buttercup.elc: flycheck.elc
 
 doc/_static/logo.png: flycheck.svg
@@ -121,14 +110,6 @@ compile:
 specs: compile
 	$(EASK) exec buttercup -L . -L test/specs test/specs
 
-.PHONY: unit
-unit: compile
-	$(RUNTEST) '(and (not (tag external-tool)) $(SELECTOR))'
-
-.PHONY: integ
-integ: compile
-	$(RUNTEST) '(and (tag external-tool) $(SELECTOR))'
-
 .PHONY: images
 images: $(IMGS)
 
@@ -142,16 +123,12 @@ help:
 	@echo '  compile: Byte-compile Emacs Lisp sources'
 	@echo '  format:  Format all Emacs Lisp sources'
 	@echo '  specs:   Run all buttercup specs for Flycheck'
-	@echo '  unit:    Run all ERT unit tests for Flycheck (legacy)'
-	@echo '  integ:   Run all integration tests for Flycheck'
 	@echo '  images:  Generate PNG images from SVG sources'
 	@echo '  clean:   Clean compiled files'
 	@echo '  purge:   Clean everything'
 	@echo ''
 	@echo 'Available make variables:'
 	@echo '  PATTERN:  A regular expression matching spec names to run with `specs`'
-	@echo '  SELECTOR: An ERT selector expression for `unit` and `integ`'
-	@echo '  LANGUAGE: The name of a language for `integ`.  Overrides `SELECTOR`'
 	@echo '  EMACSOPTS: Additional options to pass to `emacs`'
 	@echo '  EMACS:    The path or name of the Emacs to use for tests and compilation'
 	@echo ''
