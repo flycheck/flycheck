@@ -12,7 +12,7 @@
     (it "just a base name"
       (flycheck-buttercup-with-temp-buffer
         (cd flycheck-test-directory)
-        (expect (flycheck-locate-config-file-by-path "flycheck-test.el"
+        (expect (flycheck-locate-config-file-by-path "init.el"
                                                      'emacs-lisp)
                 :not :to-be-truthy)))
 
@@ -33,7 +33,7 @@
 
     (it "not existing file"
       (flycheck-buttercup-with-temp-buffer
-        (setq buffer-file-name (expand-file-name "flycheck-test.el"
+        (setq buffer-file-name (expand-file-name "init.el"
                                                  flycheck-test-directory))
         (expect (flycheck-locate-config-file-ancestor-directories
                  "foo" 'emacs-lisp)
@@ -41,15 +41,16 @@
 
     (it "file on same level"
       (flycheck-buttercup-with-temp-buffer
-        (setq buffer-file-name (expand-file-name "flycheck-test.el"
-                                                 flycheck-test-directory))
+        (setq buffer-file-name (expand-file-name "test-helpers.el"
+                                                 flycheck-test-specs-directory))
         (expect (flycheck-locate-config-file-ancestor-directories
-                 "run.el" 'emacs-lisp)
-                :to-equal (expand-file-name "run.el" flycheck-test-directory))))
+                 "test-documentation.el" 'emacs-lisp)
+                :to-equal (expand-file-name "test-documentation.el"
+                                            flycheck-test-specs-directory))))
 
     (it "file on parent level"
       (flycheck-buttercup-with-temp-buffer
-        (setq buffer-file-name (expand-file-name "flycheck-test.el"
+        (setq buffer-file-name (expand-file-name "init.el"
                                                  flycheck-test-directory))
         (expect (flycheck-locate-config-file-ancestor-directories
                  "Makefile" 'emacs-lisp)
@@ -71,8 +72,8 @@
     (it "existing file in home directory"
       (flycheck-buttercup-with-env (list (cons "HOME" flycheck-test-directory))
         (expect (flycheck-locate-config-file-home
-                 "flycheck-test.el" 'emacs-lisp)
-                :to-equal (expand-file-name "flycheck-test.el"
+                 "init.el" 'emacs-lisp)
+                :to-equal (expand-file-name "init.el"
                                             flycheck-test-directory)))))
 
   (describe "flycheck-locate-config-file"
@@ -82,7 +83,7 @@
         (setq buffer-file-name (expand-file-name "specs/test-documentation.el"
                                                  flycheck-test-directory))
         (expect (flycheck-locate-config-file
-                 '("test-documentation.el" "flycheck-test.el") 'emacs-lisp)
+                 '("test-documentation.el" "no-such-file.el") 'emacs-lisp)
                 :to-equal (expand-file-name "specs/test-documentation.el"
                                             flycheck-test-directory))))
 
@@ -91,8 +92,8 @@
         (setq buffer-file-name (expand-file-name "specs/test-documentation.el"
                                                  flycheck-test-directory))
         (expect (flycheck-locate-config-file
-                 '("flycheck-test.el" "test-documentation.el") 'emacs-lisp)
-                :to-equal (expand-file-name "flycheck-test.el" flycheck-test-directory)))))
+                 '("init.el" "test-documentation.el") 'emacs-lisp)
+                :to-equal (expand-file-name "init.el" flycheck-test-directory)))))
 
   (describe "flycheck-option-int"
 

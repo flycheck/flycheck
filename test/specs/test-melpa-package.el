@@ -87,9 +87,6 @@ version."
       (expect entries :to-contain "flycheck.el"))
 
     (it "contains flycheck-buttercup"
-      (expect entries :to-contain "flycheck-buttercup.el"))
-
-    (it "contains flycheck-ert"
-      (expect entries :to-contain "flycheck-ert.el"))))
+      (expect entries :to-contain "flycheck-buttercup.el"))))
 
 ;;; test-melpa-package.el ends here

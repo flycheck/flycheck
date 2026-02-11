@@ -105,7 +105,7 @@ long lines or not."
 
 Test files which contain error messages from checkers are allowed
 to have long lines."
-  (string-match-p (rx (or "languages/test-" "flycheck-test.el")) filename))
+  (string-match-p (rx "languages/test-") filename))
 
 (defun flycheck/file-formatted-p (filename)
   "Check whether FILENAME is properly formatted.

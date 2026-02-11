@@ -434,7 +434,7 @@
     (it "returns true for direct child of user-emacs-directory"
       (let ((user-emacs-directory flycheck-test-directory))
         (expect (flycheck-in-user-emacs-directory-p
-                 (expand-file-name "flycheck-test.el" flycheck-test-directory))
+                 (expand-file-name "init.el" flycheck-test-directory))
                 :to-be-truthy)))
 
     (it "returns true for indirect child of user-emacs-directory"
