@@ -16,6 +16,7 @@ Bugs fixed
 -----------
 
 - [#2086]: Fix the name of the PyMarkdown config.
+- [#2036]: Fix ``awk-gawk`` checker passing spurious quotes to ``gawk --source``.
 
 35.0 (2025-04-23)
 ======================
