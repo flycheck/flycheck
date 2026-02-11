@@ -24,6 +24,7 @@
 ;;; Code:
 
 (require 'flycheck-buttercup)
+(require 'test-helpers)
 
 (describe "Language C/C++"
   (describe "The Cppcheck error parser"
@@ -101,6 +102,115 @@ against a integer value that is neither 1 nor 0.\">
         (let ((flycheck-xml-parser #'flycheck-parse-xml-region))
           (expect (flycheck-parse-cppcheck cppcheck-xml-without-errors
                                            'checker 'buffer)
-                  :to-be-equal-flycheck-errors nil))))))
+                  :to-be-equal-flycheck-errors nil)))))
+
+  (describe "Checker tests"
+    (flycheck-buttercup-def-checker-test c/c++-clang (c c++) error
+      (let ((flycheck-disabled-checkers '(c/c++-gcc)))
+        (flycheck-buttercup-should-syntax-check
+         "language/c_c++/error.cpp" 'c++-mode
+         '(2 20 error "no member named 'bar' in 'A'"
+             :checker c/c++-clang)
+         '(6 19 info "in instantiation of function template specialization 'foo<A>' requested here"
+             :checker c/c++-clang)
+         '(8 9 warning "unknown pragma ignored"
+             :checker c/c++-clang))))
+
+    (flycheck-buttercup-def-checker-test c/c++-clang (c c++) fatal-error
+      (let ((flycheck-disabled-checkers '(c/c++-gcc)))
+        (flycheck-buttercup-should-syntax-check
+         "language/c_c++/includes.c" 'c-mode
+         '(2 10 error "'library.h' file not found"
+             :checker c/c++-clang))))
+
+    (flycheck-buttercup-def-checker-test c/c++-clang (c c++) warnings
+      (let ((flycheck-disabled-checkers '(c/c++-gcc c/c++-cppcheck)))
+        (flycheck-buttercup-should-syntax-check
+         "language/c_c++/warning.c" 'c-mode
+         '(5 10 warning "unused variable 'unused'" :checker c/c++-clang)
+         '(7 15 warning "comparison of integers of different signs: 'int' and 'unsigned int'"
+             :checker c/c++-clang)
+         '(8 7 warning "no message" :checker c/c++-clang))))
+
+    (flycheck-buttercup-def-checker-test c/c++-clang (c c++) included-file-warning
+      (let ((flycheck-clang-include-path '("./include"))
+            (flycheck-disabled-checkers '(c/c++-gcc))
+            (flycheck-relevant-error-other-file-minimum-level 'warning))
+        (flycheck-buttercup-should-syntax-check
+         "language/c_c++/in-included-file.cpp" 'c++-mode
+         `(5 10 warning "unused variable 'unused'"
+             :filename ,(flycheck-buttercup-resource-filename "language/c_c++/warning.c")
+             :checker c/c++-clang)
+         `(7 15 warning "comparison of integers of different signs: 'int' and 'unsigned int'"
+             :filename ,(flycheck-buttercup-resource-filename "language/c_c++/warning.c")
+             :checker c/c++-clang)
+         `(8 7 warning "no message"
+             :filename ,(flycheck-buttercup-resource-filename "language/c_c++/warning.c")
+             :checker c/c++-clang))))
+
+    (flycheck-buttercup-def-checker-test c/c++-gcc (c c++) error
+      (let ((flycheck-disabled-checkers '(c/c++-clang)))
+        (flycheck-buttercup-should-syntax-check
+         "language/c_c++/error.cpp" 'c++-mode
+         '(2 20 error "'struct A' has no member named 'bar'"
+             :checker c/c++-gcc)
+         '(8 nil warning "ignoring #pragma nope"
+             :id "-Wunknown-pragmas" :checker c/c++-gcc))))
+
+    (flycheck-buttercup-def-checker-test c/c++-gcc (c c++) fatal-error
+      (let ((flycheck-disabled-checkers '(c/c++-clang)))
+        (flycheck-buttercup-should-syntax-check
+         "language/c_c++/includes.c" 'c-mode
+         '(2 10 error "library.h: No such file or directory"
+             :checker c/c++-gcc))))
+
+    (flycheck-buttercup-def-checker-test c/c++-gcc (c c++) warning
+      (let ((flycheck-disabled-checkers '(c/c++-clang c/c++-cppcheck)))
+        (flycheck-buttercup-should-syntax-check
+         "language/c_c++/warning.c" 'c-mode
+         '(5 10 warning "unused variable 'unused'"
+             :id "-Wunused-variable" :checker c/c++-gcc)
+         '(7 15 warning "comparison of integer expressions of different signedness: 'int' and 'unsigned int'"
+             :id "-Wsign-compare" :checker c/c++-gcc)
+         '(8 7 warning "#warning" :id "-Wcpp" :checker c/c++-gcc))))
+
+    (flycheck-buttercup-def-checker-test c/c++-gcc (c c++) included-file-warning
+      (let ((flycheck-gcc-include-path '("./include"))
+            (flycheck-disabled-checkers '(c/c++-clang))
+            (flycheck-relevant-error-other-file-minimum-level 'warning))
+        (flycheck-buttercup-should-syntax-check
+         "language/c_c++/in-included-file.cpp" 'c++-mode
+         `(5 10 warning "unused variable 'unused'"
+             :filename ,(flycheck-buttercup-resource-filename "language/c_c++/warning.c")
+             :id "-Wunused-variable" :checker c/c++-gcc)
+         `(7 15 warning "comparison of integer expressions of different signedness: 'int' and 'unsigned int'"
+             :filename ,(flycheck-buttercup-resource-filename "language/c_c++/warning.c")
+             :id "-Wsign-compare" :checker c/c++-gcc)
+         `(8 7 warning "#warning"
+             :filename ,(flycheck-buttercup-resource-filename "language/c_c++/warning.c")
+             :id "-Wcpp" :checker c/c++-gcc))))
+
+    (flycheck-buttercup-def-checker-test c/c++-cppcheck (c c++) nil
+      (let ((flycheck-disabled-checkers '(c/c++-clang c/c++-gcc))
+            (flycheck-cppcheck-inconclusive nil)
+            (flycheck-cppcheck-checks '("style")))
+        (flycheck-buttercup-should-syntax-check
+         "language/c_c++/style2.cpp" 'c++-mode
+         '(3 nil info "The scope of the variable 'i' can be reduced. Warning: Be careful when fixing this message, especially when there are inner loops. Here is an example where cppcheck will write that the scope for 'i' can be reduced:\nvoid f(int x)\n{\n    int i = 0;\n    if (x) {\n        // it's safe to move 'int i = 0;' here\n        for (int n = 0; n < 10; ++n) {\n            // it is possible but not safe to move 'int i = 0;' here\n            do_something(&i);\n        }\n    }\n}\nWhen you see this message it is always safe to reduce the variable scope 1 level."
+             :id "variableScope" :checker c/c++-cppcheck))
+
+        (flycheck-buttercup-should-syntax-check
+         "language/c_c++/style.cpp" 'c-mode
+         '(12 nil error "Code 'std::string' is invalid C code. Use --std or --language to configure the language."
+              :id "syntaxError" :checker c/c++-cppcheck))
+
+        (flycheck-buttercup-should-syntax-check
+         "language/c_c++/style.cpp" 'c++-mode
+         '(3 nil error "Division by zero." :id "zerodiv" :checker c/c++-cppcheck)
+         '(5 nil info "Unused variable: unused" :id "unusedVariable"
+             :checker c/c++-cppcheck)
+         '(9 nil error "Division by zero." :id "zerodiv" :checker c/c++-cppcheck)
+         '(12 nil warning "Parameter 'foo' is passed by value. It could be passed as a const reference which is usually faster and recommended in C++."
+              :id "passedByValue" :checker c/c++-cppcheck))))))
 
 ;;; test-c_c++.el ends here

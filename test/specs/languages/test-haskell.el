@@ -26,6 +26,7 @@
 ;;; Code:
 
 (require 'flycheck-buttercup)
+(require 'test-helpers)
 
 (describe "Language Haskell"
 
@@ -50,6 +51,115 @@
     (it "extracts a module name with exports right after the name"
       (expect flycheck-haskell-module-re
               :to-match-with-group "module Hello.World(hello) where"
-              1 "Hello.World"))))
+              1 "Hello.World")))
+
+  (describe "Checker tests"
+    (flycheck-buttercup-def-checker-test haskell-stack-ghc haskell syntax-error
+      (assume (file-exists-p (getenv "HOME")))
+      (let ((flycheck-disabled-checkers '(haskell-ghc)))
+        (flycheck-buttercup-should-syntax-check
+         "language/haskell/SyntaxError.hs" 'haskell-mode
+         '(3 1 error "parse error on input `module'" :checker haskell-stack-ghc))))
+
+    (flycheck-buttercup-def-checker-test haskell-stack-ghc haskell type-error
+      (assume (file-exists-p (getenv "HOME")))
+      (let ((flycheck-disabled-checkers '(haskell-ghc)))
+        (flycheck-buttercup-should-syntax-check
+         "language/haskell/Error.hs" 'haskell-mode
+         '(4 16 error "* Couldn't match type `Bool' with `[Char]'
+  Expected type: String
+    Actual type: Bool
+* In the first argument of `putStrLn', namely `True'
+  In the expression: putStrLn True
+  In an equation for `foo': foo = putStrLn True" :checker haskell-stack-ghc))))
+
+    (flycheck-buttercup-def-checker-test (haskell-stack-ghc haskell-hlint) haskell literate
+      (assume (file-exists-p (getenv "HOME")))
+      (let ((flycheck-disabled-checkers '(haskell-ghc)))
+        (flycheck-buttercup-should-syntax-check
+         "language/haskell/Literate.lhs" 'haskell-literate-mode
+         '(6 1 warning "Top-level binding with no type signature: foo :: a"
+             :id "-Wmissing-signatures"
+             :checker haskell-stack-ghc))))
+
+    (flycheck-buttercup-def-checker-test (haskell-stack-ghc haskell-hlint) haskell
+                                         complete-chain
+      (assume (file-exists-p (getenv "HOME")))
+      (let ((flycheck-disabled-checkers '(haskell-ghc)))
+        (flycheck-buttercup-should-syntax-check
+         "language/haskell/Warnings.hs" 'haskell-mode
+         '(4 1 warning "Eta reduce
+Found:
+  spam eggs = map lines eggs
+Perhaps:
+  spam = map lines" :checker haskell-hlint)
+         '(4 1 warning "Top-level binding with no type signature:
+  spam :: [String] -> [[String]]"
+             :id "-Wmissing-signatures"
+             :checker haskell-stack-ghc)
+         '(7 8 info "Redundant bracket
+Found:
+  (putStrLn \"hello world\")
+Perhaps:
+  putStrLn \"hello world\"" :checker haskell-hlint))))
+
+    (flycheck-buttercup-def-checker-test
+        haskell-stack-ghc haskell nonstandard-stack-yaml-file
+      (assume (file-exists-p (getenv "HOME")))
+
+      (let* ((flycheck-disabled-checkers '(haskell-ghc))
+             (proj-dir "language/haskell/stack-project-with-renamed-stack-yaml")
+             (flycheck-ghc-stack-project-file
+              (expand-file-name "stack-nonstandard.yaml"
+                                (flycheck-buttercup-resource-filename proj-dir))))
+
+        (flycheck-buttercup-should-syntax-check
+         (concat proj-dir "/src/Foo.hs")
+         'haskell-mode)))
+
+    (flycheck-buttercup-def-checker-test haskell-ghc haskell syntax-error
+      (let ((flycheck-disabled-checkers '(haskell-stack-ghc)))
+        (flycheck-buttercup-should-syntax-check
+         "language/haskell/SyntaxError.hs" 'haskell-mode
+         '(3 1 error "parse error on input `module'" :checker haskell-ghc))))
+
+    (flycheck-buttercup-def-checker-test haskell-ghc haskell type-error
+      (let ((flycheck-disabled-checkers '(haskell-stack-ghc)))
+        (flycheck-buttercup-should-syntax-check
+         "language/haskell/Error.hs" 'haskell-mode
+         '(4 16 error "* Couldn't match type `Bool' with `[Char]'
+  Expected type: String
+    Actual type: Bool
+* In the first argument of `putStrLn', namely `True'
+  In the expression: putStrLn True
+  In an equation for `foo': foo = putStrLn True" :checker haskell-ghc))))
+
+    (flycheck-buttercup-def-checker-test (haskell-ghc haskell-hlint) haskell literate
+      (let ((flycheck-disabled-checkers '(haskell-stack-ghc)))
+        (flycheck-buttercup-should-syntax-check
+         "language/haskell/Literate.lhs" 'haskell-literate-mode
+         '(6 1 warning "Top-level binding with no type signature: foo :: a"
+             :id "-Wmissing-signatures"
+             :checker haskell-ghc))))
+
+    (flycheck-buttercup-def-checker-test (haskell-ghc haskell-hlint) haskell
+                                         complete-chain
+      (let ((flycheck-disabled-checkers '(haskell-stack-ghc)))
+        (flycheck-buttercup-should-syntax-check
+         "language/haskell/Warnings.hs" 'haskell-mode
+         '(4 1 warning "Eta reduce
+Found:
+  spam eggs = map lines eggs
+Perhaps:
+  spam = map lines" :checker haskell-hlint)
+         '(4 1 warning "Top-level binding with no type signature:
+  spam :: [String] -> [[String]]"
+             :id "-Wmissing-signatures"
+             :checker haskell-ghc)
+         '(7 8 info "Redundant bracket
+Found:
+  (putStrLn \"hello world\")
+Perhaps:
+  putStrLn \"hello world\"" :checker haskell-hlint))))))
 
 ;;; test-haskell.el ends here
