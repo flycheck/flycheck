@@ -17,6 +17,9 @@ Bugs fixed
 
 - [#2086]: Fix the name of the PyMarkdown config.
 - [#2036]: Fix ``awk-gawk`` checker passing spurious quotes to ``gawk --source``.
+- [#2144]: Rewrite ``org-lint`` checker to run in the current Emacs process
+  instead of a ``-Q --batch`` subprocess. This eliminates false "Unknown source
+  block language" warnings for languages from external packages.
 
 35.0 (2025-04-23)
 ======================
