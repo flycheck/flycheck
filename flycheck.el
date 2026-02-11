@@ -7657,7 +7657,7 @@ See URL `https://asciidoctor.org'."
   "GNU awk's built-in --lint checker."
   :command ("gawk"
             ;; Avoid code execution.  See https://github.com/w0rp/ale/pull/1411
-            "--source" "'BEGIN{exit} END{exit 1}'"
+            "--source" "BEGIN{exit} END{exit 1}"
             "-f" source
             "--lint"
             "/dev/null")
