@@ -100,6 +100,8 @@
         (expect was-called :to-equal 2)))
 
     (it "truncated stdin with errors"
+      ;; Skip on Emacs 28 where large pipe writes can cause SIGPIPE
+      (assume (version<= "29" emacs-version))
       (cl-letf* ((flycheck-checker 'truncated-stdin)
                  ((symbol-plist 'truncated-stdin) flycheck-test--truncated-stdin))
         (dolist (buffer-size '(4095 65537))
@@ -112,6 +114,8 @@
              '(1 1 error "error" :checker truncated-stdin))))))
 
     (it "truncated stdin without errors"
+      ;; Skip on Emacs 28 where large pipe writes can cause SIGPIPE
+      (assume (version<= "29" emacs-version))
       (cl-letf* ((flycheck-checker 'truncated-stdin)
                  ((symbol-plist 'truncated-stdin) flycheck-test--truncated-stdin)
                  ((flycheck-checker-get 'truncated-stdin 'error-patterns)
