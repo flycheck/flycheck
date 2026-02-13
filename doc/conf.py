@@ -96,7 +96,7 @@ rst_prolog = """\
 exclude_patterns = ['_build']
 default_role = 'any'
 primary_domain = 'el'
-templates_path = ['_templates']
+templates_path = ['_templates']  # layout.html blocks Google Analytics
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = 'sphinx'
@@ -119,25 +119,11 @@ nitpick_ignore = [
 ]
 
 # HTML settings
-html_theme = 'alabaster'
+html_theme = 'furo'
 html_theme_options = {
-    'logo': 'logo.png',
-    'logo_name': False,
-    'description': 'Syntax checking for GNU Emacs',
-    'github_user': 'flycheck',
-    'github_repo': 'flycheck',
-    'github_type': 'star',
-    'github_banner': True,
-    'travis_button': False,
-}
-html_sidebars = {
-    '**': [
-        'about.html',
-        'tables.html',
-        'navigation.html',
-        'relations.html',
-        'searchbox.html',
-    ]
+    'source_repository': 'https://github.com/flycheck/flycheck',
+    'source_branch': 'master',
+    'source_directory': 'doc/',
 }
 html_static_path = ['_static']
 html_favicon = '_static/favicon.ico'
@@ -273,21 +259,6 @@ class IssueReferences(Transform):
             parent.replace(node, new_nodes)
 
 
-def build_offline_html(app):
-    from sphinx.builders.html import StandaloneHTMLBuilder
-    build_standalone = isinstance(app.builder, StandaloneHTMLBuilder)
-    if app.config.flycheck_offline_html and build_standalone:
-        logger.info(
-            'Building offline documentation without external resources!')
-        app.builder.theme_options['github_banner'] = 'false'
-        app.builder.theme_options['github_button'] = 'false'
-
-
-def add_offline_to_context(app, _pagename, _templatename, context, _doctree):
-    # Expose offline setting in HTML context
-    context['flycheck_offline_html'] = app.config.flycheck_offline_html
-
-
 def setup(app):
     app.add_object_type('syntax-checker', 'checker',
                         'pair: %s; Syntax checker')
@@ -295,8 +266,3 @@ def setup(app):
     app.add_directive('syntax-checker-config-file',
                       SyntaxCheckerConfigurationFile)
     app.add_transform(IssueReferences)
-    # Build offline HTML that loads no external resources, for use in 3rd party
-    # packages, see https://github.com/flycheck/flycheck/issues/999
-    app.add_config_value('flycheck_offline_html', False, 'html')
-    app.connect('builder-inited', build_offline_html)
-    app.connect('html-page-context', add_offline_to_context)
