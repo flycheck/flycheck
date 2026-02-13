@@ -59,7 +59,7 @@
 (buttercup-define-matcher :to-be-empty-string (s)
   (let ((s (funcall s)))
     (if (equal s "")
-        (cons t (format "Expected %S not be an empty string" s))
+        (cons t (format "Expected %S not to be an empty string" s))
       (cons nil (format "Expected %S to be an empty string" s)))))
 
 (buttercup-define-matcher :to-match-with-group (re s index match)
@@ -123,10 +123,10 @@ but is not a buffer" buffer re))
         (save-excursion
           (goto-char (point-min))
           (if (re-search-forward re nil 'noerror)
-              (cons t (format "Expected %S to contain a match \
-for %s, but it did not" buffer re))
-            (cons nil (format "Expected %S not to contain a match for \
-%s but it did not." buffer re))))))))
+              (cons t (format "Expected %S not to contain a match \
+for %s, but it did" buffer re))
+            (cons nil (format "Expected %S to contain a match for \
+%s, but it did not." buffer re))))))))
 
 
 ;;; Flycheck matchers
