@@ -639,7 +639,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
    .. syntax-checker:: haskell-stack-ghc
                        haskell-ghc
 
-      Check syntax and type GHC_.  In Stack_ projects invoke GHC through Stack
+      Check syntax and types with GHC_.  In Stack_ projects invoke GHC through Stack
       to bring package dependencies from Stack in.
 
       .. _GHC: https://www.haskell.org/ghc/
@@ -1036,7 +1036,6 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
          This syntax checker requires PHP Code Sniffer 2.6 or newer.
 
-      .. _PHP Code Sniffer: http://pear.php.net/package/PHP_CodeSniffer
       .. _PHPCS Changed: https://github.com/sirbrillig/phpcs-changed
 
       .. defcustom:: flycheck-phpcs-standard
@@ -1083,7 +1082,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
    .. syntax-checker:: puppet-lint
 
-      Link with `Puppet Lint <http://puppet-lint.com/>`_.
+      Lint with `Puppet Lint <http://puppet-lint.com/>`_.
 
       .. defcustom:: flycheck-puppet-lint-disabled-checks
 
@@ -1152,7 +1151,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
    .. syntax-checker:: python-pyright
 
-      Type check python with  `pyright <https://github.com/microsoft/pyright>`_.
+      Type check Python with `pyright <https://github.com/microsoft/pyright>`_.
 
       .. note::
 
@@ -1160,7 +1159,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
    .. syntax-checker:: python-mypy
 
-      Type check python with  `mypy <http://www.mypy-lang.org/>`_.
+      Type check Python with `mypy <http://www.mypy-lang.org/>`_.
 
       .. note::
 

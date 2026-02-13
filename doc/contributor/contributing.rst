@@ -72,7 +72,7 @@ Feature requests
 ================
 
 To request a new feature please open a new issue through our `issue form`_.
-A feature request needs to find a core developer or maintainer who adopts and
+A feature request needs to find a core developer or maintainer who adopts and
 implements it.
 
 The build system
@@ -90,18 +90,6 @@ Run ``make help`` to see a list of all available targets.  Some common ones are:
 - ``make specs`` runs all Buttercup_ specs for Flycheck.  Set :makevar:`PATTERN`
   to run only specs matching a specific regular expression, e.g. ``make
   PATTERN='^Mode Line' specs`` to run only tests for the mode line.
-- ``make unit`` runs all ERT unit tests for Flycheck.  We are phasing ERT out in
-  favour of Buttercup; no new ERT unit tests will be added and this target will
-  eventually be removed.
-- ``make integ`` runs all integration tests for Flycheck syntax checkers.  These
-  tests are dependent on the checker programs and their versions; expect
-  failures when running this target with bleeding-edge checkers.  Set
-  :makevar:`SELECTOR` to run only tests matching a specific ERT selector,
-  e.g. ``make SELECTOR='(language haskell)' integ`` to run only integration
-  tests for Haskell.  ``make LANGUAGE=haskell integ`` is a shortcut for this.
-
-  If you want to replicate the integration tests that are run on the CI,
-  continue reading.
 
 .. _Eask: https://emacs-eask.github.io/
 .. _Buttercup: https://github.com/jorgenschaefer/emacs-buttercup
@@ -128,7 +116,7 @@ Once the image is built, you can use it to run the integration tests::
 
   docker run --rm -it -v `pwd`:/flycheck --workdir /flycheck tools-and-emacs:26.2 /bin/bash -c "make integ"
 
-Note that the ``all-tools`` image is rebuilt each month, so the versions of the
+Note that the ``all-tools`` image is rebuilt each month, so the versions of
 its syntax checkers will change accordingly.  You can check the version of each
 installed tool by running the ``check-tools`` script in the image::
 
@@ -147,9 +135,9 @@ Flycheck. Github provides great documentation about `Pull Requests`_.
 Please make your pull requests against the ``master`` branch.
 
 Use ``make check specs unit`` to test your pull request locally. When making
-changes to syntax checkers of a specific language, it’s also a good idea to run
+changes to syntax checkers of a specific language, it’s also a good idea to run
 :samp:`make LANGUAGE={language} integ` and check whether the tests for the
-particular language still work.  A successful ``make integ`` is by no means
+particular language still work.  A successful ``make integ`` is by no means
 mandatory for pull requests, though, the continuous integration will test your
 changes, too.
 
@@ -180,13 +168,13 @@ All pull requests go through a two-stage review process:
 .. important::
 
    We have a comprehensive :ref:`flycheck-style-guide` that explains what
-   features we will accept, how our code should look likewise, what tests we
+   features we will accept, how our code should look like, what tests we
    require, how commit messages should look like, and so on.
 
    Take a look at it to see what we look for in a code review.
 
 Additionally all pull requests go through automated tests on `Travis CI`_ which
-check code style, run unit tests, etc
+check code style, run unit tests, etc.
 
 Feel free to mention individual contributors or entire teams
 (e.g. ``@flycheck/maintainers`` or ``@flycheck/javascript``) to ask for help or

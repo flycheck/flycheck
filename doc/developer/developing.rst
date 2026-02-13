@@ -28,7 +28,7 @@ started (see :ref:`flycheck-syntax-checks`), the following happens:
    the error.
 3. Flycheck then filters the collected errors to keep only the relevant ones.
    For instance, errors directed at other files than the one you are editing are
-   discarded.  The exact sementics of which errors are relevant is defined in
+   discarded.  The exact semantics of which errors are relevant is defined in
    ``flycheck-relevant-error-p``.
 4. Relevant errors are highlighted by Flycheck in the buffer, according to user
    preference.  By default, each error adds a mark in the fringe at the line it
@@ -183,7 +183,7 @@ feedback to the user.
    ``rx.el`` is a built-in Emacs module for declarative regular expressions.
    Look for the documentation of the `rx` function inside Emacs for its usage.
    Flycheck extends `rx` with a few constructs like ``line``, ``file-name`` and
-   ``message``.  You can find them the full list in the docstring for
+   ``message``.  You can find the full list in the docstring for
    `flycheck-rx-to-string`.
 
 Registering the checker
@@ -298,7 +298,7 @@ XML format, so the definition above uses Flycheck's built-in CheckStyle parser,
 and an ``:error-filter`` to replace ``-`` by the current buffer's filename.
 
 Both checkers use a new ``:predicate`` property to determine when the checker
-can be called.  In addition to the ``:mode`` property which restricts the
+can be called.  In addition to the ``:modes`` property which restricts the
 ``protoc`` checker to buffers in ``protobuf-mode``, the ``:predicate`` property
 ensures that ``protoc`` is called only when there is a file associated to the
 buffer (this is necessary since we are passing the file associated to the buffer
@@ -364,7 +364,7 @@ The idea is that you know statically one mode that you want to use the checker
 in: ``foobar-mode``, but another mode can be given via the variable
 ``my-other-foobar-mode`` before the checker is defined.  This won't work,
 because the ``:modes`` property is auto-quoted by `flycheck-define-checker`.
-The issue arises not just with ``:modes``:, but with almost all the other
+The issue arises not just with ``:modes``, but with almost all the other
 properties since they are also auto-quoted.
 
 If you do find yourself in need to define such a checker, there is a solution

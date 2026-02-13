@@ -145,7 +145,7 @@ patches and their testing:
 .. _Debian Emacs addon team: https://pkg-emacsen.alioth.debian.org/
 
 Acknowledgments
-================
+===============
 
 We would also like to thank the following people and projects:
 
@@ -167,7 +167,7 @@ We would also like to thank the following people and projects:
   when he was using Vim, and served as inspiration for Flycheck and many of its
   syntax checkers.
 * Matthias Güdemann (:gh:`mgudemann`), for his invaluable work on
-  Flycheck’s logo.
+  Flycheck’s logo.
 * Pavel Kobyakov for his work on GNU Flymake, which is a great work on
   its own, despite its flaws and weaknesses.
 * Simon Carter (:gh:`bbbscarter`), for his patient in-depth testing of automatic

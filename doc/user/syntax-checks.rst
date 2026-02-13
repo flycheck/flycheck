@@ -50,7 +50,7 @@ possible.
          i.e. whenever the value of ``major-mode`` is contained in this list.
 
       :samp:`(not {foo-mode} …)`
-         Turn :mode:`flycheck` on for all major nodes *not* in this list,
+         Turn :mode:`flycheck` on for all major modes *not* in this list,
          i.e. whenever the value of ``major-mode`` is *not* contained in this
          list.
 
@@ -83,7 +83,7 @@ You can customise this behaviour with `flycheck-check-syntax-automatically`:
 
 .. defcustom:: flycheck-check-syntax-automatically
 
-   A list of events which trigger a syntax check in the current buffer:
+   A list of events which trigger a syntax check in the current buffer:
 
    ``save``
       Check the buffer immediately after it was saved.

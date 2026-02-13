@@ -54,7 +54,7 @@ Navigate and list errors
 
 With `C-c ! n` and `C-c ! p` you can now jump back and forth between erroneous
 places.  If you keep on such a place for a little while Flycheck will show the
-corresponding error message in the each area.  Likewise, if you hover such a
+corresponding error message in the echo area.  Likewise, if you hover such a
 place with the mouse cursor Flycheck will show the error message in a tooltip.
 
 Press `C-c ! l` to pop up a list of all errors in the current buffer.  This list

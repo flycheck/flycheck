@@ -7,7 +7,7 @@
 Issue triage
 ============
 
-Please label incoming tickets accordingly according to these rules:
+Please label incoming tickets according to these rules:
 
 - Add the “bug” label to things that you think **must be fixed urgently**.
   Please don’t use this label for bugs that do not severely impede Flycheck’s
@@ -27,7 +27,7 @@ Please label incoming tickets accordingly according to these rules:
 **If you’d like to review a bug or pull request please assign the corresponding
 ticket to you.**
 
-In issues for specific languages that Flycheck support please mention the
+In issues for specific languages that Flycheck supports please mention the
 corresponding :ref:`language team <flycheck-language-teams>` if one exists.
 
 Git workflow
@@ -86,7 +86,7 @@ As a maintainer
 
 * Consider whether you personally think that the change is a good addition to
   Flycheck.
-* Weight the expected benefits and impact of the feature against the
+* Weigh the expected benefits and impact of the feature against the
   expected complexity.
 * Check whether the pull request complies with our :ref:`style guide
   <flycheck-style-guide>`, but don't go too much into technical details.
@@ -232,12 +232,12 @@ We use a single continuously increasing version number for Flycheck.
 
    Breaking changes may occur **at any point**.
 
-Please feel free to make a release whenever you think it’s appropriate.
-It’s generally a good idea to release when
+Please feel free to make a release whenever you think it’s appropriate.
+It’s generally a good idea to release when
 
 - you fixed an important bug that affects many users,
 - there are a couple of new syntax checkers available,
-- there’s a major new feature in ``master``,
+- there’s a major new feature in ``master``,
 - etc.
 
 In doubt just make a release.  We aim to release early and frequently.  If
@@ -256,7 +256,7 @@ First, check that
 3. all commits are pushed,
 4. and Travis CI passes for the latest commit on ``master``.
 
-If all is good a new release is a simple as
+If all is good a new release is as simple as
 
 .. code-block:: console
 

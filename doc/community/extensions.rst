@@ -34,7 +34,7 @@ These extensions change Flycheck’s user interface:
 * :flyc:`flycheck-pos-tip` (*official*) shows Flycheck error messages in a
   graphical popup.
 * :gh:`liblit/flycheck-status-emoji` adds cute emoji (e.g. 😱 for errors) to
-  Flycheck’s mode line status.
+  Flycheck’s mode line status.
 * :gh:`Wilfred/flycheck-title` shows Flycheck error messages in the frame title.
 * :flyc:`flycheck-inline` shows Flycheck error messages in the buffer, directly
   below their origin.
@@ -48,8 +48,8 @@ diagnostics received by the LSP server (by providing a Flymake backend).
 
 It seems that many people were forced to move to Flymake, because they wanted to
 use Eglot and its maintainer (who's also the maintainer of Flymake) didn't want
-to provide Flycheck integration (backend) for it. (see the relevant `discussion
-<https://github.com/joaotavora/eglot/issues/42>`_))
+to provide Flycheck integration (backend) for it (see the relevant `discussion
+<https://github.com/joaotavora/eglot/issues/42>`_).
 
 Fortunately, you have options if you want to stick with Flycheck:
 

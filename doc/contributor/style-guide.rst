@@ -116,9 +116,8 @@ Tests
   :file:`test/specs/`.  Check whether the specs fit into an existing spec file,
   or add a new file instead.  In doubt, use a new file.
 
-* For new syntax checkers add at least one syntax checker integration test to
-  :file:`test/flycheck-test.el`.  Make sure that the test passes with
-  :samp:`make LANGUAGE={language} integ`.
+* For new syntax checkers add at least one syntax checker test to
+  :file:`test/specs/languages/`.
 
 Documentation
 =============
@@ -166,7 +165,7 @@ This model commit message illustrates our style::
 
    The first line is the summary, 50 characters or less.  Write in the
    imperative and in present tense: “Fix bug”, not “fixed bug” or “fixes
-   bug”.  Explain the intend of the change not the actual contents which the
+   bug”.  Explain the intent of the change not the actual contents which the
    diff already provides
 
    After the summary more paragraphs with detailed explanations may follow,
@@ -180,7 +179,7 @@ This model commit message illustrates our style::
    like this: Fixes GH-42 and closes GH-42.
 
 `Git Commit`_ and Magit_ provide Emacs mode for Git commit messages, which helps
-you to comply to these guidelines.
+you to comply with these guidelines.
 
 .. seealso::
 

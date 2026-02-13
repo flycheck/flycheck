@@ -26,7 +26,7 @@ errors; navigation should just work out of the box.
 .. note::
 
    Visible compilation buffers such as buffers from ``M-x compile``, ``M-x
-   grep``, etc. still take *precedence* over Flycheck’s errors.
+   grep``, etc. still take *precedence* over Flycheck’s errors.
 
 The exact behaviour of these error navigation features is very context-dependent
 and can be very confusing at times so you can disable this integration:
@@ -70,7 +70,7 @@ compilation buffers and `flycheck-standard-error-navigation`:
 
    Jump to the first Flycheck error.
 
-   With prefix argument, jump forwards to by as many errors as specified by the
+   With prefix argument, jump forwards by as many errors as specified by the
    prefix argument, e.g. :kbd:`M-3 M-x flycheck-first-error` moves to the 3rd
    error from the beginning of the buffer.  With negative prefix argument move
    to the last error instead.
@@ -114,7 +114,7 @@ behaviour is entirely customisable:
 
 .. defcustom:: flycheck-display-errors-function
 
-   A function to display errors.
+   A function to display errors.
 
    The function is given the list of Flycheck errors to display as sole argument
    and shall display these errors to the user in some way.
@@ -134,7 +134,7 @@ Flycheck provides two built-in functions for this option:
       (setq flycheck-display-errors-function
             #'flycheck-display-error-messages-unless-error-list)
 
-Along the same vein, Flycheck provides a way to customise how a error message is
+Along the same vein, Flycheck provides a way to customise how an error message is
 cleared, this is especially useful if you use a Flycheck extension to display
 error messages differently from the default.
 
@@ -155,7 +155,7 @@ clear the last Flycheck error message from the minibuffer:
 .. seealso::
 
    :flyc:`flycheck-pos-tip`
-      A Flycheck extension to display errors in a GUI popup.
+      A Flycheck extension to display errors in a GUI popup.
 
 Additionally Flycheck shows errors in a GUI tooltip whenever you hover an error
 location with the mouse pointer.  By default the tooltip contains the messages
@@ -163,7 +163,7 @@ and IDs of all errors under the pointer, but the contents are customisable:
 
 .. defcustom:: flycheck-help-echo-function
 
-   A function to create the contents of the tooltip.
+   A function to create the contents of the tooltip.
 
    The function is given a list of Flycheck errors to display as sole argument
    and shall return a single string to use as the contents of the tooltip.
@@ -224,7 +224,7 @@ checkers produce explanations, the majority do not.  Those that do are:
 Kill errors
 ===========
 
-You can put errors into the kill ring with `C-c ! w`:
+You can put errors into the kill ring with `C-c ! C-w`:
 
 .. define-key:: C-c ! C-w
                 M-x flycheck-copy-errors-as-kill
@@ -234,9 +234,9 @@ You can put errors into the kill ring with `C-c ! w`:
 .. define-key:: C-u C-c ! C-w
                 C-u M-x flycheck-copy-errors-as-kill
 
-   Like `C-c ! w` but with error IDs.
+   Like `C-c ! C-w` but with error IDs.
 
 .. define-key:: M-0 C-c ! C-w
                 M-0 M-x flycheck-copy-errors-as-kill
 
-   Like `C-c ! w` but do not copy the error messages but only the error IDs.
+   Like `C-c ! C-w` but do not copy the error messages but only the error IDs.

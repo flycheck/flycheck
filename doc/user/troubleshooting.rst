@@ -16,13 +16,13 @@ First check whether your issue is one of the common setup issues and problems.
 
 .. _flycheck-macos-exec-path-from-shell:
 
-Flycheck can’t find any programs in GUI Emacs on MacOS
+Flycheck can’t find any programs in GUI Emacs on macOS
 ------------------------------------------------------
 
 Try to install and configure exec-path-from-shell_ to make a GUI Emacs inherit
 the ``$PATH`` environment variable from your shell configuration.
 
-The issue is that due to the special way MacOS starts GUI programs a GUI Emacs
+The issue is that due to the special way macOS starts GUI programs a GUI Emacs
 does not inherit the environment variables from the shell configuration so Emacs
 will lack some important entries in ``$PATH``, most notably ``/usr/local/bin/``
 where Homebrew, NPM and many other package managers put binaries in.
@@ -105,12 +105,12 @@ syntax checker just the way Flycheck would run it:
 .. define-key:: C-c ! C-c
                 M-x flycheck-compile
 
-   Prompt for a syntax checker and run in as a shell command, showing the whole
+   Prompt for a syntax checker and run it as a shell command, showing the whole
    output in a separate buffer.
 
    .. important::
 
-      The current implementation this command suffers from a couple of issues,
+      The current implementation of this command suffers from a couple of issues,
       so we’d like to have a replacement in GH-854_ and we could use your help!
       If you’d like to help out with this task please join the discussion in
       that issue.

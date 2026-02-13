@@ -102,7 +102,7 @@ contributions to Flymake are subject to the FSF policies on GNU projects.  Most
 notably, contributors are required to assign their copyright to the FSF.
 
 **Flycheck** is not part of GNU Emacs.  However, it is free software as well,
-and publicly developed on the well-known code hosting platform :gh:`Github
+and publicly developed on the well-known code hosting platform :gh:`GitHub
 <flycheck/flycheck>`.  Contributing to Flycheck does not require a copyright
 assignment, only an explicit agreement that your contributions will be licensed
 under the GPL.
@@ -253,7 +253,7 @@ Error explanations
 ~~~~~~~~~~~~~~~~~~
 
 Some **Flycheck** checkers can use error identifiers to provide error
-explanations in an help buffer (see `flycheck-explain-error-at-point`).
+explanations in a help buffer (see `flycheck-explain-error-at-point`).
 
 .. _margins:
 
@@ -269,7 +269,7 @@ behavior can be customized using `flycheck-indication-mode`, and
 Error parsing
 ~~~~~~~~~~~~~
 
-**Flymake** lets backend parse error messages from
+**Flymake** lets backends parse error messages from
 tools.  There are no built-in helpers for defining error patterns, or for
 parsing JSON or XML formats.
 
@@ -286,10 +286,10 @@ Error message display
 the mouse over an error location, or in the echo area if the user navigates to
 the error with `flymake-goto-next-error`.
 
-**Flycheck** shows error message in tool tips as well, and also displays error
+**Flycheck** shows error messages in tool tips as well, and also displays error
 messages in the echo area if the point is at an error location.  This feature is
 fully customizable via `flycheck-display-errors-function`, and several
-`extensions <flycheck-extensions>` already provide alternative way to display
+`extensions <flycheck-extensions>` already provide alternative ways to display
 errors.
 
 Supported by Eglot
@@ -301,8 +301,8 @@ diagnostics received by the LSP server (by providing a Flymake backend).
 
 It seems that many people were forced to move to Flymake, because they wanted to
 use Eglot and its maintainer (who's also the maintainer of Flymake) didn't want
-to provide Flycheck integration (backend) for it. (see the relevant `discussion
-<https://github.com/joaotavora/eglot/issues/42>`_))
+to provide Flycheck integration (backend) for it (see the relevant `discussion
+<https://github.com/joaotavora/eglot/issues/42>`_).
 
 .. note::
 
@@ -315,7 +315,7 @@ Supported by lsp-mode
 `lsp-mode <https://github.com/emacs-lsp/lsp-mode>`_ is a popular alternative to
 Eglot that supports both Flycheck and Flymake.
 
-As you might imagine we encourage Flycheck to use ``lsp-mode`` until we find
+As you might imagine we encourage Flycheck users to use ``lsp-mode`` until we find
 some solution for the existing limitations in Eglot.
 
 .. rubric:: Footnotes

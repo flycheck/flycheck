@@ -41,9 +41,9 @@ package managers such as Rubygems, NPM, Cabal, etc.
 
 .. important::
 
-   For a GUI Emacs on MacOS we recommend to install and configure
+   For a GUI Emacs on macOS we recommend to install and configure
    exec-path-from-shell_ to make Emacs use the proper ``$PATH`` and avoid a
-   :ref:`common setup issue on MacOS <flycheck-macos-exec-path-from-shell>`.
+   :ref:`common setup issue on macOS <flycheck-macos-exec-path-from-shell>`.
 
 .. _Homebrew: https://brew.sh
 .. _exec-path-from-shell: https://github.com/purcell/exec-path-from-shell
@@ -55,7 +55,7 @@ Package installation
 
 We recommend to install Flycheck with Emacs' built-in package manager.  Flycheck
 is available in the popular `MELPA`_ archive which serves up to date snapshots
-of Flycheck's development state.  We recommend to read through the
+of Flycheck's development state.  We recommend to read through the
 :doc:`changelog </changes>` before every upgrade to check for any breaking
 changes that might affect you.
 

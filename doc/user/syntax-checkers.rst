@@ -22,7 +22,7 @@ you can access with `C-c ! ?`:
    Prompt for the name of a syntax checker and pop up a Help buffer with its
    documentation.
 
-   The documentation includes the name of the program or service used, a list of
+   The documentation includes the name of the program or service used, a list of
    major modes the checker supports and a list of all options for this syntax
    checker.
 
@@ -36,9 +36,9 @@ buffer from `flycheck-checkers` whenever it needs to check the buffer:
 
 .. defcustom:: flycheck-checkers
 
-   A list of all syntax checkers available for syntax checking.
+   A list of all syntax checkers available for syntax checking.
 
-   A syntax checker in this list is a :term:`registered syntax checker`.
+   A syntax checker in this list is a :term:`registered syntax checker`.
 
 Flycheck picks the first syntax checker from this list which exists and supports
 the current major mode, and runs it over the current buffer.  When the checker
@@ -112,7 +112,7 @@ a specific syntax checker for a project.  For instance, Flycheck usually prefers
 `javascript-jshint` instead you can tell Flycheck to use `javascript-jshint` for
 all Javascript buffers of your project with the following command in the
 top-level directory of your project: :kbd:`M-x add-dir-local-variable RET
-js-mode RET flycheck-checker RET javascript-jshint`.  A new buffer pops up that
+js-mode RET flycheck-checker RET javascript-jshint`.  A new buffer pops up that
 shows the newly created entry in the directory variables.  Save this buffer and
 kill it.  From now on Flycheck will check all Javascript files of this project
 with JSHint.
@@ -287,7 +287,7 @@ reported, the next checker of the sequence runs and its errors are reported,
 etc. until there are no more checkers in the sequence.  This sequence is called
 a *checker chain*.
 
-Some checkers chains are already setup by default in Flycheck: e.g.,
+Some checker chains are already set up by default in Flycheck: e.g.,
 `emacs-lisp` will be followed by `emacs-lisp-checkdoc`, and `python-mypy` will
 be followed by `python-flake8`.
 

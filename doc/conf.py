@@ -74,7 +74,7 @@ def read_minimum_emacs_version():
         if match:
             return match.group(1)
         else:
-            raise ValueError('Vailed to parse minimum Emacs version from '
+            raise ValueError('Failed to parse minimum Emacs version from '
                              'Package-Requires of flycheck.el!')
 
 
@@ -142,7 +142,7 @@ extlinks = {
 }
 
 # While still have work to do :)
-# FIXME: Remove when the old Texinfo manual is completed ported
+# FIXME: Remove when the old Texinfo manual is completely ported
 todo_include_todos = True
 
 
@@ -222,7 +222,7 @@ class IssueReferences(Transform):
     def apply(self):
         docname = self.document.settings.env.docname
         if docname != 'changes':
-            # Only transform issue references in changelo
+            # Only transform issue references in changelog
             return
 
         for node in self.document.traverse(nodes.Text):

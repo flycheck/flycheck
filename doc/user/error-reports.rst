@@ -13,7 +13,7 @@ results of the check in the current buffer in two ways:
 Additionally Flycheck indicates its current state and the number of errors and
 warnings in the mode line.
 
-The following screenshot illustrates how this looks like in the default Emacs
+The following screenshot illustrates what this looks like in the default Emacs
 color theme.  It shows an info, a warning and an error annotation, from top to
 bottom.  Please also note the fringe indicators on the left side and the
 emphasized mode line indicator in the bottom right corner:
@@ -76,7 +76,7 @@ using `flycheck-highlighting-mode`.
 
    ``symbols``
       Highlight the entire symbol around the error column if any, otherwise like
-      ``columns``.  This is this default.
+      ``columns``.  This is the default.
 
    ``sexps``
       Highlight the entire expression around the error column if any, otherwise
@@ -118,7 +118,7 @@ is achieved using the ``conditional`` style described below).
       twice to form double brackets.
 
    ``(conditional NLINES S1 S2)``
-      Chose between styles ``S1`` and ``S2``: ``S1`` if the error covers up to
+      Choose between styles ``S1`` and ``S2``: ``S1`` if the error covers up to
       ``NLINES``, and ``S2`` otherwise.
 
 To change the style of the underline or use different colours in the
@@ -151,7 +151,7 @@ In GUI frames, Flycheck also adds indicators to the fringe—the left or right
 border of an Emacs window—to help you identify erroneous lines quickly.
 These indicators consist of a rightward-pointing double arrow shape coloured in
 the colour of the corresponding error level.  By default the arrow is 8 pixels
-wide, but a 16 pixels version is used if the fringe is `wide enough
+wide, but a 16-pixel version is used if the fringe is `wide enough
 <https://www.gnu.org/software/emacs/manual/html_node/emacs/Fringes.html>`_.
 
 .. note::
@@ -254,7 +254,7 @@ Flycheck’s current state via one of the following texts:
 |             |<flycheck-languages>` and type `C-c ! v` to see what checkers   |
 |             |are available for the current buffer.                           |
 +-------------+----------------------------------------------------------------+
-|``FlyC!``    |The last syntax check failed.  Inspect the ``*Messages*`` buffer|
+|``FlyC!``    |The last syntax check failed.  Inspect the ``*Messages*`` buffer,|
 |             |look for error messages, and consider :ref:`reporting a bug     |
 |             |<flycheck-bug-reports>`.                                        |
 +-------------+----------------------------------------------------------------+
@@ -276,7 +276,7 @@ You can also customize the indicator for a successful run (no errors/warnings fo
 
 .. defcustom:: flycheck-mode-success-indicator
 
-   Success indicator appended to `flycheck-mode-line-prefix'. Set to ":0" by default.
+   Success indicator appended to `flycheck-mode-line-prefix`. Set to ":0" by default.
 
 .. seealso::
 
@@ -294,7 +294,7 @@ You can also customize the indicator for a successful run (no errors/warnings fo
 Error thresholds
 ================
 
-To avoid flooding a buffers with excessive highlighting, cluttering the
+To avoid flooding a buffer with excessive highlighting, cluttering the
 appearance and slowing down Emacs, Flycheck takes precautions against syntax
 checkers that report a large number of errors exceeding
 `flycheck-checker-error-threshold`:

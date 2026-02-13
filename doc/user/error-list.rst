@@ -42,7 +42,7 @@ Within the error list the following key bindings are available:
 Filter the list
 ===============
 
-By the default the error list shows all errors but sometimes you'd like to hide
+By default the error list shows all errors but sometimes you'd like to hide
 warnings to focus only on real errors.  The error list lets you hide all errors
 below a certain level with :kbd:`f`.  This key prompts for an error level and
 will remove all errors of lower levels from the list.  The filter is permanent

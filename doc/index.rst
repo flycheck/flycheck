@@ -46,7 +46,7 @@ run ``M-x eval-buffer``:
 
    (global-flycheck-mode)
 
-*On MacOS* also add the following to :ref:`fix your $PATH environment variable
+*On macOS* also add the following to :ref:`fix your $PATH environment variable
 <flycheck-macos-exec-path-from-shell>`:
 
 .. code-block:: cl
@@ -56,7 +56,7 @@ run ``M-x eval-buffer``:
 
 For a permanent installation of Flycheck follow the :ref:`Installation
 <flycheck-installation>` instructions.  For a gentle introduction into Flycheck
-features go through :ref:`Quickstart <flycheck-quickstart>` guide.
+features go through the :ref:`Quickstart <flycheck-quickstart>` guide.
 
 .. important::
 
@@ -74,7 +74,7 @@ The User Guide
 
 The User Guide provides installation and usage help for Flycheck.  It starts
 with installation instructions and a quick start tutorial and then focuses on an
-in-depth references of all parts of Flycheck.
+in-depth reference to all parts of Flycheck.
 
 .. toctree::
 
@@ -93,7 +93,7 @@ in-depth references of all parts of Flycheck.
 The Community Guide
 ===================
 
-The Community Guide provides information about Flycheck’s ecosystem and
+The Community Guide provides information about Flycheck’s ecosystem and
 community.
 
 .. toctree::
@@ -108,7 +108,7 @@ community.
 The Developer Guide
 ===================
 
-The Developer Guide shows how extend Flycheck and how to write syntax checkers
+The Developer Guide shows how to extend Flycheck and how to write syntax checkers
 for Flycheck.
 
 .. toctree::
