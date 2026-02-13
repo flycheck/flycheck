@@ -51,12 +51,12 @@ version."
 (describe "MELPA package"
   (let* ((directory (make-temp-file "flycheck-test-package" 'directory))
          (filename (expand-file-name "flycheck.tar" directory))
-         (travis-p (getenv "TRAVIS"))
+         (ci-p (getenv "CI"))
          version
          entries)
 
     (before-all
-      (unless travis-p
+      (unless ci-p
         (with-demoted-errors "Failed to obtain Flycheck package: %S"
           (setq version (flycheck/get-melpa-version))
 
@@ -74,8 +74,8 @@ version."
                                      (process-lines "tar" "-tf" filename))))))))
 
     (before-each
-      (assume (not travis-p)
-              (concat "Don't test package on Travis CI. "
+      (assume (not ci-p)
+              (concat "Don't test package on CI. "
                       "Let's not spoil MELPA download stats."))
       (assume version "Flycheck MELPA version not found")
       (assume entries "Could not download and parse Flycheck package"))

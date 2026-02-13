@@ -32,7 +32,7 @@ SOURCE_DIR = Path(__file__).resolve().parent.parent
 FLYCHECK_EL = SOURCE_DIR.joinpath('flycheck.el')
 CHANGELOG = SOURCE_DIR.joinpath('CHANGES.rst')
 
-TRAVIS_ENDPOINT = 'https://api.travis-ci.org/repos/flycheck/flycheck'
+GITHUB_API = 'https://api.github.com/repos/flycheck/flycheck'
 
 VERSION_HEADER_RE = re.compile(
     r'^(?P<label>;;\s*Version:\s*)(?P<value>\S+)\s*$',
@@ -78,12 +78,18 @@ class Version(namedtuple('Version', 'version is_snapshot')):
 class BuildState(namedtuple('BuildState', 'commit state')):
 
     @classmethod
-    def get_from_travis_ci(cls):
+    def get_from_github_actions(cls):
         response = requests.get(
-            TRAVIS_ENDPOINT + '/branches/master',
-            headers={'Accept': 'application/vnd.travis-ci.2+json'}).json()
-        return cls(commit=response['commit']['sha'],
-                   state=response['branch']['state'])
+            GITHUB_API + '/actions/runs',
+            params={'branch': 'master', 'per_page': 1},
+            headers={'Accept': 'application/vnd.github+json'}).json()
+        if not response.get('workflow_runs'):
+            return cls(commit=None, state='unknown')
+        run = response['workflow_runs'][0]
+        # Map GitHub Actions conclusion to a simple state
+        conclusion = run.get('conclusion', run.get('status', 'unknown'))
+        state = 'passed' if conclusion == 'success' else conclusion
+        return cls(commit=run['head_sha'], state=state)
 
 
 def read_version_from_library_header(path):
@@ -149,10 +155,10 @@ def ensure_can_make_release(repo):
         raise CannotReleaseError(
             'Cannot release from dirty working directory.'
             ' Please commit or stash all changes!')
-    state = BuildState.get_from_travis_ci()
+    state = BuildState.get_from_github_actions()
     if state.commit != repo.head.ref.object.hexsha:
         raise CannotReleaseError(
-            'HEAD not tested on Travis CI.\n'
+            'HEAD not tested on CI.\n'
             'Please push your changes and wait for the build to complete.')
     if state.state != 'passed':
         raise CannotReleaseError(

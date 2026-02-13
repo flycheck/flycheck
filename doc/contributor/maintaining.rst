@@ -55,7 +55,7 @@ Our workflow implies a couple of rules about which branches to push code to:
   discussion.
 * The ``master`` branch is protected.  Only :ref:`owners <flycheck-maintainers>`
   can push directly to it.  Everyone else needs to open a pull request.  Github
-  requires maintainer approval and passing Travis CI tests before a pull request
+  requires maintainer approval and passing CI tests before a pull request
   can be merged to master.
 
 .. important::
@@ -187,8 +187,8 @@ extra tooling and some 3rd party services for Flycheck:
 * ReadTheDocs_ hosts http://www.flycheck.org and automatically rebuilds it on
   every change.  It works mostly automatically and requires little
   configuration.
-* `Travis CI`_ runs our tests after every push and for every pull request.
-  It's configured through ``.travis.yml``.
+* `GitHub Actions`_ runs our tests after every push and for every pull request.
+  It's configured through ``.github/workflows/``.
 * `CLA assistant`_ checks signatures to our CLA_ and allows contributors to sign
   the CLA through their Github account.
 
@@ -197,7 +197,7 @@ these services so in case of an issue just contact them.
 
 .. _Github: https://github.com/flycheck
 .. _ReadTheDocs: https://readthedocs.org/projects/flycheck/
-.. _Travis CI: https://travis-ci.org/flycheck/flycheck
+.. _GitHub Actions: https://github.com/flycheck/flycheck/actions
 .. _CLA assistant: https://cla-assistant.io
 .. _CLA: https://gist.github.com/swsnr/c9c0d656fe7e704da2f734779242ec99
 
@@ -254,7 +254,7 @@ First, check that
 2. your working directory is clean, i.e. has no uncommitted changes or untracked
    files,
 3. all commits are pushed,
-4. and Travis CI passes for the latest commit on ``master``.
+4. and CI passes for the latest commit on ``master``.
 
 If all is good a new release is as simple as
 

@@ -94,36 +94,6 @@ Run ``make help`` to see a list of all available targets.  Some common ones are:
 .. _Eask: https://emacs-eask.github.io/
 .. _Buttercup: https://github.com/jorgenschaefer/emacs-buttercup
 
-Running all the integration tests
-=================================
-
-To run all the integration tests, you need to have all the syntax checkers
-installed.  As that can be tedious work, and since your locally installed tools
-can have different versions than the tools used on the CI, we have created a
-Docker image with most of the supported checkers.  To use the Docker image
-locally and replicate the integration tests that are run on the CI, first you
-need to build the image::
-
-  cd flycheck
-  docker pull flycheck/emacs-cask:26.2
-  docker pull flycheck/all-tools:latest
-  docker build --build-arg EMACS_VERSION=26.2 --tag tools-and-emacs:26.2 -f .travis/tools-and-emacs .
-
-Replace ``26.2`` by the Emacs version you want to test.  See the available
-versions on `docker hub`_.
-
-Once the image is built, you can use it to run the integration tests::
-
-  docker run --rm -it -v `pwd`:/flycheck --workdir /flycheck tools-and-emacs:26.2 /bin/bash -c "make integ"
-
-Note that the ``all-tools`` image is rebuilt each month, so the versions of
-its syntax checkers will change accordingly.  You can check the version of each
-installed tool by running the ``check-tools`` script in the image::
-
-  docker run --rm -it -v `pwd`:/flycheck --workdir /flycheck tools-and-emacs:26.2 check-tools
-
-.. _docker hub: https://hub.docker.com/r/flycheck/emacs-cask/tags
-
 Pull requests
 =============
 
@@ -173,8 +143,8 @@ All pull requests go through a two-stage review process:
 
    Take a look at it to see what we look for in a code review.
 
-Additionally all pull requests go through automated tests on `Travis CI`_ which
-check code style, run unit tests, etc.
+Additionally all pull requests go through automated tests on `GitHub Actions`_
+which check code style, run tests, etc.
 
 Feel free to mention individual contributors or entire teams
 (e.g. ``@flycheck/maintainers`` or ``@flycheck/javascript``) to ask for help or
@@ -188,7 +158,7 @@ may also ask you whether you'd like to join Flycheck and help us, thus giving
 you commit access to our repository and let you merge your own pull request.
 
 .. _pull request reviews: https://help.github.com/articles/about-pull-request-reviews/
-.. _Travis CI: https://travis-ci.org/flycheck/flycheck/pull_requests
+.. _GitHub Actions: https://github.com/flycheck/flycheck/actions
 
 Writing documentation
 =====================
