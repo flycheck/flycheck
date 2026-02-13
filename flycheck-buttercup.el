@@ -57,12 +57,14 @@
 ;;; Data matchers
 
 (buttercup-define-matcher :to-be-empty-string (s)
+  "Match that S is an empty string."
   (let ((s (funcall s)))
     (if (equal s "")
         (cons t (format "Expected %S not to be an empty string" s))
       (cons nil (format "Expected %S to be an empty string" s)))))
 
 (buttercup-define-matcher :to-match-with-group (re s index match)
+  "Match that regexp RE matches string S with MATCH in group INDEX."
   (let* ((re (funcall re))
          (s (funcall s))
          (index (funcall index))
@@ -83,6 +85,7 @@
 ;;; Emacs feature matchers
 
 (buttercup-define-matcher :to-be-live (buffer)
+  "Match that BUFFER is a live buffer."
   (let ((buffer (get-buffer (funcall buffer))))
     (if (buffer-live-p buffer)
         (cons t (format "Expected %S not to be a live buffer, but it is"
@@ -91,6 +94,7 @@
                         buffer)))))
 
 (buttercup-define-matcher :to-be-visible (buffer)
+  "Match that BUFFER is displayed in a window."
   (let ((buffer (get-buffer (funcall buffer))))
     (cond
      ((and buffer (get-buffer-window buffer))
@@ -106,6 +110,7 @@
                  buffer))))))
 
 (buttercup-define-matcher :to-be-local (symbol)
+  "Match that SYMBOL is a buffer-local variable in the current buffer."
   (let ((symbol (funcall symbol)))
     (if (local-variable-p symbol)
         (cons t (format "Expected %S not to be a local variable, but it is"
@@ -114,6 +119,7 @@
                         symbol)))))
 
 (buttercup-define-matcher :to-contain-match (buffer re)
+  "Match that BUFFER contains text matching regexp RE."
   (let ((buffer (funcall buffer))
         (re (funcall re)))
     (if (not (get-buffer buffer))
@@ -132,6 +138,7 @@ for %s, but it did" buffer re))
 ;;; Flycheck matchers
 
 (buttercup-define-matcher :to-be-equal-flycheck-errors (a b)
+  "Match that flycheck error lists A and B are equal."
   (let* ((a (funcall a))
          (b (funcall b))
          (a-formatted (flycheck-buttercup-format-error-list a))
@@ -194,7 +201,8 @@ it has a backing file and is modified."
   "Create a buffer from FILE-NAME and eval BODY.
 
 BODY is evaluated with `current-buffer' being a buffer with the
-contents FILE-NAME."
+contents of FILE-NAME, its `visited-file-name' set to FILE-NAME,
+and `default-directory' set to the file's directory."
   (declare (indent 1) (debug t))
   `(let ((file-name ,file-name))
      (unless (file-exists-p file-name)
@@ -278,7 +286,11 @@ failed, and the test aborted with failure.")
   "Suspicious state from checker")
 
 (defun flycheck-buttercup-wait-for-syntax-checker ()
-  "Wait until the syntax check in the current buffer is finished."
+  "Wait until the syntax check in the current buffer is finished.
+
+Signal `flycheck-buttercup-syntax-check-timed-out' if the check
+does not complete within `flycheck-buttercup-checker-wait-time'
+seconds."
   (let ((starttime (float-time)))
     (while (and (not flycheck-buttercup-syntax-checker-finished)
                 (< (- (float-time) starttime)
@@ -307,9 +319,9 @@ failed, and the test aborted with failure.")
   (flycheck-buttercup-wait-for-syntax-checker))
 
 (defun flycheck-buttercup-ensure-clear ()
-  "Clear the current buffer.
+  "Clear Flycheck errors and overlays from the current buffer.
 
-Raise an assertion error if the buffer is not clear afterwards."
+Raise an assertion error if errors or overlays remain afterwards."
   (flycheck-clear)
   (expect flycheck-current-errors :not :to-be-truthy)
   (expect (seq-find (lambda (ov) (overlay-get ov 'flycheck-overlay))

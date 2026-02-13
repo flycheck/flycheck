@@ -834,7 +834,11 @@ display all errors from other files."
   :package-version '(flycheck . "32"))
 
 (defcustom flycheck-relevant-error-other-file-show t
-  "Whether to show errors from other files."
+  "Whether to show errors from other files.
+
+When non-nil, errors reported by a checker that reference files
+other than the one being checked are shown in the error list and
+highlighted in the buffer."
   :group 'flycheck
   :type 'boolean
   :package-version '(flycheck . "32")
@@ -1935,7 +1939,7 @@ Signal an error if NEXT is not a valid entry for
 (defun flycheck-define-generic-checker (symbol docstring &rest properties)
   "Define SYMBOL as generic syntax checker.
 
-Any syntax checker defined with this macro is eligible for manual
+Any syntax checker defined with this function is eligible for manual
 syntax checker selection with `flycheck-select-checker'.  To make
 the new syntax checker available for automatic selection, it must
 be registered in `flycheck-checkers'.
@@ -2619,7 +2623,7 @@ When WITH-SELECT is non-nil, add a button to select this checker."
 (defun flycheck--get-next-checker-symbol (next)
   "Get the checker symbol of NEXT checker.
 
-NEXT should be either a cons (NEXT-CHECKER . LEVEL) or a
+NEXT should be either a cons (LEVEL . CHECKER) or a
 symbol."
   (if (consp next) (cdr next) next))
 
@@ -3244,11 +3248,11 @@ Get a syntax checker for the current buffer with
 
 (defun flycheck-report-buffer-checker-status
     (syntax-check status &optional data)
-  "In BUFFER, report a SYNTAX-CHECK STATUS with DATA.
+  "Report a SYNTAX-CHECK STATUS with DATA.
 
 SYNTAX-CHECK is the `flycheck-syntax-check' which reported
-STATUS.  STATUS denotes the status of CHECKER, with an optional
-DATA.  STATUS may be one of the following symbols:
+STATUS.  STATUS denotes the status of the syntax check, with an
+optional DATA.  STATUS may be one of the following symbols:
 
 `errored'
      The syntax checker has errored.  DATA is an optional error
@@ -3820,7 +3824,7 @@ return nil."
   "Get the line region of position POS.
 
 Return a cons cell `(BEG . END)' where BEG is the first
-non-whitespace character on the line ERR refers to, and END the
+non-whitespace character on the line POS refers to, and END the
 end of the line."
   (save-excursion
     (goto-char pos)
@@ -3841,8 +3845,8 @@ end of the line."
 (defun flycheck--column-region (pos)
   "Get the column region of position POS.
 
-Return a cons cell `(BEG . END)' where BEG is the character
-before the column, and END the actual column."
+Return a cons cell `(BEG . END)' where BEG is the position at
+the column, and END is one past it."
   (save-excursion
     (goto-char pos)
     ;; (eobp): Not enough lines in the buffer
@@ -5188,9 +5192,9 @@ string with attached text properties."
    face))
 
 (defun flycheck-error-list-make-entry (error)
-  "Make a table cell for the given ERROR.
+  "Make a table entry for the given ERROR.
 
-Return a list with the contents of the table cell."
+Return a list of (ID CELLS) for `tabulated-list-entries'."
   (let* ((level (flycheck-error-level error))
          (level-face (flycheck-error-level-error-list-face level))
          (filename (flycheck-error-filename error))
@@ -6692,7 +6696,7 @@ appears in the help output."
 ;;;###autoload
 (defmacro flycheck-def-option-var (symbol init-value checkers docstring
                                           &rest custom-args)
-  "Define SYMBOL as option variable with INIT-VALUE for CHECKER.
+  "Define SYMBOL as option variable with INIT-VALUE for CHECKERS.
 
 SYMBOL is declared as customizable variable using `defcustom', to
 provide an option for the given syntax CHECKERS (a checker or a
@@ -7473,7 +7477,7 @@ tries to parse each error token with all patterns, in the order
 of declaration.  Hence an error is never matched twice by two
 different patterns.  The pattern declared first always wins.
 
-_BUFFER is ignored.
+BUFFER is the buffer being checked.
 
 Return a list of parsed errors and warnings (as `flycheck-error'
 objects)."
@@ -8263,7 +8267,8 @@ When non-nil, enable quiet mode, via `--quiet'."
 
 (defconst flycheck-stylelint-error-re
   (flycheck-rx-to-string
-   '(: line-start (id (one-or-more word)) ": " (message) line-end)))
+   '(: line-start (id (one-or-more word)) ": " (message) line-end))
+  "Fallback regex for parsing stylelint errors from non-JSON output.")
 
 (defun flycheck-parse-stylelint (output checker buffer)
   "Parse stylelint errors from OUTPUT.
@@ -8400,7 +8405,7 @@ See URL `https://stylelint.io/'."
       (and error-code `(url . ,(format url error-code))))))
 
 (flycheck-def-option-var flycheck-cuda-language-standard nil cuda-nvcc
-  "Our CUDA Language Standard."
+  "The CUDA language standard to use in nvcc."
   :type '(choice (const :tag "Default standard" nil)
                  (string :tag "Language standard"))
   :safe #'flycheck-string-or-nil-p
@@ -8408,7 +8413,7 @@ See URL `https://stylelint.io/'."
 (make-variable-buffer-local 'flycheck-cuda-language-standard)
 
 (flycheck-def-option-var flycheck-cuda-compiler-options '("-Wall" "-Wextra") cuda-nvcc
-  "Specify options directly to the compiler/preprocessor."
+  "Additional options to pass to the compiler via `-Xcompiler'."
   :type '(choice (const :tag "No additional compiler options" nil)
                  (repeat :tag "Additional compiler options"
                          (string :tag "Compiler option")))
@@ -8416,20 +8421,22 @@ See URL `https://stylelint.io/'."
   :package-version '(flycheck . "35"))
 
 (flycheck-def-option-var flycheck-cuda-gencodes nil cuda-nvcc
-  "Our real and virtual GPU architectures to pass to nvcc."
+  "GPU architectures to pass to nvcc via `-gencode'."
   :type '(repeat (file :tag "GPU architecture"))
   :safe #'flycheck-string-list-p
   :package-version '(flycheck . "32"))
 
 (flycheck-def-option-var flycheck-cuda-includes nil cuda-nvcc
-  "Our include directories to pass to nvcc."
-  :type '(repeat (file :tag "Include file"))
+  "A list of include directories for nvcc."
+  :type '(repeat (directory :tag "Include directory"))
   :safe #'flycheck-string-list-p
   :package-version '(flycheck . "32"))
 
 (flycheck-def-option-var flycheck-cuda-definitions nil cuda-nvcc
   "Additional preprocessor definitions for nvcc.
-A list of strings to pass to cuda, a la flycheck-clang"
+
+The value of this variable is a list of strings, where each
+string is an additional definition to pass to nvcc via `-D'."
   :type '(repeat (string :tag "Definitions"))
   :safe #'flycheck-string-list-p
   :package-version '(flycheck . "32"))
@@ -10134,9 +10141,10 @@ See URL `https://stedolan.github.io/jq/'."
   :modes (json-mode js-json-mode json-ts-mode))
 
 (flycheck-def-option-var flycheck-jsonnet-include-paths nil jsonnet
-  "a list of include paths to specify to the jsonnet binary, via -J .
+  "A list of include paths for the jsonnet binary.
 
-For example (\"./lib\") ."
+The value of this variable is a list of strings, where each
+string is a directory to add to the include path via `-J'."
   :type '(repeat (directory :tag "Include directory"))
   :safe #'flycheck-string-list-p
   :package-version '(flycheck . "35.0"))
@@ -10983,7 +10991,7 @@ Requires Flake8 3.0 or newer. See URL
                               '("pyproject.toml" "ruff.toml" ".ruff.toml"))
 
 (defun flycheck-python-ruff-explainer (err)
-  "Return documentation for the ruff `flycheck-error' ERR."
+  "Return an explainer function for the ruff error ERR."
   (when-let (error-code (flycheck-error-id err))
     (lambda ()
       (flycheck-call-checker-process
@@ -11141,9 +11149,9 @@ the BUFFER that was checked respectively."
    (cdr (nth 2 (car (flycheck-parse-json output))))))
 
 (flycheck-define-checker python-pyright
-  "Static type checker for Python
+  "A Python static type checker using Pyright.
 
-See URL https://github.com/microsoft/pyright."
+See URL `https://github.com/microsoft/pyright'."
   :command ("pyright"
             "--outputjson"
             source-inplace)
@@ -11709,7 +11717,8 @@ report style issues as well."
              line-end)
     (error line-start (file-name) ":" line ":" column ": " (or "E" "F") ": "
            (optional (id (one-or-more (not (any ":")))) ": ") (message)
-           line-end)))
+           line-end))
+  "Error patterns shared by RuboCop-based checkers.")
 
 (flycheck-def-executable-var ruby-rubocop "rubocop")
 (flycheck-define-command-checker 'ruby-rubocop
@@ -11968,7 +11977,7 @@ Relative paths are relative to the file being checked."
       (font-lock-ensure))))
 
 (defun flycheck-rust-error-explainer (error)
-  "Return an explanation for the given `flycheck-error' ERROR."
+  "Return an explainer function for the given rustc error ERROR."
   (when-let (error-code (flycheck-error-id error))
     (lambda ()
       (flycheck-call-checker-process
@@ -12173,7 +12182,7 @@ See URL `https://salt-lint.readthedocs.io/en/latest/'."
 (defun flycheck-salt-lint-parser (output checker buffer)
   "Parse salt lint JSON errors from OUTPUT.
 
-The arguments CHECKER and BUFFER are only passed through."
+CHECKER and BUFFER are used to construct the error objects."
   (condition-case nil
       (let* ((json-array-type 'list)
              (json-object-type 'plist)
@@ -12397,7 +12406,7 @@ See URL `https://call-cc.org/'."
 
 (defconst flycheck-scss-lint-checkstyle-re
   (rx "cannot load such file" (1+ not-newline) "scss_lint_reporter_checkstyle")
-  "Regular expression to parse missing checkstyle error.")
+  "Regular expression to detect a missing checkstyle reporter.")
 
 (defun flycheck-parse-scss-lint (output checker buffer)
   "Parse SCSS-Lint OUTPUT from CHECKER and BUFFER.
@@ -12716,7 +12725,7 @@ See URL
 (flycheck-def-config-file-var flycheck-chktexrc tex-chktex ".chktexrc")
 
 (flycheck-define-checker tcl-nagelfar
-  "An extensible tcl syntax checker
+  "A Tcl syntax checker using Nagelfar.
 
 See URL `https://nagelfar.sourceforge.net/'."
   :command ("nagelfar" "-H" source)
