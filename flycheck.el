@@ -1278,7 +1278,8 @@ Only has effect when variable `global-flycheck-mode' is non-nil."
      ["Read the Flycheck manual" flycheck-manual t]))
   "Menu of command `flycheck-mode'.")
 
-(easy-menu-add-item nil '("Tools") flycheck-mode-menu-map "Spell Checking")
+(when (lookup-key global-map [menu-bar tools])
+  (easy-menu-add-item nil '("Tools") flycheck-mode-menu-map "Spell Checking"))
 
 
 
@@ -1322,7 +1323,8 @@ just return nil."
 (defun flycheck-unload-function ()
   "Unload function for Flycheck."
   (global-flycheck-mode -1)
-  (easy-menu-remove-item nil '("Tools") (cadr flycheck-mode-menu-map))
+  (when (lookup-key global-map [menu-bar tools])
+    (easy-menu-remove-item nil '("Tools") (cadr flycheck-mode-menu-map)))
   (remove-hook 'kill-emacs-hook #'flycheck-global-teardown)
   (setq find-function-regexp-alist
         (assq-delete-all 'flycheck-checker find-function-regexp-alist)))
