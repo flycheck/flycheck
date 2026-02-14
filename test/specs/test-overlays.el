@@ -239,6 +239,6 @@
         (let ((text-quoting-style 'grave))
           (expect (help-at-pt-string)
                   :to-equal
-                  "`int main() {}': info\n`main': warning\n`main()': error"))))))
+                  "`\N{FIRST STRONG ISOLATE}int main() {}\N{POP DIRECTIONAL ISOLATE}': info\n`\N{FIRST STRONG ISOLATE}main\N{POP DIRECTIONAL ISOLATE}': warning\n`\N{FIRST STRONG ISOLATE}main()\N{POP DIRECTIONAL ISOLATE}': error"))))))
 
 ;;; test-overlays.el ends here
