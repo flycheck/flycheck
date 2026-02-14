@@ -11191,6 +11191,14 @@ See URL `https://docs.python.org/3.4/library/py_compile.html'."
   :modes (python-mode python-ts-mode)
   :next-checkers ((warning . python-mypy)))
 
+;; On systems where "python3" is not available (e.g., Windows with
+;; Anaconda/Miniforge), fall back to "python" for Python-based checkers.
+(unless (executable-find "python3")
+  (dolist (checker '(json-python-json python-flake8 python-pylint
+                     python-pycompile))
+    (let ((var (flycheck-checker-executable-variable checker)))
+      (set-default var "python"))))
+
 (defun flycheck-pyright--parse-error (output checker buffer)
   "Parse pyright errors/warnings from JSON OUTPUT.
 CHECKER and BUFFER denote the CHECKER that returned OUTPUT and
