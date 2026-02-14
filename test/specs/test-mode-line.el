@@ -28,18 +28,19 @@
 (require 'flycheck-buttercup)
 
 (describe "Mode Line"
-  (it "shows the number of errors and warnings"
+  (it "shows the number of errors, warnings, and infos"
     (let ((flycheck-current-errors
            (list (flycheck-error-new-at 1 1 'warning "warning 1")
                  (flycheck-error-new-at 2 2 'warning "warning 2")
                  (flycheck-error-new-at 1 1 'error "error"))))
       (expect (flycheck-mode-line-status-text 'finished)
-              :to-equal " FlyC:1|2")))
+              :to-equal " FlyC:1|2|0")))
 
-  (it "does not show the number of infos"
+  (it "shows the number of infos"
     (let ((flycheck-current-errors
            (list (flycheck-error-new-at 1 1 'info "info"))))
-      (expect (flycheck-mode-line-status-text 'finished) :to-equal " FlyC:0")))
+      (expect (flycheck-mode-line-status-text 'finished)
+              :to-equal " FlyC:0|0|1")))
 
   (it "includes the prefix"
     (let ((flycheck-mode-line-prefix "foobar")
