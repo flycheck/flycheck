@@ -12685,6 +12685,19 @@ shellcheck directives in the script."
   :safe #'booleanp
   :package-version '(flycheck . "36"))
 
+(flycheck-def-option-var flycheck-shellcheck-enabled-checks nil sh-shellcheck
+  "A list of enabled optional checks for ShellCheck.
+
+The value of this variable is a list of strings, where each
+string is the name of an optional check to enable.  Use \"all\"
+to enable all optional checks.
+
+See the ShellCheck man page for a list of available optional checks."
+  :type '(repeat :tag "Enabled checks"
+                 (string :tag "Check name"))
+  :safe #'flycheck-string-list-p
+  :package-version '(flycheck . "36"))
+
 (flycheck-def-args-var flycheck-shellcheck-args sh-shellcheck
   :package-version '(flycheck . "36"))
 
@@ -12700,6 +12713,8 @@ See URL `https://github.com/koalaman/shellcheck/'."
             (option-flag "--external-sources"
                          flycheck-shellcheck-follow-sources)
             (option "--exclude" flycheck-shellcheck-excluded-warnings list
+                    flycheck-option-comma-separated-list)
+            (option "--enable" flycheck-shellcheck-enabled-checks list
                     flycheck-option-comma-separated-list)
             (eval flycheck-shellcheck-args)
             "-")
