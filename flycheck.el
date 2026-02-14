@@ -3626,6 +3626,7 @@ Flycheck mode is not enabled for
 - the minibuffer,
 - `fundamental-mode'
 - major modes whose `mode-class' property is `special',
+- Flycheck's own error message buffer,
 - ephemeral buffers (see `flycheck-ephemeral-buffer-p'),
 - encrypted buffers (see `flycheck-encrypted-buffer-p'),
 - remote files (see `file-remote-p'),
@@ -3641,6 +3642,7 @@ otherwise."
        (not (or (minibufferp)
                 (eq major-mode 'fundamental-mode)
                 (eq (get major-mode 'mode-class) 'special)
+                (derived-mode-p 'flycheck-error-message-mode)
                 (flycheck-ephemeral-buffer-p)
                 (flycheck-encrypted-buffer-p)
                 (and (buffer-file-name)
