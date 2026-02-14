@@ -4825,7 +4825,7 @@ function resolves `conditional' style specifications."
       (setf (overlay-get overlay 'before-string)
             (flycheck-error-level-make-indicator
              level flycheck-indication-mode))
-      (setf (overlay-get overlay 'line-prefix)
+      (setf (overlay-get overlay 'wrap-prefix)
             (flycheck-error-level-make-indicator
              level flycheck-indication-mode t)))
     (pcase (flycheck--highlighting-style err)
