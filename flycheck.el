@@ -4832,10 +4832,11 @@ function resolves `conditional' style specifications."
              level flycheck-indication-mode t))
       ;; Preserve any existing line-prefix text property (e.g. from
       ;; org-indent-mode) so the overlay doesn't clobber indentation.
-      (let ((existing-prefix (get-text-property
-                              (overlay-start overlay) 'line-prefix)))
-        (when existing-prefix
-          (setf (overlay-get overlay 'line-prefix) existing-prefix))))
+      (when (buffer-live-p (overlay-buffer overlay))
+        (let ((existing-prefix (get-text-property
+                                (overlay-start overlay) 'line-prefix)))
+          (when existing-prefix
+            (setf (overlay-get overlay 'line-prefix) existing-prefix)))))
     (pcase (flycheck--highlighting-style err)
       ((or `nil (guard (null flycheck-highlighting-mode)))
        ;; Erase the highlighting
