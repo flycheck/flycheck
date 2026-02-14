@@ -10663,6 +10663,7 @@ are relative to the file being checked."
   :type '(repeat (directory :tag "Import directory"))
   :safe #'flycheck-string-list-p
   :package-version '(flycheck . "32"))
+(make-variable-buffer-local 'flycheck-protoc-import-path)
 
 (flycheck-define-checker protobuf-protoc
   "A protobuf syntax checker using the protoc compiler.
