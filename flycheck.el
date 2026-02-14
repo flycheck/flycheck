@@ -2974,6 +2974,7 @@ Slots:
     ;; Handle events that may start automatic syntax checks
     (after-save-hook        . flycheck-handle-save)
     (after-change-functions . flycheck-handle-change)
+    (after-revert-hook      . flycheck-buffer)
     ;; Handle events that may trigger pending deferred checks
     (window-configuration-change-hook . flycheck-perform-deferred-syntax-check)
     (post-command-hook                . flycheck-perform-deferred-syntax-check)
