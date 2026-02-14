@@ -2971,7 +2971,7 @@ Slots:
     ;; Handle events that may start automatic syntax checks
     (after-save-hook        . flycheck-handle-save)
     (after-change-functions . flycheck-handle-change)
-    (after-revert-hook      . flycheck-buffer)
+    (after-revert-hook      . flycheck-handle-revert)
     ;; Handle events that may trigger pending deferred checks
     (window-configuration-change-hook . flycheck-perform-deferred-syntax-check)
     (post-command-hook                . flycheck-perform-deferred-syntax-check)
@@ -3565,6 +3565,14 @@ If a buffer switch actually happened, schedule a syntax check."
 (defun flycheck-handle-save ()
   "Handle a save of the buffer."
   (flycheck-buffer-automatically 'save))
+
+(defun flycheck-handle-revert ()
+  "Handle a buffer revert.
+Start a syntax check after the buffer has been reverted, but only
+if `flycheck-mode' is still active (it may have been killed by
+`revert-buffer' via `kill-all-local-variables')."
+  (when flycheck-mode
+    (flycheck-buffer)))
 
 
 ;;; Deferred syntax checking
