@@ -1243,7 +1243,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 .. supported-language:: reStructuredText
 
    Flycheck checks reStructuredText with `rst-sphinx` in Sphinx_ projects and
-   with `rst` otherwise.
+   with `rst` otherwise.  Both chain to `proselint` for prose linting.
 
    .. _Sphinx: http://sphinx-doc.org/
 
@@ -1584,6 +1584,10 @@ to view the docstring of the syntax checker.  Likewise, you may use
       .. defcustom:: flycheck-shellcheck-excluded-warnings
 
          A list of excluded warnings.
+
+      .. defcustom:: flycheck-shellcheck-enabled-checks
+
+         A list of enabled optional checks.
 
       .. defcustom:: flycheck-shellcheck-follow-sources
 
