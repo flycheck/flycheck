@@ -8856,6 +8856,16 @@ See Info Node `(elisp)Byte Compilation'."
           (message (zero-or-more not-newline)
                    (zero-or-more "\n    " (zero-or-more not-newline)))
           line-end)
+   ;; Parse errors subsequent to byte-compilation (e.g., unbalanced
+   ;; parentheses) may lack line/column info.
+   (error line-start (file-name) ":"
+          (zero-or-more whitespace) "Error:" (zero-or-more whitespace)
+          (message (or "End of file during parsing"
+                       (seq "Invalid read syntax:"
+                            (zero-or-more not-newline))))
+          (optional "," (zero-or-more whitespace) line
+                    "," (zero-or-more whitespace) column)
+          line-end)
    (warning line-start (file-name) ":" line ":" column ":"
             (zero-or-more whitespace) "Warning:" (zero-or-more whitespace)
             (message (zero-or-more not-newline)
@@ -8866,7 +8876,7 @@ See Info Node `(elisp)Byte Compilation'."
             (message (zero-or-more "    " (zero-or-more not-newline))
                      (zero-or-more "\n    " (zero-or-more not-newline)))
             line-end)
-   ;; The following is for Emacs 24 ‘check-declare-file’, which uses a
+   ;; The following is for Emacs 24 'check-declare-file', which uses a
    ;; less informative format.
    (warning line-start "Warning (check-declare): " (file-name) " said "
             (message (zero-or-more not-newline))
