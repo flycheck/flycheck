@@ -5,27 +5,83 @@
 New Features
 ------------
 
-- [#2132]: Add the ``flycheck-shellcheck-infer-shell`` option to the ``sh-shellcheck`` checker.
-- [#2139]: Add compatibility with Proselint 0.16.
+- [#2047]: Add ``javascript-oxlint`` checker for JavaScript and TypeScript
+  using `oxlint <https://oxc.rs/>`_.
 - [#1757]: Add :ref:`org-lint <flycheck-checkers-org-lint>` checker for Org mode files.
   The checker uses Emacs' built-in ``org-lint`` command to detect issues such
   as invalid links, dead links, and duplicate IDs.
+- [#2132]: Add the ``flycheck-shellcheck-infer-shell`` option to the
+  ``sh-shellcheck`` checker.
+- [#1977]: Add ``flycheck-shellcheck-args`` for passing extra command-line
+  arguments to ShellCheck.
+- [#1854]: Add ``flycheck-shellcheck-enabled-checks`` option to enable
+  optional ShellCheck checks via the ``--enable`` flag.
+- [#2139]: Add compatibility with Proselint 0.16.
+- [#1574]: Enable ``proselint`` checker for reStructuredText mode and chain
+  it after the ``rst`` and ``rst-sphinx`` checkers.
+- [#1874]: Add ``flycheck-error-list-after-jump-hook``, run after jumping
+  from the error list to an error location.
+- [#2137]: Allow ``flycheck-command-map`` to be used as a prefix command
+  with ``keymap-set`` and similar functions.
+- [#1833]: Automatically re-check the buffer after ``revert-buffer``
+  (e.g. when using ``global-auto-revert-mode``).
+- [#1134]: Add error explainer for the ``python-ruff`` checker.
+- [#1979]: Show pyright rule names (e.g. ``reportGeneralTypeIssues``) as
+  error IDs.
+- [#2134]: Include info-level errors in the mode-line indicator
+  (format: ``errors|warnings|infos``).
 
 -----------
 Bugs fixed
 -----------
 
-- [#2086]: Fix the name of the PyMarkdown config.
-- [#2036]: Fix ``awk-gawk`` checker passing spurious quotes to ``gawk --source``.
+- [#2131]: Mitigate CVE-2024-53920 in the ``emacs-lisp`` checker subprocess
+  by disabling local eval directives and restricting local variables to safe
+  values during byte-compilation.
 - [#2144]: Rewrite ``org-lint`` checker to run in the current Emacs process
-  instead of a ``-Q --batch`` subprocess. This eliminates false "Unknown source
-  block language" warnings for languages from external packages.
+  instead of a ``-Q --batch`` subprocess.  This eliminates false "Unknown
+  source block language" warnings for languages from external packages.
 - [#2043]: Fix ``rust`` checker temp directory error by using
   ``--emit=metadata --out-dir`` instead of ``--emit=mir -o /dev/null``.
-- [#2134]: Include info-level errors in the mode-line indicator
-  (format: ``errors|warnings|infos``).
+  Also fixes the checker on Windows where ``/dev/null`` does not exist.
+- [#1859]: Force C locale (``LC_ALL=C``) for checker processes to ensure
+  English output.  Fixes error pattern matching in non-English locales.
+- [#1919]: Isolate bidi characters in error message snippets using Unicode
+  directional isolates to prevent formatting corruption.
+- [#1856]: Strictly enforce ``flycheck-navigation-minimum-level``.
+  Previously, setting the minimum level would still navigate to lower-severity
+  errors when no errors at the minimum level existed.
+- [#1918]: Exclude the ``*Flycheck error messages*`` buffer from
+  ``global-flycheck-mode``.
+- [#1908]: Increase error list File column width from 6 to 12 characters.
+- [#1882]: Fix Go build tags to use comma-separated format instead of
+  repeated ``-tags`` flags.
+- [#2098]: Fix ``tex-chktex`` error parsing with ``--inputfiles``.
+- [#2143]: Fix compilation warnings on Emacs 30 (obsolete ``rx-constituents``
+  and missing ``defcustom`` type spec).
+- [#2089]: Make ``flycheck-protoc-import-path`` buffer-local so different
+  protobuf projects can have different import paths.
+- [#2032]: Guard Tools menu operations for Emacs configurations that remove
+  the Tools menu (e.g. Doom Emacs).
+- [#1805]: Preserve match data in idle trigger timer handler.
+- [#1170]: Skip error list highlighting when the error list buffer is not
+  visible, improving performance on every ``post-command-hook``.
+- [#1153]: Handle ``puppet-parser`` errors without line numbers (e.g.
+  "Syntax error at end of file").
+- [#1886]: Fix continuation indicator appearing on non-wrapped lines by
+  using ``wrap-prefix`` instead of ``line-prefix``.
+- [#2062]: Fall back to ``python`` executable when ``python3`` is unavailable
+  (e.g. Windows with Anaconda/Miniforge).
 - [#2127]: Preserve pre-existing ``line-prefix`` text properties
   (e.g. from ``org-indent-mode``) when adding flycheck overlays.
+- [#2086]: Fix the name of the PyMarkdown config.
+- [#2036]: Fix ``awk-gawk`` checker passing spurious quotes to
+  ``gawk --source``.
+- [#2092]: Detect parse errors (unbalanced parentheses, invalid read syntax)
+  in ``emacs-lisp`` byte compilation.
+- Fix ``python-ruff`` checker to use ``text`` output format instead of
+  removed ``concise`` format.
+- Fix ``python-ruff`` error ID regex and ``invalid-syntax`` error handling.
 
 35.0 (2025-04-23)
 ======================
