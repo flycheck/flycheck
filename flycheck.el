@@ -5098,7 +5098,7 @@ message to stretch arbitrarily far."
     (format "%s (%s)" message checker-name)))
 
 (defconst flycheck-error-list-format
-  `[("File" 6)
+  `[("File" 12)
     ("Line" 5 flycheck-error-list-entry-< :right-align t)
     ("Col" 3 nil :right-align t)
     ("Level" 8 flycheck-error-list-entry-level-<)
