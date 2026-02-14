@@ -5389,13 +5389,26 @@ Interactively, or with non-nil REFRESH, refresh the error list."
                   errors)
     errors))
 
+(defcustom flycheck-error-list-after-jump-hook nil
+  "Functions to run after jumping to an error from the error list.
+
+This hook is run in the source buffer after
+`flycheck-error-list-goto-error' jumps to the error location.
+Useful for post-jump actions like recentering:
+
+  (add-hook \\='flycheck-error-list-after-jump-hook #\\='recenter)"
+  :group 'flycheck
+  :type 'hook
+  :package-version '(flycheck . "36"))
+
 (defun flycheck-error-list-goto-error (&optional pos)
   "Go to the location of the error at POS in the error list.
 
 POS defaults to `point'."
   (interactive)
   (when-let* ((error (tabulated-list-get-id pos)))
-    (flycheck-jump-to-error error)))
+    (flycheck-jump-to-error error)
+    (run-hooks 'flycheck-error-list-after-jump-hook)))
 
 (defun flycheck-jump-to-error (error)
   "Go to the location of ERROR."
