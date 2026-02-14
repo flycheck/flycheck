@@ -11143,6 +11143,7 @@ the BUFFER that was checked respectively."
           ("warning" 'warning)
           (_ 'warning))
         .message
+        :id .rule
         :end-line (+ 1 .range.end.line)
         :end-column (+ 1 .range.end.character)
         :checker checker
