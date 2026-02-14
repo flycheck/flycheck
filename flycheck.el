@@ -3471,16 +3471,17 @@ or a list of them.)
 
 The syntax check is deferred if FORCE-DEFERRED is non-nil, or if
 `flycheck-must-defer-check' returns t."
-  (when (and flycheck-mode (if (listp condition)
-                               (apply #'flycheck-may-check-automatically
-                                      condition)
-                             (flycheck-may-check-automatically condition)))
-    (flycheck--clear-idle-trigger-timer)
-    (setq flycheck--idle-trigger-conditions nil)
-    (if (or force-deferred (flycheck-must-defer-check))
-        (flycheck-buffer-deferred)
-      (with-demoted-errors "Error while checking syntax automatically: %S"
-        (flycheck-buffer)))))
+  (save-match-data
+    (when (and flycheck-mode (if (listp condition)
+                                 (apply #'flycheck-may-check-automatically
+                                        condition)
+                               (flycheck-may-check-automatically condition)))
+      (flycheck--clear-idle-trigger-timer)
+      (setq flycheck--idle-trigger-conditions nil)
+      (if (or force-deferred (flycheck-must-defer-check))
+          (flycheck-buffer-deferred)
+        (with-demoted-errors "Error while checking syntax automatically: %S"
+          (flycheck-buffer))))))
 
 (defun flycheck--clear-idle-trigger-timer ()
   "Clear the idle trigger timer."
