@@ -1105,6 +1105,8 @@ is used."
     map)
   "Keymap of Flycheck interactive commands.")
 
+(fset 'flycheck-command-map flycheck-command-map)
+
 (defcustom flycheck-keymap-prefix (kbd "C-c !")
   "Prefix for key bindings of Flycheck.
 
