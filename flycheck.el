@@ -3492,17 +3492,18 @@ The syntax check is deferred if FORCE-DEFERRED is non-nil, or if
 (defun flycheck--handle-idle-trigger (buffer)
   "Run a syntax check in BUFFER if appropriate.
 This function is called by `flycheck--idle-trigger-timer'."
-  (let ((current-buffer (current-buffer)))
-    (when (buffer-live-p buffer)
-      (with-current-buffer buffer
-        (unless (or flycheck-buffer-switch-check-intermediate-buffers
-                    (eq buffer current-buffer))
-          (setq flycheck--idle-trigger-conditions
-                (delq 'idle-buffer-switch
-                      flycheck--idle-trigger-conditions)))
-        (when flycheck--idle-trigger-conditions
-          (flycheck-buffer-automatically flycheck--idle-trigger-conditions)
-          (setq flycheck--idle-trigger-conditions nil))))))
+  (save-match-data
+    (let ((current-buffer (current-buffer)))
+      (when (buffer-live-p buffer)
+        (with-current-buffer buffer
+          (unless (or flycheck-buffer-switch-check-intermediate-buffers
+                      (eq buffer current-buffer))
+            (setq flycheck--idle-trigger-conditions
+                  (delq 'idle-buffer-switch
+                        flycheck--idle-trigger-conditions)))
+          (when flycheck--idle-trigger-conditions
+            (flycheck-buffer-automatically flycheck--idle-trigger-conditions)
+            (setq flycheck--idle-trigger-conditions nil)))))))
 
 (defun flycheck-handle-change (beg end _len)
   "Handle a buffer change between BEG and END.
