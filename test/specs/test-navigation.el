@@ -162,15 +162,15 @@
           (let ((err (should-error (flycheck-next-error) :type 'user-error)))
             (expect (cadr err) :to-equal "No more Flycheck errors"))))
 
-      (it "ignores minimum level if no error beyond it"
+      (it "signals error when no error at minimum level"
         (flycheck-buttercup-with-resource-buffer "language/emacs-lisp/warnings.el"
           (emacs-lisp-mode)
           (flycheck-mode)
           (let ((flycheck-navigation-minimum-level 'error))
             (flycheck-buttercup-buffer-sync)
             (goto-char (point-min))
-            (flycheck-next-error 1)
-            (expect (point) :to-be-at-flycheck-error 1)))))
+            (let ((err (should-error (flycheck-next-error 1) :type 'user-error)))
+              (expect (cadr err) :to-equal "No more Flycheck errors"))))))
 
     (describe "flycheck-previous-error"
 
@@ -224,19 +224,22 @@
             (expect (cadr err) :to-equal "No more Flycheck errors"))))))
 
   (describe "with minimum level warning"
+    ;; The resource file has only 'info and 'error level errors (no exact
+    ;; 'warning level), so with minimum-level 'warning only error 2
+    ;; (error-level, severity 100) is navigable.
 
     (describe "flycheck-next-error"
 
       (it "goes to first error"
         (flycheck-test-with-nav-buffer 'warning
           (flycheck-next-error)
-          (expect (point) :to-be-at-flycheck-error 1)))
+          (expect (point) :to-be-at-flycheck-error 2)))
 
       (it "goes to next error"
         (flycheck-test-with-nav-buffer 'warning
           (flycheck-next-error)
-          (flycheck-next-error)
-          (expect (point) :to-be-at-flycheck-error 2)))
+          (let ((err (should-error (flycheck-next-error) :type 'user-error)))
+            (expect (cadr err) :to-equal "No more Flycheck errors"))))
 
       (it "errors beyond last error"
         (flycheck-test-with-nav-buffer 'warning
@@ -251,28 +254,26 @@
 
       (it "navigates by two errors"
         (flycheck-test-with-nav-buffer 'warning
-          (let ((err (should-error (flycheck-next-error 4) :type 'user-error)))
+          (let ((err (should-error (flycheck-next-error 2) :type 'user-error)))
             (expect (cadr err) :to-equal "No more Flycheck errors"))))
 
       (it "navigates back by two errors"
         (flycheck-test-with-nav-buffer 'warning
           (goto-char (point-max))
-          (flycheck-next-error -2)
-          (expect (point) :to-be-at-flycheck-error 1)))
+          (let ((err (should-error (flycheck-next-error -2) :type 'user-error)))
+            (expect (cadr err) :to-equal "No more Flycheck errors"))))
 
       (it "reset navigates to first error"
         (flycheck-test-with-nav-buffer 'warning
           (goto-char (point-max))
           (flycheck-next-error 1 'reset)
-          (expect (point) :to-be-at-flycheck-error 1)))
+          (expect (point) :to-be-at-flycheck-error 2)))
 
       (it "does not cross narrowing"
         (flycheck-test-with-nav-buffer 'warning
           (re-search-forward "(defun .*")
           (narrow-to-defun)
           (goto-char (point-min))
-          (flycheck-next-error)
-          (expect (point) :to-be-at-flycheck-error 1)
           (let ((err (should-error (flycheck-next-error) :type 'user-error)))
             (expect (cadr err) :to-equal "No more Flycheck errors")))))
 
@@ -292,13 +293,13 @@
       (it "navigates by two errors"
         (flycheck-test-with-nav-buffer 'warning
           (goto-char (point-max))
-          (flycheck-previous-error 2)
-          (expect (point) :to-be-at-flycheck-error 1)))
+          (let ((err (should-error (flycheck-previous-error 2) :type 'user-error)))
+            (expect (cadr err) :to-equal "No more Flycheck errors"))))
 
       (it "navigates back by two errors"
         (flycheck-test-with-nav-buffer 'warning
-          (flycheck-previous-error -2)
-          (expect (point) :to-be-at-flycheck-error 2)))
+          (let ((err (should-error (flycheck-previous-error -2) :type 'user-error)))
+            (expect (cadr err) :to-equal "No more Flycheck errors"))))
 
       (it "errors when moving too far"
         (flycheck-test-with-nav-buffer 'warning
@@ -312,20 +313,20 @@
         (flycheck-test-with-nav-buffer 'warning
           (goto-char (point-max))
           (flycheck-first-error)
-          (expect (point) :to-be-at-flycheck-error 1)))
+          (expect (point) :to-be-at-flycheck-error 2)))
 
       (it "stays at first error if called again"
         (flycheck-test-with-nav-buffer 'warning
           (goto-char (point-max))
           (flycheck-first-error)
           (flycheck-first-error)
-          (expect (point) :to-be-at-flycheck-error 1)))
+          (expect (point) :to-be-at-flycheck-error 2)))
 
       (it "goes to second error"
         (flycheck-test-with-nav-buffer 'warning
           (goto-char (point-max))
-          (flycheck-first-error 2)
-          (expect (point) :to-be-at-flycheck-error 2)))))
+          (let ((err (should-error (flycheck-first-error 2) :type 'user-error)))
+            (expect (cadr err) :to-equal "No more Flycheck errors"))))))
 
   (describe "with minimum level info"
 
