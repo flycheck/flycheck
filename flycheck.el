@@ -10687,7 +10687,7 @@ See URL `https://proselint.com/'."
                (list "check" "--output-format=json"))))
   :standard-input t
   :error-parser flycheck-proselint-parse-errors
-  :modes (text-mode markdown-mode gfm-mode message-mode org-mode))
+  :modes (text-mode markdown-mode gfm-mode message-mode org-mode rst-mode))
 
 (flycheck-def-option-var flycheck-protoc-import-path nil protobuf-protoc
   "A list of directories to resolve import directives.
@@ -11708,7 +11708,8 @@ See URL `https://docutils.sourceforge.net/'."
    (error line-start "<stdin>:" line
           ": (" (or "ERROR/3" "SEVERE/4") ") "
           (message) line-end))
-  :modes rst-mode)
+  :modes rst-mode
+  :next-checkers ((warning . proselint)))
 
 (flycheck-def-option-var flycheck-sphinx-warn-on-missing-references t rst-sphinx
   "Whether to warn about missing references in Sphinx.
@@ -11738,7 +11739,8 @@ Requires Sphinx 1.2 or newer.  See URL `https://sphinx-doc.org'."
           (message) line-end))
   :modes rst-mode
   :predicate (lambda () (and (flycheck-buffer-saved-p)
-                             (flycheck-locate-sphinx-source-directory))))
+                             (flycheck-locate-sphinx-source-directory)))
+  :next-checkers ((warning . proselint)))
 
 (defun flycheck-ruby--find-project-root (_checker)
   "Compute an appropriate working-directory for flycheck-ruby.
