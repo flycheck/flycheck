@@ -4962,15 +4962,11 @@ overlays."
   (flycheck-error-level-interesting-p (get-char-property pos 'flycheck-error)))
 
 (defun flycheck-error-level-interesting-p (err)
-  "Check if ERR severity is >= `flycheck-navigation-minimum-level'.
-
-ERR is also interesting (the function returns true) if there are
-no errors as or more severe than `flycheck-navigation-minimum-level'."
+  "Check if ERR severity is >= `flycheck-navigation-minimum-level'."
   (when (flycheck-error-p err)
     (if-let (min-level flycheck-navigation-minimum-level)
-        (or (<= (flycheck-error-level-severity min-level)
-                (flycheck-error-level-severity (flycheck-error-level err)))
-            (not (flycheck-has-current-errors-p min-level)))
+        (<= (flycheck-error-level-severity min-level)
+            (flycheck-error-level-severity (flycheck-error-level err)))
       t)))
 
 (defun flycheck-next-error-pos (n &optional reset)
