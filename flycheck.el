@@ -12631,6 +12631,9 @@ shellcheck directives in the script."
   :safe #'booleanp
   :package-version '(flycheck . "36"))
 
+(flycheck-def-args-var flycheck-shellcheck-args sh-shellcheck
+  :package-version '(flycheck . "36"))
+
 (flycheck-define-checker sh-shellcheck
   "A shell script syntax and style checker using Shellcheck.
 
@@ -12644,6 +12647,7 @@ See URL `https://github.com/koalaman/shellcheck/'."
                          flycheck-shellcheck-follow-sources)
             (option "--exclude" flycheck-shellcheck-excluded-warnings list
                     flycheck-option-comma-separated-list)
+            (eval flycheck-shellcheck-args)
             "-")
   :standard-input t
   :error-parser flycheck-parse-checkstyle
