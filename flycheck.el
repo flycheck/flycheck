@@ -1668,17 +1668,18 @@ Safely delete all files and directories listed in
 NO-GROUP is passed to `rx-to-string'.
 
 See `rx' for a complete list of all built-in `rx' forms."
-  (let ((rx-constituents
-         (append
-          `((file-name flycheck-rx-file-name 0 nil) ;; group 1
-            (line . ,(rx (group-n 2 (one-or-more digit))))
-            (column . ,(rx (group-n 3 (one-or-more digit))))
-            (message flycheck-rx-message 0 nil) ;; group 4
-            (id flycheck-rx-id 0 nil) ;; group 5
-            (end-line . ,(rx (group-n 6 (one-or-more digit))))
-            (end-column . ,(rx (group-n 7 (one-or-more digit)))))
-          rx-constituents nil)))
-    (rx-to-string form no-group)))
+  (with-suppressed-warnings ((obsolete rx-constituents))
+    (let ((rx-constituents
+           (append
+            `((file-name flycheck-rx-file-name 0 nil) ;; group 1
+              (line . ,(rx (group-n 2 (one-or-more digit))))
+              (column . ,(rx (group-n 3 (one-or-more digit))))
+              (message flycheck-rx-message 0 nil) ;; group 4
+              (id flycheck-rx-id 0 nil) ;; group 5
+              (end-line . ,(rx (group-n 6 (one-or-more digit))))
+              (end-column . ,(rx (group-n 7 (one-or-more digit)))))
+            rx-constituents nil)))
+      (rx-to-string form no-group))))
 
 (defun flycheck-current-load-file ()
   "Get the source file currently being loaded.
@@ -10354,7 +10355,7 @@ Relative paths are relative to the file being checked."
 
 The value of this variable is a list of strings, where each
 string is a module to `use' in Perl."
-  :type '(repeat :tag "Module")
+  :type '(repeat (string :tag "Module"))
   :safe #'flycheck-string-list-p
   :package-version '(flycheck . "32"))
 
