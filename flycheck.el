@@ -9211,7 +9211,7 @@ See URL `https://www.kuwata-lab.com/erubis/'."
   :command ("erubis" "-z" source)
   :error-patterns
   ((error line-start (file-name) ":" line ": " (message) line-end))
-  :modes (html-erb-mode rhtml-mode)
+  :modes (html-erb-mode rhtml-mode web-mode)
   :next-checkers ((warning . eruby-ruumba)))
 
 (flycheck-def-config-file-var flycheck-ruumbarc eruby-ruumba ".ruumba.yml")
@@ -9252,7 +9252,7 @@ See URL `https://github.com/ericqweinstein/ruumba'."
    (error line-start (file-name) ":" line ":" column ": " (or "E" "F") ": "
           (optional (id (one-or-more (not (any ":")))) ": ") (message)
           line-end))
-  :modes (html-erb-mode rhtml-mode))
+  :modes (html-erb-mode rhtml-mode web-mode))
 
 (flycheck-def-args-var flycheck-gfortran-args fortran-gfortran
   :package-version '(flycheck . "0.22"))
