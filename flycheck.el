@@ -5879,6 +5879,18 @@ of command checkers is `flycheck-sanitize-errors'.
      or as special symbol or form for
      `flycheck-substitute-argument', which see.
 
+`:environment FUNCTION`
+     A function to build process environment.
+
+     FUNCTION is a function taking two arguments: ENVIRONMENT and
+     CHECKER.  ENVIRONMENT will be initialized to the value of
+     standard variable `process-environment'.  Return value of
+     the function should be a list (possibly even empty) in the
+     same format as `process-environment'.
+
+     This property is optional.  If omitted, processes are
+     started in unmodified `process-environment'.
+
 `:error-patterns PATTERNS'
      A list of patterns to parse the output of the `:command'.
 
@@ -5961,6 +5973,7 @@ default `:verify' function of command checkers."
                                     (funcall verify-fn checker)))))))
 
   (let ((command (plist-get properties :command))
+        (environment (plist-get properties :environment))
         (patterns (plist-get properties :error-patterns))
         (parser (or (plist-get properties :error-parser)
                     #'flycheck-parse-with-patterns))
@@ -6002,6 +6015,7 @@ default `:verify' function of command checkers."
                              patterns)))
       (pcase-dolist (`(,prop . ,value)
                      `((command        . ,command)
+                       (environment    . ,environment)
                        (error-parser   . ,parser)
                        (error-patterns . ,patterns)
                        (standard-input . ,standard-input)))
@@ -6288,6 +6302,12 @@ symbols in the command."
          (seq-map (lambda (arg) (flycheck-substitute-argument arg checker))
                   (flycheck-checker-arguments checker))))
 
+(defun flycheck-checker-process-environment (checker)
+  "Get the process environment for a CHECKER."
+  (-if-let (builder (flycheck-checker-get checker 'environment))
+      (funcall builder checker (seq-copy process-environment))
+    process-environment))
+
 (defun flycheck--process-send-buffer-contents-chunked (process)
   "Send contents of current buffer to PROCESS in small batches.
 
@@ -6352,6 +6372,8 @@ and rely on Emacs' own buffering and chunking."
         (let* ((program (flycheck-find-checker-executable checker))
                (args (flycheck-checker-substituted-arguments checker))
                (command (flycheck--wrap-command program args))
+               (process-environment (flycheck-checker-process-environment
+                                     checker))
                (sentinel-events nil)
                ;; Use pipes to receive output from the syntax checker.  They are
                ;; more efficient and more robust than PTYs, which Emacs uses by
@@ -7544,6 +7566,7 @@ SYMBOL with `flycheck-def-executable-var'."
   (declare (indent 1)
            (doc-string 2))
   (let ((command (plist-get properties :command))
+        (environment (plist-get properties :environment))
         (parser (plist-get properties :error-parser))
         (filter (plist-get properties :error-filter))
         (explainer (plist-get properties :error-explainer))
@@ -7557,6 +7580,8 @@ SYMBOL with `flycheck-def-executable-var'."
        (flycheck-define-command-checker ',symbol
          ,docstring
          :command ',command
+         ,@(when environment
+             `(:environment #',environment))
          ,@(when parser
              `(:error-parser #',parser))
          :error-patterns ',(plist-get properties :error-patterns)
