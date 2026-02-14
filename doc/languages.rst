@@ -733,6 +733,10 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
          A list of directories with custom rules.
 
+   .. syntax-checker:: javascript-oxlint
+
+      Lint JavaScript and TypeScript with `oxlint <https://oxc.rs/>`_.
+
    .. syntax-checker:: javascript-jshint
 
       Check syntax and lint with `JSHint <http://jshint.com/>`_.
@@ -1589,6 +1593,10 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
          Whether to let ShellCheck infer the shell from the script.
 
+      .. defcustom:: flycheck-shellcheck-args
+
+         A list of additional arguments passed to ShellCheck.
+
 .. supported-language:: Slim
 
    .. syntax-checker:: slim
@@ -1696,6 +1704,11 @@ to view the docstring of the syntax checker.  Likewise, you may use
       :noindex:
 
       See `javascript-eslint`.
+
+   .. syntax-checker:: javascript-oxlint
+      :noindex:
+
+      See `javascript-oxlint`.
 
    .. syntax-checker:: typescript-tslint
 
