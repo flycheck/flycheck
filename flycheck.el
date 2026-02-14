@@ -12853,11 +12853,13 @@ See URL `https://www.nongnu.org/chktex/'."
             "--verbosity=0" "--quiet" "--inputfiles")
   :standard-input t
   :error-patterns
-  ((warning line-start "stdin:" line ":" column ":"
+  ((warning line-start (file-name) ":" line ":" column ":"
             (id (one-or-more digit)) ":" (message) line-end))
   :error-filter
   (lambda (errors)
-    (flycheck-sanitize-errors (flycheck-increment-error-columns errors)))
+    (flycheck-sanitize-errors
+     (flycheck-remove-error-file-names
+      "stdin" (flycheck-increment-error-columns errors))))
   :modes (latex-mode LaTeX-mode plain-tex-mode plain-TeX-mode))
 
 (flycheck-define-checker tex-lacheck
