@@ -20,6 +20,12 @@ Bugs fixed
 - [#2144]: Rewrite ``org-lint`` checker to run in the current Emacs process
   instead of a ``-Q --batch`` subprocess. This eliminates false "Unknown source
   block language" warnings for languages from external packages.
+- [#2043]: Fix ``rust`` checker temp directory error by using
+  ``--emit=metadata --out-dir`` instead of ``--emit=mir -o /dev/null``.
+- [#2134]: Include info-level errors in the mode-line indicator
+  (format: ``errors|warnings|infos``).
+- [#2127]: Preserve pre-existing ``line-prefix`` text properties
+  (e.g. from ``org-indent-mode``) when adding flycheck overlays.
 
 35.0 (2025-04-23)
 ======================
