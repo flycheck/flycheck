@@ -5519,8 +5519,11 @@ nil, if there is no next error."
 Highlight all errors in the error list that are at point in the
 source buffer, and on the same line as point.  Then recenter the
 error list to the highlighted error, unless PRESERVE-POS is
-non-nil."
-  (when (get-buffer flycheck-error-list-buffer)
+non-nil.
+
+Skip highlighting when the error list buffer is not visible, to
+avoid slowing down editing when the error list is hidden."
+  (when (get-buffer-window flycheck-error-list-buffer)
     (with-current-buffer flycheck-error-list-buffer
       (let ((current-errors
              (when (buffer-live-p flycheck-error-list-source-buffer)
