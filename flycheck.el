@@ -6345,7 +6345,10 @@ and rely on Emacs' own buffering and chunking."
                ;; more efficient and more robust than PTYs, which Emacs uses by
                ;; default, and since we don't need any job control features, we
                ;; can easily use pipes.
-               (process-connection-type nil))
+               (process-connection-type nil)
+               ;; Force English messages from checker processes so that
+               ;; error patterns can match reliably.
+               (process-environment (cons "LC_ALL=C" process-environment)))
           ;; We do not associate the process with any buffer, by
           ;; passing nil for the BUFFER argument of `start-process'.
           ;; Instead, we just remember the buffer being checked in a
