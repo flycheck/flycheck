@@ -167,6 +167,7 @@
     haskell-hlint
     html-tidy
     javascript-eslint
+    javascript-oxlint
     javascript-jshint
     javascript-standard
     json-jsonlint
@@ -10075,6 +10076,21 @@ See URL `https://eslint.org/'."
            (not ;; `seq-contains-p' is only in seq >= 2.21
             (with-no-warnings (seq-contains error-code ?/)))
            `(url . ,(format url error-code))))))
+
+(flycheck-define-checker javascript-oxlint
+  "A JavaScript and TypeScript linter using oxlint.
+
+See URL `https://oxc.rs/'."
+  :command ("oxlint"
+            "--format" "checkstyle"
+            source-inplace)
+  :error-parser flycheck-parse-checkstyle
+  :error-filter
+  (lambda (errors)
+    (flycheck-sanitize-errors
+     (flycheck-dequalify-error-ids errors)))
+  :modes (js-mode js-jsx-mode js2-mode js2-jsx-mode js3-mode rjsx-mode
+                  typescript-mode js-ts-mode typescript-ts-mode tsx-ts-mode))
 
 (flycheck-define-checker javascript-standard
   "A Javascript code and style checker for the (Semi-)Standard Style.
