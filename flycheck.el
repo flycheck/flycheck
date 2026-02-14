@@ -1112,13 +1112,10 @@ is used."
   "Prefix for key bindings of Flycheck.
 
 Changing this variable outside Customize does not have any
-effect.  To change the keymap prefix from Lisp, you need to
-explicitly re-define the prefix key:
+effect.  To change the keymap prefix from Lisp, use
+`customize-set-variable':
 
-    (define-key flycheck-mode-map flycheck-keymap-prefix nil)
-    (setq flycheck-keymap-prefix (kbd \"C-c f\"))
-    (define-key flycheck-mode-map flycheck-keymap-prefix
-                flycheck-command-map)
+    (customize-set-variable \\='flycheck-keymap-prefix (kbd \"C-c f\"))
 
 Please note that Flycheck's manual documents the default
 keybindings.  Changing this variable is at your own risk."
