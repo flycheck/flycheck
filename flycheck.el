@@ -10799,7 +10799,11 @@ See URL `https://puppet.com/'."
           (minimal-match (zero-or-more not-newline))
           ": Could not parse for environment " (one-or-more word)
           ": " (message (minimal-match (zero-or-more anything)))
-          " at " (file-name "/" (zero-or-more not-newline)) ":" line line-end))
+          " at " (file-name "/" (zero-or-more not-newline)) ":" line line-end)
+   ;; Errors without line/column (e.g., "end of file" or "end of input")
+   (error line-start "Error: Could not parse for environment "
+          (one-or-more (in "a-z" "0-9" "_")) ":"
+          (message) line-end))
   :modes (puppet-mode puppet-ts-mode)
   :next-checkers ((warning . puppet-lint)))
 
