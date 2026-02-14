@@ -78,14 +78,16 @@
   (describe "flycheck-checker-executable"
     (it "is-string"
       (dolist (checker flycheck-checkers)
-        (expect (stringp (flycheck-checker-executable checker)) :to-be-truthy)))
+        (when (flycheck-checker-get checker 'command)
+          (expect (stringp (flycheck-checker-executable checker)) :to-be-truthy))))
 
     (it "override-the-executable"
       (dolist (checker flycheck-checkers)
-        (let ((variable (flycheck-checker-executable-variable checker)))
-          (expect (eval `(let ((,variable "some-nice-executable"))
-                           (flycheck-checker-executable ',checker)))
-                  :to-equal "some-nice-executable")))))
+        (when (flycheck-checker-get checker 'command)
+          (let ((variable (flycheck-checker-executable-variable checker)))
+            (expect (eval `(let ((,variable "some-nice-executable"))
+                             (flycheck-checker-executable ',checker)))
+                    :to-equal "some-nice-executable"))))))
 
   (describe "flycheck-checker-get"
     (it "modes"

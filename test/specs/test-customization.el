@@ -112,18 +112,21 @@
 
     (it "is a special variable"
       (dolist (checker flycheck-checkers)
-        (let ((variable (flycheck-checker-executable-variable checker)))
-          (expect (custom-variable-p variable) :to-be-truthy))))
+        (when (flycheck-checker-get checker 'command)
+          (let ((variable (flycheck-checker-executable-variable checker)))
+            (expect (custom-variable-p variable) :to-be-truthy)))))
 
     (it "is customizable"
       (dolist (checker flycheck-checkers)
-        (let ((variable (flycheck-checker-executable-variable checker)))
-          (expect (custom-variable-p variable) :to-be-truthy))))
+        (when (flycheck-checker-get checker 'command)
+          (let ((variable (flycheck-checker-executable-variable checker)))
+            (expect (custom-variable-p variable) :to-be-truthy)))))
 
     (it "defaults to nil"
       (dolist (checker flycheck-checkers)
-        (let ((variable (flycheck-checker-executable-variable checker)))
-          (expect (null (symbol-value variable)) :to-be-truthy)))))
+        (when (flycheck-checker-get checker 'command)
+          (let ((variable (flycheck-checker-executable-variable checker)))
+            (expect (null (symbol-value variable)) :to-be-truthy))))))
 
   (describe "flycheck-keymap-prefix"
 
