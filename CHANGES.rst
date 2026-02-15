@@ -95,8 +95,8 @@ Removed
   over 4 years.  Use ``sass-stylelint`` or ``scss-stylelint`` instead.
 - Remove ``scss-lint`` checker.  scss-lint depends on the dead Ruby Sass engine
   and is no longer maintained.  Use ``scss-stylelint`` instead.
-- Remove ``eruby-erubis`` checker.  Erubis has been abandoned since 2011.
-  The ``eruby-ruumba`` checker remains available.
+- Remove ``eruby-erubis`` and ``eruby-ruumba`` checkers.  Erubis has been
+  abandoned since 2011 and Ruumba since 2020.  ERuby support is removed.
 - Remove ``css-csslint`` checker.  CSSLint has been abandoned since ~2017.
   Use ``css-stylelint`` instead.
 - Remove ``protobuf-prototool`` checker.  Prototool was archived by Uber in
@@ -105,6 +105,12 @@ Removed
   who recommends `statix <https://github.com/nerdypepper/statix>`_ instead.
 - Remove ``coffee-coffeelint`` checker.  CoffeeLint has been effectively
   inactive with known security vulnerabilities.
+- Remove ``asciidoc`` checker.  The legacy Python AsciiDoc processor is
+  superseded by Asciidoctor.  Use ``asciidoctor`` instead.
+- Remove ``json-jsonlint`` checker.  The original jsonlint has been abandoned
+  since ~2017.  Use ``json-python-json`` or ``json-jq`` instead.
+- Remove ``xml-xmlstarlet`` checker.  XMLStarlet has not had a release since
+  2014.  Use ``xml-xmllint`` instead.
 
 35.0 (2025-04-23)
 ======================
