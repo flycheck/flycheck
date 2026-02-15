@@ -10405,22 +10405,25 @@ See URL `https://proselint.com/' for more information about proselint."
 Value is t for old (<= 0.14.0), nil for new (>= 0.16.0),
 or `unknown' if not yet detected.")
 
+(defun flycheck--proselint-args ()
+  "Return command arguments for proselint, detecting the version once."
+  (when (eq flycheck--proselint-use-old-args 'unknown)
+    (setq flycheck--proselint-use-old-args
+          (zerop (call-process
+                  (or flycheck-proselint-executable "proselint")
+                  nil nil nil "--version"))))
+  (if flycheck--proselint-use-old-args
+      ;; Proselint versions <= 0.14.0:
+      (list "--json" "-")
+    ;; Proselint versions >= 0.16.0
+    (list "check" "--output-format=json")))
+
 (flycheck-define-checker proselint
   "Flycheck checker using Proselint.
 
 See URL `https://proselint.com/'."
   :command ("proselint"
-            (eval
-             (when (eq flycheck--proselint-use-old-args 'unknown)
-               (setq flycheck--proselint-use-old-args
-                     (zerop (call-process
-                             (or flycheck-proselint-executable "proselint")
-                             nil nil nil "--version"))))
-             (if flycheck--proselint-use-old-args
-                 ;; Proselint versions <= 0.14.0:
-                 (list "--json" "-")
-               ;; Proselint versions >= 0.16.0
-               (list "check" "--output-format=json"))))
+            (eval (flycheck--proselint-args)))
   :standard-input t
   :error-parser flycheck-proselint-parse-errors
   :modes (text-mode markdown-mode gfm-mode message-mode org-mode rst-mode))
