@@ -227,7 +227,6 @@
     scala
     scala-scalastyle
     scheme-chicken
-    scss-lint
     sass-stylelint
     scss-stylelint
     sh-bash
@@ -12371,63 +12370,6 @@ See URL `https://call-cc.org/'."
                ((eq geiser-impl 'chicken) 'success)
                (t '(bold error)))))))
   :modes scheme-mode)
-
-(defconst flycheck-scss-lint-checkstyle-re
-  (rx "cannot load such file" (1+ not-newline) "scss_lint_reporter_checkstyle")
-  "Regular expression to detect a missing checkstyle reporter.")
-
-(defun flycheck-parse-scss-lint (output checker buffer)
-  "Parse SCSS-Lint OUTPUT from CHECKER and BUFFER.
-
-Like `flycheck-parse-checkstyle', but catches errors about
-missing checkstyle reporter from SCSS-Lint."
-  (if (string-match-p flycheck-scss-lint-checkstyle-re output)
-      (list (flycheck-error-new-at
-             1 nil 'error "Checkstyle reporter for SCSS-Lint missing.
-Please run gem install scss_lint_reporter_checkstyle"
-             :checker checker
-             :buffer buffer
-             :filename (buffer-file-name buffer)))
-    (flycheck-parse-checkstyle output checker buffer)))
-
-(flycheck-def-config-file-var flycheck-scss-lintrc scss-lint ".scss-lint.yml"
-  :package-version '(flycheck . "0.23"))
-
-(flycheck-define-checker scss-lint
-  "A SCSS syntax checker using SCSS-Lint.
-
-Needs SCSS-Lint 0.43.2 or newer.
-
-See URL `https://github.com/brigade/scss-lint'."
-  :command ("scss-lint"
-            "--require=scss_lint_reporter_checkstyle"
-            "--format=Checkstyle"
-            (config-file "--config" flycheck-scss-lintrc)
-            "--stdin-file-path" source-original "-")
-  :standard-input t
-  ;; We cannot directly parse Checkstyle XML, since for some mysterious reason
-  ;; SCSS-Lint doesn't have a built-in Checkstyle reporter, and instead ships it
-  ;; as an addon which might not be installed.  We use a custom error parser to
-  ;; check whether the addon is missing and turn that into a special kind of
-  ;; Flycheck error.
-  :error-parser flycheck-parse-scss-lint
-  :modes scss-mode
-  :verify
-  (lambda (checker)
-    (when-let
-        (output (flycheck-call-checker-process-for-output
-                 checker nil nil "--require=scss_lint_reporter_checkstyle"))
-      (let ((reporter-missing
-             (string-match-p flycheck-scss-lint-checkstyle-re output)))
-        (list
-         (flycheck-verification-result-new
-          :label "checkstyle reporter"
-          :message (if reporter-missing
-                       "scss_lint_reporter_checkstyle plugin missing"
-                     "present")
-          :face (if reporter-missing
-                    '(bold error)
-                  'success)))))))
 
 (flycheck-define-checker scss-stylelint
   "A SCSS syntax and style checker using stylelint.
