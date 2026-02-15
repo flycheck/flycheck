@@ -232,7 +232,6 @@
     scss-stylelint
     sass/scss-sass-lint
     sass
-    scss
     sh-bash
     sh-posix-dash
     sh-posix-bash
@@ -12526,44 +12525,6 @@ See URL `https://stylelint.io/'."
   :error-parser flycheck-parse-stylelint
   :predicate flycheck-buffer-nonempty-p
   :modes (sass-mode))
-
-(flycheck-def-option-var flycheck-scss-compass nil scss
-  "Whether to enable the Compass CSS framework.
-
-When non-nil, enable the Compass CSS framework, via `--compass'."
-  :type 'boolean
-  :safe #'booleanp
-  :package-version '(flycheck . "0.16"))
-
-(flycheck-define-checker scss
-  "A SCSS syntax checker using the SCSS compiler.
-
-See URL `https://sass-lang.com'."
-  :command ("scss"
-            "--cache-location" (eval (flycheck-sass-scss-cache-location))
-            (option-flag "--compass" flycheck-scss-compass)
-            "--check" "--stdin")
-  :standard-input t
-  :error-patterns
-  ((error line-start
-          (or "Syntax error: " "Error: ")
-          (message (one-or-more not-newline)
-                   (zero-or-more "\n"
-                                 (one-or-more " ")
-                                 (one-or-more not-newline)))
-          (optional "\r") "\n" (one-or-more " ") "on line " line
-          " of standard input"
-          line-end)
-   (warning line-start
-            "WARNING: "
-            (message (one-or-more not-newline)
-                     (zero-or-more "\n"
-                                   (one-or-more " ")
-                                   (one-or-more not-newline)))
-            (optional "\r") "\n" (one-or-more " ") "on line " line
-            " of an unknown file"
-            line-end))
-  :modes scss-mode)
 
 (flycheck-def-args-var flycheck-sh-bash-args (sh-bash)
   :package-version '(flycheck . "32"))

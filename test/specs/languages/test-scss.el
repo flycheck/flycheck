@@ -43,17 +43,6 @@
      '(3 1 error "Syntax Error: Invalid CSS after \"...    c olor: red\": expected \"{\", was \";\""
          :checker scss-lint :id "Syntax")))
 
-  (flycheck-buttercup-def-checker-test scss scss nil
-    (let ((flycheck-disabled-checkers '(scss-lint scss-stylelint sass/scss-sass-lint)))
-      (flycheck-buttercup-should-syntax-check
-       "language/scss/error.scss" 'scss-mode
-       '(3 nil error "Invalid CSS after \"...    c olor: red\": expected \"{\", was \";\""
-           :checker scss))))
-
-  (flycheck-buttercup-def-checker-test scss scss warning
-    (let ((flycheck-disabled-checkers '(scss-lint scss-stylelint sass/scss-sass-lint)))
-      (flycheck-buttercup-should-syntax-check
-       "language/scss/warning.scss" 'scss-mode
-       '(2 nil warning ".container is deprecated" :checker scss)))))
+)
 
 ;;; test-scss.el ends here
