@@ -11181,13 +11181,6 @@ See URL `https://github.com/rpm-software-management/rpmlint'."
   :safe #'flycheck-string-list-p
   :package-version '(flycheck . "33"))
 
-(defconst flycheck-markdownlint-error-patterns
-  '((error line-start
-           (file-name) ":" line
-           (? ":" column) " " (id (one-or-more (not (any space))))
-           " " (message) line-end))
-  "Error patterns shared by markdownlint-cli and markdownlint-cli2.")
-
 (defun flycheck-markdownlint-error-filter (errors)
   "Error filter for markdownlint checkers."
   (flycheck-sanitize-errors
@@ -11209,7 +11202,11 @@ See URL `https://github.com/igorshubovych/markdownlint-cli'."
             (option-list "--enable" flycheck-markdown-markdownlint-cli-enable-rules)
             "--"
             source)
-  :error-patterns flycheck-markdownlint-error-patterns
+  :error-patterns
+  ((error line-start
+          (file-name) ":" line
+          (? ":" column) " " (id (one-or-more (not (any space))))
+          " " (message) line-end))
   :error-filter flycheck-markdownlint-error-filter
   :modes (markdown-mode gfm-mode)
   :error-explainer flycheck-markdownlint-error-explainer)
@@ -11227,7 +11224,11 @@ See URL `https://github.com/DavidAnson/markdownlint-cli2'."
             (config-file "--config" flycheck-markdown-markdownlint-cli2-config)
             "--"
             source)
-  :error-patterns flycheck-markdownlint-error-patterns
+  :error-patterns
+  ((error line-start
+          (file-name) ":" line
+          (? ":" column) " " (id (one-or-more (not (any space))))
+          " " (message) line-end))
   :error-filter flycheck-markdownlint-error-filter
   :modes (markdown-mode gfm-mode)
   :error-explainer flycheck-markdownlint-error-explainer)
@@ -12096,16 +12097,6 @@ See URL `https://stylelint.io/'."
 (flycheck-def-args-var flycheck-sh-bash-args (sh-bash)
   :package-version '(flycheck . "32"))
 
-(defconst flycheck-bash-error-patterns
-  '((error line-start
-           ;; The name/path of the bash executable
-           (one-or-more (not (any ":"))) ":"
-           ;; A label "line", possibly localized
-           (one-or-more (not (any digit)))
-           line (zero-or-more " ") ":" (zero-or-more " ")
-           (message) line-end))
-  "Error patterns for Bash syntax checkers.")
-
 (flycheck-define-checker sh-bash
   "A Bash syntax checker using the Bash shell.
 
@@ -12114,7 +12105,14 @@ See URL `https://www.gnu.org/software/bash/'."
             (eval flycheck-sh-bash-args)
             "--")
   :standard-input t
-  :error-patterns flycheck-bash-error-patterns
+  :error-patterns
+  ((error line-start
+          ;; The name/path of the bash executable
+          (one-or-more (not (any ":"))) ":"
+          ;; A label "line", possibly localized
+          (one-or-more (not (any digit)))
+          line (zero-or-more " ") ":" (zero-or-more " ")
+          (message) line-end))
   :modes (sh-mode bash-ts-mode)
   :predicate (lambda () (eq sh-shell 'bash))
   :next-checkers ((warning . sh-shellcheck)))
@@ -12137,7 +12135,14 @@ See URL `https://gondor.apana.org.au/~herbert/dash/'."
 See URL `https://www.gnu.org/software/bash/'."
   :command ("bash" "--posix" "--norc" "-n" "--")
   :standard-input t
-  :error-patterns flycheck-bash-error-patterns
+  :error-patterns
+  ((error line-start
+          ;; The name/path of the bash executable
+          (one-or-more (not (any ":"))) ":"
+          ;; A label "line", possibly localized
+          (one-or-more (not (any digit)))
+          line (zero-or-more " ") ":" (zero-or-more " ")
+          (message) line-end))
   :modes sh-mode
   :predicate (lambda () (eq sh-shell 'sh))
   :next-checkers ((warning . sh-shellcheck)))
