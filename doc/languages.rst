@@ -447,10 +447,6 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
 .. supported-language:: ERuby
 
-   .. syntax-checker:: eruby-erubis
-
-      Check ERuby with `erubis <http://www.kuwata-lab.com/erubis/>`_.
-
    .. syntax-checker:: eruby-ruumba
 
       Check syntax and lint with `Ruumba <https://github.com/ericqweinstein/ruumba>`_.

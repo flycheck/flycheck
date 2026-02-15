@@ -149,7 +149,6 @@
     ember-template
     erlang-rebar3
     erlang
-    eruby-erubis
     eruby-ruumba
     fortran-gfortran
     go-gofmt
@@ -9170,16 +9169,6 @@ directory name is \"test\" or \"eqc\", or else \"default\"."
   :enabled flycheck-rebar3-project-root
   :predicate flycheck-buffer-saved-p
   :working-directory flycheck-rebar3-project-root)
-
-(flycheck-define-checker eruby-erubis
-  "An eRuby syntax checker using the `erubis' command.
-
-See URL `https://www.kuwata-lab.com/erubis/'."
-  :command ("erubis" "-z" source)
-  :error-patterns
-  ((error line-start (file-name) ":" line ": " (message) line-end))
-  :modes (html-erb-mode rhtml-mode)
-  :next-checkers ((warning . eruby-ruumba)))
 
 (flycheck-def-config-file-var flycheck-ruumbarc eruby-ruumba ".ruumba.yml")
 
