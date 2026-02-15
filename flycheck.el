@@ -10766,14 +10766,19 @@ Requires Flake8 3.0 or newer. See URL
 (flycheck-def-config-file-var flycheck-python-ruff-config python-ruff
                               '("pyproject.toml" "ruff.toml" ".ruff.toml"))
 
+(defun flycheck--explain-error-via-checker (checker &rest args)
+  "Return an explainer function that calls CHECKER with ARGS.
+The checker output is fontified as Markdown."
+  (lambda ()
+    (apply #'flycheck-call-checker-process
+           checker nil standard-output t args)
+    (with-current-buffer standard-output
+      (flycheck--fontify-as-markdown))))
+
 (defun flycheck-python-ruff-explainer (err)
   "Return an explainer function for the ruff error ERR."
   (when-let (error-code (flycheck-error-id err))
-    (lambda ()
-      (flycheck-call-checker-process
-       'python-ruff nil standard-output t "rule" error-code)
-      (with-current-buffer standard-output
-        (flycheck--fontify-as-markdown)))))
+    (flycheck--explain-error-via-checker 'python-ruff "rule" error-code)))
 
 (flycheck-define-checker python-ruff
   "A Python syntax and style checker using Ruff.
@@ -11708,11 +11713,7 @@ Relative paths are relative to the file being checked."
 (defun flycheck-rust-error-explainer (error)
   "Return an explainer function for the given rustc error ERROR."
   (when-let (error-code (flycheck-error-id error))
-    (lambda ()
-      (flycheck-call-checker-process
-       'rust nil standard-output t "--explain" error-code)
-      (with-current-buffer standard-output
-        (flycheck--fontify-as-markdown)))))
+    (flycheck--explain-error-via-checker 'rust "--explain" error-code)))
 
 (defun flycheck-rust-error-filter (errors)
   "Filter ERRORS from rustc output that have no explanatory value."
