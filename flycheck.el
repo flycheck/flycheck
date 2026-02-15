@@ -6043,7 +6043,7 @@ the error checking automatically."
         (let ((exit-code (apply #'flycheck-call-checker-process
                                 checker infile temp error args))
               (output (with-current-buffer temp (buffer-string))))
-          (if (eql 0 exit-code) output
+          (if (zerop exit-code) output
             (when error
               (error "Process %s failed with %S (%s)"
                      checker exit-code output))))
@@ -8241,7 +8241,7 @@ about the JSON format of stylelint."
 
 (defun flycheck--stylelint-config-exists-p (checker)
   "Whether there is a valid stylelint CHECKER config for the current buffer."
-  (eql 0 (flycheck-call-checker-process
+  (zerop (flycheck-call-checker-process
           checker nil nil nil
           "--print-config" (or buffer-file-name "index.js"))))
 
@@ -9778,7 +9778,7 @@ for more information about the custom directories."
 
 (defun flycheck-eslint-config-exists-p ()
   "Whether there is a valid eslint config for the current buffer."
-  (eql 0 (flycheck-call-checker-process
+  (zerop (flycheck-call-checker-process
           'javascript-eslint nil nil nil
           "--print-config" (or buffer-file-name "index.js"))))
 
@@ -10400,15 +10400,23 @@ See URL `https://proselint.com/' for more information about proselint."
               (let-alist (car response)
                 .result.<stdin>.diagnostics)))))
 
+(defvar flycheck--proselint-use-old-args 'unknown
+  "Cache for proselint version detection.
+Value is t for old (<= 0.14.0), nil for new (>= 0.16.0),
+or `unknown' if not yet detected.")
+
 (flycheck-define-checker proselint
   "Flycheck checker using Proselint.
 
 See URL `https://proselint.com/'."
   :command ("proselint"
             (eval
-             (if (= (call-process (or flycheck-proselint-executable "proselint")
-                                  nil nil nil "--version")
-                    0)
+             (when (eq flycheck--proselint-use-old-args 'unknown)
+               (setq flycheck--proselint-use-old-args
+                     (zerop (call-process
+                             (or flycheck-proselint-executable "proselint")
+                             nil nil nil "--version"))))
+             (if flycheck--proselint-use-old-args
                  ;; Proselint versions <= 0.14.0:
                  (list "--json" "-")
                ;; Proselint versions >= 0.16.0
@@ -10711,9 +10719,11 @@ of 79 characters if there is no configuration with this setting."
 
 Update the error level of ERR according to
 `flycheck-flake8-error-level-alist'."
-  (pcase-dolist (`(,pattern . ,level) flycheck-flake8-error-level-alist)
-    (when (string-match-p pattern (flycheck-error-id err))
-      (setf (flycheck-error-level err) level)))
+  (when-let* ((entry (seq-find
+                      (lambda (e)
+                        (string-match-p (car e) (flycheck-error-id err)))
+                      flycheck-flake8-error-level-alist)))
+    (setf (flycheck-error-level err) (cdr entry)))
   err)
 
 (flycheck-define-checker python-flake8
@@ -10778,11 +10788,11 @@ See URL `https://docs.astral.sh/ruff/'."
             "-")
   :standard-input t
   :error-filter (lambda (errors)
-                  (let* ((errors (flycheck-sanitize-errors errors))
-                         (errors-with-ids (seq-filter #'flycheck-error-id errors)))
-                    (seq-union
-                     (seq-difference errors errors-with-ids)
-                     (seq-map #'flycheck-flake8-fix-error-level errors-with-ids))))
+                  (let ((errors (flycheck-sanitize-errors errors)))
+                    (dolist (err errors)
+                      (when (flycheck-error-id err)
+                        (flycheck-flake8-fix-error-level err)))
+                    errors))
   :error-patterns
   ((error line-start
           (or "-" (file-name)) ":" line ":" (optional column ":") " "
@@ -11001,7 +11011,7 @@ expression, which selects linters for lintr."
 
 (defun flycheck-r-has-lintr (checker)
   "Whether CHECKER (R) has installed the `lintr' library."
-  (eql 0 (flycheck-call-checker-process
+  (zerop (flycheck-call-checker-process
           checker nil nil nil
           "--slave" "--no-restore" "--no-save" "-e"
           "library('lintr')")))
@@ -11057,7 +11067,7 @@ See URL: `https://www.r-project.org/'."
 
 (defun flycheck-racket-has-expand-p (checker)
   "Whether the executable of CHECKER provides the `expand' command."
-  (eql 0 (flycheck-call-checker-process checker nil nil nil "expand")))
+  (zerop (flycheck-call-checker-process checker nil nil nil "expand")))
 
 (flycheck-define-checker racket
   "A Racket syntax checker with `raco expand'.
@@ -11168,6 +11178,24 @@ See URL `https://github.com/rpm-software-management/rpmlint'."
   :safe #'flycheck-string-list-p
   :package-version '(flycheck . "33"))
 
+(defconst flycheck-markdownlint-error-patterns
+  '((error line-start
+           (file-name) ":" line
+           (? ":" column) " " (id (one-or-more (not (any space))))
+           " " (message) line-end))
+  "Error patterns shared by markdownlint-cli and markdownlint-cli2.")
+
+(defun flycheck-markdownlint-error-filter (errors)
+  "Error filter for markdownlint checkers."
+  (flycheck-sanitize-errors
+   (flycheck-remove-error-file-names "(string)" errors)))
+
+(defun flycheck-markdownlint-error-explainer (err)
+  "Error explainer for markdownlint checkers."
+  (let ((error-code (substring (flycheck-error-id err) 0 5))
+        (url "https://github.com/DavidAnson/markdownlint/blob/main/doc/Rules.md#%s"))
+    (and error-code `(url . ,(format url error-code)))))
+
 (flycheck-define-checker markdown-markdownlint-cli
   "Markdown checker using markdownlint-cli.
 
@@ -11178,21 +11206,10 @@ See URL `https://github.com/igorshubovych/markdownlint-cli'."
             (option-list "--enable" flycheck-markdown-markdownlint-cli-enable-rules)
             "--"
             source)
-  :error-patterns
-  ((error line-start
-          (file-name) ":" line
-          (? ":" column) " " (id (one-or-more (not (any space))))
-          " " (message) line-end))
-  :error-filter
-  (lambda (errors)
-    (flycheck-sanitize-errors
-     (flycheck-remove-error-file-names "(string)" errors)))
+  :error-patterns flycheck-markdownlint-error-patterns
+  :error-filter flycheck-markdownlint-error-filter
   :modes (markdown-mode gfm-mode)
-  :error-explainer
-  (lambda (err)
-    (let ((error-code (substring (flycheck-error-id err) 0 5))
-          (url "https://github.com/DavidAnson/markdownlint/blob/main/doc/Rules.md#%s"))
-      (and error-code `(url . ,(format url error-code))))))
+  :error-explainer flycheck-markdownlint-error-explainer)
 
 (flycheck-def-config-file-var flycheck-markdown-markdownlint-cli2-config
     markdown-markdownlint-cli2
@@ -11207,21 +11224,10 @@ See URL `https://github.com/DavidAnson/markdownlint-cli2'."
             (config-file "--config" flycheck-markdown-markdownlint-cli2-config)
             "--"
             source)
-  :error-patterns
-  ((error line-start
-          (file-name) ":" line
-          (? ":" column) " " (id (one-or-more (not (any space))))
-          " " (message) line-end))
-  :error-filter
-  (lambda (errors)
-    (flycheck-sanitize-errors
-     (flycheck-remove-error-file-names "(string)" errors)))
+  :error-patterns flycheck-markdownlint-error-patterns
+  :error-filter flycheck-markdownlint-error-filter
   :modes (markdown-mode gfm-mode)
-  :error-explainer
-  (lambda (err)
-    (let ((error-code (substring (flycheck-error-id err) 0 5))
-          (url "https://github.com/DavidAnson/markdownlint/blob/main/doc/Rules.md#%s"))
-      (and error-code `(url . ,(format url error-code))))))
+  :error-explainer flycheck-markdownlint-error-explainer)
 
 (flycheck-def-option-var flycheck-markdown-mdl-rules nil markdown-mdl
   "Rules to enable for mdl.
@@ -11760,7 +11766,7 @@ Execute `cargo --list' to find out whether COMMAND is present."
   (let ((cargo (funcall flycheck-executable-find "cargo")))
     (member command
             (mapcar (lambda (line)
-                      (replace-regexp-in-string "\\s-*\\(\\S-+\\).*\\'" "\\1" line))
+                      (car (split-string (string-trim line))))
                     (ignore-errors (process-lines cargo "--list"))))))
 
 (defun flycheck-rust-valid-crate-type-p (crate-type)
@@ -11900,7 +11906,7 @@ See URL `https://salt-lint.readthedocs.io/en/latest/'."
   :command ("python" "-m" "saltlint" "--json")
   :standard-input t
   :error-parser flycheck-salt-lint-parser
-  :error-filter (lambda (errors) (flycheck-sanitize-errors errors))
+  :error-filter flycheck-sanitize-errors
   :modes salt-mode)
 
 (defun flycheck-salt-lint-parser (output checker buffer)
@@ -11908,26 +11914,30 @@ See URL `https://salt-lint.readthedocs.io/en/latest/'."
 
 CHECKER and BUFFER are used to construct the error objects."
   (condition-case nil
-      (let* ((json-array-type 'list)
-             (json-object-type 'plist)
-            (filename (buffer-file-name buffer))
-            (errors (json-read-from-string output)))
+      (let ((filename (buffer-file-name buffer))
+            (errors (json-parse-string output
+                                      :object-type 'alist
+                                      :array-type 'list
+                                      :null-object nil
+                                      :false-object nil)))
         (mapcar (lambda (e)
-                  (flycheck-error-new
-                   :checker checker
-                   :buffer buffer
-                   :filename filename
-                   :level (pcase (plist-get e :severity)
-                            ("HIGH" 'error)
-                            ("MEDIUM" 'warning)
-                            ("LOW" 'warning)
-                            ("INFO" 'info)
-                            (_ 'info))
-                   :line (plist-get e :linenumber)
-                   :column 0
-                   :message (concat (plist-get e :message) (plist-get e :line))
-                   :id (plist-get e :id))) errors))
-    (json-error nil)))
+                  (let-alist e
+                    (flycheck-error-new
+                     :checker checker
+                     :buffer buffer
+                     :filename filename
+                     :level (pcase .severity
+                              ("HIGH" 'error)
+                              ("MEDIUM" 'warning)
+                              ("LOW" 'warning)
+                              ("INFO" 'info)
+                              (_ 'info))
+                     :line .linenumber
+                     :column 0
+                     :message (concat .message .line)
+                     :id .id)))
+                errors))
+    (json-parse-error nil)))
 
 (flycheck-define-checker scala
   "A Scala syntax checker using the Scala compiler.
@@ -12092,6 +12102,16 @@ See URL `https://stylelint.io/'."
 (flycheck-def-args-var flycheck-sh-bash-args (sh-bash)
   :package-version '(flycheck . "32"))
 
+(defconst flycheck-bash-error-patterns
+  '((error line-start
+           ;; The name/path of the bash executable
+           (one-or-more (not (any ":"))) ":"
+           ;; A label "line", possibly localized
+           (one-or-more (not (any digit)))
+           line (zero-or-more " ") ":" (zero-or-more " ")
+           (message) line-end))
+  "Error patterns for Bash syntax checkers.")
+
 (flycheck-define-checker sh-bash
   "A Bash syntax checker using the Bash shell.
 
@@ -12100,14 +12120,7 @@ See URL `https://www.gnu.org/software/bash/'."
             (eval flycheck-sh-bash-args)
             "--")
   :standard-input t
-  :error-patterns
-  ((error line-start
-          ;; The name/path of the bash executable
-          (one-or-more (not (any ":"))) ":"
-          ;; A label "line", possibly localized
-          (one-or-more (not (any digit)))
-          line (zero-or-more " ") ":" (zero-or-more " ")
-          (message) line-end))
+  :error-patterns flycheck-bash-error-patterns
   :modes (sh-mode bash-ts-mode)
   :predicate (lambda () (eq sh-shell 'bash))
   :next-checkers ((warning . sh-shellcheck)))
@@ -12130,14 +12143,7 @@ See URL `https://gondor.apana.org.au/~herbert/dash/'."
 See URL `https://www.gnu.org/software/bash/'."
   :command ("bash" "--posix" "--norc" "-n" "--")
   :standard-input t
-  :error-patterns
-  ((error line-start
-          ;; The name/path of the bash executable
-          (one-or-more (not (any ":"))) ":"
-          ;; A label "line", possibly localized
-          (one-or-more (not (any digit)))
-          line (zero-or-more " ") ":" (zero-or-more " ")
-          (message) line-end))
+  :error-patterns flycheck-bash-error-patterns
   :modes sh-mode
   :predicate (lambda () (eq sh-shell 'sh))
   :next-checkers ((warning . sh-shellcheck)))
