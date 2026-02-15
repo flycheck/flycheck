@@ -10405,6 +10405,8 @@ See URL `https://proselint.com/' for more information about proselint."
 Value is t for old (<= 0.14.0), nil for new (>= 0.16.0),
 or `unknown' if not yet detected.")
 
+(defvar flycheck-proselint-executable)
+
 (defun flycheck--proselint-args ()
   "Return command arguments for proselint, detecting the version once."
   (when (eq flycheck--proselint-use-old-args 'unknown)
