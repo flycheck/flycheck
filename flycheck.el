@@ -125,7 +125,6 @@
 (defcustom flycheck-checkers
   '(ada-gnat
     asciidoctor
-    asciidoc
     awk-gawk
     bazel-build-buildifier
     bazel-module-buildifier
@@ -7609,24 +7608,6 @@ Uses the GNAT compiler from GCC.  See URL
    (error line-start (file-name) ":" line ":" column
           ": " (message) line-end))
   :modes ada-mode)
-
-(flycheck-define-checker asciidoc
-  "An AsciiDoc syntax checker using the AsciiDoc compiler.
-
-See URL `https://www.methods.co.nz/asciidoc'."
-  :command ("asciidoc" "-o" null-device "-")
-  :standard-input t
-  :error-patterns
-  ((error line-start
-          "asciidoc: ERROR: <stdin>: Line " line ": " (message)
-          line-end)
-   (warning line-start
-            "asciidoc: WARNING: <stdin>: Line " line ": " (message)
-            line-end)
-   (info line-start
-         "asciidoc: DEPRECATED: <stdin>: Line " line ": " (message)
-         line-end))
-  :modes adoc-mode)
 
 (flycheck-define-checker asciidoctor
   "An AsciiDoc syntax checker using the Asciidoctor compiler.

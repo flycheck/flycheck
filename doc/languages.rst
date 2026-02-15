@@ -56,12 +56,6 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       .. _Asciidoctor: http://asciidoctor.org
 
-   .. syntax-checker:: asciidoc
-
-      Check AsciiDoc_ with the standard AsciiDoc processor.
-
-      .. _AsciiDoc: http://www.methods.co.nz/asciidoc
-
 .. supported-language:: Awk
 
    .. syntax-checker:: awk-gawk

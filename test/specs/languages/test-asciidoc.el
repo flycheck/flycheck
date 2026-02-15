@@ -4,14 +4,6 @@
 (require 'test-helpers)
 
 (describe "Language AsciiDoc"
-  (flycheck-buttercup-def-checker-test asciidoc asciidoc nil
-    (let ((flycheck-disabled-checkers '(asciidoctor)))
-      (flycheck-buttercup-should-syntax-check
-       "language/asciidoc.adoc" 'adoc-mode
-       '(1 nil warning "missing style: [paradef-default]: paragraph" :checker asciidoc)
-       '(3 nil info "old tables syntax" :checker asciidoc)
-       '(11 nil error "[tabledef-default] illegal width=%60%" :checker asciidoc))))
-
   (flycheck-buttercup-def-checker-test asciidoctor asciidoc nil
     (flycheck-buttercup-should-syntax-check
      "language/asciidoctor.adoc" 'adoc-mode
