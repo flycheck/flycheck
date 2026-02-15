@@ -82,6 +82,13 @@ Bugs fixed
 - Fix ``python-ruff`` checker to use ``concise`` output format instead of
   removed ``text`` format (renamed in ruff 0.2).
 - Fix ``python-ruff`` error ID regex and ``invalid-syntax`` error handling.
+- Fix ``rpm-rpmlint`` error filter returning unfiltered errors (the
+  ``(none)`` filename filter was not applied).
+- Add ``php-ts-mode`` to the ``php-phpcs-changed`` checker.
+- Fix ``flycheck-cuda-gencodes`` customize type (was ``file``, now
+  ``string``).
+- Guard ``buffer-file-name`` against nil in ``yaml-actionlint`` predicate,
+  ``erlang`` enabled check, and ``flycheck-rebar3-project-root``.
 
 -------
 Removed
@@ -117,6 +124,19 @@ Removed
   functionality as js-yaml.  Use ``yaml-jsyaml`` or ``yaml-yamllint`` instead.
 - Remove ``ruby-jruby`` checker.  JRuby is extremely niche for linting.
   Use ``ruby-rubocop`` or ``ruby`` instead.
+- Remove dead code: ``flycheck-option-symbol``,
+  ``flycheck-flake8--find-project-root``, ``flycheck-string-or-nil-p``,
+  ``flycheck-chunked-process-input`` and associated chunking functions.
+- Replace deprecated ``seq-contains`` with ``seq-contains-p``.
+- Replace ``flycheck-string-or-nil-p`` with built-in ``string-or-null-p``.
+- Use ``json-parse-buffer`` unconditionally (available since Emacs 27.1),
+  removing the ``json-read`` fallback and the ``json`` library dependency.
+- Use ``libxml-available-p`` (available since Emacs 27.1) instead of
+  ``fboundp`` check.
+- Use ``seq-sort-by`` (available since Emacs 27.1) instead of workaround.
+- Use ``seq-mapcat`` instead of ``(apply #'append (seq-map ...))``.
+- Minor code style improvements: ``when (not ...)`` → ``unless``,
+  ``reverse`` → ``nreverse`` for locally-built lists.
 
 35.0 (2025-04-23)
 ======================
