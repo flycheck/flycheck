@@ -250,7 +250,6 @@
     tex-lacheck
     texinfo
     textlint
-    typescript-tslint
     verilog-verilator
     vhdl-ghdl
     xml-xmlstarlet
@@ -7171,32 +7170,6 @@ information about staticcheck."
          errors)))
     (nreverse errors)))
 
-(defun flycheck-parse-tslint (output checker buffer)
-  "Parse TSLint errors from JSON OUTPUT.
-
-CHECKER and BUFFER denote the CHECKER that returned OUTPUT and
-the BUFFER that was checked respectively.
-
-See URL `https://palantir.github.io/tslint/' for more information
-about TSLint."
-  (seq-map (lambda (message)
-             (let-alist message
-               (flycheck-error-new-at
-                (+ 1 .startPosition.line)
-                (+ 1 .startPosition.character)
-                (pcase .ruleSeverity
-                  ("ERROR"   'error)
-                  ("WARNING" 'warning)
-                  (_         'warning))
-                .failure
-                :id .ruleName
-                :checker checker
-                :buffer buffer
-                :filename .name
-                :end-line (+ 1 .endPosition.line)
-                :end-column (+ 1 .endPosition.character))))
-           (car (flycheck-parse-json output))))
-
 (defun flycheck-parse-rust-collect-spans (span)
   "Return a list of spans contained in a SPAN object."
   (let ((spans))
@@ -13008,45 +12981,6 @@ See URL `https://textlint.github.io/'."
         :label "textlint plugin"
         :message plugin
         :face 'success)))))
-
-(flycheck-def-config-file-var flycheck-typescript-tslint-config
-    typescript-tslint "tslint.json"
-  :package-version '(flycheck . "27"))
-
-(flycheck-def-option-var flycheck-typescript-tslint-rulesdir
-    nil typescript-tslint
-  "The directory of custom rules for TSLint.
-
-The value of this variable is either a string containing the path
-to a directory with custom rules, or nil, to not give any custom
-rules to TSLint.
-
-Refer to the TSLint manual at URL
-`https://palantir.github.io/tslint/usage/cli/'
-for more information about the custom directory."
-  :type '(choice (const :tag "No custom rules directory" nil)
-                 (directory :tag "Custom rules directory"))
-  :safe #'flycheck-string-or-nil-p
-  :package-version '(flycheck . "27"))
-
-(flycheck-def-args-var flycheck-tslint-args (typescript-tslint)
-  :package-version '(flycheck . "31"))
-
-(flycheck-define-checker typescript-tslint
-  "TypeScript style checker using TSLint.
-
-Note that this syntax checker is not used if
-`flycheck-typescript-tslint-config' is nil or refers to a
-non-existing file.
-
-See URL `https://github.com/palantir/tslint'."
-  :command ("tslint" "--format" "json"
-            (config-file "--config" flycheck-typescript-tslint-config)
-            (option "--rules-dir" flycheck-typescript-tslint-rulesdir)
-            (eval flycheck-tslint-args)
-            source-inplace)
-  :error-parser flycheck-parse-tslint
-  :modes (typescript-mode typescript-ts-mode tsx-ts-mode))
 
 (flycheck-def-option-var flycheck-verilator-include-path nil verilog-verilator
   "A list of include directories for Verilator.

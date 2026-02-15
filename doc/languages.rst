@@ -1706,21 +1706,6 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       See `javascript-oxlint`.
 
-   .. syntax-checker:: typescript-tslint
-
-      Check syntax and style with `TSLint <https://github.com/palantir/tslint>`_.
-      This checker is deprecated.
-
-      .. syntax-checker-config-file:: flycheck-typescript-tslint-config
-
-      .. defcustom:: flycheck-typescript-tslint-rulesdir
-
-         Additional rules directory, for user created rules.
-
-      .. defcustom:: flycheck-tslint-args
-
-         A list of additional arguments that are passed to tslint.
-
 .. supported-language:: Verilog
 
    .. syntax-checker:: verilog-verilator
