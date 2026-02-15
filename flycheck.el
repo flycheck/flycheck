@@ -10892,17 +10892,12 @@ See URL `https://www.pylint.org/'."
 See URL `https://docs.python.org/3.4/library/py_compile.html'."
   :command ("python3" "-m" "py_compile" source)
   :error-patterns
-  ;; Python 2.7
   ((error line-start "  File \"" (file-name) "\", line " line "\n"
           (>= 2 (zero-or-more not-newline) "\n")
           "SyntaxError: " (message) line-end)
    (error line-start "Sorry: IndentationError: "
           (message) "(" (file-name) ", line " line ")"
-          line-end)
-   ;; 2.6
-   (error line-start "SyntaxError: ('" (message (one-or-more (not (any "'"))))
-          "', ('" (file-name (one-or-more (not (any "'")))) "', "
-          line ", " column ", " (one-or-more not-newline) line-end))
+          line-end))
   :working-directory flycheck-python-find-project-root
   :modes (python-mode python-ts-mode)
   :next-checkers ((warning . python-mypy)))
