@@ -1799,7 +1799,7 @@ chosen.  If DEFAULT is nil and no checker was chosen, signal a
 a default on its own."
   (when (and default (not (flycheck-valid-checker-p default)))
     (error "%S is no valid Flycheck checker" default))
-  (let* ((candidates (seq-map #'symbol-name
+  (let* ((candidates (mapcar #'symbol-name
                               (or candidates
                                   (flycheck-defined-checkers property))))
          (default (and default (symbol-name default)))
@@ -1820,7 +1820,7 @@ a default on its own."
 
 Only offers levels for which errors currently exist, in addition
 to the default levels."
-  (let* ((levels (seq-map #'flycheck-error-level
+  (let* ((levels (mapcar #'flycheck-error-level
                           (flycheck-error-list-current-errors)))
          (levels-with-defaults (append '(info warning error) levels))
          (uniq-levels (seq-uniq levels-with-defaults))
@@ -2415,7 +2415,7 @@ Pop up a help buffer with the documentation of CHECKER."
           ;; it later
           (princ "  This syntax checker checks syntax in the major mode(s) ")
           (princ (string-join
-                  (seq-map (apply-partially #'format "`%s'") modes)
+                  (mapcar (apply-partially #'format "`%s'") modes)
                   ", "))
           (when predicate
             (princ ", and uses a custom predicate"))
@@ -4905,12 +4905,12 @@ overlays."
 
 (defun flycheck-overlay-errors-at (pos)
   "Return a list of all flycheck errors overlaid at POS."
-  (seq-map (lambda (o) (overlay-get o 'flycheck-error))
+  (mapcar (lambda (o) (overlay-get o 'flycheck-error))
            (flycheck-overlays-at pos)))
 
 (defun flycheck-overlay-errors-in (beg end)
   "Return a list of all flycheck errors overlaid between BEG and END."
-  (seq-map (lambda (o) (overlay-get o 'flycheck-error))
+  (mapcar (lambda (o) (overlay-get o 'flycheck-error))
            (flycheck-overlays-in beg end)))
 
 (defvar-local flycheck-overlays-to-delete nil
@@ -5245,7 +5245,7 @@ ensure that they line up properly once the message is displayed."
   "Create the entries for the error list."
   (when-let* ((errors (flycheck-error-list-current-errors))
               (filtered (flycheck-error-list-apply-filter errors)))
-    (seq-map #'flycheck-error-list-make-entry filtered)))
+    (mapcar #'flycheck-error-list-make-entry filtered)))
 
 (defun flycheck-error-list-entry-< (entry1 entry2)
   "Determine whether ENTRY1 is before ENTRY2 by location.
@@ -5711,7 +5711,7 @@ universal prefix arg, and only the id with normal prefix arg."
                        ((pred not) #'flycheck-error-message)
                        ((pred consp) #'flycheck-error-format-message-and-id)
                        (_ #'flycheck-error-id))))
-  (let ((messages (delq nil (seq-map (or formatter #'flycheck-error-message)
+  (let ((messages (delq nil (mapcar (or formatter #'flycheck-error-message)
                                      (flycheck-overlay-errors-at pos)))))
     (when messages
       (seq-do #'kill-new (nreverse messages))
@@ -5965,7 +5965,7 @@ default `:verify' function of command checkers."
 
     ;; Pre-compile all errors patterns into strings, so that we don't need to do
     ;; that on each error parse
-    (let ((patterns (seq-map (lambda (p)
+    (let ((patterns (mapcar (lambda (p)
                                (cons (flycheck-rx-to-string `(and ,@(cdr p))
                                                             'no-group)
                                      (car p)))
@@ -6232,7 +6232,7 @@ are substituted within the body of cells!"
                 value variable option-name))
        (flycheck-prepend-with-option option-name value prepend-fn)))
     (`(option-list ,option-name ,variable ,prepend-fn ,filter)
-     (let ((value (delq nil (seq-map filter (symbol-value variable)))))
+     (let ((value (delq nil (mapcar filter (symbol-value variable)))))
        (unless (and (listp value) (seq-every-p #'stringp value))
          (error "Value %S of %S for option %S is not a list of strings"
                 value variable option-name))
@@ -6479,7 +6479,7 @@ output checker)))
     (funcall callback 'finished
              ;; Fix error file names, by substituting them backwards from the
              ;; temporaries.
-             (seq-map (lambda (e) (flycheck-fix-error-filename e files cwd))
+             (mapcar (lambda (e) (flycheck-fix-error-filename e files cwd))
                       errors))))
 
 
@@ -6718,7 +6718,7 @@ SEPARATOR is ignored in this case."
   (let ((filter (or filter #'identity))
         (separator (or separator ",")))
     (if (listp value)
-        (when-let (value (delq nil (seq-map filter value)))
+        (when-let (value (delq nil (mapcar filter value)))
           (string-join value separator))
       (funcall filter value))))
 
@@ -6759,7 +6759,7 @@ Return a list representing PATTERN, suitable as element in
 
 Return an alist of all error patterns of CHECKER, suitable for
 use with `compilation-error-regexp-alist'."
-  (seq-map #'flycheck-checker-pattern-to-error-regexp
+  (mapcar #'flycheck-checker-pattern-to-error-regexp
            (flycheck-checker-get checker 'error-patterns)))
 
 (defun flycheck--substitute-shell-command-argument (arg checker)
@@ -7332,7 +7332,7 @@ CHECKER and BUFFER are passed along as well."
 ;;; Error parsing with regular expressions
 (defun flycheck-get-regexp (patterns)
   "Create a single regular expression from PATTERNS."
-  (rx-to-string `(or ,@(seq-map (lambda (p) (list 'regexp (car p))) patterns))
+  (rx-to-string `(or ,@(mapcar (lambda (p) (list 'regexp (car p))) patterns))
                 'no-group))
 
 (defun flycheck-tokenize-output-with-patterns (output patterns)
@@ -7414,7 +7414,7 @@ Return a list of parsed errors and warnings (as `flycheck-error'
 objects)."
   (with-current-buffer buffer
     (let ((patterns (flycheck-checker-get checker 'error-patterns)))
-      (seq-map (lambda (err)
+      (mapcar (lambda (err)
                  (flycheck-parse-error-with-patterns err patterns checker))
                (flycheck-tokenize-output-with-patterns output patterns)))))
 
@@ -8718,7 +8718,7 @@ See Info Node `(elisp)Byte Compilation'."
             (eval
              (let ((path (pcase flycheck-emacs-lisp-load-path
                            (`inherit load-path)
-                           (p (seq-map #'expand-file-name p)))))
+                           (p (mapcar #'expand-file-name p)))))
                (flycheck-prepend-with-option "--directory" path)))
             (option "--eval" flycheck-emacs-lisp-package-user-dir nil
                     flycheck-option-emacs-lisp-package-user-dir)
@@ -8829,7 +8829,7 @@ See Info Node `(elisp)Byte Compilation'."
 
 Variables are taken from `flycheck-emacs-lisp-checkdoc-variables'."
   `(progn
-     ,@(seq-map (lambda (opt) `(setq-default ,opt ',(symbol-value opt)))
+     ,@(mapcar (lambda (opt) `(setq-default ,opt ',(symbol-value opt)))
                 (seq-filter #'boundp flycheck-emacs-lisp-checkdoc-variables))))
 
 (defun flycheck-org-lint-available-p ()
@@ -10748,7 +10748,7 @@ Requires Flake8 3.0 or newer. See URL
   :working-directory flycheck-python-find-project-root
   :error-filter (lambda (errors)
                   (let ((errors (flycheck-sanitize-errors errors)))
-                    (seq-map #'flycheck-flake8-fix-error-level errors)))
+                    (mapcar #'flycheck-flake8-fix-error-level errors)))
   :error-patterns
   ((warning line-start
             (file-name) ":" line ":" (optional column ":") " "
@@ -10914,7 +10914,7 @@ See URL `https://docs.python.org/3.4/library/py_compile.html'."
   "Parse pyright errors/warnings from JSON OUTPUT.
 CHECKER and BUFFER denote the CHECKER that returned OUTPUT and
 the BUFFER that was checked respectively."
-  (seq-map
+  (mapcar
    (lambda (err)
      (let-alist err
        (flycheck-error-new-at
