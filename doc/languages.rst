@@ -244,12 +244,6 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
 .. supported-language:: CSS
 
-   .. syntax-checker:: css-csslint
-
-      Check syntax and style with `CSSLint`_.
-
-      .. _CSSLint: https://github.com/CSSLint/csslint
-
    .. syntax-checker:: css-stylelint
 
       Syntax-check and lint CSS with stylelint_.

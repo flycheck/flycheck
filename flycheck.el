@@ -137,7 +137,6 @@
     cfengine
     coffee
     coffee-coffeelint
-    css-csslint
     css-stylelint
     cuda-nvcc
     cwl
@@ -8244,15 +8243,6 @@ See URL `https://www.coffeelint.org/'."
                    "stdin" (flycheck-remove-error-ids
                             (flycheck-sanitize-errors errors))))
   :modes coffee-mode)
-
-(flycheck-define-checker css-csslint
-  "A CSS syntax and style checker using csslint.
-
-See URL `https://github.com/CSSLint/csslint'."
-  :command ("csslint" "--format=checkstyle-xml" source)
-  :error-parser flycheck-parse-checkstyle
-  :error-filter flycheck-dequalify-error-ids
-  :modes (css-mode css-ts-mode))
 
 (defconst flycheck-stylelint-args '("--formatter" "json")
   "Common arguments to stylelint invocations.")
