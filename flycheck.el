@@ -167,7 +167,6 @@
     javascript-oxlint
     javascript-jshint
     javascript-standard
-    json-jsonlint
     json-python-json
     json-jq
     jsonnet
@@ -10041,24 +10040,6 @@ See URL `https://github.com/standard/standard' and URL
   ((error line-start "  <text>:" line ":" column ":" (message) line-end))
   :modes (js-mode js-jsx-mode js2-mode js2-jsx-mode js3-mode rjsx-mode
                   js-ts-mode))
-
-(flycheck-define-checker json-jsonlint
-  "A JSON syntax and style checker using jsonlint.
-
-See URL `https://github.com/zaach/jsonlint'."
-  ;; We can't use standard input for jsonlint, because it doesn't output errors
-  ;; anymore when using -c -q with standard input :/
-  :command ("jsonlint" "-c" "-q" source)
-  :error-patterns
-  ((error line-start
-          (file-name)
-          ": line " line
-          ", col " column ", "
-          (message) line-end))
-  :error-filter
-  (lambda (errors)
-    (flycheck-sanitize-errors (flycheck-increment-error-columns errors)))
-  :modes (json-mode js-json-mode json-ts-mode))
 
 (flycheck-define-checker json-python-json
   "A JSON syntax checker using Python json.tool module.

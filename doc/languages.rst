@@ -734,12 +734,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
 .. supported-language:: JSON
 
-   Flycheck checks JSON with `json-jsonlint`, `json-python-json`, or
-   `json-jq`.
-
-   .. syntax-checker:: json-jsonlint
-
-      Check JSON with `jsonlint <https://github.com/zaach/jsonlint>`_.
+   Flycheck checks JSON with `json-python-json` or `json-jq`.
 
    .. syntax-checker:: json-python-json
 
