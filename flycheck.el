@@ -231,7 +231,6 @@
     sass-stylelint
     scss-stylelint
     sass/scss-sass-lint
-    sass
     sh-bash
     sh-posix-dash
     sh-posix-bash
@@ -12241,56 +12240,6 @@ CHECKER and BUFFER are used to construct the error objects."
                    :message (concat (plist-get e :message) (plist-get e :line))
                    :id (plist-get e :id))) errors))
     (json-error nil)))
-
-(defvar flycheck-sass-scss-cache-directory nil
-  "The cache directory for `sass' and `scss'.")
-
-(defun flycheck-sass-scss-cache-location ()
-  "Get the cache location for `sass' and `scss'.
-
-If no cache directory exists yet, create one and return it.
-Otherwise return the previously used cache directory."
-  (setq flycheck-sass-scss-cache-directory
-        (or flycheck-sass-scss-cache-directory
-            (make-temp-file "flycheck-sass-scss-cache" 'directory))))
-
-(flycheck-def-option-var flycheck-sass-compass nil sass
-  "Whether to enable the Compass CSS framework.
-
-When non-nil, enable the Compass CSS framework, via `--compass'."
-  :type 'boolean
-  :safe #'booleanp
-  :package-version '(flycheck . "0.16"))
-
-(flycheck-define-checker sass
-  "A Sass syntax checker using the Sass compiler.
-
-See URL `https://sass-lang.com'."
-  :command ("sass"
-            "--cache-location" (eval (flycheck-sass-scss-cache-location))
-            (option-flag "--compass" flycheck-sass-compass)
-            "--check" "--stdin")
-  :standard-input t
-  :error-patterns
-  ((error line-start
-          (or "Syntax error: " "Error: ")
-          (message (one-or-more not-newline)
-                   (zero-or-more "\n"
-                                 (one-or-more " ")
-                                 (one-or-more not-newline)))
-          (optional "\r") "\n" (one-or-more " ") "on line " line
-          " of standard input"
-          line-end)
-   (warning line-start
-            "WARNING: "
-            (message (one-or-more not-newline)
-                     (zero-or-more "\n"
-                                   (one-or-more " ")
-                                   (one-or-more not-newline)))
-            (optional "\r") "\n" (one-or-more " ") "on line " line
-            " of " (one-or-more not-newline)
-            line-end))
-  :modes sass-mode)
 
 (flycheck-def-config-file-var flycheck-sass-lintrc sass/scss-sass-lint
                               ".sass-lint.yml"

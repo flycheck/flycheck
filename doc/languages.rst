@@ -1478,14 +1478,6 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
          Whether to run stylelint in quiet mode via ``--quiet``.
 
-   .. syntax-checker:: sass
-
-      Check SASS with the `SCSS compiler <http://sass-lang.com/>`_.
-
-      .. defcustom:: flycheck-sass-compass
-
-         Whether to enable the Compass CSS framework with ``--compass``.
-
 .. supported-language:: Scala
 
    Flycheck checks Scala with `scala` and `scala-scalastyle`.
