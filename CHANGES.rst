@@ -111,6 +111,12 @@ Removed
   since ~2017.  Use ``json-python-json`` or ``json-jq`` instead.
 - Remove ``xml-xmlstarlet`` checker.  XMLStarlet has not had a release since
   2014.  Use ``xml-xmllint`` instead.
+- Remove ``javascript-jshint`` checker.  JSHint has been largely superseded
+  by ESLint.  Use ``javascript-eslint`` instead.
+- Remove ``yaml-ruby`` checker.  Ruby's YAML parser provides the same
+  functionality as js-yaml.  Use ``yaml-jsyaml`` or ``yaml-yamllint`` instead.
+- Remove ``ruby-jruby`` checker.  JRuby is extremely niche for linting.
+  Use ``ruby-rubocop`` or ``ruby`` instead.
 
 35.0 (2025-04-23)
 ======================
