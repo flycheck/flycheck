@@ -83,6 +83,29 @@ Bugs fixed
   removed ``concise`` format.
 - Fix ``python-ruff`` error ID regex and ``invalid-syntax`` error handling.
 
+-------
+Removed
+-------
+
+- Remove ``typescript-tslint`` checker.  TSLint has been deprecated since 2019
+  in favor of `ESLint with typescript-eslint <https://typescript-eslint.io/>`_.
+- Remove ``sass`` and ``scss`` checkers.  Ruby Sass reached end-of-life in
+  March 2019.  Use ``sass-stylelint`` and ``scss-stylelint`` instead.
+- Remove ``sass/scss-sass-lint`` checker.  sass-lint has been abandoned for
+  over 4 years.  Use ``sass-stylelint`` or ``scss-stylelint`` instead.
+- Remove ``scss-lint`` checker.  scss-lint depends on the dead Ruby Sass engine
+  and is no longer maintained.  Use ``scss-stylelint`` instead.
+- Remove ``eruby-erubis`` checker.  Erubis has been abandoned since 2011.
+  The ``eruby-ruumba`` checker remains available.
+- Remove ``css-csslint`` checker.  CSSLint has been abandoned since ~2017.
+  Use ``css-stylelint`` instead.
+- Remove ``protobuf-prototool`` checker.  Prototool was archived by Uber in
+  March 2022.
+- Remove ``nix-linter`` checker.  nix-linter has been abandoned by its author,
+  who recommends `statix <https://github.com/nerdypepper/statix>`_ instead.
+- Remove ``coffee-coffeelint`` checker.  CoffeeLint has been effectively
+  inactive with known security vulnerabilities.
+
 35.0 (2025-04-23)
 ======================
 
