@@ -28,16 +28,8 @@
 (require 'test-helpers)
 
 (describe "Language XML"
-  (flycheck-buttercup-def-checker-test xml-xmlstarlet xml nil
-    (let ((inhibit-message t))
-      (flycheck-buttercup-should-syntax-check
-       "language/xml.xml" 'nxml-mode
-       '(4 10 error "Opening and ending tag mismatch: spam line 3 and with"
-           :checker xml-xmlstarlet))))
-
   (flycheck-buttercup-def-checker-test xml-xmllint xml nil
-    (let ((flycheck-disabled-checkers '(xml-xmlstarlet))
-          (inhibit-message t))
+    (let ((inhibit-message t))
       (flycheck-buttercup-should-syntax-check
        "language/xml.xml" 'nxml-mode
        '(4 nil error "parser error : Opening and ending tag mismatch: spam line 3 and with"

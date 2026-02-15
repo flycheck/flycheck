@@ -241,7 +241,6 @@
     textlint
     verilog-verilator
     vhdl-ghdl
-    xml-xmlstarlet
     xml-xmllint
     yaml-actionlint
     yaml-jsyaml
@@ -12761,27 +12760,6 @@ See URL `https://github.com/ghdl/ghdl'."
   ((warning line-start (file-name) ":" line ":" column ":warning: " (message) line-end)
    (error line-start (file-name) ":" line ":" column ":error: " (message) line-end))
   :modes vhdl-mode)
-
-(flycheck-def-option-var flycheck-xml-xmlstarlet-xsd-path nil xml-xmlstarlet
-  "An XSD schema to validate against."
-  :type '(choice (const :tag "None" nil)
-                 (file :tag "XSD schema"))
-  :safe #'flycheck-string-or-nil-p
-  :package-version '(flycheck . "31"))
-
-(flycheck-define-checker xml-xmlstarlet
-  "An XML syntax checker and validator using the xmlstarlet utility.
-
-See URL `https://xmlstar.sourceforge.net/'."
-  ;; Validate standard input with verbose error messages, and do not dump
-  ;; contents to standard output
-  :command ("xmlstarlet" "val" "--err" "--quiet"
-            (option "--xsd" flycheck-xml-xmlstarlet-xsd-path)
-            "-")
-  :standard-input t
-  :error-patterns
-  ((error line-start "-:" line "." column ": " (message) line-end))
-  :modes (xml-mode nxml-mode))
 
 (flycheck-def-option-var flycheck-xml-xmllint-xsd-path nil xml-xmllint
   "An XSD schema to validate against."
