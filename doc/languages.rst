@@ -902,12 +902,6 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       .. _nix-instantiate: https://nixos.org/nix/manual/#sec-nix-instantiate
 
-   .. syntax-checker:: nix-linter
-
-      Check Nix with nix-linter_.
-
-      .. _nix-linter: https://github.com/Synthetica9/nix-linter
-
    .. syntax-checker:: statix
 
       Check Nix with statix_.
