@@ -243,7 +243,6 @@
     xml-xmllint
     yaml-actionlint
     yaml-jsyaml
-    yaml-ruby
     yaml-yamllint)
   "Syntax checkers available for automatic selection.
 
@@ -12763,26 +12762,6 @@ See URL `https://github.com/nodeca/js-yaml'."
           (or "JS-YAML" "YAMLException") ": "
           (message) " (" line ":" column ")"
           line-end))
-  :modes (yaml-mode yaml-ts-mode)
-  :next-checkers ((warning . yaml-yamllint)
-                  (warning . cwl)))
-
-(flycheck-define-checker yaml-ruby
-  "A YAML syntax checker using Ruby's YAML parser.
-
-This syntax checker uses the YAML parser from Ruby's standard
-library.
-
-See URL `https://www.ruby-doc.org/stdlib-2.0.0/libdoc/yaml/rdoc/YAML.html'."
-  :command ("ruby" "-ryaml" "-e" "begin;
-   YAML.load(STDIN); \
- rescue Exception => e; \
-   STDERR.puts \"stdin:#{e}\"; \
- end")
-  :standard-input t
-  :error-patterns
-  ((error line-start "stdin:" (zero-or-more not-newline) ":" (message)
-          "at line " line " column " column line-end))
   :modes (yaml-mode yaml-ts-mode)
   :next-checkers ((warning . yaml-yamllint)
                   (warning . cwl)))

@@ -34,15 +34,8 @@
      '(4 5 error "bad indentation of a mapping entry"
          :checker yaml-jsyaml)))
 
-  (flycheck-buttercup-def-checker-test yaml-ruby yaml nil
-    (let ((flycheck-disabled-checkers '(yaml-jsyaml)))
-      (flycheck-buttercup-should-syntax-check
-       "language/yaml.yaml" 'yaml-mode
-       '(4 5 error "mapping values are not allowed in this context"
-           :checker yaml-ruby))))
-
   (flycheck-buttercup-def-checker-test yaml-yamllint yaml nil
-    (let ((flycheck-disabled-checkers '(yaml-yamlyaml)))
+    (let ((flycheck-disabled-checkers '(yaml-jsyaml)))
       (flycheck-buttercup-should-syntax-check
        "language/yaml.yaml" 'yaml-mode
        '(3 1 warning "missing document start \"---\" (document-start)"

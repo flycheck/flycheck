@@ -1662,7 +1662,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
 .. supported-language:: YAML
 
-   Flycheck checks YAML with `yaml-actionlint`, `yaml-jsyaml`, `yaml-ruby` or `yaml-yamllint`.
+   Flycheck checks YAML with `yaml-actionlint`, `yaml-jsyaml` or `yaml-yamllint`.
 
    .. syntax-checker:: yaml-actionlint
 
@@ -1671,10 +1671,6 @@ to view the docstring of the syntax checker.  Likewise, you may use
    .. syntax-checker:: yaml-jsyaml
 
       Check syntax with `js-yaml <https://github.com/nodeca/js-yaml>`_.
-
-   .. syntax-checker:: yaml-ruby
-
-      Check syntax with Ruby's YAML parser.
 
    .. syntax-checker:: yaml-yamllint
 
