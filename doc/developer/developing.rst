@@ -265,15 +265,15 @@ Here are two examples of more complex checkers:
      :predicate (lambda () (memq sh-shell '(bash ksh88 sh)))
      :verify
      (lambda (_)
-       (let ((supported (memq sh-shell '(bash ksh88 sh))))
+       (let ((supports-shell (memq sh-shell '(bash ksh88 sh))))
          (list (flycheck-verification-result-new
                 :label (format "Shell %s supported" sh-shell)
-                :message (if supported "yes" "no")
+                :message (if supports-shell "yes" "no")
                 :face (if supports-shell 'success '(bold warning))))))
      :error-explainer
      (lambda (err)
        (let ((error-code (flycheck-error-id err))
-             (url "https://github.com/koalaman/shellcheck/wiki/%S"))
+             (url "https://github.com/koalaman/shellcheck/wiki/%s"))
          (and error-code `(url . ,(format url error-code))))))
 
 The ``:command`` forms are longer, as the checkers pass more flags to ``protoc``

@@ -84,7 +84,7 @@ Run ``make help`` to see a list of all available targets.  Some common ones are:
 
 - ``make init`` initialises the project by installing local Emacs Lisp
   dependencies.
-- ``make check`` checks all Emacs Lisp sources.  This target requires Emacs 25.
+- ``make check`` checks all Emacs Lisp sources.  This target requires Emacs 27.1.
 - ``make compile`` compiles Flycheck and its libraries to byte code.
 - ``make format`` formats all Emacs Lisp sources.
 - ``make specs`` runs all Buttercup_ specs for Flycheck.  Set :makevar:`PATTERN`

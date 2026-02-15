@@ -79,8 +79,8 @@ Bugs fixed
   ``gawk --source``.
 - [#2092]: Detect parse errors (unbalanced parentheses, invalid read syntax)
   in ``emacs-lisp`` byte compilation.
-- Fix ``python-ruff`` checker to use ``text`` output format instead of
-  removed ``concise`` format.
+- Fix ``python-ruff`` checker to use ``concise`` output format instead of
+  removed ``text`` format (renamed in ruff 0.2).
 - Fix ``python-ruff`` error ID regex and ``invalid-syntax`` error handling.
 
 -------

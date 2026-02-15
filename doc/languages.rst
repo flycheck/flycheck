@@ -223,8 +223,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
 .. supported-language:: Coffeescript
 
-   Flycheck checks Coffeescript syntax with `coffee` and then lints with
-   `coffee-coffeelint`.
+   Flycheck checks Coffeescript syntax with `coffee`.
 
    .. syntax-checker:: coffee
 
@@ -671,7 +670,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
 .. supported-language:: Javascript
 
-   Flycheck checks Javascript with `javascript-eslint`.
+   Flycheck checks Javascript with `javascript-eslint` or `javascript-oxlint`.
 
    Alternatively `javascript-standard` is used instead.
 
@@ -1023,8 +1022,10 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
 .. supported-language:: Python
 
-   Flycheck checks Python with `python-flake8` or `python-pylint`, and falls
-   back to `python-pycompile` if neither of those is available.
+   Flycheck checks Python with `python-flake8`, `python-ruff` or
+   `python-pylint`, and falls back to `python-pycompile` if none of those
+   is available.  Additionally `python-pyright` and `python-mypy` provide
+   optional type checking.
 
    All Python checkers are invoked indirectly using ``python -c ...`` (rather
    than a direct call to ``flake8`` or ``pylint``) to make it easier to switch
@@ -1192,10 +1193,10 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
 .. supported-language:: Ruby
 
-   Flycheck checks Ruby with `ruby-rubocop` and `ruby-reek`,
-   falling back to `ruby` for basic syntax checking if those are not
-   available. There's also `ruby-chef-cookstyle`, which is only used
-   for Chef cookbooks.
+   Flycheck checks Ruby with `ruby-rubocop` (or `ruby-standard`) and
+   `ruby-reek`, falling back to `ruby` for basic syntax checking if those
+   are not available.  There's also `ruby-chef-cookstyle`, which is only
+   used for Chef cookbooks.
 
    .. syntax-checker:: ruby-rubocop
 

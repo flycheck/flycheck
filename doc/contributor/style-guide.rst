@@ -56,10 +56,10 @@ Style
 
 .. important::
 
-   ``make check compile`` must pass on Emacs 25 or newer.  This command checks
+   ``make check compile`` must pass on Emacs 27.1 or newer.  This command checks
    for some formatting issues and compilation errors.
 
-   Run ``make format`` with Emacs 25 to automatically reformat the Emacs Lisp
+   Run ``make format`` with Emacs 27.1 to automatically reformat the Emacs Lisp
    source files.
 
 * Generally try to fit into the style of the code you see.

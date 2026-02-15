@@ -206,9 +206,9 @@ checkers produce explanations, the majority do not.  Those that do are:
 * `javascript-eslint`
 * `markdown-markdownlint-cli`
 * `markdown-markdownlint-cli2`
-* `nix-linter`
 * `perl-perlcritic`
 * `python-pylint`
+* `python-ruff`
 * `rpm-rpmlint`
 * `rust`
 * `rust-cargo`
