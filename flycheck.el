@@ -164,7 +164,6 @@
     html-tidy
     javascript-eslint
     javascript-oxlint
-    javascript-jshint
     javascript-standard
     json-python-json
     json-jq
@@ -9827,45 +9826,6 @@ See URL `https://github.com/htacg/tidy-html5'."
             " column " column
             " - Warning: " (message) line-end))
   :modes (html-mode mhtml-mode nxhtml-mode))
-
-(flycheck-def-config-file-var flycheck-jshintrc javascript-jshint ".jshintrc")
-
-(flycheck-def-option-var flycheck-jshint-extract-javascript nil
-                         javascript-jshint
-  "Whether jshint should extract Javascript from HTML.
-
-If nil no extract rule is given to jshint.  If `auto' only
-extract Javascript if a HTML file is detected.  If `always' or
-`never' extract Javascript always or never respectively.
-
-Refer to the jshint manual at the URL
-`https://jshint.com/docs/cli/#flags' for more information."
-  :type
-  '(choice (const :tag "No extraction rule" nil)
-           (const :tag "Try to extract Javascript when detecting HTML files"
-                  auto)
-           (const :tag "Always try to extract Javascript" always)
-           (const :tag "Never try to extract Javascript" never))
-  :safe #'symbolp
-  :package-version '(flycheck . "26"))
-
-(flycheck-define-checker javascript-jshint
-  "A Javascript syntax and style checker using jshint.
-
-See URL `https://www.jshint.com'."
-  :command ("jshint" "--reporter=checkstyle"
-            "--filename" source-original
-            (config-file "--config" flycheck-jshintrc)
-            (option "--extract=" flycheck-jshint-extract-javascript
-                    concat flycheck-option-symbol)
-            "-")
-  :standard-input t
-  :error-parser flycheck-parse-checkstyle
-  :error-filter
-  (lambda (errors)
-    (flycheck-remove-error-file-names
-     "stdin" (flycheck-dequalify-error-ids errors)))
-  :modes (js-mode js2-mode js3-mode rjsx-mode js-ts-mode))
 
 (flycheck-def-args-var flycheck-eslint-args javascript-eslint
   :package-version '(flycheck . "32"))

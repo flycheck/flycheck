@@ -199,9 +199,7 @@ JavaScript checkers provided by Flycheck:
 .. code-block:: console
 
    javascript-eslint
-   javascript-jshint
-   javascript-gjslint
-   javascript-jscs
+   javascript-oxlint
    javascript-standard
 
 If a buffer is in ``js-mode``, Flycheck will try first to enable

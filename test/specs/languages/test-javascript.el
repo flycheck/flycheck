@@ -74,41 +74,14 @@
                                         :end-column 2))))))
 
   (describe "Checker tests"
-    (flycheck-buttercup-def-checker-test javascript-jshint javascript syntax-error
-      ;; Silence JS2 and JS3 parsers
-      (let ((js2-mode-show-parse-errors nil)
-            (js2-mode-show-strict-warnings nil)
-            (js3-mode-show-parse-errors nil)
-            (inhibit-message t)
-            (flycheck-disabled-checkers
-             '(javascript-eslint javascript-gjslint)))
-        (flycheck-buttercup-should-syntax-check
-         "language/javascript/syntax-error.js" '(js-mode js2-mode js3-mode rjsx-mode)
-         '(3 1 error "Unrecoverable syntax error. (75% scanned)."
-             :checker javascript-jshint :id "E041")
-         '(3 25 error "Expected an identifier and instead saw ')'."
-             :checker javascript-jshint :id "E030"))))
-
-    (flycheck-buttercup-def-checker-test javascript-jshint javascript nil
-      (let ((flycheck-jshintrc "jshintrc")
-            (inhibit-message t)
-            (flycheck-disabled-checkers
-             '(javascript-eslint javascript-gjslint)))
-        (flycheck-buttercup-should-syntax-check
-         "language/javascript/warnings.js" '(js-mode js2-mode js3-mode rjsx-mode)
-         '(4 9 warning "'foo' is defined but never used." :id "W098"
-             :checker javascript-jshint))))
-
     (flycheck-buttercup-def-checker-test javascript-eslint javascript error
-      (let ((flycheck-disabled-checkers '(javascript-jshint))
-            (inhibit-message t))
+      (let ((inhibit-message t))
         (flycheck-buttercup-should-syntax-check
          "language/javascript/syntax-error.js" flycheck-test-javascript-modes
          '(3 25 error "Parsing error: Unexpected token )" :checker javascript-eslint))))
 
     (flycheck-buttercup-def-checker-test javascript-eslint javascript warning
-      (let ((flycheck-disabled-checkers '(javascript-jshint))
-            (inhibit-message t))
+      (let ((inhibit-message t))
         (flycheck-buttercup-should-syntax-check
          "language/javascript/warnings.js" flycheck-test-javascript-modes
          '(3 2 warning "Use the function form of 'use strict'." :id "strict"
