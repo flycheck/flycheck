@@ -1429,10 +1429,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
 .. supported-language:: Sass/SCSS
 
-   Flycheck checks SASS with `sass/scss-sass-lint` or
-   `sass-stylelint`, falling back to `sass`, and SCSS with `scss-lint`
-   or `scss-stylelint` falling back to `sass/scss-sass-lint` first and
-   then `scss` if neither is available.
+   Flycheck checks SASS with `sass-stylelint` and SCSS with `scss-stylelint`.
 
    .. syntax-checker:: scss-lint
 
@@ -1445,14 +1442,6 @@ to view the docstring of the syntax checker.  Likewise, you may use
       .. _SCSS-Lint: https://github.com/brigade/scss-lint
 
       .. syntax-checker-config-file:: flycheck-scss-lintrc
-
-   .. syntax-checker:: sass/scss-sass-lint
-
-      Syntax-check and lint Sass/SCSS with SASS-Lint_.
-
-      .. _SASS-Lint: https://github.com/sasstools/sass-lint
-
-      .. syntax-checker-config-file:: flycheck-sass-lintrc
 
    .. syntax-checker:: sass-stylelint
 

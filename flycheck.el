@@ -230,7 +230,6 @@
     scss-lint
     sass-stylelint
     scss-stylelint
-    sass/scss-sass-lint
     sh-bash
     sh-posix-dash
     sh-posix-bash
@@ -12240,23 +12239,6 @@ CHECKER and BUFFER are used to construct the error objects."
                    :message (concat (plist-get e :message) (plist-get e :line))
                    :id (plist-get e :id))) errors))
     (json-error nil)))
-
-(flycheck-def-config-file-var flycheck-sass-lintrc sass/scss-sass-lint
-                              ".sass-lint.yml"
-  :package-version '(flycheck . "30"))
-
-(flycheck-define-checker sass/scss-sass-lint
-  "A SASS/SCSS syntax checker using sass-Lint.
-
-See URL `https://github.com/sasstools/sass-lint'."
-  :command ("sass-lint"
-            "--verbose"
-            "--no-exit"
-            "--format" "Checkstyle"
-            (config-file "--config" flycheck-sass-lintrc)
-            source)
-  :error-parser flycheck-parse-checkstyle
-  :modes (sass-mode scss-mode))
 
 (flycheck-define-checker scala
   "A Scala syntax checker using the Scala compiler.
