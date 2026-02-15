@@ -236,12 +236,6 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       Check syntax with the `Coffeescript <https://coffeescript.org/>`_ compiler.
 
-   .. syntax-checker:: coffee-coffeelint
-
-      Lint with `Coffeelint <http://www.coffeelint.org/>`_.
-
-      .. syntax-checker-config-file:: flycheck-coffeelintrc
-
 .. supported-language:: CSS
 
    .. syntax-checker:: css-stylelint

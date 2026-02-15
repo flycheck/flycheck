@@ -136,7 +136,6 @@
     c/c++-cppcheck
     cfengine
     coffee
-    coffee-coffeelint
     css-stylelint
     cuda-nvcc
     cwl
@@ -8222,26 +8221,6 @@ See URL `https://coffeescript.org/'."
   :error-patterns
   ((error line-start "[stdin]:" line ":" column
           ": error: " (message) line-end))
-  :modes coffee-mode
-  :next-checkers ((warning . coffee-coffeelint)))
-
-(flycheck-def-config-file-var flycheck-coffeelintrc coffee-coffeelint
-                              ".coffeelint.json")
-
-(flycheck-define-checker coffee-coffeelint
-  "A CoffeeScript style checker using coffeelint.
-
-See URL `https://www.coffeelint.org/'."
-  :command
-  ("coffeelint"
-   (config-file "--file" flycheck-coffeelintrc)
-   "--stdin" "--reporter" "checkstyle")
-  :standard-input t
-  :error-parser flycheck-parse-checkstyle
-  :error-filter (lambda (errors)
-                  (flycheck-remove-error-file-names
-                   "stdin" (flycheck-remove-error-ids
-                            (flycheck-sanitize-errors errors))))
   :modes coffee-mode)
 
 (defconst flycheck-stylelint-args '("--formatter" "json")
