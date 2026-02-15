@@ -427,23 +427,6 @@ to view the docstring of the syntax checker.  Likewise, you may use
          directories, the eqc profile in eqc directories and the default profile
          otherwise.
 
-.. supported-language:: ERuby
-
-   .. syntax-checker:: eruby-ruumba
-
-      Check syntax and lint with `Ruumba <https://github.com/ericqweinstein/ruumba>`_.
-
-      .. note::
-
-         This syntax checker requires Ruumba 0.1.7 or newer.
-
-      .. defcustom:: flycheck-ruumba-lint-only
-
-         Whether to suppress warnings about style issues, via the ``--lint``
-         option.
-
-      .. syntax-checker-config-file:: flycheck-ruumbarc
-
 .. supported-language:: Fortran
 
    .. syntax-checker:: fortran-gfortran
