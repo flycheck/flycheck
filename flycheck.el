@@ -211,7 +211,6 @@
     ruby-standard
     ruby-reek
     ruby
-    ruby-jruby
     rust-cargo
     rust
     rust-clippy
@@ -11700,23 +11699,6 @@ See URL `https://www.ruby-lang.org/'."
    (error line-start (optional (one-or-more (not (any ":"))) ": ") "-:" line ": " (message) line-end))
   :modes (enh-ruby-mode ruby-mode ruby-ts-mode)
   :next-checkers ((warning . ruby-chef-cookstyle)))
-
-(flycheck-define-checker ruby-jruby
-  "A Ruby syntax checker using the JRuby interpreter.
-
-This syntax checker is very primitive, and may break on future
-versions of JRuby.
-
-Please consider using `ruby-rubocop' instead.
-
-See URL `https://jruby.org/'."
-  :command ("jruby" "-w" "-c")
-  :standard-input t
-  :error-patterns
-  ((error   line-start "SyntaxError in -:" line ": " (message) line-end)
-   (warning line-start "-:" line ": warning: " (message) line-end)
-   (error   line-start "-:" line ": "          (message) line-end))
-  :modes (enh-ruby-mode ruby-mode ruby-ts-mode))
 
 (flycheck-def-args-var flycheck-cargo-check-args (rust-cargo)
   :package-version '(flycheck . "32"))

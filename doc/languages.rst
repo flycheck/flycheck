@@ -1204,9 +1204,9 @@ to view the docstring of the syntax checker.  Likewise, you may use
 .. supported-language:: Ruby
 
    Flycheck checks Ruby with `ruby-rubocop` and `ruby-reek`,
-   falling back to `ruby` or `ruby-jruby` for basic syntax checking if those
-   are not available. There's also `ruby-chef-cookstyle`, which is only
-   used for Chef cookbooks.
+   falling back to `ruby` for basic syntax checking if those are not
+   available. There's also `ruby-chef-cookstyle`, which is only used
+   for Chef cookbooks.
 
    .. syntax-checker:: ruby-rubocop
 
@@ -1254,10 +1254,6 @@ to view the docstring of the syntax checker.  Likewise, you may use
    .. syntax-checker:: ruby
 
       Check syntax with the `Ruby <https://www.ruby-lang.org/>`_ interpreter.
-
-   .. syntax-checker:: ruby-jruby
-
-      Check syntax with the `JRuby <http://jruby.org/>`_ interpreter.
 
    .. syntax-checker:: ruby-chef-cookstyle
 

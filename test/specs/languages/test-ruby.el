@@ -98,12 +98,6 @@
          '(5 nil error "syntax error, unexpected constant, expecting end-of-input"
              :checker ruby))))
 
-    (flycheck-buttercup-def-checker-test ruby-jruby ruby syntax-error
-      (let ((flycheck-disabled-checkers '(ruby-rubocop ruby-reek ruby)))
-        (flycheck-buttercup-should-syntax-check
-         "language/ruby/syntax-error.rb" 'ruby-mode
-         '(5 nil error "syntax error, unexpected tCONSTANT" :checker ruby-jruby))))
-
     (flycheck-buttercup-def-checker-test (ruby-rubocop ruby-reek) ruby warnings
       (flycheck-buttercup-should-syntax-check
        "language/ruby/warnings.rb" 'ruby-mode
@@ -145,11 +139,6 @@
          '(16 nil warning "possibly useless use of == in void context"
               :checker ruby))))
 
-    (flycheck-buttercup-def-checker-test ruby-jruby ruby nil
-      (let ((flycheck-disabled-checkers '(ruby-rubocop ruby-reek ruby)))
-        (flycheck-buttercup-should-syntax-check
-         "language/ruby/warnings.rb" 'ruby-mode
-         '(16 nil warning "Useless use of == in void context."
-              :checker ruby-jruby))))))
+))
 
 ;;; test-ruby.el ends here
