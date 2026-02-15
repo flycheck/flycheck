@@ -1052,10 +1052,6 @@ to view the docstring of the syntax checker.  Likewise, you may use
          A list of directories to resolve import directives.  Relative paths are
          relative to the path of the buffer being checked.
 
-   .. syntax-checker:: protobuf-prototool
-
-      Lint with `prototool <https://github.com/uber/prototool>`_.
-
 .. supported-language:: Pug
 
    .. syntax-checker:: pug
