@@ -225,6 +225,7 @@
     sh-shellcheck
     slim
     slim-lint
+    swift
     sql-sqlint
     statix
     systemd-analyze
@@ -12273,6 +12274,20 @@ See URL `https://github.com/sds/slim-lint'."
   :command ("slim-lint" "--reporter=checkstyle" source)
   :error-parser flycheck-parse-checkstyle
   :modes slim-mode)
+
+(flycheck-define-checker swift
+  "A Swift syntax checker using the Swift compiler.
+
+See URL `https://www.swift.org/'."
+  :command ("swiftc" "-parse" "-diagnostic-style" "llvm" source)
+  :error-patterns
+  ((error line-start (file-name) ":" line ":" column ": "
+          "error: " (message) line-end)
+   (warning line-start (file-name) ":" line ":" column ": "
+            "warning: " (message) line-end)
+   (info line-start (file-name) ":" line ":" column ": "
+         "note: " (message) line-end))
+  :modes swift-mode)
 
 (flycheck-define-checker sql-sqlint
   "A SQL syntax checker using the sqlint tool.
