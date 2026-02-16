@@ -882,6 +882,18 @@ to view the docstring of the syntax checker.  Likewise, you may use
       See the ``org-lint`` documentation in Org mode for details about the checks
       performed.
 
+.. supported-language:: OCaml
+
+   .. syntax-checker:: ocaml
+
+      Check OCaml with the `OCaml <https://ocaml.org/>`_ compiler via
+      ``ocamlfind ocamlc``.
+
+      .. defcustom:: flycheck-ocaml-packages
+
+         A list of findlib package names passed to ``ocamlfind`` via
+         ``-package``.
+
 .. supported-language:: Opam
 
    .. syntax-checker:: opam

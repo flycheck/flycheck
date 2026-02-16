@@ -177,6 +177,7 @@
     markdown-mdl
     markdown-pymarkdown
     nix
+    ocaml
     opam
     org-lint
     perl
@@ -10101,6 +10102,41 @@ See URL `https://opam.ocaml.org/doc/man/opam-lint.html'."
     (flycheck-increment-error-columns
      (flycheck-fill-empty-line-numbers errors)))
   :modes tuareg-opam-mode)
+
+(flycheck-def-option-var flycheck-ocaml-packages nil ocaml
+  "A list of findlib packages for the OCaml checker.
+
+The value of this variable is a list of strings, where each
+string is a findlib package name."
+  :type '(repeat (string :tag "Package name"))
+  :safe #'flycheck-string-list-p
+  :package-version '(flycheck . "36"))
+
+(flycheck-define-checker ocaml
+  "An OCaml syntax and type checker using the OCaml compiler.
+
+See URL `https://ocaml.org/'."
+  :command ("ocamlfind" "ocamlc"
+            (option-list "-package" flycheck-ocaml-packages)
+            "-c" source)
+  :error-patterns
+  ((error line-start
+          "File \"" (file-name) "\", line " line
+          ", characters " column "-" (one-or-more digit) ":\n"
+          (zero-or-more (zero-or-more not-newline) "\n")
+          "Error: " (message (one-or-more not-newline)
+                             (zero-or-more "\n" (one-or-more " ") (one-or-more not-newline)))
+          line-end)
+   (warning line-start
+            "File \"" (file-name) "\", line " line
+            ", characters " column "-" (one-or-more digit) ":\n"
+            (zero-or-more (zero-or-more not-newline) "\n")
+            "Warning " (id (one-or-more digit))
+            (? " [" (one-or-more (any "a-z0-9-")) "]")
+            ": " (message (one-or-more not-newline)
+                          (zero-or-more "\n" (one-or-more " ") (one-or-more not-newline)))
+            line-end))
+  :modes (tuareg-mode caml-mode neocaml-mode))
 
 (flycheck-def-option-var flycheck-perl-include-path nil perl
   "A list of include directories for Perl.

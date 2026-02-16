@@ -5,6 +5,8 @@
 New Features
 ------------
 
+- Add ``ocaml`` checker using ``ocamlfind ocamlc`` for OCaml syntax and type
+  checking in ``tuareg-mode``, ``caml-mode``, and ``neocaml-mode``.
 - [#2047]: Add ``javascript-oxlint`` checker for JavaScript and TypeScript
   using `oxlint <https://oxc.rs/>`_.
 - [#1757]: Add :ref:`org-lint <flycheck-checkers-org-lint>` checker for Org mode files.
