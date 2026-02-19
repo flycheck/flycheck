@@ -8,7 +8,7 @@
 ;; Maintainer: Clément Pit-Claudel <clement.pitclaudel@live.com>
 ;;             fmdkdd <fmdkdd@gmail.com>
 ;;             Bozhidar Batsov <bozhidar@batsov.dev>
-;; URL: https://www.flycheck.org
+;; URL: https://github.com/flycheck/flycheck
 ;; Keywords: convenience, languages, tools
 ;; Version: 35.0
 ;; Package-Requires: ((emacs "27.1") (seq "2.24"))
