@@ -124,6 +124,7 @@ html_theme_options = {
     'source_repository': 'https://github.com/flycheck/flycheck',
     'source_branch': 'master',
     'source_directory': 'doc/',
+    'top_of_page_buttons': ['view', 'edit'],
 }
 html_static_path = ['_static']
 html_favicon = '_static/favicon.ico'
