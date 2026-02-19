@@ -7,7 +7,7 @@ New Features
 
 - [#2047]: Add ``javascript-oxlint`` checker for JavaScript and TypeScript
   using `oxlint <https://oxc.rs/>`_.
-- [#1757]: Add :ref:`org-lint <flycheck-checkers-org-lint>` checker for Org mode files.
+- [#1757]: Add ``org-lint`` checker for Org mode files.
   The checker uses Emacs' built-in ``org-lint`` command to detect issues such
   as invalid links, dead links, and duplicate IDs.
 - [#2132]: Add the ``flycheck-shellcheck-infer-shell`` option to the
@@ -79,13 +79,13 @@ Bugs fixed
   ``gawk --source``.
 - [#2092]: Detect parse errors (unbalanced parentheses, invalid read syntax)
   in ``emacs-lisp`` byte compilation.
-- Fix ``python-ruff`` checker to use ``concise`` output format instead of
-  removed ``text`` format (renamed in ruff 0.2).
+- [#2090]: Fix ``python-ruff`` checker to use ``concise`` output format instead
+  of removed ``text`` format (renamed in ruff 0.2).
 - Fix ``python-ruff`` error ID regex and ``invalid-syntax`` error handling.
 - Fix ``rpm-rpmlint`` error filter returning unfiltered errors (the
   ``(none)`` filename filter was not applied).
 - Add ``php-ts-mode`` to the ``php-phpcs-changed`` checker.
-- Fix ``flycheck-cuda-gencodes`` customize type (was ``file``, now
+- [#1926]: Fix ``flycheck-cuda-gencodes`` customize type (was ``file``, now
   ``string``).
 - Guard ``buffer-file-name`` against nil in ``yaml-actionlint`` predicate,
   ``erlang`` enabled check, and ``flycheck-rebar3-project-root``.
@@ -124,6 +124,11 @@ Removed
   functionality as js-yaml.  Use ``yaml-jsyaml`` or ``yaml-yamllint`` instead.
 - Remove ``ruby-jruby`` checker.  JRuby is extremely niche for linting.
   Use ``ruby-rubocop`` or ``ruby`` instead.
+
+----------
+Changes
+----------
+
 - Remove dead code: ``flycheck-option-symbol``,
   ``flycheck-flake8--find-project-root``, ``flycheck-string-or-nil-p``,
   ``flycheck-chunked-process-input`` and associated chunking functions.
@@ -219,7 +224,7 @@ Bugs Fixed
 Changes
 ----------
 
-- [#2026]:Update the possible locations for ``yamllint``'s configuration file.
+- [#2026]: Update the possible locations for ``yamllint``'s configuration file.
 - **(Breaking)** [#1697]: Remove the ``coq`` checker.
 - **(Breaking)** [#1935]: Remove the ``chef-foodcritic`` checker. (it's now replaced by ``ruby-chef-cookstyle``)
 - **(Breaking)** [#2018]: Remove the ``golint`` checker.
@@ -340,7 +345,7 @@ Changes
   - protobuf-prototool with ``prototool`` [GH-1591]
   - Rust with ``rust-clippy`` [GH-1385]
   - Ruumba with ``eruby-ruumba`` [GH-1616]
-  - Staticcheck with ``go-staticheck`` [GH-1541]
+  - Staticcheck with ``go-staticcheck`` [GH-1541]
   - terraform with ``terraform fmt``, ``tflint`` [GH-1586]
   - Tcl with ``nagelfar`` [GH-1365]
   - Text prose with ``textlint`` [GH-1534]
@@ -359,7 +364,7 @@ Changes
     file to cppcheck. [GH-1329]
   - Add ``--force-exclusion`` flag to ``rubocop`` command. [GH-1348]
   - Flycheck now uses ESLint's JSON output instead of checkstyle XML. [GH-1350]
-  - Add ``flychjeck-eslint-args`` to pass arguments to ``javascript-eslint``.
+  - Add ``flycheck-eslint-args`` to pass arguments to ``javascript-eslint``.
     [GH-1360]
   - Flycheck will now execute ``rubocop`` from the directory where a ``Gemfile``
     is located. If a ``Gemfile`` does not exist, the old behaviour of running
