@@ -1,6 +1,9 @@
 ``master`` (unreleased)
 ======================
 
+36.0 (2026-02-19)
+======================
+
 ------------
 New Features
 ------------
@@ -89,6 +92,9 @@ Bugs fixed
   ``string``).
 - Guard ``buffer-file-name`` against nil in ``yaml-actionlint`` predicate,
   ``erlang`` enabled check, and ``flycheck-rebar3-project-root``.
+- Fix ``python-pycompile`` to verify ``python3`` actually works instead of
+  just checking it exists.
+- Fix proselint version detection breaking checker validation.
 
 -------
 Removed
@@ -142,6 +148,8 @@ Changes
 - Use ``seq-mapcat`` instead of ``(apply #'append (seq-map ...))``.
 - Minor code style improvements: ``when (not ...)`` → ``unless``,
   ``reverse`` → ``nreverse`` for locally-built lists.
+- [#2152]: Point package ``URL`` header to GitHub repository instead of
+  the website.
 
 35.0 (2025-04-23)
 ======================

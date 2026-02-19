@@ -1,10 +1,10 @@
 ;; -*- mode: eask; lexical-binding: t -*-
 
 (package "flycheck"
-         "35.0"
+         "36.0"
          "On-the-fly syntax checking")
 
-(website-url "https://www.flycheck.org")
+(website-url "https://github.com/flycheck/flycheck")
 (keywords "convenience" "languages" "tools")
 
 (package-file "flycheck.el")
