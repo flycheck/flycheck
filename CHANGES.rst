@@ -1,6 +1,15 @@
 ``master`` (unreleased)
 ======================
 
+-----------
+Bugs fixed
+-----------
+
+- [#2159]: Properly mitigate CVE-2024-53920 in the ``emacs-lisp`` checker
+  by requiring files to be marked as trusted (via ``trusted-content``) on
+  Emacs 30+.  Byte-compilation triggers macro expansion which can execute
+  arbitrary code, so the checker is now disabled for untrusted files.
+
 36.0 (2026-02-19)
 ======================
 

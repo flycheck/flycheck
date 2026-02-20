@@ -8687,9 +8687,20 @@ This variable has no effect, if
         (setq flycheck-emacs-lisp-check-declare ,value)))))
 
 (defun flycheck--emacs-lisp-enabled-p ()
-  "Check whether to enable Emacs Lisp checker in the current buffer."
+  "Check whether to enable Emacs Lisp checker in the current buffer.
+
+On Emacs 30+, the checker is only enabled for trusted files
+to mitigate CVE-2024-53920.  Byte-compilation involves macro
+expansion which can execute arbitrary code, so untrusted files
+must not be byte-compiled.  Customize `trusted-content' to
+mark files or directories as trusted."
   (not
    (or
+    ;; Mitigate CVE-2024-53920: byte-compilation triggers macro expansion
+    ;; which can execute arbitrary code.  On Emacs 30+, only check files
+    ;; the user has explicitly marked as trusted.
+    (and (fboundp 'trusted-content-p)
+         (not (trusted-content-p)))
     ;; Do not check buffers used for autoloads generation during package
     ;; installation.  These buffers are too short-lived for being checked, and
     ;; doing so causes spurious errors.  See
@@ -8712,6 +8723,11 @@ This variable has no effect, if
 
 (flycheck-define-checker emacs-lisp
   "An Emacs Lisp syntax checker using the Emacs Lisp Byte compiler.
+
+On Emacs 30+, this checker is only enabled for files the user has
+marked as trusted via the `trusted-content' variable, to mitigate
+CVE-2024-53920 (byte-compilation involves macro expansion which can
+execute arbitrary code).
 
 See Info Node `(elisp)Byte Compilation'."
   :command ("emacs" (eval flycheck-emacs-args)
