@@ -28,6 +28,12 @@
   ``LC_ALL=C``, so the character encoding is left untouched.  ``LC_ALL=C``
   broke checkers reading UTF-8 input, such as ``hledger``.
 
+- [#2159]: Properly mitigate CVE-2024-53920 in the ``emacs-lisp`` checker
+  by requiring files to be marked as trusted (via ``trusted-content``) on
+  Emacs 30+.  Byte-compilation triggers macro expansion which can execute
+  arbitrary code, so the checker is now disabled for untrusted files.
+  ``emacs-lisp-checkdoc`` doesn't expand macros and stays enabled.
+
 36.0 (2026-02-19)
 ======================
 

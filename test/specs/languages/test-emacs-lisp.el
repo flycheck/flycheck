@@ -57,6 +57,25 @@
                 :to-equal
                 (seq-sort #'string-lessp checkdoc-relevant-vars)))))
 
+  (describe "Trusted content (CVE-2024-53920)"
+
+    (it "disables byte compilation for untrusted files"
+      (assume (fboundp 'trusted-content-p) "Requires Emacs 30+")
+      (flycheck-buttercup-with-resource-buffer "language/emacs-lisp/warnings.el"
+        (emacs-lisp-mode)
+        (let ((trusted-content nil))
+          (expect (flycheck-may-use-checker 'emacs-lisp)
+                  :not :to-be-truthy)
+          ;; Checkdoc doesn't expand macros, so it stays enabled
+          (expect (flycheck-may-use-checker 'emacs-lisp-checkdoc)
+                  :to-be-truthy))))
+
+    (it "enables byte compilation for trusted files"
+      (assume (fboundp 'trusted-content-p) "Requires Emacs 30+")
+      (flycheck-buttercup-with-resource-buffer "language/emacs-lisp/warnings.el"
+        (emacs-lisp-mode)
+        (expect (flycheck-may-use-checker 'emacs-lisp) :to-be-truthy))))
+
   (describe "Checker tests"
     (flycheck-buttercup-def-checker-test (emacs-lisp emacs-lisp-checkdoc) emacs-lisp nil
       (flycheck-buttercup-should-syntax-check
