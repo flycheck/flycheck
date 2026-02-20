@@ -8726,6 +8726,20 @@ This variable has no effect, if
          (member (file-name-nondirectory (buffer-file-name))
                  '("Cask" "Carton" ".dir-locals.el" ".dir-locals-2.el"))))))
 
+(defun flycheck--emacs-lisp-byte-compile-enabled-p ()
+  "Check whether to enable the Emacs Lisp byte compiler checker.
+
+On Emacs 30+, the checker is only enabled for trusted files, to
+mitigate CVE-2024-53920: byte-compilation involves macro expansion
+which can execute arbitrary code.  Customize `trusted-content' to
+mark files or directories as trusted.
+
+Checkdoc doesn't expand macros, so `emacs-lisp-checkdoc' stays
+enabled for untrusted files, like in Emacs core."
+  (and (flycheck--emacs-lisp-enabled-p)
+       (or (not (fboundp 'trusted-content-p))
+           (trusted-content-p))))
+
 (defun flycheck--emacs-lisp-checkdoc-enabled-p ()
   "Check whether to enable Emacs Lisp Checkdoc in the current buffer."
   (and (flycheck--emacs-lisp-enabled-p)
@@ -8734,6 +8748,11 @@ This variable has no effect, if
 
 (flycheck-define-checker emacs-lisp
   "An Emacs Lisp syntax checker using the Emacs Lisp Byte compiler.
+
+On Emacs 30+, this checker is only enabled for files the user has
+marked as trusted via the `trusted-content' variable, to mitigate
+CVE-2024-53920 (byte-compilation involves macro expansion which can
+execute arbitrary code).
 
 See Info Node `(elisp)Byte Compilation'."
   :command ("emacs" (eval flycheck-emacs-args)
@@ -8784,7 +8803,7 @@ See Info Node `(elisp)Byte Compilation'."
      (flycheck-collapse-error-message-whitespace
       (flycheck-sanitize-errors errors))))
   :modes (emacs-lisp-mode lisp-interaction-mode)
-  :enabled flycheck--emacs-lisp-enabled-p
+  :enabled flycheck--emacs-lisp-byte-compile-enabled-p
   :predicate
   (lambda ()
     ;; Do not check buffers that should not be byte-compiled.  The checker
