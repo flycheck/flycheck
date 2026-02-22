@@ -201,28 +201,6 @@ these services so in case of an issue just contact them.
 .. _CLA assistant: https://cla-assistant.io
 .. _CLA: https://gist.github.com/swsnr/c9c0d656fe7e704da2f734779242ec99
 
-.. _flycheck-maintenance-scripts:
-
-Maintenance scripts
-===================
-
-Administrative processes are tedious and time-consuming, so we try to automate
-as much as possible.  The :file:`maint/` directory contains many scripts for
-this purpose.  ``make -C maint/ help`` provides an overview over all
-administrative tasks.
-
-Most of these scripts require Python 3.5 and additional Python libraries.  On OS
-X it is recommended that you use Homebrew_ to install the latest Python version
-with ``brew install python3``.  On Linux you should be able to obtain Python 3.5
-from the package manager of your distribution.
-
-To install all required libraries run ``make -C maint init``.  We recommend that
-you use virtualenv_ to avoid a global installation of Python modules.  ``make
-init`` will warn you if you do not.
-
-.. _Homebrew: https://brew.sh
-.. _virtualenv: https://virtualenv.pypa.io/en/latest/
-
 Versioning and releases
 =======================
 
@@ -256,37 +234,16 @@ First, check that
 3. all commits are pushed,
 4. and CI passes for the latest commit on ``master``.
 
-If all is good a new release is as simple as
+To make a release:
 
-.. code-block:: console
-
-   $ make -C maint release
-
-This runs the release script in :file:`maint/release.py`.  If any of the above
-requirements isn't met the release script will signal an error and abort.
-
-The release script bumps the version number, commits and tags a new release, and
-pushes it to Github.
-
-.. note::
-
-    The tag is *signed*; you must configure Git for :ref:`signing commits and
-    tags <flycheck-git-signatures>` before you make a release the first time.
-    After pushing the new release to Github, the script bumps the version number
-    again, to the next snapshot, and commits the changes again.
-
-Once the script is completed please
-
-1. Edit the `release information`_ on Github and add a short summary about the
-   release.  Don’t forget to add a link to the complete changelog and upload the
-   package TAR file.
-2. Enable the new release on the ReadTheDocs `versions dashboard`_.
-3. Announce the new release in our Gitter_ channel, and wherever else you see
-   fit.
-
-.. _release information: https://github.com/flycheck/flycheck/releases
-.. _versions dashboard: https://readthedocs.org/dashboard/flycheck/versions/
-.. _Gitter: https://gitter.im/flycheck/flycheck
+1. Update the ``Version:`` header in ``flycheck.el`` and the version in
+   ``Eask``.
+2. Update ``CHANGES.rst``: replace the ``master (unreleased)`` header with the
+   version and date, and add a fresh unreleased section above it.
+3. Commit the changes with a message like ``Release X.Y``.
+4. Tag the commit (e.g. ``git tag vX.Y``).
+5. Push the commit and tag to GitHub.
+6. Create a GitHub release from the tag using ``gh release create``.
 
 New maintainers
 ===============
@@ -296,11 +253,6 @@ To propose a new maintainer open a pull request that adds the user to
 to the :ref:`same rules <flycheck-pull-requests-reviews>` as all other pull
 requests.  Notably it goes through the same approval process.
 
-Once merged please also
-
-- add the new maintainer to the ``Maintainers`` team of the Github
-  organisation.  This does not award additional privileges, it's just to support
-  ``@flycheck/maintainers`` mentions for the sake of convenience,
-- invite the new maintainer to the internal `Maintainers channel`_ on Gitter,
-
-.. _Maintainers channel: https://gitter.im/flycheck/maintainers
+Once merged please also add the new maintainer to the ``Maintainers`` team of
+the Github organisation.  This does not award additional privileges, it's just
+to support ``@flycheck/maintainers`` mentions for the sake of convenience.

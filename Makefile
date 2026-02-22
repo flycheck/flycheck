@@ -87,20 +87,12 @@ clean:
 purge:
 	$(GIT) clean -xfd
 
-.PHONY: format
-format:
-	$(RUNEMACS) -l maint/flycheck-format.el -f flycheck/batch-format
-
-.PHONY: check-format
-check-format:
-	$(RUNEMACS) -l maint/flycheck-format.el -f flycheck/batch-check-format
-
 .PHONY: checkdoc
 checkdoc:
 	$(EASK) lint checkdoc
 
 .PHONY: check
-check: check-format checkdoc
+check: checkdoc
 
 .PHONY: compile
 compile:
@@ -119,9 +111,8 @@ help:
 	@echo ''
 	@echo 'Available targets:'
 	@echo '  init:    Initialise the project.  RUN FIRST!'
-	@echo '  check:   Check all Emacs Lisp sources (needs Emacs 25)'
+	@echo '  check:   Check all Emacs Lisp sources'
 	@echo '  compile: Byte-compile Emacs Lisp sources'
-	@echo '  format:  Format all Emacs Lisp sources'
 	@echo '  specs:   Run all buttercup specs for Flycheck'
 	@echo '  images:  Generate PNG images from SVG sources'
 	@echo '  clean:   Clean compiled files'
