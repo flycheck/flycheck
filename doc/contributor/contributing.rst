@@ -109,19 +109,6 @@ particular language still work.  A successful ``make integ`` is by no means
 mandatory for pull requests, though, the continuous integration will test your
 changes, too.
 
-.. important::
-
-   To contribute to Flycheck you must sign our CLA_ (Contributor License
-   Agreement).  The CLA Assistant bot will automatically ask you to do this when
-   you open a pull request, and will let you sign the CLA through your Github
-   account.
-
-   We require this process mostly to make you aware of the licensing
-   implications of contributing to Flycheck and to obtain your explicit approval
-   of our licenses for your contribution.
-
-   .. _CLA: https://gist.github.com/swsnr/c9c0d656fe7e704da2f734779242ec99
-
 All pull requests go through a two-stage review process:
 
 * :ref:`Maintainer <flycheck-maintainers>` review the general idea and direction

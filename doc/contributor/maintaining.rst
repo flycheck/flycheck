@@ -189,17 +189,12 @@ extra tooling and some 3rd party services for Flycheck:
   configuration.
 * `GitHub Actions`_ runs our tests after every push and for every pull request.
   It's configured through ``.github/workflows/``.
-* `CLA assistant`_ checks signatures to our CLA_ and allows contributors to sign
-  the CLA through their Github account.
-
 All :ref:`maintainers <flycheck-maintainers>` have administrative access to
 these services so in case of an issue just contact them.
 
 .. _Github: https://github.com/flycheck
 .. _ReadTheDocs: https://readthedocs.org/projects/flycheck/
 .. _GitHub Actions: https://github.com/flycheck/flycheck/actions
-.. _CLA assistant: https://cla-assistant.io
-.. _CLA: https://gist.github.com/swsnr/c9c0d656fe7e704da2f734779242ec99
 
 Versioning and releases
 =======================
