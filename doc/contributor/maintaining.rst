@@ -184,7 +184,7 @@ Tooling and Services
 In addition to Github_ where we host code and do code reviews we use a bit of
 extra tooling and some 3rd party services for Flycheck:
 
-* ReadTheDocs_ hosts http://www.flycheck.org and automatically rebuilds it on
+* ReadTheDocs_ hosts https://www.flycheck.org and automatically rebuilds it on
   every change.  It works mostly automatically and requires little
   configuration.
 * `GitHub Actions`_ runs our tests after every push and for every pull request.

@@ -102,8 +102,8 @@ Deno
 
 * :flyc:`flycheck-deno` (*official*) makes linting for Deno_ project available via deno-lint_.
 
-.. _Deno: https://deno.land/
-.. _deno-lint: https://deno.land/manual@v1.15.2/tools/linter
+.. _Deno: https://deno.com/
+.. _deno-lint: https://docs.deno.com/runtime/reference/cli/lint/
 
 Emacs Lisp
 ----------
@@ -154,7 +154,7 @@ Mercury
 * :flyc:`flycheck-mercury` (*official*) adds a syntax checker for the Mercury_
   language.
 
-.. _Mercury: http://mercurylang.org/
+.. _Mercury: https://mercurylang.org/
 
 OCaml
 -----
@@ -179,8 +179,8 @@ Python
 * :gh:`chocoelho/flycheck-prospector` adds Prospector_ checker for Python syntax.
 
 .. _Pyflakes: https://github.com/PyCQA/pyflakes
-.. _Prospector: https://github.com/PyCQA/prospector
-.. _Mypy: http://mypy-lang.org/
+.. _Prospector: https://github.com/prospector-dev/prospector
+.. _Mypy: https://mypy-lang.org/
 
 Rust
 ----
