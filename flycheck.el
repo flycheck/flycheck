@@ -1597,20 +1597,27 @@ Safely delete all files and directories listed in
   (seq-do #'flycheck-safe-delete flycheck-temporaries)
   (setq flycheck-temporaries nil))
 
-(defun flycheck-rx-file-name (form)
-  "Translate the `(file-name)' FORM into a regular expression."
-  (let ((body (or (cdr form) '((minimal-match
-                                (one-or-more not-newline))))))
-    (rx-to-string `(group-n 1 ,@body) t)))
+(defun flycheck--rx-expand (form)
+  "Expand Flycheck-specific rx constructs in FORM.
 
-(defun flycheck-rx-message (form)
-  "Translate the `(message)' FORM into a regular expression."
-  (let ((body (or (cdr form) '((one-or-more not-newline)))))
-    (rx-to-string `(group-n 4 ,@body) t)))
-
-(defun flycheck-rx-id (form)
-  "Translate the `(id)' FORM into a regular expression."
-  (rx-to-string `(group-n 5 ,@(cdr form)) t))
+Recursively walks the form tree and expands `file-name', `line',
+`column', `message', `id', `end-line', and `end-column'."
+  (pcase form
+    ('line '(group-n 2 (one-or-more digit)))
+    ('column '(group-n 3 (one-or-more digit)))
+    ('end-line '(group-n 6 (one-or-more digit)))
+    ('end-column '(group-n 7 (one-or-more digit)))
+    (`(file-name . ,body)
+     (let ((body (or body '((minimal-match (one-or-more not-newline))))))
+       `(group-n 1 ,@(mapcar #'flycheck--rx-expand body))))
+    (`(message . ,body)
+     (let ((body (or body '((one-or-more not-newline)))))
+       `(group-n 4 ,@(mapcar #'flycheck--rx-expand body))))
+    (`(id . ,body)
+     `(group-n 5 ,@(mapcar #'flycheck--rx-expand body)))
+    ((pred consp)
+     (mapcar #'flycheck--rx-expand form))
+    (_ form)))
 
 (defun flycheck-rx-to-string (form &optional no-group)
   "Like `rx-to-string' for FORM, but with special keywords:
@@ -1644,18 +1651,7 @@ Safely delete all files and directories listed in
 NO-GROUP is passed to `rx-to-string'.
 
 See `rx' for a complete list of all built-in `rx' forms."
-  (with-suppressed-warnings ((obsolete rx-constituents))
-    (let ((rx-constituents
-           (append
-            `((file-name flycheck-rx-file-name 0 nil) ;; group 1
-              (line . ,(rx (group-n 2 (one-or-more digit))))
-              (column . ,(rx (group-n 3 (one-or-more digit))))
-              (message flycheck-rx-message 0 nil) ;; group 4
-              (id flycheck-rx-id 0 nil) ;; group 5
-              (end-line . ,(rx (group-n 6 (one-or-more digit))))
-              (end-column . ,(rx (group-n 7 (one-or-more digit)))))
-            rx-constituents nil)))
-      (rx-to-string form no-group))))
+  (rx-to-string (flycheck--rx-expand form) no-group))
 
 (defun flycheck-current-load-file ()
   "Get the source file currently being loaded.
