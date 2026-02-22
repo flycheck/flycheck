@@ -126,6 +126,7 @@ html_theme_options = {
     'top_of_page_buttons': ['view', 'edit'],
 }
 html_static_path = ['_static']
+html_logo = '_static/logo.png'
 html_favicon = '_static/favicon.ico'
 
 # Ignore localhost when checking links
