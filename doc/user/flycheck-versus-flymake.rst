@@ -14,16 +14,13 @@ to `edit this page`_ and improve it.
 
 .. note::
 
-   This comparison is being updated periodically and reflects the major overhaul
-   of Flymake in Emacs 26.1.  As Flycheck and Flymake are moving targets
-   we can't guarantee that the data here will always reflect the current state
-   of both projects. If you notice that something is incorrect, please let our
-   team know. If you are using Emacs 25.3 or below, you can still access the
-   comparison between Flycheck and the legacy Flymake `here`_.
+   This comparison reflects the major overhaul of Flymake in Emacs 26.1.  As
+   Flycheck and Flymake are moving targets we can't guarantee that the data here
+   will always reflect the current state of both projects.  If you notice that
+   something is incorrect, please let our team know.
 
 .. _flymake-easy: https://github.com/purcell/flymake-easy
 .. _edit this page: https://github.com/flycheck/flycheck/edit/master/doc/user/flycheck-versus-flymake.rst
-.. _here: /en/31/
 
 Overview
 ========

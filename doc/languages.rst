@@ -54,7 +54,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       Check AsciiDoc with the default Asciidoctor_ backend.
 
-      .. _Asciidoctor: http://asciidoctor.org
+      .. _Asciidoctor: https://asciidoctor.org
 
 .. supported-language:: Awk
 
@@ -91,7 +91,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
          `c/c++-gcc` requires GCC 4.4 or newer.
 
-      .. _Clang: http://clang.llvm.org/
+      .. _Clang: https://clang.llvm.org/
       .. _GCC: https://gcc.gnu.org/
 
       .. defcustom:: flycheck-clang-args
@@ -175,7 +175,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       Check C/C++ for semantic and stylistic issues with cppcheck_.
 
-      .. _cppcheck: http://cppcheck.sourceforge.net/
+      .. _cppcheck: https://cppcheck.sourceforge.io/
 
       .. defcustom:: flycheck-cppcheck-args
 
@@ -404,7 +404,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
    .. syntax-checker:: erlang
 
-      Check Erlang with the standard `Erlang <http://www.erlang.org/>`_
+      Check Erlang with the standard `Erlang <https://www.erlang.org/>`_
       compiler.
 
       .. defcustom:: flycheck-erlang-include-path
@@ -562,13 +562,13 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
    .. syntax-checker:: groovy
 
-      Check syntax using the `Groovy <http://www.groovy-lang.org/>`_ compiler.
+      Check syntax using the `Groovy <https://www.groovy-lang.org/>`_ compiler.
 
 .. supported-language:: Haml
 
    .. syntax-checker:: haml
 
-      Check syntax with the `Haml <http://haml.info/>`_ compiler.
+      Check syntax with the `Haml <https://haml.info/>`_ compiler.
 
    .. syntax-checker:: haml-lint
 
@@ -579,7 +579,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
    .. syntax-checker:: handlebars
 
-      Check syntax with the `Handlebars <http://handlebarsjs.com/>`_ compiler.
+      Check syntax with the `Handlebars <https://handlebarsjs.com/>`_ compiler.
 
 .. supported-language:: Haskell
 
@@ -701,7 +701,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
       Check syntax and code style with Standard_ or Semistandard_.
 
       .. _Standard: https://github.com/standard/standard
-      .. _Semistandard: https://github.com/Flet/semistandard
+      .. _Semistandard: https://github.com/standard/semistandard
 
 .. supported-language:: JSON
 
@@ -739,7 +739,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
    .. syntax-checker:: less
 
-      Check syntax with the `Less <http://lesscss.org/>`_ compiler.
+      Check syntax with the `Less <https://lesscss.org/>`_ compiler.
 
       .. note::
 
@@ -761,7 +761,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
    .. syntax-checker:: llvm-llc
 
-      Check syntax with `llc <http://llvm.org/docs/CommandGuide/llc.html>`_.
+      Check syntax with `llc <https://llvm.org/docs/CommandGuide/llc.html>`_.
 
 .. supported-language:: Lua
 
@@ -781,7 +781,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
    .. syntax-checker:: lua
 
-      Check syntax with the `Lua compiler <http://www.lua.org/>`_.
+      Check syntax with the `Lua compiler <https://www.lua.org/>`_.
 
 .. supported-language:: Markdown
 
@@ -936,7 +936,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       Check syntax with `PHP CLI`_
 
-      .. _PHP CLI: http://php.net/manual/en/features.commandline.php
+      .. _PHP CLI: https://www.php.net/manual/en/features.commandline.php
 
    .. syntax-checker:: php-phpmd
 
@@ -955,7 +955,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
          This syntax checker requires PHP Code Sniffer 2.6 or newer.
 
-      .. _PHP Code Sniffer: http://pear.php.net/package/PHP_CodeSniffer
+      .. _PHP Code Sniffer: https://pear.php.net/package/PHP_CodeSniffer
 
       .. defcustom:: flycheck-phpcs-standard
 
@@ -989,7 +989,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       Check syntax using the protoc_ compiler.
 
-      .. _protoc: https://developers.google.com/protocol-buffers/
+      .. _protoc: https://protobuf.dev
 
       .. defcustom:: flycheck-protoc-import-path
 
@@ -1012,7 +1012,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
    .. syntax-checker:: puppet-lint
 
-      Lint with `Puppet Lint <http://puppet-lint.com/>`_.
+      Lint with `Puppet Lint <https://puppet-lint.com/>`_.
 
       .. defcustom:: flycheck-puppet-lint-disabled-checks
 
@@ -1055,7 +1055,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
    .. syntax-checker:: python-flake8
 
-      Check syntax and lint with `flake8 <https://flake8.readthedocs.io/>`_.
+      Check syntax and lint with `flake8 <https://flake8.pycqa.org/>`_.
 
       .. note::
 
@@ -1077,7 +1077,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
    .. syntax-checker:: python-ruff
 
-      Lint with `ruff <https://beta.ruff.rs/>`_.
+      Lint with `ruff <https://docs.astral.sh/ruff/>`_.
 
       .. syntax-checker-config-file:: flycheck-python-ruff-config
 
@@ -1091,7 +1091,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
    .. syntax-checker:: python-mypy
 
-      Type check Python with `mypy <http://www.mypy-lang.org/>`_.
+      Type check Python with `mypy <https://www.mypy-lang.org/>`_.
 
       .. note::
 
@@ -1160,7 +1160,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
          This syntax checker needs the ``compiler-lib`` package.
 
-      .. _raco expand: http://docs.racket-lang.org/raco/expand.html
+      .. _raco expand: https://docs.racket-lang.org/raco/expand.html
 
 .. supported-language:: RPM Spec
 
@@ -1173,7 +1173,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
    Flycheck checks reStructuredText with `rst-sphinx` in Sphinx_ projects and
    with `rst` otherwise.  Both chain to `proselint` for prose linting.
 
-   .. _Sphinx: http://sphinx-doc.org/
+   .. _Sphinx: https://www.sphinx-doc.org/
 
    .. syntax-checker:: rst-sphinx
 
@@ -1189,7 +1189,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
    .. syntax-checker:: rst
 
-      Check documents with `docutils <http://docutils.sourceforge.net/>`_.
+      Check documents with `docutils <https://docutils.sourceforge.io/>`_.
 
 .. supported-language:: Ruby
 
@@ -1286,7 +1286,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
          `rust` requires Rust 1.18 or newer.
          `rust-clippy` requires the nightly version of Rust.
 
-      .. _Cargo: http://doc.crates.io/index.html
+      .. _Cargo: https://doc.crates.io/index.html
 
       .. seealso::
 
@@ -1401,11 +1401,11 @@ to view the docstring of the syntax checker.  Likewise, you may use
          This syntax checker is fairly primitive.  For a better Scala experience
          we recommend Ensime_.
 
-         .. _Ensime: http://ensime.github.io/
+         .. _Ensime: https://ensime.github.io/
 
    .. syntax-checker:: scala-scalastyle
 
-      Check style with `Scalastyle <http://www.scalastyle.org/>`_.
+      Check style with `Scalastyle <https://www.scalastyle.org/>`_.
 
       .. syntax-checker-config-file:: flycheck-scalastylerc
 
@@ -1421,7 +1421,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
    .. syntax-checker:: scheme-chicken
 
-      Check syntax with ``csc``, the `CHICKEN Scheme <http://call-cc.org/>`_
+      Check syntax with ``csc``, the `CHICKEN Scheme <https://call-cc.org/>`_
       compiler.
 
       .. defcustom:: flycheck-scheme-chicken-args
@@ -1430,7 +1430,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
    .. important::
 
-      `Geiser <http://www.nongnu.org/geiser/>`_ must be installed and active for
+      `Geiser <https://www.nongnu.org/geiser/>`_ must be installed and active for
       this checker to work.
 
 .. supported-language:: Shell scripting languages
@@ -1445,7 +1445,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       Check Bash_ syntax.
 
-      .. _Bash: http://www.gnu.org/software/bash/
+      .. _Bash: https://www.gnu.org/software/bash/
 
       .. defcustom:: flycheck-sh-bash-args
 
@@ -1455,7 +1455,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       Check POSIX shell syntax with Dash_.
 
-      .. _Dash: http://gondor.apana.org.au/~herbert/dash/
+      .. _Dash: https://gondor.apana.org.au/~herbert/dash/
 
    .. syntax-checker:: sh-posix-bash
 
@@ -1463,7 +1463,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
    .. syntax-checker:: sh-zsh
 
-      Check `Zsh <http://www.zsh.org/>`_ syntax.
+      Check `Zsh <https://www.zsh.org/>`_ syntax.
 
    .. syntax-checker:: sh-shellcheck
 
@@ -1495,7 +1495,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
    .. syntax-checker:: slim
 
-      Check Slim using the `Slim <http://slim-lang.com/>`_ compiler.
+      Check Slim using the `Slim <https://slim-lang.com/>`_ compiler.
 
    .. syntax-checker:: slim-lint
 
@@ -1520,7 +1520,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
    .. syntax-checker:: tcl-nagelfar
 
-      Check Tcl syntax with `Nagelfar <http://nagelfar.sourceforge.net/>`_.
+      Check Tcl syntax with `Nagelfar <https://nagelfar.sourceforge.io/>`_.
 
 .. supported-language:: Terraform
 
@@ -1543,7 +1543,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
    .. syntax-checker:: proselint
 
-      Check English prose with `Proselint <http://proselint.com/>`_.
+      Check English prose with `Proselint <https://proselint.com/>`_.
 
    .. syntax-checker:: textlint
 
@@ -1572,7 +1572,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
    .. syntax-checker:: tex-chktex
 
-      Check style with `ChkTeX <http://www.nongnu.org/chktex/>`_.
+      Check style with `ChkTeX <https://www.nongnu.org/chktex/>`_.
 
       .. syntax-checker-config-file:: flycheck-chktexrc
 
@@ -1582,7 +1582,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
    .. syntax-checker:: tex-lacheck
 
-      Check style with `Lacheck <http://www.ctan.org/pkg/lacheck>`_.
+      Check style with `Lacheck <https://www.ctan.org/pkg/lacheck>`_.
 
 .. supported-language:: Texinfo
 
@@ -1590,7 +1590,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       Check syntax with :program:`makeinfo` from Texinfo_.
 
-      .. _Texinfo: http://www.gnu.org/software/texinfo/
+      .. _Texinfo: https://www.gnu.org/software/texinfo/
 
 .. supported-language:: TypeScript
 

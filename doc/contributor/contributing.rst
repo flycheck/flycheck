@@ -175,8 +175,8 @@ documentation.
 Documentation pull requests work in the same way as other pull requests.  To
 find documentation issues sort by the `documentation`_ label.
 
-.. _ReStructuredText: http://docutils.sourceforge.net/rst.html
-.. _Sphinx: http://www.sphinx-doc.org
+.. _ReStructuredText: https://docutils.sourceforge.io/rst.html
+.. _Sphinx: https://www.sphinx-doc.org
 .. _Homebrew: https://brew.sh
 .. _documentation: https://github.com/flycheck/flycheck/labels/documentation
 

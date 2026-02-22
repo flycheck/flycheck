@@ -43,7 +43,7 @@ Conduct
 * Likewise any spamming, trolling, flaming, baiting or other attention-stealing
   behaviour is not welcome.
 
-.. _Citizen Code of Conduct: http://citizencodeofconduct.org/
+.. _Citizen Code of Conduct: https://github.com/stumpsyn/policies/blob/master/citizen_code_of_conduct.md
 
 Moderation
 ==========
