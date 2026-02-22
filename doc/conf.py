@@ -96,7 +96,7 @@ rst_prolog = """\
 exclude_patterns = ['_build']
 default_role = 'any'
 primary_domain = 'el'
-templates_path = ['_templates']  # layout.html blocks Google Analytics
+templates_path = []
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = 'sphinx'
