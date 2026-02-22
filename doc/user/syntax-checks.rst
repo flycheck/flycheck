@@ -76,6 +76,7 @@ By default :mode:`flycheck` automatically checks a buffer whenever
 
 * it is enabled,
 * the buffer is saved,
+* the buffer is reverted (e.g. via ``global-auto-revert-mode``),
 * a new line is inserted,
 * or a short time after the last change was made in a buffer.
 

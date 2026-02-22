@@ -39,6 +39,19 @@ Within the error list the following key bindings are available:
 :kbd:`q`     Quit the error list and hide its window
 ==========   ====
 
+When you jump to an error from the error list with :kbd:`RET`, Flycheck runs
+`flycheck-error-list-after-jump-hook` in the source buffer.  This is useful for
+post-jump actions like recentering:
+
+.. defcustom:: flycheck-error-list-after-jump-hook
+
+   Functions to run after jumping to an error from the error list.  For
+   example, to recenter the window on the error location:
+
+   .. code-block:: elisp
+
+      (add-hook 'flycheck-error-list-after-jump-hook #'recenter)
+
 Filter the list
 ===============
 

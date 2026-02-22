@@ -240,31 +240,33 @@ Like all minor modes Flycheck also has a mode line indicator.  You can see it in
 the bottom right corner of the above screenshot.  By default the indicator shows
 Flycheck’s current state via one of the following texts:
 
-+-------------+----------------------------------------------------------------+
-|``FlyC``     |Current buffer has not been checked.                            |
-+-------------+----------------------------------------------------------------+
-|``FlyC*``    |Flycheck is checking the buffer currently.                      |
-+-------------+----------------------------------------------------------------+
-|``FlyC:0``   |Last check resulted in no errors and no warnings.               |
-+-------------+----------------------------------------------------------------+
-|``FlyC:3/5`` |There are three errors and five warnings in the current buffer. |
-+-------------+----------------------------------------------------------------+
-|``FlyC-``    |Flycheck did not find a syntax checker for the current buffer.  |
-|             |Take a look at the :ref:`list of supported languages            |
-|             |<flycheck-languages>` and type `C-c ! v` to see what checkers   |
-|             |are available for the current buffer.                           |
-+-------------+----------------------------------------------------------------+
-|``FlyC!``    |The last syntax check failed.  Inspect the ``*Messages*`` buffer,|
-|             |look for error messages, and consider :ref:`reporting a bug     |
-|             |<flycheck-bug-reports>`.                                        |
-+-------------+----------------------------------------------------------------+
-|``FlyC.``    |The last syntax check was manually interrupted.                 |
-+-------------+----------------------------------------------------------------+
-|``FlyC?``    |The last syntax check had a dubious result.  The definition of a|
-|             |syntax checker may have a bug.  Inspect the ``*Messages*``      |
-|             |buffer and consider :ref:`reporting a bug                       |
-|             |<flycheck-bug-reports>`.                                        |
-+-------------+----------------------------------------------------------------+
++------------------+-------------------------------------------------------------+
+|``FlyC``          |Current buffer has not been checked.                         |
++------------------+-------------------------------------------------------------+
+|``FlyC*``         |Flycheck is checking the buffer currently.                   |
++------------------+-------------------------------------------------------------+
+|``FlyC:0``        |Last check resulted in no errors, no warnings and no info    |
+|                  |messages.                                                    |
++------------------+-------------------------------------------------------------+
+|``FlyC:3|5|1``    |There are three errors, five warnings and one info message in|
+|                  |the current buffer.                                          |
++------------------+-------------------------------------------------------------+
+|``FlyC-``         |Flycheck did not find a syntax checker for the current       |
+|                  |buffer.  Take a look at the :ref:`list of supported languages|
+|                  |<flycheck-languages>` and type `C-c ! v` to see what checkers|
+|                  |are available for the current buffer.                        |
++------------------+-------------------------------------------------------------+
+|``FlyC!``         |The last syntax check failed.  Inspect the ``*Messages*``    |
+|                  |buffer, look for error messages, and consider                |
+|                  |:ref:`reporting a bug <flycheck-bug-reports>`.               |
++------------------+-------------------------------------------------------------+
+|``FlyC.``         |The last syntax check was manually interrupted.              |
++------------------+-------------------------------------------------------------+
+|``FlyC?``         |The last syntax check had a dubious result.  The definition  |
+|                  |of a syntax checker may have a bug.  Inspect the             |
+|                  |``*Messages*`` buffer and consider :ref:`reporting a bug     |
+|                  |<flycheck-bug-reports>`.                                     |
++------------------+-------------------------------------------------------------+
 
 You can entirely customise the mode line indicator with `flycheck-mode-line`:
 
