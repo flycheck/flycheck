@@ -6240,7 +6240,7 @@ are substituted within the body of cells!"
      (when (symbol-value variable)
        (list option-name)))
     (`(eval ,form)
-     (let ((result (eval form)))
+     (let ((result (eval form t)))
        (cond
         ((and (listp result) (seq-every-p #'stringp result)) result)
         ((stringp result) (list result))
