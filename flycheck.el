@@ -1343,9 +1343,6 @@ Key bindings:
         (read-only-mode 0)
         (insert help)))))
 
-(define-obsolete-function-alias 'flycheck-info
-  'flycheck-manual "Flycheck 26" "Open the Flycheck manual.")
-
 
 ;;; Utility functions
 (defun flycheck-sexp-to-string (sexp)
@@ -4355,10 +4352,6 @@ show the indicator."
              "")))
      (_ (error "Invalid fringe side: %S" side)))))
 
-(define-obsolete-function-alias
-  'flycheck-error-level-make-fringe-icon
-  'flycheck-error-level-make-indicator
-  "33")
 
 
 ;;; Built-in error levels
