@@ -89,7 +89,6 @@
 (defvar markdown-fontify-code-blocks-natively)    ;
 
 ;; Tell the byte compiler about autoloaded functions from packages
-(declare-function pkg-info-version-info "pkg-info" (package))
 (declare-function org-lint "org-lint" (&optional arg))
 
 
@@ -1268,19 +1267,11 @@ Only has effect when variable `global-flycheck-mode' is non-nil."
   "The current version of Flycheck.
 
 Should be kept in sync with the package version metadata.
-Used only when `package-get-version' is not available
-or fails.")
+Used as fallback when `package-get-version' returns nil.")
 
 (defun flycheck--pkg-version ()
   "Extract FLYCHECK's package version from its package metadata."
-  ;; Use `cond' below to avoid a compiler unused return value warning
-  ;; when `package-get-version' returns nil. See #3181.
-  (cond ((fboundp 'package-get-version)
-         (package-get-version))
-        ((fboundp 'pkg-info-version-info)
-         (pkg-info-version-info 'flycheck))
-        (t
-         flycheck-version)))
+  (or (package-get-version) flycheck-version))
 
 ;;; Version information, manual and loading of Flycheck
 (defun flycheck-version (&optional show-version)
