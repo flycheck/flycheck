@@ -355,7 +355,7 @@ to have a custom checker in your Emacs configuration written like this:
 
    (flycheck-define-checker my-foobar-checker
      :command ("foobar" source)
-     :error-patterns ((error …))
+     :error-patterns ((error ...))
      :modes `(foobar-mode ,my-other-foobar-mode))
 
 The idea is that you know statically one mode that you want to use the checker
@@ -375,7 +375,7 @@ follows:
    (flycheck-def-executable-var my-foobar-checker "foobar")
    (flycheck-define-command-checker 'my-foobar-checker
      :command '("foobar" source)
-     :error-patterns '((error …))
+     :error-patterns '((error ...))
      :modes `(foobar-mode ,my-other-foobar-mode))
 
 Using `flycheck-define-command-checker`, you now need to quote all the list

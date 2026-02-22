@@ -189,6 +189,7 @@ extra tooling and some 3rd party services for Flycheck:
   configuration.
 * `GitHub Actions`_ runs our tests after every push and for every pull request.
   It's configured through ``.github/workflows/``.
+
 All :ref:`maintainers <flycheck-maintainers>` have administrative access to
 these services so in case of an issue just contact them.
 

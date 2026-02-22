@@ -723,7 +723,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
    .. syntax-checker:: jsonnet
 
-      Checks `Jsonnet <https://jsonnet.org>`_ with the `jsonnet` binary published at `https://github.com/google/go-jsonnet`_.
+      Checks `Jsonnet <https://jsonnet.org>`_ with the `jsonnet` binary published at `go-jsonnet <https://github.com/google/go-jsonnet>`_.
 
       .. defcustom:: flycheck-jsonnet-command-args
 

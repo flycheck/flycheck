@@ -1,5 +1,5 @@
 ``master`` (unreleased)
-======================
+=======================
 
 36.0 (2026-02-19)
 ======================
@@ -249,7 +249,7 @@ Changes
   - Fixed an usage of the removed ``flycheck--format-message`` function.
 
 33.0 (2024-02-04)
-=======================
+======================
 
 .. note:: The changelog for this release is incomplete.
 
