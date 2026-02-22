@@ -88,7 +88,7 @@ class HTMLXRefDB(object):
     """Cross-reference database for Info manuals."""
 
     #: URL of the htmlxref database of GNU Texinfo
-    XREF_URL = 'http://ftpmirror.gnu.org/texinfo/htmlxref.cnf'
+    XREF_URL = 'https://ftpmirror.gnu.org/texinfo/htmlxref.cnf'
 
     #: Regular expression to parse entries from an xref DB
     XREF_RE = re.compile(r"""
