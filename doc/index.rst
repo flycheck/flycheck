@@ -13,8 +13,8 @@ warnings and errors directly in the buffer, or in an optional :ref:`error list
 
 .. image:: images/flycheck-annotated.png
 
-Out of the box Flycheck supports over :ref:`40 different programming languages
-<flycheck-languages>` with more than 80 different syntax checking tools, and
+Out of the box Flycheck supports over :ref:`60 different programming languages
+<flycheck-languages>` with more than 100 different syntax checking tools, and
 comes with a :ref:`simple interface <flycheck-developers-guide>` to define new
 syntax checkers.
 
