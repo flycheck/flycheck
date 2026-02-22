@@ -3383,8 +3383,7 @@ current syntax check."
   "Empty variables used by Flycheck."
   (kill-local-variable 'flycheck--file-truename-cache)
   (kill-local-variable 'flycheck--idle-trigger-timer)
-  (kill-local-variable 'flycheck--idle-trigger-conditions)
-  (kill-local-variable 'flycheck--last-error-display-tick))
+  (kill-local-variable 'flycheck--idle-trigger-conditions))
 
 (defun flycheck-teardown (&optional ignore-global)
   "Teardown Flycheck in the current buffer.
