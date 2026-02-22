@@ -14,10 +14,11 @@ to `edit this page`_ and improve it.
 
 .. note::
 
-   This comparison reflects the major overhaul of Flymake in Emacs 26.1.  As
-   Flycheck and Flymake are moving targets we can't guarantee that the data here
-   will always reflect the current state of both projects.  If you notice that
-   something is incorrect, please let our team know.
+   Flymake was significantly overhauled in Emacs 26.1 and has continued to
+   evolve since.  As Flycheck and Flymake are both moving targets we can't
+   guarantee that the data here will always reflect the current state of both
+   projects.  If you notice that something is incorrect, please let our team
+   know.
 
 .. _flymake-easy: https://github.com/purcell/flymake-easy
 .. _edit this page: https://github.com/flycheck/flycheck/edit/master/doc/user/flycheck-versus-flymake.rst
@@ -36,16 +37,16 @@ detail.
 +---------------------------+-----------------------+-----------------------+
 |Built-in                   |no                     |yes                    |
 +---------------------------+-----------------------+-----------------------+
-|`Supported languages`_     |100+ built-in,         |10 built-in,           |
+|`Supported languages`_     |100+ built-in,         |~10 built-in,          |
 |                           |200+ w/ 3rd-party      |50+ w/ 3rd party       |
 +---------------------------+-----------------------+-----------------------+
 |`Automatic syntax          |built-in               |manual                 |
 |checking`_                 |                       |                       |
 +---------------------------+-----------------------+-----------------------+
 |Check triggers             |save, newline, change, |save, newline, change  |
-|                           |buffer switch          |                       |
+|                           |buffer switch, revert  |                       |
 +---------------------------+-----------------------+-----------------------+
-|Asynchronous checking      |yes, always            |yes, for some modes    |
+|Asynchronous checking      |yes                    |yes                    |
 +---------------------------+-----------------------+-----------------------+
 |`Automatic syntax checker  |by major mode and      |no                     |
 |selection <Syntax checker  |custom predicates      |                       |
@@ -78,12 +79,11 @@ detail.
 |                           |(e.g. tooltip, popup   |                       |
 |                           |w/ 3rd party packages) |                       |
 +---------------------------+-----------------------+-----------------------+
-|List of all errors         |yes; filterable by     |yes                    |
-|                           |error level            |                       |
+|List of all errors         |yes; filterable by     |yes; project-wide      |
+|                           |error level            |diagnostics (28+)      |
 +---------------------------+-----------------------+-----------------------+
-|`Supported by Eglot`_      |no, but a compatibility|yes                    |
-|                           |package exists         |                       |
-|                           |(``flycheck-eglot``)   |                       |
+|`Supported by Eglot`_      |yes, via               |yes (built-in)         |
+|                           |``flycheck-eglot``     |                       |
 +---------------------------+-----------------------+-----------------------+
 |`Supported by lsp-mode`_   |yes                    |yes                    |
 +---------------------------+-----------------------+-----------------------+
@@ -122,12 +122,14 @@ Syntax checkers
 Supported languages
 ~~~~~~~~~~~~~~~~~~~
 
-**Flymake** comes with support for Emacs Lisp, Ruby (``ruby`` for syntax check
-and ``rubocop`` for lints), Python and Perl.  In addition, backends written for
-the legacy Flymake are compatible with the new implementation.
+**Flymake** comes with built-in backends for Emacs Lisp, Ruby (``ruby`` for
+syntax check and ``rubocop`` for lints), Python, Perl, and a handful of others.
+The community provides additional backends via third-party packages.  When used
+with Eglot, Flymake gains support for any language with an LSP server.
 
-**Flycheck** provides support for `over 50 languages <flycheck-languages>` with
-over 100 syntax checkers, most of them contributed by the community.
+**Flycheck** provides support for `over 60 languages <flycheck-languages>` with
+over 100 syntax checkers, most of them contributed by the community.  When used
+with ``lsp-mode`` or ``flycheck-eglot``, Flycheck also gains LSP-based checking.
 
 Definition of new syntax checkers
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -292,28 +294,21 @@ errors.
 Supported by Eglot
 ~~~~~~~~~~~~~~~~~~
 
-`Eglot <https://github.com/joaotavora/eglot>`_ is the built-in LSP package in
-Emacs, starting with version 29. It uses internally Flymake to render
-diagnostics received by the LSP server (by providing a Flymake backend).
+`Eglot <https://github.com/joaotavora/eglot>`_ is the built-in LSP client in
+Emacs (since version 29).  It uses Flymake internally to display diagnostics
+from the LSP server.
 
-It seems that many people were forced to move to Flymake, because they wanted to
-use Eglot and its maintainer (who's also the maintainer of Flymake) didn't want
-to provide Flycheck integration (backend) for it (see the relevant `discussion
-<https://github.com/joaotavora/eglot/issues/42>`_).
-
-.. note::
-
-   `flycheck-eglot <https://github.com/flycheck/flycheck-eglot>`_ is the best
-   workaround for this unfortunate situation that exists today.
+Eglot does not provide built-in Flycheck support, but the
+`flycheck-eglot <https://github.com/flycheck/flycheck-eglot>`_ package bridges
+this gap.  It routes Eglot's LSP diagnostics through Flycheck, so you can use
+Eglot for LSP features while keeping Flycheck for error display, navigation
+and your existing non-LSP checkers.
 
 Supported by lsp-mode
 ~~~~~~~~~~~~~~~~~~~~~
 
 `lsp-mode <https://github.com/emacs-lsp/lsp-mode>`_ is a popular alternative to
-Eglot that supports both Flycheck and Flymake.
-
-As you might imagine we encourage Flycheck users to use ``lsp-mode`` until we find
-some solution for the existing limitations in Eglot.
+Eglot that supports both Flycheck and Flymake out of the box.
 
 .. rubric:: Footnotes
 
