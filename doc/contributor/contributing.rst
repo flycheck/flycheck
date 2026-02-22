@@ -152,15 +152,15 @@ Documentation improvements are very welcome.  Flycheck’s manual is written in
 reStructuredText_ and built with Sphinx_.  The source of the manual resides in
 the ``doc/`` directory.
 
-You need Python 3.4 or newer to install Sphinx_ for Flycheck’s documentation.
+You need Python 3.9 or newer to install Sphinx_ for Flycheck’s documentation.
 On macOS it is recommended that you use Homebrew_ to install the latest Python
 version with ``brew install python3``.  On Linux you should be able to obtain
-Python 3.4 from the package manager of your distribution.
+Python 3 from the package manager of your distribution.
 
 With Python 3 installed change into the ``doc/`` directory and run ``make init``
 to install Sphinx and related tools required for Flycheck’s documentation.  We
-recommend that you use virtualenv_ to avoid a global installation of Python
-modules.  ``make init`` will warn you if you do not.
+recommend that you use a virtual environment to avoid a global installation of
+Python modules.  ``make init`` will warn you if you do not.
 
 When editing documentation run ``make html-auto`` to view the results of your
 edits.  This target runs a local webserver at http://localhost:8000 which serves
@@ -178,7 +178,6 @@ find documentation issues sort by the `documentation`_ label.
 .. _ReStructuredText: http://docutils.sourceforge.net/rst.html
 .. _Sphinx: http://www.sphinx-doc.org
 .. _Homebrew: https://brew.sh
-.. _virtualenv: https://virtualenv.pypa.io/en/latest/
 .. _documentation: https://github.com/flycheck/flycheck/labels/documentation
 
 Issue management

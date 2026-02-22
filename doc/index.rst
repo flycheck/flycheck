@@ -34,11 +34,11 @@ To try Flycheck in your Emacs session install some :ref:`syntax checker tools
 <flycheck-languages>` and type the following in your ``*scratch*`` buffer and
 run ``M-x eval-buffer``:
 
-.. code-block:: cl
+.. code-block:: elisp
 
    (require 'package)
    (add-to-list 'package-archives
-                '("MELPA Stable" . "http://stable.melpa.org/packages/") t)
+                '("MELPA Stable" . "https://stable.melpa.org/packages/") t)
    (package-initialize)
    (package-refresh-contents)
 
@@ -49,7 +49,7 @@ run ``M-x eval-buffer``:
 *On macOS* also add the following to :ref:`fix your $PATH environment variable
 <flycheck-macos-exec-path-from-shell>`:
 
-.. code-block:: cl
+.. code-block:: elisp
 
    (package-install 'exec-path-from-shell)
    (exec-path-from-shell-initialize)
