@@ -827,18 +827,6 @@ highlighted in the buffer."
   :package-version '(flycheck . "32")
   :safe #'booleanp)
 
-(defcustom flycheck-completing-read-function #'completing-read
-  "Function to read from minibuffer with completion.
-
-The function must be compatible to the built-in `completing-read'
-function."
-  :group 'flycheck
-  :type '(choice (const :tag "Default" completing-read)
-                 (const :tag "IDO" ido-completing-read)
-                 (function :tag "Custom function"))
-  :risky t
-  :package-version '(flycheck . "26"))
-
 (defcustom flycheck-temp-prefix "flycheck"
   "Prefix for temporary files created by Flycheck."
   :group 'flycheck
@@ -1753,17 +1741,13 @@ COLUMN is one-based."
 (defun flycheck-completing-read (prompt candidates default &optional history)
   "Read a value from the minibuffer.
 
-Use `flycheck-completing-read-function' to read input from the
-minibuffer with completion.
-
 Show PROMPT and read one of CANDIDATES, defaulting to DEFAULT.
-HISTORY is passed to `flycheck-completing-read-function'.
+HISTORY is passed to `completing-read'.
 
-Note that `flycheck-completing-read-function' may return an empty
-string instead of nil, even when \"\" isn't among the candidates.
-See `completing-read' for more details."
-  (funcall flycheck-completing-read-function
-           prompt candidates nil 'require-match nil history default))
+Note that `completing-read' may return an empty string instead of
+nil, even when \"\" isn't among the candidates.  Customize
+`completing-read-function' to change the completion UI globally."
+  (completing-read prompt candidates nil 'require-match nil history default))
 
 (defun flycheck-read-checker (prompt &optional default property candidates)
   "Read a flycheck checker from minibuffer with PROMPT and DEFAULT.
