@@ -49,8 +49,7 @@ Moderation
 ==========
 
 These are the policies for upholding our community's standards of conduct in our
-communication channels, most notably in Flycheck’s Github organisation and in
-Flycheck’s Gitter channels.
+communication channels, most notably in Flycheck’s Github organisation.
 
 1. Remarks that violate the Flycheck code of conduct, including hateful,
    hurtful, oppressive, or exclusionary remarks, are not allowed.

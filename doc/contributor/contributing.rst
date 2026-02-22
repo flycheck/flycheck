@@ -10,7 +10,7 @@ with us!
 
 There are many ways to contribute to Flycheck, and we appreciate all of them. We
 hope that this document helps you to contribute. If you have questions, please
-ask on our `issue tracker`_ or in our `Gitter chatroom`_.
+ask on our `issue tracker`_.
 
 For a gentle start please take a look at all the things we `need your help
 with`_ and look for `beginner-friendly tasks`_.
@@ -19,7 +19,6 @@ Please note that all contributors are expected to follow our :ref:`Code of
 Conduct <flycheck-conduct>`.
 
 .. _issue tracker: https://github.com/flycheck/flycheck/issues
-.. _Gitter chatroom: https://gitter.im/flycheck/flycheck
 .. _need your help with: https://github.com/flycheck/flycheck/issues?q=is%3Aissue+is%3Aopen+label%3A%22needs+help%22
 .. _beginner-friendly tasks: https://github.com/flycheck/flycheck/labels/beginner%20friendly
 
@@ -84,9 +83,8 @@ Run ``make help`` to see a list of all available targets.  Some common ones are:
 
 - ``make init`` initialises the project by installing local Emacs Lisp
   dependencies.
-- ``make check`` checks all Emacs Lisp sources.  This target requires Emacs 27.1.
+- ``make check`` checks all Emacs Lisp sources.
 - ``make compile`` compiles Flycheck and its libraries to byte code.
-- ``make format`` formats all Emacs Lisp sources.
 - ``make specs`` runs all Buttercup_ specs for Flycheck.  Set :makevar:`PATTERN`
   to run only specs matching a specific regular expression, e.g. ``make
   PATTERN='^Mode Line' specs`` to run only tests for the mode line.
@@ -215,14 +213,13 @@ Out of tree contributions
 There are many ways that you can contribute to Flycheck that go beyond
 this repository.
 
-Answer questions in our `Gitter channel`_ or on StackExchange_.
+Answer questions on StackExchange_ or on our `issue tracker`_.
 
 Participate in Flycheck discussions in other Emacs communities and help
 users with troubles.
 
 Write :ref:`extensions for Flycheck <flycheck-extensions>`.
 
-.. _Gitter channel: https://gitter.im/flycheck/flycheck
 .. _StackExchange: https://emacs.stackexchange.com/questions/tagged/flycheck
 
 --------------
