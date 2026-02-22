@@ -1264,7 +1264,7 @@ Only has effect when variable `global-flycheck-mode' is non-nil."
 
 
 
-(defconst flycheck-version "35.0"
+(defconst flycheck-version "36.0"
   "The current version of Flycheck.
 
 Should be kept in sync with the package version metadata.
