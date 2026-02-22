@@ -34,7 +34,7 @@ sys.path.append(str(Path(__file__).parent))
 
 ON_RTD = os.environ.get('READTHEDOCS', None) == 'True'
 
-needs_sphinx = '1.3'
+needs_sphinx = '7.0'
 extensions = [
     'sphinx.ext.intersphinx',
     'sphinx.ext.extlinks',
@@ -83,7 +83,7 @@ version = '.'.join(release.split('.')[:2])
 
 # Source settings
 source_suffix = '.rst'
-master_doc = 'index'
+root_doc = 'index'
 
 rst_prolog = """\
 .. role:: elisp(code)
@@ -98,8 +98,7 @@ default_role = 'any'
 primary_domain = 'el'
 templates_path = []
 
-# The name of the Pygments (syntax highlighting) style to use.
-pygments_style = 'sphinx'
+# Let Furo handle Pygments styling for proper light/dark mode support
 
 # Warn about all undefined references, but exclude references to built-in
 # symbols which we don't document here.
@@ -134,12 +133,12 @@ linkcheck_ignore = [r'http://localhost:\d+/?']
 
 # Cross-reference remote Sphinx sites
 intersphinx_mapping = {
-    'python': ('https://docs.python.org/3.5', None)
+    'python': ('https://docs.python.org/3.13', None)
 }
 
 extlinks = {
-    'gh': ('https://github.com/%s', None),
-    'flyc': ('https://github.com/flycheck/%s', None)
+    'gh': ('https://github.com/%s', '%s'),
+    'flyc': ('https://github.com/flycheck/%s', '%s')
 }
 
 # While still have work to do :)
