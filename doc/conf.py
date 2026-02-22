@@ -93,7 +93,7 @@ rst_prolog = """\
 """.format(emacs_version=read_minimum_emacs_version())
 
 # Build settings
-exclude_patterns = ['_build']
+exclude_patterns = ['_build', '.venv', 'venv']
 default_role = 'any'
 primary_domain = 'el'
 templates_path = []
@@ -105,16 +105,43 @@ templates_path = []
 # TODO: Resolve built-in symbols to the Emacs Lisp references?
 nitpicky = True
 nitpick_ignore = [
+    # Emacs built-in symbols
     ('any', 'default-directory'),
-    ('any', 'package-initialize'),
+    ('any', 'display-buffer-alist'),
+    ('any', 'display-message-or-buffer'),
+    ('any', 'exec-path'),
+    ('any', 'next-error'),
+    ('any', 'nil'),
     ('any', 'package-archives'),
-    ('any', 'user-init-file'),
+    ('any', 'package-initialize'),
+    ('any', 'previous-error'),
+    ('any', 'rx'),
+    ('any', 'sh-shell'),
     ('any', 'user-emacs-directory'),
+    ('any', 'user-init-file'),
+    ('any', 'with-eval-after-load'),
     ('any', 'check-declare-file'),
     ('any', 'declare-function'),
-    ('any', 'exec-path'),
-    ('any', 'sh-shell'),
-    ('any', 'rx'),
+    # Flymake symbols
+    ('any', 'flymake-diagnostic-functions'),
+    ('any', 'flymake-goto-next-error'),
+    # Flycheck internal symbols not in the Sphinx index
+    ('any', 'flycheck-define-checker'),
+    ('any', 'flycheck-define-command-checker'),
+    ('any', 'flycheck-define-generic-checker'),
+    ('any', 'flycheck-locate-config-file-functions'),
+    ('any', 'flycheck-mode-line-prefix'),
+    ('any', 'flycheck-posframe'),
+    ('any', 'flycheck-rx-to-string'),
+    ('any', 'flycheck-substitute-argument'),
+    ('any', 'M-x flycheck-verify-setup'),
+    # External tool names used as inline references
+    ('any', 'gcc'),
+    ('any', 'markdownlint'),
+    ('any', 'markdownlint-cli'),
+    ('any', 'markdownlint-cli2'),
+    ('any', 'mdl'),
+    ('any', 'pymarkdown'),
 ]
 
 # HTML settings
