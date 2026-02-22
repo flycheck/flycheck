@@ -87,8 +87,12 @@ def expand_node_name(node):
 class HTMLXRefDB(object):
     """Cross-reference database for Info manuals."""
 
-    #: URL of the htmlxref database of GNU Texinfo
-    XREF_URL = 'https://ftpmirror.gnu.org/texinfo/htmlxref.cnf'
+    #: URLs of the htmlxref database of GNU Texinfo (split into two files
+    #: since late 2024)
+    XREF_URLS = [
+        'https://ftpmirror.gnu.org/texinfo/htmlxref.d/Texinfo_GNU.cnf',
+        'https://ftpmirror.gnu.org/texinfo/htmlxref.d/Texinfo_nonGNU.cnf',
+    ]
 
     #: Regular expression to parse entries from an xref DB
     XREF_RE = re.compile(r"""
@@ -133,11 +137,12 @@ class HTMLXRefDB(object):
 
 def update_htmlxref(app):
     if not isinstance(getattr(app.env, 'info_htmlxref', None), HTMLXRefDB):
-        logger.info('fetching Texinfo htmlxref database from {0}... '.format(
-            HTMLXRefDB.XREF_URL))
+        logger.info('fetching Texinfo htmlxref database...')
         try:
-            app.env.info_htmlxref = HTMLXRefDB.parse(
-                requests.get(HTMLXRefDB.XREF_URL).text)
+            combined = ''
+            for url in HTMLXRefDB.XREF_URLS:
+                combined += requests.get(url).text + '\n'
+            app.env.info_htmlxref = HTMLXRefDB.parse(combined)
         except requests.exceptions.ConnectionError:
             logger.warning('Failed to load xref DB.  '
                            'Info references will not be resolved')
