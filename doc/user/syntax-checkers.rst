@@ -246,6 +246,54 @@ commit the configuration files to your source control repository to share them
 with other contributors so that all contributors can use the same configuration
 for syntax checking and linting.
 
+.. _flycheck-project-config:
+
+Project-specific configuration
+------------------------------
+
+Flycheck integrates well with Emacs' directory local variables (see
+:infonode:`(emacs)Directory Variables`), which let you configure checkers on a
+per-project basis.  Directory variables are stored in a ``.dir-locals.el`` file
+at the root of your project.
+
+To create or edit directory variables interactively, use :kbd:`M-x
+add-dir-local-variable`.  Here are some common examples:
+
+**Use a specific checker for a project:**
+
+.. code-block:: elisp
+
+   ;; .dir-locals.el
+   ((js-mode . ((flycheck-checker . javascript-standard))))
+
+**Disable a checker for a project:**
+
+.. code-block:: elisp
+
+   ;; .dir-locals.el
+   ((python-mode . ((flycheck-disabled-checkers . (python-mypy)))))
+
+**Set checker options per project:**
+
+.. code-block:: elisp
+
+   ;; .dir-locals.el
+   ((c++-mode . ((flycheck-clang-language-standard . "c++17")
+                 (flycheck-gcc-language-standard . "c++17"))))
+
+**Use a project-local checker executable:**
+
+.. code-block:: elisp
+
+   ;; .dir-locals.el
+   ((js-mode . ((flycheck-javascript-eslint-executable
+                 . "/path/to/project/node_modules/.bin/eslint"))))
+
+.. tip::
+
+   Commit your ``.dir-locals.el`` to version control so that all contributors
+   share the same Flycheck configuration.
+
 .. _flycheck-checker-executables:
 
 Change syntax checker executables
@@ -274,6 +322,59 @@ installed into a local ``node_modules`` directory:
 
       :infonode:`(emacs)Directory Variables`
          Information about directory variables.
+
+.. _flycheck-keybindings:
+
+Customize keybindings
+=====================
+
+All Flycheck commands are bound under the ``C-c !`` prefix by default.  The
+full list of default keybindings is:
+
+=================   =================================
+``C-c ! c``         Check the current buffer
+``C-c ! C``         Clear all errors
+``C-c ! C-c``       Run a checker as a shell command
+``C-c ! n``         Jump to the next error
+``C-c ! p``         Jump to the previous error
+``C-c ! l``         List all errors
+``C-c ! C-w``       Copy errors at point to kill ring
+``C-c ! s``         Select a checker
+``C-c ! ?``         Describe a checker
+``C-c ! h``         Display error at point
+``C-c ! e``         Explain error at point
+``C-c ! H``         Display local help
+``C-c ! i``         Open the Flycheck manual
+``C-c ! V``         Show Flycheck version
+``C-c ! v``         Verify the setup
+``C-c ! x``         Disable a checker
+=================   =================================
+
+Change the prefix key
+---------------------
+
+You can change the prefix key by customizing `flycheck-keymap-prefix`.  Note
+that you must use ``customize-set-variable`` (not ``setq``) because the
+variable has a custom setter:
+
+.. defcustom:: flycheck-keymap-prefix
+
+   The prefix key for Flycheck keybindings.  Defaults to ``C-c !``.
+
+   .. code-block:: elisp
+
+      (customize-set-variable 'flycheck-keymap-prefix (kbd "C-c f"))
+
+Use with keymap-set
+-------------------
+
+``flycheck-command-map`` is registered as both a variable and a command (via
+``fset``), so you can use it with ``keymap-set`` and similar functions in Emacs
+29+:
+
+.. code-block:: elisp
+
+   (keymap-set flycheck-mode-map "C-c f" #'flycheck-command-map)
 
 .. _flycheck-checker-chains:
 
