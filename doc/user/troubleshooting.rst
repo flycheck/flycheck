@@ -95,6 +95,21 @@ click on the syntax checker names to show the docstring for a syntax checker.
 * *Red* items indicate *bad* configuration.  `python-pylint` wasn’t found in the
   screenshot, so you’ll not be able to use pylint in the current buffer.
 
+The verification buffer also shows:
+
+* Whether each checker is **disabled** (manually via `C-c ! x` or automatically
+  due to too many errors).  You can re-enable disabled checkers with `C-u C-c !
+  x`.
+* The **selected checker** for the current buffer (set via `C-c ! s`), if any.
+* Your **Flycheck version**, **Emacs version** and **operating system**, which
+  is useful information when reporting bugs.
+
+.. tip::
+
+   When :ref:`reporting a bug <flycheck-bug-reports>`, include the output of
+   `C-c ! v` in your report.  It gives maintainers a quick overview of your
+   setup.
+
 Debug syntax checkers
 =====================
 
@@ -124,6 +139,6 @@ you run the same command in a terminal.
 If all else fails…
 ==================
 
-…please do :ref:`ask for help <flycheck-get-help>`.  We have many different
-channels, from Twitter to a chat room to StackOverflow, whatever suits you best,
-and we try to help you as fast and as well as possible.
+…please do :ref:`ask for help <flycheck-get-help>`.  You can ask questions on
+Stack Exchange or open an issue on GitHub, and we try to help you as fast and as
+well as possible.
