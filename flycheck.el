@@ -2962,16 +2962,11 @@ Slots:
     ;; Update the error list if necessary
     (post-command-hook . flycheck-error-list-update-source)
     (post-command-hook . flycheck-error-list-highlight-errors)
-    ;; Display errors.  Show errors at point after commands (like movements) and
-    ;; when Emacs gets focus.  Cancel the display timer when Emacs looses focus
-    ;; (as there's no need to display errors if the user can't see them), and
-    ;; hide the error buffer (for large error messages) if necessary.  Note that
-    ;; the focus hooks only work on Emacs 24.4 and upwards, but since undefined
-    ;; hooks are perfectly ok we don't need a version guard here.  They'll just
-    ;; not work silently.
+    ;; Display errors.  Show errors at point after commands (like movements)
+    ;; and hide the error buffer (for large error messages) if necessary.
+    ;; Focus change handling is done separately via
+    ;; `after-focus-change-function' (see `flycheck-handle-focus-change').
     (post-command-hook . flycheck-display-error-at-point-soon)
-    (focus-in-hook     . flycheck-display-error-at-point-soon)
-    (focus-out-hook    . flycheck-cancel-error-display-error-at-point-timer)
     (post-command-hook . flycheck-hide-error-buffer)
     ;; Immediately show error popups when navigating to an error
     (next-error-hook . flycheck-display-error-at-point))
@@ -5609,6 +5604,20 @@ If there are no errors, clears the error messages at point."
                      'flycheck-display-error-at-point)))
 
 
+(defun flycheck-handle-focus-change ()
+  "Handle frame focus changes for Flycheck error display.
+
+When the frame gains focus, schedule error display at point.
+When the frame loses focus, cancel any pending error display."
+  (when flycheck-mode
+    (if (frame-focus-state)
+        (flycheck-display-error-at-point-soon)
+      (flycheck-cancel-error-display-error-at-point-timer))))
+
+(add-function :after after-focus-change-function
+              #'flycheck-handle-focus-change)
+
+
 ;;; Functions to display errors
 (defconst flycheck-error-message-buffer "*Flycheck error messages*"
   "The name of the buffer to show long error messages in.")
