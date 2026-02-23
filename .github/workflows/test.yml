@@ -50,13 +50,11 @@ jobs:
       if: matrix.os == 'ubuntu-latest' || matrix.os == 'macos-latest'
       run: |
         make init
-        make format
         make specs
 
     - name: Run tests (Windows)
       if: matrix.os == 'windows-latest'
       run: |
         make init
-        make format
         make compile
         make specs
