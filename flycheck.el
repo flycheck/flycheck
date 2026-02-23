@@ -8160,11 +8160,13 @@ the BUFFER that was checked respectively.
 
 See URL `https://stylelint.io/developer-guide/formatters/' for information
 about the JSON format of stylelint."
-  (let ((json-object-type 'plist))
-
-    ;; stylelint returns a vector of result objects
-    ;; Since we only passed one file, the first element is enough
-    (let* ((stylelint-output (elt (json-read-from-string output) 0))
+  ;; stylelint returns a vector of result objects
+  ;; Since we only passed one file, the first element is enough
+  (let* ((stylelint-output (elt (json-parse-string output
+                                                   :object-type 'plist
+                                                   :null-object nil
+                                                   :false-object nil)
+                                0))
            (filename (buffer-file-name buffer))
 
            ;; Turn all deprecations into warnings
@@ -8209,7 +8211,7 @@ about the JSON format of stylelint."
                     (plist-get stylelint-output :warnings))))
 
       ;; Return the combined errors (deprecations, invalid options, warnings)
-      (append deprecations invalid-options warnings))))
+      (append deprecations invalid-options warnings)))
 
 (defun flycheck--stylelint-config-exists-p (checker)
   "Whether there is a valid stylelint CHECKER config for the current buffer."
