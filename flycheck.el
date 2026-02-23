@@ -11906,7 +11906,8 @@ CHECKER and BUFFER are used to construct the error objects."
 See URL `https://www.scala-lang.org/'."
   :command ("scalac" "-Ystop-after:parser" source)
   :error-patterns
-  ((error line-start (file-name) ":" line ": error: " (message) line-end))
+  ((error line-start (file-name) ":" line ": error: " (message) line-end)
+   (warning line-start (file-name) ":" line ": warning: " (message) line-end))
   :modes (scala-mode scala-ts-mode)
   :next-checkers ((warning . scala-scalastyle)))
 
@@ -12584,7 +12585,11 @@ The xmllint is part of libxml2, see URL
             "-")
   :standard-input t
   :error-patterns
-  ((error line-start "-:" line ": " (message) line-end))
+  ((warning line-start "-:" line ": "
+            (message (one-or-more (not (any ":"))) "warning : "
+                     (one-or-more not-newline))
+            line-end)
+   (error line-start "-:" line ": " (message) line-end))
   :modes (xml-mode nxml-mode))
 
 (flycheck-define-checker yaml-jsyaml
