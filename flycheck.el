@@ -11893,20 +11893,19 @@ CHECKER and BUFFER are used to construct the error objects."
                                       :false-object nil)))
         (mapcar (lambda (e)
                   (let-alist e
-                    (flycheck-error-new
+                    (flycheck-error-new-at
+                     .linenumber 0
+                     (pcase .severity
+                       ("HIGH" 'error)
+                       ("MEDIUM" 'warning)
+                       ("LOW" 'warning)
+                       ("INFO" 'info)
+                       (_ 'info))
+                     (concat .message .line)
+                     :id .id
                      :checker checker
                      :buffer buffer
-                     :filename filename
-                     :level (pcase .severity
-                              ("HIGH" 'error)
-                              ("MEDIUM" 'warning)
-                              ("LOW" 'warning)
-                              ("INFO" 'info)
-                              (_ 'info))
-                     :line .linenumber
-                     :column 0
-                     :message (concat .message .line)
-                     :id .id)))
+                     :filename filename)))
                 errors))
     (json-parse-error nil)))
 
