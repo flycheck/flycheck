@@ -38,8 +38,8 @@
     (let ((flycheck-disabled-checkers '(yaml-jsyaml)))
       (flycheck-buttercup-should-syntax-check
        "language/yaml.yaml" 'yaml-mode
-       '(3 1 warning "missing document start \"---\" (document-start)"
-           :checker yaml-yamllint))
+       '(3 1 warning "missing document start \"---\""
+           :id "document-start" :checker yaml-yamllint))
       (flycheck-buttercup-should-syntax-check
        "language/yaml.yaml" 'yaml-mode
        '(4 5 error "syntax error: mapping values are not allowed here"

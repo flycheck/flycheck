@@ -12629,10 +12629,16 @@ See URL `https://github.com/adrienverge/yamllint'."
           "stdin:" line ":" column ": [error] "
           (message (minimal-match (one-or-more not-newline)))
           " (" (id (one-or-more (not (any ")")))) ")" line-end)
+   (error line-start
+          "stdin:" line ":" column ": [error] "
+          (message) line-end)
    (warning line-start
             "stdin:" line ":" column ": [warning] "
             (message (minimal-match (one-or-more not-newline)))
-            " (" (id (one-or-more (not (any ")")))) ")" line-end))
+            " (" (id (one-or-more (not (any ")")))) ")" line-end)
+   (warning line-start
+            "stdin:" line ":" column ": [warning] "
+            (message) line-end))
   :modes (yaml-mode yaml-ts-mode)
   :next-checkers ((warning . cwl)))
 
