@@ -1573,6 +1573,12 @@ Safely delete all files and directories listed in
   (seq-do #'flycheck-safe-delete flycheck-temporaries)
   (setq flycheck-temporaries nil))
 
+;; We use a custom tree-walking expander instead of `rx-define' or
+;; `rx-let' because those don't support optional arguments with
+;; defaults.  For example, `(file-name)' should use a default body
+;; while `(file-name SEXP ...)' uses a custom one — this conditional
+;; logic cannot be expressed with `rx-define's parameter mechanism,
+;; which only supports required args and `&rest'.
 (defun flycheck--rx-expand (form)
   "Expand Flycheck-specific rx constructs in FORM.
 
