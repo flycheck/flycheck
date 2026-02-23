@@ -476,30 +476,17 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       Check Go for suspicious code with vet_.
 
-      .. defcustom:: flycheck-go-vet-print-functions
-
-         A list of print-like functions to check calls for format string problems.
-
       .. defcustom:: flycheck-go-build-tags
 
          A list of build tags.
 
-      .. _vet: https://golang.org/cmd/vet/
+      .. _vet: https://pkg.go.dev/cmd/vet/
 
    .. syntax-checker:: go-build
 
       Check syntax and type with the `Go compiler`_.
 
-      .. note::
-
-         This syntax checker requires Go 1.6 or newer.
-
-      .. _Go compiler: https://golang.org/cmd/go
-
-      .. defcustom:: flycheck-go-build-install-deps
-
-         Whether to install dependencies while checking with `go-build` or
-         `go-test`
+      .. _Go compiler: https://go.dev/cmd/go/
 
       .. defcustom:: flycheck-go-build-tags
          :noindex:
@@ -509,15 +496,6 @@ to view the docstring of the syntax checker.  Likewise, you may use
    .. syntax-checker:: go-test
 
       Check syntax and types of Go tests with the `Go compiler`_.
-
-      .. note::
-
-         This syntax checker requires Go 1.6 or newer.
-
-      .. defcustom:: flycheck-go-build-install-deps
-         :noindex:
-
-         See `flycheck-go-build-install-deps`.
 
       .. defcustom:: flycheck-go-build-tags
          :noindex:
@@ -971,6 +949,10 @@ to view the docstring of the syntax checker.  Likewise, you may use
          This syntax checker requires PHP Code Sniffer 2.6 or newer.
 
       .. _PHPCS Changed: https://github.com/sirbrillig/phpcs-changed
+
+      .. defcustom:: flycheck-phpcs-changed-git-base
+
+         The git base branch to compare against (e.g. "main", "master", "trunk").
 
       .. defcustom:: flycheck-phpcs-standard
 
