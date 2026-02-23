@@ -12617,9 +12617,13 @@ See URL `https://github.com/adrienverge/yamllint'."
             (config-file "-c" flycheck-yamllintrc))
   :error-patterns
   ((error line-start
-          "stdin:" line ":" column ": [error] " (message) line-end)
+          "stdin:" line ":" column ": [error] "
+          (message (minimal-match (one-or-more not-newline)))
+          " (" (id (one-or-more (not (any ")")))) ")" line-end)
    (warning line-start
-            "stdin:" line ":" column ": [warning] " (message) line-end))
+            "stdin:" line ":" column ": [warning] "
+            (message (minimal-match (one-or-more not-newline)))
+            " (" (id (one-or-more (not (any ")")))) ")" line-end))
   :modes (yaml-mode yaml-ts-mode)
   :next-checkers ((warning . cwl)))
 
