@@ -9139,7 +9139,7 @@ See URL https://github.com/rhysd/actionlint/."
 (flycheck-define-checker go-gofmt
   "A Go syntax and style checker using the gofmt utility.
 
-See URL `https://golang.org/cmd/gofmt/'."
+See URL `https://go.dev/cmd/gofmt/'."
   :command ("gofmt")
   :standard-input t
   :error-patterns
@@ -9153,32 +9153,12 @@ See URL `https://golang.org/cmd/gofmt/'."
                   (warning . go-unconvert)
                   (warning . go-staticcheck)))
 
-(flycheck-def-option-var flycheck-go-vet-print-functions nil go-vet
-  "A list of print-like functions for `go vet'.
-
-Go vet will check these functions for format string problems and
-issues, such as a mismatch between the number of formats used,
-and the number of arguments given.
-
-Each entry is in the form Name:N where N is the zero-based
-argument position of the first argument involved in the print:
-either the format or the first print argument for non-formatted
-prints.  For example, if you have Warn and Warnf functions that
-take an io.Writer as their first argument, like Fprintf,
--printfuncs=Warn:1,Warnf:1 "
-  :type '(repeat :tag "print-like functions"
-                 (string :tag "function"))
-  :safe #'flycheck-string-list-p)
-
 (flycheck-define-checker go-vet
   "A Go syntax checker using the `go vet' command.
 
-See URL `https://golang.org/cmd/go/' and URL
-`https://golang.org/cmd/vet/'."
-  :command ("go" "vet"
-            (option "-printf.funcs=" flycheck-go-vet-print-functions concat
-                    flycheck-option-comma-separated-list)
-            (source ".go"))
+See URL `https://go.dev/cmd/go/' and URL
+`https://pkg.go.dev/cmd/vet/'."
+  :command ("go" "vet" (source ".go"))
   :error-patterns
   ((warning line-start (file-name) ":" line ": " (message) line-end))
   :modes (go-mode go-ts-mode)
@@ -9197,15 +9177,6 @@ See URL `https://golang.org/cmd/go/' and URL
                 :label "go tool vet"
                 :message (if have-vet "present" "missing")
                 :face (if have-vet 'success '(bold error)))))))
-
-(flycheck-def-option-var flycheck-go-build-install-deps nil (go-build go-test)
-  "Whether to install dependencies in `go build' and `go test'.
-
-If non-nil automatically install dependencies with `go build'
-while syntax checking."
-  :type 'boolean
-  :safe #'booleanp
-  :package-version '(flycheck . "0.25"))
 
 (flycheck-def-option-var flycheck-go-build-tags nil
                          (go-build go-test go-errcheck go-staticcheck)
@@ -9231,9 +9202,8 @@ details."
 (flycheck-define-checker go-build
   "A Go syntax and type checker using the `go build' command.
 
-Requires Go 1.6 or newer.  See URL `https://golang.org/cmd/go'."
+See URL `https://go.dev/cmd/go/'."
   :command ("go" "build"
-            (option-flag "-i" flycheck-go-build-install-deps)
             ;; multiple tags are comma-separated: "dev,debug"
             (option "-tags=" flycheck-go-build-tags concat
                     flycheck-option-comma-separated-list)
@@ -9272,9 +9242,8 @@ Requires Go 1.6 or newer.  See URL `https://golang.org/cmd/go'."
 (flycheck-define-checker go-test
   "A Go syntax and type checker using the `go test' command.
 
-Requires Go 1.6 or newer.  See URL `https://golang.org/cmd/go'."
+See URL `https://go.dev/cmd/go/'."
   :command ("go" "test"
-            (option-flag "-i" flycheck-go-build-install-deps)
             (option "-tags=" flycheck-go-build-tags concat
                     flycheck-option-comma-separated-list)
             "-c" "-o" null-device)
