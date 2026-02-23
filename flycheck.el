@@ -8499,7 +8499,7 @@ See `https://credo-ci.org/'."
    (warning line-start
             (file-name) ":" line (optional ":" column) ": "
             (or "D" "W")  ": " (message) line-end))
-  :modes elixir-mode)
+  :modes (elixir-mode elixir-ts-mode))
 
 (defconst flycheck-this-emacs-executable
   (concat invocation-directory invocation-name)
@@ -9545,7 +9545,7 @@ See URL `https://github.com/commercialhaskell/stack'."
   :error-filter
   (lambda (errors)
     (flycheck-sanitize-errors (flycheck-dedent-error-messages errors)))
-  :modes (haskell-mode haskell-literate-mode)
+  :modes (haskell-mode haskell-literate-mode haskell-ts-mode)
   :next-checkers ((warning . haskell-hlint))
   :working-directory (lambda (_)
                        (flycheck-haskell--find-stack-default-directory))
@@ -9605,7 +9605,7 @@ See URL `https://www.haskell.org/ghc/'."
   :error-filter
   (lambda (errors)
     (flycheck-sanitize-errors (flycheck-dedent-error-messages errors)))
-  :modes (haskell-mode haskell-literate-mode)
+  :modes (haskell-mode haskell-literate-mode haskell-ts-mode)
   :next-checkers ((warning . haskell-hlint))
   :working-directory flycheck-haskell--ghc-find-default-directory)
 
@@ -9680,7 +9680,7 @@ See URL `https://github.com/ndmitchell/hlint'."
           ": Error: "
           (message (one-or-more (and (one-or-more (not (any ?\n))) ?\n)))
           line-end))
-  :modes (haskell-mode haskell-literate-mode))
+  :modes (haskell-mode haskell-literate-mode haskell-ts-mode))
 
 (flycheck-def-config-file-var flycheck-tidyrc html-tidy ".tidyrc")
 
@@ -9701,7 +9701,7 @@ See URL `https://github.com/htacg/tidy-html5'."
             "line " line
             " column " column
             " - Warning: " (message) line-end))
-  :modes (html-mode mhtml-mode nxhtml-mode))
+  :modes (html-mode mhtml-mode nxhtml-mode html-ts-mode))
 
 (flycheck-def-args-var flycheck-eslint-args javascript-eslint
   :package-version '(flycheck . "32"))
@@ -11332,7 +11332,7 @@ information about statix."
 See URL `https://github.com/nerdypepper/statix'."
   :command ("statix" "check" "-o=json" source)
   :error-parser flycheck-parse-statix
-  :modes nix-mode)
+  :modes (nix-mode nix-ts-mode))
 
 (defun flycheck-locate-sphinx-source-directory ()
   "Locate the Sphinx source directory for the current buffer.
@@ -11903,7 +11903,7 @@ See URL `https://www.scala-lang.org/'."
   :command ("scalac" "-Ystop-after:parser" source)
   :error-patterns
   ((error line-start (file-name) ":" line ": error: " (message) line-end))
-  :modes scala-mode
+  :modes (scala-mode scala-ts-mode)
   :next-checkers ((warning . scala-scalastyle)))
 
 (flycheck-def-config-file-var flycheck-scalastylerc scala-scalastyle nil
@@ -11927,7 +11927,7 @@ See URL `https://www.scalastyle.org'."
   :error-filter (lambda (errors)
                   (flycheck-sanitize-errors
                    (flycheck-increment-error-columns errors)))
-  :modes scala-mode
+  :modes (scala-mode scala-ts-mode)
   :predicate
   ;; Inhibit this syntax checker if the JAR or the configuration are unset or
   ;; missing
@@ -12302,7 +12302,7 @@ See URL `https://www.terraform.io/docs/commands/fmt.html'."
           (message (one-or-more (and (one-or-more (not (any ?\n))) ?\n)))
           line-end))
   :next-checkers ((warning . terraform-tflint))
-  :modes terraform-mode)
+  :modes (terraform-mode terraform-ts-mode))
 
 (flycheck-def-option-var flycheck-tflint-variable-files nil terraform-tflint
   "A list of files to resolve terraform variables.
@@ -12348,7 +12348,7 @@ See URL `https://github.com/terraform-linters/tflint'."
             (option-list "--var-file=" flycheck-tflint-variable-files concat))
   :error-parser flycheck-parse-tflint-linter
   :predicate flycheck-buffer-saved-p
-  :modes terraform-mode)
+  :modes (terraform-mode terraform-ts-mode))
 
 (flycheck-def-option-var flycheck-chktex-extra-flags nil tex-chktex
   "A list of extra arguments to give to chktex.
