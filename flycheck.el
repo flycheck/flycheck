@@ -10929,6 +10929,7 @@ See URL `https://github.com/microsoft/pyright'."
 See URL `https://mypy-lang.org/'."
   :command ("mypy"
             "--show-column-numbers"
+            "--show-error-codes"
             "--no-pretty"
             (config-file "--config-file" flycheck-python-mypy-config)
             (option "--cache-dir" flycheck-python-mypy-cache-dir)
@@ -10941,6 +10942,14 @@ See URL `https://mypy-lang.org/'."
             ": warning:" (message) line-end)
    (info line-start (file-name) ":" line (optional ":" column)
          ": note:" (message) line-end))
+  :error-filter
+  (lambda (errors)
+    (dolist (err errors)
+      (let ((msg (flycheck-error-message err)))
+        (when (and msg (string-match "\\(.*?\\)  \\[\\([^]]+\\)\\]\\'" msg))
+          (setf (flycheck-error-message err) (match-string 1 msg))
+          (setf (flycheck-error-id err) (match-string 2 msg)))))
+    errors)
   :working-directory flycheck-python-find-project-root
   :modes (python-mode python-ts-mode)
   ;; Ensure the file is saved, to work around
