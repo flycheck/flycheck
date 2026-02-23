@@ -11172,7 +11172,8 @@ See URL `https://github.com/igorshubovych/markdownlint-cli'."
           " " (message) line-end))
   :error-filter flycheck-markdownlint-error-filter
   :modes (markdown-mode gfm-mode)
-  :error-explainer flycheck-markdownlint-error-explainer)
+  :error-explainer flycheck-markdownlint-error-explainer
+  :next-checkers ((warning . proselint)))
 
 (flycheck-def-config-file-var flycheck-markdown-markdownlint-cli2-config
     markdown-markdownlint-cli2
@@ -11194,7 +11195,8 @@ See URL `https://github.com/DavidAnson/markdownlint-cli2'."
           " " (message) line-end))
   :error-filter flycheck-markdownlint-error-filter
   :modes (markdown-mode gfm-mode)
-  :error-explainer flycheck-markdownlint-error-explainer)
+  :error-explainer flycheck-markdownlint-error-explainer
+  :next-checkers ((warning . proselint)))
 
 (flycheck-def-option-var flycheck-markdown-mdl-rules nil markdown-mdl
   "Rules to enable for mdl.
@@ -11246,7 +11248,8 @@ See URL `https://github.com/markdownlint/markdownlint'."
   (lambda (errors)
     (flycheck-sanitize-errors
      (flycheck-remove-error-file-names "(stdin)" errors)))
-  :modes (markdown-mode gfm-mode))
+  :modes (markdown-mode gfm-mode)
+  :next-checkers ((warning . proselint)))
 
 (flycheck-def-config-file-var flycheck-markdown-pymarkdown-config
     markdown-pymarkdown nil
@@ -11269,7 +11272,8 @@ See URL `https://pypi.org/project/pymarkdownlnt/'."
   (lambda (errors)
     (flycheck-sanitize-errors
      (flycheck-remove-error-file-names "(string)" errors)))
-  :modes (markdown-mode gfm-mode))
+  :modes (markdown-mode gfm-mode)
+  :next-checkers ((warning . proselint)))
 
 (flycheck-define-checker nix
   "Nix checker using nix-instantiate.
