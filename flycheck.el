@@ -6907,7 +6907,7 @@ checkers that have an option to output errors in this format.
 CHECKER and BUFFER denote the CHECKER that returned OUTPUT and
 the BUFFER that was checked respectively.
 
-See URL `https://checkstyle.sourceforge.net/' for information
+See URL `https://checkstyle.org/' for information
 about Checkstyle."
   (pcase (flycheck-parse-xml-string output)
     (`(checkstyle ,_ . ,file-nodes)
@@ -7269,7 +7269,7 @@ JSON lines.  This function ignores the plain text lines and
 parses only JSON lines.  Each JSON line is expected to be a JSON
 object that represents a message from Cargo.  The format of
 messages emitted by Cargo is described in cargo's
-machine_message.rs at URL `https://git.io/vh24R'."
+machine_message.rs at URL `https://github.com/rust-lang/cargo/blob/master/src/cargo/util/machine_message.rs'."
   (let ((errors))
     (dolist (msg (flycheck-parse-json output))
       (let-alist msg
@@ -11206,7 +11206,7 @@ the name of a rule to enable.
 
 By default all rules are enabled.
 
-See URL `https://git.io/vhi2t'."
+See URL `https://github.com/markdownlint/markdownlint/blob/main/docs/RULES.md'."
   :type '(repeat :tag "Enabled rules"
                  (string :tag "rule name"))
   :safe #'flycheck-string-list-p
@@ -11220,7 +11220,7 @@ the name of a rule tag.  Only rules with these tags are enabled.
 
 By default all rules are enabled.
 
-See URL `https://git.io/vhi2t'."
+See URL `https://github.com/markdownlint/markdownlint/blob/main/docs/RULES.md'."
   :type '(repeat :tag "Enabled tags"
                  (string :tag "tag name"))
   :safe #'flycheck-string-list-p
@@ -11350,7 +11350,7 @@ part of a Sphinx project."
 (flycheck-define-checker rst
   "A ReStructuredText (RST) syntax checker using Docutils.
 
-See URL `https://docutils.sourceforge.net/'."
+See URL `https://docutils.sourceforge.io/'."
   ;; include:: directives
   :command ("rst2pseudoxml.py" "--report=2" "--halt=5"
             ;; Read from standard input and throw output away
