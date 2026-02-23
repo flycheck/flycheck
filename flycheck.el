@@ -10262,17 +10262,26 @@ See URL `https://pear.php.net/package/PHP_CodeSniffer/'."
   ;; buffer is empty, see https://github.com/flycheck/flycheck/issues/907
   :predicate flycheck-buffer-nonempty-p)
 
+(flycheck-def-option-var flycheck-phpcs-changed-git-base "trunk"
+                         php-phpcs-changed
+  "The git base branch for PHPCS-Changed.
+
+The value of this variable is a string specifying the git branch
+to compare against (e.g. \"main\", \"master\", \"trunk\")."
+  :type '(string :tag "Branch name")
+  :safe #'stringp)
+
 (flycheck-define-checker php-phpcs-changed
   "A PHP style checker using PHPCS-Changed.
-   Needs PHP Code Sniffer 2.6 or newer.
-   See `https://github.com/sirbrillig/phpcs-changed'."
+
+Needs PHP Code Sniffer 2.6 or newer.
+See URL `https://github.com/sirbrillig/phpcs-changed'."
   :command ("phpcs-changed"
             "--git"
-            "--git-base trunk"
+            "--git-base" (eval flycheck-phpcs-changed-git-base)
             "--git-unstaged"
             (option "--standard=" flycheck-phpcs-standard concat)
-            (eval (buffer-file-name))
-            )
+            (eval (buffer-file-name)))
   :standard-input t
   :error-parser flycheck-parse-checkstyle
   :error-filter
