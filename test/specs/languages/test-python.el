@@ -44,7 +44,7 @@
       (flycheck-buttercup-should-syntax-check
        "language/python/invalid_type.py" 'python-mode
        '(2 12 error "Incompatible return value type (got \"str\", expected \"int\")"
-           :checker python-mypy))))
+           :id "return-value" :checker python-mypy))))
 
   (flycheck-buttercup-def-checker-test python-pylint python nil
     (let ((flycheck-disabled-checkers '(python-flake8 python-mypy))
