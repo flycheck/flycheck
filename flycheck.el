@@ -11172,7 +11172,15 @@ See URL `https://github.com/igorshubovych/markdownlint-cli'."
             "--"
             source)
   :error-patterns
-  ((error line-start
+  (;; markdownlint-cli v0.42+/cli2 v0.14+ include a severity word
+   (error line-start
+          (file-name) ":" line
+          (? ":" column) " "
+          (or "error" "warning") " "
+          (id (one-or-more (not (any space))))
+          " " (message) line-end)
+   ;; older versions without severity word
+   (error line-start
           (file-name) ":" line
           (? ":" column) " " (id (one-or-more (not (any space))))
           " " (message) line-end))
@@ -11195,7 +11203,15 @@ See URL `https://github.com/DavidAnson/markdownlint-cli2'."
             "--"
             source)
   :error-patterns
-  ((error line-start
+  (;; markdownlint-cli v0.42+/cli2 v0.14+ include a severity word
+   (error line-start
+          (file-name) ":" line
+          (? ":" column) " "
+          (or "error" "warning") " "
+          (id (one-or-more (not (any space))))
+          " " (message) line-end)
+   ;; older versions without severity word
+   (error line-start
           (file-name) ":" line
           (? ":" column) " " (id (one-or-more (not (any space))))
           " " (message) line-end))
