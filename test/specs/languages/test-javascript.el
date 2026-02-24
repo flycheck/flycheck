@@ -91,6 +91,14 @@
              :id "no-unused-vars" :checker javascript-eslint
              :end-line 4 :end-column 12))))
 
+    (flycheck-buttercup-def-checker-test javascript-oxlint javascript nil
+      (let ((flycheck-checker 'javascript-oxlint)
+            (inhibit-message t))
+        (flycheck-buttercup-should-syntax-check
+         "language/javascript/warnings.js" flycheck-test-javascript-modes
+         '(4 9 warning "Variable 'foo' is declared but never used. Unused variables should start with a '_'."
+             :id "eslint(no-unused-vars)" :checker javascript-oxlint))))
+
     (flycheck-buttercup-def-checker-test javascript-standard javascript error
       (let ((flycheck-checker 'javascript-standard)
             (inhibit-message t))

@@ -46,6 +46,27 @@
        '(2 12 error "Incompatible return value type (got \"str\", expected \"int\")"
            :id "return-value" :checker python-mypy))))
 
+  (flycheck-buttercup-def-checker-test python-ruff python syntax-error
+    (let ((flycheck-disabled-checkers '(python-flake8))
+          (flycheck-checkers '(python-ruff))
+          (python-indent-guess-indent-offset nil))
+      (flycheck-buttercup-should-syntax-check
+       "language/python/syntax-error.py" 'python-mode
+       '(3 7 error "Expected an identifier, but found a keyword `import` that cannot be used here"
+           :checker python-ruff)
+       '(3 14 error "Simple statements must be separated by newlines or semicolons"
+           :checker python-ruff))))
+
+  (flycheck-buttercup-def-checker-test python-ruff python nil
+    (let ((flycheck-disabled-checkers '(python-flake8))
+          (flycheck-checkers '(python-ruff)))
+      (flycheck-buttercup-should-syntax-check
+       "language/python/test.py" 'python-mode
+       '(5 15 warning "[*] `.antigravit` imported but unused" :id "F401"
+           :checker python-ruff)
+       '(22 1 error "Undefined name `antigravity`" :id "F821"
+           :checker python-ruff))))
+
   (flycheck-buttercup-def-checker-test python-pylint python nil
     (let ((flycheck-disabled-checkers '(python-flake8 python-mypy))
           (flycheck-python-pylint-executable "python3"))
