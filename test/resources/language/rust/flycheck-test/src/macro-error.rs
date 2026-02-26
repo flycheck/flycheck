@@ -1,3 +1,3 @@
-fn foo() {
+fn main() {
   println!("{}");
 }
