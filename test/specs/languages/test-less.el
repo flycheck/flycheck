@@ -18,6 +18,16 @@
   (flycheck-buttercup-def-checker-test less less syntax-error
     (flycheck-buttercup-should-syntax-check
      "language/less/syntax-error.less" 'less-css-mode
-     '(1 1 error "Unrecognised input" :checker less))))
+     '(1 1 error "Unrecognised input" :checker less)))
+
+  (flycheck-buttercup-def-checker-test less-stylelint less nil
+    (let ((flycheck-disabled-checkers '(less))
+          (flycheck-stylelintrc
+           (flycheck-buttercup-resource-filename
+            "language/css/.stylelintrc.json")))
+      (flycheck-buttercup-should-syntax-check
+       "language/less/syntax-error.less" 'less-css-mode
+       '(1 1 error "Unclosed block (CssSyntaxError)"
+           :id "CssSyntaxError" :checker less-stylelint)))))
 
 ;;; test-less.el ends here
