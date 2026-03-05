@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Flycheck Documentation
+    url: https://www.flycheck.org/en/latest/
+    about: Check the official documentation before opening an issue.
+  - name: Questions on StackOverflow
+    url: https://stackoverflow.com/questions/tagged/flycheck
+    about: Ask usage questions on StackOverflow with the "flycheck" tag.
