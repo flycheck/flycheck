@@ -1,0 +1,38 @@
+name: Feature request
+description: Suggest an improvement to Flycheck
+labels: ["kind: feature request"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for taking the time to suggest an improvement.
+
+        **Before submitting**, please search [existing issues](https://github.com/flycheck/flycheck/issues) to check if this has already been requested.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Feature description
+      description: A clear and concise description of what you want Flycheck to do.
+    validations:
+      required: true
+
+  - type: textarea
+    id: use-case
+    attributes:
+      label: Use case
+      description: What problem does this solve? How would you use this feature in your workflow?
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Any alternative solutions or workarounds you've considered.
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional context
+      description: Any other context, screenshots, or mockups.

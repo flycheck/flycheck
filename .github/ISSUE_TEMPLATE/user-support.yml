@@ -1,0 +1,84 @@
+name: User support
+description: Trouble setting up or using Flycheck?
+labels: ["kind: user support"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This template is for **setup and usage questions**. If you are reporting an actual bug, please use the bug report template instead.
+
+        **Before submitting**, make sure you have:
+        - Searched [existing issues](https://github.com/flycheck/flycheck/issues) and [StackOverflow](https://stackoverflow.com/questions/tagged/flycheck) for solutions
+        - Read the [Flycheck manual](https://www.flycheck.org/en/latest/)
+        - Read the [Troubleshooting guide](https://www.flycheck.org/en/latest/user/troubleshooting.html)
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Problem description
+      description: A clear and concise description of the problem you're encountering.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to reproduce
+      description: Steps to reproduce the behavior.
+      placeholder: |
+        1. Open file '...'
+        2. Do '...'
+        3. See error
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: What did you expect to happen instead?
+    validations:
+      required: true
+
+  - type: textarea
+    id: verify-setup
+    attributes:
+      label: Output of M-x flycheck-verify-setup
+      description: Run `M-x flycheck-verify-setup` in the affected buffer and paste the output here.
+      render: text
+    validations:
+      required: true
+
+  - type: input
+    id: emacs-version
+    attributes:
+      label: Emacs version
+      description: Output of `M-x emacs-version`.
+      placeholder: "e.g. GNU Emacs 30.1"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: emacs-config
+    attributes:
+      label: Emacs configuration
+      options:
+        - Plain Emacs / Custom configuration
+        - Spacemacs
+        - Doom Emacs
+        - Prelude
+        - Other (please specify in additional notes)
+    validations:
+      required: true
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots
+      description: If applicable, add screenshots to help explain the problem.
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional notes
+      description: Any other context about the problem.
