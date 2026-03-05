@@ -45,7 +45,8 @@ Emacs configuration:
 - [ ] Plain Emacs / Custom configuration
 - [ ] Spacemacs
 - [ ] Doom Emacs
-- [ ] Other shared configuration
+- [ ] Prelude
+- [ ] Other shared configuration (please specify)
 
 ## Additional notes
 
