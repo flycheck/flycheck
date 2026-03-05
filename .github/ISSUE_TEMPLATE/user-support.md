@@ -54,5 +54,5 @@ Emacs configuration:
 
 Add any other context about the problem here.
 
-[Flycheck manual]:  https://www.flycheck.org/en/latest/user/troubleshooting.html
+[Flycheck manual]:  https://www.flycheck.org/en/latest/
 [Troubleshooting guide]:  https://www.flycheck.org/en/latest/user/troubleshooting.html
