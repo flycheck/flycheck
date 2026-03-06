@@ -12003,6 +12003,13 @@ See URL `https://call-cc.org/'."
             "Warning: " (zero-or-more not-newline) ":\n"
             (one-or-more (any space)) "(" (file-name) ":" line ") " (message)
             line-end)
+   (error line-start
+          "Error: Module `" (one-or-more not-newline) "' has unresolved identifiers\n"
+          (zero-or-more space) "In file `" (file-name) "':"
+          line-end)
+   (error line-start
+          (zero-or-more space) (message) "\n" (zero-or-more space) "On line " line
+          line-end)
    (error line-start "Error: (line " line ") " (message) line-end)
    (error line-start "Syntax error: (" (file-name) ":" line ")"
           (zero-or-more not-newline) " - "
