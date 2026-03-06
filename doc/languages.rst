@@ -350,6 +350,13 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       Check syntax with the built-in byte compiler.
 
+      On Emacs 30+, this checker is only enabled for files marked as
+      trusted via ``trusted-content`` (see :infonode:`(emacs)Safe File
+      Variables`), to mitigate CVE-2024-53920.  Byte-compilation involves
+      macro expansion which can execute arbitrary code, so untrusted files
+      must not be byte-compiled.  To use this checker, add your project
+      directories to ``trusted-content``.
+
       .. defcustom:: flycheck-emacs-lisp-load-path
 
          The load path as list of strings.  Relative directories are expanded
