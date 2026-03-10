@@ -8,6 +8,8 @@
 New Features
 ------------
 
+- Add ``swift`` checker using ``swiftc -parse`` for Swift syntax checking
+  in ``swift-mode``.
 - [#2047]: Add ``javascript-oxlint`` checker for JavaScript and TypeScript
   using `oxlint <https://oxc.rs/>`_.
 - [#1757]: Add ``org-lint`` checker for Org mode files.
