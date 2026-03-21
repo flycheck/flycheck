@@ -8849,7 +8849,10 @@ has access to all installed packages and user configuration."
                                (pcase e
                                  (`(,_n [,line ,_trust ,desc ,_checker])
                                   (flycheck-error-new-at
-                                   line nil 'info desc
+                                   (if (stringp line)
+                                       (string-to-number line)
+                                     line)
+                                   nil 'info desc
                                    :checker checker))
                                  (_
                                   (flycheck-error-new-at
