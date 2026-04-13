@@ -9532,8 +9532,8 @@ See URL `https://github.com/commercialhaskell/stack'."
             (eval flycheck-ghc-args)
             "-x" (eval
                   (pcase major-mode
-                    (`haskell-mode "hs")
-                    (`haskell-literate-mode "lhs")))
+                    (`haskell-literate-mode "lhs")
+                    (_ "hs")))
             source)
   :error-patterns
   ((warning line-start (file-name) ":" line ":" column ":"
@@ -9592,8 +9592,8 @@ See URL `https://www.haskell.org/ghc/'."
             (eval flycheck-ghc-args)
             "-x" (eval
                   (pcase major-mode
-                    (`haskell-mode "hs")
-                    (`haskell-literate-mode "lhs")))
+                    (`haskell-literate-mode "lhs")
+                    (_ "hs")))
             source)
   :error-patterns
   ((warning line-start (file-name) ":" line ":" column ":"
