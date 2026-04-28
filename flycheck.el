@@ -6268,7 +6268,7 @@ PROCESS, and terminates standard input with EOF."
                (process-connection-type nil)
                ;; Force English messages from checker processes so that
                ;; error patterns can match reliably.
-               (process-environment (cons "LC_ALL=C" process-environment)))
+               (process-environment (cons "LC_ALL=C.UTF-8" process-environment)))
           ;; We do not associate the process with any buffer, by
           ;; passing nil for the BUFFER argument of `start-process'.
           ;; Instead, we just remember the buffer being checked in a
