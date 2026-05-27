@@ -4769,15 +4769,44 @@ function resolves `conditional' style specifications."
       (setf (overlay-get overlay 'wrap-prefix)
             (flycheck-error-level-make-indicator
              level flycheck-indication-mode t))
-      ;; Preserve any existing line-prefix text property (e.g. from
-      ;; org-indent-mode) so the overlay doesn't clobber indentation.
+      ;; Preserve existing text-property prefixes so the overlay doesn't
+      ;; clobber indentation set by other modes.
+      ;;
+      ;; line-prefix: copy the text property onto the overlay unchanged
+      ;; (e.g. from org-indent-mode).
+      ;;
+      ;; wrap-prefix: compose the flycheck fringe indicator with the
+      ;; existing value (e.g. from visual-wrap-prefix-mode).  The fringe
+      ;; indicator uses a `display' property for `!' that directly
+      ;; renders in the fringe without producing any character in the
+      ;; text area.  This effectively-zero-width character is composed
+      ;; by concatenation with the preexisting wrap prefix.
+      ;;
+      ;; Per the Elisp manual ("Properties with Special Meanings"),
+      ;; `wrap-prefix' may be a string, an image, or a stretch spec (`:width' or
+      ;; `:align-to').  When the preexisting value is a string (e.g. a repeated
+      ;; comment prefix like "% "), concatenate it directly; otherwise wrap it
+      ;; in a propertized character via its `display' property so it can be
+      ;; concatenated.
+      ;;
+      ;; Without this, an error overlay on the first character of a
+      ;; soft-wrapped visual continuation line replaces the indentation
+      ;; prefix with the fringe-only indicator, causing the line to
+      ;; jump to column 0.
       (when (buffer-live-p (overlay-buffer overlay))
         (save-restriction
           (widen)
-          (let ((existing-prefix (get-text-property
-                                  (overlay-start overlay) 'line-prefix)))
-            (when existing-prefix
-              (setf (overlay-get overlay 'line-prefix) existing-prefix))))))
+          (let* ((pos (overlay-start overlay))
+                 (existing-lp (get-text-property pos 'line-prefix))
+                 (existing-wp (get-text-property pos 'wrap-prefix)))
+            (when existing-lp
+              (setf (overlay-get overlay 'line-prefix) existing-lp))
+            (when existing-wp
+              (setf (overlay-get overlay 'wrap-prefix)
+                    (concat (overlay-get overlay 'wrap-prefix)
+                            (if (stringp existing-wp)
+                                existing-wp
+                              (propertize " " 'display existing-wp)))))))))
     (pcase (flycheck--highlighting-style err)
       ((or `nil (guard (null flycheck-highlighting-mode)))
        ;; Erase the highlighting
