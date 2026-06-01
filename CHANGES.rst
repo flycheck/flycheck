@@ -6,6 +6,8 @@
   in preview mode (e.g. ``error[F401]`` instead of ``F401``).
 - [#2166]: Fix ``awk-gawk`` reporting a suspicious checker state for valid
   scripts.
+- [#2163]: Disable native compilation in the ``emacs-lisp`` checker subprocess
+  so it no longer writes stray ``.eln`` files to the native-comp cache.
 
 36.0 (2026-02-19)
 ======================
