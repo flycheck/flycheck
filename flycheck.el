@@ -7552,7 +7552,10 @@ See URL `https://asciidoctor.org'."
   "GNU awk's built-in --lint checker."
   :command ("gawk"
             ;; Avoid code execution.  See https://github.com/w0rp/ale/pull/1411
-            "--source" "BEGIN{exit} END{exit 1}"
+            ;; The BEGIN/END blocks short-circuit the script's own rules so
+            ;; only linting happens; exit 0 so that valid scripts don't get
+            ;; flagged as a suspicious non-zero exit.
+            "--source" "BEGIN{exit} END{exit}"
             "-f" source
             "--lint"
             "/dev/null")
