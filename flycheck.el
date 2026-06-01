@@ -10770,7 +10770,11 @@ See URL `https://docs.astral.sh/ruff/'."
           line-end)
    (warning line-start
             (or "-" (file-name)) ":" line ":" (optional column ":") " "
-            (id (one-or-more (any alpha)) (one-or-more digit)) " "
+            ;; ruff >= 0.15.7 in preview mode wraps the rule code in a
+            ;; severity tag, e.g. "error[F401]" instead of just "F401"
+            (optional (one-or-more (any alpha)) "[")
+            (id (one-or-more (any alpha)) (one-or-more digit))
+            (optional "]") " "
             (message (one-or-more not-newline))
             line-end))
   :error-explainer flycheck-python-ruff-explainer

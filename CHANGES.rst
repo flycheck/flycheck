@@ -2,6 +2,8 @@
 =======================
 
 - Add ``neocaml-opam-mode`` support to the ``opam`` checker.
+- [#2169]: Parse the severity-tagged output format introduced by Ruff 0.15.7
+  in preview mode (e.g. ``error[F401]`` instead of ``F401``).
 
 36.0 (2026-02-19)
 ======================

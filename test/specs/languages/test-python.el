@@ -67,6 +67,30 @@
        '(22 1 error "Undefined name `antigravity`" :id "F821"
            :checker python-ruff))))
 
+  (describe "python-ruff error patterns"
+    ;; Run synthetic output through the patterns so we cover formats from
+    ;; ruff versions other than the one installed in CI.
+    (it "parses the plain rule code format (ruff < 0.15.7)"
+      (flycheck-buttercup-with-temp-buffer
+        (expect
+         (flycheck-parse-output
+          "-:1:8: F401 `os` imported but unused\n"
+          'python-ruff (current-buffer))
+         :to-be-equal-flycheck-errors
+         (list (flycheck-error-new-at
+                1 8 'warning "`os` imported but unused"
+                :id "F401" :checker 'python-ruff)))))
+    (it "parses the severity-tagged format (ruff >= 0.15.7 preview)"
+      (flycheck-buttercup-with-temp-buffer
+        (expect
+         (flycheck-parse-output
+          "-:1:8: error[F401] `os` imported but unused\n"
+          'python-ruff (current-buffer))
+         :to-be-equal-flycheck-errors
+         (list (flycheck-error-new-at
+                1 8 'warning "`os` imported but unused"
+                :id "F401" :checker 'python-ruff))))))
+
   (flycheck-buttercup-def-checker-test python-pylint python nil
     (let ((flycheck-disabled-checkers '(python-flake8 python-mypy))
           (flycheck-python-pylint-executable "python3"))
