@@ -126,6 +126,19 @@
           (truncated-stdin-mode)
           (insert (make-string 65537 ?\n))
           (expect (shut-up (flycheck-buttercup-should-syntax-check-in-buffer))
-                  :to-throw 'flycheck-buttercup-suspicious-checker))))))
+                  :to-throw 'flycheck-buttercup-suspicious-checker))))
+
+    (it "forces English messages without overriding the character set"
+      ;; LC_MESSAGES=C gives English output, while LC_ALL is left alone so
+      ;; that the subprocess keeps the user's LC_CTYPE (see #2170).
+      (assume (or (executable-find "python3") (executable-find "python")))
+      (cl-letf* ((flycheck-checker 'print-locale)
+                 ((symbol-plist 'print-locale) flycheck-test--print-locale))
+        (flycheck-buttercup-with-env '(("LC_MESSAGES" . nil) ("LC_ALL" . nil))
+          (flycheck-buttercup-with-temp-buffer
+            (print-locale-mode)
+            (insert "dummy\n")
+            (flycheck-buttercup-should-syntax-check-in-buffer
+             '(1 1 error "LC_MESSAGES=C LC_ALL=" :checker print-locale))))))))
 
 ;;; test-command-checker.el ends here

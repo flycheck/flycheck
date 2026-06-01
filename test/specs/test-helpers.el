@@ -161,6 +161,26 @@ The manifest path is relative to
 (setf (symbol-plist 'truncated-stdin) nil)
 
 
+;;; Locale test helpers (for command-checker tests)
+
+(define-derived-mode print-locale-mode prog-mode "locale")
+
+(flycheck-define-command-checker 'print-locale
+  "Report the LC_MESSAGES and LC_ALL the subprocess inherits."
+  :command `(,(or (executable-find "python3") "python")
+             "-c" ,(concat "import os; print('locale:1:1:LC_MESSAGES=%s LC_ALL=%s'"
+                           " % (os.environ.get('LC_MESSAGES', ''),"
+                           " os.environ.get('LC_ALL', '')))"))
+  :error-patterns '((error bol "locale" ":" line ":" column ":" (message)))
+  :modes '(print-locale-mode))
+
+(defconst flycheck-test--print-locale
+  (symbol-plist 'print-locale)
+  "Saved plist for the print-locale checker.")
+
+(setf (symbol-plist 'print-locale) nil)
+
+
 ;;; Custom error level for error-level tests
 
 (flycheck-define-error-level 'test-level

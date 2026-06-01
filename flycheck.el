@@ -6267,8 +6267,12 @@ PROCESS, and terminates standard input with EOF."
                ;; can easily use pipes.
                (process-connection-type nil)
                ;; Force English messages from checker processes so that
-               ;; error patterns can match reliably.
-               (process-environment (cons "LC_ALL=C" process-environment)))
+               ;; error patterns can match reliably.  We set LC_MESSAGES
+               ;; rather than LC_ALL so that the character encoding
+               ;; (LC_CTYPE) is left untouched; using LC_ALL=C forces an
+               ;; ASCII locale that breaks checkers reading UTF-8 input,
+               ;; such as hledger (see #2170).
+               (process-environment (cons "LC_MESSAGES=C" process-environment)))
           ;; We do not associate the process with any buffer, by
           ;; passing nil for the BUFFER argument of `start-process'.
           ;; Instead, we just remember the buffer being checked in a

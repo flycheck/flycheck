@@ -8,6 +8,9 @@
   scripts.
 - [#2163]: Disable native compilation in the ``emacs-lisp`` checker subprocess
   so it no longer writes stray ``.eln`` files to the native-comp cache.
+- [#2170]: Force English checker output with ``LC_MESSAGES=C`` instead of
+  ``LC_ALL=C``, so the character encoding is left untouched.  ``LC_ALL=C``
+  broke checkers reading UTF-8 input, such as ``hledger``.
 
 36.0 (2026-02-19)
 ======================
