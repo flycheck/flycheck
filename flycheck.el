@@ -7530,7 +7530,7 @@ See URL `https://asciidoctor.org'."
    (warning line-start
             "asciidoctor: WARNING: <stdin>: Line " line ": " (message)
             line-end))
-  :modes adoc-mode)
+  :modes (adoc-mode asciidoc-mode))
 
 (defun flycheck-awk-gawk-fix-message (err)
   "Remove the repeated file-name/line from the error message of ERR."
@@ -12502,7 +12502,7 @@ See URL `https://textlint.github.io/'."
   ;; user to add mode->plugin mappings manually in
   ;; `flycheck-textlint-plugin-alist'.
   :modes
-  (text-mode markdown-mode gfm-mode message-mode adoc-mode
+  (text-mode markdown-mode gfm-mode message-mode adoc-mode asciidoc-mode
              mhtml-mode latex-mode LaTeX-mode org-mode rst-mode)
   :enabled
   (lambda () (flycheck--textlint-get-plugin))
