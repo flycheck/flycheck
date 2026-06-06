@@ -40,7 +40,7 @@ $graph:
       Since draft-3, this draft introduces the following changes and additions:
 
         * The `inputs` and `outputs` fields have been renamed `in` and `out`.
-        * Syntax simplifcations: denoted by the `map<>` syntax. Example: `in`
+        * Syntax simplifications: denoted by the `map<>` syntax. Example: `in`
           contains a list of items, each with an id. Now one can specify
           a mapping of that identifier to the corresponding
           `InputParameter`.

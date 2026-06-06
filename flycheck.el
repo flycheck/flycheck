@@ -12576,7 +12576,7 @@ pass the ieee library standard via the `--ieee' option."
   :type '(choice (const :tag "Default standard" nil)
                  (const :tag "No IEEE Library" "none")
                  (const :tag "IEEE standard" "standard")
-                 (const :tag "Synopsys standard" "synopsys")
+                 (const :tag "Synopsis standard" "synopsis")
                  (const :tag "Mentor standard" "mentor"))
   :safe #'string-or-null-p
   :package-version '(flycheck . "32"))
