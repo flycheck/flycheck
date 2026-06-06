@@ -43,7 +43,7 @@ $graph:
       Since draft-3, version 1.0 introduces the following changes and additions:
 
         * The [Directory](#Directory) type.
-        * Syntax simplifcations: denoted by the `map<>` syntax. Example: inputs
+        * Syntax simplifications: denoted by the `map<>` syntax. Example: inputs
           contains a list of items, each with an id. Now one can specify
           a mapping of that identifier to the corresponding
           `CommandInputParamater`.
