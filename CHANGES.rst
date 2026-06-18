@@ -14,6 +14,12 @@
   ``LC_ALL=C``, so the character encoding is left untouched.  ``LC_ALL=C``
   broke checkers reading UTF-8 input, such as ``hledger``.
 
+------------
+New Features
+------------
+
+- [#2125]: Add ``flycheck-rust-clippy-args`` for configuring the ``rust-clippy`` checker.
+
 36.0 (2026-02-19)
 ======================
 
