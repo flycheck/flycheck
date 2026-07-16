@@ -4,6 +4,8 @@
 - Drop support for Emacs 27; Flycheck now requires Emacs 28.1 or newer.
 - [#2161]: Fix the ``org-lint`` checker erroring out on Emacs 31, where
   ``org-lint`` reports line numbers as strings.
+- [#2174]: Fix the ``haskell-ghc`` and ``haskell-stack-ghc`` checkers
+  passing a broken ``-x`` flag in ``haskell-ts-mode``.
 - [#2177]: Avoid ``\N{...}`` character escapes, which break native
   compilation on Emacs 32.
 - Add ``asciidoc-mode`` support to the ``asciidoctor`` and ``textlint``

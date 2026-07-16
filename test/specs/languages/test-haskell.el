@@ -53,6 +53,21 @@
               :to-match-with-group "module Hello.World(hello) where"
               1 "Hello.World")))
 
+  (describe "GHC language flag"
+    (it "defaults -x to hs in non-literate modes"
+      (flycheck-buttercup-with-temp-buffer
+        (setq major-mode 'haskell-ts-mode)
+        (let ((args (flycheck-checker-substituted-arguments 'haskell-ghc)))
+          (expect (cadr (member "-x" args)) :to-equal "hs"))
+        (flycheck-safe-delete-temporaries)))
+
+    (it "passes -x lhs in haskell-literate-mode"
+      (flycheck-buttercup-with-temp-buffer
+        (setq major-mode 'haskell-literate-mode)
+        (let ((args (flycheck-checker-substituted-arguments 'haskell-ghc)))
+          (expect (cadr (member "-x" args)) :to-equal "lhs"))
+        (flycheck-safe-delete-temporaries))))
+
   (describe "Checker tests"
     (flycheck-buttercup-def-checker-test haskell-stack-ghc haskell syntax-error
       (assume (file-exists-p (getenv "HOME")))
