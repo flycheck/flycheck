@@ -181,6 +181,24 @@ The manifest path is relative to
 (setf (symbol-plist 'print-locale) nil)
 
 
+;;; Suspicious-state test helpers (for command-checker tests)
+
+(define-derived-mode suspicious-exit-mode prog-mode "suspicious")
+
+(flycheck-define-command-checker 'suspicious-exit
+  "Exit with a non-zero code without producing parsable errors."
+  :command `(,(or (executable-find "python3") "python")
+             "-c" "import sys; print('tool exploded'); sys.exit(1)")
+  :error-patterns '((error bol "never-matches:" line ":" (message)))
+  :modes '(suspicious-exit-mode))
+
+(defconst flycheck-test--suspicious-exit
+  (symbol-plist 'suspicious-exit)
+  "Saved plist for the suspicious-exit checker.")
+
+(setf (symbol-plist 'suspicious-exit) nil)
+
+
 ;;; Custom error level for error-level tests
 
 (flycheck-define-error-level 'test-level

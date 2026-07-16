@@ -128,6 +128,49 @@
           (expect (shut-up (flycheck-buttercup-should-syntax-check-in-buffer))
                   :to-throw 'flycheck-buttercup-suspicious-checker))))
 
+    (it "reports errors returned by the :handle-suspicious function"
+      (assume (or (executable-find "python3") (executable-find "python")))
+      (cl-letf* ((flycheck-checker 'suspicious-exit)
+                 ((symbol-plist 'suspicious-exit)
+                  flycheck-test--suspicious-exit)
+                 ((flycheck-checker-get 'suspicious-exit 'handle-suspicious)
+                  (lambda (checker exit-status output)
+                    (list (flycheck-error-new-at
+                           1 1 'error
+                           (format "exited with %d: %s" exit-status
+                                   (string-trim output))
+                           :checker checker)))))
+        (flycheck-buttercup-with-temp-buffer
+          (suspicious-exit-mode)
+          (insert "hello\n")
+          (flycheck-buttercup-should-syntax-check-in-buffer
+           '(1 1 error "exited with 1: tool exploded"
+               :checker suspicious-exit)))))
+
+    (it "stays suspicious when the :handle-suspicious function declines"
+      (assume (or (executable-find "python3") (executable-find "python")))
+      (cl-letf* ((flycheck-checker 'suspicious-exit)
+                 ((symbol-plist 'suspicious-exit)
+                  flycheck-test--suspicious-exit)
+                 ((flycheck-checker-get 'suspicious-exit 'handle-suspicious)
+                  (lambda (_checker _exit-status _output) 'suspicious)))
+        (flycheck-buttercup-with-temp-buffer
+          (suspicious-exit-mode)
+          (insert "hello\n")
+          (expect (shut-up (flycheck-buttercup-should-syntax-check-in-buffer))
+                  :to-throw 'flycheck-buttercup-suspicious-checker))))
+
+    (it "treats a non-zero exit without errors as suspicious by default"
+      (assume (or (executable-find "python3") (executable-find "python")))
+      (cl-letf* ((flycheck-checker 'suspicious-exit)
+                 ((symbol-plist 'suspicious-exit)
+                  flycheck-test--suspicious-exit))
+        (flycheck-buttercup-with-temp-buffer
+          (suspicious-exit-mode)
+          (insert "hello\n")
+          (expect (shut-up (flycheck-buttercup-should-syntax-check-in-buffer))
+                  :to-throw 'flycheck-buttercup-suspicious-checker))))
+
     (it "forces English messages without overriding the character set"
       ;; LC_MESSAGES=C gives English output, while LC_ALL is left alone so
       ;; that the subprocess keeps the user's LC_CTYPE (see #2170).
