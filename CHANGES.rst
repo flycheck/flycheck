@@ -7,6 +7,17 @@
   status with no parsable errors, e.g. a missing dependency) into
   regular errors shown in the buffer, instead of the generic
   suspicious-state warning.
+- Syntax checkers that exceed ``flycheck-checker-error-threshold`` are no
+  longer silently disabled.  Flycheck now shows the most severe errors up
+  to the threshold and signals the truncation in the mode line (e.g.
+  ``FlyC:400|12|3+``) and the error list.  Set the new option
+  ``flycheck-checker-error-threshold-action`` to ``disable`` to get the
+  old behavior, minus the ``*Warnings*`` popup: the notification is now a
+  plain echo-area message that says how to re-enable the checker.  Note
+  that with the new default, level-conditioned ``:next-checkers`` see the
+  kept errors and behave as they would in any buffer with that many real
+  errors; previously they ran unconditionally because the whole result
+  was discarded.
 - [#2161]: Fix the ``org-lint`` checker erroring out on Emacs 31, where
   ``org-lint`` reports line numbers as strings.
 - [#2174]: Fix the ``haskell-ghc`` and ``haskell-stack-ghc`` checkers

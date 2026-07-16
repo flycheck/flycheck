@@ -170,6 +170,82 @@
           (insert "hello\n")
           (expect (shut-up (flycheck-buttercup-should-syntax-check-in-buffer))
                   :to-throw 'flycheck-buttercup-suspicious-checker))))
+    (it "truncates excessive errors keeping the most severe"
+      (assume (or (executable-find "python3") (executable-find "python")))
+      (cl-letf* ((flycheck-checker 'many-errors)
+                 ((symbol-plist 'many-errors) flycheck-test--many-errors)
+                 (flycheck-checker-error-threshold 3))
+        (flycheck-buttercup-with-temp-buffer
+          (many-errors-mode)
+          (insert "hello\n")
+          (flycheck-mode)
+          (shut-up (flycheck-buttercup-buffer-sync))
+          (expect (length flycheck-current-errors) :to-equal 3)
+          ;; The two error-level errors outrank the six infos, and among
+          ;; the infos the one closest to the top of the buffer survives
+          (expect (seq-sort #'< (seq-map #'flycheck-error-line
+                                         flycheck-current-errors))
+                  :to-equal '(1 7 8))
+          (expect flycheck--suppressed-error-count :to-equal 5)
+          (expect (flycheck-mode-line-status-text) :to-match (rx "2|0|1+" eos))
+          (expect (flycheck-automatically-disabled-checker-p 'many-errors)
+                  :not :to-be-truthy)
+          ;; Under the threshold everything is reported again
+          (let ((flycheck-checker-error-threshold 100))
+            (flycheck-buttercup-buffer-sync))
+          (expect (length flycheck-current-errors) :to-equal 8)
+          (expect flycheck--suppressed-error-count :to-equal 0))))
+
+    (it "disables the checker over the threshold with the disable action"
+      (assume (or (executable-find "python3") (executable-find "python")))
+      (cl-letf* ((flycheck-checker 'many-errors)
+                 ((symbol-plist 'many-errors) flycheck-test--many-errors)
+                 (flycheck-checker-error-threshold 3)
+                 (flycheck-checker-error-threshold-action 'disable))
+        (flycheck-buttercup-with-temp-buffer
+          (many-errors-mode)
+          (insert "hello\n")
+          (flycheck-mode)
+          (shut-up (flycheck-buttercup-buffer-sync))
+          (expect flycheck-current-errors :not :to-be-truthy)
+          (expect (flycheck-automatically-disabled-checker-p 'many-errors)
+                  :to-be-truthy))))
+
+    (it "notifies only when a checker newly exceeds the threshold"
+      (flycheck-buttercup-with-temp-buffer
+        (let ((flycheck-checker-error-threshold 1)
+              (messages 0)
+              (errs (list (flycheck-error-new-at 1 1 'info "spam")
+                          (flycheck-error-new-at 2 1 'error "boom"))))
+          (cl-letf (((symbol-function 'message)
+                     (lambda (&rest _) (cl-incf messages))))
+            ;; Truncation keeps the most severe error
+            (let ((kept (flycheck--truncate-excessive-errors 'foo errs 2)))
+              (expect (mapcar #'flycheck-error-level kept) :to-equal '(error)))
+            ;; Repeated checks over the threshold notify only once
+            (flycheck--truncate-excessive-errors 'foo errs 2)
+            (expect messages :to-equal 1)
+            ;; Passing under the threshold re-arms the notification
+            (flycheck--handle-excessive-errors 'foo (cdr errs))
+            (flycheck--truncate-excessive-errors 'foo errs 2)
+            (expect messages :to-equal 2)))))
+
+    (it "shows the suppressed error count in the error list mode line"
+      (flycheck-buttercup-with-temp-buffer
+        (setq flycheck--suppressed-error-count 5)
+        (let ((source (current-buffer)))
+          (with-temp-buffer
+            (setq flycheck-error-list-source-buffer source)
+            (expect (flycheck-error-list-mode-line-suppressed-indicator)
+                    :to-equal " (+5 suppressed)")))))
+
+    (it "shows no suppressed count without suppressed errors"
+      (flycheck-buttercup-with-temp-buffer
+        (let ((source (current-buffer)))
+          (with-temp-buffer
+            (setq flycheck-error-list-source-buffer source)
+            (expect (flycheck-error-list-mode-line-suppressed-indicator)
+                    :to-equal "")))))
 
     (it "forces English messages without overriding the character set"
       ;; LC_MESSAGES=C gives English output, while LC_ALL is left alone so
