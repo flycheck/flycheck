@@ -197,6 +197,26 @@ The manifest path is relative to
   "Saved plist for the suspicious-exit checker.")
 
 (setf (symbol-plist 'suspicious-exit) nil)
+;;; Excessive-errors test helpers (for error-threshold tests)
+
+(define-derived-mode many-errors-mode prog-mode "many")
+
+(flycheck-define-command-checker 'many-errors
+  "Report six info-level and two error-level errors."
+  :command `(,(or (executable-find "python3") "python")
+             "-c" ,(concat
+                    "print('\\n'.join("
+                    "['many:%d:1:info:spam' % i for i in range(1, 7)]"
+                    " + ['many:7:1:error:boom', 'many:8:1:error:bang']))"))
+  :error-patterns '((info bol "many:" line ":" column ":info:" (message))
+                    (error bol "many:" line ":" column ":error:" (message)))
+  :modes '(many-errors-mode))
+
+(defconst flycheck-test--many-errors
+  (symbol-plist 'many-errors)
+  "Saved plist for the many-errors checker.")
+
+(setf (symbol-plist 'many-errors) nil)
 
 
 ;;; Custom error level for error-level tests

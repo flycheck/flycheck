@@ -305,10 +305,23 @@ checkers that report a large number of errors exceeding
 
    The maximum number of errors a syntax checker is allowed to report.
 
-   If a syntax checker reports more errors the error information is
-   **discarded**.  To not run into the same issue again on the next syntax check
-   the syntax checker is automatically added to `flycheck-disabled-checkers` in
-   this case to disable it for the next syntax check.
+   What happens to the excessive errors is controlled by
+   `flycheck-checker-error-threshold-action`.
+
+.. defcustom:: flycheck-checker-error-threshold-action
+
+   What to do when a syntax checker exceeds the error threshold.
+
+   By default (``truncate``), Flycheck keeps the most severe errors up to the
+   threshold and discards the rest.  The mode line signals the truncation with
+   a ``+`` after the error counts (e.g. ``FlyC:400|12|3+``), and the error
+   list shows how many errors were suppressed.
+
+   When set to ``disable``, Flycheck instead discards **all** errors from the
+   syntax checker and disables it in the buffer for subsequent syntax checks,
+   like older Flycheck versions did.  Use :kbd:`C-u C-c ! x` to re-enable a
+   disabled checker.  This avoids re-parsing excessive checker output on every
+   syntax check, which can be preferable for pathological cases.
 
 Clear results
 =============

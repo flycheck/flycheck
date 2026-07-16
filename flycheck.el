@@ -286,10 +286,24 @@ respectively."
 A checker can be automatically disabled in two cases:
 
 1. Its `:enabled' predicate returned false.
-2. It returned too many errors (see `flycheck-checker-error-threshold').
+2. It returned too many errors (see `flycheck-checker-error-threshold')
+   and `flycheck-checker-error-threshold-action' is set to `disable'.
 
 To trigger a reverification from Emacs Lisp code, do not modify
 this variable: use `flycheck-reset-enabled-checker'.")
+
+(defvar-local flycheck--suppressed-error-count 0
+  "Number of errors suppressed in the last syntax check.
+
+Incremented when a syntax checker exceeds
+`flycheck-checker-error-threshold' and the excessive errors are
+truncated, per `flycheck-checker-error-threshold-action'.")
+
+(defvar-local flycheck--excessive-checkers nil
+  "Syntax checkers that last exceeded the error threshold.
+
+Used to notify about the threshold only when a checker newly
+exceeds it, instead of after every syntax check.")
 
 (defvar-local flycheck-checker nil
   "Syntax checker to use for the current buffer.
@@ -341,15 +355,36 @@ maximum number of errors per syntax checker and buffer, or nil to
 not limit the errors reported from a syntax checker.
 
 If this variable is a number and a syntax checker reports more
-errors than the value of this variable, its errors are
-discarded, and not highlighted in the buffer or available in the
-error list.  The affected syntax checker is also disabled for
-future syntax checks of the buffer."
+errors than the value of this variable,
+`flycheck-checker-error-threshold-action' determines what happens
+to the excessive errors."
   :group 'flycheck
   :type '(choice (const :tag "Do not limit reported errors" nil)
                  (integer :tag "Maximum number of errors"))
   :risky t
   :package-version '(flycheck . "0.22"))
+
+(defcustom flycheck-checker-error-threshold-action 'truncate
+  "What to do when a checker exceeds `flycheck-checker-error-threshold'.
+
+`truncate'
+     Keep the most severe errors up to the threshold and discard
+     the rest.  The mode line indicates that some errors were
+     suppressed.  This is the default.
+
+`disable'
+     Discard all errors reported by the syntax checker and
+     disable it in the buffer for subsequent syntax checks.
+     The checker can be re-enabled with
+     \\[universal-argument] \\[flycheck-disable-checker].
+     Compared to `truncate' this avoids re-parsing excessive
+     output on every syntax check, at the cost of no feedback at
+     all."
+  :group 'flycheck
+  :type '(choice (const :tag "Keep the most severe errors" truncate)
+                 (const :tag "Disable the checker in the buffer" disable))
+  :safe #'symbolp
+  :package-version '(flycheck . "37"))
 
 (defcustom flycheck-process-error-functions nil
   "Functions to process errors.
@@ -1154,7 +1189,8 @@ function must be updated to use this variable."
   `(,(propertized-buffer-identification "%12b")
     " for buffer "
     (:eval (flycheck-error-list-propertized-source-name))
-    (:eval (flycheck-error-list-mode-line-filter-indicator)))
+    (:eval (flycheck-error-list-mode-line-filter-indicator))
+    (:eval (flycheck-error-list-mode-line-suppressed-indicator)))
   "Mode line construct for Flycheck error list.
 
 The value of this variable is a mode line template as in
@@ -1309,7 +1345,8 @@ Mode line status for the current buffer:
   FlyC        Not been checked yet
   FlyC*       Flycheck is running
   FlyC:0      Last check resulted in no errors and no warnings
-  FlyC:3|5    Checker reported three errors and five warnings
+  FlyC:3|5|1  Checker reported three errors, five warnings and one info
+  FlyC:3|5|1+ Some errors were suppressed over the error threshold
   FlyC-       No checker available
   FlyC!       The checker crashed
   FlyC.       The last syntax check was manually interrupted
@@ -3186,6 +3223,7 @@ Get a syntax checker for the current buffer with
         ;; completed.
         (run-hooks 'flycheck-before-syntax-check-hook)
         (flycheck-clear-errors)
+        (setq flycheck--suppressed-error-count 0)
         (flycheck-mark-all-overlays-for-deletion)
         (condition-case err
             (let* ((checker (flycheck-get-checker-for-buffer)))
@@ -3279,9 +3317,9 @@ current syntax check in `flycheck-current-syntax-check'.
 
 Report all ERRORS and potentially start any next syntax checkers.
 
-If the current syntax checker reported excessive errors, it is
-disabled via `flycheck-disable-excessive-checker' for subsequent
-syntax checks.
+If the current syntax checker reported excessive errors, they are
+truncated or discarded via `flycheck--handle-excessive-errors',
+according to `flycheck-checker-error-threshold-action'.
 
 Relative file names in ERRORS will be expanded relative to
 WORKING-DIR."
@@ -3292,8 +3330,8 @@ WORKING-DIR."
                    (flycheck-filter-errors
                     (flycheck-assert-error-list-p errors) checker)
                    working-dir))))
-    (unless (flycheck-disable-excessive-checker checker errors)
-      (flycheck-report-current-errors errors))
+    (flycheck-report-current-errors
+     (flycheck--handle-excessive-errors checker errors))
     (let ((next-checker (flycheck-get-next-checker-for-buffer checker)))
       (if next-checker
           (flycheck-start-current-syntax-check next-checker)
@@ -3312,25 +3350,77 @@ WORKING-DIR."
         ;; that we quickly refine outdated error information
         (flycheck-perform-deferred-syntax-check)))))
 
+(defun flycheck--handle-excessive-errors (checker errors)
+  "Handle ERRORS from CHECKER exceeding the error threshold.
+
+Return the errors to report: ERRORS when
+`flycheck-checker-error-threshold' is not exceeded, the most
+severe errors up to the threshold when
+`flycheck-checker-error-threshold-action' is `truncate', or nil
+when it is `disable'."
+  (let ((total (length errors)))
+    (if (or (null flycheck-checker-error-threshold)
+            (<= total flycheck-checker-error-threshold))
+        (progn
+          (setq flycheck--excessive-checkers
+                (remq checker flycheck--excessive-checkers))
+          errors)
+      (if (eq flycheck-checker-error-threshold-action 'disable)
+          (progn
+            (setq flycheck--excessive-checkers
+                  (remq checker flycheck--excessive-checkers))
+            (flycheck-disable-excessive-checker checker errors)
+            nil)
+        (flycheck--truncate-excessive-errors checker errors total)))))
+
+(defun flycheck--excessive-errors-< (err1 err2)
+  "Determine the truncation order of ERR1 and ERR2.
+
+Orders by severity, from most to least severe; errors of equal
+severity keep their buffer-position order, so that truncation
+drops the errors furthest down in the buffer."
+  (let ((severity1 (flycheck-error-level-severity
+                    (flycheck-error-level err1)))
+        (severity2 (flycheck-error-level-severity
+                    (flycheck-error-level err2))))
+    (if (= severity1 severity2)
+        (flycheck-error-< err1 err2)
+      (> severity1 severity2))))
+
+(defun flycheck--truncate-excessive-errors (checker errors total)
+  "Truncate ERRORS from CHECKER to the error threshold.
+
+TOTAL is the length of ERRORS.  Keep the most severe errors up to
+`flycheck-checker-error-threshold' and record the number of
+suppressed errors in `flycheck--suppressed-error-count'."
+  (let* ((threshold flycheck-checker-error-threshold)
+         (kept (seq-take (sort (copy-sequence errors)
+                               #'flycheck--excessive-errors-<)
+                         threshold)))
+    (cl-incf flycheck--suppressed-error-count (- total threshold))
+    (unless (memq checker flycheck--excessive-checkers)
+      (push checker flycheck--excessive-checkers)
+      (message "Flycheck: %s reported %d errors; showing the %d most severe \
+(see `flycheck-checker-error-threshold')"
+               checker total threshold))
+    kept))
+
 (defun flycheck-disable-excessive-checker (checker errors)
   "Disable CHECKER if it reported excessive ERRORS.
 
 If ERRORS has more items than `flycheck-checker-error-threshold',
 add CHECKER to `flycheck--automatically-disabled-checkers', and
-show a warning.
+say so in the echo area.
 
 Return t when CHECKER was disabled, or nil otherwise."
   (when (and flycheck-checker-error-threshold
              (> (length errors) flycheck-checker-error-threshold))
     ;; Disable CHECKER for this buffer
     ;; (`flycheck--automatically-disabled-checkers' is a local variable).
-    (lwarn '(flycheck syntax-checker) :warning
-           (substitute-command-keys
-            "Syntax checker %s reported too many errors (%s) and is disabled.
-Use `\\[customize-variable] RET flycheck-checker-error-threshold' to
-change the threshold or `\\[universal-argument] \
-\\[flycheck-disable-checker]' to re-enable the checker.")
-           checker (length errors))
+    (message (substitute-command-keys
+              "Flycheck: %s reported %d errors and was disabled in this \
+buffer; \\[universal-argument] \\[flycheck-disable-checker] re-enables it")
+             checker (length errors))
     (push checker flycheck--automatically-disabled-checkers)
     t))
 
@@ -3344,6 +3434,10 @@ current syntax check."
     (flycheck-stop))
   (flycheck-delete-all-overlays)
   (flycheck-clear-errors)
+  ;; Note: `flycheck--excessive-checkers' deliberately survives a clear,
+  ;; so that the truncation notification doesn't re-fire after every
+  ;; manual clear or transient no-checker pass
+  (setq flycheck--suppressed-error-count 0)
   (flycheck-clear-displayed-error-messages)
   (flycheck-error-list-refresh)
   (flycheck-hide-error-buffer))
@@ -3367,6 +3461,7 @@ buffer), and if so then clean up global hooks."
   (flycheck-stop)
   (flycheck-clean-deferred-check)
   (flycheck-clear)
+  (setq flycheck--excessive-checkers nil)
   (flycheck-cancel-error-display-error-at-point-timer)
   (flycheck--clear-idle-trigger-timer)
   (flycheck--empty-variables)
@@ -4149,10 +4244,17 @@ nil."
                       (`errored "!")
                       (`finished
                        (let-alist (flycheck-count-errors flycheck-current-errors)
-                         (if (or .error .warning .info)
-                             (format ":%s|%s|%s" (or .error 0) (or .warning 0)
-                                     (or .info 0))
-                           flycheck-mode-success-indicator)))
+                         (concat
+                          (if (or .error .warning .info)
+                              (format ":%s|%s|%s" (or .error 0) (or .warning 0)
+                                      (or .info 0))
+                            flycheck-mode-success-indicator)
+                          ;; Signal that some errors were suppressed over
+                          ;; `flycheck-checker-error-threshold', even when
+                          ;; the kept errors have no built-in level
+                          (if (> flycheck--suppressed-error-count 0)
+                              "+"
+                            ""))))
                       (`interrupted ".")
                       (`suspicious "?")))
          (face (when flycheck-mode-line-color
@@ -4164,6 +4266,13 @@ nil."
          (text (format " %s%s" flycheck-mode-line-prefix indicator)))
     (when face
       (setq text (propertize text 'face face)))
+    (when (and (eq current-status 'finished)
+               (> flycheck--suppressed-error-count 0))
+      (setq text (propertize
+                  text 'help-echo
+                  (format "%d more errors not shown\
+ (see flycheck-checker-error-threshold)"
+                          flycheck--suppressed-error-count))))
     text))
 
 
@@ -5333,6 +5442,18 @@ list."
   (if flycheck-error-list-minimum-level
       (format " [>= %s]" flycheck-error-list-minimum-level)
     ""))
+
+(defun flycheck-error-list-mode-line-suppressed-indicator ()
+  "Create a string for the mode line about suppressed errors.
+
+Shows the number of errors in the source buffer that were
+suppressed over `flycheck-checker-error-threshold', if any."
+  (let ((count (and (buffer-live-p flycheck-error-list-source-buffer)
+                    (buffer-local-value 'flycheck--suppressed-error-count
+                                        flycheck-error-list-source-buffer))))
+    (if (and count (> count 0))
+        (format " (+%d suppressed)" count)
+      "")))
 
 (defun flycheck-error-list-set-filter (level)
   "Restrict the error list to errors at level LEVEL or higher.
