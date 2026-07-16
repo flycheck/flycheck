@@ -531,12 +531,16 @@ path and tries invoking `executable-find' again."
    (when (file-name-directory executable)
      (executable-find (expand-file-name executable)))))
 
-(defcustom flycheck-indication-mode 'left-fringe
+(defcustom flycheck-indication-mode 'auto
   "The indication mode for Flycheck errors.
 
 This variable controls how Flycheck indicates errors in buffers.
-May be `left-fringe', `right-fringe', `left-margin',
+May be `auto', `left-fringe', `right-fringe', `left-margin',
 `right-margin', or nil.
+
+If set to `auto', indicate errors in the left fringe on graphical
+displays, and in the left margin on text terminals, where fringes
+are not available.  This is the default.
 
 If set to `left-fringe' or `right-fringe', indicate errors via
 icons in the left and right fringe respectively.  If set to
@@ -545,12 +549,14 @@ icons in the left and right fringe respectively.  If set to
 If set to nil, do not indicate errors and warnings, but just
 highlight them according to `flycheck-highlighting-mode'."
   :group 'flycheck
-  :type '(choice (const :tag "Indicate in the left fringe" left-fringe)
+  :type '(choice (const :tag "Automatically choose fringe or margin" auto)
+                 (const :tag "Indicate in the left fringe" left-fringe)
                  (const :tag "Indicate in the right fringe" right-fringe)
                  (const :tag "Indicate in the left margin" left-margin)
                  (const :tag "Indicate in the right margin" right-margin)
                  (const :tag "Do not indicate" nil))
-  :safe #'symbolp)
+  :safe #'symbolp
+  :package-version '(flycheck . "37"))
 
 (defcustom flycheck-highlighting-mode 'symbols
   "The highlighting mode for Flycheck errors and warnings.
@@ -599,33 +605,114 @@ to a potential new indication mode."
   (when flycheck-current-errors
     (flycheck-buffer)))
 
+(defun flycheck--resolve-indication-mode ()
+  "Resolve `flycheck-indication-mode' to a concrete side, or nil.
+
+The value `auto' resolves to `left-fringe' when the current
+buffer is displayed on a graphical frame with a visible left
+fringe, and to `left-margin' otherwise; fringes are not available
+on text terminals.
+
+The resolution considers the frame of the first window displaying
+the buffer, falling back to the selected frame when the buffer is
+not displayed anywhere."
+  (if (not (eq flycheck-indication-mode 'auto))
+      flycheck-indication-mode
+    (let* ((window (get-buffer-window (current-buffer) 'visible))
+           (frame (if window (window-frame window) (selected-frame))))
+      (if (and (display-graphic-p frame)
+               ;; The buffer-local fringe width takes precedence over
+               ;; the frame's fringe; nil means inherit from the frame
+               (> (or left-fringe-width
+                      (frame-parameter frame 'left-fringe)
+                      0)
+                  0))
+          'left-fringe
+        'left-margin))))
+
+(defvar-local flycheck--provisioned-margin nil
+  "The margin side that Flycheck widened in this buffer, if any.")
+
+(defun flycheck--margin-width-var (side)
+  "Return the margin width variable for margin SIDE."
+  (if (eq side 'left-margin) 'left-margin-width 'right-margin-width))
+
+(defun flycheck--update-window-margins ()
+  "Apply the buffer's margin widths to all windows displaying it.
+
+Unlike `flycheck-refresh-fringes-and-margins' this doesn't launch
+a new syntax check, so it is safe to call while reporting errors."
+  (dolist (win (get-buffer-window-list nil nil t))
+    (set-window-margins win left-margin-width right-margin-width)))
+
+(defun flycheck--sync-margin ()
+  "Reconcile the widened margin with the resolved indication mode.
+
+When `flycheck-indication-mode' resolves to a margin that isn't
+visible, widen it by one column, and remember doing so in
+`flycheck--provisioned-margin'.  Undo a previous widening when
+indicators no longer resolve to that margin, e.g. after the
+buffer moved to a graphical frame.  Margins configured by the
+user or other packages are left alone."
+  (let ((side (flycheck--resolve-indication-mode)))
+    (unless (eq side flycheck--provisioned-margin)
+      (flycheck--release-margin))
+    (when (memq side '(left-margin right-margin))
+      (let ((width-var (flycheck--margin-width-var side)))
+        ;; A nil margin width also means no margin
+        (when (zerop (or (symbol-value width-var) 0))
+          (set width-var 1)
+          (setq flycheck--provisioned-margin side)
+          (flycheck--update-window-margins))))))
+
+(defun flycheck--release-margin ()
+  "Undo the margin widening done by `flycheck--sync-margin'."
+  (when flycheck--provisioned-margin
+    (let ((width-var (flycheck--margin-width-var
+                      flycheck--provisioned-margin)))
+      ;; Leave the margin alone if something else widened it meanwhile.
+      ;; Another package could also render into the one-column margin we
+      ;; widened without changing its width; that cannot be detected, so
+      ;; the column is reclaimed regardless.
+      (when (eql (symbol-value width-var) 1)
+        (set width-var 0))
+      (setq flycheck--provisioned-margin nil)
+      (flycheck--update-window-margins))))
+
 (defun flycheck-set-indication-mode (&optional mode)
-  "Set `flycheck-indication-mode' to MODE and adjust margins and fringes.
+  "Set `flycheck-indication-mode' to MODE in the current buffer.
 
-When MODE is nil, adjust window parameters without changing the
-mode.  This function can be useful as a `flycheck-mode-hook',
-especially if you use margins only in Flycheck buffers.
+Widen the margin of the current buffer if MODE requires one that
+is not visible, as by `flycheck--sync-margin'.  When MODE is nil,
+only adjust the margins for the current value of
+`flycheck-indication-mode'.
 
-When MODE is `left-margin', the left fringe is reduced to 1 pixel
-to save space."
+This function no longer shrinks fringes or margins configured by
+you or other packages; set the fringe and margin width variables
+directly to reclaim the space of unused indication areas."
   (interactive (list (intern (completing-read
-                              "Mode: " '("left-fringe" "right-fringe"
+                              "Mode: " '("auto" "left-fringe" "right-fringe"
                                          "left-margin" "right-margin")
                               nil t nil nil
                               (prin1-to-string flycheck-indication-mode)))))
-  (setq mode (or mode flycheck-indication-mode))
-  (pcase mode
-    ((or `left-fringe `right-fringe)
-     (setq left-fringe-width 8 right-fringe-width 8
-           left-margin-width 0 right-margin-width 0))
-    (`left-margin
-     (setq left-fringe-width 1 right-fringe-width 8
-           left-margin-width 1 right-margin-width 0))
-    (`right-margin
-     (setq left-fringe-width 8 right-fringe-width 8
-           left-margin-width 0 right-margin-width 1))
-    (_ (user-error "Invalid indication mode")))
-  (setq-local flycheck-indication-mode mode)
+  (when mode
+    (unless (memq mode '(auto left-fringe right-fringe
+                              left-margin right-margin))
+      (user-error "Invalid indication mode: %S" mode))
+    (setq-local flycheck-indication-mode mode))
+  (flycheck--sync-margin)
+  (pcase (flycheck--resolve-indication-mode)
+    ((and (or `left-fringe `right-fringe) side)
+     ;; Unlike margins, fringes configured away are not widened back;
+     ;; at least tell the user why nothing shows up
+     (let ((width-var (if (eq side 'left-fringe)
+                          'left-fringe-width
+                        'right-fringe-width)))
+       (when (zerop (or (symbol-value width-var)
+                        (frame-parameter nil side)
+                        0))
+         (message "The %s is disabled in this buffer; customize `%s' \
+to make Flycheck's indicators visible" side width-var)))))
   (flycheck-refresh-fringes-and-margins))
 
 (define-widget 'flycheck-highlighting-style 'lazy
@@ -3037,6 +3124,7 @@ ARG is ‘toggle’; disable the mode otherwise."
   (cond
    (flycheck-mode
     (flycheck-clear)
+    (flycheck--sync-margin)
 
     (pcase-dolist (`(,hook . ,fn) (reverse flycheck-hooks-alist))
       (add-hook hook fn nil 'local))
@@ -3462,6 +3550,7 @@ buffer), and if so then clean up global hooks."
   (flycheck-clean-deferred-check)
   (flycheck-clear)
   (setq flycheck--excessive-checkers nil)
+  (flycheck--release-margin)
   (flycheck-cancel-error-display-error-at-point-timer)
   (flycheck--clear-idle-trigger-timer)
   (flycheck--empty-variables)
@@ -4092,6 +4181,9 @@ again."
 
 Add ERRORS to `flycheck-current-errors' and process each error
 with `flycheck-process-error-functions'."
+  ;; The frame type may have changed since the mode was enabled, e.g. a
+  ;; buffer redisplayed on a TTY frame of the same daemon
+  (flycheck--sync-margin)
   (setq flycheck-current-errors (append errors flycheck-current-errors))
   (overlay-recenter (point-max))
   (seq-do (lambda (err)
@@ -4871,13 +4963,11 @@ function resolves `conditional' style specifications."
     (unless flycheck-highlighting-mode
       ;; Erase the highlighting from the overlay if requested by the user
       (setf (overlay-get overlay 'face) nil))
-    (when flycheck-indication-mode
+    (when-let* ((side (flycheck--resolve-indication-mode)))
       (setf (overlay-get overlay 'before-string)
-            (flycheck-error-level-make-indicator
-             level flycheck-indication-mode))
+            (flycheck-error-level-make-indicator level side))
       (setf (overlay-get overlay 'wrap-prefix)
-            (flycheck-error-level-make-indicator
-             level flycheck-indication-mode t))
+            (flycheck-error-level-make-indicator level side t))
       ;; Preserve existing text-property prefixes so the overlay doesn't
       ;; clobber indentation set by other modes.
       ;;

@@ -18,6 +18,13 @@
   kept errors and behave as they would in any buffer with that many real
   errors; previously they ran unconditionally because the whole result
   was discarded.
+- ``flycheck-indication-mode`` defaults to the new value ``auto``, which
+  picks the left fringe on graphical displays and the left margin on text
+  terminals.  Previously the default was ``left-fringe``, which silently
+  displayed nothing in terminal Emacs.  When the chosen margin isn't
+  visible, Flycheck now widens it automatically and restores it when the
+  mode is disabled.  ``flycheck-set-indication-mode`` no longer overrides
+  fringe and margin widths configured by you or other packages.
 - [#2161]: Fix the ``org-lint`` checker erroring out on Emacs 31, where
   ``org-lint`` reports line numbers as strings.
 - [#2174]: Fix the ``haskell-ghc`` and ``haskell-stack-ghc`` checkers

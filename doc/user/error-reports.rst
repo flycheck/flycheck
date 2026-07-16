@@ -169,7 +169,11 @@ of the fringes:
 
 .. defcustom:: flycheck-indication-mode
 
-   How Flycheck indicates errors and warnings in the buffer fringes:
+   How Flycheck indicates errors and warnings in the buffer:
+
+   ``auto``
+      Use the left fringe on graphical displays and the left margin on text
+      terminals, where fringes are not available.  This is the default.
 
    ``left-fringe`` or ``right-fringe``
       Use the left or right fringe respectively.  Fringes can only contain
@@ -183,18 +187,14 @@ of the fringes:
    ``nil``
       Do not indicate errors and warnings in the fringe or in the margin.
 
-By default, Emacs displays fringes, but not margins.  With ``left-margin`` and
-``right-margin`` indication modes, you will need to enable margins in your
-``.emacs``.  For example:
+By default, Emacs displays fringes, but not margins.  When indicators end up
+in a margin and that margin is not visible, Flycheck widens it to one column
+automatically, and restores it when you disable ``flycheck-mode``.  Margins
+that you or other packages configured are never touched, and neither are the
+fringes.
 
-.. code-block:: elisp
-
-   (setq-default left-fringe-width 1 right-fringe-width 8
-                 left-margin-width 1 right-margin-width 0)
-
-If you intend to use margins only with Flycheck, consider using
-``flycheck-set-indication-mode`` in a hook instead; this function adjusts
-margins and fringes for the current buffer.
+To switch the indication mode interactively in the current buffer, use
+``M-x flycheck-set-indication-mode``.
 
 .. code-block:: elisp
 
