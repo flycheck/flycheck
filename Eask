@@ -20,6 +20,13 @@
 (depends-on "seq" "2.24")
 
 (development
+ ;; Install compat and magit-section explicitly before the major-mode
+ ;; packages below.  When they are pulled in as transitive dependencies
+ ;; (nix-mode -> magit-section -> compat) they are not activated in time
+ ;; for the dependent package's byte-compilation, which fails with
+ ;; "Cannot open load file: compat-31".
+ (depends-on "compat")
+ (depends-on "magit-section")
  (depends-on "f")                       ; For some maintenance tools
  (depends-on "buttercup")               ; BDD test framework for Emacs
  (depends-on "shut-up")                 ; Silence Emacs
