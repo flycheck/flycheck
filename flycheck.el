@@ -11,7 +11,7 @@
 ;; URL: https://github.com/flycheck/flycheck
 ;; Keywords: convenience, languages, tools
 ;; Version: 36.0
-;; Package-Requires: ((emacs "27.1") (seq "2.24"))
+;; Package-Requires: ((emacs "28.1") (seq "2.24"))
 
 ;; This file is not part of GNU Emacs.
 
@@ -8748,11 +8748,6 @@ See Info Node `(elisp)Byte Compilation'."
             (zero-or-more whitespace) "Warning (check-declare): said\n"
             (message (zero-or-more "    " (zero-or-more not-newline))
                      (zero-or-more "\n    " (zero-or-more not-newline)))
-            line-end)
-   ;; The following is for Emacs 24 'check-declare-file', which uses a
-   ;; less informative format.
-   (warning line-start "Warning (check-declare): " (file-name) " said "
-            (message (zero-or-more not-newline))
             line-end))
   :error-filter
   (lambda (errors)
@@ -8770,9 +8765,7 @@ See Info Node `(elisp)Byte Compilation'."
 
 (defconst flycheck-emacs-lisp-checkdoc-form
   (flycheck-prepare-emacs-lisp-form
-    (unless (require 'elisp-mode nil 'no-error)
-      ;; TODO: Fallback for Emacs 24, remove when dropping support for 24
-      (require 'lisp-mode))
+    (require 'elisp-mode)
     (require 'checkdoc)
 
     (let ((source (car command-line-args-left))
@@ -8810,8 +8803,7 @@ See Info Node `(elisp)Byte Compilation'."
     checkdoc-verb-check-experimental-flag
     checkdoc-max-keyref-before-warn
     sentence-end-double-space
-    ,@(and (>= emacs-major-version 28)
-           '(checkdoc-column-zero-backslash-before-paren))
+    checkdoc-column-zero-backslash-before-paren
     ,@(and (>= emacs-major-version 31)
            '(checkdoc-allow-quoting-nil-and-t
              checkdoc-arguments-missing-flag)))
