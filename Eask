@@ -33,7 +33,10 @@
 
  ;; Various modes for use in the unit tests
  (depends-on "adoc-mode")
- (depends-on "bazel")
+ ;; bazel-mode requires Emacs 29; its checker specs skip without the
+ ;; buildifier binary anyway, so just drop it on older versions
+ (when (>= emacs-major-version 29)
+   (depends-on "bazel"))
  (depends-on "coffee-mode")
  (depends-on "cperl-mode")
  (depends-on "cwl-mode")
