@@ -1,6 +1,8 @@
 ``master`` (unreleased)
 =======================
 
+- [#2177]: Avoid ``\N{...}`` character escapes, which break native
+  compilation on Emacs 32.
 - Add ``asciidoc-mode`` support to the ``asciidoctor`` and ``textlint``
   checkers, alongside the existing ``adoc-mode``.
 - Add ``neocaml-opam-mode`` support to the ``opam`` checker.

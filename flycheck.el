@@ -3900,8 +3900,10 @@ beginning position)."
     (concat (and other-file-p (format "In %S:\n" (file-relative-name fname)))
             (and include-snippet
                  (when-let* ((snippet (flycheck-error-format-snippet err)))
-                   (format-message "`\N{FIRST STRONG ISOLATE}%s\N{POP DIRECTIONAL ISOLATE}': "
-                                   snippet)))
+                   ;; \u2068 (FIRST STRONG ISOLATE) and \u2069 (POP
+                   ;; DIRECTIONAL ISOLATE); the equivalent \N{...} escapes
+                   ;; break native compilation on Emacs 32 (#2177)
+                   (format-message "`\u2068%s\u2069': " snippet)))
             (or (flycheck-error-message err)
                 (format "Unknown %S" (flycheck-error-level err)))
             (and id (format " [%s]" id)))))
