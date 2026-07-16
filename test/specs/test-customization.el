@@ -84,8 +84,8 @@
 
   (describe "flycheck-indication-mode"
 
-    (it "defaults to left-fringe"
-      (expect flycheck-indication-mode :to-be 'left-fringe)))
+    (it "defaults to auto"
+      (expect flycheck-indication-mode :to-be 'auto)))
 
   (describe "flycheck-highlighting-mode"
 

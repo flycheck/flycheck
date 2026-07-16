@@ -371,17 +371,20 @@ ERROR is a Flycheck error object."
          (level (flycheck-error-level error))
          (category (flycheck-error-level-overlay-category level))
          (face (get category 'face))
-         (fringe-bitmap (flycheck-error-level-fringe-bitmap level))
-         (fringe-face (flycheck-error-level-fringe-face level))
-         (fringe-icon (list 'left-fringe fringe-bitmap fringe-face)))
+         ;; With indication disabled there is no icon at all
+         (indicator-icon (when-let* ((side (flycheck--resolve-indication-mode)))
+                           (get-char-property
+                            0 'display
+                            (flycheck-error-level-make-indicator level side))))
+         (before-string (and overlay (overlay-get overlay 'before-string))))
     (expect overlay :to-be-truthy)
     (expect (overlay-get overlay 'flycheck-overlay) :to-be-truthy)
     (expect (overlay-start overlay) :to-equal (car region))
     (expect (overlay-end overlay) :to-equal (cdr region))
     (expect (overlay-get overlay 'face) :to-equal face)
-    (expect (get-char-property 0 'display
-                               (overlay-get overlay 'before-string))
-            :to-equal fringe-icon)
+    (expect (and before-string
+                 (get-char-property 0 'display before-string))
+            :to-equal indicator-icon)
     (expect (overlay-get overlay 'category) :to-equal category)
     (expect (flycheck-buttercup-error-without-group
              (overlay-get overlay 'flycheck-error))

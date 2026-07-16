@@ -137,35 +137,38 @@
     (it "has an info fringe icon"
       (flycheck-buttercup-with-temp-buffer
         (insert "Hello\n    World")
-        (pcase-let* ((overlay (flycheck-add-overlay
-                               (flycheck-error-new-at 1 1 'info)))
-                     (before-string (overlay-get overlay 'before-string))
-                     (`(_ ,bitmap ,face)
-                      (get-text-property 0 'display before-string)))
-          (expect face :to-be 'flycheck-fringe-info)
-          (expect bitmap :to-be 'flycheck-fringe-bitmap-double-arrow))))
+        (let ((flycheck-indication-mode 'left-fringe))
+          (pcase-let* ((overlay (flycheck-add-overlay
+                                 (flycheck-error-new-at 1 1 'info)))
+                       (before-string (overlay-get overlay 'before-string))
+                       (`(_ ,bitmap ,face)
+                        (get-text-property 0 'display before-string)))
+            (expect face :to-be 'flycheck-fringe-info)
+            (expect bitmap :to-be 'flycheck-fringe-bitmap-double-arrow)))))
 
     (it "has a warning fringe icon"
       (flycheck-buttercup-with-temp-buffer
         (insert "Hello\n    World")
-        (pcase-let* ((overlay (flycheck-add-overlay
-                               (flycheck-error-new-at 1 1 'warning)))
-                     (before-string (overlay-get overlay 'before-string))
-                     (`(_ ,bitmap ,face)
-                      (get-text-property 0 'display before-string)))
-          (expect face :to-be 'flycheck-fringe-warning)
-          (expect bitmap :to-be 'flycheck-fringe-bitmap-double-arrow))))
+        (let ((flycheck-indication-mode 'left-fringe))
+          (pcase-let* ((overlay (flycheck-add-overlay
+                                 (flycheck-error-new-at 1 1 'warning)))
+                       (before-string (overlay-get overlay 'before-string))
+                       (`(_ ,bitmap ,face)
+                        (get-text-property 0 'display before-string)))
+            (expect face :to-be 'flycheck-fringe-warning)
+            (expect bitmap :to-be 'flycheck-fringe-bitmap-double-arrow)))))
 
     (it "has an error fringe icon"
       (flycheck-buttercup-with-temp-buffer
         (insert "Hello\n    World")
-        (pcase-let* ((overlay (flycheck-add-overlay
-                               (flycheck-error-new-at 1 1 'error)))
-                     (before-string (overlay-get overlay 'before-string))
-                     (`(_ ,bitmap ,face)
-                      (get-text-property 0 'display before-string)))
-          (expect face :to-be 'flycheck-fringe-error)
-          (expect bitmap :to-be 'flycheck-fringe-bitmap-double-arrow))))
+        (let ((flycheck-indication-mode 'left-fringe))
+          (pcase-let* ((overlay (flycheck-add-overlay
+                                 (flycheck-error-new-at 1 1 'error)))
+                       (before-string (overlay-get overlay 'before-string))
+                       (`(_ ,bitmap ,face)
+                        (get-text-property 0 'display before-string)))
+            (expect face :to-be 'flycheck-fringe-error)
+            (expect bitmap :to-be 'flycheck-fringe-bitmap-double-arrow)))))
 
     (it "has a left fringe icon"
       (flycheck-buttercup-with-temp-buffer
@@ -258,5 +261,125 @@
           (expect (help-at-pt-string)
                   :to-equal
                   "`\u2068int main() {}\u2069': info\n`\u2068main\u2069': warning\n`\u2068main()\u2069': error"))))))
+
+(describe "Indication mode"
+
+  (it "resolves auto to the left margin on text terminals"
+    ;; Batch Emacs runs on a dumb terminal where `display-graphic-p' is nil
+    (let ((flycheck-indication-mode 'auto))
+      (expect (flycheck--resolve-indication-mode) :to-be 'left-margin)))
+
+  (it "resolves auto to the left fringe on graphical displays"
+    (let ((flycheck-indication-mode 'auto)
+          (orig (symbol-function 'frame-parameter)))
+      (cl-letf (((symbol-function 'display-graphic-p)
+                 (lambda (&optional _) t))
+                ((symbol-function 'frame-parameter)
+                 (lambda (frame param)
+                   (if (eq param 'left-fringe) 8
+                     (funcall orig frame param)))))
+        (expect (flycheck--resolve-indication-mode) :to-be 'left-fringe))))
+
+  (it "resolves auto to the left margin when fringes are disabled"
+    (let ((flycheck-indication-mode 'auto)
+          (orig (symbol-function 'frame-parameter)))
+      (cl-letf (((symbol-function 'display-graphic-p)
+                 (lambda (&optional _) t))
+                ((symbol-function 'frame-parameter)
+                 (lambda (frame param)
+                   (if (eq param 'left-fringe) 0
+                     (funcall orig frame param)))))
+        (expect (flycheck--resolve-indication-mode) :to-be 'left-margin))))
+
+  (it "passes explicit modes through unchanged"
+    (let ((flycheck-indication-mode 'right-fringe))
+      (expect (flycheck--resolve-indication-mode) :to-be 'right-fringe))
+    (let ((flycheck-indication-mode nil))
+      (expect (flycheck--resolve-indication-mode) :to-be nil)))
+
+  (it "puts indicators in the margin under auto on text terminals"
+    (flycheck-buttercup-with-temp-buffer
+      (insert "Hello")
+      (let* ((flycheck-indication-mode 'auto)
+             (overlay (flycheck-add-overlay
+                       (flycheck-error-new-at 1 1 'error)))
+             (display (get-text-property
+                       0 'display (overlay-get overlay 'before-string))))
+        (expect (car display) :to-equal '(margin left-margin)))))
+
+  (it "widens a zero-width margin when flycheck-mode is enabled"
+    (flycheck-buttercup-with-temp-buffer
+      (let ((flycheck-indication-mode 'auto))
+        (expect left-margin-width :to-equal 0)
+        (flycheck-mode 1)
+        (expect left-margin-width :to-equal 1)
+        (expect flycheck--provisioned-margin :to-be 'left-margin)
+        (flycheck-mode -1)
+        (expect left-margin-width :to-equal 0)
+        (expect flycheck--provisioned-margin :not :to-be-truthy))))
+
+  (it "leaves margins configured by others alone"
+    (flycheck-buttercup-with-temp-buffer
+      (setq left-margin-width 2)
+      (let ((flycheck-indication-mode 'auto))
+        (flycheck-mode 1)
+        (expect left-margin-width :to-equal 2)
+        (expect flycheck--provisioned-margin :not :to-be-truthy)
+        (flycheck-mode -1)
+        (expect left-margin-width :to-equal 2))))
+
+  (it "treats a nil margin width as no margin"
+    (flycheck-buttercup-with-temp-buffer
+      (setq left-margin-width nil)
+      (let ((flycheck-indication-mode 'auto))
+        (flycheck-mode 1)
+        (expect left-margin-width :to-equal 1)
+        (expect flycheck--provisioned-margin :to-be 'left-margin)
+        (flycheck-mode -1))))
+
+  (it "resolves auto to the margin when the buffer disables its fringe"
+    (flycheck-buttercup-with-temp-buffer
+      (setq-local left-fringe-width 0)
+      (let ((flycheck-indication-mode 'auto)
+            (orig (symbol-function 'frame-parameter)))
+        (cl-letf (((symbol-function 'display-graphic-p)
+                   (lambda (&optional _) t))
+                  ((symbol-function 'frame-parameter)
+                   (lambda (frame param)
+                     (if (eq param 'left-fringe) 8
+                       (funcall orig frame param)))))
+          (expect (flycheck--resolve-indication-mode) :to-be 'left-margin)))))
+
+  (it "releases the margin when indicators move back to the fringe"
+    (flycheck-buttercup-with-temp-buffer
+      (let ((flycheck-indication-mode 'auto)
+            (orig (symbol-function 'frame-parameter)))
+        ;; Provision the margin on a text terminal first
+        (flycheck--sync-margin)
+        (expect flycheck--provisioned-margin :to-be 'left-margin)
+        (expect left-margin-width :to-equal 1)
+        ;; ...then move the buffer to a graphical frame
+        (cl-letf (((symbol-function 'display-graphic-p)
+                   (lambda (&optional _) t))
+                  ((symbol-function 'frame-parameter)
+                   (lambda (frame param)
+                     (if (eq param 'left-fringe) 8
+                       (funcall orig frame param)))))
+          (flycheck--sync-margin))
+        (expect flycheck--provisioned-margin :not :to-be-truthy)
+        (expect left-margin-width :to-equal 0))))
+
+  (it "moves the provisioned margin when the side changes"
+    (flycheck-buttercup-with-temp-buffer
+      (setq-local flycheck-indication-mode 'left-margin)
+      (flycheck--sync-margin)
+      (expect left-margin-width :to-equal 1)
+      (setq-local flycheck-indication-mode 'right-margin)
+      (flycheck--sync-margin)
+      (expect left-margin-width :to-equal 0)
+      (expect right-margin-width :to-equal 1)
+      (expect flycheck--provisioned-margin :to-be 'right-margin)
+      (flycheck--release-margin)
+      (expect right-margin-width :to-equal 0))))
 
 ;;; test-overlays.el ends here
