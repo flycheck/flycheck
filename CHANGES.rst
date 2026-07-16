@@ -8,6 +8,13 @@
   passing a broken ``-x`` flag in ``haskell-ts-mode``.
 - [#2177]: Avoid ``\N{...}`` character escapes, which break native
   compilation on Emacs 32.
+- [#2175]: Compose the error indicator with pre-existing ``wrap-prefix``
+  text properties (e.g. from ``visual-wrap-prefix-mode``), so error
+  overlays no longer reset the indentation of soft-wrapped lines.
+- [#2164]: Recognize unresolved-identifier errors in the
+  ``scheme-chicken`` checker.
+- [#1946]: Fix ``flycheck-lintr-linters`` being ignored by recent lintr
+  versions, which require linters to be passed as a named argument.
 - Add ``asciidoc-mode`` support to the ``asciidoctor`` and ``textlint``
   checkers, alongside the existing ``adoc-mode``.
 - Add ``neocaml-opam-mode`` support to the ``opam`` checker.

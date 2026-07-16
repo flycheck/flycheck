@@ -11016,8 +11016,9 @@ disables caching in case there are problems."
 (flycheck-def-option-var flycheck-lintr-linters "default_linters" r-lintr
   "Linters to use with lintr.
 
-The value of this variable is a string which is the argument `linters = `
-passing to the lintr::lint() function,"
+The value of this variable is a string containing an R
+expression, passed as the `linters' argument to the
+lintr::lint() function."
   :type 'string
   :risky t
   :package-version '(flycheck . "0.23"))

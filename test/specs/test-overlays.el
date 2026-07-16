@@ -116,6 +116,24 @@
               (expect (overlay-get overlay 'before-string)
                       :not :to-be-truthy))))))
 
+    (it "preserves existing line-prefix text properties"
+      (flycheck-buttercup-with-temp-buffer
+        (insert "Hello world")
+        (put-text-property 1 6 'line-prefix "  ")
+        (let ((overlay (flycheck-add-overlay
+                        (flycheck-error-new-at 1 1 'error))))
+          (expect (overlay-get overlay 'line-prefix) :to-equal "  "))))
+
+    (it "composes existing wrap-prefix text properties with the indicator"
+      (flycheck-buttercup-with-temp-buffer
+        (insert "Hello world")
+        (put-text-property 1 6 'wrap-prefix "  ")
+        (let ((wrap-prefix (overlay-get (flycheck-add-overlay
+                                         (flycheck-error-new-at 1 1 'error))
+                                        'wrap-prefix)))
+          (expect (stringp wrap-prefix) :to-be-truthy)
+          (expect (substring wrap-prefix -2) :to-equal "  "))))
+
     (it "has an info fringe icon"
       (flycheck-buttercup-with-temp-buffer
         (insert "Hello\n    World")
