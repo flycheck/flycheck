@@ -73,6 +73,25 @@
                                         :end-line 5
                                         :end-column 2))))))
 
+  (describe "Fatal-failure handling"
+    (it "disables the checker on a fatal eslint exit"
+      ;; Exit status 2 is eslint's fatal-error status, used for missing
+      ;; and broken configurations alike, in every eslint version
+      (expect (flycheck--eslint-handle-suspicious
+               'javascript-eslint 2
+               "ESLint couldn't find an eslint.config.(js|mjs|cjs) file.
+Some more explanation here.")
+              :to-equal
+              '(disable
+                . "ESLint couldn't find an eslint.config.(js|mjs|cjs) file.")))
+
+    (it "stays suspicious on unparsable lint results"
+      ;; Exit status 1 means eslint found lint problems; reaching the
+      ;; suspicious handler then means we failed to parse them
+      (expect (flycheck--eslint-handle-suspicious
+               'javascript-eslint 1 "[{\"unexpected\": \"format\"}]")
+              :to-be 'suspicious)))
+
   (describe "Checker tests"
     (flycheck-buttercup-def-checker-test javascript-eslint javascript error
       (let ((inhibit-message t))

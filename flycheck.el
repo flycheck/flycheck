@@ -3520,6 +3520,16 @@ optional DATA.  STATUS may be one of the following symbols:
      user needs to be informed about.  DATA is an optional
      message.
 
+`self-disabled'
+     The syntax checker diagnosed itself as inapplicable to the
+     buffer, e.g. a linter without a configuration file.  The
+     checker is disabled in the buffer like a failing `:enabled'
+     test, and checker selection is re-run so that another
+     checker can take over.  DATA is an optional reason string
+     for the echo-area notice.
+
+     This report finishes the current syntax check.
+
 A syntax checker _must_ report a status at least once with any
 symbol that finishes the current syntax checker.  Otherwise
 Flycheck gets stuck with the current syntax check.
@@ -3550,6 +3560,26 @@ discarded."
                (message "Suspicious state from syntax checker %s: %s"
                         checker (or data "UNKNOWN!")))
              (flycheck-report-status 'suspicious))
+            (`self-disabled
+             (when flycheck-mode
+               ;; Disable the checker like a failing `:enabled' test.  A
+               ;; fallback checker is selected on the next automatic
+               ;; check, uniformly for all buffers.  We deliberately don't
+               ;; force a fallback in this very cycle: doing so has to
+               ;; route through the automatic-check gates (which refuse
+               ;; e.g. read-only buffers) and re-runs earlier chain
+               ;; members, for a marginal gain over the next idle tick.
+               (cl-pushnew checker flycheck--automatically-disabled-checkers)
+               (message
+                (substitute-command-keys
+                 "Flycheck: %s disabled itself in this buffer%s; \
+\\[universal-argument] \\[flycheck-disable-checker] re-enables it")
+                checker (if data (format " (%s)" data) ""))
+               ;; Complete the check without running the disabled
+               ;; checker's own `:next-checkers'
+               (flycheck-finish-current-syntax-check
+                nil (flycheck-syntax-check-working-directory syntax-check)
+                'no-next)))
             (`finished
              (when flycheck-mode
                ;; Only report errors from the checker if Flycheck Mode is
@@ -3561,13 +3591,14 @@ discarded."
              (error "Unknown status %s from syntax checker %s"
                     status checker))))))))
 
-(defun flycheck-finish-current-syntax-check (errors working-dir)
+(defun flycheck-finish-current-syntax-check (errors working-dir &optional no-next)
   "Finish the current syntax-check in the current buffer with ERRORS.
 
 ERRORS is a list of `flycheck-error' objects reported by the
 current syntax check in `flycheck-current-syntax-check'.
 
-Report all ERRORS and potentially start any next syntax checkers.
+Report all ERRORS and, unless NO-NEXT is non-nil, potentially
+start any next syntax checkers.
 
 If the current syntax checker reported excessive errors, they are
 truncated or discarded via `flycheck--handle-excessive-errors',
@@ -3584,7 +3615,8 @@ WORKING-DIR."
                    working-dir))))
     (flycheck-report-current-errors
      (flycheck--handle-excessive-errors checker errors))
-    (let ((next-checker (flycheck-get-next-checker-for-buffer checker)))
+    (let ((next-checker (unless no-next
+                          (flycheck-get-next-checker-for-buffer checker))))
       (if next-checker
           (flycheck-start-current-syntax-check next-checker)
         (setq flycheck-current-syntax-check nil)
@@ -6496,9 +6528,22 @@ of command checkers is `flycheck-sanitize-errors'.
      as current.  It should process the output and return a list
      of non-standard errors that best describe what exactly has
      failed.  The returned errors go through `:error-filter' just
-     like regular parsed errors.  If the function cannot make
-     sense of the output, it should return symbol `suspicious' to
-     indicate that what has happened is really not expected.
+     like regular parsed errors.
+
+     The function may also return symbol `disable', or a cons
+     cell `(disable . REASON)' with a reason string, when the
+     output shows that the checker doesn't apply to this buffer
+     at all, e.g. a linter reporting that it has no configuration
+     file: the checker is then disabled in the buffer like a
+     failing `:enabled' test, with an echo-area notice including
+     REASON, and checker selection re-runs so a fallback checker
+     can take over.  This avoids probing for applicability with a
+     blocking process call in `:enabled'; the asynchronous check
+     itself serves as the probe.
+
+     If the function cannot make sense of the output, it should
+     return symbol `suspicious' to indicate that what has
+     happened is really not expected.
 
      This property is optional.  If omitted, such state is always
      treated as suspicious.
@@ -7090,28 +7135,42 @@ Parse the OUTPUT and report an appropriate error status.
 
 Resolve all errors in OUTPUT using CWD as working directory."
   (let ((errors (flycheck-parse-output output checker (current-buffer))))
-    (when (and (not (equal exit-status 0)) (null errors))
-      ;; Give the checker a chance to recover from suspicious state:
-      ;; exit status is nonzero, but there are no errors.
-      (let ((recovered (flycheck-handle-suspicious-state checker exit-status
-                                                         output)))
-        (if (listp recovered)
-            (setf errors recovered)
-          ;; Warn about a suspicious result from the syntax checker.  We do
-          ;; right after parsing the errors, before filtering, because a syntax
-          ;; checker might report errors from other files (e.g. includes) even
-          ;; if there are no errors in the file being checked.
-          (funcall callback 'suspicious
-                   (format "Flycheck checker %S returned %S, but \
+    (let ((self-disabled nil))
+      (when (and (not (equal exit-status 0)) (null errors))
+        ;; Give the checker a chance to recover from suspicious state:
+        ;; exit status is nonzero, but there are no errors.
+        (let ((recovered (flycheck-handle-suspicious-state checker exit-status
+                                                           output)))
+          (cond
+           ((or (eq recovered 'disable)
+                (and (consp recovered) (eq (car recovered) 'disable)))
+            ;; The checker diagnosed itself as inapplicable to this
+            ;; buffer, e.g. a linter without a configuration file.  The
+            ;; status report performs the disabling, subject to the usual
+            ;; staleness checks, and finishes the syntax check.
+            (setq self-disabled t)
+            (funcall callback 'self-disabled
+                     (and (consp recovered) (cdr recovered))))
+           ((listp recovered)
+            (setf errors recovered))
+           (t
+            ;; Warn about a suspicious result from the syntax checker.  We do
+            ;; right after parsing the errors, before filtering, because a
+            ;; syntax checker might report errors from other files
+            ;; (e.g. includes) even if there are no errors in the file being
+            ;; checked.
+            (funcall callback 'suspicious
+                     (format "Flycheck checker %S returned %S, but \
 its output contained no errors: %s\nTry installing a more \
 recent version of %S, and please open a bug report if the issue \
 persists in the latest release.  Thanks!"  checker exit-status
-output checker)))))
-    (funcall callback 'finished
-             ;; Fix error file names, by substituting them backwards from the
-             ;; temporaries.
-             (mapcar (lambda (e) (flycheck-fix-error-filename e files cwd))
-                      errors))))
+output checker))))))
+      (unless self-disabled
+        (funcall callback 'finished
+                 ;; Fix error file names, by substituting them backwards
+                 ;; from the temporaries.
+                 (mapcar (lambda (e) (flycheck-fix-error-filename e files cwd))
+                         errors))))))
 
 
 ;;; Executables of command checkers.
@@ -10417,6 +10476,24 @@ for more information about the custom directories."
           'javascript-eslint nil nil nil
           "--print-config" (or buffer-file-name "index.js"))))
 
+(defun flycheck--eslint-handle-suspicious (_checker exit-status output)
+  "Disable the checker when eslint cannot lint at all.
+
+Eslint exits with status 2 on any fatal failure -- a missing or
+broken configuration, a crashing plugin -- rather than lint
+findings, so the checker cannot be used in this buffer.  This
+matches the semantics of the blocking `--print-config' probe that
+previous versions ran in `:enabled' (see URL
+`https://github.com/flycheck/flycheck/issues/1129'), and doesn't
+depend on the wording of any particular eslint version.  The
+first line of OUTPUT is included in the disable notice.
+
+Any other exit status without parsable errors is suspicious: it
+suggests an output format Flycheck fails to parse."
+  (if (eq exit-status 2)
+      (cons 'disable (car (split-string output "\n" t)))
+    'suspicious))
+
 (defun flycheck-parse-eslint (output checker buffer)
   "Parse ESLint errors/warnings from JSON OUTPUT.
 
@@ -10470,7 +10547,11 @@ See URL `https://eslint.org/'."
             "--stdin" "--stdin-filename" source-original)
   :standard-input t
   :error-parser flycheck-parse-eslint
-  :enabled (lambda () (flycheck-eslint-config-exists-p))
+  ;; A missing eslint config is diagnosed from the check's own output
+  ;; (see `flycheck--eslint-handle-suspicious') instead of a blocking
+  ;; `--print-config' probe in `:enabled', which used to freeze Emacs on
+  ;; the first check in every buffer
+  :handle-suspicious flycheck--eslint-handle-suspicious
   :modes (js-mode js-jsx-mode js2-mode js2-jsx-mode js3-mode rjsx-mode
                   typescript-mode js-ts-mode typescript-ts-mode tsx-ts-mode)
   :working-directory flycheck-eslint--find-working-directory
