@@ -431,21 +431,30 @@ Use floating point numbers to express fractions of seconds."
   :package-version '(flycheck . "0.15")
   :safe #'numberp)
 
-(defcustom flycheck-display-errors-function #'flycheck-display-error-messages
+(defcustom flycheck-display-errors-function #'flycheck-display-errors-via-eldoc
   "Function to display error messages.
 
 If set to a function, call the function with the list of errors
 to display as single argument.  Each error is an instance of the
 `flycheck-error' struct.
 
+With the default value `flycheck-display-errors-via-eldoc',
+errors at point are documented through Eldoc.  This composes with
+other Eldoc sources (e.g. Eglot) and honors Eldoc display
+customizations such as `eldoc-echo-area-use-multiline-p' or
+alternative Eldoc frontends.  Use \\[eldoc-doc-buffer] to read
+messages that don't fit into the echo area in full.
+
 If set to nil, do not display errors at all."
   :group 'flycheck
-  :type '(choice (const :tag "Display error messages"
+  :type '(choice (const :tag "Display errors via Eldoc"
+                        flycheck-display-errors-via-eldoc)
+                 (const :tag "Display error messages"
                         flycheck-display-error-messages)
                  (const :tag "Display error messages only if no error list"
                         flycheck-display-error-messages-unless-error-list)
                  (function :tag "Error display function"))
-  :package-version '(flycheck . "0.13")
+  :package-version '(flycheck . "37")
   :risky t)
 
 (defcustom flycheck-clear-displayed-errors-function #'flycheck-clear-displayed-error-messages
@@ -3144,6 +3153,15 @@ ARG is ‘toggle’; disable the mode otherwise."
    (flycheck-mode
     (flycheck-clear)
     (flycheck--sync-margin)
+    (add-hook 'eldoc-documentation-functions #'flycheck-eldoc-function nil t)
+    ;; `global-eldoc-mode' may have skipped this buffer because no
+    ;; documentation source was registered when it made its decision;
+    ;; give it another chance now that Flycheck provides one.  Buffers
+    ;; where the user disabled Eldoc entirely are left alone; there the
+    ;; display timer picks up the slack.
+    (when (and (bound-and-true-p global-eldoc-mode)
+               (not (bound-and-true-p eldoc-mode)))
+      (turn-on-eldoc-mode))
 
     (pcase-dolist (`(,hook . ,fn) (reverse flycheck-hooks-alist))
       (add-hook hook fn nil 'local))
@@ -3164,6 +3182,8 @@ ARG is ‘toggle’; disable the mode otherwise."
    (t
     (unless (eq flycheck-old-next-error-function :unset)
       (setq next-error-function flycheck-old-next-error-function))
+
+    (remove-hook 'eldoc-documentation-functions #'flycheck-eldoc-function t)
 
     (pcase-dolist (`(,hook . ,fn) flycheck-hooks-alist)
       (remove-hook hook fn 'local))
@@ -5920,6 +5940,43 @@ avoid slowing down editing when the error list is hidden."
 
 
 ;;; Displaying errors in the current buffer
+(defun flycheck--display-errors-via-eldoc-p ()
+  "Whether errors at point are displayed through Eldoc."
+  (eq flycheck-display-errors-function #'flycheck-display-errors-via-eldoc))
+
+(defun flycheck-display-errors-via-eldoc (_errors)
+  "Trigger Eldoc to document the errors at point.
+
+Eldoc computes its documentation from all of its registered
+sources, including `flycheck-eldoc-function', so refreshing it
+shows the Flycheck errors at point alongside e.g. Eglot's
+documentation.  This works from any display entry point --
+interactive commands, error navigation, automatic display after a
+check -- whether or not variable `eldoc-mode' is enabled."
+  (eldoc-print-current-symbol-info))
+
+(defun flycheck-eldoc-function (callback &rest _ignored)
+  "Document the Flycheck errors at point by calling CALLBACK.
+
+Intended for `eldoc-documentation-functions', where command
+`flycheck-mode' registers it.  Only active when
+`flycheck-display-errors-function' has its default value
+`flycheck-display-errors-via-eldoc', so that user customizations
+and third-party display packages keep working unchanged."
+  (when (and flycheck-mode (flycheck--display-errors-via-eldoc-p))
+    (when-let* ((errors (flycheck-overlay-errors-at (point))))
+      (funcall callback
+               (mapconcat
+                (lambda (err)
+                  (let ((level (flycheck-error-level err)))
+                    (concat
+                     (propertize (symbol-name level)
+                                 'face (flycheck-error-level-error-list-face
+                                        level))
+                     ": "
+                     (flycheck-error-format-message-and-id err))))
+                errors "\n")))))
+
 (defun flycheck-display-errors (errors)
   "Display ERRORS using `flycheck-display-errors-function'."
   (when flycheck-display-errors-function
@@ -5957,9 +6014,14 @@ If there are no errors, clears the error messages at point."
 (defun flycheck-display-error-at-point-soon ()
   "Display error messages at point, with a delay."
   (flycheck-cancel-error-display-error-at-point-timer)
-  (setq flycheck-display-error-at-point-timer
-        (run-at-time flycheck-display-errors-delay nil
-                     'flycheck-display-error-at-point)))
+  ;; When errors are displayed through Eldoc and `eldoc-mode' is active,
+  ;; its own post-command refresh covers this path; without `eldoc-mode'
+  ;; fall back to Flycheck's timer, which triggers the refresh itself
+  (unless (and (flycheck--display-errors-via-eldoc-p)
+               (bound-and-true-p eldoc-mode))
+    (setq flycheck-display-error-at-point-timer
+          (run-at-time flycheck-display-errors-delay nil
+                       'flycheck-display-error-at-point))))
 
 
 (defun flycheck-handle-focus-change ()

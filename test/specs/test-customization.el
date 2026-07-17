@@ -78,9 +78,9 @@
 
   (describe "flycheck-display-errors-function"
 
-    (it "defaults to display-error-messages"
+    (it "defaults to display via eldoc"
       (expect flycheck-display-errors-function
-              :to-be #'flycheck-display-error-messages)))
+              :to-be #'flycheck-display-errors-via-eldoc)))
 
   (describe "flycheck-indication-mode"
 
