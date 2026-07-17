@@ -184,6 +184,94 @@ afterwards."
           (expect (shut-up (flycheck-buttercup-should-syntax-check-in-buffer))
                   :to-throw 'flycheck-buttercup-suspicious-checker))))
 
+    (it "disables the checker when the :handle-suspicious function says so"
+      (assume (or (executable-find "python3") (executable-find "python")))
+      (cl-letf* ((flycheck-checker 'suspicious-exit)
+                 ((symbol-plist 'suspicious-exit)
+                  flycheck-test--suspicious-exit)
+                 ((flycheck-checker-get 'suspicious-exit 'handle-suspicious)
+                  (lambda (_checker _exit-status _output) 'disable)))
+        (flycheck-buttercup-with-temp-buffer
+          (suspicious-exit-mode)
+          (insert "hello\n")
+          ;; The check finishes cleanly with no errors and no suspicious
+          ;; warning, and the checker is disabled like a failed :enabled
+          (flycheck-buttercup-should-syntax-check-in-buffer)
+          (expect (flycheck-automatically-disabled-checker-p 'suspicious-exit)
+                  :to-be-truthy))))
+
+    (it "selects the fallback checker after a self-disable"
+      (assume (or (executable-find "python3") (executable-find "python")))
+      (flycheck-buttercup-with-temp-buffer
+        (rename-buffer "flycheck-self-disable-test")
+        (cl-letf* (((symbol-plist 'suspicious-exit)
+                    flycheck-test--suspicious-exit)
+                   ((flycheck-checker-get 'suspicious-exit
+                                          'handle-suspicious)
+                    (lambda (_checker _exit-status _output) 'disable))
+                   ((symbol-function 'get-buffer-window)
+                    (lambda (&rest _) (selected-window))))
+          (flycheck-define-generic-checker 'fallback-checker
+            "Report a fixed warning synchronously."
+            :start (lambda (checker callback)
+                     (funcall callback 'finished
+                              (list (flycheck-error-new-at
+                                     1 1 'warning "fallback ran"
+                                     :checker checker))))
+            :modes '(suspicious-exit-mode))
+          (unwind-protect
+              (let ((flycheck-checkers '(suspicious-exit fallback-checker)))
+                (suspicious-exit-mode)
+                (insert "hello\n")
+                (flycheck-mode)
+                (shut-up (flycheck-buttercup-buffer-sync))
+                ;; The self-disabled checker is out of the running...
+                (expect (flycheck-automatically-disabled-checker-p
+                         'suspicious-exit)
+                        :to-be-truthy)
+                ;; ...so the next check picks the fallback checker
+                (expect (flycheck-get-checker-for-buffer)
+                        :to-be 'fallback-checker)
+                (shut-up (flycheck-buttercup-buffer-sync))
+                (expect (mapcar #'flycheck-error-message
+                                flycheck-current-errors)
+                        :to-equal '("fallback ran")))
+            (setf (symbol-plist 'fallback-checker) nil)))))
+
+    (it "does not run the chain of a self-disabled checker"
+      (assume (or (executable-find "python3") (executable-find "python")))
+      (flycheck-buttercup-with-temp-buffer
+        (rename-buffer "flycheck-chain-skip-test")
+        (cl-letf* (((symbol-plist 'suspicious-exit)
+                    flycheck-test--suspicious-exit)
+                   ((flycheck-checker-get 'suspicious-exit
+                                          'handle-suspicious)
+                    (lambda (_checker _exit-status _output) 'disable))
+                   ((flycheck-checker-get 'suspicious-exit 'next-checkers)
+                    '(chain-target))
+                   ((symbol-function 'get-buffer-window)
+                    (lambda (&rest _) (selected-window))))
+          (flycheck-define-generic-checker 'chain-target
+            "Report a fixed error synchronously."
+            :start (lambda (checker callback)
+                     (funcall callback 'finished
+                              (list (flycheck-error-new-at
+                                     1 1 'error "chain ran"
+                                     :checker checker))))
+            :modes '(suspicious-exit-mode))
+          (unwind-protect
+              (let ((flycheck-checkers '(suspicious-exit)))
+                (suspicious-exit-mode)
+                (insert "hello\n")
+                (flycheck-mode)
+                (shut-up (flycheck-buttercup-buffer-sync))
+                ;; The disabled checker's own chain must not run
+                (expect (flycheck-automatically-disabled-checker-p
+                         'suspicious-exit)
+                        :to-be-truthy)
+                (expect flycheck-current-errors :not :to-be-truthy))
+            (setf (symbol-plist 'chain-target) nil)))))
+
     (it "treats a non-zero exit without errors as suspicious by default"
       (assume (or (executable-find "python3") (executable-find "python")))
       (cl-letf* ((flycheck-checker 'suspicious-exit)

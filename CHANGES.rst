@@ -2,6 +2,16 @@
 =======================
 
 - Drop support for Emacs 27; Flycheck now requires Emacs 28.1 or newer.
+- [#1129]: ``javascript-eslint`` no longer probes for a configuration
+  file with a blocking ``--print-config`` call before the first check in
+  every buffer, which used to freeze Emacs for its duration (the
+  interactive ``flycheck-verify-setup`` still probes).  A fatal eslint
+  failure (a missing or broken configuration) is now diagnosed from the
+  check's own exit status: the checker disables itself in the buffer
+  with an echo-area notice naming the reason, and a fallback checker
+  takes over on the next automatic check.  Checker authors can use the
+  same mechanism by returning ``disable`` or ``(disable . reason)`` from
+  ``:handle-suspicious``.
 - A new syntax check now interrupts a still-running one and starts
   immediately, instead of waiting for it to finish and displaying its
   stale results in the meantime.  This makes slow checkers (cargo, mypy
