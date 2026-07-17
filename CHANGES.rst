@@ -2,6 +2,16 @@
 =======================
 
 - Drop support for Emacs 27; Flycheck now requires Emacs 28.1 or newer.
+- The error list pops up in a bottom side window by default, a quarter of
+  the frame tall.  Customize the new option
+  ``flycheck-error-list-display-buffer-action`` to change that;
+  ``display-buffer-alist`` entries still take precedence.  Note that side
+  windows are unaffected by ``C-x 1``; dismiss the list with ``q``.
+- The error list can now also be filtered by syntax checker (``c``) and
+  by a regexp matching the error message or ID (``/``), in addition to
+  the existing minimum-level filter (``f``); ``F`` resets all filters.
+- The File and ID columns of the error list adapt their width to the
+  errors on display instead of truncating at fixed widths.
 - [#1787]: Add the ``:handle-suspicious`` property to command checkers.
   It lets a checker translate a "suspicious state" (a non-zero exit
   status with no parsable errors, e.g. a missing dependency) into

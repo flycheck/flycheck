@@ -1294,6 +1294,25 @@ currently listed."
   :risky t
   :package-version '(flycheck . "0.20"))
 
+(defcustom flycheck-error-list-display-buffer-action
+  '((display-buffer-reuse-window display-buffer-in-side-window)
+    (side . bottom)
+    (window-height . 0.25)
+    (preserve-size . (nil . t)))
+  "The `display-buffer' action for the error list buffer.
+
+By default the error list pops up in a side window at the bottom
+of the frame, a quarter of the frame tall.  Set to nil to fall
+back to the default behavior of `display-buffer'.
+
+Entries in `display-buffer-alist' matching the error list buffer
+take precedence over this action, so this option composes with
+window-management configurations."
+  :group 'flycheck
+  :type 'sexp
+  :risky t
+  :package-version '(flycheck . "37"))
+
 (defcustom flycheck-global-modes t
   "Modes for which option `flycheck-mode' is turned on.
 
@@ -5242,6 +5261,15 @@ the beginning of the buffer."
 (defconst flycheck-error-list-buffer "*Flycheck errors*"
   "The name of the buffer to show error lists.")
 
+(defvar-local flycheck-error-list--checker-filter nil
+  "When non-nil, show only errors from this syntax checker.")
+
+(defvar-local flycheck-error-list--message-filter nil
+  "When non-nil, show only errors matching this regexp.
+
+The regexp is matched against the error message and the error
+ID.")
+
 (defmacro flycheck-error-list-with-buffer (&rest body)
   "Evaluate BODY in flycheck-error-list-buffer, if it exists."
   (declare (indent 0) (debug t))
@@ -5252,6 +5280,8 @@ the beginning of the buffer."
 (defvar flycheck-error-list-mode-map
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "f") #'flycheck-error-list-set-filter)
+    (define-key map (kbd "c") #'flycheck-error-list-set-checker-filter)
+    (define-key map (kbd "/") #'flycheck-error-list-set-message-filter)
     (define-key map (kbd "F") #'flycheck-error-list-reset-filter)
     (define-key map (kbd "n") #'flycheck-error-list-next-error)
     (define-key map (kbd "p") #'flycheck-error-list-previous-error)
@@ -5279,26 +5309,76 @@ message to stretch arbitrarily far."
     ("Level" 8 flycheck-error-list-entry-level-<)
     ("ID" 6 t)
     (,(flycheck-error-list-make-last-column "Message" 'Checker) 0 t)]
-  "Table format for the error list.")
+  "Default table format for the error list.
+
+The File and ID columns are resized to fit the errors being
+displayed; see `flycheck-error-list--update-format'.")
 
 (defconst flycheck-error-list-padding 1
   "Padding used in error list.")
 
-(defconst flycheck--error-list-msg-offset
+(defun flycheck--error-list-compute-msg-offset (format)
+  "Compute the space before the message column in FORMAT."
   (seq-reduce
    (lambda (offset fmt)
      (pcase-let* ((`(,_ ,width ,_ . ,props) fmt)
                   (padding (or (plist-get props :pad-right) 1)))
        (+ offset width padding)))
-   (seq-subseq flycheck-error-list-format 0 -1)
-   flycheck-error-list-padding)
+   (seq-subseq format 0 -1)
+   flycheck-error-list-padding))
+
+(defvar-local flycheck--error-list-msg-offset
+    (flycheck--error-list-compute-msg-offset flycheck-error-list-format)
   "Amount of space to use in `flycheck-flush-multiline-message'.")
+
+(defun flycheck-error-list--column-widths (errors)
+  "Compute the File and ID column widths for ERRORS.
+
+Return a cons cell (FILE-WIDTH . ID-WIDTH)."
+  (let ((file-width 4) (id-width 2))
+    (dolist (err errors)
+      (when-let* ((file (flycheck-error-filename err)))
+        (setq file-width (max file-width
+                              (length (file-name-nondirectory file)))))
+      (when-let* ((id (flycheck-error-id err)))
+        (setq id-width (max id-width (length (format "%s" id))))))
+    (cons (min file-width 40) (min id-width 24))))
+
+(defun flycheck-error-list--set-column-width (format name width)
+  "Set the width of the column NAME in FORMAT to WIDTH.
+
+FORMAT is a tabulated list format vector; the other column
+properties are left unchanged.  Unknown column names are
+ignored."
+  (when-let* ((index (seq-position format name
+                                   (lambda (column name)
+                                     (equal (car column) name)))))
+    (setf (aref format index)
+          (cons name (cons width (cddr (aref format index)))))))
+
+(defun flycheck-error-list--update-format ()
+  "Fit the File and ID column widths to the displayed errors."
+  (pcase-let ((`(,file-width . ,id-width)
+               (flycheck-error-list--column-widths
+                (flycheck-error-list-apply-filter
+                 (flycheck-error-list-current-errors)))))
+    (let ((format (copy-sequence flycheck-error-list-format)))
+      (flycheck-error-list--set-column-width format "File" file-width)
+      (flycheck-error-list--set-column-width format "ID" id-width)
+      (setq tabulated-list-format format))
+    (setq flycheck--error-list-msg-offset
+          (flycheck--error-list-compute-msg-offset tabulated-list-format))
+    (tabulated-list-init-header)))
 
 (define-derived-mode flycheck-error-list-mode tabulated-list-mode
   "Flycheck errors"
   "Major mode for listing Flycheck errors.
 
 \\{flycheck-error-list-mode-map}"
+  ;; Fit the column widths on every revert, including a manual
+  ;; `revert-buffer', so that they never go stale
+  (add-hook 'tabulated-list-revert-hook
+            #'flycheck-error-list--update-format nil t)
   (setq tabulated-list-format flycheck-error-list-format
         ;; Sort by location initially
         tabulated-list-sort-key (cons "Line" nil)
@@ -5528,10 +5608,14 @@ list."
       (flycheck-error-list-highlight-errors preserve-pos))))
 
 (defun flycheck-error-list-mode-line-filter-indicator ()
-  "Create a string representing the current error list filter."
-  (if flycheck-error-list-minimum-level
-      (format " [>= %s]" flycheck-error-list-minimum-level)
-    ""))
+  "Create a string representing the current error list filters."
+  (concat
+   (when flycheck-error-list-minimum-level
+     (format " [>= %s]" flycheck-error-list-minimum-level))
+   (when flycheck-error-list--checker-filter
+     (format " [%s]" flycheck-error-list--checker-filter))
+   (when flycheck-error-list--message-filter
+     (format " [/%s/]" flycheck-error-list--message-filter))))
 
 (defun flycheck-error-list-mode-line-suppressed-indicator ()
   "Create a string for the mode line about suppressed errors.
@@ -5545,6 +5629,14 @@ suppressed over `flycheck-checker-error-threshold', if any."
         (format " (+%d suppressed)" count)
       "")))
 
+(defun flycheck-error-list--apply-filter-change (thunk)
+  "Call THUNK in the error list buffer and refresh the list."
+  (flycheck-error-list-with-buffer
+    (funcall thunk)
+    (force-mode-line-update)
+    (flycheck-error-list-refresh)
+    (flycheck-error-list-recenter-at (point-min))))
+
 (defun flycheck-error-list-set-filter (level)
   "Restrict the error list to errors at level LEVEL or higher.
 
@@ -5554,11 +5646,45 @@ LEVEL is either an error level symbol, or nil, to remove the filter."
           "Minimum error level (errors at lower levels will be hidden): ")))
   (when (and level (not (flycheck-error-level-p level)))
     (user-error "Invalid level: %s" level))
-  (flycheck-error-list-with-buffer
-    (setq-local flycheck-error-list-minimum-level level)
-    (force-mode-line-update)
-    (flycheck-error-list-refresh)
-    (flycheck-error-list-recenter-at (point-min))))
+  (flycheck-error-list--apply-filter-change
+   (lambda () (setq-local flycheck-error-list-minimum-level level))))
+
+(defun flycheck-error-list-set-checker-filter (checker)
+  "Restrict the error list to errors from CHECKER.
+
+CHECKER is a syntax checker symbol, or nil to remove the filter."
+  (interactive
+   (list (flycheck-error-list-with-buffer
+           (let ((checkers (seq-uniq
+                            (seq-map
+                             (lambda (err)
+                               (symbol-name (flycheck-error-checker err)))
+                             (flycheck-error-list-current-errors)))))
+             (unless checkers
+               (user-error "The error list contains no errors"))
+             (let ((name (completing-read "Show only errors from checker: "
+                                          checkers nil t)))
+               ;; Empty input removes the filter
+               (and (not (string-empty-p name)) (intern name)))))))
+  (flycheck-error-list--apply-filter-change
+   (lambda () (setq flycheck-error-list--checker-filter checker))))
+
+(defun flycheck-error-list-set-message-filter (regexp)
+  "Restrict the error list to errors matching REGEXP.
+
+REGEXP is matched against the error messages and IDs.  An empty
+or nil REGEXP removes the filter."
+  (interactive (list (read-regexp "Show only errors matching regexp")))
+  (setq regexp (and regexp (not (string-empty-p regexp)) regexp))
+  ;; Reject invalid regexps here; storing one would break every
+  ;; subsequent refresh of the error list
+  (when regexp
+    (condition-case err
+        (string-match-p regexp "")
+      (invalid-regexp
+       (user-error "Invalid regexp: %s" (cadr err)))))
+  (flycheck-error-list--apply-filter-change
+   (lambda () (setq flycheck-error-list--message-filter regexp))))
 
 (defun flycheck-error-list-reset-filter (&optional refresh)
   "Remove local error filters and reset to the default filter.
@@ -5567,20 +5693,39 @@ Interactively, or with non-nil REFRESH, refresh the error list."
   (interactive '(t))
   (flycheck-error-list-with-buffer
     (kill-local-variable 'flycheck-error-list-minimum-level)
+    (setq flycheck-error-list--checker-filter nil
+          flycheck-error-list--message-filter nil)
     (when refresh
       (flycheck-error-list-refresh)
       (flycheck-error-list-recenter-at (point-min))
       (force-mode-line-update))))
 
 (defun flycheck-error-list-apply-filter (errors)
-  "Filter ERRORS according to `flycheck-error-list-minimum-level'."
-  (if-let* ((min-level flycheck-error-list-minimum-level)
-            (min-severity (flycheck-error-level-severity min-level)))
-      (seq-filter (lambda (err) (>= (flycheck-error-level-severity
-                                     (flycheck-error-level err))
-                                    min-severity))
-                  errors)
-    errors))
+  "Filter ERRORS according to the error list filters.
+
+Combines `flycheck-error-list-minimum-level',
+`flycheck-error-list--checker-filter' and
+`flycheck-error-list--message-filter'."
+  (when-let* ((min-level flycheck-error-list-minimum-level)
+              (min-severity (flycheck-error-level-severity min-level)))
+    (setq errors
+          (seq-filter (lambda (err) (>= (flycheck-error-level-severity
+                                         (flycheck-error-level err))
+                                        min-severity))
+                      errors)))
+  (when-let* ((checker flycheck-error-list--checker-filter))
+    (setq errors
+          (seq-filter (lambda (err) (eq (flycheck-error-checker err) checker))
+                      errors)))
+  (when-let* ((regexp flycheck-error-list--message-filter))
+    (setq errors
+          (seq-filter
+           (lambda (err)
+             (or (string-match-p regexp (or (flycheck-error-message err) ""))
+                 (when-let* ((id (flycheck-error-id err)))
+                   (string-match-p regexp (format "%s" id)))))
+           errors)))
+  errors)
 
 (defcustom flycheck-error-list-after-jump-hook nil
   "Functions to run after jumping to an error from the error list.
@@ -5766,7 +5911,8 @@ avoid slowing down editing when the error list is hidden."
     ;; Show the error list in a side window.  Under some configurations of
     ;; `display-buffer', this may select `flycheck-error-list-buffer' (see URL
     ;; `https://github.com/flycheck/flycheck/issues/1776').
-    (display-buffer flycheck-error-list-buffer)
+    (display-buffer flycheck-error-list-buffer
+                    flycheck-error-list-display-buffer-action)
     ;; Adjust the source, causing a refresh
     (flycheck-error-list-set-source source)))
 

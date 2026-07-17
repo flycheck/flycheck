@@ -195,6 +195,126 @@
       (it "shows the level filter in the mode line if set"
         (let ((flycheck-error-list-minimum-level 'warning))
           (expect (flycheck-error-list-mode-line-filter-indicator)
-                  :to-equal " [>= warning]"))))))
+                  :to-equal " [>= warning]")))
+
+      (it "shows the checker and message filters in the mode line"
+        (let ((flycheck-error-list-minimum-level nil)
+              (flycheck-error-list--checker-filter 'python-ruff)
+              (flycheck-error-list--message-filter "unused"))
+          (expect (flycheck-error-list-mode-line-filter-indicator)
+                  :to-equal " [python-ruff] [/unused/]"))))
+
+    (describe "Checker and message filters"
+      (it "filters errors by checker"
+        (let ((flycheck-error-list--checker-filter 'foo)
+              (errors (list (flycheck-error-new-at 1 1 'error "a" :checker 'foo)
+                            (flycheck-error-new-at 2 1 'error "b"
+                                                   :checker 'bar))))
+          (expect (flycheck-error-list-apply-filter errors)
+                  :to-be-equal-flycheck-errors
+                  (list (flycheck-error-new-at 1 1 'error "a"
+                                               :checker 'foo)))))
+
+      (it "filters errors by message and id regexp"
+        (let ((flycheck-error-list--message-filter "unused\\|W10")
+              (errors (list (flycheck-error-new-at 1 1 'error "unused var")
+                            (flycheck-error-new-at 2 1 'error "bad" :id "W101")
+                            (flycheck-error-new-at 3 1 'error "other"))))
+          (expect (flycheck-error-list-apply-filter errors)
+                  :to-be-equal-flycheck-errors
+                  (list (flycheck-error-new-at 1 1 'error "unused var")
+                        (flycheck-error-new-at 2 1 'error "bad" :id "W101")))))
+
+      (it "combines all filters"
+        (let ((flycheck-error-list-minimum-level 'warning)
+              (flycheck-error-list--checker-filter 'foo)
+              (flycheck-error-list--message-filter "spam")
+              (errors (list (flycheck-error-new-at 1 1 'error "spam"
+                                                   :checker 'foo)
+                            (flycheck-error-new-at 2 1 'info "spam"
+                                                   :checker 'foo)
+                            (flycheck-error-new-at 3 1 'error "spam"
+                                                   :checker 'bar)
+                            (flycheck-error-new-at 4 1 'error "eggs"
+                                                   :checker 'foo))))
+          (expect (flycheck-error-list-apply-filter errors)
+                  :to-be-equal-flycheck-errors
+                  (list (flycheck-error-new-at 1 1 'error "spam"
+                                               :checker 'foo)))))
+
+      (it "resets all filters"
+        (flycheck/with-error-list-buffer
+          (setq-local flycheck-error-list-minimum-level 'error)
+          (setq flycheck-error-list--checker-filter 'foo
+                flycheck-error-list--message-filter "spam")
+          (flycheck-error-list-reset-filter)
+          (expect flycheck-error-list-minimum-level :not :to-be 'error)
+          (expect flycheck-error-list--checker-filter :not :to-be-truthy)
+          (expect flycheck-error-list--message-filter :not :to-be-truthy))))
+
+    (describe "Dynamic columns"
+      (it "fits the File and ID columns to the errors"
+        (expect (flycheck-error-list--column-widths
+                 (list (flycheck-error-new-at
+                        1 1 'error "a" :filename "path/to/some-file.el")
+                       (flycheck-error-new-at
+                        2 1 'error "b" :id "reportGeneralTypeIssues")))
+                :to-equal '(12 . 23)))
+
+      (it "caps the column widths"
+        (expect (flycheck-error-list--column-widths
+                 (list (flycheck-error-new-at
+                        1 1 'error "a"
+                        :filename (make-string 100 ?x)
+                        :id (make-string 100 ?y))))
+                :to-equal '(40 . 24)))
+
+      (it "uses minimum widths without errors"
+        (expect (flycheck-error-list--column-widths nil)
+                :to-equal '(4 . 2)))
+
+      (it "fits the format to the displayed errors"
+        (flycheck-buttercup-with-temp-buffer
+          (setq flycheck-current-errors
+                (list (flycheck-error-new-at
+                       1 1 'error "a" :checker 'foo
+                       :filename "a-rather-long-file-name.el")
+                      (flycheck-error-new-at
+                       2 1 'error "b" :checker 'bar :filename "s.el")))
+          (let ((source (current-buffer)))
+            (flycheck/with-error-list-buffer
+              (setq flycheck-error-list-source-buffer source)
+              (flycheck-error-list--update-format)
+              (expect (cadr (aref tabulated-list-format 0))
+                      :to-equal (length "a-rather-long-file-name.el"))
+              ;; Errors hidden by a filter don't inflate the columns
+              (setq flycheck-error-list--checker-filter 'bar)
+              (flycheck-error-list--update-format)
+              (expect (cadr (aref tabulated-list-format 0))
+                      :to-equal (length "s.el"))
+              (expect flycheck--error-list-msg-offset
+                      :to-equal (+ (length "s.el") 1  ; file + padding
+                                   5 1                ; line
+                                   3 1                ; col
+                                   8 1                ; level
+                                   2 1                ; id
+                                   1))))))            ; list padding
+
+      (it "rejects an invalid message filter regexp"
+        (expect (flycheck-error-list-set-message-filter "[")
+                :to-throw 'user-error)))
+
+    (describe "Display"
+      (it "displays the error list according to the display action"
+        (let (received-action)
+          (cl-letf (((symbol-function 'display-buffer)
+                     (lambda (_buffer &optional action &rest _)
+                       (setq received-action action)
+                       nil)))
+            (flycheck-buttercup-with-temp-buffer
+              (flycheck-mode)
+              (flycheck-list-errors)))
+          (expect received-action
+                  :to-equal flycheck-error-list-display-buffer-action))))))
 
 ;;; test-error-list.el ends here
