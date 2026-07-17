@@ -55,12 +55,18 @@ post-jump actions like recentering:
 Filter the list
 ===============
 
-By default the error list shows all errors but sometimes you'd like to hide
-warnings to focus only on real errors.  The error list lets you hide all errors
-below a certain level with :kbd:`f`.  This key prompts for an error level and
-will remove all errors of lower levels from the list.  The filter is permanent
-as long as the error list buffer stays alive or the filter is reset with
-:kbd:`F`.
+By default the error list shows all errors but sometimes you'd like to narrow
+it down.  The error list supports three filters, which combine and stay in
+effect as long as the error list buffer stays alive, until you reset them all
+with :kbd:`F`:
+
+* :kbd:`f` prompts for an error level and hides all errors of lower levels.
+* :kbd:`c` prompts for a syntax checker and shows only its errors, e.g. only
+  the type errors from your type checker while ignoring stylistic complaints.
+* :kbd:`/` prompts for a regular expression and shows only errors whose
+  message or ID matches it.
+
+The active filters are shown in the error list's mode line.
 
 Sort the list
 =============
@@ -79,15 +85,22 @@ to descending or vice versa.
 Tune error list display
 =======================
 
-By default the error list buffer pops up like any other buffer.  Flycheck does
-not enforce special rules on how it's displayed and where it's located in the
-frame so essentially the error list pops up at arbitrary places wherever Emacs
-can find a window for it.
+By default the error list pops up in a side window at the bottom of the frame,
+a quarter of the frame tall, like similar lists in contemporary IDEs.  Side
+windows are not affected by :kbd:`C-x 1` (`delete-other-windows`); dismiss the
+error list with :kbd:`q` in its window instead.  You can change or disable
+this behavior:
 
-However you can tell Emacs to obey certain rules when displaying buffers by
-customizing the built-in option `display-buffer-alist`.  You can use this option
-to make the error list display like similar lists in contemporary IDEs like
-VisualStudio, Eclipse, etc. with the following code in your :term:`init file`:
+.. defcustom:: flycheck-error-list-display-buffer-action
+
+   The `display-buffer` action used to display the error list.  Set to ``nil``
+   to fall back to the default behavior of `display-buffer`, where the error
+   list pops up at an arbitrary place wherever Emacs finds a window for it.
+
+Entries in the built-in option `display-buffer-alist` matching the error list
+buffer take precedence over this action, so any existing window-management
+configuration keeps working.  For example, to display the error list at the
+bottom with a third of the frame height instead:
 
 .. code-block:: elisp
 
@@ -98,9 +111,6 @@ VisualStudio, Eclipse, etc. with the following code in your :term:`init file`:
                  (side            . bottom)
                  (reusable-frames . visible)
                  (window-height   . 0.33)))
-
-This display rule tells Emacs to always display the error list at the bottom
-side of the frame, occupying a third of the entire height of the frame.
 
 .. seealso::
 
