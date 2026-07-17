@@ -12,6 +12,12 @@
   the existing minimum-level filter (``f``); ``F`` resets all filters.
 - The File and ID columns of the error list adapt their width to the
   errors on display instead of truncating at fixed widths.
+- Errors at point are now documented through Eldoc by default, composing
+  with other Eldoc sources (e.g. Eglot) and honoring Eldoc display
+  customizations.  The previous behavior remains available by setting
+  ``flycheck-display-errors-function`` to
+  ``flycheck-display-error-messages``; custom display functions and
+  extensions like flycheck-posframe keep working unchanged.
 - [#1787]: Add the ``:handle-suspicious`` property to command checkers.
   It lets a checker translate a "suspicious state" (a non-zero exit
   status with no parsable errors, e.g. a missing dependency) into

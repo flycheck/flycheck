@@ -108,9 +108,10 @@ customising:
    `flycheck-posframe`, to prevent `flycheck-posframe` from repeatedly displaying
    errors at point.
 
-By default Flycheck shows the error messages in the minibuffer or in a separate
-buffer if the minibuffer is too small to hold the whole error message but this
-behaviour is entirely customisable:
+By default Flycheck documents the errors at point through Eldoc, alongside
+other Eldoc sources such as Eglot.  This honors your Eldoc customizations,
+e.g. `eldoc-echo-area-use-multiline-p` or alternative Eldoc frontends like
+`eldoc-box`.  The behaviour is entirely customisable:
 
 .. defcustom:: flycheck-display-errors-function
 
@@ -119,15 +120,22 @@ behaviour is entirely customisable:
    The function is given the list of Flycheck errors to display as sole argument
    and shall display these errors to the user in some way.
 
-Flycheck provides two built-in functions for this option:
+Flycheck provides three built-in functions for this option:
+
+.. defun:: flycheck-display-errors-via-eldoc errors
+
+   The default.  Errors at point are shown through Eldoc.  Messages too
+   long for the echo area (see `eldoc-echo-area-use-multiline-p`) can be
+   read in full with :kbd:`M-x eldoc-doc-buffer`.
 
 .. defun:: flycheck-display-error-messages errors
            flycheck-display-error-messages-unless-error-list errors
 
    Show error messages and IDs in the echo area or in a separate buffer if the
-   echo area is too small (using `display-message-or-buffer` which see).  The
-   latter only displays errors when the :ref:`error list <flycheck-error-list>`
-   is not visible.  To enable it add the following to your :term:`init file`:
+   echo area is too small (using `display-message-or-buffer` which see).  This
+   was the default before Flycheck 37.  The latter only displays errors when
+   the :ref:`error list <flycheck-error-list>` is not visible.  To enable it
+   add the following to your :term:`init file`:
 
    .. code-block:: elisp
 
