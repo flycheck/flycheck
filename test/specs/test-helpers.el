@@ -219,6 +219,24 @@ The manifest path is relative to
 (setf (symbol-plist 'many-errors) nil)
 
 
+;;; Slow-checker test helpers (for check-interruption tests)
+
+(define-derived-mode slow-checker-mode prog-mode "slow")
+
+(flycheck-define-command-checker 'slow-checker
+  "Sleep for a minute before reporting an error."
+  :command `(,(or (executable-find "python3") "python")
+             "-c" "import time; time.sleep(60); print('slow:1:1:too late')")
+  :error-patterns '((error bol "slow:" line ":" column ":" (message)))
+  :modes '(slow-checker-mode))
+
+(defconst flycheck-test--slow-checker
+  (symbol-plist 'slow-checker)
+  "Saved plist for the slow-checker checker.")
+
+(setf (symbol-plist 'slow-checker) nil)
+
+
 ;;; Custom error level for error-level tests
 
 (flycheck-define-error-level 'test-level
