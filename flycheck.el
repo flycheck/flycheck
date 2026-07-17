@@ -4362,6 +4362,26 @@ refresh the mode line."
   (run-hook-with-args 'flycheck-status-changed-functions status)
   (force-mode-line-update))
 
+(defun flycheck-mode-line-list-errors (&optional event)
+  "Pop up the error list for the buffer of EVENT's window.
+
+Without a mouse EVENT, e.g. when invoked from the keyboard, pop
+up the error list for the current buffer."
+  (interactive (list last-nonmenu-event))
+  (let ((window (and (eventp event)
+                     (posn-window (event-start event)))))
+    ;; `posn-window' may return a frame for frame-relative positions
+    (with-selected-window (if (windowp window) window (selected-window))
+      (flycheck-list-errors))))
+
+(defvar flycheck-mode-line-counts-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map [mode-line mouse-1] #'flycheck-mode-line-list-errors)
+    ;; Some setups render the mode-line construct in the header line
+    (define-key map [header-line mouse-1] #'flycheck-mode-line-list-errors)
+    map)
+  "Keymap for the error counts in the mode line.")
+
 (defun flycheck-mode-line-status-text (&optional status)
   "Get a text describing STATUS for use in the mode line.
 
@@ -4375,17 +4395,27 @@ nil."
                       (`errored "!")
                       (`finished
                        (let-alist (flycheck-count-errors flycheck-current-errors)
-                         (concat
-                          (if (or .error .warning .info)
-                              (format ":%s|%s|%s" (or .error 0) (or .warning 0)
-                                      (or .info 0))
-                            flycheck-mode-success-indicator)
-                          ;; Signal that some errors were suppressed over
-                          ;; `flycheck-checker-error-threshold', even when
-                          ;; the kept errors have no built-in level
-                          (if (> flycheck--suppressed-error-count 0)
-                              "+"
-                            ""))))
+                         (propertize
+                          (concat
+                           (if (or .error .warning .info)
+                               (format ":%s|%s|%s" (or .error 0) (or .warning 0)
+                                       (or .info 0))
+                             flycheck-mode-success-indicator)
+                           ;; Signal that some errors were suppressed over
+                           ;; `flycheck-checker-error-threshold', even when
+                           ;; the kept errors have no built-in level
+                           (if (> flycheck--suppressed-error-count 0)
+                               "+"
+                             ""))
+                          'local-map flycheck-mode-line-counts-map
+                          'mouse-face 'mode-line-highlight
+                          'help-echo
+                          (concat
+                           (when (> flycheck--suppressed-error-count 0)
+                             (format "%d more errors not shown\
+ (see flycheck-checker-error-threshold)\n"
+                                     flycheck--suppressed-error-count))
+                           "mouse-1: list errors"))))
                       (`interrupted ".")
                       (`suspicious "?")))
          (face (when flycheck-mode-line-color
@@ -4397,13 +4427,6 @@ nil."
          (text (format " %s%s" flycheck-mode-line-prefix indicator)))
     (when face
       (setq text (propertize text 'face face)))
-    (when (and (eq current-status 'finished)
-               (> flycheck--suppressed-error-count 0))
-      (setq text (propertize
-                  text 'help-echo
-                  (format "%d more errors not shown\
- (see flycheck-checker-error-threshold)"
-                          flycheck--suppressed-error-count))))
     text))
 
 
