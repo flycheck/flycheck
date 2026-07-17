@@ -133,6 +133,25 @@ You can customise this behaviour with `flycheck-check-syntax-automatically`:
 
       (setq flycheck-check-syntax-automatically '(mode-enabled save))
 
+When a change-driven syntax check (``idle-change`` or ``save``) is triggered
+while a recently started check is still running, the running check is
+interrupted and the new one starts immediately, since its results would no
+longer match the buffer.  Checks triggered on every keystroke (the
+``new-line`` condition) or by buffer switches coalesce behind the running
+check instead, and syntax checkers that cannot be interrupted or that have
+already made substantial progress are left to finish:
+
+.. defcustom:: flycheck-interrupt-running-checks
+
+   Whether a new syntax check interrupts a running one.  With the default
+   value of ``10``, only running checks younger than ten seconds are
+   interrupted; checks that have made more progress are left to complete, and
+   the new check is deferred until they finish, so slow syntax checkers still
+   publish their results.  Set to ``t`` to always interrupt, or ``nil`` to
+   never interrupt and always defer, like older Flycheck versions did.
+   Setting ``nil`` file- or directory-locally is handy for projects whose
+   syntax checkers you never want interrupted.
+
 .. _flycheck-manual-checks:
 
 Check manually

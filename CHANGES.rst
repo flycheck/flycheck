@@ -2,6 +2,21 @@
 =======================
 
 - Drop support for Emacs 27; Flycheck now requires Emacs 28.1 or newer.
+- A new syntax check now interrupts a still-running one and starts
+  immediately, instead of waiting for it to finish and displaying its
+  stale results in the meantime.  This makes slow checkers (cargo, mypy
+  and friends) feel much more responsive.  The new option
+  ``flycheck-interrupt-running-checks`` controls this: with the default
+  value of ``10``, only checks younger than ten seconds are interrupted,
+  so long-running checks still complete and publish their results
+  instead of being restarted forever; ``t`` always interrupts and
+  ``nil`` (also usable file- or directory-locally) restores the old
+  queueing behavior.  Checks triggered on every keystroke (the
+  ``new-line`` condition) always coalesce behind a running check, and
+  checkers without an ``:interrupt`` function are never interrupted.
+  Interactive checks (``C-c ! c``) now also restart a running check
+  instead of doing nothing, without the age limit; Lisp calls to
+  ``flycheck-buffer`` keep the old do-nothing-while-running behavior.
 - The error list pops up in a bottom side window by default, a quarter of
   the frame tall.  Customize the new option
   ``flycheck-error-list-display-buffer-action`` to change that;

@@ -364,6 +364,43 @@ to the excessive errors."
   :risky t
   :package-version '(flycheck . "0.22"))
 
+(defcustom flycheck-interrupt-running-checks 10
+  "Whether a new syntax check interrupts a running one.
+
+When a syntax check is triggered while one is already running in
+the buffer, the running check can either be interrupted, so that
+the new check starts immediately and its results reflect the
+latest buffer contents, or the new check can be deferred until
+the running one finishes, like older Flycheck versions did.
+
+If the value is a number, interrupt running checks that are
+younger than that many seconds, and defer behind older ones.
+This is the default: fast syntax checkers restart immediately on
+every change, while slow checkers (think cargo or mypy on a large
+project) are left alone once they have made real progress, so
+they complete and publish their results instead of being
+restarted forever.
+
+If t, always interrupt running checks.  If nil, never interrupt,
+and always defer new checks, as older Flycheck versions did.
+
+Regardless of the value, checks triggered on every keystroke (the
+`new-line' condition) coalesce behind a running check, and
+checkers without an `:interrupt' function are never interrupted.
+Interactive checks (\\[flycheck-buffer]) are exempt from the age
+limit -- you asked for fresh results explicitly -- but nil
+disables interruption even for them.
+
+This variable is buffer-local friendly: set it to nil via file or
+directory local variables in projects whose syntax checkers you
+never want interrupted."
+  :group 'flycheck
+  :type '(choice (number :tag "Interrupt checks younger than N seconds")
+                 (const :tag "Always interrupt" t)
+                 (const :tag "Never interrupt; defer new checks" nil))
+  :safe (lambda (value) (or (booleanp value) (numberp value)))
+  :package-version '(flycheck . "37"))
+
 (defcustom flycheck-checker-error-threshold-action 'truncate
   "What to do when a checker exceeds `flycheck-checker-error-threshold'.
 
@@ -3039,8 +3076,12 @@ Slots:
 
 `working-directory'
      Working directory for the syntax checker.  Serves as a value for
-     `default-directory' for a checker."
-  buffer checker context working-directory)
+     `default-directory' for a checker.
+
+`start-time'
+     The time the syntax check was started, as a float."
+  buffer checker context working-directory
+  (start-time (float-time)))
 
 (defun flycheck-syntax-check-start (syntax-check callback)
   "Start a SYNTAX-CHECK with CALLBACK."
@@ -3313,7 +3354,14 @@ Set `flycheck-current-syntax-check' accordingly."
            :buffer (current-buffer)
            :checker checker
            :context nil
-           :working-directory (flycheck-compute-working-directory checker)))
+           :working-directory (flycheck-compute-working-directory checker)
+           ;; Chained checkers continue the same logical check: keep the
+           ;; original start time, so the age limit of
+           ;; `flycheck-interrupt-running-checks' covers the whole chain
+           :start-time (if flycheck-current-syntax-check
+                           (flycheck-syntax-check-start-time
+                            flycheck-current-syntax-check)
+                         (float-time))))
          (callback (flycheck-buffer-status-callback check)))
     (setq flycheck-current-syntax-check check)
     (flycheck-report-status 'running)
@@ -3323,15 +3371,72 @@ Set `flycheck-current-syntax-check' accordingly."
   "Determine whether a syntax check is running in the current buffer."
   (not (null flycheck-current-syntax-check)))
 
+(defun flycheck--interrupt-current-syntax-check ()
+  "Interrupt the running syntax check, without reporting a status."
+  (when (flycheck-running-p)
+    (let ((syntax-check flycheck-current-syntax-check))
+      ;; Remove the current syntax check FIRST, to reset Flycheck into a
+      ;; non-running state, and to make
+      ;; `flycheck-report-buffer-checker-status' ignore any status reports
+      ;; from the interrupted syntax check.  Interrupting below may run the
+      ;; process sentinel synchronously, so this must happen before.
+      (setq flycheck-current-syntax-check nil)
+      ;; A signaling interrupt function must not leave Flycheck in a
+      ;; half-stopped state; the interrupted check's reports are already
+      ;; ignored at this point
+      (with-demoted-errors "Error interrupting syntax check: %S"
+        (flycheck-syntax-check-interrupt syntax-check)))))
+
 (defun flycheck-stop ()
   "Stop any ongoing syntax check in the current buffer."
   (when (flycheck-running-p)
-    (flycheck-syntax-check-interrupt flycheck-current-syntax-check)
-    ;; Remove the current syntax check, to reset Flycheck into a non-running
-    ;; state, and to make `flycheck-report-buffer-checker-status' ignore any
-    ;; status reports from the current syntax check.
-    (setq flycheck-current-syntax-check nil)
-    (flycheck-report-status 'interrupted)))
+    (flycheck--interrupt-current-syntax-check)
+    ;; Match the observable behavior of older Flycheck versions, where
+    ;; the interrupted process's own status report cleared the buffer
+    ;; state and ran `flycheck-syntax-check-failed-hook' -- but do it
+    ;; deterministically, instead of relying on the process sentinel
+    ;; running inline.  Only after the check was interrupted: a
+    ;; signaling hook must not leave the checker process running.
+    (flycheck-report-failed-syntax-check 'interrupted)))
+
+(defun flycheck--interruptible-check-p ()
+  "Whether the running syntax check can be interrupted.
+
+Only syntax checkers with an `:interrupt' function can be
+interrupted; for others the check would keep running in the
+background and pile up with its replacement."
+  (and flycheck-current-syntax-check
+       (flycheck-checker-get
+        (flycheck-syntax-check-checker flycheck-current-syntax-check)
+        'interrupt)
+       t))
+
+(defconst flycheck--interrupting-conditions '(idle-change save)
+  "Trigger conditions that may interrupt a running syntax check.
+
+Only conditions that imply changed buffer contents qualify: the
+running check's results are stale then, so restarting has value.
+Buffer switches and the deferred-check drain don't change the
+contents, and `new-line' fires on every keystroke; interrupting
+for these would kill and restart the checker without gaining
+anything.")
+
+(defun flycheck--may-interrupt-at-condition-p (condition)
+  "Whether checks triggered at CONDITION may interrupt a running check.
+
+Consults `flycheck-interrupt-running-checks'.  Only conditions in
+`flycheck--interrupting-conditions' interrupt, and with a numeric
+option value only checks younger than that many seconds are
+interrupted, so that slow checkers eventually complete."
+  (let ((allowed flycheck-interrupt-running-checks))
+    (and allowed
+         (seq-intersection (if (listp condition) condition (list condition))
+                           flycheck--interrupting-conditions)
+         (or (eq allowed t)
+             (< (- (float-time)
+                   (flycheck-syntax-check-start-time
+                    flycheck-current-syntax-check))
+                allowed)))))
 
 (defun flycheck-buffer-status-callback (syntax-check)
   "Create a status callback for SYNTAX-CHECK in the current buffer."
@@ -3343,28 +3448,44 @@ Set `flycheck-current-syntax-check' accordingly."
   "Start checking syntax in the current buffer.
 
 Get a syntax checker for the current buffer with
-`flycheck-get-checker-for-buffer', and start it."
+`flycheck-get-checker-for-buffer', and start it.
+
+Interactively, a running syntax check is interrupted first, per
+`flycheck-interrupt-running-checks' (without its age limit, since
+you asked for fresh results explicitly).  When called from Lisp
+while a check is running, do nothing; automatic re-checks handle
+interruption in `flycheck-buffer-automatically' instead."
   (interactive)
   (flycheck-clean-deferred-check)
   (if flycheck-mode
-      (unless (flycheck-running-p)
-        ;; Clear error list and mark all overlays for deletion.  We do not
-        ;; delete all overlays immediately to avoid excessive re-displays and
-        ;; flickering, if the same errors gets highlighted again after the check
-        ;; completed.
-        (run-hooks 'flycheck-before-syntax-check-hook)
-        (flycheck-clear-errors)
-        (setq flycheck--suppressed-error-count 0)
-        (flycheck-mark-all-overlays-for-deletion)
-        (condition-case err
-            (let* ((checker (flycheck-get-checker-for-buffer)))
-              (if checker
-                  (flycheck-start-current-syntax-check checker)
-                (flycheck-clear)
-                (flycheck-report-status 'no-checker)))
-          (error
-           (flycheck-report-failed-syntax-check)
-           (signal (car err) (cdr err)))))
+      (progn
+        (when (and (called-interactively-p 'any)
+                   (flycheck-running-p)
+                   flycheck-interrupt-running-checks
+                   (flycheck--interruptible-check-p)
+                   ;; Don't kill a useful running check when no new one
+                   ;; could start in its place; resolution errors surface
+                   ;; in the check below
+                   (ignore-errors (flycheck-get-checker-for-buffer)))
+          (flycheck--interrupt-current-syntax-check))
+        (unless (flycheck-running-p)
+          ;; Clear error list and mark all overlays for deletion.  We do not
+          ;; delete all overlays immediately to avoid excessive re-displays
+          ;; and flickering, if the same errors gets highlighted again after
+          ;; the check completed.
+          (run-hooks 'flycheck-before-syntax-check-hook)
+          (flycheck-clear-errors)
+          (setq flycheck--suppressed-error-count 0)
+          (flycheck-mark-all-overlays-for-deletion)
+          (condition-case err
+              (let* ((checker (flycheck-get-checker-for-buffer)))
+                (if checker
+                    (flycheck-start-current-syntax-check checker)
+                  (flycheck-clear)
+                  (flycheck-report-status 'no-checker)))
+            (error
+             (flycheck-report-failed-syntax-check)
+             (signal (car err) (cdr err))))))
     (user-error "Flycheck mode disabled")))
 
 (defun flycheck-report-buffer-checker-status
@@ -3643,17 +3764,33 @@ returns nil for CONDITION.  (CONDITION may be a single condition
 or a list of them.)
 
 The syntax check is deferred if FORCE-DEFERRED is non-nil, or if
-`flycheck-must-defer-check' returns t."
+the buffer is not visible or being reverted.  When a syntax check
+is already running, it is interrupted per
+`flycheck-interrupt-running-checks'; if it is kept instead, the
+new check is deferred until it finishes."
   (when (and flycheck-mode (if (listp condition)
                                (apply #'flycheck-may-check-automatically
                                       condition)
                              (flycheck-may-check-automatically condition)))
     (flycheck--clear-idle-trigger-timer)
     (setq flycheck--idle-trigger-conditions nil)
-    (if (or force-deferred (flycheck-must-defer-check))
+    (if (or force-deferred (flycheck--must-defer-regardless-of-running-p))
         (flycheck-buffer-deferred)
-      (with-demoted-errors "Error while checking syntax automatically: %S"
-        (flycheck-buffer)))))
+      ;; A new check supersedes a running one: its results would be
+      ;; outdated by the time it finishes anyway.  But don't kill a useful
+      ;; running check when no new one could start in its place.
+      (when (and (flycheck-running-p)
+                 (flycheck--may-interrupt-at-condition-p condition)
+                 (flycheck--interruptible-check-p)
+                 (ignore-errors (flycheck-get-checker-for-buffer)))
+        (flycheck--interrupt-current-syntax-check))
+      ;; When the running check was kept -- it cannot be interrupted, or
+      ;; has made too much progress to throw away -- queue the new check
+      ;; behind it, like older Flycheck versions did
+      (if (flycheck-must-defer-check)
+          (flycheck-buffer-deferred)
+        (with-demoted-errors "Error while checking syntax automatically: %S"
+          (flycheck-buffer))))))
 
 (defun flycheck--clear-idle-trigger-timer ()
   "Clear the idle trigger timer."
@@ -3760,12 +3897,22 @@ A check has to be deferred if the buffer is not visible, or if the buffer is
 currently being reverted.
 
 Return t if the check is to be deferred, or nil otherwise."
-  (or (not (get-buffer-window))
+  (or (flycheck--must-defer-regardless-of-running-p)
       ;; We defer the syntax check if Flycheck is already running, to
       ;; immediately start a new syntax check after the current one finished,
       ;; because the result of the current check will most likely be outdated by
-      ;; the time it is finished.
-      (flycheck-running-p)
+      ;; the time it is finished.  `flycheck-buffer-automatically' may
+      ;; interrupt the running check instead; see
+      ;; `flycheck-interrupt-running-checks'.
+      (flycheck-running-p)))
+
+(defun flycheck--must-defer-regardless-of-running-p ()
+  "Whether a new syntax check must be deferred, running check or not.
+
+Like `flycheck-must-defer-check', but without considering a
+running syntax check, which may be interrupted to make room; the
+conditions here cannot be resolved by interruption."
+  (or (not (get-buffer-window))
       ;; We must defer checks while a buffer is being reverted, to avoid race
       ;; conditions while the buffer contents are being restored.
       revert-buffer-in-progress-p))

@@ -6,6 +6,30 @@
 (require 'test-helpers)
 (require 'shut-up)
 
+(defmacro flycheck-test--with-fake-running-check (checker properties &rest body)
+  "Run BODY with a fake running check by CHECKER defined with PROPERTIES.
+
+Define CHECKER as a generic syntax checker with PROPERTIES (a
+quoted plist), install a fake syntax check for it as
+`flycheck-current-syntax-check', and clean everything up
+afterwards."
+  (declare (indent 2))
+  `(flycheck-buttercup-with-temp-buffer
+     (apply #'flycheck-define-generic-checker ,checker
+            "A fake checker for interruption specs." ,properties)
+     (unwind-protect
+         (progn
+           (setq flycheck-current-syntax-check
+                 (flycheck-syntax-check-new
+                  :buffer (current-buffer)
+                  :checker ,checker
+                  :context nil
+                  :working-directory default-directory))
+           ,@body)
+       (setq flycheck-current-syntax-check nil)
+       (flycheck-clean-deferred-check)
+       (setf (symbol-plist ,checker) nil))))
+
 (describe "Command checker"
 
   (describe "flycheck-command-argument-p"
@@ -246,6 +270,183 @@
             (setq flycheck-error-list-source-buffer source)
             (expect (flycheck-error-list-mode-line-suppressed-indicator)
                     :to-equal "")))))
+
+    (it "interrupts a running check when a new one starts"
+      (assume (or (executable-find "python3") (executable-find "python")))
+      (cl-letf* ((flycheck-checker 'slow-checker)
+                 ((symbol-plist 'slow-checker) flycheck-test--slow-checker))
+        (flycheck-buttercup-with-temp-buffer
+          (slow-checker-mode)
+          (insert "hello\n")
+          (flycheck-mode)
+          (unwind-protect
+              (progn
+                (flycheck-buffer)
+                (expect (flycheck-running-p) :to-be-truthy)
+                (let* ((first-check flycheck-current-syntax-check)
+                       (first-process
+                        (flycheck-syntax-check-context first-check)))
+                  ;; Only interactive invocations interrupt
+                  (funcall-interactively #'flycheck-buffer)
+                  ;; The second check interrupted the first and took over,
+                  ;; and the first check's process is dead
+                  (expect (flycheck-running-p) :to-be-truthy)
+                  (expect flycheck-current-syntax-check
+                          :not :to-be first-check)
+                  (expect (process-live-p first-process)
+                          :not :to-be-truthy)))
+            (flycheck-stop)))))
+
+    (it "does not interrupt a running check when configured not to"
+      (assume (or (executable-find "python3") (executable-find "python")))
+      (cl-letf* ((flycheck-checker 'slow-checker)
+                 ((symbol-plist 'slow-checker) flycheck-test--slow-checker)
+                 (flycheck-interrupt-running-checks nil))
+        (flycheck-buttercup-with-temp-buffer
+          (slow-checker-mode)
+          (insert "hello\n")
+          (flycheck-mode)
+          (unwind-protect
+              (progn
+                (flycheck-buffer)
+                (let ((first-check flycheck-current-syntax-check))
+                  ;; The running check keeps running even for an
+                  ;; interactive invocation; the new check is a no-op
+                  (funcall-interactively #'flycheck-buffer)
+                  (expect flycheck-current-syntax-check :to-be first-check)
+                  ;; Lisp calls never interrupt to begin with
+                  (let ((flycheck-interrupt-running-checks t))
+                    (flycheck-buffer)
+                    (expect flycheck-current-syntax-check
+                            :to-be first-check))))
+            (flycheck-stop)))))
+
+    (it "ignores reports from an interrupt that fires synchronously"
+      ;; `delete-process' can run the process sentinel inline, so the
+      ;; interrupted check's status report must not clear the buffer state
+      (flycheck-buttercup-with-temp-buffer
+        (let (captured-callback)
+          (flycheck-define-generic-checker 'sync-interrupt
+            "Capture the callback; report synchronously on interruption."
+            :start (lambda (_checker callback)
+                     (setq captured-callback callback))
+            :interrupt (lambda (_checker _context)
+                         (funcall captured-callback 'errored "interrupted"))
+            :modes '(prog-mode))
+          (unwind-protect
+              (progn
+                (setq flycheck-current-syntax-check
+                      (flycheck-syntax-check-new
+                       :buffer (current-buffer)
+                       :checker 'sync-interrupt
+                       :context nil
+                       :working-directory default-directory))
+                (setq captured-callback
+                      (flycheck-buffer-status-callback
+                       flycheck-current-syntax-check))
+                (setq flycheck-current-errors
+                      (list (flycheck-error-new-at 1 1 'error "keep me")))
+                ;; The restart path interrupts via the internal function:
+                ;; the synchronous 'errored report must be ignored, and
+                ;; the displayed errors survive for the replacement check
+                (flycheck--interrupt-current-syntax-check)
+                (expect flycheck-current-errors :to-be-truthy)
+                (expect flycheck-last-status-change :not :to-be 'errored)
+                ;; A genuine stop clears deterministically, like older
+                ;; Flycheck versions did via the inline sentinel report
+                (setq flycheck-current-syntax-check
+                      (flycheck-syntax-check-new
+                       :buffer (current-buffer)
+                       :checker 'sync-interrupt
+                       :context nil
+                       :working-directory default-directory))
+                (setq captured-callback
+                      (flycheck-buffer-status-callback
+                       flycheck-current-syntax-check))
+                (flycheck-stop)
+                (expect flycheck-current-errors :not :to-be-truthy)
+                (expect flycheck-last-status-change :to-be 'interrupted))
+            (setf (symbol-plist 'sync-interrupt) nil)))))
+
+    (it "does not interrupt checkers without an interrupt function"
+      (flycheck-test--with-fake-running-check 'no-interrupt
+          '(:start ignore :modes (prog-mode))
+        (expect (flycheck--interruptible-check-p) :not :to-be-truthy)
+        (let ((first-check flycheck-current-syntax-check)
+              (flycheck-mode t))
+          ;; Even an interactive check must not stop it and pile up a
+          ;; second concurrent one
+          (funcall-interactively #'flycheck-buffer)
+          (expect flycheck-current-syntax-check :to-be first-check))))
+
+    (it "only interrupts at content-changing trigger conditions"
+      (flycheck-test--with-fake-running-check 'gate-checker
+          '(:start ignore :interrupt ignore :modes (prog-mode))
+        (cl-flet ((may-p (condition &optional option)
+                    (let ((flycheck-interrupt-running-checks
+                           (or option t)))
+                      (flycheck--may-interrupt-at-condition-p condition))))
+          (expect (may-p 'idle-change) :to-be-truthy)
+          (expect (may-p 'save) :to-be-truthy)
+          (expect (may-p '(idle-buffer-switch idle-change)) :to-be-truthy)
+          ;; Per-keystroke triggers coalesce behind the running check
+          (expect (may-p 'new-line) :not :to-be-truthy)
+          ;; Buffer switches don't change the contents, so the running
+          ;; check's results are not stale
+          (expect (may-p 'idle-buffer-switch) :not :to-be-truthy)
+          ;; The deferred-check drain passes no condition
+          (expect (may-p nil) :not :to-be-truthy)
+          ;; Numeric option: young checks are interruptible...
+          (expect (may-p 'idle-change 10) :to-be-truthy)
+          ;; ...checks that made real progress are protected
+          (setf (flycheck-syntax-check-start-time
+                 flycheck-current-syntax-check)
+                (- (float-time) 60))
+          (expect (may-p 'idle-change 10) :not :to-be-truthy))
+        (let ((flycheck-interrupt-running-checks nil))
+          (expect (flycheck--may-interrupt-at-condition-p 'idle-change)
+                  :not :to-be-truthy))))
+
+    (it "defers the new check when the running one is kept"
+      (flycheck-test--with-fake-running-check 'keeper
+          '(:start ignore :modes (prog-mode))
+        (rename-buffer "flycheck-keeper-test")
+        (cl-letf (((symbol-function 'get-buffer-window)
+                   (lambda (&rest _) (selected-window))))
+          (let ((first-check flycheck-current-syntax-check)
+                (flycheck-mode t))
+            (flycheck-buffer-automatically 'idle-change)
+            ;; No :interrupt function: the running check is kept and the
+            ;; new one queued behind it
+            (expect flycheck-current-syntax-check :to-be first-check)
+            (expect (flycheck-deferred-check-p) :to-be-truthy)))))
+
+    (it "keeps the chain's start time across chained checkers"
+      (flycheck-test--with-fake-running-check 'chain-link
+          '(:start ignore :modes (prog-mode))
+        (setf (flycheck-syntax-check-start-time flycheck-current-syntax-check)
+              1000.0)
+        ;; Starting the next chain link inherits the start time of the
+        ;; running check, so the interruption age limit covers the whole
+        ;; chain
+        (flycheck-start-current-syntax-check 'chain-link)
+        (expect (flycheck-syntax-check-start-time
+                 flycheck-current-syntax-check)
+                :to-equal 1000.0)))
+
+    (it "keeps the running check when the buffer is not visible"
+      (flycheck-test--with-fake-running-check 'invisible-checker
+          '(:start ignore :interrupt ignore :modes (prog-mode))
+        (rename-buffer "flycheck-invisible-test")
+        (cl-letf (((symbol-function 'get-buffer-window)
+                   (lambda (&rest _) nil)))
+          (let ((first-check flycheck-current-syntax-check)
+                (flycheck-mode t))
+            ;; The replacement could only be deferred, so the running
+            ;; check must not be killed
+            (flycheck-buffer-automatically 'save)
+            (expect flycheck-current-syntax-check :to-be first-check)
+            (expect (flycheck-deferred-check-p) :to-be-truthy)))))
 
     (it "forces English messages without overriding the character set"
       ;; LC_MESSAGES=C gives English output, while LC_ALL is left alone so
