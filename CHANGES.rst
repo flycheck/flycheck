@@ -20,6 +20,8 @@
   extensions like flycheck-posframe keep working unchanged.
 - The error counts in the mode line are clickable: ``mouse-1`` pops up
   the error list.
+- ``flycheck-verify-setup`` and ``flycheck-verify-checker`` now ask
+  before saving a modified buffer instead of saving it silently.
 - [#1787]: Add the ``:handle-suspicious`` property to command checkers.
   It lets a checker translate a "suspicious state" (a non-zero exit
   status with no parsable errors, e.g. a missing dependency) into
