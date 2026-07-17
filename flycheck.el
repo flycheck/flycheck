@@ -2838,9 +2838,12 @@ is applicable from Emacs Lisp code.  Use
   (unless (flycheck-valid-checker-p checker)
     (user-error "%s is not a syntax checker" checker))
 
-  ;; Save the buffer to make sure that all predicates are good
-  ;; FIXME: this may be surprising to users, with unintended side-effects.
-  (when (and (buffer-file-name) (buffer-modified-p))
+  ;; Predicates and `:enabled' functions usually check the file on disk, so
+  ;; the verification is only accurate for a saved buffer.  Ask instead of
+  ;; saving behind the user's back, which may have unintended side effects
+  ;; (e.g. save hooks and file watchers).
+  (when (and (buffer-file-name) (buffer-modified-p)
+             (y-or-n-p "Save the buffer to make the verification accurate? "))
     (save-buffer))
 
   (let ((buffer (current-buffer)))
@@ -2866,9 +2869,10 @@ Display a new buffer listing all syntax checkers that could be
 applicable in the current buffer.  For each syntax checker,
 possible problems are shown."
   (interactive)
-  ;; Save to make sure checkers that only work on saved buffers will pass the
-  ;; verification
-  (when (and (buffer-file-name) (buffer-modified-p))
+  ;; Checkers that only work on saved buffers would fail the verification
+  ;; for a modified buffer, so ask instead of saving behind the user's back
+  (when (and (buffer-file-name) (buffer-modified-p)
+             (y-or-n-p "Save the buffer to make the verification accurate? "))
     (save-buffer))
 
   (let* ((buffer (current-buffer))
