@@ -79,6 +79,7 @@
 (require 'help-mode)             ; `define-button-type'
 (require 'find-func)             ; `find-function-regexp-alist'
 (require 'ansi-color)            ; `flycheck-parse-with-patterns-without-color'
+(require 'url-util)              ; `url-unhex-string' for `flycheck-parse-sarif'
 
 
 ;; Declare a bunch of dynamic variables that we need from other modes
@@ -6514,6 +6515,13 @@ of command checkers is `flycheck-sanitize-errors'.
      must return a list of `flycheck-error' objects parsed from
      OUTPUT.
 
+     Flycheck provides ready-made parsers for common structured
+     output formats: `flycheck-parse-checkstyle' for Checkstyle
+     XML and `flycheck-parse-sarif' for SARIF, which many
+     analyzers can emit.  Prefer these over `:error-patterns'
+     when a checker offers such an output format, as they are
+     more robust than matching human-readable text.
+
      This property is optional.  If omitted, it defaults to
      `flycheck-parse-with-patterns'.  In this case,
      `:error-patterns' is mandatory.
@@ -7967,6 +7975,93 @@ lines, and returns the parsed JSON lines in a list."
           (push (funcall flycheck--json-parser) objects))
         (forward-line)))
     (nreverse objects)))
+
+(defun flycheck-parse-sarif--level (level)
+  "Map a SARIF result LEVEL string to a Flycheck error level."
+  (pcase level
+    ("error" 'error)
+    ("warning" 'warning)
+    ;; \"note\" is advisory, \"none\" carries no severity of its own
+    ((or "note" "none") 'info)
+    ;; SARIF defaults an unspecified level to \"warning\"
+    (_ 'warning)))
+
+(defun flycheck-parse-sarif (output checker buffer)
+  "Parse SARIF errors from OUTPUT.
+
+Parse output in the Static Analysis Results Interchange Format
+\(SARIF) 2.1.0.  Use this error parser for checkers that have an
+option to output errors in this format.
+
+CHECKER and BUFFER denote the CHECKER that returned OUTPUT and
+the BUFFER that was checked respectively.
+
+See URL `https://sarifweb.azurewebsites.net/' for more
+information about SARIF."
+  (let-alist (car (flycheck-parse-json output))
+    (seq-mapcat
+     (lambda (run)
+       (let-alist run
+         ;; The rules of the run's driver supply the id and default level
+         ;; of a result that omits them
+         (let ((rules .tool.driver.rules))
+           (seq-mapcat
+            (lambda (result)
+              (let-alist result
+                (let* ((rule
+                        ;; A result references its rule by index into the
+                        ;; rules array, or by id
+                        (or (and (natnump .ruleIndex)
+                                 (nth .ruleIndex rules))
+                            (and .ruleId
+                                 (seq-find (lambda (r)
+                                             (equal (alist-get 'id r)
+                                                    .ruleId))
+                                           rules))))
+                       (id (or .ruleId (alist-get 'id rule)))
+                       (level (flycheck-parse-sarif--level
+                               (or .level
+                                   (let-alist rule
+                                     .defaultConfiguration.level))))
+                       (message .message.text))
+                  (if .locations
+                      (seq-map
+                       (lambda (location)
+                         (let-alist location
+                           (flycheck-error-new-at
+                            .physicalLocation.region.startLine
+                            .physicalLocation.region.startColumn
+                            level message
+                            :id id
+                            :checker checker
+                            :buffer buffer
+                            :filename
+                            (flycheck-parse-sarif--uri
+                             .physicalLocation.artifactLocation.uri)
+                            :end-line .physicalLocation.region.endLine
+                            :end-column .physicalLocation.region.endColumn)))
+                       .locations)
+                    ;; A result without a location applies to the whole run
+                    (list (flycheck-error-new-at
+                           nil nil level message
+                           :id id :checker checker :buffer buffer))))))
+            .results))))
+     .runs)))
+
+(defun flycheck-parse-sarif--uri (uri)
+  "Turn a SARIF artifact-location URI into a file name.
+
+Strip a `file://' scheme and percent-decode URI; return relative
+URIs unchanged, for Flycheck to expand against the working
+directory."
+  (when uri
+    ;; Strip a file:// scheme and any authority: file:///abs/path and
+    ;; file://host/abs/path both leave the leading slash of the path
+    (when (string-match "\\`file://[^/]*" uri)
+      (setq uri (substring uri (match-end 0))))
+    ;; `url-unhex-string' returns the raw bytes of percent escapes, which
+    ;; must be decoded, as file URIs percent-encode UTF-8
+    (decode-coding-string (url-unhex-string uri) 'utf-8)))
 
 (defun flycheck-parse-rustc (output checker buffer)
   "Parse rustc errors from OUTPUT and return a list of `flycheck-error'.
