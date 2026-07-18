@@ -113,8 +113,8 @@ it for all ``prog-mode`` buffers.  If no backends for the major mode are
 available, Flymake will non-intrusively tell you in the modeline.
 
 **Flycheck** provides a global mode `global-flycheck-mode` which enables syntax
-checking in every supported language, where it is safe to do so (remote and
-encrypted buffers are excluded by default).
+checking in every supported language, including remote files over TRAMP
+(encrypted buffers are excluded by default).
 
 Syntax checkers
 ---------------
