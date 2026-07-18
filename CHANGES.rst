@@ -2,6 +2,14 @@
 =======================
 
 - Drop support for Emacs 27; Flycheck now requires Emacs 28.1 or newer.
+- The ``dockerfile-hadolint`` checker now parses hadolint's SARIF output
+  (``--format sarif``) via ``flycheck-parse-sarif`` instead of matching
+  its text output with error patterns, so it no longer breaks when
+  hadolint tweaks its human-readable format.
+- ``flycheck-parse-sarif`` now treats a zero-width SARIF region (where
+  the start and end positions coincide, as some tools emit for
+  line-level findings) as spanning the whole line, instead of producing
+  an empty highlight.
 - Add ``flycheck-parse-sarif``, a ready-made ``:error-parser`` for the
   SARIF output format that many analyzers can emit.  Like the existing
   ``flycheck-parse-checkstyle``, checker definitions can point
