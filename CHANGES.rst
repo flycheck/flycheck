@@ -2,6 +2,11 @@
 =======================
 
 - Drop support for Emacs 27; Flycheck now requires Emacs 28.1 or newer.
+- Add ``flycheck-parse-sarif``, a ready-made ``:error-parser`` for the
+  SARIF output format that many analyzers can emit.  Like the existing
+  ``flycheck-parse-checkstyle``, checker definitions can point
+  ``:error-parser`` at it instead of matching output text with
+  ``:error-patterns``.
 - [#1129]: ``javascript-eslint`` no longer probes for a configuration
   file with a blocking ``--print-config`` call before the first check in
   every buffer, which used to freeze Emacs for its duration (the
