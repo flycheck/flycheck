@@ -874,6 +874,32 @@ If nil, never check syntax automatically.  In this case, use
   :package-version '(flycheck . "0.12")
   :safe #'flycheck-symbol-list-p)
 
+(defcustom flycheck-check-syntax-automatically-remote '(save mode-enabled)
+  "When Flycheck should check syntax automatically in remote buffers.
+
+Like `flycheck-check-syntax-automatically', but used for buffers
+visiting remote files (see `file-remote-p').  Checking a remote
+buffer spawns a process on the remote host over TRAMP, which is
+slow, so the change-driven triggers (`idle-change', `new-line',
+`idle-buffer-switch') are excluded by default and remote buffers
+are only checked on `save' and `mode-enabled'.
+
+Set to the symbol t to check remote buffers on the same events as
+local ones, i.e. to use `flycheck-check-syntax-automatically'
+unchanged.  A manual \\[flycheck-buffer] always works regardless
+of this option."
+  :group 'flycheck
+  :type '(choice
+          (const :tag "Same as local buffers" t)
+          (set (const :tag "After the buffer was saved" save)
+               (const :tag "After the buffer was changed and idle" idle-change)
+               (const
+                :tag "After switching the current buffer" idle-buffer-switch)
+               (const :tag "After a new line was inserted" new-line)
+               (const :tag "After `flycheck-mode' was enabled" mode-enabled)))
+  :package-version '(flycheck . "38")
+  :safe (lambda (value) (or (eq value t) (flycheck-symbol-list-p value))))
+
 (defcustom flycheck-idle-change-delay 0.5
   "How many seconds to wait after a change before checking syntax.
 
@@ -3792,10 +3818,16 @@ under at least one of them, according to
   (and (not (or buffer-read-only (flycheck-ephemeral-buffer-p)))
        (file-exists-p default-directory)
        (or (not conditions)
-           (seq-some
-            (lambda (condition)
-              (memq condition flycheck-check-syntax-automatically))
-            conditions))))
+           (let ((allowed
+                  ;; Remote buffers use a narrower set of trigger events by
+                  ;; default, since each check spawns a slow remote process
+                  (if (and (file-remote-p default-directory)
+                           (not (eq flycheck-check-syntax-automatically-remote
+                                    t)))
+                      flycheck-check-syntax-automatically-remote
+                    flycheck-check-syntax-automatically)))
+             (seq-some (lambda (condition) (memq condition allowed))
+                       conditions)))))
 
 (defvar-local flycheck--idle-trigger-timer nil
   "Timer used to trigger a syntax check after an idle delay.")
@@ -4004,8 +4036,10 @@ Flycheck mode is not enabled for
 - Flycheck's own error message buffer,
 - ephemeral buffers (see `flycheck-ephemeral-buffer-p'),
 - encrypted buffers (see `flycheck-encrypted-buffer-p'),
-- remote files (see `file-remote-p'),
 - and major modes excluded by `flycheck-global-modes'.
+
+Remote files (see `file-remote-p') are checked like local ones;
+command checkers run on the remote host over TRAMP.
 
 Return non-nil if Flycheck mode may be enabled, and nil
 otherwise."
@@ -4019,9 +4053,7 @@ otherwise."
                 (eq (get major-mode 'mode-class) 'special)
                 (derived-mode-p 'flycheck-error-message-mode)
                 (flycheck-ephemeral-buffer-p)
-                (flycheck-encrypted-buffer-p)
-                (and (buffer-file-name)
-                     (file-remote-p (buffer-file-name) 'method))))))
+                (flycheck-encrypted-buffer-p)))))
 
 (defun flycheck-mode-on-safe ()
   "Enable command `flycheck-mode' if it is safe to do so.

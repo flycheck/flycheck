@@ -42,7 +42,38 @@
             (expect (seq-every-p #'flycheck-may-check-automatically
                                  flycheck-check-syntax-automatically)
                     :to-be-truthy)
-            (expect (flycheck-may-check-automatically) :to-be-truthy))))))
+            (expect (flycheck-may-check-automatically) :to-be-truthy)))))
+
+    (describe "in remote buffers"
+      ;; `file-remote-p' parses the prefix without connecting, so faking
+      ;; it is enough to exercise the remote cadence without a live host.
+
+      (it "narrows to the remote trigger set by default"
+        (flycheck-buttercup-with-resource-buffer "automatic-check-dummy.el"
+          (spy-on 'file-remote-p :and-return-value "/ssh:host:")
+          (expect (flycheck-may-check-automatically 'save) :to-be-truthy)
+          (expect (flycheck-may-check-automatically 'mode-enabled) :to-be-truthy)
+          (expect (flycheck-may-check-automatically 'idle-change)
+                  :not :to-be-truthy)
+          (expect (flycheck-may-check-automatically 'new-line)
+                  :not :to-be-truthy)))
+
+      (it "honors flycheck-check-syntax-automatically-remote"
+        (flycheck-buttercup-with-resource-buffer "automatic-check-dummy.el"
+          (spy-on 'file-remote-p :and-return-value "/ssh:host:")
+          (let ((flycheck-check-syntax-automatically-remote '(idle-change)))
+            (expect (flycheck-may-check-automatically 'idle-change)
+                    :to-be-truthy)
+            (expect (flycheck-may-check-automatically 'save)
+                    :not :to-be-truthy))))
+
+      (it "uses the local trigger set when set to t"
+        (flycheck-buttercup-with-resource-buffer "automatic-check-dummy.el"
+          (spy-on 'file-remote-p :and-return-value "/ssh:host:")
+          (let ((flycheck-check-syntax-automatically-remote t)
+                (flycheck-check-syntax-automatically '(idle-change)))
+            (expect (flycheck-may-check-automatically 'idle-change)
+                    :to-be-truthy))))))
 
   (describe "flycheck-check-syntax-automatically"
 
