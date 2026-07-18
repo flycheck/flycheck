@@ -132,7 +132,18 @@
                  (exec-suffixes '(".program" ".bat"))
                  (result (flycheck-default-executable-find
                           (expand-file-name "dir/flycheck-testprog" temp-dir))))
-            (expect result :to-equal program-path))))))
+            (expect result :to-equal program-path)))))
+
+    (describe "on a remote host"
+      (it "resolves the executable on the host of a remote default-directory"
+        ;; `file-remote-p' parses the prefix without connecting, so no
+        ;; live remote is needed to verify the REMOTE argument is passed.
+        (spy-on 'executable-find :and-return-value "/ssh:host:/usr/bin/prog")
+        (let ((default-directory "/ssh:host:/home/user/"))
+          (expect (flycheck-default-executable-find "prog")
+                  :to-equal "/ssh:host:/usr/bin/prog")
+          (expect 'executable-find
+                  :to-have-been-called-with "prog" "/ssh:host:")))))
 
   (describe "flycheck-string-to-number-safe"
 
@@ -208,6 +219,27 @@
 
     (it "returns true for an empty list"
       (expect (flycheck-symbol-list-p '()) :to-be-truthy)))
+
+  (describe "flycheck--expand-file-name"
+
+    (it "expands a relative name against a local directory"
+      (expect (flycheck--expand-file-name "foo.py" "/home/user/")
+              :to-equal "/home/user/foo.py"))
+
+    (it "expands a relative name against a remote directory"
+      (expect (flycheck--expand-file-name "foo.py" "/ssh:host:/home/user/")
+              :to-equal "/ssh:host:/home/user/foo.py"))
+
+    (it "grafts the remote prefix onto a host-local absolute path"
+      ;; A checker running on the remote host reports host-local paths;
+      ;; the result must name the file on that host, not locally.
+      (expect (flycheck--expand-file-name "/tmp/foo.py" "/ssh:host:/home/user/")
+              :to-equal "/ssh:host:/tmp/foo.py"))
+
+    (it "leaves an already-remote filename untouched"
+      (expect (flycheck--expand-file-name
+               "/ssh:host:/tmp/foo.py" "/ssh:host:/home/user/")
+              :to-equal "/ssh:host:/tmp/foo.py")))
 
   (describe "flycheck-same-files-p"
 
