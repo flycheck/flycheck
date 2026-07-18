@@ -8028,18 +8028,38 @@ information about SARIF."
                       (seq-map
                        (lambda (location)
                          (let-alist location
-                           (flycheck-error-new-at
-                            .physicalLocation.region.startLine
-                            .physicalLocation.region.startColumn
-                            level message
-                            :id id
-                            :checker checker
-                            :buffer buffer
-                            :filename
-                            (flycheck-parse-sarif--uri
-                             .physicalLocation.artifactLocation.uri)
-                            :end-line .physicalLocation.region.endLine
-                            :end-column .physicalLocation.region.endColumn)))
+                           (let* ((start-line
+                                   .physicalLocation.region.startLine)
+                                  (start-col
+                                   .physicalLocation.region.startColumn)
+                                  (end-line
+                                   .physicalLocation.region.endLine)
+                                  (end-col
+                                   .physicalLocation.region.endColumn)
+                                  ;; A zero-width region carries no span:
+                                  ;; endColumn equals startColumn on the same
+                                  ;; line (endLine defaults to startLine per
+                                  ;; the SARIF spec).  Some tools emit these
+                                  ;; for line-level findings, so treat them as
+                                  ;; the whole line -- drop the column and end
+                                  ;; and let the highlighting mode take over,
+                                  ;; rather than highlight an empty range.
+                                  (zero-width
+                                   (and end-col
+                                        (equal end-col start-col)
+                                        (or (null end-line)
+                                            (equal end-line start-line)))))
+                             (flycheck-error-new-at
+                              start-line (unless zero-width start-col)
+                              level message
+                              :id id
+                              :checker checker
+                              :buffer buffer
+                              :filename
+                              (flycheck-parse-sarif--uri
+                               .physicalLocation.artifactLocation.uri)
+                              :end-line (unless zero-width end-line)
+                              :end-column (unless zero-width end-col)))))
                        .locations)
                     ;; A result without a location applies to the whole run
                     (list (flycheck-error-new-at
@@ -9275,25 +9295,17 @@ Requires DMD 2.066 or newer.  See URL `https://dlang.org/'."
   "A Dockerfile syntax checker using hadolint.
 
 See URL `https://github.com/hadolint/hadolint/'."
-  :command ("hadolint" "--no-color" "-")
+  :command ("hadolint" "--format" "sarif" "-")
   :standard-input t
-  :error-patterns
-  ((error line-start
-          (file-name) ":" line " " (id (one-or-more alnum)) " error: " (message)
-          line-end)
-   (warning line-start
-            (file-name) ":" line " " (id (one-or-more alnum))
-            " warning: " (message) line-end)
-   (info line-start
-         (file-name) ":" line " " (id (one-or-more alnum)) " info: " (message)
-         line-end)
-   (error line-start
-          (file-name) ":" line ":" column " " (message)
-          line-end))
+  :error-parser flycheck-parse-sarif
   :error-filter
   (lambda (errors)
+    ;; hadolint reports stdin as "-" for lint findings but as
+    ;; "/dev/stdin" for parse errors; strip both so the errors attach to
+    ;; the current buffer
     (flycheck-sanitize-errors
-     (flycheck-remove-error-file-names "-" errors)))
+     (flycheck-remove-error-file-names
+      "/dev/stdin" (flycheck-remove-error-file-names "-" errors))))
   :modes (dockerfile-mode dockerfile-ts-mode))
 
 (defun flycheck-credo--working-directory (&rest _ignored)

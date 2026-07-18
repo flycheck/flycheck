@@ -111,6 +111,45 @@
                  (car (flycheck-parse-sarif sarif 'checker 'buffer)))
                 :to-equal "/abs/path.py")))
 
+    (it "treats a zero-width region as the whole line"
+      ;; A start == end region carries no span; drop the column and end so
+      ;; the whole line is highlighted rather than an empty range.  Also
+      ;; covers endLine omitted, which defaults to startLine.
+      (dolist (region '("\"startLine\":2,\"startColumn\":1,\"endLine\":2,\"endColumn\":1"
+                        "\"startLine\":2,\"startColumn\":4,\"endColumn\":4"))
+        (let* ((sarif (concat "{\"runs\":[{\"tool\":{\"driver\":{\"name\":\"d\"}},\
+\"results\":[{\"message\":{\"text\":\"m\"},\"locations\":[{\"physicalLocation\":\
+{\"artifactLocation\":{\"uri\":\"a.txt\"},\"region\":{" region "}}}]}]}]}"))
+               (err (car (flycheck-parse-sarif sarif 'checker 'buffer))))
+          (expect (flycheck-error-line err) :to-equal 2)
+          (expect (flycheck-error-column err) :to-be nil)
+          (expect (flycheck-error-end-line err) :to-be nil)
+          (expect (flycheck-error-end-column err) :to-be nil))))
+
+    (it "keeps a non-empty region's end position"
+      (let ((sarif "{\"runs\":[{\"tool\":{\"driver\":{\"name\":\"d\"}},\
+\"results\":[{\"message\":{\"text\":\"m\"},\"locations\":[{\"physicalLocation\":\
+{\"artifactLocation\":{\"uri\":\"a.txt\"},\"region\":\
+{\"startLine\":2,\"startColumn\":3,\"endLine\":2,\"endColumn\":7}}}]}]}]}"))
+        (let ((err (car (flycheck-parse-sarif sarif 'checker 'buffer))))
+          (expect (flycheck-error-column err) :to-equal 3)
+          (expect (flycheck-error-end-line err) :to-equal 2)
+          (expect (flycheck-error-end-column err) :to-equal 7))))
+
+    (it "keeps multiple results at the same location distinct"
+      (let ((sarif "{\"runs\":[{\"tool\":{\"driver\":{\"name\":\"d\"}},\
+\"results\":[\
+{\"ruleId\":\"A\",\"message\":{\"text\":\"first\"},\"locations\":[\
+{\"physicalLocation\":{\"artifactLocation\":{\"uri\":\"a.txt\"},\
+\"region\":{\"startLine\":3}}}]},\
+{\"ruleId\":\"B\",\"message\":{\"text\":\"second\"},\"locations\":[\
+{\"physicalLocation\":{\"artifactLocation\":{\"uri\":\"a.txt\"},\
+\"region\":{\"startLine\":3}}}]}]}]}"))
+        (expect (mapcar (lambda (e) (list (flycheck-error-id e)
+                                          (flycheck-error-message e)))
+                        (flycheck-parse-sarif sarif 'checker 'buffer))
+                :to-equal '(("A" "first") ("B" "second")))))
+
     (it "utf-8-decodes percent escapes in file URIs"
       (let ((sarif "{\"runs\":[{\"tool\":{\"driver\":{\"name\":\"d\"}},\
 \"results\":[{\"message\":{\"text\":\"m\"},\"locations\":[{\"physicalLocation\":\
