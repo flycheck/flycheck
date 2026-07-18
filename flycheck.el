@@ -1684,7 +1684,10 @@ Return the path of the file."
 Return nil if the CHECKER does not write temporary files."
   (let ((args (flycheck-checker-arguments checker)))
     (cond
-     ((memq 'source args) temporary-file-directory)
+     ;; `flycheck-temp-file-system' creates the file with
+     ;; `make-nearby-temp-file', i.e. on the host of `default-directory',
+     ;; so probe that host's temporary directory, not the local one.
+     ((memq 'source args) (temporary-file-directory))
      ((memq 'source-inplace args)
       (if buffer-file-name (file-name-directory buffer-file-name)
         temporary-file-directory))
@@ -3816,7 +3819,6 @@ If CONDITIONS are given, determine whether syntax may be checked
 under at least one of them, according to
 `flycheck-check-syntax-automatically'."
   (and (not (or buffer-read-only (flycheck-ephemeral-buffer-p)))
-       (file-exists-p default-directory)
        (or (not conditions)
            (let ((allowed
                   ;; Remote buffers use a narrower set of trigger events by
@@ -3827,7 +3829,10 @@ under at least one of them, according to
                       flycheck-check-syntax-automatically-remote
                     flycheck-check-syntax-automatically)))
              (seq-some (lambda (condition) (memq condition allowed))
-                       conditions)))))
+                       conditions)))
+       ;; Checked last so a disallowed trigger short-circuits before this
+       ;; possibly-remote (and thus blocking) stat of `default-directory'.
+       (file-exists-p default-directory)))
 
 (defvar-local flycheck--idle-trigger-timer nil
   "Timer used to trigger a syntax check after an idle delay.")
@@ -7555,7 +7560,9 @@ use with `compilation-error-regexp-alist'."
 Like `flycheck-substitute-argument', except for source,
 source-inplace, and source-original."
   (if (memq arg '(source source-inplace source-original))
-      (list buffer-file-name)
+      ;; The command runs on the host of `default-directory', so strip any
+      ;; remote prefix from the file name.
+      (list (file-local-name buffer-file-name))
     (flycheck-substitute-argument arg checker)))
 
 (defun flycheck--checker-substituted-shell-command-arguments (checker)
@@ -7587,8 +7594,9 @@ shell execution."
          (abs-prog
           ;; The executable path returned by `flycheck-command-wrapper-function'
           ;; may not be absolute, so expand it here.  See URL
-          ;; `https://github.com/flycheck/flycheck/issues/1461'.
-          (or (executable-find (car wrapped))
+          ;; `https://github.com/flycheck/flycheck/issues/1461'.  Resolve it on
+          ;; the host the command runs on when `default-directory' is remote.
+          (or (executable-find (car wrapped) (file-remote-p default-directory))
               (user-error "Cannot find `%s' using `executable-find'"
                           (car wrapped))))
          (command (mapconcat #'shell-quote-argument
@@ -7596,7 +7604,8 @@ shell execution."
     (if (flycheck-checker-get checker 'standard-input)
         ;; If the syntax checker expects the source from standard input add an
         ;; appropriate shell redirection
-        (concat command " < " (shell-quote-argument (buffer-file-name)))
+        (concat command " < "
+                (shell-quote-argument (file-local-name (buffer-file-name))))
       command)))
 
 (defun flycheck-compile-name (_name)
@@ -11323,26 +11332,31 @@ See URL `https://proselint.com/' for more information about proselint."
               (let-alist (car response)
                 .result.<stdin>.diagnostics)))))
 
-(defvar flycheck--proselint-use-old-args 'unknown
-  "Cache for proselint version detection.
-Value is t for old (<= 0.14.0), nil for new (>= 0.16.0),
-or `unknown' if not yet detected.")
+(defvar flycheck--proselint-use-old-args (make-hash-table :test 'equal)
+  "Cache for proselint version detection, keyed by host.
+The key is the remote identifier of `default-directory' (see
+`file-remote-p'), or nil for the local host, since the proselint
+on each host may have a different version.  Each value is t for
+old (<= 0.14.0) proselint and nil for new (>= 0.16.0); a host
+absent from the table has not been probed yet.")
 
 (defvar flycheck-proselint-executable)
 
 (defun flycheck--proselint-args ()
-  "Return command arguments for proselint, detecting the version once."
-  (when (eq flycheck--proselint-use-old-args 'unknown)
-    (setq flycheck--proselint-use-old-args
-          ;; Probe on the host the check will run on (remote over TRAMP)
-          (zerop (process-file
-                  (or flycheck-proselint-executable "proselint")
-                  nil nil nil "--version"))))
-  (if flycheck--proselint-use-old-args
-      ;; Proselint versions <= 0.14.0:
-      (list "--json" "-")
-    ;; Proselint versions >= 0.16.0
-    (list "check" "--output-format=json")))
+  "Return command arguments for proselint, detecting the version once per host."
+  (let ((host (file-remote-p default-directory)))
+    (when (eq (gethash host flycheck--proselint-use-old-args 'unknown) 'unknown)
+      (puthash host
+               ;; Probe on the host the check will run on (remote over TRAMP).
+               (zerop (process-file
+                       (or flycheck-proselint-executable "proselint")
+                       nil nil nil "--version"))
+               flycheck--proselint-use-old-args))
+    (if (gethash host flycheck--proselint-use-old-args)
+        ;; Proselint versions <= 0.14.0:
+        (list "--json" "-")
+      ;; Proselint versions >= 0.16.0
+      (list "check" "--output-format=json"))))
 
 (flycheck-define-checker proselint
   "Flycheck checker using Proselint.
@@ -11374,7 +11388,8 @@ See URL `https://developers.google.com/protocol-buffers/'."
                                          (flycheck-temp-dir-system))))
             ;; Add the current directory to resolve imports
             (eval (concat "--proto_path="
-                          (file-name-directory (buffer-file-name))))
+                          (file-local-name
+                           (file-name-directory (buffer-file-name)))))
             ;; Add other import paths; this needs to be after the current
             ;; directory to produce the right output.  See URL
             ;; `https://github.com/flycheck/flycheck/pull/1655'
@@ -11395,7 +11410,8 @@ See URL `https://developers.google.com/protocol-buffers/'."
   "A Pug syntax checker using the pug compiler.
 
 See URL `https://pugjs.org/'."
-  :command ("pug" "-p" (eval (expand-file-name (buffer-file-name))))
+  :command ("pug" "-p"
+            (eval (file-local-name (expand-file-name (buffer-file-name)))))
   :standard-input t
   :error-patterns
   ;; errors with includes/extends (e.g. missing files)
