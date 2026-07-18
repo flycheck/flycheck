@@ -1,6 +1,10 @@
 ``master`` (unreleased)
 =======================
 
+
+37.0 (2026-07-18)
+=================
+
 - Drop support for Emacs 27; Flycheck now requires Emacs 28.1 or newer.
 - The ``dockerfile-hadolint`` checker now parses hadolint's SARIF output
   (``--format sarif``) via ``flycheck-parse-sarif`` instead of matching

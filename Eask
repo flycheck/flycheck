@@ -1,7 +1,7 @@
 ;; -*- mode: eask; lexical-binding: t -*-
 
 (package "flycheck"
-         "36.0"
+         "37.0"
          "On-the-fly syntax checking")
 
 (website-url "https://github.com/flycheck/flycheck")
