@@ -85,6 +85,7 @@
 ;; Declare a bunch of dynamic variables that we need from other modes
 (defvar sh-shell)                       ; For shell script checker predicates
 (defvar ess-language)                   ; For r-lintr predicate
+(defvar tramp-remote-process-environment) ; For remote checker env, see below
 (defvar markdown-hide-markup)                     ;
 (defvar markdown-fontify-code-block-default-mode) ; For rust-error-explainer
 (defvar markdown-fontify-code-blocks-natively)    ;
@@ -566,17 +567,20 @@ sandboxes."
 (defun flycheck-default-executable-find (executable)
   "Resolve EXECUTABLE to a full path.
 
-Like `executable-find', but supports relative paths.
+Like `executable-find', but supports relative paths, and resolves
+EXECUTABLE on the remote host when `default-directory' is remote,
+so that checkers can run over TRAMP.
 
 Attempts invoking `executable-find' first; if that returns nil,
 and EXECUTABLE contains a directory component, expands to a full
 path and tries invoking `executable-find' again."
-  ;; file-name-directory returns non-nil iff the given path has a
-  ;; directory component.
-  (or
-   (executable-find executable)
-   (when (file-name-directory executable)
-     (executable-find (expand-file-name executable)))))
+  (let ((remote (file-remote-p default-directory)))
+    ;; file-name-directory returns non-nil iff the given path has a
+    ;; directory component.
+    (or
+     (executable-find executable remote)
+     (when (file-name-directory executable)
+       (executable-find (expand-file-name executable) remote)))))
 
 (defcustom flycheck-indication-mode 'auto
   "The indication mode for Flycheck errors.
@@ -1566,6 +1570,19 @@ to a number and return it.  Otherwise return nil."
       (puthash file (file-truename (directory-file-name file))
                flycheck--file-truename-cache)))
 
+(defun flycheck--expand-file-name (filename directory)
+  "Expand FILENAME against DIRECTORY, honoring a remote DIRECTORY.
+
+Like `expand-file-name', but when DIRECTORY is remote and
+FILENAME is a host-local path -- as a checker running on the
+remote host over TRAMP reports -- the result names the file on
+that host, so it compares against the remote temporary files and
+opens the right file when jumped to."
+  (if-let* ((remote (and (not (file-remote-p filename))
+                         (file-remote-p directory))))
+      (concat remote (expand-file-name filename (file-local-name directory)))
+    (expand-file-name filename directory)))
+
 (defun flycheck-same-files-p (file-a file-b)
   "Determine whether FILE-A and FILE-B refer to the same file.
 
@@ -1584,8 +1601,12 @@ if they resolve to the same canonical paths."
 Use `flycheck-temp-prefix' as prefix, and add the directory to
 `flycheck-temporaries'.
 
-Return the path of the directory"
-  (let* ((tempdir (make-temp-file flycheck-temp-prefix 'directory)))
+Return the path of the directory.
+
+The directory is created on the remote host when
+`default-directory' is remote, so that checkers running over
+TRAMP can access it."
+  (let* ((tempdir (make-nearby-temp-file flycheck-temp-prefix 'directory)))
     (push tempdir flycheck-temporaries)
     tempdir))
 
@@ -1606,7 +1627,7 @@ Return the path of the file."
                    (if filename
                        (expand-file-name (file-name-nondirectory filename)
                                          (flycheck-temp-dir-system))
-                     (make-temp-file flycheck-temp-prefix nil suffix)))))
+                     (make-nearby-temp-file flycheck-temp-prefix nil suffix)))))
     (push tempfile flycheck-temporaries)
     tempfile))
 
@@ -4430,7 +4451,7 @@ Return ERRORS, modified in-place."
   (seq-do (lambda (err)
             (setf (flycheck-error-filename err)
                   (if-let (filename (flycheck-error-filename err))
-                      (expand-file-name filename directory)
+                      (flycheck--expand-file-name filename directory)
                     (buffer-file-name))))
           errors)
   errors)
@@ -6692,7 +6713,12 @@ from INFILE, and its output is sent to DESTINATION, as in
 `call-process'."
   (if-let (executable (flycheck-find-checker-executable checker))
       (condition-case err
-          (apply #'call-process executable infile destination nil args)
+          ;; `process-file' runs EXECUTABLE on the remote host when
+          ;; `default-directory' is remote, and behaves like
+          ;; `call-process' otherwise.  The program must be the plain
+          ;; local name on that host.
+          (apply #'process-file (file-local-name executable)
+                 infile destination nil args)
         (error (when error (signal (car err) (cdr err)))))
     (when error
       (user-error "Cannot find `%s' using `flycheck-executable-find'"
@@ -6851,30 +6877,44 @@ Note that substitution is *not* recursive.  No symbols or cells
 are substituted within the body of cells!"
   (pcase arg
     ((pred stringp) (list arg))
+    ;; File names below are reduced with `file-local-name': the checker
+    ;; process runs on the host of `default-directory' (a remote host
+    ;; over TRAMP) and must receive a plain local name, not a TRAMP file
+    ;; name.  The temporary files are created and later deleted through
+    ;; their full (possibly remote) names.
     (`source
-     (list (flycheck-save-buffer-to-temp #'flycheck-temp-file-system)))
+     (list (file-local-name
+            (flycheck-save-buffer-to-temp #'flycheck-temp-file-system))))
     (`source-inplace
-     (list (flycheck-save-buffer-to-temp #'flycheck-temp-file-inplace)))
+     (list (file-local-name
+            (flycheck-save-buffer-to-temp #'flycheck-temp-file-inplace))))
     (`(source ,suffix)
-     (list (flycheck-save-buffer-to-temp
-            (lambda (filename) (flycheck-temp-file-system filename suffix)))))
+     (list (file-local-name
+            (flycheck-save-buffer-to-temp
+             (lambda (filename) (flycheck-temp-file-system filename suffix))))))
     (`(source-inplace ,suffix)
-     (list (flycheck-save-buffer-to-temp
-            (lambda (filename) (flycheck-temp-file-inplace filename suffix)))))
-    (`source-original (list (or (buffer-file-name) "")))
-    (`temporary-directory (list (flycheck-temp-dir-system)))
+     (list (file-local-name
+            (flycheck-save-buffer-to-temp
+             (lambda (filename) (flycheck-temp-file-inplace filename suffix))))))
+    (`source-original (list (if-let* ((f (buffer-file-name)))
+                                (file-local-name f)
+                              "")))
+    (`temporary-directory (list (file-local-name (flycheck-temp-dir-system))))
     (`temporary-file-name
      (let ((directory (flycheck-temp-dir-system)))
-       (list (make-temp-name (expand-file-name "flycheck" directory)))))
+       (list (file-local-name
+              (make-temp-name (expand-file-name "flycheck" directory))))))
     (`null-device (list null-device))
     (`(config-file ,option-name ,file-name-var)
      (when-let* ((value (symbol-value file-name-var))
                  (file-name (flycheck-locate-config-file value checker)))
-       (flycheck-prepend-with-option option-name (list file-name))))
+       (flycheck-prepend-with-option
+        option-name (list (file-local-name file-name)))))
     (`(config-file ,option-name ,file-name-var ,prepend-fn)
      (when-let* ((value (symbol-value file-name-var))
                  (file-name (flycheck-locate-config-file value checker)))
-       (flycheck-prepend-with-option option-name (list file-name) prepend-fn)))
+       (flycheck-prepend-with-option
+        option-name (list (file-local-name file-name)) prepend-fn)))
     (`(option ,option-name ,variable)
      (when-let (value (symbol-value variable))
        (unless (stringp value)
@@ -6953,7 +6993,11 @@ PROCESS, and terminates standard input with EOF."
   "Start a command CHECKER with CALLBACK."
   (let (process)
     (condition-case err
-        (let* ((program (flycheck-find-checker-executable checker))
+        (let* (;; `flycheck-find-checker-executable' may return a remote
+               ;; (TRAMP) file name; the process program must be the plain
+               ;; local name on the remote host
+               (program (file-local-name
+                         (flycheck-find-checker-executable checker)))
                (args (flycheck-checker-substituted-arguments checker))
                (command (flycheck--wrap-command program args))
                (sentinel-events nil)
@@ -6967,10 +7011,15 @@ PROCESS, and terminates standard input with EOF."
                ;; rather than LC_ALL so that the character encoding
                ;; (LC_CTYPE) is left untouched; using LC_ALL=C forces an
                ;; ASCII locale that breaks checkers reading UTF-8 input,
-               ;; such as hledger (see #2170).
-               (process-environment (cons "LC_MESSAGES=C" process-environment)))
+               ;; such as hledger (see #2170).  For remote checks the
+               ;; environment reaches the process through
+               ;; `tramp-remote-process-environment'.
+               (process-environment (cons "LC_MESSAGES=C" process-environment))
+               (tramp-remote-process-environment
+                (when (boundp 'tramp-remote-process-environment)
+                  (cons "LC_MESSAGES=C" tramp-remote-process-environment))))
           ;; We do not associate the process with any buffer, by
-          ;; passing nil for the BUFFER argument of `start-process'.
+          ;; passing nil for the BUFFER argument of `start-file-process'.
           ;; Instead, we just remember the buffer being checked in a
           ;; process property (see below).  This neatly avoids all
           ;; side-effects implied by attaching a process to a buffer, which
@@ -6978,7 +7027,12 @@ PROCESS, and terminates standard input with EOF."
           ;;
           ;; See https://github.com/flycheck/flycheck/issues/298 for an
           ;; example for such a conflict.
-          (setq process (apply 'start-process (format "flycheck-%s" checker)
+          ;;
+          ;; We use `start-file-process' rather than `start-process' so
+          ;; the checker runs on the remote host when `default-directory'
+          ;; is remote; it behaves exactly like `start-process' otherwise.
+          (setq process (apply 'start-file-process
+                               (format "flycheck-%s" checker)
                                nil command))
           ;; Process sentinels can be called while sending input to the process.
           ;; We want to record errors raised by process-send before calling
@@ -7341,8 +7395,11 @@ _CHECKER is ignored."
   "Locate a configuration FILENAME in the home directory.
 
 Return the absolute path, if FILENAME exists in the user's home
-directory, or nil otherwise."
-  (let ((path (expand-file-name filename "~")))
+directory, or nil otherwise.  For a remote buffer, the remote
+user's home directory is searched."
+  (let* ((remote (file-remote-p default-directory))
+         (home (if remote (concat remote "~") "~"))
+         (path (expand-file-name filename home)))
     (when (file-exists-p path)
       path)))
 
@@ -7582,7 +7639,7 @@ ERR is in BUFFER-FILES, replace it with the value of variable
   (flycheck-error-with-buffer err
     (when-let (filename (flycheck-error-filename err))
       (when (seq-some (apply-partially #'flycheck-same-files-p
-                                       (expand-file-name filename cwd))
+                                       (flycheck--expand-file-name filename cwd))
                       buffer-files)
         (setf (flycheck-error-filename err) buffer-file-name)
         (when (and buffer-file-name (flycheck-error-message err))
@@ -11180,8 +11237,10 @@ See https://github.com/processing/processing/wiki/Command-Line"
   :command ("processing-java" "--force"
             ;; Don't change the order of these arguments, processing is pretty
             ;; picky
-            (eval (concat "--sketch=" (file-name-directory (buffer-file-name))))
-            (eval (concat "--output=" (flycheck-temp-dir-system)))
+            (eval (concat "--sketch=" (file-local-name
+                                       (file-name-directory (buffer-file-name)))))
+            (eval (concat "--output=" (file-local-name
+                                       (flycheck-temp-dir-system))))
             "--build")
   :error-patterns
   ((error line-start (file-name) ":" line ":" column
@@ -11243,7 +11302,8 @@ or `unknown' if not yet detected.")
   "Return command arguments for proselint, detecting the version once."
   (when (eq flycheck--proselint-use-old-args 'unknown)
     (setq flycheck--proselint-use-old-args
-          (zerop (call-process
+          ;; Probe on the host the check will run on (remote over TRAMP)
+          (zerop (process-file
                   (or flycheck-proselint-executable "proselint")
                   nil nil nil "--version"))))
   (if flycheck--proselint-use-old-args
@@ -11278,7 +11338,8 @@ are relative to the file being checked."
 
 See URL `https://developers.google.com/protocol-buffers/'."
   :command ("protoc" "--error_format" "gcc"
-            (eval (concat "--java_out=" (flycheck-temp-dir-system)))
+            (eval (concat "--java_out=" (file-local-name
+                                         (flycheck-temp-dir-system))))
             ;; Add the current directory to resolve imports
             (eval (concat "--proto_path="
                           (file-name-directory (buffer-file-name))))
@@ -12719,7 +12780,7 @@ This syntax checker needs Rust 1.18 or newer.  See URL
   :command ("rustc"
             (option "--crate-type" flycheck-rust-crate-type)
             "--emit=metadata"
-            "--out-dir" (eval (flycheck-temp-dir-system)) ; avoid creating binaries
+            "--out-dir" (eval (file-local-name (flycheck-temp-dir-system))) ; avoid creating binaries
             "--error-format=json"
             (option-flag "--test" flycheck-rust-check-tests)
             (option-list "-L" flycheck-rust-library-path concat)
