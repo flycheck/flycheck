@@ -1,6 +1,15 @@
 ``master`` (unreleased)
 =======================
 
+- [#1816]: Flycheck now runs syntax checkers over TRAMP.  When a buffer
+  visits a remote file, command checkers execute on the remote host
+  (their executables must be installed there) instead of being unable to
+  run.  ``global-flycheck-mode`` enables Flycheck in remote buffers by
+  default.  Because each check spawns a remote process, remote buffers
+  are checked on fewer triggers by default (``save`` and
+  ``mode-enabled``); customize
+  ``flycheck-check-syntax-automatically-remote`` to change this.  Builds
+  on the earlier work in [#1842].
 
 37.0 (2026-07-18)
 =================

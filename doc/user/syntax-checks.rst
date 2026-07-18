@@ -20,13 +20,16 @@ possible.
 
    .. note::
 
-      This mode does not enable :mode:`flycheck` in remote files (via
-      TRAMP) and encrypted files.  Checking remote files may be very slow
-      depending on the network connections, and checking encrypted files would
-      leak confidential data to temporary files and subprocesses.
+      Remote files (via TRAMP) are checked like local ones: command checkers
+      run on the remote host, so the tools need to be installed there rather
+      than locally.  Because each check spawns a process over the network,
+      remote buffers are checked on fewer triggers by default; see
+      `flycheck-check-syntax-automatically-remote`.
 
-      You can manually enable :mode:`flycheck` in these buffers nonetheless, but
-      we do *not* recommend this for said reasons.
+      This mode does not enable :mode:`flycheck` in encrypted files, as
+      checking them would leak confidential data to temporary files and
+      subprocesses.  You can manually enable :mode:`flycheck` in these buffers
+      nonetheless, but we do *not* recommend it for said reason.
 
    Add the following to your :term:`init file` to enable syntax checking
    permanently:
@@ -132,6 +135,19 @@ You can customise this behaviour with `flycheck-check-syntax-automatically`:
    .. code-block:: elisp
 
       (setq flycheck-check-syntax-automatically '(mode-enabled save))
+
+.. defcustom:: flycheck-check-syntax-automatically-remote
+
+   The same as `flycheck-check-syntax-automatically`, but for buffers visiting
+   remote files (see `file-remote-p`).  Checking a remote buffer spawns a
+   process on the remote host over TRAMP, which is slow, so by default the
+   change-driven triggers (``idle-change``, ``new-line`` and
+   ``idle-buffer-switch``) are excluded and remote buffers are only checked on
+   ``save`` and ``mode-enabled``.
+
+   Set it to ``t`` to check remote buffers on the same events as local ones.
+   A manual check with :command:`flycheck-buffer` (:kbd:`C-c ! c`) always
+   works regardless of this option.
 
 When a change-driven syntax check (``idle-change`` or ``save``) is triggered
 while a recently started check is still running, the running check is
