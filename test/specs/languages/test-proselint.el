@@ -4,6 +4,32 @@
 (require 'test-helpers)
 
 (describe "Language Proselint"
+
+  (describe "flycheck--proselint-args"
+    (before-each
+      (clrhash flycheck--proselint-use-old-args))
+
+    (it "probes a host once and caches the detected version"
+      ;; Exit 0 -> old proselint, which takes the "--json -" arguments.
+      (spy-on 'process-file :and-return-value 0)
+      (let ((default-directory "/tmp/"))
+        (expect (flycheck--proselint-args) :to-equal '("--json" "-"))
+        (expect (flycheck--proselint-args) :to-equal '("--json" "-")))
+      (expect 'process-file :to-have-been-called-times 1))
+
+    (it "detects the version independently on each host"
+      ;; `file-remote-p' parses the prefix without connecting, so the probe
+      ;; can be faked per host without a live remote.
+      (spy-on 'process-file :and-call-fake
+              (lambda (&rest _)
+                (if (file-remote-p default-directory) 1 0)))
+      (let ((default-directory "/tmp/"))
+        (expect (flycheck--proselint-args) :to-equal '("--json" "-")))
+      (let ((default-directory "/ssh:host:/tmp/"))
+        (expect (flycheck--proselint-args)
+                :to-equal '("check" "--output-format=json")))
+      (expect 'process-file :to-have-been-called-times 2)))
+
   (flycheck-buttercup-def-checker-test proselint (text markdown) nil
     (let ((flycheck-disabled-checkers '(markdown-markdownlint-cli markdown-markdownlint-cli2 markdown-mdl markdown-pymarkdown)))
       (flycheck-buttercup-with-env '(("LC_ALL" . nil))
