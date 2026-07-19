@@ -123,6 +123,16 @@ afterwards."
         ;; Called once for `emacs-lisp', and a second time for checkdoc
         (expect was-called :to-equal 2)))
 
+    (it "signals when the executable cannot be found"
+      ;; A cached-enabled checker whose executable later vanished resolves to
+      ;; nil.  Fail the check cleanly rather than starting a process with no
+      ;; program, which never exits and would hang the check forever.
+      (spy-on 'flycheck-find-checker-executable :and-return-value nil)
+      (spy-on 'start-file-process)
+      (flycheck-buttercup-with-temp-buffer
+        (expect (flycheck-start-command-checker 'emacs-lisp #'ignore) :to-throw)
+        (expect 'start-file-process :not :to-have-been-called)))
+
     (it "truncated stdin with errors"
       ;; Skip on Emacs 28 where large pipe writes can cause SIGPIPE
       (assume (version<= "29" emacs-version))

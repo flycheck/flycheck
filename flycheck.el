@@ -7062,14 +7062,17 @@ PROCESS, and terminates standard input with EOF."
   "Start a command CHECKER with CALLBACK."
   (let (process)
     (condition-case err
-        (let* (;; `flycheck-find-checker-executable' may return a remote
+        (let* (;; `flycheck-find-checker-executable' may return nil for a
+               ;; cached-enabled checker whose executable later vanished.
+               ;; Fail the check cleanly rather than starting a process with
+               ;; a nil program, which never exits and hangs the check.
+               (executable (or (flycheck-find-checker-executable checker)
+                               (error "Cannot find the executable of checker %s"
+                                      checker)))
+               ;; `flycheck-find-checker-executable' may return a remote
                ;; (TRAMP) file name; the process program must be the plain
-               ;; local name on the remote host.  It may also return nil (a
-               ;; cached-enabled checker whose executable later vanished), in
-               ;; which case leave it nil, as before, rather than erroring in
-               ;; `file-local-name'.
-               (executable (flycheck-find-checker-executable checker))
-               (program (and executable (file-local-name executable)))
+               ;; local name on the remote host.
+               (program (file-local-name executable))
                (args (flycheck-checker-substituted-arguments checker))
                (command (flycheck--wrap-command program args))
                (sentinel-events nil)
@@ -10445,8 +10448,11 @@ pragma.  Each extension is enabled via `-X'."
   :safe #'flycheck-string-list-p
   :package-version '(flycheck . "0.19"))
 
-(defvar flycheck-haskell-ghc-cache-directory (make-hash-table :test 'equal)
-  "The cache directory for `ghc' output, keyed by host.
+;; A hash table (not the scalar of earlier versions -- hence the new name,
+;; so an in-session reload does not leave a stale non-table value that
+;; `gethash' would choke on).
+(defvar flycheck--haskell-ghc-cache-directories (make-hash-table :test 'equal)
+  "The cache directories for `ghc' output, keyed by host.
 The key is the remote identifier of `default-directory' (see
 `file-remote-p'), or nil for the local host, since `ghc' runs on
 the host of the checked buffer and needs a cache directory there.")
@@ -10458,12 +10464,12 @@ If no cache directory exists yet for the current host, create one
 on that host and return it.  Otherwise return the previously used
 cache directory."
   (let ((host (file-remote-p default-directory)))
-    (or (gethash host flycheck-haskell-ghc-cache-directory)
+    (or (gethash host flycheck--haskell-ghc-cache-directories)
         ;; `make-nearby-temp-file' creates the directory on the host of
         ;; `default-directory', so `ghc' running there can write to it.
         (puthash host
                  (make-nearby-temp-file "flycheck-haskell-ghc-cache" 'directory)
-                 flycheck-haskell-ghc-cache-directory))))
+                 flycheck--haskell-ghc-cache-directories))))
 
 (defun flycheck--locate-dominating-file-matching (directory regexp)
   "Search for a file in directory hierarchy starting at DIRECTORY.
@@ -11384,7 +11390,10 @@ See URL `https://proselint.com/' for more information about proselint."
               (let-alist (car response)
                 .result.<stdin>.diagnostics)))))
 
-(defvar flycheck--proselint-use-old-args (make-hash-table :test 'equal)
+;; A hash table (not the scalar of earlier versions -- hence the new name,
+;; so an in-session reload does not leave a stale non-table value that
+;; `gethash' would choke on).
+(defvar flycheck--proselint-old-args-by-host (make-hash-table :test 'equal)
   "Cache for proselint version detection, keyed by host.
 The key is the remote identifier of `default-directory' (see
 `file-remote-p'), or nil for the local host, since the proselint
@@ -11397,14 +11406,14 @@ absent from the table has not been probed yet.")
 (defun flycheck--proselint-args ()
   "Return command arguments for proselint, detecting the version once per host."
   (let ((host (file-remote-p default-directory)))
-    (when (eq (gethash host flycheck--proselint-use-old-args 'unknown) 'unknown)
+    (when (eq (gethash host flycheck--proselint-old-args-by-host 'unknown) 'unknown)
       (puthash host
                ;; Probe on the host the check will run on (remote over TRAMP).
                (zerop (process-file
                        (or flycheck-proselint-executable "proselint")
                        nil nil nil "--version"))
-               flycheck--proselint-use-old-args))
-    (if (gethash host flycheck--proselint-use-old-args)
+               flycheck--proselint-old-args-by-host))
+    (if (gethash host flycheck--proselint-old-args-by-host)
         ;; Proselint versions <= 0.14.0:
         (list "--json" "-")
       ;; Proselint versions >= 0.16.0
