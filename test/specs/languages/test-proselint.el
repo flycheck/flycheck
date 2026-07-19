@@ -7,7 +7,7 @@
 
   (describe "flycheck--proselint-args"
     (before-each
-      (clrhash flycheck--proselint-use-old-args))
+      (clrhash flycheck--proselint-old-args-by-host))
 
     (it "probes a host once and caches the detected version"
       ;; Exit 0 -> old proselint, which takes the "--json -" arguments.
