@@ -241,6 +241,39 @@
                "/ssh:host:/tmp/foo.py" "/ssh:host:/home/user/")
               :to-equal "/ssh:host:/tmp/foo.py")))
 
+  (describe "flycheck-buffer-file-local-name"
+
+    (it "returns a local file name unchanged"
+      (flycheck-buttercup-with-temp-buffer
+        (setq buffer-file-name "/home/user/foo.py")
+        (expect (flycheck-buffer-file-local-name) :to-equal "/home/user/foo.py")))
+
+    (it "strips the remote prefix from a TRAMP file name"
+      (flycheck-buttercup-with-temp-buffer
+        (setq buffer-file-name "/ssh:host:/home/user/foo.py")
+        (expect (flycheck-buffer-file-local-name)
+                :to-equal "/home/user/foo.py")))
+
+    (it "returns the fallback when there is no backing file"
+      (flycheck-buttercup-with-temp-buffer
+        (setq buffer-file-name nil)
+        (expect (flycheck-buffer-file-local-name "stdin") :to-equal "stdin")
+        (expect (flycheck-buffer-file-local-name) :to-be nil))))
+
+  (describe "flycheck--process-file-lines"
+
+    (it "returns the program output as a list of lines"
+      (spy-on 'process-file :and-call-fake
+              (lambda (_program _infile buffer &rest _)
+                (with-current-buffer buffer (insert "line1\nline2\n"))
+                0))
+      (expect (flycheck--process-file-lines "prog" "arg")
+              :to-equal '("line1" "line2")))
+
+    (it "signals an error on a non-zero exit status"
+      (spy-on 'process-file :and-return-value 1)
+      (expect (flycheck--process-file-lines "prog") :to-throw)))
+
   (describe "flycheck-same-files-p"
 
     (it "returns true for same files"
