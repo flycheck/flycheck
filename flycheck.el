@@ -1609,6 +1609,15 @@ opens the right file when jumped to."
       (concat remote (expand-file-name filename (file-local-name directory)))
     (expand-file-name filename directory)))
 
+(defun flycheck-buffer-file-local-name (&optional fallback)
+  "Return the visited file's name as a plain local name.
+
+Strip any remote (TRAMP) prefix with `file-local-name', so a
+checker running on the host of the buffer's file receives a path
+that is valid there.  Return FALLBACK when the buffer has no
+backing file."
+  (if buffer-file-name (file-local-name buffer-file-name) fallback))
+
 (defun flycheck-same-files-p (file-a file-b)
   "Determine whether FILE-A and FILE-B refer to the same file.
 
@@ -6623,10 +6632,12 @@ of command checkers is `flycheck-sanitize-errors'.
      Some checkers that support reading from standard input have
      a separate flag to indicate the name of the file whose
      contents are being passed on standard input (typically
-     `stdin-filename').  In that case, use the `(option)' form in
-     `:command' to pass the value of variable `buffer-file-name'
-     when the current buffer has a file name (that is,
-     use `option \"--stdin-file-name\" buffer-file-name').
+     `stdin-filename').  In that case, use an `(eval)' form in
+     `:command' to pass `flycheck-buffer-file-local-name', which
+     yields the file name the checker's host understands even when
+     the buffer visits a remote file over TRAMP (that is, use
+     `eval (when buffer-file-name (list \"--stdin-file-name\"
+     (flycheck-buffer-file-local-name)))').
 
      For buffers not backed by files, checkers that support input
      on stdin typically report a file name like `-' or `<stdin>'.
@@ -6785,6 +6796,27 @@ the error checking automatically."
               (error "Process %s failed with %S (%s)"
                      checker exit-code output))))
       (kill-buffer temp))))
+
+(defun flycheck--process-file-lines (program &rest args)
+  "Execute PROGRAM with ARGS, returning its output as a list of lines.
+
+Like `process-lines', but runs PROGRAM through `process-file', so
+it executes on the host of `default-directory' (a remote host
+over TRAMP) instead of always locally.  PROGRAM must be the plain
+local name on that host.  Signal an error if PROGRAM cannot be
+found or exits with a non-zero status."
+  (with-temp-buffer
+    (let ((status (apply #'process-file program nil (current-buffer) nil args)))
+      (unless (eq status 0)
+        (error "%s exited with status %s" program status))
+      (goto-char (point-min))
+      (let (lines)
+        (while (not (eobp))
+          (push (buffer-substring-no-properties
+                 (line-beginning-position) (line-end-position))
+                lines)
+          (forward-line 1))
+        (nreverse lines)))))
 
 (defun flycheck-checker-arguments (checker)
   "Get the command arguments of CHECKER."
@@ -7032,9 +7064,12 @@ PROCESS, and terminates standard input with EOF."
     (condition-case err
         (let* (;; `flycheck-find-checker-executable' may return a remote
                ;; (TRAMP) file name; the process program must be the plain
-               ;; local name on the remote host
-               (program (file-local-name
-                         (flycheck-find-checker-executable checker)))
+               ;; local name on the remote host.  It may also return nil (a
+               ;; cached-enabled checker whose executable later vanished), in
+               ;; which case leave it nil, as before, rather than erroring in
+               ;; `file-local-name'.
+               (executable (flycheck-find-checker-executable checker))
+               (program (and executable (file-local-name executable)))
                (args (flycheck-checker-substituted-arguments checker))
                (command (flycheck--wrap-command program args))
                (sentinel-events nil)
@@ -9163,7 +9198,7 @@ about the JSON format of stylelint."
   "Whether there is a valid stylelint CHECKER config for the current buffer."
   (zerop (flycheck-call-checker-process
           checker nil nil nil
-          "--print-config" (or buffer-file-name "index.js"))))
+          "--print-config" (flycheck-buffer-file-local-name "index.js"))))
 
 (defun flycheck--stylelint-get-major-version (checker)
   "Return major version of stylelint CHECKER."
@@ -9196,7 +9231,8 @@ See URL `https://stylelint.io/'."
             (eval flycheck-stylelint-args)
             (option-flag "--quiet" flycheck-stylelint-quiet)
             (config-file "--config" flycheck-stylelintrc)
-            "--stdin-filename" (eval (or (buffer-file-name) "style.css")))
+            "--stdin-filename" (eval (flycheck-buffer-file-local-name
+                                      "style.css")))
   :standard-input t
   :verify (lambda (_) (flycheck--stylelint-verify 'css-stylelint))
   :error-parser flycheck-parse-stylelint
@@ -10127,7 +10163,8 @@ See URL `https://go.dev/cmd/go/' and URL
   :verify (lambda (_)
             (let* ((go (flycheck-checker-executable 'go-vet))
                    (have-vet (member "vet" (ignore-errors
-                                             (process-lines go "tool")))))
+                                             (flycheck--process-file-lines
+                                              (file-local-name go) "tool")))))
               (list
                (flycheck-verification-result-new
                 :label "go tool vet"
@@ -10408,17 +10445,25 @@ pragma.  Each extension is enabled via `-X'."
   :safe #'flycheck-string-list-p
   :package-version '(flycheck . "0.19"))
 
-(defvar flycheck-haskell-ghc-cache-directory nil
-  "The cache directory for `ghc' output.")
+(defvar flycheck-haskell-ghc-cache-directory (make-hash-table :test 'equal)
+  "The cache directory for `ghc' output, keyed by host.
+The key is the remote identifier of `default-directory' (see
+`file-remote-p'), or nil for the local host, since `ghc' runs on
+the host of the checked buffer and needs a cache directory there.")
 
 (defun flycheck-haskell-ghc-cache-directory ()
   "Get the cache location for `ghc' output.
 
-If no cache directory exists yet, create one and return it.
-Otherwise return the previously used cache directory."
-  (setq flycheck-haskell-ghc-cache-directory
-        (or flycheck-haskell-ghc-cache-directory
-            (make-temp-file "flycheck-haskell-ghc-cache" 'directory))))
+If no cache directory exists yet for the current host, create one
+on that host and return it.  Otherwise return the previously used
+cache directory."
+  (let ((host (file-remote-p default-directory)))
+    (or (gethash host flycheck-haskell-ghc-cache-directory)
+        ;; `make-nearby-temp-file' creates the directory on the host of
+        ;; `default-directory', so `ghc' running there can write to it.
+        (puthash host
+                 (make-nearby-temp-file "flycheck-haskell-ghc-cache" 'directory)
+                 flycheck-haskell-ghc-cache-directory))))
 
 (defun flycheck--locate-dominating-file-matching (directory regexp)
   "Search for a file in directory hierarchy starting at DIRECTORY.
@@ -10442,10 +10487,15 @@ directory returned by \"stack path --project-root\"."
       (rx "stack" (* any) "." (or "yml" "yaml") eos)))
    (when-let* ((stack (funcall flycheck-executable-find "stack"))
                (output (ignore-errors
-                         (process-lines stack
-                                        "--no-install-ghc"
-                                        "path" "--project-root")))
-               (stack-dir (car output)))
+                         (flycheck--process-file-lines
+                          (file-local-name stack)
+                          "--no-install-ghc"
+                          "path" "--project-root")))
+               (root (car output))
+               ;; `stack' reports a host-local path; name it on the host of
+               ;; `default-directory' so it is usable as the remote working
+               ;; directory (and checked on the right host below).
+               (stack-dir (flycheck--expand-file-name root default-directory)))
      (and (file-directory-p stack-dir) stack-dir))))
 
 (defun flycheck-haskell--ghc-find-default-directory (_checker)
@@ -10464,7 +10514,8 @@ See URL `https://github.com/commercialhaskell/stack'."
             (option "--stack-yaml" flycheck-ghc-stack-project-file)
             (option-flag "--nix" flycheck-ghc-stack-use-nix)
             "ghc" "--" "-Wall" "-no-link"
-            "-outputdir" (eval (flycheck-haskell-ghc-cache-directory))
+            "-outputdir" (eval (file-local-name
+                                (flycheck-haskell-ghc-cache-directory)))
             (option-list "-X" flycheck-ghc-language-extensions concat)
             (option-list "-i" flycheck-ghc-search-path concat)
             (eval (concat
@@ -10519,7 +10570,8 @@ See URL `https://github.com/commercialhaskell/stack'."
 
 See URL `https://www.haskell.org/ghc/'."
   :command ("ghc" "-Wall" "-no-link"
-            "-outputdir" (eval (flycheck-haskell-ghc-cache-directory))
+            "-outputdir" (eval (file-local-name
+                                (flycheck-haskell-ghc-cache-directory)))
             (option-flag "-no-user-package-db"
                          flycheck-ghc-no-user-package-database)
             (option-list "-package-db" flycheck-ghc-package-databases)
@@ -10679,7 +10731,7 @@ for more information about the custom directories."
   "Whether there is a valid eslint config for the current buffer."
   (zerop (flycheck-call-checker-process
           'javascript-eslint nil nil nil
-          "--print-config" (or buffer-file-name "index.js"))))
+          "--print-config" (flycheck-buffer-file-local-name "index.js"))))
 
 (defun flycheck--eslint-handle-suspicious (_checker exit-status output)
   "Disable the checker when eslint cannot lint at all.
@@ -11225,8 +11277,8 @@ See URL `https://pear.php.net/package/PHP_CodeSniffer/'."
             ;; Pass original file name to phpcs.  We need to concat explicitly
             ;; here, because phpcs really insists to get option and argument as
             ;; a single command line argument :|
-            (eval (when (buffer-file-name)
-                    (concat "--stdin-path=" (buffer-file-name))))
+            (eval (when buffer-file-name
+                    (concat "--stdin-path=" (flycheck-buffer-file-local-name))))
             ;; Read from standard input
             "-")
   :standard-input t
@@ -11259,7 +11311,7 @@ See URL `https://github.com/sirbrillig/phpcs-changed'."
             "--git-base" (eval flycheck-phpcs-changed-git-base)
             "--git-unstaged"
             (option "--standard=" flycheck-phpcs-standard concat)
-            (eval (buffer-file-name)))
+            (eval (flycheck-buffer-file-local-name)))
   :standard-input t
   :error-parser flycheck-parse-checkstyle
   :error-filter
@@ -11688,7 +11740,8 @@ Requires Flake8 3.0 or newer. See URL
             (option "--max-line-length" flycheck-flake8-maximum-line-length nil
                     flycheck-option-int)
             (eval (when buffer-file-name
-                    (concat "--stdin-display-name=" buffer-file-name)))
+                    (concat "--stdin-display-name="
+                            (flycheck-buffer-file-local-name))))
             "-")
   :standard-input t
   :working-directory flycheck-python-find-project-root
@@ -11735,7 +11788,8 @@ See URL `https://docs.astral.sh/ruff/'."
             (config-file "--config" flycheck-python-ruff-config)
             ;; older versions of ruff (before 0.2) used "text" instead of "concise"
             "--output-format=concise"
-            (option "--stdin-filename" buffer-file-name)
+            (eval (when buffer-file-name
+                    (list "--stdin-filename" (flycheck-buffer-file-local-name))))
             "-")
   :standard-input t
   :error-filter (lambda (errors)
@@ -12460,7 +12514,7 @@ See URL `https://rubocop.org/'."
              ;; from standard input, but it chokes when that name is the empty
              ;; string, so fall back to "stdin" in order to handle buffers with
              ;; no backing file (e.g. org-mode snippet buffers)
-             "--stdin" (eval (or (buffer-file-name) "stdin")))
+             "--stdin" (eval (flycheck-buffer-file-local-name "stdin")))
   :standard-input t
   :working-directory #'flycheck-ruby--find-project-root
   :error-patterns flycheck-ruby-rubocop-error-patterns
@@ -12486,7 +12540,7 @@ See URL `https://github.com/chef/cookstyle'."
              ;; from standard input, but it chokes when that name is the empty
              ;; string, so fall back to "stdin" in order to handle buffers with
              ;; no backing file (e.g. org-mode snippet buffers)
-             "--stdin" (eval (or (buffer-file-name) "stdin")))
+             "--stdin" (eval (flycheck-buffer-file-local-name "stdin")))
   :standard-input t
   :working-directory #'flycheck-ruby--find-project-root
   :error-patterns flycheck-ruby-rubocop-error-patterns
@@ -12739,7 +12793,11 @@ Execute `cargo --list' to find out whether COMMAND is present."
     (member command
             (mapcar (lambda (line)
                       (car (split-string (string-trim line))))
-                    (ignore-errors (process-lines cargo "--list"))))))
+                    ;; Probe on the host the check will run on (remote over
+                    ;; TRAMP), where cargo was resolved.
+                    (ignore-errors
+                      (flycheck--process-file-lines
+                       (file-local-name cargo) "--list"))))))
 
 (defun flycheck-rust-valid-crate-type-p (crate-type)
   "Whether CRATE-TYPE is a valid target type for Cargo.
