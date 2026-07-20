@@ -339,9 +339,14 @@ Raise an assertion error if errors or overlays remain afterwards."
 ;;; Error utilities
 
 (defun flycheck-buttercup-error-without-group (err)
-  "Return a copy of ERR with the `group' property set to nil."
+  "Return a copy of ERR with the `group' and `fix' properties set to nil.
+
+Language checker specs compare errors without asserting on these
+incidental slots: `group' holds an uninterned symbol, and `fix'
+holds a machine-applicable suggestion that is verified separately."
   (let ((copy (copy-flycheck-error err)))
     (setf (flycheck-error-group copy) nil)
+    (setf (flycheck-error-fix copy) nil)
     copy))
 
 (defun flycheck-buttercup-sort-errors (errors)
