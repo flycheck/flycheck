@@ -222,6 +222,12 @@
 
   (describe "flycheck--expand-file-name"
 
+    ;; These assert POSIX output, as reported by remote hosts over TRAMP.
+    ;; On Windows `expand-file-name' prepends the current drive to drive-less
+    ;; absolute paths, so the exact strings differ; skip there.
+    (before-each
+      (assume (not (memq system-type '(cygwin windows-nt ms-dos)))))
+
     (it "expands a relative name against a local directory"
       (expect (flycheck--expand-file-name "foo.py" "/home/user/")
               :to-equal "/home/user/foo.py"))
