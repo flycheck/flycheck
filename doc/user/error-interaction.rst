@@ -229,6 +229,30 @@ checkers produce explanations, the majority do not.  Those that do are:
    Display an explanation for the first explainable error at point.
 
 
+Fix errors
+==========
+
+Some checkers report a machine-applicable fix along with an error - the
+replacement text a tool like ``eslint --fix``, ``cargo clippy`` or a SARIF
+analyzer already computes.  Flycheck keeps that fix and can apply it for you.
+In the error list, fixable errors are marked with ``[fix]`` before the message.
+
+.. define-key:: C-c ! f
+                M-x flycheck-fix-error-at-point
+
+   Apply the fix of the first fixable error at point.  Signals an error if no
+   error at point has a fix.
+
+In the :ref:`error list <flycheck-error-list>` press :kbd:`x`
+(``flycheck-error-list-apply-fix``) to apply the fix of the error on the
+current row.
+
+A fix is applied as a single undoable change, so :kbd:`C-/` reverts it.  The
+checkers that currently provide fixes are ``javascript-eslint``, the ``rust``
+checkers (from ``cargo clippy``'s machine-applicable suggestions), and any
+checker whose SARIF output includes fixes (e.g. ``dockerfile-hadolint``).
+
+
 Kill errors
 ===========
 

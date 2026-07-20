@@ -1,6 +1,15 @@
 ``master`` (unreleased)
 =======================
 
+- Flycheck can now apply machine-applicable fixes that checkers suggest.
+  ``C-c ! f`` (``flycheck-fix-error-at-point``) applies the fix of the
+  error at point, and ``x`` does the same for the selected row in the
+  error list, where fixable errors are marked ``[fix]``.  The
+  ``javascript-eslint`` (``--fix``), ``rust``/``rust-cargo``/``rust-clippy``
+  (machine-applicable suggestions) and SARIF-based checkers (e.g.
+  ``dockerfile-hadolint``) now carry these fixes, which were previously
+  parsed and discarded.  Error parsers can attach a ``flycheck-fix`` to a
+  ``flycheck-error`` via the new ``:fix`` slot.
 - The error list can now show whole-project diagnostics.  Press ``P``
   (``flycheck-error-list-toggle-scope``) to switch it between the current
   buffer and the project, where it aggregates the errors of every open
