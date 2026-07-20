@@ -1,6 +1,13 @@
 ``master`` (unreleased)
 =======================
 
+- The error list can now show whole-project diagnostics.  Press ``P``
+  (``flycheck-error-list-toggle-scope``) to switch it between the current
+  buffer and the project, where it aggregates the errors of every open
+  Flycheck buffer together with the cross-file errors that checkers like
+  ``tsc``, ``cargo check`` and ``mypy`` report but the per-buffer view
+  drops.  A buffer's project is Emacs' ``project-current`` when found, and
+  the checker's working directory otherwise.
 - [#1816]: Flycheck now runs syntax checkers over TRAMP.  When a buffer
   visits a remote file, command checkers execute on the remote host
   (their executables must be installed there) instead of being unable to
