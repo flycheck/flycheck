@@ -32,6 +32,7 @@ Within the error list the following key bindings are available:
 :kbd:`n`     Jump to the next error
 :kbd:`p`     Jump to the previous error
 :kbd:`e`     Explain the error
+:kbd:`x`     Apply the error's fix, if it has one
 :kbd:`f`     Filter the error list by level
 :kbd:`F`     Remove the filter
 :kbd:`S`     Sort the error list by the column at point
