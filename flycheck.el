@@ -3668,13 +3668,24 @@ Relative file names in ERRORS will be expanded relative to
 WORKING-DIR."
   (let* ((syntax-check flycheck-current-syntax-check)
          (checker (flycheck-syntax-check-checker syntax-check))
-         (errors (flycheck-relevant-errors
-                  (flycheck-fill-and-expand-error-file-names
-                   (flycheck-filter-errors
-                    (flycheck-assert-error-list-p errors) checker)
-                   working-dir))))
-    (flycheck-report-current-errors
-     (flycheck--handle-excessive-errors checker errors))
+         ;; The full, file-name-expanded error set, including errors for
+         ;; other files that `flycheck-relevant-errors' drops below.  Record
+         ;; it in the project store before narrowing to the buffer.
+         (all-errors (flycheck-fill-and-expand-error-file-names
+                      (flycheck-filter-errors
+                       (flycheck-assert-error-list-p errors) checker)
+                      working-dir))
+         (relevant (flycheck-relevant-errors all-errors))
+         (reported (flycheck--handle-excessive-errors checker relevant)))
+    ;; Record exactly what the buffer shows (`reported', already narrowed
+    ;; and flood-handled) plus the cross-file errors this check also found,
+    ;; so a buffer's own errors stay identical between buffer and project
+    ;; scope and its flood handling is never bypassed.
+    (flycheck--project-record-errors
+     (append reported
+             (flycheck--project-storable-errors
+              (seq-remove (lambda (err) (memq err relevant)) all-errors))))
+    (flycheck-report-current-errors reported)
     (let ((next-checker (unless no-next
                           (flycheck-get-next-checker-for-buffer checker))))
       (if next-checker
@@ -3731,6 +3742,13 @@ drops the errors furthest down in the buffer."
         (flycheck-error-< err1 err2)
       (> severity1 severity2))))
 
+(defun flycheck--take-most-severe-errors (errors n)
+  "Return the N most severe of ERRORS, most severe first.
+
+Errors of equal severity keep their buffer-position order (see
+`flycheck--excessive-errors-<')."
+  (seq-take (sort (copy-sequence errors) #'flycheck--excessive-errors-<) n))
+
 (defun flycheck--truncate-excessive-errors (checker errors total)
   "Truncate ERRORS from CHECKER to the error threshold.
 
@@ -3738,9 +3756,7 @@ TOTAL is the length of ERRORS.  Keep the most severe errors up to
 `flycheck-checker-error-threshold' and record the number of
 suppressed errors in `flycheck--suppressed-error-count'."
   (let* ((threshold flycheck-checker-error-threshold)
-         (kept (seq-take (sort (copy-sequence errors)
-                               #'flycheck--excessive-errors-<)
-                         threshold)))
+         (kept (flycheck--take-most-severe-errors errors threshold)))
     (cl-incf flycheck--suppressed-error-count (- total threshold))
     (unless (memq checker flycheck--excessive-checkers)
       (push checker flycheck--excessive-checkers)
@@ -4484,7 +4500,140 @@ with `flycheck-process-error-functions'."
 (defun flycheck-clear-errors ()
   "Remove all error information from the current buffer."
   (setq flycheck-current-errors nil)
+  (flycheck--project-forget-buffer)
   (flycheck-report-status 'not-checked))
+
+
+;;; Project-wide diagnostics
+;;
+;; Besides the per-buffer `flycheck-current-errors', Flycheck keeps a
+;; project-wide store of every error a check produces, including the
+;; cross-file errors that `flycheck-relevant-errors' drops from the
+;; buffer view (e.g. a `tsc' or `cargo check' run reporting errors across
+;; a whole package).  The store aggregates those with the errors of every
+;; open Flycheck buffer, so the error list can show a project at a glance
+;; (see `flycheck-error-list-scope').
+
+(defvar flycheck--project-error-store (make-hash-table :test 'eq)
+  "Store of project-wide diagnostics.
+
+Maps a source buffer to the list of `flycheck-error' objects its
+last check produced, across every file rather than just the source
+buffer.  A buffer's project is resolved lazily, when the errors are
+aggregated (see `flycheck--project-errors'), so recording stays off
+the check hot path.  Entries are retracted in `flycheck-clear-errors',
+so a re-check, clear, or buffer teardown replaces the buffer's
+contribution.")
+
+(declare-function project-root "project" (project))
+
+(defun flycheck--project-directory ()
+  "Return a key identifying the current buffer's project.
+
+Use Emacs' project (see `project-current') when a project is
+found, so diagnostics from any file in the project aggregate
+together; otherwise fall back to `default-directory', which
+matches how a checker's working directory groups a multi-file
+check.  The result is an expanded directory name."
+  (file-name-as-directory
+   (expand-file-name
+    (or (and (require 'project nil 'noerror)
+             (when-let* ((project (project-current nil)))
+               (project-root project)))
+        default-directory))))
+
+(defun flycheck--project-storable-errors (errors)
+  "Return the subset of ERRORS worth recording project-wide.
+
+Drop errors without a line number or message: the buffer view
+discards these too (see `flycheck-relevant-error-p') and the error
+list cannot sort them."
+  (seq-filter
+   (lambda (err)
+     (and (flycheck-error-line err)
+          (let ((message (flycheck-error-message err)))
+            (and message (not (string-empty-p message))))))
+   errors))
+
+(defun flycheck--project-record-errors (errors)
+  "Add the storable subset of ERRORS to the current buffer's project.
+
+Successive checkers of a check chain accumulate, mirroring
+`flycheck-report-current-errors'.  The errors are not capped here:
+the buffer's own errors arrive already flood-handled by
+`flycheck--handle-excessive-errors', so nothing recorded exceeds
+what the buffer itself shows for its file."
+  (let ((buffer (current-buffer)))
+    (puthash buffer
+             (append (flycheck--project-storable-errors errors)
+                     (gethash buffer flycheck--project-error-store))
+             flycheck--project-error-store)))
+
+(defun flycheck--project-forget-buffer (&optional buffer)
+  "Drop BUFFER's contribution to the project store.
+
+BUFFER defaults to the current buffer."
+  (remhash (or buffer (current-buffer)) flycheck--project-error-store))
+
+(defun flycheck--project-error-identity (err buffer)
+  "Return a value uniquely identifying ERR contributed by BUFFER.
+
+Two errors compare `equal' when they describe the same problem in
+the same file -- e.g. one `cargo check' diagnostic reported once
+per open crate file -- so duplicates collapse.  Errors without a
+file name are distinguished by BUFFER, so identical diagnostics
+from different unsaved buffers are not mistaken for duplicates."
+  (list (or (flycheck-error-filename err) buffer)
+        (flycheck-error-line err)
+        (flycheck-error-column err)
+        (flycheck-error-end-line err)
+        (flycheck-error-end-column err)
+        (flycheck-error-level err)
+        (flycheck-error-message err)
+        (flycheck-error-id err)
+        (flycheck-error-checker err)))
+
+(defun flycheck--project-errors (project-key)
+  "Return the deduplicated diagnostics recorded for PROJECT-KEY.
+
+Aggregate the errors every live buffer of the project contributed,
+dropping duplicates (see `flycheck--project-error-identity').  Dead
+buffers are pruned from the store on the way.
+
+Cross-file errors reflect the last check that reported them: an
+error a checker reported about another file stays until the buffer
+that produced it is re-checked, since Flycheck has no way to know
+the file changed without running a check."
+  ;; OWNER maps an error identity to the first buffer that contributed it.
+  ;; Duplicates within one buffer are kept (a checker may legitimately report
+  ;; the same diagnostic twice), but the same diagnostic seen from several
+  ;; buffers -- e.g. one `cargo check' error reported from each open crate
+  ;; file -- collapses to a single entry.
+  (let ((owner (make-hash-table :test 'equal))
+        (dead nil)
+        (result nil))
+    (when project-key
+      (maphash
+       (lambda (buffer errors)
+         (if (not (buffer-live-p buffer))
+             (push buffer dead)
+           ;; Resolve the project lazily, only now, to keep `project-current'
+           ;; off the check hot path; a misbehaving project backend must not
+           ;; abort the whole aggregation, so guard against it.
+           (when (equal project-key
+                        (ignore-errors
+                          (with-current-buffer buffer
+                            (flycheck--project-directory))))
+             (dolist (err errors)
+               (let* ((identity (flycheck--project-error-identity err buffer))
+                      (seen-in (gethash identity owner)))
+                 (when (or (null seen-in) (eq seen-in buffer))
+                   (unless seen-in (puthash identity buffer owner))
+                   (push err result)))))))
+       flycheck--project-error-store)
+      (dolist (buffer dead)
+        (remhash buffer flycheck--project-error-store)))
+    (nreverse result)))
 
 (defun flycheck-fill-and-expand-error-file-names (errors directory)
   "Fill and expand file names in ERRORS relative to DIRECTORY.
