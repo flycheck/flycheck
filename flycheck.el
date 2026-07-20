@@ -1267,6 +1267,7 @@ is used."
     (define-key map "?"         #'flycheck-describe-checker)
     (define-key map "h"         #'flycheck-display-error-at-point)
     (define-key map "e"         #'flycheck-explain-error-at-point)
+    (define-key map "f"         #'flycheck-fix-error-at-point)
     (define-key map "H"         #'display-local-help)
     (define-key map "i"         #'flycheck-manual)
     (define-key map "V"         #'flycheck-version)
@@ -1453,6 +1454,7 @@ Only has effect when variable `global-flycheck-mode' is non-nil."
      ["Copy messages at point" flycheck-copy-errors-as-kill
       (flycheck-overlays-at (point))]
      ["Explain error at point" flycheck-explain-error-at-point]
+     ["Apply fix at point" flycheck-fix-error-at-point]
      "---"
      ["Select syntax checker" flycheck-select-checker flycheck-mode]
      ["Disable syntax checker" flycheck-disable-checker flycheck-mode]
@@ -3403,10 +3405,20 @@ buffer-local value of `flycheck-disabled-checkers'."
   "The current syntax check in this buffer.")
 (put 'flycheck-current-syntax-check 'permanent-local t)
 
+(defvar-local flycheck--syntax-check-modified-tick nil
+  "`buffer-chars-modified-tick' when the current check started.
+
+A fix a checker suggests carries this tick (see `flycheck--make-fix')
+so `flycheck-apply-fix' can tell whether the buffer has changed since
+the checker read it, and thus whether the fix's positions are stale.")
+
 (defun flycheck-start-current-syntax-check (checker)
   "Start a syntax check in the current buffer with CHECKER.
 
 Set `flycheck-current-syntax-check' accordingly."
+  ;; Remember the buffer's modification state, so a fix this check produces
+  ;; can be refused later if the buffer has changed in the meantime.
+  (setq flycheck--syntax-check-modified-tick (buffer-chars-modified-tick))
   ;; Allocate the current syntax check *before* starting it.  This allows for
   ;; synchronous checks, which call the status callback immediately in their
   ;; start function.
@@ -4129,21 +4141,23 @@ non-nil, then only do this and skip per-buffer teardown.)"
                 flycheck-error-new
                 (&key
                  line column end-line end-column
-                 buffer checker filename message level id group
-                 &aux (-end-line end-line) (-end-column end-column)))
+                 buffer checker filename message level id group fix
+                 &aux (-end-line end-line) (-end-column end-column)
+                 (-fix fix)))
                (:constructor
                 flycheck-error-new-at
                 (line
                  column
                  &optional level message
-                 &key end-line end-column checker id group
+                 &key end-line end-column checker id group fix
                  (filename (buffer-file-name)) (buffer (current-buffer))
-                 &aux (-end-line end-line) (-end-column end-column)))
+                 &aux (-end-line end-line) (-end-column end-column)
+                 (-fix fix)))
                (:constructor
                 flycheck-error-new-at-pos
                 (pos
                  &optional level message
-                 &key end-pos checker id group
+                 &key end-pos checker id group fix
                  (filename (buffer-file-name)) (buffer (current-buffer))
                  &aux
                  ((line . column)
@@ -4151,7 +4165,8 @@ non-nil, then only do this and skip per-buffer teardown.)"
                     '(nil . nil)))
                  ((-end-line . -end-column)
                   (if end-pos (flycheck-line-column-at-pos end-pos)
-                    '(nil . nil))))))
+                    '(nil . nil)))
+                 (-fix fix))))
   "Structure representing an error reported by a syntax checker.
 Slots:
 
@@ -4214,7 +4229,7 @@ Slots:
   ;; The fields below are at the end of the record to preserve backwards
   ;; compatibility; see https://github.com/flycheck/flycheck/pull/1400 and
   ;; https://lists.gnu.org/archive/html/emacs-devel/2018-07/msg00436.html
-  -end-line -end-column)
+  -end-line -end-column -fix)
 
 ;; These accessors are defined for backwards compatibility
 ;; FIXME: Clean up once package.el learns how to recompile dependencies.
@@ -4243,6 +4258,42 @@ Slots:
                          flycheck-error--set-end-line)
 (gv-define-simple-setter flycheck-error-end-column
                          flycheck-error--set-end-column)
+
+(defun flycheck-error-fix (err)
+  "Return the suggested fix of a Flycheck error ERR, or nil.
+
+The value is a `flycheck-fix' object when the checker offered a
+machine-applicable fix for ERR; see `flycheck-apply-fix'."
+  (condition-case nil (flycheck-error--fix err)
+    (args-out-of-range nil)))
+
+(defun flycheck-error--set-fix (err fix)
+  "Set the suggested fix of a Flycheck error ERR to FIX."
+  (condition-case nil (setf (flycheck-error--fix err) fix)
+    (args-out-of-range nil)))
+
+(gv-define-simple-setter flycheck-error-fix flycheck-error--set-fix)
+
+(cl-defstruct (flycheck-fix-edit (:constructor flycheck-fix-edit-new))
+  "A single text edit of a `flycheck-fix'.
+
+Replace the region from LINE, COLUMN to END-LINE, END-COLUMN with
+REPLACEMENT.  Positions are one-based, as in `flycheck-error'; an
+edit that only inserts text has END-LINE, END-COLUMN equal to
+LINE, COLUMN, and an edit that only deletes has an empty
+REPLACEMENT."
+  line column end-line end-column replacement)
+
+(cl-defstruct (flycheck-fix (:constructor flycheck-fix-new))
+  "A machine-applicable fix a checker suggested for an error.
+
+DESCRIPTION is a short human-readable summary, or nil.  EDITS is
+the list of `flycheck-fix-edit' objects to apply together.  TICK
+is the buffer's `buffer-chars-modified-tick' when the check that
+produced the fix started; `flycheck-apply-fix' refuses to apply
+the fix if the buffer has changed since, so stale line and column
+numbers can never silently corrupt it.  See `flycheck-apply-fix'."
+  description edits tick)
 
 (defmacro flycheck-error-with-buffer (err &rest forms)
   "Switch to the buffer of ERR and evaluate FORMS.
@@ -4359,6 +4410,110 @@ The error position is the error column, or the first
 non-whitespace character of the error line, if ERR has no error column."
   (car (flycheck-error-region-for-mode
         err flycheck-highlighting-mode)))
+
+
+;;; Applying fixes
+
+(defun flycheck--fix-region (line column end-line end-column)
+  "Return the buffer region (BEG . END) named by LINE, COLUMN, END-LINE,
+END-COLUMN, resolved in the current buffer.  Missing columns default to 1
+and a missing end line to LINE."
+  (let ((beg (flycheck-line-column-to-position line (or column 1)))
+        (end (flycheck-line-column-to-position
+              (or end-line line) (or end-column column 1))))
+    (cons (min beg end) (max beg end))))
+
+(defun flycheck--fix-edit-region (edit)
+  "Return the buffer region (BEG . END) that EDIT replaces.
+
+EDIT is a `flycheck-fix-edit'; positions are resolved in the
+current buffer, so call this in the buffer being fixed."
+  (flycheck--fix-region (flycheck-fix-edit-line edit)
+                        (flycheck-fix-edit-column edit)
+                        (flycheck-fix-edit-end-line edit)
+                        (flycheck-fix-edit-end-column edit)))
+
+(defun flycheck--make-fix (buffer description edits)
+  "Return a `flycheck-fix' with DESCRIPTION and EDITS, or nil if no EDITS.
+
+Stamp the fix with BUFFER's modification tick at the start of the
+current check (see `flycheck--syntax-check-modified-tick'), so
+`flycheck-apply-fix' can tell whether the buffer has changed since."
+  (when edits
+    (flycheck-fix-new
+     :description description :edits edits
+     :tick (and (buffer-live-p buffer)
+                (buffer-local-value 'flycheck--syntax-check-modified-tick
+                                    buffer)))))
+
+(defun flycheck-apply-fix (fix &optional buffer)
+  "Apply FIX in BUFFER, defaulting to the current buffer.
+
+FIX is a `flycheck-fix' object.  Its edits are applied together as
+a single undoable change, from the end of the buffer backwards so
+that earlier edits do not invalidate the positions of later ones.
+
+Signal a `user-error', touching nothing, when BUFFER is not live
+or read-only, when the buffer has changed since the check that
+produced the fix (its line and column numbers would be stale), or
+when the fix's own edits overlap -- so a fix can never silently
+corrupt the buffer."
+  (let ((buffer (or buffer (current-buffer))))
+    (unless (buffer-live-p buffer)
+      (user-error "Cannot apply a fix: its buffer is gone"))
+    (with-current-buffer buffer
+      (when buffer-read-only
+        (user-error "Cannot apply a fix in a read-only buffer"))
+      (when (and (flycheck-fix-tick fix)
+                 (/= (flycheck-fix-tick fix) (buffer-chars-modified-tick)))
+        (user-error
+         "The buffer changed since this fix was computed; re-check first"))
+      (save-restriction
+        (widen)
+        (let ((regions
+               ;; Apply from the bottom up so applying one edit does not
+               ;; shift the positions of the ones above it; break ties on
+               ;; equal starts by the larger region first.
+               (sort (mapcar (lambda (edit)
+                               (cons (flycheck--fix-edit-region edit)
+                                     (flycheck-fix-edit-replacement edit)))
+                             (flycheck-fix-edits fix))
+                     (lambda (a b)
+                       (let ((ra (car a)) (rb (car b)))
+                         (or (> (car ra) (car rb))
+                             (and (= (car ra) (car rb))
+                                  (> (cdr ra) (cdr rb)))))))))
+          ;; Reject a fix whose own edits overlap: applying them bottom-up
+          ;; would let one edit clobber another.  REGIONS are sorted with
+          ;; later positions first, so each region must end at or before the
+          ;; previous one began.
+          (let ((limit nil))
+            (pcase-dolist (`((,beg . ,end) . ,_) regions)
+              (when (and limit (> end limit))
+                (user-error "This fix has overlapping edits; not applying it"))
+              (setq limit beg)))
+          (atomic-change-group
+            (pcase-dolist (`((,beg . ,end) . ,replacement) regions)
+              (delete-region beg end)
+              (save-excursion
+                (goto-char beg)
+                (insert (or replacement ""))))))))))
+
+(defun flycheck--error-fix-buffer (err)
+  "Return the live buffer in which ERR's fix may be applied, or nil.
+
+A fix's line and column numbers only make sense in a buffer
+visiting ERR's own file, so a cross-file error -- one a
+whole-project checker reports for a file other than the one being
+edited -- cannot be fixed in place."
+  (when-let* ((buffer (flycheck-error-buffer err))
+              ((buffer-live-p buffer)))
+    (let ((filename (flycheck-error-filename err)))
+      (when (with-current-buffer buffer
+              (or (null filename)
+                  (and buffer-file-name
+                       (flycheck-same-files-p filename buffer-file-name))))
+        buffer))))
 
 (defun flycheck-error-format-snippet (err &optional max-length)
   "Extract the text that ERR refers to from the buffer.
@@ -5732,6 +5887,7 @@ ID.")
     (define-key map (kbd "g") #'flycheck-error-list-check-source)
     (define-key map (kbd "P") #'flycheck-error-list-toggle-scope)
     (define-key map (kbd "e") #'flycheck-error-list-explain-error)
+    (define-key map (kbd "x") #'flycheck-error-list-apply-fix)
     (define-key map (kbd "RET") #'flycheck-error-list-goto-error)
     map)
   "The keymap of `flycheck-error-list-mode'.")
@@ -5945,7 +6101,15 @@ Return a list of (ID CELLS) for `tabulated-list-entries'."
          (id-str (if id (format "%s" id) ""))
          (checker (flycheck-error-checker error))
          (msg-and-checker
-          (flycheck-error-list-make-last-column flushed-msg checker))
+          (concat
+           ;; Flag errors that carry an applicable machine fix (apply with
+           ;; `x'/`flycheck-error-list-apply-fix'), for discoverability.  Only
+           ;; badge errors whose fix can actually be applied here, not
+           ;; cross-file ones the apply command would refuse.
+           (when (and (flycheck-error-fix error)
+                      (flycheck--error-fix-buffer error))
+             (propertize "[fix] " 'face 'flycheck-error-list-checker-name))
+           (flycheck-error-list-make-last-column flushed-msg checker)))
          (explainer (flycheck-checker-get checker 'error-explainer)))
     (list error
           (vector (flycheck-error-list-make-cell
@@ -6284,6 +6448,26 @@ POS defaults to `point'."
     (flycheck-error-with-buffer error
       (when-let (explanation (funcall explainer error))
         (flycheck-display-error-explanation explanation)))))
+
+(defun flycheck-error-list-apply-fix (&optional pos)
+  "Apply the suggested fix of the error at POS in the error list.
+
+POS defaults to `point'.  Signal a `user-error' when the error
+has no fix."
+  (interactive)
+  (let* ((error (tabulated-list-get-id pos))
+         (fix (and error (flycheck-error-fix error)))
+         (buffer (and error (flycheck--error-fix-buffer error))))
+    (unless fix
+      (user-error "The error at point has no fix"))
+    (unless buffer
+      (user-error "This fix cannot be applied here (the error is in another \
+file, or its buffer is gone)"))
+    (flycheck-apply-fix fix buffer)
+    (flycheck-error-list-refresh)
+    (message "Applied fix%s"
+             (if-let* ((description (flycheck-fix-description fix)))
+                 (concat ": " description) ""))))
 
 (defun flycheck-error-list-next-error-pos (pos &optional n)
   "Starting from POS get the N'th next error in the error list.
@@ -6629,6 +6813,25 @@ this error to produce the explanation to display."
                                      'error-explainer))
               (explanation (funcall explainer first-error)))
     (flycheck-display-error-explanation explanation)))
+
+(defun flycheck-fix-error-at-point ()
+  "Apply the suggested fix of the first fixable error at point.
+
+The first fixable error at point is the first error at point with
+a non-nil `flycheck-error-fix'; its fix is applied with
+`flycheck-apply-fix'.  Signal a `user-error' when no error at
+point has a fix."
+  (interactive)
+  (if-let* ((error (seq-find (lambda (err)
+                              (and (flycheck-error-fix err)
+                                   (flycheck--error-fix-buffer err)))
+                            (flycheck-overlay-errors-at (point)))))
+      (let ((fix (flycheck-error-fix error)))
+        (flycheck-apply-fix fix (flycheck--error-fix-buffer error))
+        (message "Applied fix%s"
+                 (if-let* ((description (flycheck-fix-description fix)))
+                     (concat ": " description) "")))
+    (user-error "No applicable fix at point")))
 
 (defconst flycheck-explain-error-buffer "*Flycheck error explanation*"
   "The name of the buffer to show error explanations.")
