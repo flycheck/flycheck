@@ -1353,6 +1353,7 @@ function must be updated to use this variable."
   `(,(propertized-buffer-identification "%12b")
     " for buffer "
     (:eval (flycheck-error-list-propertized-source-name))
+    (:eval (flycheck-error-list-mode-line-scope-indicator))
     (:eval (flycheck-error-list-mode-line-filter-indicator))
     (:eval (flycheck-error-list-mode-line-suppressed-indicator)))
   "Mode line construct for Flycheck error list.
@@ -5729,6 +5730,7 @@ ID.")
     (define-key map (kbd "n") #'flycheck-error-list-next-error)
     (define-key map (kbd "p") #'flycheck-error-list-previous-error)
     (define-key map (kbd "g") #'flycheck-error-list-check-source)
+    (define-key map (kbd "P") #'flycheck-error-list-toggle-scope)
     (define-key map (kbd "e") #'flycheck-error-list-explain-error)
     (define-key map (kbd "RET") #'flycheck-error-list-goto-error)
     map)
@@ -5840,6 +5842,17 @@ ignored."
 ;; reversions
 (put 'flycheck-error-list-source-buffer 'permanent-local t)
 
+(defvar-local flycheck-error-list-scope 'buffer
+  "The scope of the error list.
+
+Either `buffer', to show the errors of the source buffer alone, or
+`project', to show the project-wide diagnostics aggregated across
+every open buffer of the source buffer's project (see
+`flycheck--project-directory').  Toggle it with
+\\<flycheck-error-list-mode-map>\\[flycheck-error-list-toggle-scope].")
+;; Preserved across the reversions Tabulated List mode performs on refresh.
+(put 'flycheck-error-list-scope 'permanent-local t)
+
 (defun flycheck-error-list-set-source (buffer)
   "Set BUFFER as the source buffer of the error list."
   (flycheck-error-list-with-buffer
@@ -5864,6 +5877,19 @@ if the error list is already pointing to the current buffer."
     (when (buffer-live-p buffer)
       (with-current-buffer buffer
         (flycheck-buffer)))))
+
+(defun flycheck-error-list-toggle-scope ()
+  "Toggle the error list between buffer and project scope.
+
+See `flycheck-error-list-scope'."
+  (interactive)
+  (flycheck-error-list-with-buffer
+    (setq flycheck-error-list-scope
+          (if (eq flycheck-error-list-scope 'project) 'buffer 'project))
+    (flycheck-error-list-refresh)
+    (message "Flycheck error list now showing the %s"
+             (if (eq flycheck-error-list-scope 'project)
+                 "whole project" "current buffer"))))
 
 (define-button-type 'flycheck-error-list
   'action #'flycheck-error-list-goto-error
@@ -5953,10 +5979,21 @@ ensure that they line up properly once the message is displayed."
     (replace-regexp-in-string "\\([\r\n]+\\)\\(.\\)" rep msg)))
 
 (defun flycheck-error-list-current-errors ()
-  "Read the list of errors in `flycheck-error-list-source-buffer'."
+  "Read the errors to display in the error list.
+
+With `flycheck-error-list-scope' `buffer' (the default), read the
+errors of `flycheck-error-list-source-buffer'.  With `project',
+read the project-wide diagnostics of that buffer's project."
   (when (buffer-live-p flycheck-error-list-source-buffer)
-    (buffer-local-value 'flycheck-current-errors
-                        flycheck-error-list-source-buffer)))
+    (if (eq flycheck-error-list-scope 'project)
+        (flycheck--project-errors
+         ;; Guard the project lookup: a misbehaving project backend must
+         ;; not abort the error-list refresh that runs after every check.
+         (ignore-errors
+           (with-current-buffer flycheck-error-list-source-buffer
+             (flycheck--project-directory))))
+      (buffer-local-value 'flycheck-current-errors
+                          flycheck-error-list-source-buffer))))
 
 (defun flycheck-error-list-entries ()
   "Create the entries for the error list."
@@ -6059,6 +6096,11 @@ list."
      (format " [%s]" flycheck-error-list--checker-filter))
    (when flycheck-error-list--message-filter
      (format " [/%s/]" flycheck-error-list--message-filter))))
+
+(defun flycheck-error-list-mode-line-scope-indicator ()
+  "Create a string representing the current error list scope."
+  (when (eq flycheck-error-list-scope 'project)
+    " [project]"))
 
 (defun flycheck-error-list-mode-line-suppressed-indicator ()
   "Create a string for the mode line about suppressed errors.
