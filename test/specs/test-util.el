@@ -221,28 +221,29 @@
       (expect (flycheck-symbol-list-p '()) :to-be-truthy)))
 
   (describe "flycheck--expand-file-name"
-
     ;; These assert POSIX output, as reported by remote hosts over TRAMP.
     ;; On Windows `expand-file-name' prepends the current drive to drive-less
     ;; absolute paths, so the exact strings differ; skip there.
-    (before-each
-      (assume (not (memq system-type '(cygwin windows-nt ms-dos)))))
 
     (it "expands a relative name against a local directory"
+      (assume (not (memq system-type '(cygwin windows-nt ms-dos))))
       (expect (flycheck--expand-file-name "foo.py" "/home/user/")
               :to-equal "/home/user/foo.py"))
 
     (it "expands a relative name against a remote directory"
+      (assume (not (memq system-type '(cygwin windows-nt ms-dos))))
       (expect (flycheck--expand-file-name "foo.py" "/ssh:host:/home/user/")
               :to-equal "/ssh:host:/home/user/foo.py"))
 
     (it "grafts the remote prefix onto a host-local absolute path"
+      (assume (not (memq system-type '(cygwin windows-nt ms-dos))))
       ;; A checker running on the remote host reports host-local paths;
       ;; the result must name the file on that host, not locally.
       (expect (flycheck--expand-file-name "/tmp/foo.py" "/ssh:host:/home/user/")
               :to-equal "/ssh:host:/tmp/foo.py"))
 
     (it "leaves an already-remote filename untouched"
+      (assume (not (memq system-type '(cygwin windows-nt ms-dos))))
       (expect (flycheck--expand-file-name
                "/ssh:host:/tmp/foo.py" "/ssh:host:/home/user/")
               :to-equal "/ssh:host:/tmp/foo.py")))
