@@ -36,6 +36,7 @@ Within the error list the following key bindings are available:
 :kbd:`F`     Remove the filter
 :kbd:`S`     Sort the error list by the column at point
 :kbd:`g`     Check the source buffer and update the error list
+:kbd:`P`     Toggle between buffer and whole-project scope
 :kbd:`q`     Quit the error list and hide its window
 ==========   ====
 
@@ -51,6 +52,33 @@ post-jump actions like recentering:
    .. code-block:: elisp
 
       (add-hook 'flycheck-error-list-after-jump-hook #'recenter)
+
+See the whole project
+=====================
+
+Press :kbd:`P` to switch the error list between the *current buffer* and the
+*whole project*.  In project scope the list aggregates the diagnostics of every
+open Flycheck buffer in the source buffer's project, together with the
+cross-file errors your checkers report but the per-buffer view discards.  A
+checker like ``tsc``, ``cargo check`` or ``mypy`` that checks a whole package
+reports errors for files other than the one you are editing; Flycheck normally
+drops those from the buffer (see `flycheck-relevant-error-other-file-show`), but
+in project scope it keeps them, so you see the whole picture in one place.
+Press :kbd:`RET` on an error in another file to jump straight to it.
+
+.. note::
+
+   Flycheck does not run checkers on files you haven't opened; project scope
+   surfaces the diagnostics it already has, from open buffers and from the
+   cross-file output of the checks you run.  It does not turn Flycheck into a
+   background whole-project linter.  A cross-file error therefore reflects the
+   last check that reported it: it stays until the buffer that produced it is
+   checked again, since Flycheck cannot tell that another file changed without
+   re-running a check.
+
+The project of a buffer is Emacs' project (see `project-current`) when one is
+found, and the checker's working directory otherwise.  The current scope is
+shown as ``[project]`` in the error list's mode line.
 
 Filter the list
 ===============
