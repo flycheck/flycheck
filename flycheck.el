@@ -6020,21 +6020,23 @@ every open buffer of the source buffer's project (see
 (defvar-local flycheck-error-list-group-by nil
   "How the error list groups its errors.
 
-Either nil, to show a flat list sorted by location, or one of the
-symbols `file', `checker' or `level', to group the errors under a
-header per file, syntax checker or error level.  Grouping helps a
-lot in `project' scope, where errors span many files.  Choose it
-with \\<flycheck-error-list-mode-map>\\[flycheck-error-list-group-by-none],
-\\[flycheck-error-list-group-by-file], \\[flycheck-error-list-group-by-checker]
-and \\[flycheck-error-list-group-by-level].")
+Either nil, to show a flat list sorted by location, or a list of
+the symbols `file', `checker' and `level' to group the errors
+under a header per dimension.  With more than one dimension the
+groups nest, e.g. (file checker) groups by file and then by
+checker within each file.  Grouping helps a lot in `project'
+scope, where errors span many files.  Toggle the dimensions with
+\\<flycheck-error-list-mode-map>\\[flycheck-error-list-group-by-file],
+\\[flycheck-error-list-group-by-checker] and \\[flycheck-error-list-group-by-level];
+\\[flycheck-error-list-group-by-none] shows a flat list.")
 (put 'flycheck-error-list-group-by 'permanent-local t)
 
 (defvar-local flycheck-error-list--collapsed nil
-  "Set of collapsed group keys, or nil when nothing is collapsed.
+  "Set of collapsed group paths, or nil when nothing is collapsed.
 
-A hash table whose keys are the group keys (a file name, checker
-symbol or level symbol) of the groups whose errors are currently
-hidden.  Reset whenever the grouping changes.")
+A hash table whose keys are the group paths (a list of group keys
+from the outermost dimension inward) of the groups whose errors are
+currently hidden.  Reset whenever the grouping changes.")
 (put 'flycheck-error-list--collapsed 'permanent-local t)
 
 (defface flycheck-error-list-group-header
@@ -6087,21 +6089,49 @@ See `flycheck-error-list-scope'."
 (defconst flycheck-error-list--group-dimensions '(file checker level)
   "The error list grouping dimensions, in tab-line order.")
 
-(defun flycheck-error-list--set-group-by (dimension)
-  "Group the error list by DIMENSION and refresh it.
+(defun flycheck-error-list--grouping-dimensions ()
+  "Return the active grouping dimensions, in canonical order.
 
-DIMENSION is nil for a flat list, or one of the symbols in
-`flycheck-error-list--group-dimensions'."
+Normalize `flycheck-error-list-group-by' to a list and drop
+anything that is not a known dimension, so a flat list yields nil."
+  (let ((group-by (if (listp flycheck-error-list-group-by)
+                      flycheck-error-list-group-by
+                    (list flycheck-error-list-group-by))))
+    (seq-filter (lambda (d) (memq d group-by))
+                flycheck-error-list--group-dimensions)))
+
+(defun flycheck-error-list--set-group-by (dimensions)
+  "Group the error list by DIMENSIONS and refresh it.
+
+DIMENSIONS is nil for a flat list, or a list of the symbols in
+`flycheck-error-list--group-dimensions'; several dimensions nest."
   (flycheck-error-list-with-buffer
-    (setq flycheck-error-list-group-by dimension
+    (setq flycheck-error-list-group-by dimensions
           ;; Start each grouping fully expanded.
           flycheck-error-list--collapsed nil
           ;; Grouped entries are laid out in order already, so turn off column
           ;; sorting; restore the location sort for the flat list.
-          tabulated-list-sort-key (unless dimension (cons "Line" nil)))
+          tabulated-list-sort-key (unless dimensions (cons "Line" nil)))
     (flycheck-error-list-refresh)
     (message "Flycheck error list %s"
-             (if dimension (format "grouped by %s" dimension) "flat"))))
+             (if dimensions
+                 (concat "grouped by "
+                         (mapconcat #'symbol-name dimensions " > "))
+               "flat"))))
+
+(defun flycheck-error-list--toggle-group-by (dimension)
+  "Toggle grouping the error list by DIMENSION.
+
+Add or remove DIMENSION from the grouping, keeping the remaining
+dimensions in the canonical `flycheck-error-list--group-dimensions'
+order, so they always nest file then checker then level."
+  (let* ((active (flycheck-error-list--grouping-dimensions))
+         (next (if (memq dimension active)
+                   (remq dimension active)
+                 (cons dimension active))))
+    (flycheck-error-list--set-group-by
+     (seq-filter (lambda (d) (memq d next))
+                 flycheck-error-list--group-dimensions))))
 
 (defun flycheck-error-list-group-by-none ()
   "Show the error list as a flat list, without grouping."
@@ -6109,74 +6139,81 @@ DIMENSION is nil for a flat list, or one of the symbols in
   (flycheck-error-list--set-group-by nil))
 
 (defun flycheck-error-list-group-by-file ()
-  "Group the errors in the error list by file."
+  "Toggle grouping the errors in the error list by file."
   (interactive)
-  (flycheck-error-list--set-group-by 'file))
+  (flycheck-error-list--toggle-group-by 'file))
 
 (defun flycheck-error-list-group-by-checker ()
-  "Group the errors in the error list by syntax checker."
+  "Toggle grouping the errors in the error list by syntax checker."
   (interactive)
-  (flycheck-error-list--set-group-by 'checker))
+  (flycheck-error-list--toggle-group-by 'checker))
 
 (defun flycheck-error-list-group-by-level ()
-  "Group the errors in the error list by level."
+  "Toggle grouping the errors in the error list by level."
   (interactive)
-  (flycheck-error-list--set-group-by 'level))
+  (flycheck-error-list--toggle-group-by 'level))
 
 (defun flycheck-error-list--grouping-line ()
   "Return the tab-line string advertising the grouping controls."
-  (concat
-   " Group:"
-   (mapconcat
-    (lambda (item)
-      (let* ((dimension (car item))
-             (label (format "M-%d %s" (cdr item)
-                            (if dimension dimension "flat")))
-             (active (eq dimension flycheck-error-list-group-by)))
-        (concat "  " (if active
-                         (propertize label 'face
-                                     'flycheck-error-list-group-header)
-                       label))))
-    ;; nil (flat) is M-1, then the dimensions M-2, M-3, M-4.
-    (cons '(nil . 1)
-          (seq-map-indexed (lambda (d i) (cons d (+ i 2)))
-                           flycheck-error-list--group-dimensions))
-    "")
-   (when flycheck-error-list-group-by "   TAB collapse")))
+  (let ((active (flycheck-error-list--grouping-dimensions)))
+    (concat
+     " Group:"
+     (mapconcat
+      (lambda (item)
+        (let* ((dimension (car item))
+               (label (format "M-%d %s" (cdr item)
+                              (if dimension dimension "flat")))
+               ;; Highlight every active dimension, or `flat' when none.
+               (on (if dimension (memq dimension active) (null active))))
+          (concat "  " (if on
+                           (propertize label 'face
+                                       'flycheck-error-list-group-header)
+                         label))))
+      ;; nil (flat) is M-1, then the dimensions M-2, M-3, M-4.
+      (cons '(nil . 1)
+            (seq-map-indexed (lambda (d i) (cons d (+ i 2)))
+                             flycheck-error-list--group-dimensions))
+      "")
+     (when active "   TAB collapse"))))
+
+(defun flycheck-error-list--error-group-path (error)
+  "Return the group path of ERROR under the active grouping.
+
+The path is the list of group keys from the outermost dimension
+inward, identifying the innermost group ERROR belongs to."
+  (mapcar (lambda (dimension)
+            (funcall (flycheck-error-list--group-key-function dimension) error))
+          (flycheck-error-list--grouping-dimensions)))
 
 (defun flycheck-error-list-toggle-group-at-point (&optional pos)
   "Collapse or expand the group at POS in a grouped error list.
 
 POS defaults to `point'.  Works both on a group header and on any
-error row within a group.  With nothing to toggle (a flat list, or
-point away from any group) move to the next button instead, like
-Tabulated List mode's \\`TAB'."
+error row, whose innermost group it toggles.  With nothing to
+toggle (a flat list, or point away from any group) move to the next
+button instead, like Tabulated List mode's \\`TAB'."
   (interactive)
   (let* ((id (tabulated-list-get-id pos))
          (header (and (consp id) (eq (car id) 'flycheck-group)))
          (error (flycheck-error-p id)))
-    (if (and (memq flycheck-error-list-group-by
-                   flycheck-error-list--group-dimensions)
-             (or header error))
-        ;; A genuine group key may itself be nil (errors without a file), so
-        ;; decide from HEADER/ERROR rather than from the key's value.
-        (let ((key (if header
-                       (cadr id)
-                     (funcall (flycheck-error-list--group-key-function
-                               flycheck-error-list-group-by)
-                              id))))
+    (if (and (flycheck-error-list--grouping-dimensions) (or header error))
+        ;; A group is identified by its path; for an error row use the path of
+        ;; its innermost group.
+        (let ((path (if header
+                        (cadr id)
+                      (flycheck-error-list--error-group-path id))))
           (unless flycheck-error-list--collapsed
             (setq flycheck-error-list--collapsed (make-hash-table :test 'equal)))
-          (if (gethash key flycheck-error-list--collapsed)
-              (remhash key flycheck-error-list--collapsed)
-            (puthash key t flycheck-error-list--collapsed))
+          (if (gethash path flycheck-error-list--collapsed)
+              (remhash path flycheck-error-list--collapsed)
+            (puthash path t flycheck-error-list--collapsed))
           (flycheck-error-list-refresh)
-          (flycheck-error-list--goto-group key))
+          (flycheck-error-list--goto-group path))
       (forward-button 1 t nil t))))
 
-(defun flycheck-error-list--goto-group (key)
-  "Move point to the header of the group KEY, when it is present."
-  (let ((target (list 'flycheck-group key))
+(defun flycheck-error-list--goto-group (path)
+  "Move point to the header of the group PATH, when it is present."
+  (let ((target (list 'flycheck-group path))
         (pos (point-min))
         (found nil))
     (while (and pos (not found))
@@ -6365,58 +6402,69 @@ spans several files, as it does when grouping by checker or level."
 ERRORS is the full, unfiltered error set, so a filter that merely
 hides a group's errors keeps its collapse choice.  Pruning a group
 that is genuinely gone (its errors were all fixed) stops it from
-reappearing collapsed, and hiding a new error, when it comes back."
+reappearing collapsed, and hiding a new error, when it comes back.
+
+Every prefix of an error's group path is a live group, so nested
+headers above a still-present error keep their collapse too."
   (when flycheck-error-list--collapsed
-    (let ((key-fn (flycheck-error-list--group-key-function
-                   flycheck-error-list-group-by))
+    ;; Resolve the dimensions and their key functions once, not per error.
+    (let ((key-fns (mapcar #'flycheck-error-list--group-key-function
+                           (flycheck-error-list--grouping-dimensions)))
           (live (make-hash-table :test 'equal)))
       (dolist (err errors)
-        (puthash (funcall key-fn err) t live))
-      (maphash (lambda (key _)
-                 (unless (gethash key live)
-                   (remhash key flycheck-error-list--collapsed)))
+        (let ((prefix nil))
+          (dolist (key-fn key-fns)
+            (setq prefix (append prefix (list (funcall key-fn err))))
+            (puthash prefix t live))))
+      (maphash (lambda (path _)
+                 (unless (gethash path live)
+                   (remhash path flycheck-error-list--collapsed)))
                flycheck-error-list--collapsed))))
 
-(defun flycheck-error-list--group-header (dimension key count collapsed)
-  "Return a header entry for the group KEY under DIMENSION.
+(defun flycheck-error-list--group-header (path dimension key count collapsed depth)
+  "Return a header entry for the group at PATH.
 
-COUNT is the number of errors in the group and COLLAPSED tells
-whether the group is currently collapsed.  The entry's id is a
+DIMENSION and KEY name the group, COUNT is the number of errors it
+holds, COLLAPSED tells whether it is collapsed and DEPTH is its
+nesting level, used to indent nested headers.  The entry's id is a
 list headed by `flycheck-group', not a `flycheck-error', so
 navigation and the fix/explain commands skip it."
-  (list (list 'flycheck-group key)
+  (list (list 'flycheck-group path)
         (vector (flycheck-error-list-make-cell
-                 (format "%s %s (%d)"
+                 (format "%s%s %s (%d)"
+                         (make-string (* 2 depth) ?\s)
                          (if collapsed "▸" "▾")
                          (flycheck-error-list--group-name dimension key)
                          count)
                  'flycheck-error-list-group-header)
                 "" "" "" "" "")))
 
-(defun flycheck-error-list--grouped-entries (errors)
-  "Return grouped tabulated-list entries for ERRORS.
+(defun flycheck-error-list--grouped-entries (errors dimensions path depth omit-file)
+  "Return grouped entries for ERRORS under DIMENSIONS.
 
-The errors are grouped by `flycheck-error-list-group-by'; a
-collapsed group contributes only its header."
-  (let* ((dimension flycheck-error-list-group-by)
-         (key-fn (flycheck-error-list--group-key-function dimension))
-         (groups (flycheck-error-list--sort-groups
-                  dimension (seq-group-by key-fn errors)))
-         ;; The file name is redundant under each file header, but relevant
-         ;; when grouping by checker or level.
-         (omit-file (eq dimension 'file)))
-    (seq-mapcat
-     (lambda (group)
-       (let* ((key (car group))
-              (sorted (sort (cdr group) #'flycheck-error-list--group-error-<))
-              (collapsed (flycheck-error-list--group-collapsed-p key)))
-         (cons (flycheck-error-list--group-header
-                dimension key (length sorted) collapsed)
-               (unless collapsed
-                 (mapcar (lambda (err)
-                           (flycheck-error-list-make-entry err omit-file))
-                         sorted)))))
-     groups)))
+PATH is the group path leading to ERRORS, DEPTH its nesting level
+and OMIT-FILE whether to blank the File cell of the leaf rows.  The
+grouping recurses through DIMENSIONS; a collapsed group contributes
+only its header."
+  (if (null dimensions)
+      (mapcar (lambda (err) (flycheck-error-list-make-entry err omit-file))
+              (sort errors #'flycheck-error-list--group-error-<))
+    (let* ((dimension (car dimensions))
+           (key-fn (flycheck-error-list--group-key-function dimension))
+           (groups (flycheck-error-list--sort-groups
+                    dimension (seq-group-by key-fn errors))))
+      (seq-mapcat
+       (lambda (group)
+         (let* ((key (car group))
+                (group-path (append path (list key)))
+                (collapsed (flycheck-error-list--group-collapsed-p group-path)))
+           (cons (flycheck-error-list--group-header
+                  group-path dimension key (length (cdr group)) collapsed depth)
+                 (unless collapsed
+                   (flycheck-error-list--grouped-entries
+                    (cdr group) (cdr dimensions) group-path (1+ depth)
+                    omit-file)))))
+       groups))))
 
 (defun flycheck-error-list-entries ()
   "Create the entries for the error list.
@@ -6426,12 +6474,15 @@ out under a header per group; otherwise a flat list is returned and
 Tabulated List mode sorts it."
   (when-let* ((errors (flycheck-error-list-current-errors))
               (filtered (flycheck-error-list-apply-filter errors)))
-    (if (memq flycheck-error-list-group-by flycheck-error-list--group-dimensions)
+    (if-let* ((dimensions (flycheck-error-list--grouping-dimensions)))
         (progn
           ;; Prune against the unfiltered errors, so a filter that hides a
           ;; group does not discard the collapse state the user set.
           (flycheck-error-list--prune-collapsed errors)
-          (flycheck-error-list--grouped-entries filtered))
+          ;; The file name is redundant under a file header, but relevant when
+          ;; grouping only by checker or level.
+          (flycheck-error-list--grouped-entries
+           filtered dimensions nil 0 (memq 'file dimensions)))
       (mapcar #'flycheck-error-list-make-entry filtered))))
 
 (defun flycheck-error-list-entry-< (entry1 entry2)
