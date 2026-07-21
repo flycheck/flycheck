@@ -32,11 +32,17 @@ Within the error list the following key bindings are available:
 :kbd:`n`     Jump to the next error
 :kbd:`p`     Jump to the previous error
 :kbd:`e`     Explain the error
+:kbd:`x`     Apply the error's fix, if it has one
 :kbd:`f`     Filter the error list by level
 :kbd:`F`     Remove the filter
 :kbd:`S`     Sort the error list by the column at point
 :kbd:`g`     Check the source buffer and update the error list
 :kbd:`P`     Toggle between buffer and whole-project scope
+:kbd:`M-1`   Show a flat list, without grouping
+:kbd:`M-2`   Group the errors by file
+:kbd:`M-3`   Group the errors by checker
+:kbd:`M-4`   Group the errors by level
+:kbd:`TAB`   Collapse or expand the group at point
 :kbd:`q`     Quit the error list and hide its window
 ==========   ====
 
@@ -79,6 +85,13 @@ Press :kbd:`RET` on an error in another file to jump straight to it.
 The project of a buffer is Emacs' project (see `project-current`) when one is
 found, and the checker's working directory otherwise.  The current scope is
 shown as ``[project]`` in the error list's mode line.
+
+Group the errors under a header per file, syntax checker or level with
+:kbd:`M-2`, :kbd:`M-3` and :kbd:`M-4`; :kbd:`M-1` switches back to a flat list.
+Grouping makes a project-wide list much easier to scan.  The available
+groupings and the active one are shown in a strip at the top of the error
+list.  Press :kbd:`TAB` (or :kbd:`RET` on a header) to collapse or expand the
+group at point.
 
 Filter the list
 ===============

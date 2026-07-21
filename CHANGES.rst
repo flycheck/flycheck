@@ -1,6 +1,29 @@
 ``master`` (unreleased)
 =======================
 
+- The error list no longer scans all of its rows on every cursor movement
+  to highlight the errors at point, so keeping it open next to a large
+  project-scope list is much cheaper.
+- The error list can group its errors by file (``M-2``), syntax checker
+  (``M-3``) or level (``M-4``), laying them out under a header per group
+  instead of a flat list (``M-1``), which helps a lot in project scope.
+  Press ``TAB`` on a group to collapse or expand it.  The groupings are
+  shown in a strip at the top of the error list.
+- ``python-ruff`` and ``sh-shellcheck`` now carry the fixes their tools
+  suggest, applicable with the quick-fix commands.  Both switched to their
+  JSON output (ruff ``--output-format=json``, shellcheck ``--format
+  json1``) to get the fix data; ruff findings no longer show the ``[*]``
+  auto-fixable marker in their message, since the error list marks them
+  ``[fix]`` instead.  ``sh-shellcheck`` now needs shellcheck 0.7 or newer.
+- Flycheck can now apply machine-applicable fixes that checkers suggest.
+  ``C-c ! f`` (``flycheck-fix-error-at-point``) applies the fix of the
+  error at point, and ``x`` does the same for the selected row in the
+  error list, where fixable errors are marked ``[fix]``.  The
+  ``javascript-eslint`` (``--fix``), ``rust``/``rust-cargo``/``rust-clippy``
+  (machine-applicable suggestions) and SARIF-based checkers (e.g.
+  ``dockerfile-hadolint``) now carry these fixes, which were previously
+  parsed and discarded.  Error parsers can attach a ``flycheck-fix`` to a
+  ``flycheck-error`` via the new ``:fix`` slot.
 - The error list can now show whole-project diagnostics.  Press ``P``
   (``flycheck-error-list-toggle-scope``) to switch it between the current
   buffer and the project, where it aggregates the errors of every open
