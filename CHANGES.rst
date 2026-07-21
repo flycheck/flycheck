@@ -1,6 +1,9 @@
 ``master`` (unreleased)
 =======================
 
+- The error list no longer scans all of its rows on every cursor movement
+  to highlight the errors at point, so keeping it open next to a large
+  project-scope list is much cheaper.
 - The error list can group its errors by file: press ``t``
   (``flycheck-error-list-toggle-grouping``) to lay them out under a header
   per file instead of a flat list, which helps a lot in project scope.

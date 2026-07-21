@@ -6627,6 +6627,41 @@ nil, if there is no next error."
   "Error highlight overlays in the error list buffer.")
 (put 'flycheck-error-list-highlight-overlays 'permanent-local t)
 
+(defvar-local flycheck-error-list--position-cache nil
+  "Cached mapping from each listed error to its row positions.
+
+A cons (TICK . TABLE), where TICK is the `buffer-modified-tick' at
+which TABLE was built and TABLE maps each row's error (compared
+with `equal') to the list of buffer positions where it appears.
+It is rebuilt lazily whenever the error list is reprinted, so that
+highlighting the errors at point does not have to scan the whole
+buffer on every command.")
+(put 'flycheck-error-list--position-cache 'permanent-local t)
+
+(defun flycheck-error-list--positions ()
+  "Return a table mapping each listed error to its row positions.
+
+The table maps an error (compared with `equal', matching the old
+`member' lookup) to the list of positions where it is shown, so a
+single error highlighted on several rows still lights up all of
+them.  The result is cached and only rebuilt when the error list
+buffer changes, keyed on `buffer-modified-tick'.  This is safe
+because every change to the rows goes through a reprint, which
+edits the buffer text and bumps the tick, and the displayed error
+objects are replaced wholesale on each check rather than mutated
+in place."
+  (let ((tick (buffer-modified-tick)))
+    (unless (eql (car flycheck-error-list--position-cache) tick)
+      (let ((table (make-hash-table :test 'equal))
+            (pos (point-min)))
+        (while pos
+          (let ((err (tabulated-list-get-id pos)))
+            (when (flycheck-error-p err)
+              (push pos (gethash err table))))
+          (setq pos (flycheck-error-list-next-error-pos pos)))
+        (setq flycheck-error-list--position-cache (cons tick table))))
+    (cdr flycheck-error-list--position-cache)))
+
 (defun flycheck-error-list-highlight-errors (&optional preserve-pos)
   "Highlight errors in the error list.
 
@@ -6650,28 +6685,36 @@ avoid slowing down editing when the error list is hidden."
           ;; Display the new overlays first, to avoid re-display flickering
           (setq flycheck-error-list-highlight-overlays nil)
           (when current-errors
-            (let ((next-error-pos (point-min)))
-              (while next-error-pos
-                (let* ((beg next-error-pos)
-                       (end (flycheck-error-list-next-error-pos beg))
-                       (err (tabulated-list-get-id beg)))
-                  (when (member err current-errors)
-                    (setq min-point (min min-point beg)
-                          max-point (max max-point beg))
-                    (let ((ov (make-overlay beg
-                                            ;; Extend overlay to the beginning
-                                            ;; of the next line, to highlight
-                                            ;; the whole line
-                                            (or end (point-max)))))
-                      (push ov flycheck-error-list-highlight-overlays)
-                      (setf (overlay-get ov 'flycheck-error-highlight-overlay)
-                            t)
-                      (setf (overlay-get ov 'face)
-                            'flycheck-error-list-highlight)))
-                  (setq next-error-pos end)))))
+            ;; Look up only the errors at point in the row-position index,
+            ;; rather than scanning every row of the list on each command.
+            ;; Collect the row positions first and drop duplicates, so several
+            ;; `equal' errors at point (e.g. from two checkers) still yield a
+            ;; single overlay per row.
+            (let* ((positions (flycheck-error-list--positions))
+                   (rows (delete-dups
+                          (mapcan (lambda (err)
+                                    (copy-sequence (gethash err positions)))
+                                  current-errors))))
+              (dolist (beg rows)
+                (let ((end (flycheck-error-list-next-error-pos beg)))
+                  (setq min-point (min min-point beg)
+                        max-point (max max-point beg))
+                  (let ((ov (make-overlay beg
+                                          ;; Extend overlay to the beginning
+                                          ;; of the next line, to highlight
+                                          ;; the whole line
+                                          (or end (point-max)))))
+                    (push ov flycheck-error-list-highlight-overlays)
+                    (setf (overlay-get ov 'flycheck-error-highlight-overlay)
+                          t)
+                    (setf (overlay-get ov 'face)
+                          'flycheck-error-list-highlight))))))
           ;; Delete the old overlays
           (seq-do #'delete-overlay old-overlays)
-          (when (and (not preserve-pos) current-errors)
+          ;; Recenter only when we actually highlighted a row.  The errors at
+          ;; point may all be filtered out of the list, leaving min/max-point
+          ;; at their sentinels, which would send point to an unrelated row.
+          (when (and (not preserve-pos) flycheck-error-list-highlight-overlays)
             ;; Move point to the middle error
             (goto-char (+ min-point (/ (- max-point min-point) 2)))
             (beginning-of-line)
