@@ -1,6 +1,12 @@
 ``master`` (unreleased)
 =======================
 
+- ``python-ruff`` and ``sh-shellcheck`` now carry the fixes their tools
+  suggest, applicable with the quick-fix commands.  Both switched to their
+  JSON output (ruff ``--output-format=json``, shellcheck ``--format
+  json1``) to get the fix data; ruff findings no longer show the ``[*]``
+  auto-fixable marker in their message, since the error list marks them
+  ``[fix]`` instead.  ``sh-shellcheck`` now needs shellcheck 0.7 or newer.
 - Flycheck can now apply machine-applicable fixes that checkers suggest.
   ``C-c ! f`` (``flycheck-fix-error-at-point``) applies the fix of the
   error at point, and ``x`` does the same for the selected row in the

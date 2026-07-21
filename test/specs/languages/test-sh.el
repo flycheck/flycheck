@@ -79,6 +79,25 @@
       (flycheck-buttercup-should-syntax-check
        "language/sh/shellcheck-infer.sh" 'sh-mode
        '(4 15 warning "Remove quotes from right-hand side of =~ to match as a regex rather than literally."
-           :checker sh-shellcheck :id "SC2076")))))
+           :checker sh-shellcheck :id "SC2076"))))
+
+  (describe "sh-shellcheck JSON1 parser"
+    (it "parses a comment and its fix replacements"
+      (flycheck-buttercup-with-temp-buffer
+        (let* ((errors (flycheck-parse-output
+                        "{\"comments\":[{\"file\":\"-\",\"line\":2,\"endLine\":2,\
+\"column\":6,\"endColumn\":8,\"level\":\"info\",\"code\":2086,\
+\"message\":\"Double quote to prevent globbing.\",\"fix\":{\"replacements\":[\
+{\"line\":2,\"endLine\":2,\"column\":6,\"endColumn\":6,\"replacement\":\"Q\"},\
+{\"line\":2,\"endLine\":2,\"column\":8,\"endColumn\":8,\"replacement\":\"Q\"}]}}]}"
+                        'sh-shellcheck (current-buffer)))
+               (err (car errors))
+               (edits (flycheck-fix-edits (flycheck-error-fix err))))
+          (expect (flycheck-error-line err) :to-equal 2)
+          (expect (flycheck-error-column err) :to-equal 6)
+          (expect (flycheck-error-level err) :to-equal 'info)
+          (expect (flycheck-error-id err) :to-equal "SC2086")
+          (expect (length edits) :to-equal 2)
+          (expect (flycheck-fix-edit-replacement (car edits)) :to-equal "Q"))))))
 
 ;;; test-sh.el ends here
