@@ -10,7 +10,8 @@
   The keys toggle each dimension and combine, so ``M-2`` then ``M-3``
   nests the errors by checker within each file.  Press ``TAB`` on a group
   to collapse or expand it.  The groupings are shown in a strip at the top
-  of the error list.
+  of the error list; click a grouping there or a group header to drive it
+  all with the mouse.
 - ``python-ruff`` and ``sh-shellcheck`` now carry the fixes their tools
   suggest, applicable with the quick-fix commands.  Both switched to their
   JSON output (ruff ``--output-format=json``, shellcheck ``--format
