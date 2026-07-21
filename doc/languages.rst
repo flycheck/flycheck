@@ -1493,6 +1493,13 @@ to view the docstring of the syntax checker.  Likewise, you may use
       Check Slim best practices using the `slim-lint
       <https://github.com/sds/slim-lint>`_ linter.
 
+.. supported-language:: Swift
+
+   .. syntax-checker:: swift
+
+      Check Swift syntax with the `Swift <https://www.swift.org/>`_ compiler
+      using ``swiftc -parse``.
+
 .. supported-language:: SQL
 
    .. syntax-checker:: sql-sqlint
