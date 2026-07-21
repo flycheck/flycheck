@@ -5886,6 +5886,7 @@ ID.")
     (define-key map (kbd "p") #'flycheck-error-list-previous-error)
     (define-key map (kbd "g") #'flycheck-error-list-check-source)
     (define-key map (kbd "P") #'flycheck-error-list-toggle-scope)
+    (define-key map (kbd "t") #'flycheck-error-list-toggle-grouping)
     (define-key map (kbd "e") #'flycheck-error-list-explain-error)
     (define-key map (kbd "x") #'flycheck-error-list-apply-fix)
     (define-key map (kbd "RET") #'flycheck-error-list-goto-error)
@@ -6009,6 +6010,21 @@ every open buffer of the source buffer's project (see
 ;; Preserved across the reversions Tabulated List mode performs on refresh.
 (put 'flycheck-error-list-scope 'permanent-local t)
 
+(defvar-local flycheck-error-list-group-by nil
+  "How the error list groups its errors.
+
+Either nil, to show a flat list sorted by location, or `file', to
+group the errors under a collapsible-looking header per file --
+handy in `project' scope, where errors span many files.  Toggle it
+with \\<flycheck-error-list-mode-map>\\[flycheck-error-list-toggle-grouping].")
+(put 'flycheck-error-list-group-by 'permanent-local t)
+
+(defface flycheck-error-list-group-header
+  '((t :inherit flycheck-error-list-filename :weight bold))
+  "Face for the file headers in a grouped error list."
+  :package-version '(flycheck . "38")
+  :group 'flycheck-faces)
+
 (defun flycheck-error-list-set-source (buffer)
   "Set BUFFER as the source buffer of the error list."
   (flycheck-error-list-with-buffer
@@ -6046,6 +6062,22 @@ See `flycheck-error-list-scope'."
     (message "Flycheck error list now showing the %s"
              (if (eq flycheck-error-list-scope 'project)
                  "whole project" "current buffer"))))
+
+(defun flycheck-error-list-toggle-grouping ()
+  "Toggle grouping the error list by file.
+
+See `flycheck-error-list-group-by'."
+  (interactive)
+  (flycheck-error-list-with-buffer
+    (setq flycheck-error-list-group-by
+          (if (eq flycheck-error-list-group-by 'file) nil 'file))
+    ;; Grouped entries are laid out in order already, so turn off column
+    ;; sorting; restore the location sort for the flat list.
+    (setq tabulated-list-sort-key
+          (unless flycheck-error-list-group-by (cons "Line" nil)))
+    (flycheck-error-list-refresh)
+    (message "Flycheck error list %s"
+             (if flycheck-error-list-group-by "grouped by file" "flat"))))
 
 (define-button-type 'flycheck-error-list
   'action #'flycheck-error-list-goto-error
@@ -6085,10 +6117,12 @@ string with attached text properties."
    (if (numberp number) (number-to-string number) "")
    face))
 
-(defun flycheck-error-list-make-entry (error)
+(defun flycheck-error-list-make-entry (error &optional omit-file)
   "Make a table entry for the given ERROR.
 
-Return a list of (ID CELLS) for `tabulated-list-entries'."
+Return a list of (ID CELLS) for `tabulated-list-entries'.  With
+OMIT-FILE non-nil leave the File cell blank, as a file header
+already names it in a grouped list."
   (let* ((level (flycheck-error-level error))
          (level-face (flycheck-error-level-error-list-face level))
          (filename (flycheck-error-filename error))
@@ -6113,7 +6147,7 @@ Return a list of (ID CELLS) for `tabulated-list-entries'."
          (explainer (flycheck-checker-get checker 'error-explainer)))
     (list error
           (vector (flycheck-error-list-make-cell
-                   (if filename
+                   (if (and filename (not omit-file))
                        (file-name-nondirectory filename)
                      "")
                    'flycheck-error-list-filename)
@@ -6159,23 +6193,80 @@ read the project-wide diagnostics of that buffer's project."
       (buffer-local-value 'flycheck-current-errors
                           flycheck-error-list-source-buffer))))
 
+(defun flycheck-error-list--abbreviate-filename (filename)
+  "Abbreviate FILENAME for a group header, relative to the source project."
+  (if-let* ((filename)
+            (dir (and (buffer-live-p flycheck-error-list-source-buffer)
+                      (buffer-local-value 'default-directory
+                                          flycheck-error-list-source-buffer))))
+      (if (string-prefix-p dir filename)
+          (file-relative-name filename dir)
+        (abbreviate-file-name filename))
+    (or filename "<no file>")))
+
+(defun flycheck-error-list--group-header (filename count)
+  "Return an error-list header entry for FILENAME with COUNT errors.
+
+The entry's id is a list headed by `flycheck-group', not a
+`flycheck-error', so navigation and the fix/explain commands skip
+it."
+  (list (list 'flycheck-group filename)
+        (vector (flycheck-error-list-make-cell
+                 (format "%s (%d)"
+                         (flycheck-error-list--abbreviate-filename filename)
+                         count)
+                 'flycheck-error-list-group-header)
+                "" "" "" "" "")))
+
+(defun flycheck-error-list--grouped-entries (errors)
+  "Return grouped tabulated-list entries for ERRORS, one section per file."
+  (let ((groups (sort (seq-group-by #'flycheck-error-filename errors)
+                      (lambda (a b) (string< (or (car a) "") (or (car b) ""))))))
+    (seq-mapcat
+     (lambda (group)
+       (let ((sorted (sort (cdr group) #'flycheck-error-<)))
+         (cons (flycheck-error-list--group-header (car group) (length sorted))
+               (mapcar (lambda (err) (flycheck-error-list-make-entry err 'omit-file))
+                       sorted))))
+     groups)))
+
 (defun flycheck-error-list-entries ()
-  "Create the entries for the error list."
+  "Create the entries for the error list.
+
+When `flycheck-error-list-group-by' is `file' the errors are laid
+out under a header per file; otherwise a flat list is returned and
+Tabulated List mode sorts it."
   (when-let* ((errors (flycheck-error-list-current-errors))
               (filtered (flycheck-error-list-apply-filter errors)))
-    (mapcar #'flycheck-error-list-make-entry filtered)))
+    (if (eq flycheck-error-list-group-by 'file)
+        (flycheck-error-list--grouped-entries filtered)
+      (mapcar #'flycheck-error-list-make-entry filtered))))
 
 (defun flycheck-error-list-entry-< (entry1 entry2)
   "Determine whether ENTRY1 is before ENTRY2 by location.
 
+In a file-grouped list an entry can be a file header rather than an
+error; such entries have no location, so they sort as equal here and
+keep their place.
+
 See `flycheck-error-<'."
-  (flycheck-error-< (car entry1) (car entry2)))
+  (let ((err1 (car entry1))
+        (err2 (car entry2)))
+    (and (flycheck-error-p err1) (flycheck-error-p err2)
+         (flycheck-error-< err1 err2))))
 
 (defun flycheck-error-list-entry-level-< (entry1 entry2)
   "Determine whether ENTRY1 is before ENTRY2 by level.
 
+In a file-grouped list an entry can be a file header rather than an
+error; such entries have no level, so they sort as equal here and keep
+their place.
+
 See `flycheck-error-level-<'."
-  (not (flycheck-error-level-< (car entry1) (car entry2))))
+  (let ((err1 (car entry1))
+        (err2 (car entry2)))
+    (and (flycheck-error-p err1) (flycheck-error-p err2)
+         (not (flycheck-error-level-< err1 err2)))))
 
 (defvar flycheck-error-list-mode-line-map
   (let ((map (make-sparse-keymap)))
@@ -6263,8 +6354,11 @@ list."
 
 (defun flycheck-error-list-mode-line-scope-indicator ()
   "Create a string representing the current error list scope."
-  (when (eq flycheck-error-list-scope 'project)
-    " [project]"))
+  (concat
+   (when (eq flycheck-error-list-scope 'project)
+     " [project]")
+   (when (eq flycheck-error-list-group-by 'file)
+     " [by file]")))
 
 (defun flycheck-error-list-mode-line-suppressed-indicator ()
   "Create a string for the mode line about suppressed errors.
@@ -6393,7 +6487,9 @@ Useful for post-jump actions like recentering:
 
 POS defaults to `point'."
   (interactive)
-  (when-let* ((error (tabulated-list-get-id pos)))
+  (when-let* ((error (tabulated-list-get-id pos))
+              ;; Skip file headers, whose id is not a `flycheck-error'.
+              ((flycheck-error-p error)))
     (flycheck-jump-to-error error)
     (run-hooks 'flycheck-error-list-after-jump-hook)))
 
@@ -6443,6 +6539,7 @@ POS defaults to `point'."
 POS defaults to `point'."
   (interactive)
   (when-let* ((error (tabulated-list-get-id pos))
+              ((flycheck-error-p error))
               (explainer (flycheck-checker-get (flycheck-error-checker error)
                                                'error-explainer)))
     (flycheck-error-with-buffer error
@@ -6456,8 +6553,8 @@ POS defaults to `point'.  Signal a `user-error' when the error
 has no fix."
   (interactive)
   (let* ((error (tabulated-list-get-id pos))
-         (fix (and error (flycheck-error-fix error)))
-         (buffer (and error (flycheck--error-fix-buffer error))))
+         (fix (and (flycheck-error-p error) (flycheck-error-fix error)))
+         (buffer (and fix (flycheck--error-fix-buffer error))))
     (unless fix
       (user-error "The error at point has no fix"))
     (unless buffer
@@ -6501,9 +6598,25 @@ nil, if there is no next error."
 (defun flycheck-error-list-next-error (n)
   "Go to the N'th next error in the error list."
   (interactive "P")
-  (let ((pos (flycheck-error-list-next-error-pos (point) n)))
-    (when (and pos (/= pos (point)))
-      (goto-char pos)
+  (let* ((n (or n 1))
+         (dir (if (< n 0) -1 1))
+         (remaining (abs n))
+         (pos (point))
+         (target nil))
+    ;; Step one row at a time, counting only error rows so a prefix argument
+    ;; moves by that many errors and any file headers in a grouped list are
+    ;; skipped.  Stop as soon as we can no longer advance, so navigating past
+    ;; the top or bottom cannot loop forever.
+    (while (> remaining 0)
+      (let ((next (flycheck-error-list-next-error-pos pos dir)))
+        (if (or (null next) (= next pos))
+            (setq remaining 0)
+          (setq pos next)
+          (when (flycheck-error-p (tabulated-list-get-id pos))
+            (setq target pos
+                  remaining (1- remaining))))))
+    (when (and target (/= target (point)))
+      (goto-char target)
       (save-selected-window
         ;; Keep the error list selected, so that the user can navigate errors by
         ;; repeatedly pressing n/p, without having to re-select the error list

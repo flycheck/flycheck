@@ -38,6 +38,7 @@ Within the error list the following key bindings are available:
 :kbd:`S`     Sort the error list by the column at point
 :kbd:`g`     Check the source buffer and update the error list
 :kbd:`P`     Toggle between buffer and whole-project scope
+:kbd:`t`     Toggle grouping the errors by file
 :kbd:`q`     Quit the error list and hide its window
 ==========   ====
 
@@ -80,6 +81,10 @@ Press :kbd:`RET` on an error in another file to jump straight to it.
 The project of a buffer is Emacs' project (see `project-current`) when one is
 found, and the checker's working directory otherwise.  The current scope is
 shown as ``[project]`` in the error list's mode line.
+
+Press :kbd:`t` to group the errors under a header per file instead of a flat
+list, which makes a project-wide list much easier to scan.  The mode line
+shows ``[by file]`` while grouping is on.
 
 Filter the list
 ===============
