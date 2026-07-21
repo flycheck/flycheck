@@ -12287,6 +12287,57 @@ The checker output is fontified as Markdown."
   (when-let (error-code (flycheck-error-id err))
     (flycheck--explain-error-via-checker 'python-ruff "rule" error-code)))
 
+(defun flycheck-parse-ruff--fix (fix buffer)
+  "Build a `flycheck-fix' for BUFFER from a ruff FIX object, or nil.
+
+Only safe fixes -- the ones `ruff check --fix' applies without
+`--unsafe-fixes' -- are offered.  Each edit's `content' replaces
+the region between its `location' and `end_location', both
+one-based row/column pairs, as `flycheck-error' uses."
+  (let-alist fix
+    (when (equal .applicability "safe")
+      (flycheck--make-fix
+       buffer .message
+       (seq-map
+        (lambda (edit)
+          (let-alist edit
+            (flycheck-fix-edit-new
+             :line .location.row :column .location.column
+             :end-line .end_location.row :end-column .end_location.column
+             :replacement .content)))
+        .edits)))))
+
+(defun flycheck-parse-ruff (output checker buffer)
+  "Parse ruff JSON OUTPUT into Flycheck errors.
+
+CHECKER and BUFFER denote the CHECKER that returned OUTPUT and
+the BUFFER that was checked respectively.
+
+See URL `https://docs.astral.sh/ruff/' for more information about
+ruff."
+  (seq-map
+   (lambda (finding)
+     (let-alist finding
+       ;; ruff reports syntax errors with the code \"invalid-syntax\" (or a
+       ;; null code before ruff 0.8); keep treating those as errors without a
+       ;; rule id, and everything else as a warning that `:error-filter' may
+       ;; promote (see `flycheck-flake8-fix-error-level').  ruff's own
+       ;; severity is not used, to keep the levels Flycheck has always shown.
+       (let ((syntax-error (or (null .code) (equal .code "invalid-syntax"))))
+         ;; Keep the column-based region Flycheck showed with the text
+         ;; output; the end position stays off so the highlighting does not
+         ;; change.  The fix carries its own coordinates.
+         (flycheck-error-new-at
+          .location.row .location.column
+          (if syntax-error 'error 'warning)
+          .message
+          :id (unless syntax-error .code)
+          :checker checker
+          :buffer buffer
+          :filename (unless (equal .filename "-") .filename)
+          :fix (flycheck-parse-ruff--fix .fix buffer)))))
+   (car (flycheck-parse-json output))))
+
 (flycheck-define-checker python-ruff
   "A Python syntax and style checker using Ruff.
 
@@ -12294,34 +12345,20 @@ See URL `https://docs.astral.sh/ruff/'."
   :command ("ruff"
             "check"
             (config-file "--config" flycheck-python-ruff-config)
-            ;; older versions of ruff (before 0.2) used "text" instead of "concise"
-            "--output-format=concise"
+            ;; JSON carries the machine-applicable fixes ruff computes (see
+            ;; `flycheck-parse-ruff'); "--output-format" needs ruff >= 0.2.
+            "--output-format=json"
             (eval (when buffer-file-name
                     (list "--stdin-filename" (flycheck-buffer-file-local-name))))
             "-")
   :standard-input t
+  :error-parser flycheck-parse-ruff
   :error-filter (lambda (errors)
                   (let ((errors (flycheck-sanitize-errors errors)))
                     (dolist (err errors)
                       (when (flycheck-error-id err)
                         (flycheck-flake8-fix-error-level err)))
                     errors))
-  :error-patterns
-  ((error line-start
-          (or "-" (file-name)) ":" line ":" (optional column ":") " "
-          ;; first variant is produced by ruff < 0.8 and kept for backward compat
-          (or "SyntaxError: " "invalid-syntax: ")
-          (message (one-or-more not-newline))
-          line-end)
-   (warning line-start
-            (or "-" (file-name)) ":" line ":" (optional column ":") " "
-            ;; ruff >= 0.15.7 in preview mode wraps the rule code in a
-            ;; severity tag, e.g. "error[F401]" instead of just "F401"
-            (optional (one-or-more (any alpha)) "[")
-            (id (one-or-more (any alpha)) (one-or-more digit))
-            (optional "]") " "
-            (message (one-or-more not-newline))
-            line-end))
   :error-explainer flycheck-python-ruff-explainer
   :working-directory flycheck-python-find-project-root
   :modes (python-mode python-ts-mode)

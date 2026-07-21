@@ -62,34 +62,63 @@
           (flycheck-checkers '(python-ruff)))
       (flycheck-buttercup-should-syntax-check
        "language/python/test.py" 'python-mode
-       '(5 15 warning "[*] `.antigravit` imported but unused" :id "F401"
+       '(5 15 warning "`.antigravit` imported but unused" :id "F401"
            :checker python-ruff)
        '(22 1 error "Undefined name `antigravity`" :id "F821"
            :checker python-ruff))))
 
-  (describe "python-ruff error patterns"
-    ;; Run synthetic output through the patterns so we cover formats from
-    ;; ruff versions other than the one installed in CI.
-    (it "parses the plain rule code format (ruff < 0.15.7)"
+  (describe "python-ruff JSON parser"
+    (it "parses a finding and its machine-applicable fix"
       (flycheck-buttercup-with-temp-buffer
-        (expect
-         (flycheck-parse-output
-          "-:1:8: F401 `os` imported but unused\n"
-          'python-ruff (current-buffer))
-         :to-be-equal-flycheck-errors
-         (list (flycheck-error-new-at
-                1 8 'warning "`os` imported but unused"
-                :id "F401" :checker 'python-ruff)))))
-    (it "parses the severity-tagged format (ruff >= 0.15.7 preview)"
+        (let* ((errors (flycheck-parse-output
+                        "[{\"code\":\"F401\",\"message\":\"`os` imported but unused\",\
+\"location\":{\"row\":1,\"column\":8},\"end_location\":{\"row\":1,\"column\":10},\
+\"fix\":{\"applicability\":\"safe\",\"message\":\"Remove unused import\",\
+\"edits\":[{\"content\":\"\",\"location\":{\"row\":1,\"column\":1},\
+\"end_location\":{\"row\":2,\"column\":1}}]},\"filename\":\"-\"}]"
+                        'python-ruff (current-buffer)))
+               (err (car errors))
+               (edit (car (flycheck-fix-edits (flycheck-error-fix err)))))
+          (expect (flycheck-error-line err) :to-equal 1)
+          (expect (flycheck-error-column err) :to-equal 8)
+          (expect (flycheck-error-id err) :to-equal "F401")
+          (expect (flycheck-error-level err) :to-equal 'warning)
+          (expect (flycheck-error-message err) :to-equal "`os` imported but unused")
+          (expect (flycheck-fix-edit-line edit) :to-equal 1)
+          (expect (flycheck-fix-edit-end-line edit) :to-equal 2)
+          (expect (flycheck-fix-edit-replacement edit) :to-equal ""))))
+
+    (it "treats invalid-syntax as an error with no id or fix"
       (flycheck-buttercup-with-temp-buffer
-        (expect
-         (flycheck-parse-output
-          "-:1:8: error[F401] `os` imported but unused\n"
-          'python-ruff (current-buffer))
-         :to-be-equal-flycheck-errors
-         (list (flycheck-error-new-at
-                1 8 'warning "`os` imported but unused"
-                :id "F401" :checker 'python-ruff))))))
+        (let ((err (car (flycheck-parse-output
+                         "[{\"code\":\"invalid-syntax\",\"message\":\"boom\",\
+\"location\":{\"row\":3,\"column\":7},\"end_location\":{\"row\":3,\"column\":8},\
+\"fix\":null,\"filename\":\"-\"}]"
+                         'python-ruff (current-buffer)))))
+          (expect (flycheck-error-level err) :to-equal 'error)
+          (expect (flycheck-error-id err) :to-be nil)
+          (expect (flycheck-error-fix err) :to-be nil))))
+
+    (it "treats a null code (pre-0.8 syntax error) as an error"
+      (flycheck-buttercup-with-temp-buffer
+        (let ((err (car (flycheck-parse-output
+                         "[{\"code\":null,\"message\":\"SyntaxError: boom\",\
+\"location\":{\"row\":1,\"column\":1},\"end_location\":{\"row\":1,\"column\":2},\
+\"fix\":null,\"filename\":\"-\"}]"
+                         'python-ruff (current-buffer)))))
+          (expect (flycheck-error-level err) :to-equal 'error)
+          (expect (flycheck-error-id err) :to-be nil))))
+
+    (it "does not offer an unsafe fix"
+      (flycheck-buttercup-with-temp-buffer
+        (let ((err (car (flycheck-parse-output
+                         "[{\"code\":\"F811\",\"message\":\"m\",\
+\"location\":{\"row\":1,\"column\":1},\"end_location\":{\"row\":1,\"column\":2},\
+\"fix\":{\"applicability\":\"unsafe\",\"message\":\"x\",\"edits\":[\
+{\"content\":\"\",\"location\":{\"row\":1,\"column\":1},\
+\"end_location\":{\"row\":1,\"column\":2}}]},\"filename\":\"-\"}]"
+                         'python-ruff (current-buffer)))))
+          (expect (flycheck-error-fix err) :to-be nil)))))
 
   (flycheck-buttercup-def-checker-test python-pylint python nil
     (let ((flycheck-disabled-checkers '(python-flake8 python-mypy))
