@@ -173,6 +173,7 @@
     llvm-llc
     lua-luacheck
     lua
+    luau-analyze
     markdown-markdownlint-cli
     markdown-markdownlint-cli2
     markdown-mdl
@@ -11238,6 +11239,30 @@ See URL `https://www.lua.org/'."
           ;; Skip the name of the luac executable.
           (minimal-match (zero-or-more not-newline))
           ": stdin:" line ": " (message) line-end))
+  :modes (lua-mode lua-ts-mode))
+
+(flycheck-define-checker luau-analyze
+  "A Luau syntax checker using luau-analyze.
+
+See URL `https://github.com/luau-lang/luau'."
+  :command ("luau-analyze" "--formatter=plain" source-original)
+  :error-patterns
+  ((warning line-start
+            (file-name)
+            ":" line ":" column "-" end-column
+            ": (" (id "W" (one-or-more digit)) ") "
+            (message) line-end)
+   (error line-start
+          (file-name)
+          ":" line ":" column "-" end-column
+          ": (" (id "E" (one-or-more digit)) ") "
+          (message) line-end))
+  :working-directory
+  (lambda (checker)
+    (ignore checker)
+    (when buffer-file-name
+      (or (locate-dominating-file buffer-file-name ".luaurc")
+          (file-name-directory buffer-file-name))))
   :modes (lua-mode lua-ts-mode))
 
 (flycheck-define-checker opam

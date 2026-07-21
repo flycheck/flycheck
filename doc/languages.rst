@@ -770,6 +770,16 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       Check syntax with the `Lua compiler <https://www.lua.org/>`_.
 
+.. supported-language:: Luau
+
+   Flycheck checks Lua with `luau-analyze`.
+
+   .. syntax-checker:: luau-analyze
+
+      Check syntax and lint with luau-analyze.
+
+      .. _Luau-analyze: https://github.com/luau-lang/luau
+
 .. supported-language:: Markdown
 
    Flycheck checks Markdown with `markdownlint-cli`, `markdownlint-cli2`,
