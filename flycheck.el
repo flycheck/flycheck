@@ -12709,6 +12709,33 @@ See URL `https://docs.astral.sh/ruff/'."
                       (when (flycheck-error-id err)
                         (flycheck-flake8-fix-error-level err)))
                     errors))
+  :error-parser
+  (lambda (output checker buffer)
+    (let ((json-array (condition-case nil
+                          (let ((json-array-type 'list)
+                                (json-object-type 'alist))
+                            (json-read-from-string output))
+                        (error nil))))
+      (mapcar
+       (lambda (diag)
+         (let* ((code (cdr (assoc 'code diag)))
+                (message (cdr (assoc 'message diag)))
+                (severity (cdr (assoc 'severity diag)))
+                ;; Extract nested location details
+                (location (cdr (assoc 'location diag)))
+                (line (cdr (assoc 'row location)))
+                (column (cdr (assoc 'column location)))
+                ;; Map severity string to Flycheck symbols
+                (level (cond
+                        ((string= severity "error") 'error)
+                        ((string= severity "warning") 'warning)
+                        (t 'info))))
+           (flycheck-error-new-at
+            line column level message
+            :checker checker
+            :id code
+            :buffer buffer)))
+       json-array)))
   :error-explainer flycheck-python-ruff-explainer
   :working-directory flycheck-python-find-project-root
   :modes (python-mode python-ts-mode)
