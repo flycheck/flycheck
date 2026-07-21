@@ -277,6 +277,101 @@
               (flycheck-error-list-next-error -1)
               (expect (point) :to-equal start)))))))
 
+  (describe "Row position index"
+    (defun flycheck/error-list-print (errors)
+      "Render ERRORS as a flat list in the current error list buffer."
+      (setq flycheck-error-list-group-by nil)
+      (cl-letf (((symbol-function 'flycheck-error-list-current-errors)
+                 (lambda () errors)))
+        (setq tabulated-list-entries (flycheck-error-list-entries)))
+      (tabulated-list-print))
+
+    (it "maps each listed error to the row where it is shown"
+      (flycheck/with-error-list-buffer
+        (let ((errors (list (flycheck-error-new-at 10 1 'error)
+                            (flycheck-error-new-at 20 1 'warning))))
+          (flycheck/error-list-print errors)
+          (let ((index (flycheck-error-list--positions)))
+            (dolist (err errors)
+              (let ((positions (gethash err index)))
+                (expect (length positions) :to-equal 1)
+                (expect (tabulated-list-get-id (car positions))
+                        :to-be err)))))))
+
+    (it "records every row an equal error appears on"
+      (flycheck/with-error-list-buffer
+        ;; Two distinct but `equal' errors (e.g. from different checkers
+        ;; reporting the same thing) share a key and must both light up.
+        (let ((errors (list (flycheck-error-new-at 10 1 'error "dup")
+                            (flycheck-error-new-at 10 1 'error "dup"))))
+          (flycheck/error-list-print errors)
+          (let ((positions (gethash (car errors)
+                                    (flycheck-error-list--positions))))
+            (expect (length positions) :to-equal 2)))))
+
+    (it "reuses the cached table until the list is reprinted"
+      (flycheck/with-error-list-buffer
+        (let ((errors (list (flycheck-error-new-at 10 1 'error))))
+          (flycheck/error-list-print errors)
+          (let ((first (flycheck-error-list--positions)))
+            ;; No reprint, so the very same table is handed back.
+            (expect (flycheck-error-list--positions) :to-be first)
+            ;; Reprinting bumps the buffer tick and rebuilds the table.
+            (tabulated-list-print)
+            (expect (flycheck-error-list--positions) :not :to-be first))))))
+
+  (describe "Highlighting errors at point"
+    ;; `flycheck-error-list-highlight-errors' only runs when the list is
+    ;; visible and reads the errors on the source line; stub both so the
+    ;; overlay-building path can be exercised in batch.
+    (defmacro flycheck/highlighting (errors at-point &rest body)
+      "Print ERRORS, pretend AT-POINT are the source-line errors, run BODY."
+      (declare (indent 2))
+      `(flycheck/with-error-list-buffer
+         (let ((source (generate-new-buffer " hl-source")))
+           (unwind-protect
+               (progn
+                 (flycheck/error-list-print ,errors)
+                 (setq flycheck-error-list-source-buffer source)
+                 (cl-letf (((symbol-function 'get-buffer-window)
+                            (lambda (&rest _) t))
+                           ((symbol-function 'flycheck-overlay-errors-in)
+                            (lambda (&rest _) ,at-point)))
+                   ,@body))
+             (kill-buffer source)))))
+
+    (it "highlights the row of each error on the source line"
+      (let ((errors (list (flycheck-error-new-at 10 1 'error)
+                          (flycheck-error-new-at 20 1 'warning))))
+        (flycheck/highlighting errors (list (car errors))
+          (flycheck-error-list-highlight-errors 'preserve-pos)
+          (let ((overlays flycheck-error-list-highlight-overlays))
+            (expect (length overlays) :to-equal 1)
+            (expect (tabulated-list-get-id (overlay-start (car overlays)))
+                    :to-be (car errors))))))
+
+    (it "creates one highlight per row for equal errors at point"
+      ;; Two distinct but `equal' errors show as two rows and both are at
+      ;; point; each row must get exactly one overlay, not one per error.
+      (let ((errors (list (flycheck-error-new-at 10 1 'error "dup")
+                          (flycheck-error-new-at 10 1 'error "dup"))))
+        (flycheck/highlighting errors errors
+          (flycheck-error-list-highlight-errors 'preserve-pos)
+          (expect (length flycheck-error-list-highlight-overlays)
+                  :to-equal 2))))
+
+    (it "leaves point put when the errors at point are filtered out"
+      ;; Regression: with no matching row the recenter must be skipped rather
+      ;; than sending point to an unrelated row.
+      (let ((errors (list (flycheck-error-new-at 10 1 'error)))
+            (absent (flycheck-error-new-at 99 1 'warning)))
+        (flycheck/highlighting errors (list absent)
+          (goto-char (point-max))
+          (let ((start (point)))
+            (flycheck-error-list-highlight-errors nil)
+            (expect flycheck-error-list-highlight-overlays :to-be nil)
+            (expect (point) :to-equal start))))))
+
   (describe "Filter"
     (it "kills the filter variable when resetting the filter"
       (flycheck/with-error-list-buffer
