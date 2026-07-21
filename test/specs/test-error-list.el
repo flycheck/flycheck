@@ -196,7 +196,7 @@
                                     (flycheck-error-line (car e))
                                   (car (aref (cadr e) 0))))
                               entries)
-                      :to-equal '("a.el (2)" 1 8 "b.el (1)" 3))))))
+                      :to-equal '("▾ a.el (2)" 1 8 "▾ b.el (1)" 3))))))
 
       (it "blanks the file cell under a header"
         (flycheck/with-error-list-buffer
@@ -207,13 +207,16 @@
             (let ((error-row (nth 1 (flycheck-error-list-entries))))
               (expect (car (aref (cadr error-row) 0)) :to-equal "")))))
 
-      (it "toggles grouping and the sort key together"
+      (it "sets the grouping and the sort key together"
         (flycheck/with-error-list-buffer
           (expect flycheck-error-list-group-by :to-be nil)
-          (flycheck-error-list-toggle-grouping)
+          (flycheck-error-list-group-by-file)
           (expect flycheck-error-list-group-by :to-be 'file)
           (expect tabulated-list-sort-key :to-be nil)
-          (flycheck-error-list-toggle-grouping)
+          (flycheck-error-list-group-by-checker)
+          (expect flycheck-error-list-group-by :to-be 'checker)
+          (expect tabulated-list-sort-key :to-be nil)
+          (flycheck-error-list-group-by-none)
           (expect flycheck-error-list-group-by :to-be nil)
           (expect tabulated-list-sort-key :to-equal '("Line"))))
 
@@ -276,6 +279,193 @@
             (let ((start (point)))
               (flycheck-error-list-next-error -1)
               (expect (point) :to-equal start)))))))
+
+  (describe "Grouping by checker and level"
+    (defun flycheck/group-headers ()
+      "Return the header labels of the grouped list, in order."
+      (delq nil
+            (mapcar (lambda (e)
+                      (unless (flycheck-error-p (car e))
+                        (car (aref (cadr e) 0))))
+                    (flycheck-error-list-entries))))
+
+    (it "groups by checker, headers sorted by name"
+      (flycheck/with-error-list-buffer
+        (let ((errors (list (flycheck-error-new-at 1 1 'error nil :checker 'zebra)
+                            (flycheck-error-new-at 2 1 'error nil :checker 'alpha))))
+          (setq flycheck-error-list-group-by 'checker)
+          (cl-letf (((symbol-function 'flycheck-error-list-current-errors)
+                     (lambda () errors)))
+            (expect (flycheck/group-headers)
+                    :to-equal '("▾ alpha (1)" "▾ zebra (1)"))))))
+
+    (it "groups by level, most severe group first"
+      (flycheck/with-error-list-buffer
+        (let ((errors (list (flycheck-error-new-at 1 1 'warning)
+                            (flycheck-error-new-at 2 1 'error)
+                            (flycheck-error-new-at 3 1 'error))))
+          (setq flycheck-error-list-group-by 'level)
+          (cl-letf (((symbol-function 'flycheck-error-list-current-errors)
+                     (lambda () errors)))
+            (expect (flycheck/group-headers)
+                    :to-equal '("▾ error (2)" "▾ warning (1)"))))))
+
+    (it "keeps each file's errors contiguous within a group"
+      (flycheck/with-error-list-buffer
+        (let ((errors (list (flycheck-error-new-at
+                             5 1 'error nil :filename "/p/a.el" :checker 'x)
+                            (flycheck-error-new-at
+                             3 1 'error nil :filename "/p/b.el" :checker 'x)
+                            (flycheck-error-new-at
+                             10 1 'error nil :filename "/p/a.el" :checker 'x))))
+          (setq flycheck-error-list-group-by 'checker)
+          (cl-letf (((symbol-function 'flycheck-error-list-current-errors)
+                     (lambda () errors)))
+            ;; Sorted by file then line, so a.el's rows stay together instead
+            ;; of interleaving by line as a bare location sort would.
+            (let ((files (delq nil
+                               (mapcar (lambda (e)
+                                         (and (flycheck-error-p (car e))
+                                              (flycheck-error-filename (car e))))
+                                       (flycheck-error-list-entries)))))
+              (expect files :to-equal '("/p/a.el" "/p/a.el" "/p/b.el")))))))
+
+    (it "falls back to a flat list for an unknown grouping"
+      (flycheck/with-error-list-buffer
+        (setq flycheck-error-list-group-by 'bogus)
+        (cl-letf (((symbol-function 'flycheck-error-list-current-errors)
+                   (lambda () (list (flycheck-error-new-at 1 1 'error)))))
+          ;; Must not call seq-group-by with a nil key function.
+          (let ((entries (flycheck-error-list-entries)))
+            (expect (length entries) :to-equal 1)
+            (expect (flycheck-error-p (car (car entries))) :to-be-truthy))))))
+
+  (describe "Collapsing groups"
+    (let ((errors (list (flycheck-error-new-at 1 1 'error nil
+                                               :filename "/p/a.el" :checker 'x)
+                        (flycheck-error-new-at 3 1 'error nil
+                                               :filename "/p/b.el" :checker 'x)))
+          source)
+      (before-each
+        (setq source (generate-new-buffer " collapse-source"))
+        (with-current-buffer source (setq default-directory "/p/")))
+      (after-each (kill-buffer source))
+
+      (it "drops the errors of a collapsed group but keeps its header"
+        (flycheck/with-error-list-buffer
+          (setq flycheck-error-list-source-buffer source
+                flycheck-error-list-group-by 'file
+                flycheck-error-list--collapsed (make-hash-table :test 'equal))
+          (puthash "/p/a.el" t flycheck-error-list--collapsed)
+          (cl-letf (((symbol-function 'flycheck-error-list-current-errors)
+                     (lambda () errors)))
+            (let ((entries (flycheck-error-list-entries)))
+              ;; a.el is collapsed: just its header, marked with the collapsed
+              ;; triangle; b.el stays expanded with its error row.
+              (expect (mapcar (lambda (e)
+                                (if (flycheck-error-p (car e))
+                                    (flycheck-error-line (car e))
+                                  (car (aref (cadr e) 0))))
+                              entries)
+                      :to-equal '("▸ a.el (1)" "▾ b.el (1)" 3))))))
+
+      (it "toggles the group under point on a header"
+        (flycheck/with-error-list-buffer
+          (setq flycheck-error-list-source-buffer source
+                flycheck-error-list-group-by 'file)
+          (cl-letf (((symbol-function 'flycheck-error-list-current-errors)
+                     (lambda () errors)))
+            (setq tabulated-list-entries (flycheck-error-list-entries))
+            (tabulated-list-print)
+            (goto-char (point-min))       ; the a.el header
+            (flycheck-error-list-toggle-group-at-point)
+            (expect (gethash "/p/a.el" flycheck-error-list--collapsed) :to-be-truthy)
+            (flycheck-error-list-toggle-group-at-point)
+            (expect (gethash "/p/a.el" flycheck-error-list--collapsed) :to-be nil))))
+
+      (it "toggles the parent group from an error row"
+        (flycheck/with-error-list-buffer
+          (setq flycheck-error-list-source-buffer source
+                flycheck-error-list-group-by 'file)
+          (cl-letf (((symbol-function 'flycheck-error-list-current-errors)
+                     (lambda () errors)))
+            (setq tabulated-list-entries (flycheck-error-list-entries))
+            (tabulated-list-print)
+            (goto-char (point-min))
+            (forward-line 1)              ; the a.el error row
+            (expect (flycheck-error-p (tabulated-list-get-id)) :to-be-truthy)
+            (flycheck-error-list-toggle-group-at-point)
+            (expect (gethash "/p/a.el" flycheck-error-list--collapsed)
+                    :to-be-truthy))))
+
+      (it "expands a group that clears and later reappears"
+        (flycheck/with-error-list-buffer
+          (setq flycheck-error-list-source-buffer source
+                flycheck-error-list-group-by 'file
+                flycheck-error-list--collapsed (make-hash-table :test 'equal))
+          (puthash "/p/a.el" t flycheck-error-list--collapsed)
+          ;; a.el has no errors this round, so its stale collapse key must be
+          ;; pruned; otherwise a new a.el error would come back hidden.
+          (cl-letf (((symbol-function 'flycheck-error-list-current-errors)
+                     (lambda () (list (cadr errors)))))
+            (flycheck-error-list-entries)
+            (expect (gethash "/p/a.el" flycheck-error-list--collapsed)
+                    :to-be nil))))
+
+      (it "keeps collapse state when a filter hides the group"
+        (flycheck/with-error-list-buffer
+          (let ((errs (list (flycheck-error-new-at 1 1 'error "aaa"
+                                                   :filename "/p/a.el" :checker 'x)
+                            (flycheck-error-new-at 3 1 'error "bbb"
+                                                   :filename "/p/b.el" :checker 'x))))
+            (setq flycheck-error-list-source-buffer source
+                  flycheck-error-list-group-by 'file
+                  flycheck-error-list--collapsed (make-hash-table :test 'equal)
+                  ;; A message filter that matches only b.el's error.
+                  flycheck-error-list--message-filter "bbb")
+            (puthash "/p/a.el" t flycheck-error-list--collapsed)
+            (cl-letf (((symbol-function 'flycheck-error-list-current-errors)
+                       (lambda () errs)))
+              (flycheck-error-list-entries)
+              ;; a.el is filtered out of this render but still exists, so its
+              ;; collapse must survive to when the filter is relaxed.
+              (expect (gethash "/p/a.el" flycheck-error-list--collapsed)
+                      :to-be-truthy)))))
+
+      (it "resets collapse state when the scope changes"
+        (flycheck/with-error-list-buffer
+          (setq flycheck-error-list--collapsed (make-hash-table :test 'equal))
+          (puthash "/p/a.el" t flycheck-error-list--collapsed)
+          (flycheck-error-list-toggle-scope)
+          (expect flycheck-error-list--collapsed :to-be nil)))
+
+      (it "moves to a button instead of toggling in a flat list"
+        (flycheck/with-error-list-buffer
+          (setq flycheck-error-list-source-buffer source
+                flycheck-error-list-group-by nil)
+          (cl-letf (((symbol-function 'flycheck-error-list-current-errors)
+                     (lambda () errors)))
+            (setq tabulated-list-entries (flycheck-error-list-entries))
+            (tabulated-list-print)
+            (goto-char (point-min))
+            ;; TAB must not be dead in a flat list: it should not create
+            ;; collapse state and should leave point on an error row.
+            (flycheck-error-list-toggle-group-at-point)
+            (expect flycheck-error-list--collapsed :to-be nil)
+            (expect (flycheck-error-p (tabulated-list-get-id))
+                    :to-be-truthy))))))
+
+  (describe "Grouping controls line"
+    (it "advertises every dimension and marks the active one"
+      (flycheck/with-error-list-buffer
+        (setq flycheck-error-list-group-by 'checker)
+        (let ((line (flycheck-error-list--grouping-line)))
+          (dolist (fragment '("M-1 flat" "M-2 file" "M-3 checker" "M-4 level"))
+            (expect line :to-match (regexp-quote fragment)))
+          ;; The active dimension carries the header face.
+          (let ((start (string-match "M-3 checker" line)))
+            (expect (get-text-property start 'face line)
+                    :to-be 'flycheck-error-list-group-header))))))
 
   (describe "Row position index"
     (defun flycheck/error-list-print (errors)
