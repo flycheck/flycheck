@@ -556,6 +556,60 @@
             (expect (get-text-property start 'face line)
                     :to-be 'flycheck-error-list-group-header))))))
 
+  (describe "Mouse support"
+    (it "makes each tab-line label toggle its dimension on click"
+      (flycheck/with-error-list-buffer
+        (setq flycheck-error-list-group-by nil)
+        (let* ((line (flycheck-error-list--grouping-line))
+               (start (string-match "M-2 file" line))
+               (map (get-text-property start 'keymap line)))
+          (expect (lookup-key map [tab-line mouse-1])
+                  :to-be 'flycheck-error-list-group-by-file)
+          (expect (get-text-property start 'mouse-face line) :to-be 'highlight)
+          (expect (get-text-property start 'help-echo line) :to-be-truthy))))
+
+    (it "toggles the error list's own grouping when clicked from elsewhere"
+      ;; A tab-line click runs the command with the clicked window's buffer
+      ;; current, which need not be the error list; it must still read and
+      ;; toggle the error list's own grouping, not the current buffer's.
+      (let ((el (get-buffer-create flycheck-error-list-buffer)))
+        (unwind-protect
+            (progn
+              (with-current-buffer el
+                (flycheck-error-list-mode)
+                (setq flycheck-error-list-group-by '(file checker)))
+              (with-temp-buffer
+                (flycheck-error-list-group-by-file))
+              (expect (buffer-local-value 'flycheck-error-list-group-by el)
+                      :to-equal '(checker)))
+          (kill-buffer el))))
+
+    (it "makes group headers clickable to collapse or expand"
+      (flycheck/with-error-list-buffer
+        (let ((errors (list (flycheck-error-new-at 1 1 'error "a"
+                                                   :filename "/p/a.el" :checker 'x)))
+              (source (generate-new-buffer " mouse-source")))
+          (unwind-protect
+              (progn
+                (with-current-buffer source (setq default-directory "/p/"))
+                (setq flycheck-error-list-source-buffer source
+                      flycheck-error-list-group-by '(file))
+                (cl-letf (((symbol-function 'flycheck-error-list-current-errors)
+                           (lambda () errors)))
+                  (setq tabulated-list-entries (flycheck-error-list-entries))
+                  (tabulated-list-print))
+                (goto-char (point-min))
+                (let ((button (next-button (point))))
+                  ;; The header label is a group button; activating it (as a
+                  ;; click would) toggles the group's collapse state.
+                  (expect (button-type button)
+                          :to-be 'flycheck-error-list-group)
+                  (flycheck-error-list-goto-error (button-start button))
+                  (expect (gethash (list "/p/a.el")
+                                   flycheck-error-list--collapsed)
+                          :to-be-truthy)))
+            (kill-buffer source))))))
+
   (describe "Row position index"
     (defun flycheck/error-list-print (errors)
       "Render ERRORS as a flat list in the current error list buffer."

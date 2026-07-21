@@ -93,7 +93,9 @@ dimension, so you can combine them: with both :kbd:`M-2` and :kbd:`M-3` the
 errors nest by checker within each file.  Combined dimensions always nest in
 the file, checker, level order.  The available groupings and the active ones
 are shown in a strip at the top of the error list.  Press :kbd:`TAB` (or
-:kbd:`RET` on a header) to collapse or expand the group at point.
+:kbd:`RET` on a header) to collapse or expand the group at point.  You can
+also click a grouping in the strip to toggle it, or a group header to collapse
+or expand it.
 
 Filter the list
 ===============

@@ -6125,13 +6125,16 @@ DIMENSIONS is nil for a flat list, or a list of the symbols in
 Add or remove DIMENSION from the grouping, keeping the remaining
 dimensions in the canonical `flycheck-error-list--group-dimensions'
 order, so they always nest file then checker then level."
-  (let* ((active (flycheck-error-list--grouping-dimensions))
-         (next (if (memq dimension active)
-                   (remq dimension active)
-                 (cons dimension active))))
-    (flycheck-error-list--set-group-by
-     (seq-filter (lambda (d) (memq d next))
-                 flycheck-error-list--group-dimensions))))
+  ;; Read the current grouping in the error list buffer, not whatever buffer a
+  ;; tab-line mouse click happens to run this from.
+  (flycheck-error-list-with-buffer
+    (let* ((active (flycheck-error-list--grouping-dimensions))
+           (next (if (memq dimension active)
+                     (remq dimension active)
+                   (cons dimension active))))
+      (flycheck-error-list--set-group-by
+       (seq-filter (lambda (d) (memq d next))
+                   flycheck-error-list--group-dimensions)))))
 
 (defun flycheck-error-list-group-by-none ()
   "Show the error list as a flat list, without grouping."
@@ -6153,6 +6156,30 @@ order, so they always nest file then checker then level."
   (interactive)
   (flycheck-error-list--toggle-group-by 'level))
 
+(defun flycheck-error-list--group-command (dimension)
+  "Return the command toggling grouping by DIMENSION (nil for flat)."
+  (pcase dimension
+    ('nil #'flycheck-error-list-group-by-none)
+    ('file #'flycheck-error-list-group-by-file)
+    ('checker #'flycheck-error-list-group-by-checker)
+    ('level #'flycheck-error-list-group-by-level)))
+
+(defun flycheck-error-list--grouping-label (dimension key active)
+  "Return the tab-line label for DIMENSION, its M-KEY, ACTIVE if on.
+
+The label toggles DIMENSION when clicked."
+  (let ((label (format "M-%d %s" key (if dimension dimension "flat")))
+        (map (make-sparse-keymap)))
+    (define-key map [tab-line mouse-1]
+      (flycheck-error-list--group-command dimension))
+    (propertize label
+                'face (and active 'flycheck-error-list-group-header)
+                'mouse-face 'highlight
+                'keymap map
+                'help-echo (if dimension
+                               (format "mouse-1: toggle grouping by %s" dimension)
+                             "mouse-1: show a flat list"))))
+
 (defun flycheck-error-list--grouping-line ()
   "Return the tab-line string advertising the grouping controls."
   (let ((active (flycheck-error-list--grouping-dimensions)))
@@ -6161,14 +6188,10 @@ order, so they always nest file then checker then level."
      (mapconcat
       (lambda (item)
         (let* ((dimension (car item))
-               (label (format "M-%d %s" (cdr item)
-                              (if dimension dimension "flat")))
                ;; Highlight every active dimension, or `flat' when none.
                (on (if dimension (memq dimension active) (null active))))
-          (concat "  " (if on
-                           (propertize label 'face
-                                       'flycheck-error-list-group-header)
-                         label))))
+          (concat "  " (flycheck-error-list--grouping-label
+                        dimension (cdr item) on))))
       ;; nil (flat) is M-1, then the dimensions M-2, M-3, M-4.
       (cons '(nil . 1)
             (seq-map-indexed (lambda (d i) (cons d (+ i 2)))
@@ -6230,6 +6253,10 @@ button instead, like Tabulated List mode's \\`TAB'."
 (define-button-type 'flycheck-error-list-explain-error
   'action #'flycheck-error-list-explain-error
   'help-echo "mouse-1, RET: explain error")
+
+(define-button-type 'flycheck-error-list-group
+  'supertype 'flycheck-error-list
+  'help-echo "mouse-1, RET, TAB: collapse or expand")
 
 (defsubst flycheck-error-list-make-cell (text &optional face help-echo type)
   "Make an error list cell with TEXT and FACE.
@@ -6436,7 +6463,8 @@ navigation and the fix/explain commands skip it."
                          (if collapsed "▸" "▾")
                          (flycheck-error-list--group-name dimension key)
                          count)
-                 'flycheck-error-list-group-header)
+                 'flycheck-error-list-group-header nil
+                 'flycheck-error-list-group)
                 "" "" "" "" "")))
 
 (defun flycheck-error-list--grouped-entries (errors dimensions path depth omit-file)
