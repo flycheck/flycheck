@@ -11986,10 +11986,8 @@ See URL `https://docs.astral.sh/ruff/'."
   :command ("ruff"
             "check"
             (config-file "--config" flycheck-python-ruff-config)
-            ;; older versions of ruff (before 0.2) used "text" instead of "concise"
-            "--output-format=concise"
-            (eval (when buffer-file-name
-                    (list "--stdin-filename" (flycheck-buffer-file-local-name))))
+            "--output-format=json"
+            (option "--stdin-filename" buffer-file-name)
             "-")
   :standard-input t
   :error-filter (lambda (errors)
@@ -11998,22 +11996,33 @@ See URL `https://docs.astral.sh/ruff/'."
                       (when (flycheck-error-id err)
                         (flycheck-flake8-fix-error-level err)))
                     errors))
-  :error-patterns
-  ((error line-start
-          (or "-" (file-name)) ":" line ":" (optional column ":") " "
-          ;; first variant is produced by ruff < 0.8 and kept for backward compat
-          (or "SyntaxError: " "invalid-syntax: ")
-          (message (one-or-more not-newline))
-          line-end)
-   (warning line-start
-            (or "-" (file-name)) ":" line ":" (optional column ":") " "
-            ;; ruff >= 0.15.7 in preview mode wraps the rule code in a
-            ;; severity tag, e.g. "error[F401]" instead of just "F401"
-            (optional (one-or-more (any alpha)) "[")
-            (id (one-or-more (any alpha)) (one-or-more digit))
-            (optional "]") " "
-            (message (one-or-more not-newline))
-            line-end))
+  :error-parser
+  (lambda (output checker buffer)
+    (let ((json-array (condition-case nil
+                          (let ((json-array-type 'list)
+                                (json-object-type 'alist))
+                            (json-read-from-string output))
+                        (error nil))))
+      (mapcar
+       (lambda (diag)
+         (let* ((code (cdr (assoc 'code diag)))
+                (message (cdr (assoc 'message diag)))
+                (severity (cdr (assoc 'severity diag)))
+                ;; Extract nested location details
+                (location (cdr (assoc 'location diag)))
+                (line (cdr (assoc 'row location)))
+                (column (cdr (assoc 'column location)))
+                ;; Map severity string to Flycheck symbols
+                (level (cond
+                        ((string= severity "error") 'error)
+                        ((string= severity "warning") 'warning)
+                        (t 'info))))
+           (flycheck-error-new-at
+            line column level message
+            :checker checker
+            :id code
+            :buffer buffer)))
+       json-array)))
   :error-explainer flycheck-python-ruff-explainer
   :working-directory flycheck-python-find-project-root
   :modes (python-mode python-ts-mode)
