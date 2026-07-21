@@ -7,8 +7,10 @@
 - The error list can group its errors by file (``M-2``), syntax checker
   (``M-3``) or level (``M-4``), laying them out under a header per group
   instead of a flat list (``M-1``), which helps a lot in project scope.
-  Press ``TAB`` on a group to collapse or expand it.  The groupings are
-  shown in a strip at the top of the error list.
+  The keys toggle each dimension and combine, so ``M-2`` then ``M-3``
+  nests the errors by checker within each file.  Press ``TAB`` on a group
+  to collapse or expand it.  The groupings are shown in a strip at the top
+  of the error list.
 - ``python-ruff`` and ``sh-shellcheck`` now carry the fixes their tools
   suggest, applicable with the quick-fix commands.  Both switched to their
   JSON output (ruff ``--output-format=json``, shellcheck ``--format

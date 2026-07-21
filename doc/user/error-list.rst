@@ -39,9 +39,9 @@ Within the error list the following key bindings are available:
 :kbd:`g`     Check the source buffer and update the error list
 :kbd:`P`     Toggle between buffer and whole-project scope
 :kbd:`M-1`   Show a flat list, without grouping
-:kbd:`M-2`   Group the errors by file
-:kbd:`M-3`   Group the errors by checker
-:kbd:`M-4`   Group the errors by level
+:kbd:`M-2`   Toggle grouping the errors by file
+:kbd:`M-3`   Toggle grouping the errors by checker
+:kbd:`M-4`   Toggle grouping the errors by level
 :kbd:`TAB`   Collapse or expand the group at point
 :kbd:`q`     Quit the error list and hide its window
 ==========   ====
@@ -88,10 +88,12 @@ shown as ``[project]`` in the error list's mode line.
 
 Group the errors under a header per file, syntax checker or level with
 :kbd:`M-2`, :kbd:`M-3` and :kbd:`M-4`; :kbd:`M-1` switches back to a flat list.
-Grouping makes a project-wide list much easier to scan.  The available
-groupings and the active one are shown in a strip at the top of the error
-list.  Press :kbd:`TAB` (or :kbd:`RET` on a header) to collapse or expand the
-group at point.
+Grouping makes a project-wide list much easier to scan.  The keys toggle each
+dimension, so you can combine them: with both :kbd:`M-2` and :kbd:`M-3` the
+errors nest by checker within each file.  Combined dimensions always nest in
+the file, checker, level order.  The available groupings and the active ones
+are shown in a strip at the top of the error list.  Press :kbd:`TAB` (or
+:kbd:`RET` on a header) to collapse or expand the group at point.
 
 Filter the list
 ===============
