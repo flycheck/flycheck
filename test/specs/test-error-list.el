@@ -168,6 +168,115 @@
                     (list message 'type 'flycheck-error-list
                           'help-echo message)))))))
 
+  (describe "Grouping by file"
+    (let ((errors (list (flycheck-error-new-at 3 1 'error "in b"
+                                               :filename "/p/b.el" :checker 'x)
+                        (flycheck-error-new-at 8 1 'warning "second in a"
+                                               :filename "/p/a.el" :checker 'x)
+                        (flycheck-error-new-at 1 1 'error "first in a"
+                                               :filename "/p/a.el" :checker 'x)))
+          source)
+
+      (before-each
+        (setq source (generate-new-buffer " grouping-source"))
+        (with-current-buffer source (setq default-directory "/p/")))
+      (after-each (kill-buffer source))
+
+      (it "lays out a header per file with its errors sorted under it"
+        (flycheck/with-error-list-buffer
+          (setq flycheck-error-list-source-buffer source
+                flycheck-error-list-group-by 'file)
+          (cl-letf (((symbol-function 'flycheck-error-list-current-errors)
+                     (lambda () errors)))
+            (let ((entries (flycheck-error-list-entries)))
+              ;; header a.el, its two errors (lines 1 then 8), header b.el, its
+              ;; one error -- files and errors both in order.
+              (expect (mapcar (lambda (e)
+                                (if (flycheck-error-p (car e))
+                                    (flycheck-error-line (car e))
+                                  (car (aref (cadr e) 0))))
+                              entries)
+                      :to-equal '("a.el (2)" 1 8 "b.el (1)" 3))))))
+
+      (it "blanks the file cell under a header"
+        (flycheck/with-error-list-buffer
+          (setq flycheck-error-list-source-buffer source
+                flycheck-error-list-group-by 'file)
+          (cl-letf (((symbol-function 'flycheck-error-list-current-errors)
+                     (lambda () errors)))
+            (let ((error-row (nth 1 (flycheck-error-list-entries))))
+              (expect (car (aref (cadr error-row) 0)) :to-equal "")))))
+
+      (it "toggles grouping and the sort key together"
+        (flycheck/with-error-list-buffer
+          (expect flycheck-error-list-group-by :to-be nil)
+          (flycheck-error-list-toggle-grouping)
+          (expect flycheck-error-list-group-by :to-be 'file)
+          (expect tabulated-list-sort-key :to-be nil)
+          (flycheck-error-list-toggle-grouping)
+          (expect flycheck-error-list-group-by :to-be nil)
+          (expect tabulated-list-sort-key :to-equal '("Line"))))
+
+      (it "sorts headers as equal instead of crashing on them"
+        (let ((header (list (list 'flycheck-group "a.el") (make-vector 6 "")))
+              (err (list (car errors) (make-vector 6 ""))))
+          ;; A header entry carries a list id, not a `flycheck-error', so the
+          ;; column sorters must not pass it to `flycheck-error-<' and friends.
+          (expect (flycheck-error-list-entry-< header err) :to-be nil)
+          (expect (flycheck-error-list-entry-< err header) :to-be nil)
+          (expect (flycheck-error-list-entry-level-< header err) :to-be nil)
+          (expect (flycheck-error-list-entry-level-< err header) :to-be nil)))
+
+      (describe "next-error navigation"
+        (before-each
+          (spy-on 'flycheck-error-list-goto-error))
+
+        (defun flycheck/error-list-print-grouped (source errors)
+          "Render ERRORS grouped by file and move point to the first error."
+          (setq flycheck-error-list-source-buffer source
+                flycheck-error-list-group-by 'file
+                tabulated-list-sort-key nil)
+          (cl-letf (((symbol-function 'flycheck-error-list-current-errors)
+                     (lambda () errors)))
+            (setq tabulated-list-entries (flycheck-error-list-entries)))
+          (tabulated-list-print)
+          ;; The first row is the a.el header; step onto its first error.
+          (goto-char (point-min))
+          (forward-line 1))
+
+        (it "skips a file header when moving forward"
+          (flycheck/with-error-list-buffer
+            (flycheck/error-list-print-grouped source errors)
+            ;; From line 8 in a.el the next error is line 3 in b.el, past the
+            ;; b.el header.
+            (goto-char (point-min))
+            (forward-line 2)
+            (expect (flycheck-error-line
+                     (tabulated-list-get-id)) :to-equal 8)
+            (flycheck-error-list-next-error 1)
+            (expect (flycheck-error-line
+                     (tabulated-list-get-id)) :to-equal 3)))
+
+        (it "counts errors, not headers, for a prefix argument"
+          (flycheck/with-error-list-buffer
+            (flycheck/error-list-print-grouped source errors)
+            ;; Two errors forward from line 1 lands on line 3, skipping the
+            ;; b.el header that sits between the second and third error rows.
+            (expect (flycheck-error-line
+                     (tabulated-list-get-id)) :to-equal 1)
+            (flycheck-error-list-next-error 2)
+            (expect (flycheck-error-line
+                     (tabulated-list-get-id)) :to-equal 3)))
+
+        (it "terminates at the top instead of looping forever"
+          (flycheck/with-error-list-buffer
+            (flycheck/error-list-print-grouped source errors)
+            ;; Moving back from the first error has nowhere to go; this must
+            ;; return rather than spin on the leading header.
+            (let ((start (point)))
+              (flycheck-error-list-next-error -1)
+              (expect (point) :to-equal start)))))))
+
   (describe "Filter"
     (it "kills the filter variable when resetting the filter"
       (flycheck/with-error-list-buffer

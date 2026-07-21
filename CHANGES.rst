@@ -1,6 +1,9 @@
 ``master`` (unreleased)
 =======================
 
+- The error list can group its errors by file: press ``t``
+  (``flycheck-error-list-toggle-grouping``) to lay them out under a header
+  per file instead of a flat list, which helps a lot in project scope.
 - ``python-ruff`` and ``sh-shellcheck`` now carry the fixes their tools
   suggest, applicable with the quick-fix commands.  Both switched to their
   JSON output (ruff ``--output-format=json``, shellcheck ``--format
