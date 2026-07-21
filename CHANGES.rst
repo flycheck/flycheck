@@ -4,9 +4,11 @@
 - The error list no longer scans all of its rows on every cursor movement
   to highlight the errors at point, so keeping it open next to a large
   project-scope list is much cheaper.
-- The error list can group its errors by file: press ``t``
-  (``flycheck-error-list-toggle-grouping``) to lay them out under a header
-  per file instead of a flat list, which helps a lot in project scope.
+- The error list can group its errors by file (``M-2``), syntax checker
+  (``M-3``) or level (``M-4``), laying them out under a header per group
+  instead of a flat list (``M-1``), which helps a lot in project scope.
+  Press ``TAB`` on a group to collapse or expand it.  The groupings are
+  shown in a strip at the top of the error list.
 - ``python-ruff`` and ``sh-shellcheck`` now carry the fixes their tools
   suggest, applicable with the quick-fix commands.  Both switched to their
   JSON output (ruff ``--output-format=json``, shellcheck ``--format

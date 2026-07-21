@@ -5886,7 +5886,11 @@ ID.")
     (define-key map (kbd "p") #'flycheck-error-list-previous-error)
     (define-key map (kbd "g") #'flycheck-error-list-check-source)
     (define-key map (kbd "P") #'flycheck-error-list-toggle-scope)
-    (define-key map (kbd "t") #'flycheck-error-list-toggle-grouping)
+    (define-key map (kbd "M-1") #'flycheck-error-list-group-by-none)
+    (define-key map (kbd "M-2") #'flycheck-error-list-group-by-file)
+    (define-key map (kbd "M-3") #'flycheck-error-list-group-by-checker)
+    (define-key map (kbd "M-4") #'flycheck-error-list-group-by-level)
+    (define-key map (kbd "TAB") #'flycheck-error-list-toggle-group-at-point)
     (define-key map (kbd "e") #'flycheck-error-list-explain-error)
     (define-key map (kbd "x") #'flycheck-error-list-apply-fix)
     (define-key map (kbd "RET") #'flycheck-error-list-goto-error)
@@ -5989,6 +5993,9 @@ ignored."
         ;; `revert-buffer' updates the mode line for us, so all we need to do is
         ;; set the corresponding mode line construct.
         mode-line-buffer-identification flycheck-error-list-mode-line)
+  ;; Advertise the grouping controls in the tab line, above the column names
+  ;; Tabulated List mode keeps in the header line.
+  (setq-local tab-line-format '(:eval (flycheck-error-list--grouping-line)))
   ;; See https://github.com/flycheck/flycheck/issues/1101
   (setq-local truncate-string-ellipsis "…")
   (tabulated-list-init-header))
@@ -6013,15 +6020,26 @@ every open buffer of the source buffer's project (see
 (defvar-local flycheck-error-list-group-by nil
   "How the error list groups its errors.
 
-Either nil, to show a flat list sorted by location, or `file', to
-group the errors under a collapsible-looking header per file --
-handy in `project' scope, where errors span many files.  Toggle it
-with \\<flycheck-error-list-mode-map>\\[flycheck-error-list-toggle-grouping].")
+Either nil, to show a flat list sorted by location, or one of the
+symbols `file', `checker' or `level', to group the errors under a
+header per file, syntax checker or error level.  Grouping helps a
+lot in `project' scope, where errors span many files.  Choose it
+with \\<flycheck-error-list-mode-map>\\[flycheck-error-list-group-by-none],
+\\[flycheck-error-list-group-by-file], \\[flycheck-error-list-group-by-checker]
+and \\[flycheck-error-list-group-by-level].")
 (put 'flycheck-error-list-group-by 'permanent-local t)
+
+(defvar-local flycheck-error-list--collapsed nil
+  "Set of collapsed group keys, or nil when nothing is collapsed.
+
+A hash table whose keys are the group keys (a file name, checker
+symbol or level symbol) of the groups whose errors are currently
+hidden.  Reset whenever the grouping changes.")
+(put 'flycheck-error-list--collapsed 'permanent-local t)
 
 (defface flycheck-error-list-group-header
   '((t :inherit flycheck-error-list-filename :weight bold))
-  "Face for the file headers in a grouped error list."
+  "Face for the group headers in a grouped error list."
   :package-version '(flycheck . "38")
   :group 'flycheck-faces)
 
@@ -6057,27 +6075,115 @@ See `flycheck-error-list-scope'."
   (interactive)
   (flycheck-error-list-with-buffer
     (setq flycheck-error-list-scope
-          (if (eq flycheck-error-list-scope 'project) 'buffer 'project))
+          (if (eq flycheck-error-list-scope 'project) 'buffer 'project)
+          ;; The groups change with the scope, so start fresh rather than
+          ;; carrying collapse state that could hide a whole file's errors.
+          flycheck-error-list--collapsed nil)
     (flycheck-error-list-refresh)
     (message "Flycheck error list now showing the %s"
              (if (eq flycheck-error-list-scope 'project)
                  "whole project" "current buffer"))))
 
-(defun flycheck-error-list-toggle-grouping ()
-  "Toggle grouping the error list by file.
+(defconst flycheck-error-list--group-dimensions '(file checker level)
+  "The error list grouping dimensions, in tab-line order.")
 
-See `flycheck-error-list-group-by'."
-  (interactive)
+(defun flycheck-error-list--set-group-by (dimension)
+  "Group the error list by DIMENSION and refresh it.
+
+DIMENSION is nil for a flat list, or one of the symbols in
+`flycheck-error-list--group-dimensions'."
   (flycheck-error-list-with-buffer
-    (setq flycheck-error-list-group-by
-          (if (eq flycheck-error-list-group-by 'file) nil 'file))
-    ;; Grouped entries are laid out in order already, so turn off column
-    ;; sorting; restore the location sort for the flat list.
-    (setq tabulated-list-sort-key
-          (unless flycheck-error-list-group-by (cons "Line" nil)))
+    (setq flycheck-error-list-group-by dimension
+          ;; Start each grouping fully expanded.
+          flycheck-error-list--collapsed nil
+          ;; Grouped entries are laid out in order already, so turn off column
+          ;; sorting; restore the location sort for the flat list.
+          tabulated-list-sort-key (unless dimension (cons "Line" nil)))
     (flycheck-error-list-refresh)
     (message "Flycheck error list %s"
-             (if flycheck-error-list-group-by "grouped by file" "flat"))))
+             (if dimension (format "grouped by %s" dimension) "flat"))))
+
+(defun flycheck-error-list-group-by-none ()
+  "Show the error list as a flat list, without grouping."
+  (interactive)
+  (flycheck-error-list--set-group-by nil))
+
+(defun flycheck-error-list-group-by-file ()
+  "Group the errors in the error list by file."
+  (interactive)
+  (flycheck-error-list--set-group-by 'file))
+
+(defun flycheck-error-list-group-by-checker ()
+  "Group the errors in the error list by syntax checker."
+  (interactive)
+  (flycheck-error-list--set-group-by 'checker))
+
+(defun flycheck-error-list-group-by-level ()
+  "Group the errors in the error list by level."
+  (interactive)
+  (flycheck-error-list--set-group-by 'level))
+
+(defun flycheck-error-list--grouping-line ()
+  "Return the tab-line string advertising the grouping controls."
+  (concat
+   " Group:"
+   (mapconcat
+    (lambda (item)
+      (let* ((dimension (car item))
+             (label (format "M-%d %s" (cdr item)
+                            (if dimension dimension "flat")))
+             (active (eq dimension flycheck-error-list-group-by)))
+        (concat "  " (if active
+                         (propertize label 'face
+                                     'flycheck-error-list-group-header)
+                       label))))
+    ;; nil (flat) is M-1, then the dimensions M-2, M-3, M-4.
+    (cons '(nil . 1)
+          (seq-map-indexed (lambda (d i) (cons d (+ i 2)))
+                           flycheck-error-list--group-dimensions))
+    "")
+   (when flycheck-error-list-group-by "   TAB collapse")))
+
+(defun flycheck-error-list-toggle-group-at-point (&optional pos)
+  "Collapse or expand the group at POS in a grouped error list.
+
+POS defaults to `point'.  Works both on a group header and on any
+error row within a group.  With nothing to toggle (a flat list, or
+point away from any group) move to the next button instead, like
+Tabulated List mode's \\`TAB'."
+  (interactive)
+  (let* ((id (tabulated-list-get-id pos))
+         (header (and (consp id) (eq (car id) 'flycheck-group)))
+         (error (flycheck-error-p id)))
+    (if (and (memq flycheck-error-list-group-by
+                   flycheck-error-list--group-dimensions)
+             (or header error))
+        ;; A genuine group key may itself be nil (errors without a file), so
+        ;; decide from HEADER/ERROR rather than from the key's value.
+        (let ((key (if header
+                       (cadr id)
+                     (funcall (flycheck-error-list--group-key-function
+                               flycheck-error-list-group-by)
+                              id))))
+          (unless flycheck-error-list--collapsed
+            (setq flycheck-error-list--collapsed (make-hash-table :test 'equal)))
+          (if (gethash key flycheck-error-list--collapsed)
+              (remhash key flycheck-error-list--collapsed)
+            (puthash key t flycheck-error-list--collapsed))
+          (flycheck-error-list-refresh)
+          (flycheck-error-list--goto-group key))
+      (forward-button 1 t nil t))))
+
+(defun flycheck-error-list--goto-group (key)
+  "Move point to the header of the group KEY, when it is present."
+  (let ((target (list 'flycheck-group key))
+        (pos (point-min))
+        (found nil))
+    (while (and pos (not found))
+      (if (equal (tabulated-list-get-id pos) target)
+          (setq found pos)
+        (setq pos (flycheck-error-list-next-error-pos pos))))
+    (when found (goto-char found))))
 
 (define-button-type 'flycheck-error-list
   'action #'flycheck-error-list-goto-error
@@ -6204,42 +6310,128 @@ read the project-wide diagnostics of that buffer's project."
         (abbreviate-file-name filename))
     (or filename "<no file>")))
 
-(defun flycheck-error-list--group-header (filename count)
-  "Return an error-list header entry for FILENAME with COUNT errors.
+(defun flycheck-error-list--group-key-function (dimension)
+  "Return the function extracting the DIMENSION group key of an error."
+  (pcase dimension
+    ('file #'flycheck-error-filename)
+    ('checker #'flycheck-error-checker)
+    ('level #'flycheck-error-level)))
 
-The entry's id is a list headed by `flycheck-group', not a
-`flycheck-error', so navigation and the fix/explain commands skip
-it."
-  (list (list 'flycheck-group filename)
+(defun flycheck-error-list--group-name (dimension key)
+  "Return the display name of the group KEY under DIMENSION."
+  (pcase dimension
+    ('file (flycheck-error-list--abbreviate-filename key))
+    ('checker (if key (symbol-name key) "without checker"))
+    ('level (if key (symbol-name key) "without level"))))
+
+(defun flycheck-error-list--sort-groups (dimension groups)
+  "Sort GROUPS, an alist of (KEY . ERRORS), for DIMENSION.
+
+Level groups are ordered from the most to the least severe; the
+others alphabetically by group name."
+  (if (eq dimension 'level)
+      (sort groups (lambda (a b)
+                     (> (flycheck-error-level-severity (car a))
+                        (flycheck-error-level-severity (car b)))))
+    ;; Decorate with the display name so it is computed (and, for files,
+    ;; abbreviated) once per group instead of on every comparison.
+    (mapcar #'cdr
+            (sort (mapcar (lambda (group)
+                            (cons (flycheck-error-list--group-name
+                                   dimension (car group))
+                                  group))
+                          groups)
+                  (lambda (a b) (string< (car a) (car b)))))))
+
+(defun flycheck-error-list--group-error-< (a b)
+  "Order errors A and B within a group by file, then by location.
+
+The file tiebreak keeps a file's errors contiguous when a group
+spans several files, as it does when grouping by checker or level."
+  (let ((file-a (or (flycheck-error-filename a) ""))
+        (file-b (or (flycheck-error-filename b) "")))
+    (if (string= file-a file-b)
+        (flycheck-error-< a b)
+      (string< file-a file-b))))
+
+(defun flycheck-error-list--group-collapsed-p (key)
+  "Return non-nil when the group KEY is currently collapsed."
+  (and flycheck-error-list--collapsed
+       (gethash key flycheck-error-list--collapsed)))
+
+(defun flycheck-error-list--prune-collapsed (errors)
+  "Drop collapse state for groups absent from ERRORS.
+
+ERRORS is the full, unfiltered error set, so a filter that merely
+hides a group's errors keeps its collapse choice.  Pruning a group
+that is genuinely gone (its errors were all fixed) stops it from
+reappearing collapsed, and hiding a new error, when it comes back."
+  (when flycheck-error-list--collapsed
+    (let ((key-fn (flycheck-error-list--group-key-function
+                   flycheck-error-list-group-by))
+          (live (make-hash-table :test 'equal)))
+      (dolist (err errors)
+        (puthash (funcall key-fn err) t live))
+      (maphash (lambda (key _)
+                 (unless (gethash key live)
+                   (remhash key flycheck-error-list--collapsed)))
+               flycheck-error-list--collapsed))))
+
+(defun flycheck-error-list--group-header (dimension key count collapsed)
+  "Return a header entry for the group KEY under DIMENSION.
+
+COUNT is the number of errors in the group and COLLAPSED tells
+whether the group is currently collapsed.  The entry's id is a
+list headed by `flycheck-group', not a `flycheck-error', so
+navigation and the fix/explain commands skip it."
+  (list (list 'flycheck-group key)
         (vector (flycheck-error-list-make-cell
-                 (format "%s (%d)"
-                         (flycheck-error-list--abbreviate-filename filename)
+                 (format "%s %s (%d)"
+                         (if collapsed "▸" "▾")
+                         (flycheck-error-list--group-name dimension key)
                          count)
                  'flycheck-error-list-group-header)
                 "" "" "" "" "")))
 
 (defun flycheck-error-list--grouped-entries (errors)
-  "Return grouped tabulated-list entries for ERRORS, one section per file."
-  (let ((groups (sort (seq-group-by #'flycheck-error-filename errors)
-                      (lambda (a b) (string< (or (car a) "") (or (car b) ""))))))
+  "Return grouped tabulated-list entries for ERRORS.
+
+The errors are grouped by `flycheck-error-list-group-by'; a
+collapsed group contributes only its header."
+  (let* ((dimension flycheck-error-list-group-by)
+         (key-fn (flycheck-error-list--group-key-function dimension))
+         (groups (flycheck-error-list--sort-groups
+                  dimension (seq-group-by key-fn errors)))
+         ;; The file name is redundant under each file header, but relevant
+         ;; when grouping by checker or level.
+         (omit-file (eq dimension 'file)))
     (seq-mapcat
      (lambda (group)
-       (let ((sorted (sort (cdr group) #'flycheck-error-<)))
-         (cons (flycheck-error-list--group-header (car group) (length sorted))
-               (mapcar (lambda (err) (flycheck-error-list-make-entry err 'omit-file))
-                       sorted))))
+       (let* ((key (car group))
+              (sorted (sort (cdr group) #'flycheck-error-list--group-error-<))
+              (collapsed (flycheck-error-list--group-collapsed-p key)))
+         (cons (flycheck-error-list--group-header
+                dimension key (length sorted) collapsed)
+               (unless collapsed
+                 (mapcar (lambda (err)
+                           (flycheck-error-list-make-entry err omit-file))
+                         sorted)))))
      groups)))
 
 (defun flycheck-error-list-entries ()
   "Create the entries for the error list.
 
-When `flycheck-error-list-group-by' is `file' the errors are laid
-out under a header per file; otherwise a flat list is returned and
+When `flycheck-error-list-group-by' is non-nil the errors are laid
+out under a header per group; otherwise a flat list is returned and
 Tabulated List mode sorts it."
   (when-let* ((errors (flycheck-error-list-current-errors))
               (filtered (flycheck-error-list-apply-filter errors)))
-    (if (eq flycheck-error-list-group-by 'file)
-        (flycheck-error-list--grouped-entries filtered)
+    (if (memq flycheck-error-list-group-by flycheck-error-list--group-dimensions)
+        (progn
+          ;; Prune against the unfiltered errors, so a filter that hides a
+          ;; group does not discard the collapse state the user set.
+          (flycheck-error-list--prune-collapsed errors)
+          (flycheck-error-list--grouped-entries filtered))
       (mapcar #'flycheck-error-list-make-entry filtered))))
 
 (defun flycheck-error-list-entry-< (entry1 entry2)
@@ -6354,11 +6546,9 @@ list."
 
 (defun flycheck-error-list-mode-line-scope-indicator ()
   "Create a string representing the current error list scope."
-  (concat
-   (when (eq flycheck-error-list-scope 'project)
-     " [project]")
-   (when (eq flycheck-error-list-group-by 'file)
-     " [by file]")))
+  ;; The grouping is advertised in the header line, not here.
+  (when (eq flycheck-error-list-scope 'project)
+    " [project]"))
 
 (defun flycheck-error-list-mode-line-suppressed-indicator ()
   "Create a string for the mode line about suppressed errors.
@@ -6485,13 +6675,17 @@ Useful for post-jump actions like recentering:
 (defun flycheck-error-list-goto-error (&optional pos)
   "Go to the location of the error at POS in the error list.
 
-POS defaults to `point'."
+On a group header collapse or expand the group instead.  POS
+defaults to `point'."
   (interactive)
-  (when-let* ((error (tabulated-list-get-id pos))
-              ;; Skip file headers, whose id is not a `flycheck-error'.
-              ((flycheck-error-p error)))
-    (flycheck-jump-to-error error)
-    (run-hooks 'flycheck-error-list-after-jump-hook)))
+  (let ((error (tabulated-list-get-id pos)))
+    (cond
+     ((flycheck-error-p error)
+      (flycheck-jump-to-error error)
+      (run-hooks 'flycheck-error-list-after-jump-hook))
+     ;; A group header, whose id is not a `flycheck-error'.
+     ((and (consp error) (eq (car error) 'flycheck-group))
+      (flycheck-error-list-toggle-group-at-point pos)))))
 
 (defun flycheck-jump-to-error (error)
   "Go to the location of ERROR."
