@@ -1,6 +1,19 @@
 ``master`` (unreleased)
 =======================
 
+- [#2202]: Flycheck can now show error messages inline in the buffer, next to
+  the code they refer to, in the spirit of VS Code's Error Lens and the inline
+  diagnostics of Neovim, Helix and Zed.  ``flycheck-annotate-mode`` enables
+  this.  Two styles ship out of the box: ``eol`` appends a compact message
+  after the line, and ``below`` lays the full messages out on their own
+  lines underneath.  By default the line at point uses ``below`` and the
+  rest use ``eol`` (see ``flycheck-annotate-current-line-style`` and
+  ``flycheck-annotate-other-lines-style``; set either to nil to leave those
+  lines alone).  ``flycheck-annotate-levels`` restricts which levels appear,
+  ``flycheck-annotate-style-functions`` lets you register new styles, and by
+  default the redundant echo-area message for the errors at point is
+  suppressed while the mode is on (``flycheck-annotate-suppress-echo``).  This
+  obsoletes the third-party ``flycheck-inline`` package.
 - The error list no longer scans all of its rows on every cursor movement
   to highlight the errors at point, so keeping it open next to a large
   project-scope list is much cheaper.

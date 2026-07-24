@@ -3806,6 +3806,11 @@ current syntax check."
   (when shall-interrupt
     (flycheck-stop))
   (flycheck-delete-all-overlays)
+  ;; Inline annotations are separate overlays that the error-overlay
+  ;; teardown above doesn't touch; drop them so a manual clear doesn't
+  ;; leave stale messages behind (a re-check rebuilds them).  Harmless
+  ;; no-op when inline display was never active.
+  (flycheck-annotate--clear)
   (flycheck-clear-errors)
   ;; Note: `flycheck--excessive-checkers' deliberately survives a clear,
   ;; so that the truncation notification doesn't re-fire after every
@@ -7041,7 +7046,8 @@ Intended for `eldoc-documentation-functions', where command
 `flycheck-display-errors-function' has its default value
 `flycheck-display-errors-via-eldoc', so that user customizations
 and third-party display packages keep working unchanged."
-  (when (and flycheck-mode (flycheck--display-errors-via-eldoc-p))
+  (when (and flycheck-mode (flycheck--display-errors-via-eldoc-p)
+             (not (flycheck-annotate--suppresses-echo-p)))
     (when-let* ((errors (flycheck-overlay-errors-at (point))))
       (funcall callback
                (mapconcat
@@ -7094,9 +7100,12 @@ If there are no errors, clears the error messages at point."
   (flycheck-cancel-error-display-error-at-point-timer)
   ;; When errors are displayed through Eldoc and `eldoc-mode' is active,
   ;; its own post-command refresh covers this path; without `eldoc-mode'
-  ;; fall back to Flycheck's timer, which triggers the refresh itself
-  (unless (and (flycheck--display-errors-via-eldoc-p)
-               (bound-and-true-p eldoc-mode))
+  ;; fall back to Flycheck's timer, which triggers the refresh itself.
+  ;; When inline display already covers the line at point, skip the
+  ;; echo-area message entirely (see `flycheck-annotate-suppress-echo').
+  (unless (or (flycheck-annotate--suppresses-echo-p)
+              (and (flycheck--display-errors-via-eldoc-p)
+                   (bound-and-true-p eldoc-mode)))
     (setq flycheck-display-error-at-point-timer
           (run-at-time flycheck-display-errors-delay nil
                        'flycheck-display-error-at-point))))
@@ -7199,6 +7208,355 @@ Hide the error buffer if there is no error under point."
              (equal (current-message) flycheck--last-displayed-message))
         (message nil)
       (flycheck-hide-error-buffer))))
+
+
+;;; Inline error annotations in the buffer
+;;
+;; Besides the fringe/margin indicators and the highlighting overlays,
+;; Flycheck can render the error messages themselves right next to the
+;; offending code, in the spirit of VS Code's Error Lens, Neovim's
+;; virtual text/lines and Helix's inline diagnostics.  `flycheck-annotate-mode'
+;; enables this.
+;;
+;; Two visualization styles ship out of the box (see
+;; `flycheck-annotate-style-functions'): `eol' appends a compact message after
+;; the code, and `below' lays the full messages out on their own lines
+;; underneath.  The style is chosen per line: the line at point uses
+;; `flycheck-annotate-current-line-style' and every other line uses
+;; `flycheck-annotate-other-lines-style', so by default the focused line gets
+;; the roomy `below' treatment while the rest get a terse `eol' summary.
+;;
+;; The annotations are drawn with dedicated overlays (tagged
+;; `flycheck-annotate'), kept separate from the error overlays so they don't
+;; clobber the `before-string'/`after-string' those use for indicators and
+;; the `delimiters' highlighting style.  They cover only the visible portion
+;; of the window and are rebuilt when the check reports, point changes line,
+;; or the window scrolls.
+
+(defface flycheck-annotate-error
+  '((t :inherit flycheck-error-list-error))
+  "Flycheck face for inline error messages."
+  :package-version '(flycheck . "38")
+  :group 'flycheck-faces)
+
+(defface flycheck-annotate-warning
+  '((t :inherit flycheck-error-list-warning))
+  "Flycheck face for inline warning messages."
+  :package-version '(flycheck . "38")
+  :group 'flycheck-faces)
+
+(defface flycheck-annotate-info
+  '((t :inherit flycheck-error-list-info))
+  "Flycheck face for inline informational messages."
+  :package-version '(flycheck . "38")
+  :group 'flycheck-faces)
+
+(defface flycheck-annotate-connector
+  '((t :inherit shadow))
+  "Flycheck face for the connectors of `below'-style inline messages."
+  :package-version '(flycheck . "38")
+  :group 'flycheck-faces)
+
+(defcustom flycheck-annotate-style-functions
+  '((eol . flycheck-annotate-eol-style)
+    (below . flycheck-annotate-below-style))
+  "Alist mapping inline display styles to their renderers.
+
+Each entry is a cons cell (STYLE . FUNCTION) where STYLE is a symbol
+naming a style (as used by `flycheck-annotate-current-line-style' and
+`flycheck-annotate-other-lines-style') and FUNCTION renders it.
+
+FUNCTION is called with three arguments: ERRORS, the list of errors
+anchored to one line, sorted most-severe first; ANCHOR, the buffer
+position at the end of that line to attach the overlay to; and FOCUSED,
+non-nil when the line is the one at point.  It must create its overlays
+with `flycheck-annotate--make-overlay', which tags and tracks them for
+teardown.
+
+Add to this alist to register additional styles."
+  :group 'flycheck
+  :type '(alist :key-type symbol :value-type function)
+  :package-version '(flycheck . "38"))
+
+(defcustom flycheck-annotate-current-line-style 'below
+  "Inline display style for the line at point.
+
+A style symbol resolved through `flycheck-annotate-style-functions'
+\(`below' or `eol' out of the box), or nil to leave the current line
+unannotated.  See `flycheck-annotate-other-lines-style' for every other
+line."
+  :group 'flycheck
+  :type '(choice (const :tag "Full messages below the line" below)
+                 (const :tag "Compact message at end of line" eol)
+                 (const :tag "Do not annotate the current line" nil)
+                 (symbol :tag "Other style"))
+  :package-version '(flycheck . "38"))
+
+(defcustom flycheck-annotate-other-lines-style 'eol
+  "Inline display style for lines other than the one at point.
+
+A style symbol resolved through `flycheck-annotate-style-functions'
+\(`below' or `eol' out of the box), or nil to annotate only the line at
+point (the way Neovim and Helix show diagnostics for the cursor line
+only).  See `flycheck-annotate-current-line-style' for the line at point."
+  :group 'flycheck
+  :type '(choice (const :tag "Compact message at end of line" eol)
+                 (const :tag "Full messages below the line" below)
+                 (const :tag "Annotate only the line at point" nil)
+                 (symbol :tag "Other style"))
+  :package-version '(flycheck . "38"))
+
+(defcustom flycheck-annotate-levels t
+  "Error levels to display inline.
+
+Either t to display errors of every level, or a list of level symbols
+\(e.g. \\='(error warning)) to restrict the inline display to those
+levels.  Errors of other levels are still highlighted and listed as
+usual; they just get no inline annotation."
+  :group 'flycheck
+  :type '(choice (const :tag "All levels" t)
+                 (repeat :tag "Only these levels" symbol))
+  :package-version '(flycheck . "38"))
+
+(defcustom flycheck-annotate-format-function #'flycheck-error-format-message-and-id
+  "Function to format an error for inline display.
+
+Called with a single `flycheck-error' and must return the string to
+show for it.  The default renders the message and the error ID."
+  :group 'flycheck
+  :type 'function
+  :package-version '(flycheck . "38"))
+
+(defcustom flycheck-annotate-suppress-echo t
+  "Whether inline display suppresses the echo-area message at point.
+
+When non-nil and the line at point is annotated inline (that is,
+`flycheck-annotate-current-line-style' is non-nil), the errors at point
+are not additionally shown through `flycheck-display-errors-function'
+\(Eldoc or the echo area by default), to avoid displaying the same
+message twice.  Set to nil to keep both."
+  :group 'flycheck
+  :type 'boolean
+  :safe #'booleanp
+  :package-version '(flycheck . "38"))
+
+(defvar-local flycheck-annotate--overlays nil
+  "Inline display overlays in the current buffer.")
+
+(defvar-local flycheck-annotate--last-line-start nil
+  "Beginning-of-line position the inline overlays were last built for.
+
+Tracked instead of the line number, which would cost a scan from the
+start of the buffer on every command.")
+
+(defvar-local flycheck-annotate--last-window-start nil
+  "Window start the inline overlays were last built for.")
+
+(defun flycheck-annotate--level-face (level)
+  "Return the inline face for error LEVEL."
+  (pcase level
+    ('error 'flycheck-annotate-error)
+    ('warning 'flycheck-annotate-warning)
+    ('info 'flycheck-annotate-info)
+    (_ (flycheck-error-level-error-list-face level))))
+
+(defun flycheck-annotate--make-overlay (anchor &rest props)
+  "Create a tracked inline overlay at ANCHOR with PROPS.
+
+ANCHOR is a buffer position; the overlay is empty and carries the
+`flycheck-annotate' property so it can be found and deleted.  PROPS is a
+plist of additional overlay properties, e.g. `after-string'.  Return the
+overlay."
+  (let ((ov (make-overlay anchor anchor nil t)))
+    (overlay-put ov 'flycheck-annotate t)
+    (overlay-put ov 'priority 100)
+    (while props
+      (overlay-put ov (pop props) (pop props)))
+    (push ov flycheck-annotate--overlays)
+    ov))
+
+(defun flycheck-annotate--connectors ()
+  "Return the connector strings for `below'-style messages, as (MID . LAST).
+
+MID prefixes every message but the last, LAST the final one.  Falls back
+to ASCII when the box-drawing glyphs aren't displayable.  Computed once
+per render so the font probe stays out of the per-error loop."
+  (if (char-displayable-p ?\N{BOX DRAWINGS LIGHT UP AND RIGHT})
+      (cons "\N{BOX DRAWINGS LIGHT VERTICAL AND RIGHT}\N{BOX DRAWINGS LIGHT HORIZONTAL} "
+            "\N{BOX DRAWINGS LIGHT UP AND RIGHT}\N{BOX DRAWINGS LIGHT HORIZONTAL} ")
+    (cons "`- " "`- ")))
+
+(defun flycheck-annotate-eol-style (errors anchor _focused)
+  "Render ERRORS as a compact message after the line ending at ANCHOR.
+
+Only the most severe error's message is shown, with a count of the rest.
+FOCUSED is ignored."
+  (let* ((err (car errors))
+         (face (flycheck-annotate--level-face (flycheck-error-level err)))
+         (msg (funcall flycheck-annotate-format-function err))
+         (more (when (cdr errors) (format " (+%d)" (length (cdr errors)))))
+         (text (propertize (concat "  " msg more) 'face face)))
+    (flycheck-annotate--make-overlay anchor 'after-string text)))
+
+(defun flycheck-annotate-below-style (errors anchor _focused)
+  "Render ERRORS on their own lines below the line ending at ANCHOR.
+
+Each error gets its own message, prefixed with a connector padded to its
+column.  FOCUSED is ignored."
+  (let* ((n (length errors))
+         (i 0)
+         (connectors (flycheck-annotate--connectors))
+         (lines nil))
+    (dolist (err errors)
+      (setq i (1+ i))
+      ;; Pad with spaces to the error's column.  Lines indented with tabs
+      ;; won't align exactly, since the synthetic line has no tabs to
+      ;; measure against; this is close enough and only cosmetic.
+      (let* ((col (max 0 (1- (or (flycheck-error-column err) 1))))
+             (pad (make-string col ?\s))
+             (face (flycheck-annotate--level-face (flycheck-error-level err)))
+             (conn (propertize (if (= i n) (cdr connectors) (car connectors))
+                               'face 'flycheck-annotate-connector))
+             (msg (propertize (funcall flycheck-annotate-format-function err)
+                              'face face)))
+        (push (concat "\n" pad conn msg) lines)))
+    (flycheck-annotate--make-overlay anchor 'after-string
+                                   (apply #'concat (nreverse lines)))))
+
+(defun flycheck-annotate--clear ()
+  "Delete all inline overlays in the current buffer."
+  (mapc #'delete-overlay flycheck-annotate--overlays)
+  (setq flycheck-annotate--overlays nil))
+
+(defun flycheck-annotate--filter-levels (errors)
+  "Keep the ERRORS whose level is enabled by `flycheck-annotate-levels'."
+  (if (eq flycheck-annotate-levels t)
+      errors
+    (seq-filter (lambda (err)
+                  (memq (flycheck-error-level err) flycheck-annotate-levels))
+                errors)))
+
+(defun flycheck-annotate--region ()
+  "Return the buffer region to annotate, as a cons (BEG . END).
+
+The visible portion of the window showing the current buffer, or the
+line at point when the buffer isn't displayed."
+  (if-let* ((win (get-buffer-window)))
+      ;; Derive the end from the window height rather than `window-end'
+      ;; with its update flag, which would force a redisplay simulation on
+      ;; this hot path.  A slight over-scan past the last visible line is
+      ;; harmless; we only use the region to collect errors to annotate.
+      (let ((start (window-start win)))
+        (cons start
+              (save-excursion
+                (goto-char start)
+                (forward-line (window-body-height win))
+                (point))))
+    (cons (line-beginning-position) (line-end-position))))
+
+(defun flycheck-annotate--group-errors (beg end)
+  "Group the errors overlaid between BEG and END by their anchor line.
+
+Return an alist mapping the end-of-line position of each line to the
+list of errors on it, in buffer order.  Skips errors that belong to
+another file."
+  (let ((groups nil))
+    (dolist (ov (flycheck-overlays-in beg end))
+      (when-let* ((err (overlay-get ov 'flycheck-error)))
+        (unless (flycheck-relevant-error-other-file-p err)
+          (let* ((anchor (save-excursion
+                           (goto-char (overlay-start ov))
+                           (line-end-position)))
+                 (cell (assq anchor groups)))
+            (if cell
+                (setcdr cell (cons err (cdr cell)))
+              (push (cons anchor (list err)) groups))))))
+    groups))
+
+(defun flycheck-annotate--refresh ()
+  "Rebuild the inline overlays for the visible part of the buffer.
+
+Records the line and window start the overlays were built for, so
+`flycheck-annotate--post-command' can skip rebuilds that would not change
+anything."
+  (setq flycheck-annotate--last-line-start (line-beginning-position)
+        flycheck-annotate--last-window-start (window-start))
+  (flycheck-annotate--clear)
+  (when (and (bound-and-true-p flycheck-annotate-mode) flycheck-mode)
+    (pcase-let ((`(,beg . ,end) (flycheck-annotate--region))
+                (point-anchor (line-end-position)))
+      (pcase-dolist (`(,anchor . ,errors)
+                     (flycheck-annotate--group-errors beg end))
+        (let* ((focused (= anchor point-anchor))
+               (style (if focused
+                          flycheck-annotate-current-line-style
+                        flycheck-annotate-other-lines-style)))
+          (when-let* ((style)
+                      (render (cdr (assq style
+                                         flycheck-annotate-style-functions)))
+                      (errors (flycheck-annotate--filter-levels errors)))
+            (funcall render
+                     (sort errors #'flycheck--excessive-errors-<)
+                     anchor focused)))))))
+
+(defun flycheck-annotate--post-command ()
+  "Rebuild the inline overlays if point or the window has moved.
+
+Only rebuilds when point changed line or the window scrolled, since the
+annotations are otherwise unaffected by point motion within a line."
+  (unless (and (eql (line-beginning-position) flycheck-annotate--last-line-start)
+               (eql (window-start) flycheck-annotate--last-window-start))
+    (flycheck-annotate--refresh)))
+
+(defun flycheck-annotate--suppresses-echo-p ()
+  "Return non-nil when inline display covers the at-point echo message.
+
+Only suppresses when the errors at point would actually be rendered
+inline, so an error that the inline display drops (because its level is
+disabled by `flycheck-annotate-levels', or it belongs to another file) is
+still shown through the echo area rather than nowhere."
+  (and (bound-and-true-p flycheck-annotate-mode)
+       flycheck-annotate-suppress-echo
+       flycheck-annotate-current-line-style
+       (seq-some (lambda (err)
+                   (not (flycheck-relevant-error-other-file-p err)))
+                 (flycheck-annotate--filter-levels
+                  (flycheck-overlay-errors-at (point))))))
+
+;;;###autoload
+(define-minor-mode flycheck-annotate-mode
+  "Minor mode to display Flycheck error messages inline in the buffer.
+
+When enabled, the error messages are rendered right next to the code
+they refer to, in addition to the fringe/margin indicators and the
+highlighting.  The line at point is annotated with
+`flycheck-annotate-current-line-style' and the rest with
+`flycheck-annotate-other-lines-style'; see those options and
+`flycheck-annotate-style-functions' for the available styles.
+
+This mode only shows errors while command `flycheck-mode' is on in the
+buffer.  With `flycheck-annotate-suppress-echo' (on by default), it also
+suppresses the redundant echo-area/Eldoc message for the errors at
+point.
+
+The annotations track the window showing the buffer and the line at
+point, and are rebuilt after a check, when point changes line, and when
+the window scrolls.  When a buffer is shown in more than one window they
+follow the selected one; lines revealed by an implicit scroll are
+annotated on the next command."
+  :lighter nil
+  :group 'flycheck
+  (cond
+   (flycheck-annotate-mode
+    (add-hook 'post-command-hook #'flycheck-annotate--post-command nil t)
+    (add-hook 'flycheck-after-syntax-check-hook
+              #'flycheck-annotate--refresh nil t)
+    (flycheck-annotate--refresh))
+   (t
+    (remove-hook 'post-command-hook #'flycheck-annotate--post-command t)
+    (remove-hook 'flycheck-after-syntax-check-hook
+                 #'flycheck-annotate--refresh t)
+    (flycheck-annotate--clear))))
 
 
 ;;; Working with errors

@@ -37,7 +37,8 @@ These extensions change Flycheck’s user interface:
   Flycheck’s mode line status.
 * :gh:`Wilfred/flycheck-title` shows Flycheck error messages in the frame title.
 * :flyc:`flycheck-inline` shows Flycheck error messages in the buffer, directly
-  below their origin.
+  below their origin.  It is obsoleted by the built-in ``flycheck-annotate-mode``
+  (see :doc:`/user/error-reports`).
 
 Eglot
 =====
