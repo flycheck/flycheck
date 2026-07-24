@@ -233,6 +233,108 @@ fringes or vertical dots in the margins to indicate the extent of the error.
 To change the fringe bitmap or the symbol used in the margins, use the function
 ``flycheck-redefine-standard-error-levels``.
 
+Inline error messages
+=====================
+
+Beyond the fringe or margin indicators, Flycheck can render the error messages
+themselves right next to the code they refer to, in the spirit of VS Code's
+Error Lens and the inline diagnostics of Neovim, Helix and Zed.  Enable
+``flycheck-annotate-mode`` to turn this on:
+
+.. code-block:: elisp
+
+   (add-hook 'flycheck-mode-hook #'flycheck-annotate-mode)
+
+.. minor-mode:: flycheck-annotate-mode
+
+   Toggle the inline display of Flycheck error messages in the current buffer.
+   The annotations appear only while ``flycheck-mode`` is on.
+
+Flycheck picks the display style per line: the line at point uses
+``flycheck-annotate-current-line-style`` and every other line uses
+``flycheck-annotate-other-lines-style``.  By default the line at point gets the
+roomy ``below`` treatment while the rest get a terse ``eol`` summary, so the
+error you're working on is spelled out in full without every other line
+competing for attention.
+
+.. defcustom:: flycheck-annotate-current-line-style
+               flycheck-annotate-other-lines-style
+
+   The display style for the line at point and for every other line,
+   respectively.  Each is one of:
+
+   ``eol``
+      Append a compact message after the code.  When a line has several
+      errors, show the most severe one and a count of the rest.
+
+   ``below``
+      Lay the full messages out on their own lines underneath the code, one
+      per error, each pointing at its column.
+
+   ``nil``
+      Do not annotate those lines.  Setting ``flycheck-annotate-other-lines-style``
+      to ``nil`` annotates only the line at point, the way Neovim and Helix
+      show diagnostics for the cursor line only.
+
+   Additional styles can be registered through
+   ``flycheck-annotate-style-functions``.
+
+.. defcustom:: flycheck-annotate-levels
+
+   The error levels to display inline, either ``t`` for all levels or a list of
+   level symbols such as ``'(error warning)``.  Errors of other levels are
+   still highlighted and listed; they just get no inline annotation.
+
+.. defcustom:: flycheck-annotate-suppress-echo
+
+   When non-nil (the default) and the line at point is annotated inline, the
+   errors at point are not additionally shown through
+   ``flycheck-display-errors-function`` (Eldoc or the echo area), to avoid
+   displaying the same message twice.  Set to ``nil`` to keep both.
+
+.. defcustom:: flycheck-annotate-format-function
+
+   The function used to format an error for inline display.  It receives a
+   single ``flycheck-error`` and returns the string to show.  The default
+   renders the message and the error ID.
+
+.. defcustom:: flycheck-annotate-style-functions
+
+   An alist mapping style symbols to their renderer functions, used to resolve
+   ``flycheck-annotate-current-line-style`` and
+   ``flycheck-annotate-other-lines-style``.  Add to it to register your own
+   styles.
+
+.. defface:: flycheck-annotate-error
+             flycheck-annotate-warning
+             flycheck-annotate-info
+
+   The faces for inline ``error``, ``warning`` and ``info`` messages
+   respectively.
+
+.. defface:: flycheck-annotate-connector
+
+   The face for the connectors that precede ``below``-style messages.
+
+.. note::
+
+   ``flycheck-annotate-mode`` obsoletes the third-party `flycheck-inline
+   <https://github.com/flycheck/flycheck-inline>`_ package, which pioneered
+   inline error messages for Flycheck.  If you used it, drop it from your
+   configuration and enable ``flycheck-annotate-mode`` instead.  The built-in
+   mode differs in a few ways:
+
+   * It ships with Flycheck, so there is nothing extra to install.
+   * It annotates every error in the visible window, not only the error at
+     point.
+   * It offers two layouts, ``eol`` (after the line) and ``below`` (on their
+     own lines underneath), and picks between them per line, instead of a
+     single placement below the error.
+   * It adds level filtering (``flycheck-annotate-levels``), a custom
+     formatter (``flycheck-annotate-format-function``), echo-area suppression
+     (``flycheck-annotate-suppress-echo``), and user-registrable styles
+     (``flycheck-annotate-style-functions``).
+
 Mode line
 =========
 
