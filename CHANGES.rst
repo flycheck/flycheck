@@ -1,6 +1,9 @@
 ``master`` (unreleased)
 =======================
 
+- [#2205]: ``flycheck-annotate-mode``'s ``below`` style now aligns each message's
+  connector to the error's real display column, so it lines up correctly under
+  tab-indented code and past a line-number gutter.
 - [#2204]: ``flycheck-annotate-mode`` gains a ``sideline`` style that flushes the
   compact message to the window's right edge, in the manner of
   ``lsp-ui-sideline``.  Set ``flycheck-annotate-current-line-style`` or
