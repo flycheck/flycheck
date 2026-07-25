@@ -211,5 +211,17 @@ display, navigation and the error list:
    checker that supports the buffer's major mode, so an LSP server and a
    command checker both contribute.
 
+When the server supports code actions, an Eglot diagnostic's ``quickfix``
+action is offered as a Flycheck fix: press ``C-c ! f`` on the error to apply it
+(or ``C-c ! F`` to apply all).  The action is fetched from the server only when
+you apply a fix, so every diagnostic is shown as potentially fixable even if the
+server has nothing for it.
+
+.. defcustom:: flycheck-eglot-code-actions
+
+   When non-nil (the default), offer LSP ``quickfix`` code actions as fixes, as
+   described above.  Set to nil to turn this off (and stop marking every
+   diagnostic as fixable).
+
 This obsoletes the third-party ``flycheck-eglot`` package; drop it from your
 configuration if you used it.

@@ -10075,6 +10075,25 @@ SYMBOL with `flycheck-def-executable-var'."
 (declare-function flymake-diagnostic-type "flymake" (diag))
 (declare-function flymake-diagnostic-text "flymake" (diag))
 (declare-function flymake-diagnostic-data "flymake" (diag))
+(declare-function eglot-code-actions "eglot" (beg &optional end action-kind interactive))
+(declare-function eglot-server-capable "eglot" (&rest feats))
+(declare-function eglot-uri-to-path "eglot" (uri))
+(declare-function eglot--request "eglot" (server method params &rest _))
+(declare-function eglot--current-server-or-lose "eglot" ())
+
+(defcustom flycheck-eglot-code-actions t
+  "Whether `eglot-check' offers LSP quick-fix code actions as fixes.
+
+When non-nil (the default) and the server supports code actions, each
+Eglot diagnostic carries a lazy fix (see `flycheck-error-resolve-fix')
+that requests the server's \"quickfix\" code action for it when applied
+with \\[flycheck-fix-error-at-point].  Because the fix is only computed on
+demand, every diagnostic is shown as potentially fixable even when the
+server has no action for it; set this to nil to turn the feature off."
+  :group 'flycheck
+  :type 'boolean
+  :safe #'booleanp
+  :package-version '(flycheck . "38"))
 
 (defcustom flycheck-eglot-exclusive t
   "Whether `eglot-check' is the only checker or chains to others.
@@ -10159,9 +10178,119 @@ as a fallback."
        (format "%s" (flymake-diagnostic-text diag)))
      :end-pos (flymake-diagnostic-end diag)
      :id (and lsp (flycheck-eglot--diagnostic-id lsp))
+     :fix (flycheck-eglot--fix-provider)
      :checker 'eglot-check
      :buffer (current-buffer)
      :filename (buffer-file-name))))
+
+(defun flycheck-eglot--fix-provider ()
+  "Return the lazy code-action fix provider, or nil when unavailable.
+
+Non-nil only when `flycheck-eglot-code-actions' is on and the server
+advertises code actions; see `flycheck-eglot--code-action-fix'."
+  (when (and flycheck-eglot-code-actions
+             (fboundp 'eglot-server-capable)
+             (eglot-server-capable :codeActionProvider))
+    #'flycheck-eglot--code-action-fix))
+
+(defun flycheck-eglot--error-region (err)
+  "Return the (BEG . END) buffer region of ERR, for a code-action request."
+  (save-restriction
+    (widen)
+    (let* ((line (flycheck-error-line err))
+           (beg (flycheck-line-column-to-position
+                 line (or (flycheck-error-column err) 1)))
+           (end (if (and (flycheck-error-end-line err)
+                         (flycheck-error-end-column err))
+                    (flycheck-line-column-to-position
+                     (flycheck-error-end-line err)
+                     (flycheck-error-end-column err))
+                  beg)))
+      (cons beg end))))
+
+(defun flycheck-eglot--text-edit (tedit)
+  "Convert the LSP TextEdit TEDIT to a `flycheck-fix-edit'.
+LSP positions are zero-based and end-exclusive; Flycheck's are one-based
+and end-exclusive, so only the line/column need incrementing."
+  (let ((start (plist-get (plist-get tedit :range) :start))
+        (end (plist-get (plist-get tedit :range) :end)))
+    (flycheck-fix-edit-new
+     :line (1+ (plist-get start :line))
+     :column (1+ (plist-get start :character))
+     :end-line (1+ (plist-get end :line))
+     :end-column (1+ (plist-get end :character))
+     :replacement (plist-get tedit :newText))))
+
+(defun flycheck-eglot--workspace-edit-fix (wedit description)
+  "Build a `flycheck-fix' from WEDIT, or nil.
+
+WEDIT is an LSP WorkspaceEdit.  A fix is built only when WEDIT edits a
+single file that is the current buffer, since a `flycheck-fix' applies to
+one buffer; a multi-file edit, or one with resource operations (create,
+rename, delete), is declined and left to Eglot's own commands.
+DESCRIPTION becomes the fix's description.  The tick is the buffer's
+current one: the action was just fetched against this buffer state, and
+the fix is applied right after."
+  (let* ((this (buffer-file-name))
+         (dchanges (append (plist-get wedit :documentChanges) nil))
+         (targets
+          (cond
+           ;; `documentChanges' with a resource operation (an entry without a
+           ;; `:textDocument') is not a plain text fix; decline it whole.
+           ((seq-some (lambda (tde) (null (plist-get tde :textDocument)))
+                      dchanges)
+            nil)
+           ;; `documentChanges' (preferred): array of TextDocumentEdit.
+           (dchanges
+            (mapcar (lambda (tde)
+                      (cons (eglot-uri-to-path
+                             (plist-get (plist-get tde :textDocument) :uri))
+                            (plist-get tde :edits)))
+                    dchanges))
+           ;; `changes' (legacy): a plist of uri -> edits.
+           (t
+            (cl-loop for (uri edits) on (plist-get wedit :changes) by #'cddr
+                     collect (cons (eglot-uri-to-path uri) edits))))))
+    (when (and this
+               (= (length targets) 1)
+               (flycheck-same-files-p (caar targets) this)
+               (cdar targets))
+      (flycheck-fix-new
+       :description description
+       :edits (mapcar #'flycheck-eglot--text-edit (append (cdar targets) nil))
+       :tick (buffer-chars-modified-tick)))))
+
+(defun flycheck-eglot--resolve-action (action)
+  "Return ACTION with its edit filled in, resolving it if necessary.
+A server may omit the `edit' until the action is resolved via
+`codeAction/resolve'."
+  (if (and (null (plist-get action :edit))
+           (plist-get action :data)
+           (eglot-server-capable :codeActionProvider :resolveProvider))
+      (eglot--request (eglot--current-server-or-lose)
+                      :codeAction/resolve action)
+    action))
+
+(defun flycheck-eglot--code-action-fix (err)
+  "Resolve a \"quickfix\" code action for ERR into a `flycheck-fix', or nil.
+
+Used as a lazy fix provider (see `flycheck-error-fix'): requests the
+server's quickfix actions overlapping ERR, prefers an `isPreferred' one,
+resolves its edit, and converts a single-file edit into a fix.  Any error
+talking to the server yields nil, so the fix just reports as unavailable."
+  (when (flycheck-eglot--available-p)
+    (pcase-let ((`(,beg . ,end) (flycheck-eglot--error-region err)))
+      ;; A jsonrpc timeout or error from either request must degrade to nil,
+      ;; not abort the fix command (or a `flycheck-fix-all-errors' batch).
+      (ignore-errors
+        (when-let* ((actions (eglot-code-actions beg end "quickfix" nil))
+                    (action (or (seq-find (lambda (a) (plist-get a :isPreferred))
+                                          actions)
+                                (car actions)))
+                    (edit (plist-get (flycheck-eglot--resolve-action action)
+                                     :edit)))
+          (flycheck-eglot--workspace-edit-fix
+           edit (plist-get action :title)))))))
 
 (defun flycheck-eglot--report (diags &rest _)
   "Cache Eglot's DIAGS and re-run Flycheck to publish them.

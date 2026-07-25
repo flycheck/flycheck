@@ -1,6 +1,12 @@
 ``master`` (unreleased)
 =======================
 
+- [#2211]: With ``flycheck-eglot-mode``, an LSP diagnostic's ``quickfix`` code
+  action is now offered as a Flycheck fix: ``C-c ! f`` applies it (``C-c ! F`` applies all,
+  ``[fix]`` marks it in the error list).  The action is fetched from the server
+  only when you apply a fix.  Customize ``flycheck-eglot-code-actions`` to turn
+  it off.  This is something Flymake, which shows Eglot's diagnostics but not its
+  fixes, does not offer.
 - [#2210]: A ``flycheck-error``'s fix (the ``:fix`` slot) may now be a function
   that produces the fix on demand instead of a ready ``flycheck-fix``.  Flycheck
   resolves it with ``flycheck-error-resolve-fix`` only when the fix is applied,
