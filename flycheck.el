@@ -7489,22 +7489,37 @@ instead.  FOCUSED is ignored."
          (spacer (propertize " " 'display `(space :align-to (- right ,width)))))
     (flycheck-annotate--make-overlay anchor 'after-string (concat spacer text))))
 
+(defun flycheck-annotate--display-column (err bol eol)
+  "Return the display column of ERR's start on the line from BOL to EOL.
+
+Uses the display column (via `current-column'), so tabs and other wide
+characters before the error are accounted for.  The error's column is
+clamped to the line so a checker column past the end still lands on it."
+  (let ((offset (min (1- (max 1 (or (flycheck-error-column err) 1)))
+                     (- eol bol))))
+    (save-excursion
+      (goto-char bol)
+      (forward-char offset)
+      (current-column))))
+
 (defun flycheck-annotate-below-style (errors anchor _focused)
   "Render ERRORS on their own lines below the line ending at ANCHOR.
 
-Each error gets its own message, prefixed with a connector padded to its
-column.  FOCUSED is ignored."
+Each error gets its own message, prefixed with a connector aligned under
+its column.  Alignment uses a `:align-to' stretch measured in display
+columns, so it lines up under tab-indented code and past a line-number
+gutter.  FOCUSED is ignored."
   (let* ((n (length errors))
          (i 0)
          (connectors (flycheck-annotate--connectors))
+         (bol (save-excursion (goto-char anchor) (line-beginning-position)))
          (lines nil))
     (dolist (err errors)
       (setq i (1+ i))
-      ;; Pad with spaces to the error's column.  Lines indented with tabs
-      ;; won't align exactly, since the synthetic line has no tabs to
-      ;; measure against; this is close enough and only cosmetic.
-      (let* ((col (max 0 (1- (or (flycheck-error-column err) 1))))
-             (pad (make-string col ?\s))
+      (let* ((col (flycheck-annotate--display-column err bol anchor))
+             (pad (if (> col 0)
+                      (propertize " " 'display `(space :align-to ,col))
+                    ""))
              (face (flycheck-annotate--level-face (flycheck-error-level err)))
              (conn (propertize (if (= i n) (cdr connectors) (car connectors))
                                'face 'flycheck-annotate-connector))

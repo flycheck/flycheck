@@ -107,18 +107,46 @@ Line 2 gets an error and a warning; line 4 gets a warning."
     (it "stacks each message on its own line under the code"
       (flycheck-buttercup-with-temp-buffer
         (insert "abcdef\n")
-        (let* ((errs (list (flycheck-error-new-at 1 3 'error "one"
+        (let* ((eol (save-excursion (goto-char (point-min)) (line-end-position)))
+               (errs (list (flycheck-error-new-at 1 3 'error "one"
                                                   :checker 'emacs-lisp)
                            (flycheck-error-new-at 1 1 'warning "two"
                                                   :checker 'emacs-lisp)))
                (flycheck-annotate--overlays nil)
-               (ov (flycheck-annotate-below-style errs (line-end-position) t))
+               (ov (flycheck-annotate-below-style errs eol t))
                (s (substring-no-properties (overlay-get ov 'after-string))))
           (expect (string-prefix-p "\n" s) :to-be t)
           (expect s :to-match "one")
           (expect s :to-match "two")
           ;; leading newline plus one line per error
-          (expect (length (split-string s "\n")) :to-equal 3)))))
+          (expect (length (split-string s "\n")) :to-equal 3))))
+
+    (it "aligns the connector to the error's display column past a tab"
+      (flycheck-buttercup-with-temp-buffer
+        (setq-local tab-width 8)
+        (insert "\tx = 1\n")               ; one tab, then code
+        (let* ((eol (save-excursion (goto-char (point-min)) (line-end-position)))
+               ;; column 2 is the "x" right after the tab
+               (errs (list (flycheck-error-new-at 1 2 'error "m"
+                                                  :checker 'emacs-lisp)))
+               (flycheck-annotate--overlays nil)
+               (ov (flycheck-annotate-below-style errs eol t))
+               (s (overlay-get ov 'after-string)))
+          ;; the pad after the newline aligns to display column 8, not 1
+          (expect (get-text-property 1 'display s)
+                  :to-equal '(space :align-to 8)))))
+
+    (it "adds no pad for an error in the first column"
+      (flycheck-buttercup-with-temp-buffer
+        (insert "abc\n")
+        (let* ((eol (save-excursion (goto-char (point-min)) (line-end-position)))
+               (errs (list (flycheck-error-new-at 1 1 'error "m"
+                                                  :checker 'emacs-lisp)))
+               (flycheck-annotate--overlays nil)
+               (ov (flycheck-annotate-below-style errs eol t))
+               (s (overlay-get ov 'after-string)))
+          ;; char 1 is the connector itself, no stretch space
+          (expect (get-text-property 1 'display s) :to-be nil)))))
 
   (describe "flycheck-annotate-sideline-style"
     (it "right-aligns the compact message with an align-to spacer"
