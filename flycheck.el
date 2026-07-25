@@ -4286,7 +4286,12 @@ Slots:
   "Return the suggested fix of a Flycheck error ERR, or nil.
 
 The value is a `flycheck-fix' object when the checker offered a
-machine-applicable fix for ERR; see `flycheck-apply-fix'."
+machine-applicable fix for ERR; see `flycheck-apply-fix'.  It may instead
+be a function of one argument (ERR) that produces the fix on demand -- a
+lazy fix provider, used when computing the fix is expensive (e.g. an LSP
+code-action request).  Call `flycheck-error-resolve-fix' to get the
+concrete fix; a non-nil value here means ERR is presented as fixable
+either way."
   (condition-case nil (flycheck-error--fix err)
     (args-out-of-range nil)))
 
@@ -4296,6 +4301,16 @@ machine-applicable fix for ERR; see `flycheck-apply-fix'."
     (args-out-of-range nil)))
 
 (gv-define-simple-setter flycheck-error-fix flycheck-error--set-fix)
+
+(defun flycheck-error-resolve-fix (err)
+  "Return the concrete `flycheck-fix' for ERR, or nil.
+
+If ERR's fix slot holds a lazy provider (a function, see
+`flycheck-error-fix'), call it with ERR to produce the fix; otherwise
+return the stored fix as-is.  A provider may return nil when no fix turns
+out to be available."
+  (let ((fix (flycheck-error-fix err)))
+    (if (functionp fix) (funcall fix err) fix)))
 
 (cl-defstruct (flycheck-fix-edit (:constructor flycheck-fix-edit-new))
   "A single text edit of a `flycheck-fix'.
@@ -6970,18 +6985,23 @@ POS defaults to `point'.  Signal a `user-error' when the error
 has no fix."
   (interactive)
   (let* ((error (tabulated-list-get-id pos))
-         (fix (and (flycheck-error-p error) (flycheck-error-fix error)))
-         (buffer (and fix (flycheck--error-fix-buffer error))))
-    (unless fix
+         (fixable (and (flycheck-error-p error) (flycheck-error-fix error)))
+         (buffer (and fixable (flycheck--error-fix-buffer error))))
+    (unless fixable
       (user-error "The error at point has no fix"))
     (unless buffer
       (user-error "This fix cannot be applied here (the error is in another \
 file, or its buffer is gone)"))
-    (flycheck-apply-fix fix buffer)
-    (flycheck-error-list-refresh)
-    (message "Applied fix%s"
-             (if-let* ((description (flycheck-fix-description fix)))
-                 (concat ": " description) ""))))
+    ;; Resolve a lazy fix provider in the error's own buffer.
+    (if-let* ((fix (with-current-buffer buffer
+                     (flycheck-error-resolve-fix error))))
+        (progn
+          (flycheck-apply-fix fix buffer)
+          (flycheck-error-list-refresh)
+          (message "Applied fix%s"
+                   (if-let* ((description (flycheck-fix-description fix)))
+                       (concat ": " description) "")))
+      (user-error "The fix for this error is not available"))))
 
 (defun flycheck-error-list-fix-all ()
   "Apply every fixable error's fix in the error list's source buffer."
@@ -7944,11 +7964,13 @@ point has a fix."
                               (and (flycheck-error-fix err)
                                    (flycheck--error-fix-buffer err)))
                             (flycheck-overlay-errors-at (point)))))
-      (let ((fix (flycheck-error-fix error)))
-        (flycheck-apply-fix fix (flycheck--error-fix-buffer error))
-        (message "Applied fix%s"
-                 (if-let* ((description (flycheck-fix-description fix)))
-                     (concat ": " description) "")))
+      (if-let* ((fix (flycheck-error-resolve-fix error)))
+          (progn
+            (flycheck-apply-fix fix (flycheck--error-fix-buffer error))
+            (message "Applied fix%s"
+                     (if-let* ((description (flycheck-fix-description fix)))
+                         (concat ": " description) "")))
+        (user-error "The fix for the error at point is not available"))
     (user-error "No applicable fix at point")))
 
 (defun flycheck-fix-all-errors ()
@@ -7963,7 +7985,7 @@ are skipped; fixes for other files are ignored."
                      (mapcar (lambda (err)
                                (and (eq (flycheck--error-fix-buffer err)
                                         (current-buffer))
-                                    (flycheck-error-fix err)))
+                                    (flycheck-error-resolve-fix err)))
                              flycheck-current-errors))))
     (unless fixes
       (user-error "No applicable fixes in this buffer"))

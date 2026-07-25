@@ -1,6 +1,11 @@
 ``master`` (unreleased)
 =======================
 
+- [#2210]: A ``flycheck-error``'s fix (the ``:fix`` slot) may now be a function
+  that produces the fix on demand instead of a ready ``flycheck-fix``.  Flycheck
+  resolves it with ``flycheck-error-resolve-fix`` only when the fix is applied,
+  so a checker can offer fixes that are expensive to compute (such as an LSP
+  code action) without paying the cost up front.
 - [#2209]: Flycheck now integrates with Eglot out of the box.  Enable
   ``global-flycheck-eglot-mode`` to report an LSP server's diagnostics (as seen
   by Eglot) through Flycheck via the new ``eglot-check`` checker, so a buffer
