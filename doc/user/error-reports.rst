@@ -193,6 +193,17 @@ automatically, and restores it when you disable ``flycheck-mode``.  Margins
 that you or other packages configured are never touched, and neither are the
 fringes.
 
+A line whose error carries a machine-applicable fix (``C-c ! f``) gets a
+distinct indicator, in the error's colour, so you can spot fixable errors at a
+glance, much like an editor's "fix available" lightbulb.
+
+.. defcustom:: flycheck-fixable-indicator
+
+   When non-nil (the default) and indicators are shown, a fixable error's line
+   uses a distinct fringe bitmap or margin string
+   (``flycheck-fixable-margin-str``) instead of the usual level indicator.  Set
+   to nil to use the same indicator for fixable and non-fixable errors.
+
 To switch the indication mode interactively in the current buffer, use
 ``M-x flycheck-set-indication-mode``.
 

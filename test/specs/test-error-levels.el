@@ -99,7 +99,28 @@
     (it "rejects an invalid side"
       (let ((err (should-error (flycheck-error-level-make-indicator
                                 'test-level 'up-fringe))))
-        (expect (cadr err) :to-equal "Invalid fringe side: up-fringe"))))
+        (expect (cadr err) :to-equal "Invalid fringe side: up-fringe")))
+
+    (it "uses the fixable fringe bitmap when FIXABLE"
+      (pcase-let* ((icon (flycheck-error-level-make-indicator
+                          'test-level 'left-fringe nil t))
+                   (`(_ ,bitmap ,face) (get-text-property 0 'display icon)))
+        (expect bitmap :to-be 'flycheck-fringe-bitmap-fixable)
+        ;; the level's own colour is kept
+        (expect face :to-be 'highlight)))
+
+    (it "uses the fixable margin string when FIXABLE"
+      (pcase-let* ((icon (flycheck-error-level-make-indicator
+                          'test-level 'left-margin nil t))
+                   (`(_ ,spec) (get-text-property 0 'display icon)))
+        (expect (substring-no-properties spec)
+                :to-equal flycheck-fixable-margin-str)))
+
+    (it "lets continuation take precedence over FIXABLE"
+      (pcase-let* ((icon (flycheck-error-level-make-indicator
+                          'test-level 'left-fringe t t))
+                   (`(_ ,bitmap _) (get-text-property 0 'display icon)))
+        (expect bitmap :to-be 'flycheck-fringe-bitmap-continuation))))
 
   (describe "Built-in error levels"
     (describe "flycheck-error-level-error"
