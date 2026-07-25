@@ -241,7 +241,9 @@
     xml-xmllint
     yaml-actionlint
     yaml-jsyaml
-    yaml-yamllint)
+    yaml-yamllint
+    ;; Only ever selected when `flycheck-eglot-mode' is on (see its predicate).
+    eglot-check)
   "Syntax checkers available for automatic selection.
 
 A list of Flycheck syntax checkers to choose from when syntax
@@ -10020,6 +10022,242 @@ SYMBOL with `flycheck-def-executable-var'."
              `(:verify #',verify-fn))
          :standard-input ',(plist-get properties :standard-input)
          :working-directory ',(plist-get properties :working-directory)))))
+
+
+;;; Eglot integration
+;;
+;; Eglot, Emacs' built-in LSP client, renders its diagnostics through
+;; Flymake and deliberately offers no Flycheck support.  `flycheck-eglot-mode'
+;; bridges the gap: it feeds the diagnostics an LSP server reports to Eglot
+;; into Flycheck, so a buffer can use Eglot for LSP features while Flycheck
+;; owns the error display, navigation and the error list -- alongside the
+;; usual command checkers.
+;;
+;; This obsoletes the third-party `flycheck-eglot' package.
+;;
+;; Eglot pushes diagnostics whenever the server sends them, which does not
+;; line up with Flycheck's on-demand checking model.  The `eglot-check'
+;; generic checker adapts the two: its `:start' pulls Eglot's current
+;; diagnostics (via `eglot-flymake-backend') and reports them, and a report
+;; function caches later pushes and re-triggers a check so they reach the
+;; buffer.  Diagnostics are converted from the original LSP object Eglot
+;; stashes in each Flymake diagnostic's data slot, which is richer and more
+;; stable across Eglot versions than the Flymake fields.
+
+(declare-function eglot-managed-p "eglot")
+(declare-function eglot-flymake-backend "eglot" (report-fn &rest _))
+(declare-function flymake-mode "flymake" (&optional arg))
+(declare-function flymake-diagnostics "flymake" (&optional beg end))
+(declare-function flymake-diagnostic-beg "flymake" (diag))
+(declare-function flymake-diagnostic-end "flymake" (diag))
+(declare-function flymake-diagnostic-type "flymake" (diag))
+(declare-function flymake-diagnostic-text "flymake" (diag))
+(declare-function flymake-diagnostic-data "flymake" (diag))
+
+(defcustom flycheck-eglot-exclusive t
+  "Whether `eglot-check' is the only checker or chains to others.
+
+When non-nil (the default), a buffer using `flycheck-eglot-mode' reports
+only Eglot's diagnostics.  When nil, `eglot-check' chains to the first
+other checker that supports the buffer's major mode, so an LSP server and
+a command checker can both contribute.
+
+Note that this takes effect globally when a buffer enables the mode: it is
+stored in `eglot-check's chain, not per buffer."
+  :group 'flycheck
+  :type 'boolean
+  :safe #'booleanp
+  :package-version '(flycheck . "38"))
+
+(defvar-local flycheck-eglot--diagnostics nil
+  "Latest diagnostics Eglot reported for this buffer, in Flymake format.")
+
+(defvar-local flycheck-eglot--suppress-recheck nil
+  "When non-nil, `flycheck-eglot--report' does not re-trigger a check.
+Bound while pulling diagnostics from `:start', so the synchronous report
+that pull may produce does not recurse into another check.")
+
+(defun flycheck-eglot--available-p ()
+  "Return non-nil when Eglot is managing the current buffer."
+  (and (fboundp 'eglot-managed-p) (eglot-managed-p)))
+
+(defun flycheck-eglot--enabled-p ()
+  "Return non-nil when `eglot-check' may run in the current buffer.
+
+That is, `flycheck-eglot-mode' is on and Eglot manages the buffer.  Used
+as the checker's predicate so `eglot-check', though a registered checker,
+is never selected unless the mode opted in."
+  (and (bound-and-true-p flycheck-eglot-mode)
+       (flycheck-eglot--available-p)))
+
+(defun flycheck-eglot--severity-level (severity)
+  "Map an LSP diagnostic SEVERITY (1-4) to a Flycheck error level.
+A missing severity is treated as an error, as Eglot does."
+  (pcase severity
+    (1 'error)
+    (2 'warning)
+    (3 'info)
+    (4 'info)                           ; LSP \"hint\"
+    (_ 'error)))
+
+(defun flycheck-eglot--type-level (type)
+  "Map an Eglot Flymake diagnostic TYPE to a Flycheck error level."
+  (pcase type
+    ('eglot-note 'info)
+    ('eglot-warning 'warning)
+    (_ 'error)))
+
+(defun flycheck-eglot--diagnostic-id (lsp)
+  "Return the Flycheck error id for the LSP diagnostic plist LSP.
+
+Built from the diagnostic's `code', carrying its `codeDescription' href
+\(if any) as an `explainer-url' text property so
+`flycheck-explain-error-at-point' can open it."
+  (when-let* ((code (plist-get lsp :code)))
+    (let ((id (format "%s" code))
+          (href (plist-get (plist-get lsp :codeDescription) :href)))
+      (if href (propertize id 'explainer-url href) id))))
+
+(defun flycheck-eglot--convert-diagnostic (diag)
+  "Convert the Eglot Flymake diagnostic DIAG to a `flycheck-error'.
+
+The buffer positions come from DIAG, which Eglot has already resolved.
+The level, message and id come from the original LSP diagnostic Eglot
+stashes in DIAG's data slot; if it is absent, the Flymake fields are used
+as a fallback."
+  (let ((lsp (and (fboundp 'flymake-diagnostic-data)
+                  (alist-get 'eglot-lsp-diag (flymake-diagnostic-data diag)))))
+    (flycheck-error-new-at-pos
+     (flymake-diagnostic-beg diag)
+     (if lsp
+         (flycheck-eglot--severity-level (plist-get lsp :severity))
+       (flycheck-eglot--type-level (flymake-diagnostic-type diag)))
+     (if lsp
+         (plist-get lsp :message)
+       (format "%s" (flymake-diagnostic-text diag)))
+     :end-pos (flymake-diagnostic-end diag)
+     :id (and lsp (flycheck-eglot--diagnostic-id lsp))
+     :checker 'eglot-check
+     :buffer (current-buffer)
+     :filename (buffer-file-name))))
+
+(defun flycheck-eglot--report (diags &rest _)
+  "Cache Eglot's DIAGS and re-run Flycheck to publish them.
+Registered with `eglot-flymake-backend' as its report function."
+  (setq flycheck-eglot--diagnostics (append diags nil))
+  (unless flycheck-eglot--suppress-recheck
+    (let ((flycheck-eglot--suppress-recheck t))
+      (flycheck-buffer-automatically))))
+
+(defun flycheck-eglot--start (_checker callback)
+  "Start the `eglot-check' syntax check, reporting through CALLBACK.
+Pull Eglot's current diagnostics and report their Flycheck conversions."
+  (let ((flycheck-eglot--suppress-recheck t))
+    (eglot-flymake-backend #'flycheck-eglot--report))
+  (funcall callback 'finished
+           (mapcar #'flycheck-eglot--convert-diagnostic
+                   flycheck-eglot--diagnostics)))
+
+(flycheck-define-generic-checker 'eglot-check
+  "Report the diagnostics Eglot receives from an LSP server.
+
+Enabled by `flycheck-eglot-mode'; only usable in Eglot-managed buffers."
+  :start #'flycheck-eglot--start
+  :predicate #'flycheck-eglot--enabled-p
+  :modes '(prog-mode text-mode))
+
+(defun flycheck-eglot--flymake-diagnostics (orig &optional beg end &rest args)
+  "Serve the cached Eglot diagnostics while `flycheck-eglot-mode' is on.
+
+`flycheck-eglot-mode' turns Flymake's own mode off, which would otherwise
+leave `flymake-diagnostics' (used e.g. by `eglot-code-actions') empty.
+ORIG is the advised function; BEG, END and ARGS are its arguments."
+  (if (not (bound-and-true-p flycheck-eglot-mode))
+      (apply orig beg end args)
+    ;; Mirror `flymake-diagnostics': return the diagnostics that OVERLAP
+    ;; [BEG, END] (nil means unbounded), not just those contained in it, so
+    ;; callers like `eglot-code-actions' still see a wide diagnostic at point.
+    (seq-filter (lambda (d)
+                  (let ((db (flymake-diagnostic-beg d))
+                        (de (flymake-diagnostic-end d)))
+                    (and (or (null end) (<= db end))
+                         (or (null beg) (<= beg de)))))
+                flycheck-eglot--diagnostics)))
+
+(defun flycheck-eglot--register ()
+  "Prepare `eglot-check' for the current buffer's major mode.
+
+`eglot-check' is already in `flycheck-checkers'; this just teaches it the
+buffer's major mode when needed and sets up chaining per
+`flycheck-eglot-exclusive'."
+  (unless (flycheck-checker-supports-major-mode-p 'eglot-check major-mode)
+    (flycheck-add-mode 'eglot-check major-mode))
+  (if flycheck-eglot-exclusive
+      (setf (flycheck-checker-get 'eglot-check 'next-checkers) nil)
+    (when-let* ((next (seq-find
+                       (lambda (c)
+                         (and (not (eq c 'eglot-check))
+                              (flycheck-checker-supports-major-mode-p c major-mode)))
+                       flycheck-checkers)))
+      (flycheck-add-next-checker 'eglot-check next 'append))))
+
+(defun flycheck-eglot--enable ()
+  "Set up the current buffer to report Eglot diagnostics through Flycheck."
+  (when (flycheck-eglot--available-p)
+    (flycheck-eglot--register)
+    (setq flycheck-checker 'eglot-check)
+    ;; Suppress the recheck the synchronous report may fire; the trailing
+    ;; `flycheck-buffer-deferred' triggers the first check instead.
+    (let ((flycheck-eglot--suppress-recheck t))
+      (eglot-flymake-backend #'flycheck-eglot--report))
+    (advice-add 'flymake-diagnostics :around
+                #'flycheck-eglot--flymake-diagnostics)
+    (when (bound-and-true-p flymake-mode)
+      (flymake-mode -1))
+    (unless flycheck-mode
+      (flycheck-mode 1))
+    (flycheck-buffer-deferred)))
+
+(defun flycheck-eglot--disable ()
+  "Undo `flycheck-eglot--enable' in the current buffer."
+  (when (flycheck-eglot--available-p)
+    (ignore-errors (eglot-flymake-backend #'ignore)))
+  (when (eq flycheck-checker 'eglot-check)
+    (setq flycheck-checker nil))
+  (setq flycheck-eglot--diagnostics nil)
+  (when flycheck-mode
+    (flycheck-buffer-deferred)))
+
+;;;###autoload
+(define-minor-mode flycheck-eglot-mode
+  "Minor mode to report Eglot's LSP diagnostics through Flycheck.
+
+When enabled in an Eglot-managed buffer, Flycheck shows the diagnostics
+the LSP server reports (via the `eglot-check' checker) instead of Flymake,
+which is turned off.  With `flycheck-eglot-exclusive' nil, `eglot-check'
+chains to the command checkers so both contribute.
+
+Usually enabled for every Eglot buffer via `global-flycheck-eglot-mode'."
+  :lighter nil
+  :group 'flycheck
+  (if flycheck-eglot-mode
+      (flycheck-eglot--enable)
+    (flycheck-eglot--disable)))
+
+(defun flycheck-eglot--managed-mode-update ()
+  "Turn `flycheck-eglot-mode' on or off to track Eglot managing the buffer.
+For `eglot-managed-mode-hook', which fires on both enter and exit."
+  (flycheck-eglot-mode (if (flycheck-eglot--available-p) 1 -1)))
+
+;;;###autoload
+(define-globalized-minor-mode global-flycheck-eglot-mode
+  flycheck-eglot-mode
+  (lambda () (when (flycheck-eglot--available-p) (flycheck-eglot-mode 1)))
+  :group 'flycheck
+  (if global-flycheck-eglot-mode
+      (add-hook 'eglot-managed-mode-hook #'flycheck-eglot--managed-mode-update)
+    (remove-hook 'eglot-managed-mode-hook
+                 #'flycheck-eglot--managed-mode-update)))
 
 
 ;;; Built-in checkers

@@ -52,9 +52,12 @@ use Eglot and its maintainer (who's also the maintainer of Flymake) didn't want
 to provide Flycheck integration (backend) for it (see the relevant `discussion
 <https://github.com/joaotavora/eglot/issues/42>`_).
 
-Fortunately, you have options if you want to stick with Flycheck:
+Flycheck now bridges this gap itself: enable ``global-flycheck-eglot-mode`` (see
+:doc:`/user/syntax-checks`) to route Eglot's LSP diagnostics through Flycheck.
+This obsoletes the third-party :flyc:`flycheck-eglot` package.
 
-* :flyc:`flycheck-eglot` (*official*) provides a simple “glue” minor mode that allows Flycheck and Eglot to work together.
+Other options:
+
 * :gh:`doomemacs/doomemacs` has built-in integration for Flycheck and Eglot (that served as foundation for ``flycheck-eglot``)
 * You can use :gh:`emacs-lsp/lsp-mode` (an alternative to Eglot) which has built-in support for Flycheck.
 
