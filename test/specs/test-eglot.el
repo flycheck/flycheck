@@ -111,6 +111,109 @@
                  (lambda (&rest _) 'delegated) 1 2)
                 :to-be 'delegated))))
 
+  (describe "code-action fixes"
+
+    (it "converts an LSP TextEdit to a fix edit, one-basing positions"
+      (let ((fe (flycheck-eglot--text-edit
+                 '(:range (:start (:line 0 :character 4)
+                           :end (:line 0 :character 9))
+                   :newText "hello"))))
+        (expect (flycheck-fix-edit-line fe) :to-equal 1)
+        (expect (flycheck-fix-edit-column fe) :to-equal 5)
+        (expect (flycheck-fix-edit-end-line fe) :to-equal 1)
+        (expect (flycheck-fix-edit-end-column fe) :to-equal 10)
+        (expect (flycheck-fix-edit-replacement fe) :to-equal "hello")))
+
+    (it "builds a fix from a single-file WorkspaceEdit"
+      (flycheck-buttercup-with-temp-buffer
+        (setq buffer-file-name "/proj/a.el")
+        (cl-letf (((symbol-function 'eglot-uri-to-path) #'identity)
+                  ((symbol-function 'flycheck-same-files-p) #'equal))
+          (let ((fix (flycheck-eglot--workspace-edit-fix
+                      '(:documentChanges
+                        [(:textDocument (:uri "/proj/a.el")
+                          :edits [(:range (:start (:line 0 :character 0)
+                                           :end (:line 0 :character 3))
+                                   :newText "X")])])
+                      "Fix it")))
+            (expect (flycheck-fix-description fix) :to-equal "Fix it")
+            (expect (length (flycheck-fix-edits fix)) :to-equal 1)))))
+
+    (it "declines a multi-file WorkspaceEdit"
+      (flycheck-buttercup-with-temp-buffer
+        (setq buffer-file-name "/proj/a.el")
+        (cl-letf (((symbol-function 'eglot-uri-to-path) #'identity)
+                  ((symbol-function 'flycheck-same-files-p) #'equal))
+          (expect (flycheck-eglot--workspace-edit-fix
+                   '(:documentChanges
+                     [(:textDocument (:uri "/proj/a.el")
+                       :edits [(:range (:start (:line 0 :character 0)
+                                        :end (:line 0 :character 1))
+                                :newText "X")])
+                      (:textDocument (:uri "/proj/b.el")
+                       :edits [(:range (:start (:line 0 :character 0)
+                                        :end (:line 0 :character 1))
+                                :newText "Y")])])
+                   "x")
+                  :to-be nil))))
+
+    (it "declines a WorkspaceEdit with a resource operation"
+      (flycheck-buttercup-with-temp-buffer
+        (setq buffer-file-name "/proj/a.el")
+        (cl-letf (((symbol-function 'eglot-uri-to-path) #'identity)
+                  ((symbol-function 'flycheck-same-files-p) #'equal))
+          ;; a file-creation op alongside a text edit is not a plain fix
+          (expect (flycheck-eglot--workspace-edit-fix
+                   '(:documentChanges
+                     [(:kind "create" :uri "/proj/new.el")
+                      (:textDocument (:uri "/proj/a.el")
+                       :edits [(:range (:start (:line 0 :character 0)
+                                        :end (:line 0 :character 1))
+                                :newText "X")])])
+                   "mix")
+                  :to-be nil))))
+
+    (it "provides the code-action fix only when enabled and supported"
+      (let ((flycheck-eglot-code-actions t))
+        (cl-letf (((symbol-function 'eglot-server-capable) (lambda (&rest _) t)))
+          (expect (flycheck-eglot--fix-provider)
+                  :to-be 'flycheck-eglot--code-action-fix))
+        (cl-letf (((symbol-function 'eglot-server-capable) (lambda (&rest _) nil)))
+          (expect (flycheck-eglot--fix-provider) :to-be nil)))
+      (let ((flycheck-eglot-code-actions nil))
+        (expect (flycheck-eglot--fix-provider) :to-be nil)))
+
+    (it "resolves the preferred quickfix action into a fix"
+      (flycheck-buttercup-with-temp-buffer
+        (setq buffer-file-name "/proj/a.el")
+        (insert "line one\n")
+        (cl-letf (((symbol-function 'eglot-managed-p) (lambda () t))
+                  ((symbol-function 'eglot-uri-to-path) #'identity)
+                  ((symbol-function 'flycheck-same-files-p) #'equal)
+                  ((symbol-function 'eglot-code-actions)
+                   (lambda (&rest _)
+                     (list '(:title "Meh")
+                           '(:title "Quick fix" :isPreferred t
+                             :edit (:documentChanges
+                                    [(:textDocument (:uri "/proj/a.el")
+                                      :edits [(:range (:start (:line 0 :character 0)
+                                                       :end (:line 0 :character 4))
+                                               :newText "LINE")])]))))))
+          (let ((fix (flycheck-eglot--code-action-fix
+                      (flycheck-error-new-at 1 1 'error "x"
+                                             :buffer (current-buffer)))))
+            (expect (flycheck-fix-p fix) :to-be t)
+            (expect (flycheck-fix-description fix) :to-equal "Quick fix")))))
+
+    (it "returns no fix when the server offers no actions"
+      (flycheck-buttercup-with-temp-buffer
+        (insert "x\n")
+        (cl-letf (((symbol-function 'eglot-managed-p) (lambda () t))
+                  ((symbol-function 'eglot-code-actions) (lambda (&rest _) nil)))
+          (expect (flycheck-eglot--code-action-fix
+                   (flycheck-error-new-at 1 1 'error "x"))
+                  :to-be nil)))))
+
   (describe "the eglot-check checker"
     (it "is a valid generic checker"
       (expect (flycheck-valid-checker-p 'eglot-check) :to-be-truthy))
