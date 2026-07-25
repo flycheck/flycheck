@@ -7257,6 +7257,33 @@ Hide the error buffer if there is no error under point."
   :package-version '(flycheck . "38")
   :group 'flycheck-faces)
 
+(defface flycheck-annotate-error-background
+  '((((background dark)) :background "#402626" :extend t)
+    (((background light)) :background "#fbe9e9" :extend t))
+  "Flycheck face for the whole-line tint of error lines.
+
+Used only when `flycheck-annotate-background' is non-nil."
+  :package-version '(flycheck . "38")
+  :group 'flycheck-faces)
+
+(defface flycheck-annotate-warning-background
+  '((((background dark)) :background "#403626" :extend t)
+    (((background light)) :background "#fbf3e0" :extend t))
+  "Flycheck face for the whole-line tint of warning lines.
+
+Used only when `flycheck-annotate-background' is non-nil."
+  :package-version '(flycheck . "38")
+  :group 'flycheck-faces)
+
+(defface flycheck-annotate-info-background
+  '((((background dark)) :background "#26323f" :extend t)
+    (((background light)) :background "#e6f0fb" :extend t))
+  "Flycheck face for the whole-line tint of info lines.
+
+Used only when `flycheck-annotate-background' is non-nil."
+  :package-version '(flycheck . "38")
+  :group 'flycheck-faces)
+
 (defcustom flycheck-annotate-style-functions
   '((eol . flycheck-annotate-eol-style)
     (below . flycheck-annotate-below-style))
@@ -7340,6 +7367,20 @@ message twice.  Set to nil to keep both."
   :safe #'booleanp
   :package-version '(flycheck . "38"))
 
+(defcustom flycheck-annotate-background nil
+  "Whether to tint the whole line of each annotated error by severity.
+
+When non-nil, every visible line carrying an error that passes
+`flycheck-annotate-levels' gets a subtle background in the colour of its
+most severe error, in the spirit of VS Code's Error Lens.  The tint uses
+the `flycheck-annotate-error-background', `flycheck-annotate-warning-background'
+and `flycheck-annotate-info-background' faces, and is independent of the
+message style, so it applies even to lines whose style is nil."
+  :group 'flycheck
+  :type 'boolean
+  :safe #'booleanp
+  :package-version '(flycheck . "38"))
+
 (defvar-local flycheck-annotate--overlays nil
   "Inline display overlays in the current buffer.")
 
@@ -7360,6 +7401,12 @@ start of the buffer on every command.")
     ('info 'flycheck-annotate-info)
     (_ (flycheck-error-level-error-list-face level))))
 
+(defun flycheck-annotate--track (overlay)
+  "Tag OVERLAY as ours and track it for teardown.  Return OVERLAY."
+  (overlay-put overlay 'flycheck-annotate t)
+  (push overlay flycheck-annotate--overlays)
+  overlay)
+
 (defun flycheck-annotate--make-overlay (anchor &rest props)
   "Create a tracked inline overlay at ANCHOR with PROPS.
 
@@ -7368,12 +7415,33 @@ ANCHOR is a buffer position; the overlay is empty and carries the
 plist of additional overlay properties, e.g. `after-string'.  Return the
 overlay."
   (let ((ov (make-overlay anchor anchor nil t)))
-    (overlay-put ov 'flycheck-annotate t)
     (overlay-put ov 'priority 100)
     (while props
       (overlay-put ov (pop props) (pop props)))
-    (push ov flycheck-annotate--overlays)
-    ov))
+    (flycheck-annotate--track ov)))
+
+(defun flycheck-annotate--background-face (level)
+  "Return the whole-line background face for error LEVEL, or nil."
+  (pcase level
+    ('error 'flycheck-annotate-error-background)
+    ('warning 'flycheck-annotate-warning-background)
+    ('info 'flycheck-annotate-info-background)
+    (_ nil)))
+
+(defun flycheck-annotate--tint-line (anchor level)
+  "Tint the whole line ending at ANCHOR with LEVEL's background face.
+
+Does nothing for a LEVEL without a background face.  The overlay spans
+the trailing newline so the tint reaches the window edge via the face's
+`:extend' attribute."
+  (when-let* ((face (flycheck-annotate--background-face level)))
+    (let* ((beg (save-excursion (goto-char anchor) (line-beginning-position)))
+           (end (min (point-max) (1+ anchor)))
+           (ov (make-overlay beg end nil t)))
+      ;; Below the message overlays (priority 100) so their strings win.
+      (overlay-put ov 'priority 1)
+      (overlay-put ov 'face face)
+      (flycheck-annotate--track ov))))
 
 (defun flycheck-annotate--connectors ()
   "Return the connector strings for `below'-style messages, as (MID . LAST).
@@ -7487,17 +7555,20 @@ anything."
                 (point-anchor (line-end-position)))
       (pcase-dolist (`(,anchor . ,errors)
                      (flycheck-annotate--group-errors beg end))
-        (let* ((focused (= anchor point-anchor))
-               (style (if focused
-                          flycheck-annotate-current-line-style
-                        flycheck-annotate-other-lines-style)))
-          (when-let* ((style)
-                      (render (cdr (assq style
-                                         flycheck-annotate-style-functions)))
-                      (errors (flycheck-annotate--filter-levels errors)))
-            (funcall render
-                     (sort errors #'flycheck--excessive-errors-<)
-                     anchor focused)))))))
+        (when-let* ((errors (flycheck-annotate--filter-levels errors)))
+          (setq errors (sort errors #'flycheck--excessive-errors-<))
+          ;; The tint applies to every filtered error line, independent of
+          ;; the message style, so it survives an other-lines style of nil.
+          (when flycheck-annotate-background
+            (flycheck-annotate--tint-line
+             anchor (flycheck-error-level (car errors))))
+          (let* ((focused (= anchor point-anchor))
+                 (style (if focused
+                            flycheck-annotate-current-line-style
+                          flycheck-annotate-other-lines-style)))
+            (when-let* ((render (cdr (assq style
+                                           flycheck-annotate-style-functions))))
+              (funcall render errors anchor focused))))))))
 
 (defun flycheck-annotate--post-command ()
   "Rebuild the inline overlays if point or the window has moved.

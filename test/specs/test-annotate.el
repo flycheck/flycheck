@@ -41,11 +41,20 @@ Line 2 gets an error and a warning; line 4 gets a warning."
     (mapc #'flycheck-add-overlay flycheck-current-errors)))
 
 (defun test-annotate/anchors ()
-  "Return an alist mapping each inline overlay's line to its text."
+  "Return an alist mapping each message overlay's line to its text."
   (mapcar (lambda (ov)
             (cons (line-number-at-pos (overlay-start ov))
                   (substring-no-properties (overlay-get ov 'after-string))))
-          flycheck-annotate--overlays))
+          (seq-filter (lambda (ov) (overlay-get ov 'after-string))
+                      flycheck-annotate--overlays)))
+
+(defun test-annotate/tints ()
+  "Return an alist mapping each tinted line to its background face."
+  (mapcar (lambda (ov)
+            (cons (line-number-at-pos (overlay-start ov))
+                  (overlay-get ov 'face)))
+          (seq-filter (lambda (ov) (overlay-get ov 'face))
+                      flycheck-annotate--overlays)))
 
 (describe "Inline display"
 
@@ -202,6 +211,61 @@ Line 2 gets an error and a warning; line 4 gets a warning."
           (flycheck-annotate-mode 1)
           (expect flycheck-annotate--overlays :not :to-be nil)
           (flycheck-clear)
-          (expect flycheck-annotate--overlays :to-be nil))))))
+          (expect flycheck-annotate--overlays :to-be nil)))))
+
+  (describe "the background tint"
+    (it "adds no tint when disabled"
+      (flycheck-buttercup-with-temp-buffer
+        (save-window-excursion
+          (set-window-buffer (selected-window) (current-buffer))
+          (test-annotate/setup)
+          (let ((flycheck-annotate-background nil))
+            (flycheck-annotate-mode 1)
+            (expect (test-annotate/tints) :to-be nil)))))
+
+    (it "tints each error line with its most severe level"
+      (flycheck-buttercup-with-temp-buffer
+        (save-window-excursion
+          (set-window-buffer (selected-window) (current-buffer))
+          (test-annotate/setup)
+          (let ((flycheck-annotate-background t))
+            (flycheck-annotate-mode 1)
+            (let ((tints (test-annotate/tints)))
+              ;; line 2 has an error and a warning -> error wins
+              (expect (cdr (assq 2 tints))
+                      :to-be 'flycheck-annotate-error-background)
+              (expect (cdr (assq 4 tints))
+                      :to-be 'flycheck-annotate-warning-background))))))
+
+    (it "tints error lines even when their message style is nil"
+      (flycheck-buttercup-with-temp-buffer
+        (save-window-excursion
+          (set-window-buffer (selected-window) (current-buffer))
+          (test-annotate/setup)
+          (goto-char (point-min))
+          (forward-line 1)              ; point on line 2
+          (let ((flycheck-annotate-background t)
+                (flycheck-annotate-other-lines-style nil))
+            (flycheck-annotate-mode 1)
+            ;; line 4 gets no message, but is still tinted
+            (expect (assq 4 (test-annotate/anchors)) :to-be nil)
+            (expect (cdr (assq 4 (test-annotate/tints)))
+                    :to-be 'flycheck-annotate-warning-background)))))
+
+    (it "spans the whole line so the tint extends past the text"
+      (flycheck-buttercup-with-temp-buffer
+        (save-window-excursion
+          (set-window-buffer (selected-window) (current-buffer))
+          (test-annotate/setup)
+          (let ((flycheck-annotate-background t))
+            (flycheck-annotate-mode 1)
+            (let ((ov (seq-find
+                       (lambda (o)
+                         (and (overlay-get o 'face)
+                              (= 4 (line-number-at-pos (overlay-start o)))))
+                       flycheck-annotate--overlays)))
+              (goto-char (overlay-start ov))
+              (expect (overlay-start ov) :to-equal (line-beginning-position))
+              (expect (overlay-end ov) :to-equal (1+ (line-end-position))))))))))
 
 ;;; test-annotate.el ends here

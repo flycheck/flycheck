@@ -1,6 +1,10 @@
 ``master`` (unreleased)
 =======================
 
+- [#2203]: ``flycheck-annotate-mode`` can now tint the whole line of each error
+  with a subtle background in its severity colour, in the spirit of VS Code's
+  Error Lens.  Set ``flycheck-annotate-background`` to enable it; the tint
+  applies to every visible error line, independent of the message style.
 - [#2202]: Flycheck can now show error messages inline in the buffer, next to
   the code they refer to, in the spirit of VS Code's Error Lens and the inline
   diagnostics of Neovim, Helix and Zed.  ``flycheck-annotate-mode`` enables
