@@ -286,9 +286,19 @@ competing for attention.
 
 .. defcustom:: flycheck-annotate-levels
 
-   The error levels to display inline, either ``t`` for all levels or a list of
-   level symbols such as ``'(error warning)``.  Errors of other levels are
-   still highlighted and listed; they just get no inline annotation.
+   The base error levels to display inline, either ``t`` for all levels or a
+   list of level symbols such as ``'(error warning)``.  Errors of other levels
+   are still highlighted and listed; they just get no inline annotation.
+
+.. defcustom:: flycheck-annotate-current-line-levels
+               flycheck-annotate-other-lines-levels
+
+   Per-tier level filters for the line at point and for every other line.  Each
+   is either ``t`` to inherit ``flycheck-annotate-levels`` or a list of level
+   symbols to restrict that tier further.  Setting
+   ``flycheck-annotate-other-lines-levels`` to ``'(error)`` shows only errors
+   away from point while the line at point still shows everything, the way Helix
+   limits its non-cursor lines.
 
 .. defcustom:: flycheck-annotate-suppress-echo
 

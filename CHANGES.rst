@@ -1,6 +1,12 @@
 ``master`` (unreleased)
 =======================
 
+- [#2206]: ``flycheck-annotate-mode`` can now filter annotations per tier:
+  ``flycheck-annotate-current-line-levels`` and
+  ``flycheck-annotate-other-lines-levels`` restrict the line at point and the
+  other lines independently (each inheriting ``flycheck-annotate-levels`` by
+  default), so the focused line can show every level while the rest show only
+  errors, the way Helix limits its non-cursor lines.
 - [#2205]: ``flycheck-annotate-mode``'s ``below`` style now aligns each message's
   connector to the error's real display column, so it lines up correctly under
   tab-indented code and past a line-number gutter.

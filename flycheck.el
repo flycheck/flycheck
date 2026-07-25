@@ -7343,9 +7343,36 @@ line at point."
 Either t to display errors of every level, or a list of level symbols
 \(e.g. \\='(error warning)) to restrict the inline display to those
 levels.  Errors of other levels are still highlighted and listed as
-usual; they just get no inline annotation."
+usual; they just get no inline annotation.
+
+This is the base filter for both tiers; `flycheck-annotate-current-line-levels'
+and `flycheck-annotate-other-lines-levels' can narrow it per tier."
   :group 'flycheck
   :type '(choice (const :tag "All levels" t)
+                 (repeat :tag "Only these levels" symbol))
+  :package-version '(flycheck . "38"))
+
+(defcustom flycheck-annotate-current-line-levels t
+  "Error levels to annotate on the line at point.
+
+Either t to inherit `flycheck-annotate-levels', or a list of level
+symbols to restrict the line at point to those levels.  Together with
+`flycheck-annotate-other-lines-levels' this lets the focused line show
+more levels than the rest."
+  :group 'flycheck
+  :type '(choice (const :tag "Inherit flycheck-annotate-levels" t)
+                 (repeat :tag "Only these levels" symbol))
+  :package-version '(flycheck . "38"))
+
+(defcustom flycheck-annotate-other-lines-levels t
+  "Error levels to annotate on lines other than the one at point.
+
+Either t to inherit `flycheck-annotate-levels', or a list of level
+symbols to restrict the other lines to those levels.  Set to
+\\='(error) to show only errors away from point, the way Helix limits
+its non-cursor lines."
+  :group 'flycheck
+  :type '(choice (const :tag "Inherit flycheck-annotate-levels" t)
                  (repeat :tag "Only these levels" symbol))
   :package-version '(flycheck . "38"))
 
@@ -7534,12 +7561,22 @@ gutter.  FOCUSED is ignored."
   (mapc #'delete-overlay flycheck-annotate--overlays)
   (setq flycheck-annotate--overlays nil))
 
-(defun flycheck-annotate--filter-levels (errors)
-  "Keep the ERRORS whose level is enabled by `flycheck-annotate-levels'."
-  (if (eq flycheck-annotate-levels t)
+(defun flycheck-annotate--effective-levels (tier)
+  "Resolve a per-tier levels setting TIER to a concrete filter.
+
+TIER is `flycheck-annotate-current-line-levels' or
+`flycheck-annotate-other-lines-levels'; t inherits
+`flycheck-annotate-levels'."
+  (if (eq tier t) flycheck-annotate-levels tier))
+
+(defun flycheck-annotate--filter-levels (errors levels)
+  "Keep the ERRORS whose level is a member of LEVELS.
+
+LEVELS is t (keep all) or a list of level symbols."
+  (if (eq levels t)
       errors
     (seq-filter (lambda (err)
-                  (memq (flycheck-error-level err) flycheck-annotate-levels))
+                  (memq (flycheck-error-level err) levels))
                 errors)))
 
 (defun flycheck-annotate--region ()
@@ -7593,17 +7630,23 @@ anything."
                 (point-anchor (line-end-position)))
       (pcase-dolist (`(,anchor . ,errors)
                      (flycheck-annotate--group-errors beg end))
-        (when-let* ((errors (flycheck-annotate--filter-levels errors)))
-          (setq errors (sort errors #'flycheck--excessive-errors-<))
-          ;; The tint applies to every filtered error line, independent of
-          ;; the message style, so it survives an other-lines style of nil.
-          (when flycheck-annotate-background
-            (flycheck-annotate--tint-line
-             anchor (flycheck-error-level (car errors))))
-          (let* ((focused (= anchor point-anchor))
-                 (style (if focused
-                            flycheck-annotate-current-line-style
-                          flycheck-annotate-other-lines-style)))
+        ;; The tier (focused vs not) selects both the style and the level
+        ;; filter, so a line can show more levels at point than elsewhere.
+        (let* ((focused (= anchor point-anchor))
+               (levels (flycheck-annotate--effective-levels
+                        (if focused
+                            flycheck-annotate-current-line-levels
+                          flycheck-annotate-other-lines-levels)))
+               (style (if focused
+                          flycheck-annotate-current-line-style
+                        flycheck-annotate-other-lines-style)))
+          (when-let* ((errors (flycheck-annotate--filter-levels errors levels)))
+            (setq errors (sort errors #'flycheck--excessive-errors-<))
+            ;; The tint applies to every filtered error line, independent of
+            ;; the message style, so it survives an other-lines style of nil.
+            (when flycheck-annotate-background
+              (flycheck-annotate--tint-line
+               anchor (flycheck-error-level (car errors))))
             (when-let* ((render (cdr (assq style
                                            flycheck-annotate-style-functions))))
               (funcall render errors anchor focused))))))))
@@ -7622,7 +7665,7 @@ annotations are otherwise unaffected by point motion within a line."
 
 Only suppresses when the errors at point would actually be rendered
 inline, so an error that the inline display drops (because its level is
-disabled by `flycheck-annotate-levels', or it belongs to another file) is
+disabled for the current-line tier, or it belongs to another file) is
 still shown through the echo area rather than nowhere."
   (and (bound-and-true-p flycheck-annotate-mode)
        flycheck-annotate-suppress-echo
@@ -7630,7 +7673,9 @@ still shown through the echo area rather than nowhere."
        (seq-some (lambda (err)
                    (not (flycheck-relevant-error-other-file-p err)))
                  (flycheck-annotate--filter-levels
-                  (flycheck-overlay-errors-at (point))))))
+                  (flycheck-overlay-errors-at (point))
+                  (flycheck-annotate--effective-levels
+                   flycheck-annotate-current-line-levels)))))
 
 ;;;###autoload
 (define-minor-mode flycheck-annotate-mode

@@ -76,17 +76,25 @@ Line 2 gets an error and a warning; line 4 gets a warning."
       (expect (flycheck-annotate--level-face 'info) :to-be 'flycheck-annotate-info)))
 
   (describe "flycheck-annotate--filter-levels"
-    (it "keeps every error when set to t"
-      (let ((flycheck-annotate-levels t)
-            (errs (list (flycheck-error-new-at 1 1 'error)
+    (it "keeps every error when levels is t"
+      (let ((errs (list (flycheck-error-new-at 1 1 'error)
                         (flycheck-error-new-at 1 1 'warning))))
-        (expect (flycheck-annotate--filter-levels errs) :to-equal errs)))
+        (expect (flycheck-annotate--filter-levels errs t) :to-equal errs)))
     (it "keeps only errors of the listed levels"
-      (let* ((flycheck-annotate-levels '(error))
-             (err (flycheck-error-new-at 1 1 'error))
+      (let* ((err (flycheck-error-new-at 1 1 'error))
              (warn (flycheck-error-new-at 1 1 'warning)))
-        (expect (flycheck-annotate--filter-levels (list err warn))
+        (expect (flycheck-annotate--filter-levels (list err warn) '(error))
                 :to-equal (list err)))))
+
+  (describe "flycheck-annotate--effective-levels"
+    (it "inherits flycheck-annotate-levels when the tier is t"
+      (let ((flycheck-annotate-levels '(error warning)))
+        (expect (flycheck-annotate--effective-levels t)
+                :to-equal '(error warning))))
+    (it "uses the tier's own levels when it is a list"
+      (let ((flycheck-annotate-levels t))
+        (expect (flycheck-annotate--effective-levels '(error))
+                :to-equal '(error)))))
 
   (describe "flycheck-annotate-eol-style"
     (it "shows the most severe message and a count of the rest"
@@ -258,6 +266,33 @@ Line 2 gets an error and a warning; line 4 gets a warning."
           (let ((anchors (test-annotate/anchors)))
             (expect (string-prefix-p "\n" (cdr (assq 4 anchors))) :to-be t)
             (expect (string-prefix-p "\n" (cdr (assq 2 anchors))) :to-be nil))))))
+
+  (describe "per-tier level filtering"
+    (it "can restrict other lines to a stricter level set than point"
+      (flycheck-buttercup-with-temp-buffer
+        (save-window-excursion
+          (set-window-buffer (selected-window) (current-buffer))
+          (insert "aa\nbb\ncc\ndd\n")
+          (setq-local flycheck-mode t)
+          (let ((w2 (flycheck-error-new-at 2 1 'warning "w2"
+                                           :buffer (current-buffer)
+                                           :checker 'emacs-lisp))
+                (w4 (flycheck-error-new-at 4 1 'warning "w4"
+                                           :buffer (current-buffer)
+                                           :checker 'emacs-lisp)))
+            (setq flycheck-current-errors (list w2 w4))
+            (mapc #'flycheck-add-overlay flycheck-current-errors))
+          (goto-char (point-min))
+          (forward-line 1)              ; point on line 2
+          (let ((flycheck-annotate-current-line-style 'eol)
+                (flycheck-annotate-other-lines-style 'eol)
+                (flycheck-annotate-other-lines-levels '(error)))
+            (flycheck-annotate-mode 1)
+            (let ((anchors (test-annotate/anchors)))
+              ;; the current line's warning shows; the other line's warning,
+              ;; excluded by the stricter other-lines filter, does not
+              (expect (assq 2 anchors) :not :to-be nil)
+              (expect (assq 4 anchors) :to-be nil)))))))
 
   (describe "flycheck-annotate-mode"
     (it "clears the overlays when disabled"
