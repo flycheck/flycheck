@@ -36,6 +36,23 @@
 
 (describe "Quick fixes"
 
+  (describe "flycheck-error-resolve-fix"
+    (it "returns a stored fix as-is"
+      (let* ((fix (flycheck-test--edit 1 1 1 2 "x"))
+             (err (flycheck-error-new-at 1 1 'error "e" :fix fix)))
+        (expect (flycheck-error-resolve-fix err) :to-be fix)))
+    (it "calls a lazy provider with the error and returns its fix"
+      (let* ((fix (flycheck-test--edit 1 1 1 2 "x"))
+             (seen nil)
+             (err (flycheck-error-new-at
+                   1 1 'error "e"
+                   :fix (lambda (e) (setq seen e) fix))))
+        (expect (flycheck-error-resolve-fix err) :to-be fix)
+        (expect seen :to-be err)))
+    (it "returns nil when the provider yields no fix"
+      (let ((err (flycheck-error-new-at 1 1 'error "e" :fix (lambda (_) nil))))
+        (expect (flycheck-error-resolve-fix err) :to-be nil))))
+
   (describe "flycheck-apply-fix"
 
     (it "replaces the edit's region"
@@ -160,6 +177,26 @@
           (spy-on 'flycheck-overlay-errors-at :and-return-value (list err))
           (flycheck-fix-error-at-point)
           (expect (buffer-string) :to-equal "hello world\n"))))
+
+    (it "resolves and applies a lazy fix provider"
+      (flycheck-buttercup-with-temp-buffer
+        (insert "helo world\n")
+        (goto-char (point-min))
+        (let ((err (flycheck-error-new-at
+                    1 1 'error "typo" :buffer (current-buffer)
+                    :fix (lambda (_) (flycheck-test--edit 1 1 1 5 "hello")))))
+          (spy-on 'flycheck-overlay-errors-at :and-return-value (list err))
+          (flycheck-fix-error-at-point)
+          (expect (buffer-string) :to-equal "hello world\n"))))
+
+    (it "signals when a lazy provider yields no fix"
+      (flycheck-buttercup-with-temp-buffer
+        (insert "helo\n")
+        (let ((err (flycheck-error-new-at 1 1 'error "typo"
+                                          :buffer (current-buffer)
+                                          :fix (lambda (_) nil))))
+          (spy-on 'flycheck-overlay-errors-at :and-return-value (list err))
+          (expect (flycheck-fix-error-at-point) :to-throw 'user-error))))
 
     (it "applies a fix whose error is for the current file"
       (flycheck-buttercup-with-temp-buffer
