@@ -1,6 +1,10 @@
 ``master`` (unreleased)
 =======================
 
+- [#2208]: A line whose error carries a fix now gets a distinct fringe bitmap or
+  margin string, in the error's colour, so fixable errors stand out like an
+  editor's "fix available" lightbulb.  Customize ``flycheck-fixable-indicator``
+  to turn it off.
 - [#2207]: ``C-c ! F`` (``flycheck-fix-all-errors``) applies every machine-applicable
   fix in the buffer at once, as a single undoable change, skipping fixes that
   would conflict; ``X`` does the same from the error list.  ``flycheck-annotate-mode``

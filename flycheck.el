@@ -609,6 +609,20 @@ highlight them according to `flycheck-highlighting-mode'."
   :safe #'symbolp
   :package-version '(flycheck . "37"))
 
+(defcustom flycheck-fixable-indicator t
+  "Whether to mark lines whose error carries a fix with a distinct indicator.
+
+When non-nil and `flycheck-indication-mode' shows indicators, a line
+whose error has a machine-applicable fix (applicable with
+\\[flycheck-fix-error-at-point]) uses a distinct fringe bitmap or margin
+string in the error's colour, in the spirit of an editor's \"fix
+available\" lightbulb.  Set to nil to use the usual level indicator for
+fixable and non-fixable errors alike."
+  :group 'flycheck
+  :type 'boolean
+  :safe #'booleanp
+  :package-version '(flycheck . "38"))
+
 (defcustom flycheck-highlighting-mode 'symbols
   "The highlighting mode for Flycheck errors and warnings.
 
@@ -5071,6 +5085,9 @@ Returns MARGIN-STR with FACE applied."
 (defconst flycheck-default-margin-str "»"
   "String used to indicate errors in the margins.")
 
+(defconst flycheck-fixable-margin-str "●"
+  "String marking a line whose error carries a fix, in the margins.")
+
 (defconst flycheck-default-margin-continuation-str "⋮"
   "String used to indicate continuation lines in the margins.")
 
@@ -5199,7 +5216,7 @@ will be the high resolution version."
   "Get the error list face for LEVEL."
   (get level 'flycheck-error-list-face))
 
-(defun flycheck-error-level-make-indicator (level side &optional continuation)
+(defun flycheck-error-level-make-indicator (level side &optional continuation fixable)
   "Create the fringe or margin icon for LEVEL at SIDE.
 
 Return a propertized string that shows an indicator according
@@ -5214,6 +5231,11 @@ either the `:fringe-bitmap' and `:margin-spec' properties of
 LEVEL when CONTINUATION is nil or omitted, or bitmaps and specs
 indicating an error spanning more than one line.
 
+FIXABLE non-nil marks a line whose error carries a fix: the
+indicator uses the distinct `flycheck-fringe-bitmap-fixable' bitmap
+or `flycheck-fixable-margin-str' string, kept in LEVEL's colour.
+CONTINUATION takes precedence over FIXABLE.
+
 Return a propertized string representing the fringe icon,
 intended for use as `before-string' of an overlay to actually
 show the indicator."
@@ -5221,20 +5243,26 @@ show the indicator."
    "!" 'display
    (pcase side
      ((or `left-fringe `right-fringe)
-      (list side
-            (if continuation 'flycheck-fringe-bitmap-continuation
-              (let* ((fringe-width
-                      (pcase side
-                        (`left-fringe (car (window-fringes)))
-                        (`right-fringe (cadr (window-fringes)))))
-                     (high-res (>= fringe-width 16)))
-                (flycheck-error-level-fringe-bitmap level high-res)))
-            (flycheck-error-level-fringe-face level)))
+      (let* ((fringe-width
+              (pcase side
+                (`left-fringe (car (window-fringes)))
+                (`right-fringe (cadr (window-fringes)))))
+             (high-res (>= fringe-width 16)))
+        (list side
+              (cond
+               (continuation 'flycheck-fringe-bitmap-continuation)
+               (fixable (if high-res 'flycheck-fringe-bitmap-fixable-hi-res
+                          'flycheck-fringe-bitmap-fixable))
+               (t (flycheck-error-level-fringe-bitmap level high-res)))
+              (flycheck-error-level-fringe-face level))))
      ((or `left-margin `right-margin)
       `((margin ,side)
-        ,(or (if continuation
-                 (flycheck-error-level-margin-continuation-spec level)
-               (flycheck-error-level-margin-spec level))
+        ,(or (cond
+              (continuation (flycheck-error-level-margin-continuation-spec level))
+              (fixable (flycheck-make-margin-spec
+                        flycheck-fixable-margin-str
+                        (flycheck-error-level-fringe-face level)))
+              (t (flycheck-error-level-margin-spec level)))
              "")))
      (_ (error "Invalid fringe side: %S" side)))))
 
@@ -5298,6 +5326,33 @@ show the indicator."
    #b0000001000000010]
   "Bitmap used to indicate continuation lines in the fringes.")
 
+(defconst flycheck-fringe-bitmap-fixable
+  [#b00111100
+   #b01111110
+   #b11111111
+   #b11111111
+   #b11111111
+   #b01111110
+   #b00111100]
+  "Bitmap marking a line whose error carries a fix, in the fringes.")
+
+(defconst flycheck-fringe-bitmap-fixable-hi-res
+  [#b0000001111000000
+   #b0000111111110000
+   #b0001111111111000
+   #b0011111111111100
+   #b0111111111111110
+   #b0111111111111110
+   #b1111111111111111
+   #b1111111111111111
+   #b0111111111111110
+   #b0111111111111110
+   #b0011111111111100
+   #b0001111111111000
+   #b0000111111110000
+   #b0000001111000000]
+  "High-resolution bitmap marking a fixable line in the fringes.")
+
 (when (fboundp 'define-fringe-bitmap) ;; #ifdef HAVE_WINDOW_SYSTEM
   (define-fringe-bitmap
     'flycheck-fringe-bitmap-double-arrow
@@ -5316,7 +5371,14 @@ show the indicator."
   (define-fringe-bitmap
     'flycheck-fringe-bitmap-continuation
     flycheck-fringe-bitmap-continuation
-    nil 16 '(top repeat)))
+    nil 16 '(top repeat))
+  (define-fringe-bitmap
+    'flycheck-fringe-bitmap-fixable
+    flycheck-fringe-bitmap-fixable)
+  (define-fringe-bitmap
+    'flycheck-fringe-bitmap-fixable-hi-res
+    flycheck-fringe-bitmap-fixable-hi-res
+    nil 16))
 
 (defun flycheck-redefine-standard-error-levels
     (&optional margin-str fringe-bitmap)
@@ -5657,8 +5719,12 @@ function resolves `conditional' style specifications."
       ;; Erase the highlighting from the overlay if requested by the user
       (setf (overlay-get overlay 'face) nil))
     (when-let* ((side (flycheck--resolve-indication-mode)))
-      (setf (overlay-get overlay 'before-string)
-            (flycheck-error-level-make-indicator level side))
+      (let ((fixable (and flycheck-fixable-indicator
+                          (flycheck-error-fix err)
+                          (flycheck--error-fix-buffer err)
+                          t)))
+        (setf (overlay-get overlay 'before-string)
+              (flycheck-error-level-make-indicator level side nil fixable)))
       (setf (overlay-get overlay 'wrap-prefix)
             (flycheck-error-level-make-indicator level side t))
       ;; Preserve existing text-property prefixes so the overlay doesn't

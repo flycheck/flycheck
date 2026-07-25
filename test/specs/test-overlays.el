@@ -170,6 +170,43 @@
             (expect face :to-be 'flycheck-fringe-error)
             (expect bitmap :to-be 'flycheck-fringe-bitmap-double-arrow)))))
 
+    (it "marks a fixable error with the fixable fringe bitmap"
+      (flycheck-buttercup-with-temp-buffer
+        (insert "Hello\n    World")
+        (let ((flycheck-indication-mode 'left-fringe))
+          (pcase-let* ((err (flycheck-error-new-at
+                             1 1 'error nil :buffer (current-buffer)
+                             :fix (flycheck-fix-new
+                                   :edits (list (flycheck-fix-edit-new
+                                                 :line 1 :column 1
+                                                 :end-line 1 :end-column 2
+                                                 :replacement "x")))))
+                       (overlay (flycheck-add-overlay err))
+                       (`(_ ,bitmap ,face)
+                        (get-text-property
+                         0 'display (overlay-get overlay 'before-string))))
+            (expect bitmap :to-be 'flycheck-fringe-bitmap-fixable)
+            ;; the error's own colour is kept
+            (expect face :to-be 'flycheck-fringe-error)))))
+
+    (it "uses the normal bitmap for a fixable error when the indicator is off"
+      (flycheck-buttercup-with-temp-buffer
+        (insert "Hello\n    World")
+        (let ((flycheck-indication-mode 'left-fringe)
+              (flycheck-fixable-indicator nil))
+          (pcase-let* ((err (flycheck-error-new-at
+                             1 1 'error nil :buffer (current-buffer)
+                             :fix (flycheck-fix-new
+                                   :edits (list (flycheck-fix-edit-new
+                                                 :line 1 :column 1
+                                                 :end-line 1 :end-column 2
+                                                 :replacement "x")))))
+                       (overlay (flycheck-add-overlay err))
+                       (`(_ ,bitmap _)
+                        (get-text-property
+                         0 'display (overlay-get overlay 'before-string))))
+            (expect bitmap :to-be 'flycheck-fringe-bitmap-double-arrow)))))
+
     (it "has a left fringe icon"
       (flycheck-buttercup-with-temp-buffer
         (insert "Hello\n    World")
