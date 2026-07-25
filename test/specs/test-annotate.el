@@ -120,6 +120,45 @@ Line 2 gets an error and a warning; line 4 gets a warning."
           ;; leading newline plus one line per error
           (expect (length (split-string s "\n")) :to-equal 3)))))
 
+  (describe "flycheck-annotate-sideline-style"
+    (it "right-aligns the compact message with an align-to spacer"
+      (flycheck-buttercup-with-temp-buffer
+        (insert "abcdef\n")
+        (let* ((errs (list (flycheck-error-new-at 1 1 'error "big"
+                                                  :checker 'emacs-lisp)
+                           (flycheck-error-new-at 1 2 'warning "small"
+                                                  :checker 'emacs-lisp)))
+               (flycheck-annotate--overlays nil)
+               (ov (flycheck-annotate-sideline-style errs (line-end-position) nil))
+               (s (overlay-get ov 'after-string)))
+          ;; most severe message plus a count, no leading newline
+          (expect (substring-no-properties s) :to-match "big")
+          (expect (substring-no-properties s) :to-match (regexp-quote "(+1)"))
+          (expect (string-prefix-p "\n" s) :to-be nil)
+          ;; the leading char is a right-aligning stretch of whitespace
+          (expect (car (get-text-property 0 'display s)) :to-be 'space)
+          (expect (get-text-property 0 'display s)
+                  :to-equal '(space :align-to (- right 8)))))) ; width of "big (+1)"
+
+    (it "is registered as a built-in style"
+      (expect (cdr (assq 'sideline flycheck-annotate-style-functions))
+              :to-be 'flycheck-annotate-sideline-style))
+
+    (it "renders on the current line when selected as the style"
+      (flycheck-buttercup-with-temp-buffer
+        (save-window-excursion
+          (set-window-buffer (selected-window) (current-buffer))
+          (test-annotate/setup)
+          (goto-char (point-min))
+          (forward-line 1)              ; line 2
+          (let ((flycheck-annotate-current-line-style 'sideline)
+                (flycheck-annotate-other-lines-style nil))
+            (flycheck-annotate-mode 1)
+            (let* ((ov (seq-find (lambda (o) (overlay-get o 'after-string))
+                                 flycheck-annotate--overlays))
+                   (s (overlay-get ov 'after-string)))
+              (expect (car (get-text-property 0 'display s)) :to-be 'space)))))))
+
   (describe "flycheck-annotate--make-overlay"
     (it "tags and tracks the overlay"
       (flycheck-buttercup-with-temp-buffer

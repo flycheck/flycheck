@@ -271,6 +271,11 @@ competing for attention.
       Lay the full messages out on their own lines underneath the code, one
       per error, each pointing at its column.
 
+   ``sideline``
+      Like ``eol``, but flush the message to the window's right edge, the way
+      ``lsp-ui-sideline`` does.  When the code leaves no room, the message
+      simply follows it.
+
    ``nil``
       Do not annotate those lines.  Setting ``flycheck-annotate-other-lines-style``
       to ``nil`` annotates only the line at point, the way Neovim and Helix

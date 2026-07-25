@@ -7286,7 +7286,8 @@ Used only when `flycheck-annotate-background' is non-nil."
 
 (defcustom flycheck-annotate-style-functions
   '((eol . flycheck-annotate-eol-style)
-    (below . flycheck-annotate-below-style))
+    (below . flycheck-annotate-below-style)
+    (sideline . flycheck-annotate-sideline-style))
   "Alist mapping inline display styles to their renderers.
 
 Each entry is a cons cell (STYLE . FUNCTION) where STYLE is a symbol
@@ -7309,12 +7310,13 @@ Add to this alist to register additional styles."
   "Inline display style for the line at point.
 
 A style symbol resolved through `flycheck-annotate-style-functions'
-\(`below' or `eol' out of the box), or nil to leave the current line
-unannotated.  See `flycheck-annotate-other-lines-style' for every other
-line."
+\(`below', `eol' or `sideline' out of the box), or nil to leave the
+current line unannotated.  See `flycheck-annotate-other-lines-style' for
+every other line."
   :group 'flycheck
   :type '(choice (const :tag "Full messages below the line" below)
                  (const :tag "Compact message at end of line" eol)
+                 (const :tag "Compact message at the right edge" sideline)
                  (const :tag "Do not annotate the current line" nil)
                  (symbol :tag "Other style"))
   :package-version '(flycheck . "38"))
@@ -7323,12 +7325,14 @@ line."
   "Inline display style for lines other than the one at point.
 
 A style symbol resolved through `flycheck-annotate-style-functions'
-\(`below' or `eol' out of the box), or nil to annotate only the line at
-point (the way Neovim and Helix show diagnostics for the cursor line
-only).  See `flycheck-annotate-current-line-style' for the line at point."
+\(`below', `eol' or `sideline' out of the box), or nil to annotate only
+the line at point (the way Neovim and Helix show diagnostics for the
+cursor line only).  See `flycheck-annotate-current-line-style' for the
+line at point."
   :group 'flycheck
   :type '(choice (const :tag "Compact message at end of line" eol)
                  (const :tag "Full messages below the line" below)
+                 (const :tag "Compact message at the right edge" sideline)
                  (const :tag "Annotate only the line at point" nil)
                  (symbol :tag "Other style"))
   :package-version '(flycheck . "38"))
@@ -7454,17 +7458,36 @@ per render so the font probe stays out of the per-error loop."
             "\N{BOX DRAWINGS LIGHT UP AND RIGHT}\N{BOX DRAWINGS LIGHT HORIZONTAL} ")
     (cons "`- " "`- ")))
 
+(defun flycheck-annotate--compact-text (errors)
+  "Return the one-line summary of ERRORS for the compact styles.
+
+Shows the most severe error's message (ERRORS is sorted most-severe
+first) with a count of the rest, propertized with its level face."
+  (let* ((err (car errors))
+         (face (flycheck-annotate--level-face (flycheck-error-level err)))
+         (more (when (cdr errors) (format " (+%d)" (length (cdr errors)))))
+         (msg (funcall flycheck-annotate-format-function err)))
+    (propertize (concat msg more) 'face face)))
+
 (defun flycheck-annotate-eol-style (errors anchor _focused)
   "Render ERRORS as a compact message after the line ending at ANCHOR.
 
 Only the most severe error's message is shown, with a count of the rest.
 FOCUSED is ignored."
-  (let* ((err (car errors))
-         (face (flycheck-annotate--level-face (flycheck-error-level err)))
-         (msg (funcall flycheck-annotate-format-function err))
-         (more (when (cdr errors) (format " (+%d)" (length (cdr errors)))))
-         (text (propertize (concat "  " msg more) 'face face)))
-    (flycheck-annotate--make-overlay anchor 'after-string text)))
+  (flycheck-annotate--make-overlay
+   anchor 'after-string (concat "  " (flycheck-annotate--compact-text errors))))
+
+(defun flycheck-annotate-sideline-style (errors anchor _focused)
+  "Render ERRORS flushed to the window's right edge past line ANCHOR.
+
+Like `flycheck-annotate-eol-style', but the message is right-aligned with
+a stretch of whitespace, in the manner of `lsp-ui-sideline'.  When the
+code on the line is too long to leave room, the message simply follows it
+instead.  FOCUSED is ignored."
+  (let* ((text (flycheck-annotate--compact-text errors))
+         (width (string-width text))
+         (spacer (propertize " " 'display `(space :align-to (- right ,width)))))
+    (flycheck-annotate--make-overlay anchor 'after-string (concat spacer text))))
 
 (defun flycheck-annotate-below-style (errors anchor _focused)
   "Render ERRORS on their own lines below the line ending at ANCHOR.

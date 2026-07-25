@@ -1,6 +1,10 @@
 ``master`` (unreleased)
 =======================
 
+- [#2204]: ``flycheck-annotate-mode`` gains a ``sideline`` style that flushes the
+  compact message to the window's right edge, in the manner of
+  ``lsp-ui-sideline``.  Set ``flycheck-annotate-current-line-style`` or
+  ``flycheck-annotate-other-lines-style`` to ``sideline`` to use it.
 - [#2203]: ``flycheck-annotate-mode`` can now tint the whole line of each error
   with a subtle background in its severity colour, in the spirit of VS Code's
   Error Lens.  Set ``flycheck-annotate-background`` to enable it; the tint
