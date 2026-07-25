@@ -195,6 +195,31 @@ Line 2 gets an error and a warning; line 4 gets a warning."
                    (s (overlay-get ov 'after-string)))
               (expect (car (get-text-property 0 'display s)) :to-be 'space)))))))
 
+  (describe "the fix marker"
+    (let ((mkfix (lambda ()
+                   (flycheck-fix-new
+                    :edits (list (flycheck-fix-edit-new
+                                  :line 1 :column 1 :end-line 1 :end-column 2
+                                  :replacement "x"))))))
+      (it "prefixes a fixable error's compact text"
+        (let ((flycheck-annotate-fix-marker "[fix] ")
+              (err (flycheck-error-new-at 1 1 'error "boom"
+                                          :fix (funcall mkfix))))
+          (expect (substring-no-properties
+                   (flycheck-annotate--compact-text (list err)))
+                  :to-match (regexp-quote "[fix] "))))
+      (it "omits the marker for a non-fixable error"
+        (let ((flycheck-annotate-fix-marker "[fix] ")
+              (err (flycheck-error-new-at 1 1 'error "boom")))
+          (expect (substring-no-properties
+                   (flycheck-annotate--compact-text (list err)))
+                  :not :to-match (regexp-quote "[fix]"))))
+      (it "omits the marker when disabled"
+        (let ((flycheck-annotate-fix-marker nil)
+              (err (flycheck-error-new-at 1 1 'error "boom"
+                                          :fix (funcall mkfix))))
+          (expect (flycheck-annotate--fix-marker err) :to-equal "")))))
+
   (describe "flycheck-annotate--make-overlay"
     (it "tags and tracks the overlay"
       (flycheck-buttercup-with-temp-buffer
