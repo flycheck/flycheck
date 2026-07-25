@@ -292,6 +292,14 @@ competing for attention.
    ``flycheck-display-errors-function`` (Eldoc or the echo area), to avoid
    displaying the same message twice.  Set to ``nil`` to keep both.
 
+.. defcustom:: flycheck-annotate-background
+
+   When non-nil, tint the whole line of each error with a subtle background in
+   the colour of its most severe level, in the spirit of VS Code's Error Lens.
+   The tint applies to every visible error line that passes
+   ``flycheck-annotate-levels``, independent of the message style, so it shows
+   even on lines whose style is ``nil``.  Off by default.
+
 .. defcustom:: flycheck-annotate-format-function
 
    The function used to format an error for inline display.  It receives a
@@ -315,6 +323,14 @@ competing for attention.
 .. defface:: flycheck-annotate-connector
 
    The face for the connectors that precede ``below``-style messages.
+
+.. defface:: flycheck-annotate-error-background
+             flycheck-annotate-warning-background
+             flycheck-annotate-info-background
+
+   The whole-line tint faces for ``error``, ``warning`` and ``info`` lines,
+   used when ``flycheck-annotate-background`` is non-nil.  Each sets only a
+   background, with ``:extend t`` so it reaches the window edge.
 
 .. note::
 
