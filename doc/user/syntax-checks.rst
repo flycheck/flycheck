@@ -179,3 +179,37 @@ You can also start a syntax check explicitly with `C-c ! c`:
                 M-x flycheck-buffer
 
    Check syntax in the current buffer.
+
+
+LSP diagnostics via Eglot
+=========================
+
+Eglot, Emacs' built-in LSP client, renders its diagnostics through Flymake and
+provides no Flycheck backend of its own.  ``flycheck-eglot-mode`` bridges the
+gap, so a buffer can use Eglot for LSP features while Flycheck owns the error
+display, navigation and the error list:
+
+.. code-block:: elisp
+
+   (global-flycheck-eglot-mode 1)
+
+.. minor-mode:: flycheck-eglot-mode
+
+   Report the diagnostics Eglot receives from the LSP server through Flycheck,
+   via the ``eglot-check`` checker, and turn Flymake off in the buffer.  Only
+   active in Eglot-managed buffers.
+
+.. minor-mode:: global-flycheck-eglot-mode
+
+   Enable ``flycheck-eglot-mode`` in every Eglot-managed buffer.  This is the
+   usual way to turn the integration on.
+
+.. defcustom:: flycheck-eglot-exclusive
+
+   When non-nil (the default), an Eglot buffer reports only the LSP server's
+   diagnostics.  Set to nil to have ``eglot-check`` chain to the first command
+   checker that supports the buffer's major mode, so an LSP server and a
+   command checker both contribute.
+
+This obsoletes the third-party ``flycheck-eglot`` package; drop it from your
+configuration if you used it.

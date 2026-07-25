@@ -82,8 +82,8 @@ detail.
 |List of all errors         |yes; filterable by     |yes; project-wide      |
 |                           |error level            |diagnostics (28+)      |
 +---------------------------+-----------------------+-----------------------+
-|`Supported by Eglot`_      |yes, via               |yes (built-in)         |
-|                           |``flycheck-eglot``     |                       |
+|`Supported by Eglot`_      |yes                    |yes (built-in)         |
+|                           |(``flycheck-eglot-mode``)|                     |
 +---------------------------+-----------------------+-----------------------+
 |`Supported by lsp-mode`_   |yes                    |yes                    |
 +---------------------------+-----------------------+-----------------------+
@@ -298,11 +298,11 @@ Supported by Eglot
 Emacs (since version 29).  It uses Flymake internally to display diagnostics
 from the LSP server.
 
-Eglot does not provide built-in Flycheck support, but the
-`flycheck-eglot <https://github.com/flycheck/flycheck-eglot>`_ package bridges
-this gap.  It routes Eglot's LSP diagnostics through Flycheck, so you can use
-Eglot for LSP features while keeping Flycheck for error display, navigation
-and your existing non-LSP checkers.
+Eglot does not provide built-in Flycheck support, but Flycheck bridges the gap
+itself with ``flycheck-eglot-mode`` (see :doc:`syntax-checks`).  It routes
+Eglot's LSP diagnostics through Flycheck, so you can use Eglot for LSP features
+while keeping Flycheck for error display, navigation and your existing non-LSP
+checkers.  This obsoletes the third-party ``flycheck-eglot`` package.
 
 Supported by lsp-mode
 ~~~~~~~~~~~~~~~~~~~~~

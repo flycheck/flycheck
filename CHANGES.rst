@@ -1,6 +1,13 @@
 ``master`` (unreleased)
 =======================
 
+- [#2209]: Flycheck now integrates with Eglot out of the box.  Enable
+  ``global-flycheck-eglot-mode`` to report an LSP server's diagnostics (as seen
+  by Eglot) through Flycheck via the new ``eglot-check`` checker, so a buffer
+  can use Eglot for LSP features while Flycheck owns the error display,
+  navigation and the error list.  ``flycheck-eglot-exclusive`` (on by default)
+  makes it the sole checker, or chains to the command checkers when nil.  This
+  obsoletes the third-party ``flycheck-eglot`` package.
 - [#2208]: A line whose error carries a fix now gets a distinct fringe bitmap or
   margin string, in the error's colour, so fixable errors stand out like an
   editor's "fix available" lightbulb.  Customize ``flycheck-fixable-indicator``
