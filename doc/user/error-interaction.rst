@@ -243,9 +243,17 @@ In the error list, fixable errors are marked with ``[fix]`` before the message.
    Apply the fix of the first fixable error at point.  Signals an error if no
    error at point has a fix.
 
+.. define-key:: C-c ! F
+                M-x flycheck-fix-all-errors
+
+   Apply every machine-applicable fix in the current buffer at once, as a
+   single undoable change.  Fixes that would conflict with each other are
+   skipped; the echo area reports how many were applied.
+
 In the :ref:`error list <flycheck-error-list>` press :kbd:`x`
 (``flycheck-error-list-apply-fix``) to apply the fix of the error on the
-current row.
+current row, or :kbd:`X` (``flycheck-error-list-fix-all``) to apply every
+fix in the list's source buffer.
 
 A fix is applied as a single undoable change, so :kbd:`C-/` reverts it.  The
 checkers that currently provide fixes are ``javascript-eslint``, the ``rust``

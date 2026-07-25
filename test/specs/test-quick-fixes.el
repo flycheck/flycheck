@@ -186,6 +186,72 @@
           (spy-on 'flycheck-overlay-errors-at :and-return-value (list err))
           (expect (flycheck-fix-error-at-point) :to-throw 'user-error)))))
 
+  (describe "flycheck-apply-fixes"
+
+    (it "applies several non-overlapping fixes in one pass"
+      (flycheck-buttercup-with-temp-buffer
+        (insert "aaa bbb ccc\n")
+        (expect (flycheck-apply-fixes
+                 (list (flycheck-test--edit 1 1 1 4 "X")
+                       (flycheck-test--edit 1 9 1 12 "Y")))
+                :to-equal 2)
+        (expect (buffer-string) :to-equal "X bbb Y\n")))
+
+    (it "skips a fix that conflicts with another, applying just one"
+      (flycheck-buttercup-with-temp-buffer
+        (insert "aaa bbb\n")
+        (expect (flycheck-apply-fixes
+                 (list (flycheck-test--edit 1 1 1 4 "X")
+                       (flycheck-test--edit 1 1 1 4 "Z")))
+                :to-equal 1)))
+
+    (it "prefers many small fixes over one wide fix that conflicts"
+      ;; classic interval scheduling: spans [1,10], [2,3], [4,5] -> keep the
+      ;; two small ones, not the single wide one
+      (flycheck-buttercup-with-temp-buffer
+        (insert "abcdefghij\n")
+        (expect (flycheck-apply-fixes
+                 (list (flycheck-test--edit 1 1 1 10 "A")
+                       (flycheck-test--edit 1 2 1 3 "B")
+                       (flycheck-test--edit 1 4 1 5 "C")))
+                :to-equal 2)))
+
+    (it "refuses when a fix is stale"
+      (flycheck-buttercup-with-temp-buffer
+        (insert "aaa\n")
+        (let ((fix (flycheck-fix-new
+                    :tick (buffer-chars-modified-tick)
+                    :edits (list (flycheck-fix-edit-new
+                                  :line 1 :column 1 :end-line 1 :end-column 4
+                                  :replacement "X")))))
+          (insert "zzz")            ; mutate the buffer, advancing the tick
+          (expect (flycheck-apply-fixes (list fix)) :to-throw 'user-error)))))
+
+  (describe "flycheck-fix-all-errors"
+
+    (it "applies the fixes of every fixable error in the buffer"
+      (flycheck-buttercup-with-temp-buffer
+        (insert "aaa bbb ccc\n")
+        (let ((flycheck-current-errors
+               (list (flycheck-error-new-at 1 1 'error "a"
+                                            :buffer (current-buffer)
+                                            :fix (flycheck-test--edit 1 1 1 4 "X"))
+                     (flycheck-error-new-at 1 5 'warning "b" ; no fix
+                                            :buffer (current-buffer))
+                     (flycheck-error-new-at 1 9 'error "c"
+                                            :buffer (current-buffer)
+                                            :fix (flycheck-test--edit 1 9 1 12 "Y")))))
+          (flycheck-fix-all-errors)
+          (expect (buffer-string) :to-equal "X bbb Y\n"))))
+
+    (it "signals when the buffer has no fixable errors"
+      (flycheck-buttercup-with-temp-buffer
+        (insert "aaa\n")
+        (let ((flycheck-current-errors
+               (list (flycheck-error-new-at 1 1 'error "a"
+                                            :buffer (current-buffer)))))
+          (expect (flycheck-fix-all-errors) :to-throw 'user-error)))))
+
   (describe "fix extraction in parsers"
 
     (it "reads an ESLint fix"

@@ -328,6 +328,13 @@ competing for attention.
    ``flycheck-annotate-other-lines-style``.  Add to it to register your own
    styles.
 
+.. defcustom:: flycheck-annotate-fix-marker
+
+   A string shown inline before an error that carries a machine-applicable fix
+   (applicable with ``flycheck-fix-error-at-point``), defaulting to
+   ``"[fix] "``, or nil to show no marker.  Uses the ``flycheck-annotate-fix``
+   face.
+
 .. defface:: flycheck-annotate-error
              flycheck-annotate-warning
              flycheck-annotate-info
@@ -338,6 +345,10 @@ competing for attention.
 .. defface:: flycheck-annotate-connector
 
    The face for the connectors that precede ``below``-style messages.
+
+.. defface:: flycheck-annotate-fix
+
+   The face for the inline ``flycheck-annotate-fix-marker`` on fixable errors.
 
 .. defface:: flycheck-annotate-error-background
              flycheck-annotate-warning-background

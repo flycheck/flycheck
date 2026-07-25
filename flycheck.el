@@ -1268,6 +1268,7 @@ is used."
     (define-key map "h"         #'flycheck-display-error-at-point)
     (define-key map "e"         #'flycheck-explain-error-at-point)
     (define-key map "f"         #'flycheck-fix-error-at-point)
+    (define-key map "F"         #'flycheck-fix-all-errors)
     (define-key map "H"         #'display-local-help)
     (define-key map "i"         #'flycheck-manual)
     (define-key map "V"         #'flycheck-version)
@@ -1455,6 +1456,7 @@ Only has effect when variable `global-flycheck-mode' is non-nil."
       (flycheck-overlays-at (point))]
      ["Explain error at point" flycheck-explain-error-at-point]
      ["Apply fix at point" flycheck-fix-error-at-point]
+     ["Apply all fixes in buffer" flycheck-fix-all-errors]
      "---"
      ["Select syntax checker" flycheck-select-checker flycheck-mode]
      ["Disable syntax checker" flycheck-disable-checker flycheck-mode]
@@ -4451,6 +4453,47 @@ current check (see `flycheck--syntax-check-modified-tick'), so
                 (buffer-local-value 'flycheck--syntax-check-modified-tick
                                     buffer)))))
 
+(defun flycheck--check-fix-tick (fix)
+  "Signal a `user-error' if the current buffer changed since FIX was computed."
+  (when (and (flycheck-fix-tick fix)
+             (/= (flycheck-fix-tick fix) (buffer-chars-modified-tick)))
+    (user-error
+     "The buffer changed since this fix was computed; re-check first")))
+
+(defun flycheck--apply-edits (edits)
+  "Apply EDITS in the current, widened buffer as one undoable change.
+
+EDITS is a list of `flycheck-fix-edit' objects.  They are applied from
+the end of the buffer backwards, so applying one does not shift the
+positions of the ones above it.  Signal a `user-error', touching
+nothing, when the edits overlap."
+  (let ((regions
+         ;; Apply from the bottom up; break ties on equal starts by the
+         ;; larger region first.
+         (sort (mapcar (lambda (edit)
+                         (cons (flycheck--fix-edit-region edit)
+                               (flycheck-fix-edit-replacement edit)))
+                       edits)
+               (lambda (a b)
+                 (let ((ra (car a)) (rb (car b)))
+                   (or (> (car ra) (car rb))
+                       (and (= (car ra) (car rb))
+                            (> (cdr ra) (cdr rb)))))))))
+    ;; Reject overlapping edits: applying them bottom-up would let one
+    ;; clobber another.  REGIONS are sorted with later positions first, so
+    ;; each region must end at or before the previous one began.
+    (let ((limit nil))
+      (pcase-dolist (`((,beg . ,end) . ,_) regions)
+        (when (and limit (> end limit))
+          (user-error "This fix has overlapping edits; not applying it"))
+        (setq limit beg)))
+    (atomic-change-group
+      (pcase-dolist (`((,beg . ,end) . ,replacement) regions)
+        (delete-region beg end)
+        (save-excursion
+          (goto-char beg)
+          (insert (or replacement "")))))))
+
 (defun flycheck-apply-fix (fix &optional buffer)
   "Apply FIX in BUFFER, defaulting to the current buffer.
 
@@ -4469,40 +4512,67 @@ corrupt the buffer."
     (with-current-buffer buffer
       (when buffer-read-only
         (user-error "Cannot apply a fix in a read-only buffer"))
-      (when (and (flycheck-fix-tick fix)
-                 (/= (flycheck-fix-tick fix) (buffer-chars-modified-tick)))
-        (user-error
-         "The buffer changed since this fix was computed; re-check first"))
+      (flycheck--check-fix-tick fix)
       (save-restriction
         (widen)
-        (let ((regions
-               ;; Apply from the bottom up so applying one edit does not
-               ;; shift the positions of the ones above it; break ties on
-               ;; equal starts by the larger region first.
-               (sort (mapcar (lambda (edit)
-                               (cons (flycheck--fix-edit-region edit)
-                                     (flycheck-fix-edit-replacement edit)))
-                             (flycheck-fix-edits fix))
-                     (lambda (a b)
-                       (let ((ra (car a)) (rb (car b)))
-                         (or (> (car ra) (car rb))
-                             (and (= (car ra) (car rb))
-                                  (> (cdr ra) (cdr rb)))))))))
-          ;; Reject a fix whose own edits overlap: applying them bottom-up
-          ;; would let one edit clobber another.  REGIONS are sorted with
-          ;; later positions first, so each region must end at or before the
-          ;; previous one began.
-          (let ((limit nil))
-            (pcase-dolist (`((,beg . ,end) . ,_) regions)
-              (when (and limit (> end limit))
-                (user-error "This fix has overlapping edits; not applying it"))
-              (setq limit beg)))
-          (atomic-change-group
-            (pcase-dolist (`((,beg . ,end) . ,replacement) regions)
-              (delete-region beg end)
-              (save-excursion
-                (goto-char beg)
-                (insert (or replacement ""))))))))))
+        (flycheck--apply-edits (flycheck-fix-edits fix))))))
+
+(defun flycheck--fix-span (fix)
+  "Return the buffer region (BEG . END) that FIX's edits span.
+
+BEG is the earliest and END the latest position touched by any of
+FIX's edits, resolved in the current buffer."
+  (let ((regions (mapcar #'flycheck--fix-edit-region (flycheck-fix-edits fix))))
+    (cons (apply #'min (mapcar #'car regions))
+          (apply #'max (mapcar #'cdr regions)))))
+
+(defun flycheck-apply-fixes (fixes &optional buffer)
+  "Apply as many of FIXES together in BUFFER as do not conflict.
+
+FIXES is a list of `flycheck-fix' objects.  Their edits are merged and
+applied from the end of the buffer backwards as a single undoable
+change, so applying one does not invalidate the positions of the
+others.  A fix whose span would overlap an already-selected fix is
+skipped whole (never applied partially).  Return the number of fixes
+applied.
+
+Signal a `user-error', touching nothing, when BUFFER is not live or
+read-only, or when any fix is stale -- the buffer changed since it was
+computed."
+  (let ((buffer (or buffer (current-buffer))))
+    (unless (buffer-live-p buffer)
+      (user-error "Cannot apply fixes: their buffer is gone"))
+    (with-current-buffer buffer
+      (when buffer-read-only
+        (user-error "Cannot apply fixes in a read-only buffer"))
+      (mapc #'flycheck--check-fix-tick fixes)
+      ;; Ignore fixes with no edits: they contribute nothing and would trip
+      ;; up `flycheck--fix-span'.  In practice every live fix has edits.
+      (setq fixes (seq-filter #'flycheck-fix-edits fixes))
+      (save-restriction
+        (widen)
+        ;; Greedily select a non-overlapping subset, bottom-up: process the
+        ;; fixes lowest in the buffer first and keep a fix only if its whole
+        ;; span sits at or above every fix already selected below it.
+        (let ((spanned (mapcar (lambda (fix)
+                                 (cons (flycheck--fix-span fix) fix))
+                               fixes))
+              (boundary most-positive-fixnum)
+              (selected nil))
+          ;; Sort by span start, latest in the buffer first, and keep a fix
+          ;; when its whole span ends at or before every fix already kept
+          ;; below it.  Sorting by start (not end) maximizes the number of
+          ;; fixes applied: it is the classic interval-scheduling greedy, so
+          ;; one wide-span fix can't crowd out several small ones.
+          (setq spanned (sort spanned (lambda (a b) (> (caar a) (caar b)))))
+          (pcase-dolist (`((,beg . ,end) . ,fix) spanned)
+            (when (<= end boundary)
+              (push fix selected)
+              (setq boundary (min boundary beg))))
+          (when selected
+            (flycheck--apply-edits
+             (apply #'append (mapcar #'flycheck-fix-edits selected))))
+          (length selected))))))
 
 (defun flycheck--error-fix-buffer (err)
   "Return the live buffer in which ERR's fix may be applied, or nil.
@@ -5898,6 +5968,7 @@ ID.")
     (define-key map (kbd "TAB") #'flycheck-error-list-toggle-group-at-point)
     (define-key map (kbd "e") #'flycheck-error-list-explain-error)
     (define-key map (kbd "x") #'flycheck-error-list-apply-fix)
+    (define-key map (kbd "X") #'flycheck-error-list-fix-all)
     (define-key map (kbd "RET") #'flycheck-error-list-goto-error)
     map)
   "The keymap of `flycheck-error-list-mode'.")
@@ -6844,6 +6915,17 @@ file, or its buffer is gone)"))
              (if-let* ((description (flycheck-fix-description fix)))
                  (concat ": " description) ""))))
 
+(defun flycheck-error-list-fix-all ()
+  "Apply every fixable error's fix in the error list's source buffer."
+  (interactive)
+  (if-let* ((buffer flycheck-error-list-source-buffer)
+            ((buffer-live-p buffer)))
+      (progn
+        (with-current-buffer buffer
+          (call-interactively #'flycheck-fix-all-errors))
+        (flycheck-error-list-refresh))
+    (user-error "The error list has no live source buffer")))
+
 (defun flycheck-error-list-next-error-pos (pos &optional n)
   "Starting from POS get the N'th next error in the error list.
 
@@ -7257,6 +7339,12 @@ Hide the error buffer if there is no error under point."
   :package-version '(flycheck . "38")
   :group 'flycheck-faces)
 
+(defface flycheck-annotate-fix
+  '((t :inherit flycheck-error-list-checker-name))
+  "Flycheck face for the inline marker on errors that carry a fix."
+  :package-version '(flycheck . "38")
+  :group 'flycheck-faces)
+
 (defface flycheck-annotate-error-background
   '((((background dark)) :background "#402626" :extend t)
     (((background light)) :background "#fbe9e9" :extend t))
@@ -7385,6 +7473,16 @@ show for it.  The default renders the message and the error ID."
   :type 'function
   :package-version '(flycheck . "38"))
 
+(defcustom flycheck-annotate-fix-marker "[fix] "
+  "Marker shown inline before an error that carries a machine-applicable fix.
+
+A string prefixed to the inline message of an error whose checker offered
+a fix (applicable with \\[flycheck-fix-error-at-point]), or nil to show no
+marker.  Uses the `flycheck-annotate-fix' face."
+  :group 'flycheck
+  :type '(choice (const :tag "No marker" nil) string)
+  :package-version '(flycheck . "38"))
+
 (defcustom flycheck-annotate-suppress-echo t
   "Whether inline display suppresses the echo-area message at point.
 
@@ -7431,6 +7529,15 @@ start of the buffer on every command.")
     ('warning 'flycheck-annotate-warning)
     ('info 'flycheck-annotate-info)
     (_ (flycheck-error-level-error-list-face level))))
+
+(defun flycheck-annotate--fix-marker (err)
+  "Return the propertized fix marker for ERR, or an empty string.
+
+Non-empty only when `flycheck-annotate-fix-marker' is set and ERR
+carries a machine-applicable fix."
+  (if (and flycheck-annotate-fix-marker (flycheck-error-fix err))
+      (propertize flycheck-annotate-fix-marker 'face 'flycheck-annotate-fix)
+    ""))
 
 (defun flycheck-annotate--track (overlay)
   "Tag OVERLAY as ours and track it for teardown.  Return OVERLAY."
@@ -7494,7 +7601,8 @@ first) with a count of the rest, propertized with its level face."
          (face (flycheck-annotate--level-face (flycheck-error-level err)))
          (more (when (cdr errors) (format " (+%d)" (length (cdr errors)))))
          (msg (funcall flycheck-annotate-format-function err)))
-    (propertize (concat msg more) 'face face)))
+    (concat (flycheck-annotate--fix-marker err)
+            (propertize (concat msg more) 'face face))))
 
 (defun flycheck-annotate-eol-style (errors anchor _focused)
   "Render ERRORS as a compact message after the line ending at ANCHOR.
@@ -7550,8 +7658,9 @@ gutter.  FOCUSED is ignored."
              (face (flycheck-annotate--level-face (flycheck-error-level err)))
              (conn (propertize (if (= i n) (cdr connectors) (car connectors))
                                'face 'flycheck-annotate-connector))
-             (msg (propertize (funcall flycheck-annotate-format-function err)
-                              'face face)))
+             (msg (concat (flycheck-annotate--fix-marker err)
+                          (propertize (funcall flycheck-annotate-format-function err)
+                                      'face face))))
         (push (concat "\n" pad conn msg) lines)))
     (flycheck-annotate--make-overlay anchor 'after-string
                                    (apply #'concat (nreverse lines)))))
@@ -7773,6 +7882,31 @@ point has a fix."
                  (if-let* ((description (flycheck-fix-description fix)))
                      (concat ": " description) "")))
     (user-error "No applicable fix at point")))
+
+(defun flycheck-fix-all-errors ()
+  "Apply every machine-applicable fix in the current buffer.
+
+Gather the errors whose checker offered a fix (those the error list
+marks with a fix) and apply them together as a single undoable change,
+via `flycheck-apply-fixes'.  Fixes that would conflict with each other
+are skipped; fixes for other files are ignored."
+  (interactive)
+  (let ((fixes (delq nil
+                     (mapcar (lambda (err)
+                               (and (eq (flycheck--error-fix-buffer err)
+                                        (current-buffer))
+                                    (flycheck-error-fix err)))
+                             flycheck-current-errors))))
+    (unless fixes
+      (user-error "No applicable fixes in this buffer"))
+    (let* ((total (length fixes))
+           (applied (flycheck-apply-fixes fixes))
+           (skipped (- total applied)))
+      (message "Applied %d fix%s%s"
+               applied (if (= applied 1) "" "es")
+               (if (> skipped 0)
+                   (format " (%d skipped as conflicting)" skipped)
+                 "")))))
 
 (defconst flycheck-explain-error-buffer "*Flycheck error explanation*"
   "The name of the buffer to show error explanations.")

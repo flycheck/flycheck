@@ -1,6 +1,11 @@
 ``master`` (unreleased)
 =======================
 
+- [#2207]: ``C-c ! F`` (``flycheck-fix-all-errors``) applies every machine-applicable
+  fix in the buffer at once, as a single undoable change, skipping fixes that
+  would conflict; ``X`` does the same from the error list.  ``flycheck-annotate-mode``
+  marks a fixable error's inline message with ``flycheck-annotate-fix-marker``
+  (``[fix] `` by default).
 - [#2206]: ``flycheck-annotate-mode`` can now filter annotations per tier:
   ``flycheck-annotate-current-line-levels`` and
   ``flycheck-annotate-other-lines-levels`` restrict the line at point and the
