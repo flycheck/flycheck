@@ -92,6 +92,7 @@
 
 ;; Tell the byte compiler about autoloaded functions from packages
 (declare-function org-lint "org-lint" (&optional arg))
+(declare-function xref-push-marker-stack "xref" (&optional m))
 
 
 ;;; Customization
@@ -1283,6 +1284,7 @@ is used."
     (define-key map "?"         #'flycheck-describe-checker)
     (define-key map "h"         #'flycheck-display-error-at-point)
     (define-key map "e"         #'flycheck-explain-error-at-point)
+    (define-key map "j"         #'flycheck-visit-related-location)
     (define-key map "f"         #'flycheck-fix-error-at-point)
     (define-key map "F"         #'flycheck-fix-all-errors)
     (define-key map "H"         #'display-local-help)
@@ -1471,6 +1473,8 @@ Only has effect when variable `global-flycheck-mode' is non-nil."
      ["Copy messages at point" flycheck-copy-errors-as-kill
       (flycheck-overlays-at (point))]
      ["Explain error at point" flycheck-explain-error-at-point]
+     ["Visit related location" flycheck-visit-related-location
+      (flycheck-related-location-at-point)]
      ["Apply fix at point" flycheck-fix-error-at-point]
      ["Apply all fixes in buffer" flycheck-fix-all-errors]
      "---"
@@ -8063,6 +8067,153 @@ are skipped; fixes for other files are ignored."
                (if (> skipped 0)
                    (format " (%d skipped as conflicting)" skipped)
                  "")))))
+
+
+;;; Visiting related locations
+(defun flycheck-related-location-at-point ()
+  "Return the related locations of all Flycheck errors at point.
+
+The result is the flattened `flycheck-error-relations' of every error
+overlay at point, in error order."
+  (seq-mapcat #'flycheck-error-relations (flycheck-overlay-errors-at (point))))
+
+(defun flycheck-related-location-format (location)
+  "Format the related LOCATION as a human-readable string.
+
+Combines its message with its file and position, for completion
+candidates and echo-area display."
+  (let* ((message (or (flycheck-related-location-message location) ""))
+         (filename (flycheck-related-location-filename location))
+         (line (flycheck-related-location-line location))
+         (column (flycheck-related-location-column location))
+         (where (cond ((and filename line column)
+                       (format "%s:%d:%d" (file-name-nondirectory filename)
+                               line column))
+                      ((and filename line)
+                       (format "%s:%d" (file-name-nondirectory filename) line))
+                      (line (format "%d:%d" line (or column 1)))
+                      (t nil))))
+    (if where (format "%s (%s)" message where) message)))
+
+(defun flycheck-goto-related-location (location)
+  "Visit the related LOCATION, a `flycheck-related-location'.
+
+Push the current position on the `xref' marker stack first, so the jump
+can be reverted with `xref-go-back' (\\[xref-go-back]).  Visit the
+location's file when it differs from the current buffer."
+  (let ((filename (flycheck-related-location-filename location))
+        (line (flycheck-related-location-line location))
+        (column (flycheck-related-location-column location)))
+    (xref-push-marker-stack)
+    (when (and filename
+               (not (and buffer-file-name
+                         (equal (file-truename filename)
+                                (file-truename buffer-file-name)))))
+      (find-file filename))
+    (when line
+      (goto-char (flycheck-line-column-to-position line (or column 1))))))
+
+(defvar-local flycheck--related-location-walk nil
+  "State of the in-progress related-location walk, or nil.
+
+A cons of (LOCATIONS . INDEX): the list being walked and the index of
+the location last visited.  See `flycheck-next-related-location'.")
+
+(defun flycheck--related-location-continue-p ()
+  "Return non-nil when the last command was a related-location command."
+  (and flycheck--related-location-walk
+       (memq last-command '(flycheck-visit-related-location
+                            flycheck-next-related-location
+                            flycheck-previous-related-location))))
+
+(defun flycheck--related-location-step (n)
+  "Visit the related location N steps from the current one, cycling.
+
+Continue the active walk when one is in progress (see
+`flycheck--related-location-walk'); otherwise start a fresh walk from the
+related locations at point, where a forward step lands on the first
+location and a backward step on the last.  Signal a `user-error' when
+there are none."
+  (let* ((continue (flycheck--related-location-continue-p))
+         (locations (if continue
+                        (car flycheck--related-location-walk)
+                      (flycheck-related-location-at-point))))
+    (unless locations
+      (user-error "No related locations at point"))
+    (let* ((count (length locations))
+           (index (if continue
+                      (mod (+ (cdr flycheck--related-location-walk) n) count)
+                    ;; No current location yet: a forward step starts at the
+                    ;; first location, a backward step at the last.
+                    (mod (if (> n 0) (1- n) n) count))))
+      (setq flycheck--related-location-walk (cons locations index))
+      (flycheck-goto-related-location (nth index locations))
+      (when (> count 1)
+        (message "Related location %d/%d" (1+ index) count)))))
+
+(defun flycheck-next-related-location (&optional n)
+  "Visit the next related location, cycling through those at point.
+
+The first invocation starts from the related locations of the errors at
+point (see `flycheck-error-relations'); further invocations, and the
+`n'/`p' keys of `flycheck-related-location-repeat-map', step through the
+same list.  With prefix arg N, move N locations forward."
+  (interactive "p")
+  (flycheck--related-location-step (or n 1)))
+
+(defun flycheck-previous-related-location (&optional n)
+  "Visit the previous related location, cycling through those at point.
+
+Like `flycheck-next-related-location', but moves backward.  With prefix
+arg N, move N locations backward."
+  (interactive "p")
+  (flycheck--related-location-step (- (or n 1))))
+
+(defvar flycheck-related-location-repeat-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map "n" #'flycheck-next-related-location)
+    (define-key map "p" #'flycheck-previous-related-location)
+    map)
+  "Repeat map for stepping through related locations.
+Active after `flycheck-next-related-location' or
+`flycheck-previous-related-location' when `repeat-mode' is on.")
+(put 'flycheck-next-related-location 'repeat-map
+     'flycheck-related-location-repeat-map)
+(put 'flycheck-previous-related-location 'repeat-map
+     'flycheck-related-location-repeat-map)
+
+(defun flycheck-visit-related-location ()
+  "Visit a secondary location related to an error at point.
+
+Gather the related locations of every Flycheck error at point (an LSP
+diagnostic's `relatedInformation', a Rust lifetime borrow, and so on;
+see `flycheck-error-relations').  With one, jump to it; with several,
+prompt for one.  Visiting another file's location opens that file, and
+the jump can be reverted with `xref-go-back' (\\[xref-go-back]).
+
+Afterwards, step through the remaining locations with
+`flycheck-next-related-location' and `flycheck-previous-related-location'
+\(\\[flycheck-next-related-location] and \
+\\[flycheck-previous-related-location]).  Signal a `user-error' when no
+error at point has a related location."
+  (interactive)
+  (let ((locations (flycheck-related-location-at-point)))
+    (unless locations
+      (user-error "No related locations at point"))
+    (let ((index (if (cdr locations)
+                     (let* ((candidates
+                             (seq-map-indexed
+                              (lambda (loc i)
+                                (cons (flycheck-related-location-format loc) i))
+                              locations))
+                            (choice (flycheck-completing-read
+                                     "Related location: "
+                                     (mapcar #'car candidates)
+                                     (caar candidates))))
+                       (cdr (assoc choice candidates)))
+                   0)))
+      (setq flycheck--related-location-walk (cons locations index))
+      (flycheck-goto-related-location (nth index locations)))))
 
 (defconst flycheck-explain-error-buffer "*Flycheck error explanation*"
   "The name of the buffer to show error explanations.")
