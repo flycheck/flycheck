@@ -150,6 +150,47 @@ finds it."
       (flycheck-buttercup-with-temp-buffer
         (insert "nothing\n")
         (setq-local flycheck-mode t)
-        (expect (flycheck-next-related-location) :to-throw 'user-error)))))
+        (expect (flycheck-next-related-location) :to-throw 'user-error))))
+
+  (describe "flycheck-error-format-relations"
+    (it "is nil when the error has no related locations"
+      (expect (flycheck-error-format-relations
+               (flycheck-error-new-at 1 1 'error "x"))
+              :to-be nil))
+    (it "renders each related location as a button that visits it"
+      (let* ((loc (flycheck-related-location-new
+                   :line 2 :column 6 :message "first here"))
+             (err (flycheck-error-new-at 1 1 'error "x" :relations (list loc)))
+             (text (flycheck-error-format-relations err)))
+        (expect (substring-no-properties text) :to-match "↳ first here (2:6)")
+        ;; The formatted text is a button pointing back at the location.
+        (expect (get-text-property (- (length text) 1)
+                                   'flycheck-related-location text)
+                :to-be loc))))
+
+  (describe "display of related locations"
+    (it "appends the related locations to the help-echo message"
+      (let* ((loc (flycheck-related-location-new
+                   :line 2 :column 6 :message "first here"))
+             (err (flycheck-error-new-at 1 1 'error "redefined"
+                                         :relations (list loc)))
+             (msg (flycheck-help-echo-all-error-messages (list err))))
+        (expect (substring-no-properties msg) :to-match "redefined")
+        (expect (substring-no-properties msg) :to-match "↳ first here (2:6)")))
+    (it "shows the related locations through eldoc"
+      (flycheck-buttercup-with-temp-buffer
+        (insert "line one here\nline two here\n")
+        (flycheck-mode)
+        (goto-char (point-min))
+        (flycheck-add-overlay
+         (flycheck-error-new-at
+          1 1 'error "redefined" :end-column 5
+          :relations (list (flycheck-related-location-new
+                            :line 2 :column 6 :message "first here"))))
+        (let (doc)
+          (flycheck-eldoc-function (lambda (string &rest _) (setq doc string)))
+          (expect (substring-no-properties doc) :to-match "error: redefined")
+          (expect (substring-no-properties doc)
+                  :to-match "↳ first here (2:6)"))))))
 
 ;;; test-related-locations.el ends here

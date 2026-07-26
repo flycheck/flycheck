@@ -5915,15 +5915,18 @@ overlays."
         (propertize (funcall fn errs) 'help-echo-inhibit-substitution t)))))
 
 (defun flycheck-help-echo-all-error-messages (errs)
-  "Concatenate error messages and ids from ERRS."
-  (pcase (delq nil errs) ;; FIXME why would errors be nil here?
-    (`(,err) ;; A single error
-     (flycheck-error-format-message-and-id err))
-    (_ ;; Zero or multiple errors
-     (mapconcat
-      (lambda (err)
-        (flycheck-error-format-message-and-id err 'include-snippet))
-      errs "\n"))))
+  "Concatenate error messages, ids and related locations from ERRS."
+  (let* ((errs (delq nil errs)) ;; FIXME why would errors be nil here?
+         ;; Prepend a snippet of the offending text only when disambiguating
+         ;; several errors, matching the previous single-vs-multiple behavior.
+         (include-snippet (and (cdr errs) 'include-snippet)))
+    (mapconcat
+     (lambda (err)
+       (concat
+        (flycheck-error-format-message-and-id err include-snippet)
+        (when-let* ((rel (flycheck-error-format-relations err)))
+          (concat "\n" rel))))
+     errs "\n")))
 
 (defun flycheck-filter-overlays (overlays)
   "Get all Flycheck overlays from OVERLAYS, in original order."
@@ -7298,7 +7301,9 @@ and third-party display packages keep working unchanged."
                                  'face (flycheck-error-level-error-list-face
                                         level))
                      ": "
-                     (flycheck-error-format-message-and-id err))))
+                     (flycheck-error-format-message-and-id err)
+                     (when-let* ((rel (flycheck-error-format-relations err)))
+                       (concat "\n" rel)))))
                 errors "\n")))))
 
 (defun flycheck-display-errors (errors)
@@ -8112,6 +8117,34 @@ location's file when it differs from the current buffer."
       (find-file filename))
     (when line
       (goto-char (flycheck-line-column-to-position line (or column 1))))))
+
+(define-button-type 'flycheck-related-location
+  'action (lambda (button)
+            (flycheck-goto-related-location
+             (button-get button 'flycheck-related-location)))
+  'help-echo "mouse-1, RET: visit related location"
+  'follow-link t)
+
+(defun flycheck--related-location-button (location)
+  "Return LOCATION's formatted text as a button that visits it.
+
+Activating the button with RET or `mouse-1' calls
+`flycheck-goto-related-location' on LOCATION.  Displayed inertly (as
+plain text) in contexts without an active keymap, such as the echo area."
+  (let ((label (flycheck-related-location-format location)))
+    (make-text-button label nil
+                      'type 'flycheck-related-location
+                      'flycheck-related-location location)))
+
+(defun flycheck-error-format-relations (err)
+  "Return ERR's related locations as button lines, or nil when it has none.
+
+Each line is indented and prefixed with a `↳' arrow, and is a button that
+visits the location when activated; see `flycheck--related-location-button'."
+  (when-let* ((relations (flycheck-error-relations err)))
+    (mapconcat (lambda (loc)
+                 (concat "  ↳ " (flycheck--related-location-button loc)))
+               relations "\n")))
 
 (defvar-local flycheck--related-location-walk nil
   "State of the in-progress related-location walk, or nil.
