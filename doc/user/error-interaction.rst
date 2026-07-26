@@ -229,13 +229,61 @@ checkers produce explanations, the majority do not.  Those that do are:
    Display an explanation for the first explainable error at point.
 
 
+Related locations
+=================
+
+Many errors point at more than one place.  A "redefined variable" error
+refers back to the first definition, a Rust lifetime error to the borrow that
+outlives it, and so on.  Language servers report these secondary locations as
+an LSP diagnostic's ``relatedInformation``; with :mode:`flycheck-eglot-mode`
+Flycheck keeps them (Flymake, which shows Eglot's diagnostics, drops them).
+Other checkers can attach them too, through an error's ``relations`` slot.
+
+.. image:: /images/flycheck-related-locations.png
+
+Flycheck shows an error's related locations right after its message - in the
+echo area, through Eldoc, in the help-echo tooltip, and, with
+:mode:`flycheck-annotate-mode`, on their own lines below the code.  Each is a
+``↳`` line naming the place and its message.  In the :ref:`error list
+<flycheck-error-list>` an error that carries related locations is badged with
+``↳N`` (how many), listed in the badge's tooltip.
+
+.. define-key:: C-c ! j
+                M-x flycheck-visit-related-location
+
+   Visit a related location of an error at point.  With one, jump straight to
+   it; with several, prompt for which.  Visiting another file opens it, and the
+   jump goes on the ``xref`` marker stack, so :kbd:`M-x xref-go-back` returns.
+   Signals an error when no error at point has a related location.
+
+Afterwards, step through the rest without prompting:
+
+.. define-key:: M-x flycheck-next-related-location
+                M-x flycheck-previous-related-location
+
+   Visit the next (or previous) related location, cycling.  With
+   `repeat-mode` on, :kbd:`n` and :kbd:`p` keep walking.  With a prefix
+   argument, move that many locations.
+
+.. image:: /images/flycheck-related-locations.gif
+
+In the :ref:`error list <flycheck-error-list>` press :kbd:`j`
+(``flycheck-error-list-visit-related-location``) to visit a related location
+of the error on the current row; it opens in another window so the list stays
+put.
+
+
 Fix errors
 ==========
 
 Some checkers report a machine-applicable fix along with an error - the
 replacement text a tool like ``eslint --fix``, ``cargo clippy`` or a SARIF
 analyzer already computes.  Flycheck keeps that fix and can apply it for you.
-In the error list, fixable errors are marked with ``[fix]`` before the message.
+A fixable error gets a distinct fringe indicator, its ``[fix]`` marker in the
+error list, and, under :mode:`flycheck-annotate-mode`, a ``[fix]`` tag before
+its inline message - like an editor's "fix available" lightbulb.
+
+.. image:: /images/flycheck-quick-fix.png
 
 .. define-key:: C-c ! f
                 M-x flycheck-fix-error-at-point
@@ -249,6 +297,8 @@ In the error list, fixable errors are marked with ``[fix]`` before the message.
    Apply every machine-applicable fix in the current buffer at once, as a
    single undoable change.  Fixes that would conflict with each other are
    skipped; the echo area reports how many were applied.
+
+.. image:: /images/flycheck-fix-all.gif
 
 In the :ref:`error list <flycheck-error-list>` press :kbd:`x`
 (``flycheck-error-list-apply-fix``) to apply the fix of the error on the

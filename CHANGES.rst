@@ -1,6 +1,19 @@
 ``master`` (unreleased)
 =======================
 
+- [#2212]: Flycheck errors can now carry secondary source locations - the
+  earlier definition behind a redefinition, the borrow behind a Rust lifetime
+  error, and so on.
+
+  - ``flycheck-eglot-mode`` populates them from an LSP diagnostic's
+    ``relatedInformation``, which Flymake discards.
+  - Visit one with ``C-c ! j`` (``flycheck-visit-related-location``) and step
+    through the rest with ``flycheck-next-related-location`` and
+    ``flycheck-previous-related-location``.
+  - Each is shown after its error's message in the echo area, Eldoc, the
+    help-echo tooltip and, under ``flycheck-annotate-mode``, inline below the
+    code; the error list badges such errors with ``↳N`` and visits them with
+    ``j``.
 - [#2211]: With ``flycheck-eglot-mode``, an LSP diagnostic's ``quickfix`` code
   action is now offered as a Flycheck fix: ``C-c ! f`` applies it (``C-c ! F`` applies all,
   ``[fix]`` marks it in the error list).  The action is fetched from the server

@@ -32,6 +32,7 @@ Within the error list the following key bindings are available:
 :kbd:`n`     Jump to the next error
 :kbd:`p`     Jump to the previous error
 :kbd:`e`     Explain the error
+:kbd:`j`     Visit a related location of the error, if it has one
 :kbd:`x`     Apply the error's fix, if it has one
 :kbd:`X`     Apply every fix in the source buffer
 :kbd:`f`     Filter the error list by level
@@ -97,6 +98,10 @@ are shown in a strip at the top of the error list.  Press :kbd:`TAB` (or
 :kbd:`RET` on a header) to collapse or expand the group at point.  You can
 also click a grouping in the strip to toggle it, or a group header to collapse
 or expand it.
+
+.. image:: /images/flycheck-error-list-grouped.png
+
+.. image:: /images/flycheck-error-list-grouping.gif
 
 Filter the list
 ===============
