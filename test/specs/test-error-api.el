@@ -334,6 +334,30 @@
                 :to-equal (list (nth 0 flycheck-current-errors)
                                 (nth 2 flycheck-current-errors)))
         (expect (flycheck-related-errors (nth 1 flycheck-current-errors))
-                :to-equal (list (nth 1 flycheck-current-errors)))))))
+                :to-equal (list (nth 1 flycheck-current-errors))))))
+
+  (describe "flycheck-error-relations"
+    (it "defaults to nil"
+      (expect (flycheck-error-relations (flycheck-error-new-at 5 7 'error))
+              :to-be nil))
+
+    (it "round-trips the related locations passed to the constructor"
+      (let* ((rel (flycheck-related-location-new
+                   :filename "other.el" :line 2 :column 4
+                   :message "first defined here"))
+             (err (flycheck-error-new-at 5 7 'error "redefined"
+                                         :relations (list rel))))
+        (expect (flycheck-error-relations err) :to-equal (list rel))
+        (expect (flycheck-related-location-filename rel) :to-equal "other.el")
+        (expect (flycheck-related-location-line rel) :to-equal 2)
+        (expect (flycheck-related-location-column rel) :to-equal 4)
+        (expect (flycheck-related-location-message rel)
+                :to-equal "first defined here")))
+
+    (it "is setf-able"
+      (let ((err (flycheck-error-new-at 5 7 'error))
+            (rel (flycheck-related-location-new :line 1 :message "here")))
+        (setf (flycheck-error-relations err) (list rel))
+        (expect (flycheck-error-relations err) :to-equal (list rel))))))
 
 ;;; test-error-api.el ends here
