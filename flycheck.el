@@ -6123,6 +6123,7 @@ ID.")
     (define-key map (kbd "M-4") #'flycheck-error-list-group-by-level)
     (define-key map (kbd "TAB") #'flycheck-error-list-toggle-group-at-point)
     (define-key map (kbd "e") #'flycheck-error-list-explain-error)
+    (define-key map (kbd "j") #'flycheck-error-list-visit-related-location)
     (define-key map (kbd "x") #'flycheck-error-list-apply-fix)
     (define-key map (kbd "X") #'flycheck-error-list-fix-all)
     (define-key map (kbd "RET") #'flycheck-error-list-goto-error)
@@ -6545,6 +6546,15 @@ already names it in a grouped list."
            (when (and (flycheck-error-fix error)
                       (flycheck--error-fix-buffer error))
              (propertize "[fix] " 'face 'flycheck-error-list-checker-name))
+           ;; Flag errors that carry secondary locations (visit with `j'/
+           ;; `flycheck-error-list-visit-related-location'), showing how many
+           ;; and listing them in the badge's tooltip.
+           (when-let* ((relations (flycheck-error-relations error)))
+             (propertize
+              (format "↳%d " (length relations))
+              'face 'flycheck-error-list-checker-name
+              'help-echo (mapconcat #'flycheck-related-location-format
+                                    relations "\n")))
            (flycheck-error-list-make-last-column flushed-msg checker)))
          (explainer (flycheck-checker-get checker 'error-explainer)))
     (list error
@@ -7050,6 +7060,32 @@ POS defaults to `point'."
     (flycheck-error-with-buffer error
       (when-let (explanation (funcall explainer error))
         (flycheck-display-error-explanation explanation)))))
+
+(defun flycheck-error-list-visit-related-location (&optional pos)
+  "Visit a related location of the error at POS in the error list.
+
+POS defaults to `point'.  With one related location, jump to it; with
+several, prompt for one.  The target is shown in another window, so the
+error list stays visible.  Signal a `user-error' when the error has no
+related location; see `flycheck-visit-related-location'."
+  (interactive)
+  (let* ((error (tabulated-list-get-id pos))
+         (relations (and (flycheck-error-p error)
+                         (flycheck-error-relations error))))
+    (unless relations
+      (user-error "The error at point has no related locations"))
+    (let ((location
+           (if (cdr relations)
+               (let ((candidates
+                      (mapcar (lambda (loc)
+                                (cons (flycheck-related-location-format loc) loc))
+                              relations)))
+                 (cdr (assoc (flycheck-completing-read
+                              "Related location: "
+                              (mapcar #'car candidates) (caar candidates))
+                             candidates)))
+             (car relations))))
+      (flycheck-goto-related-location location (flycheck-error-filename error)))))
 
 (defun flycheck-error-list-apply-fix (&optional pos)
   "Apply the suggested fix of the error at POS in the error list.
@@ -7823,8 +7859,17 @@ gutter.  FOCUSED is ignored."
                                'face 'flycheck-annotate-connector))
              (msg (concat (flycheck-annotate--fix-marker err)
                           (propertize (funcall flycheck-annotate-format-function err)
-                                      'face face))))
-        (push (concat "\n" pad conn msg) lines)))
+                                      'face face)))
+             ;; Trail the error's secondary locations on their own aligned
+             ;; lines, dimmed so they read as annotations of the message above.
+             (rels (mapconcat
+                    (lambda (loc)
+                      (concat "\n" pad
+                              (propertize "  ↳ " 'face 'flycheck-annotate-connector)
+                              (propertize (flycheck-related-location-format loc)
+                                          'face 'shadow)))
+                    (flycheck-error-relations err) "")))
+        (push (concat "\n" pad conn msg rels) lines)))
     (flycheck-annotate--make-overlay anchor 'after-string
                                    (apply #'concat (nreverse lines)))))
 
@@ -8100,21 +8145,24 @@ candidates and echo-area display."
                       (t nil))))
     (if where (format "%s (%s)" message where) message)))
 
-(defun flycheck-goto-related-location (location)
+(defun flycheck-goto-related-location (location &optional default-file)
   "Visit the related LOCATION, a `flycheck-related-location'.
 
-Push the current position on the `xref' marker stack first, so the jump
-can be reverted with `xref-go-back' (\\[xref-go-back]).  Visit the
-location's file when it differs from the current buffer."
-  (let ((filename (flycheck-related-location-filename location))
-        (line (flycheck-related-location-line location))
-        (column (flycheck-related-location-column location)))
+When LOCATION carries no file of its own, fall back to DEFAULT-FILE, and
+then to the current buffer.  Push the current position on the `xref'
+marker stack first, so the jump can be reverted with `xref-go-back'
+\(\\[xref-go-back]).  When invoked from the error list, show the target
+in another window; otherwise reuse the current one."
+  (let* ((filename (or (flycheck-related-location-filename location)
+                       default-file))
+         (line (flycheck-related-location-line location))
+         (column (flycheck-related-location-column location))
+         (buffer (if filename (find-file-noselect filename) (current-buffer))))
     (xref-push-marker-stack)
-    (when (and filename
-               (not (and buffer-file-name
-                         (equal (file-truename filename)
-                                (file-truename buffer-file-name)))))
-      (find-file filename))
+    (unless (eq buffer (current-buffer))
+      (if (eq (window-buffer) (get-buffer flycheck-error-list-buffer))
+          (pop-to-buffer buffer 'other-window)
+        (switch-to-buffer buffer)))
     (when line
       (goto-char (flycheck-line-column-to-position line (or column 1))))))
 
