@@ -268,6 +268,8 @@ roomy ``below`` treatment while the rest get a terse ``eol`` summary, so the
 error you're working on is spelled out in full without every other line
 competing for attention.
 
+.. image:: /images/flycheck-inline-annotations.png
+
 .. defcustom:: flycheck-annotate-current-line-style
                flycheck-annotate-other-lines-style
 
