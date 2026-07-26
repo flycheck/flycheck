@@ -10144,6 +10144,7 @@ SYMBOL with `flycheck-def-executable-var'."
 (declare-function eglot-code-actions "eglot" (beg &optional end action-kind interactive))
 (declare-function eglot-server-capable "eglot" (&rest feats))
 (declare-function eglot-uri-to-path "eglot" (uri))
+(declare-function eglot--uri-to-path "eglot" (uri))
 (declare-function eglot--request "eglot" (server method params &rest _))
 (declare-function eglot--current-server-or-lose "eglot" ())
 
@@ -10225,6 +10226,40 @@ Built from the diagnostic's `code', carrying its `codeDescription' href
           (href (plist-get (plist-get lsp :codeDescription) :href)))
       (if href (propertize id 'explainer-url href) id))))
 
+(defun flycheck-eglot--uri-to-path (uri)
+  "Convert an LSP document URI to a file path, across Eglot versions."
+  (cond ((fboundp 'eglot-uri-to-path) (eglot-uri-to-path uri))
+        ((fboundp 'eglot--uri-to-path) (eglot--uri-to-path uri))
+        (t uri)))
+
+(defun flycheck-eglot--related-location (info)
+  "Convert one LSP `relatedInformation' entry INFO to a related location.
+
+INFO is a plist with a `location' (a `uri' and a `range') and a
+`message'.  LSP positions are 0-based; Flycheck columns are 1-based, so
+each is incremented.  The range end is exclusive in both, so it maps
+directly to Flycheck's right-open end column."
+  (let* ((location (plist-get info :location))
+         (uri (plist-get location :uri))
+         (range (plist-get location :range))
+         (start (plist-get range :start))
+         (end (plist-get range :end)))
+    (flycheck-related-location-new
+     :filename (and uri (flycheck-eglot--uri-to-path uri))
+     :line (and start (1+ (plist-get start :line)))
+     :column (and start (1+ (plist-get start :character)))
+     :end-line (and end (1+ (plist-get end :line)))
+     :end-column (and end (1+ (plist-get end :character)))
+     :message (plist-get info :message))))
+
+(defun flycheck-eglot--related-locations (lsp)
+  "Return the related locations of the LSP diagnostic plist LSP, as a list.
+
+Maps the diagnostic's `relatedInformation' entries to
+`flycheck-related-location' objects; nil when there are none."
+  (mapcar #'flycheck-eglot--related-location
+          (append (plist-get lsp :relatedInformation) nil)))
+
 (defun flycheck-eglot--convert-diagnostic (diag)
   "Convert the Eglot Flymake diagnostic DIAG to a `flycheck-error'.
 
@@ -10244,6 +10279,7 @@ as a fallback."
        (format "%s" (flymake-diagnostic-text diag)))
      :end-pos (flymake-diagnostic-end diag)
      :id (and lsp (flycheck-eglot--diagnostic-id lsp))
+     :relations (and lsp (flycheck-eglot--related-locations lsp))
      :fix (flycheck-eglot--fix-provider)
      :checker 'eglot-check
      :buffer (current-buffer)

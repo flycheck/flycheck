@@ -78,7 +78,53 @@
                (err (flycheck-eglot--convert-diagnostic diag)))
           (expect (flycheck-error-level err) :to-be 'error)
           (expect (flycheck-error-message err) :to-equal "raw")
-          (expect (flycheck-error-id err) :to-be nil)))))
+          (expect (flycheck-error-id err) :to-be nil))))
+
+    (it "maps the diagnostic's relatedInformation to related locations"
+      (flycheck-buttercup-with-temp-buffer
+        (insert "line one here\n")
+        (cl-letf (((symbol-function 'eglot-uri-to-path) #'identity))
+          (let* ((diag (test-eglot--diag
+                        (current-buffer) 1 5 :error "redefined"
+                        '(:severity 1 :message "redefined"
+                          :relatedInformation
+                          [(:location (:uri "other.el"
+                                       :range (:start (:line 1 :character 4)
+                                               :end (:line 1 :character 9)))
+                            :message "first defined here")])))
+                 (err (flycheck-eglot--convert-diagnostic diag))
+                 (rel (car (flycheck-error-relations err))))
+            (expect (length (flycheck-error-relations err)) :to-equal 1)
+            (expect (flycheck-related-location-filename rel) :to-equal "other.el")
+            (expect (flycheck-related-location-line rel) :to-equal 2)
+            (expect (flycheck-related-location-column rel) :to-equal 5)
+            (expect (flycheck-related-location-end-column rel) :to-equal 10)
+            (expect (flycheck-related-location-message rel)
+                    :to-equal "first defined here"))))))
+
+  (describe "flycheck-eglot--related-locations"
+    (it "returns nil when there is no relatedInformation"
+      (expect (flycheck-eglot--related-locations '(:message "x")) :to-be nil))
+
+    (it "converts each entry, incrementing LSP's 0-based positions"
+      (cl-letf (((symbol-function 'eglot-uri-to-path) #'identity))
+        (let* ((locs (flycheck-eglot--related-locations
+                      '(:relatedInformation
+                        [(:location (:uri "a.el"
+                                     :range (:start (:line 0 :character 0)
+                                             :end (:line 0 :character 3)))
+                          :message "one")
+                         (:location (:uri "b.el"
+                                     :range (:start (:line 9 :character 2)
+                                             :end (:line 9 :character 2)))
+                          :message "two")]))))
+          (expect (length locs) :to-equal 2)
+          (expect (flycheck-related-location-line (nth 0 locs)) :to-equal 1)
+          (expect (flycheck-related-location-column (nth 0 locs)) :to-equal 1)
+          (expect (flycheck-related-location-filename (nth 1 locs))
+                  :to-equal "b.el")
+          (expect (flycheck-related-location-line (nth 1 locs))
+                  :to-equal 10)))))
 
   (describe "flycheck-eglot--report"
     (it "caches the diagnostics and re-triggers a check"
