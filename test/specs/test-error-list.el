@@ -184,21 +184,29 @@
         (expect (substring-no-properties (car (aref cells 5)))
                 :not :to-match "↳")))
 
+    ;; Put the error on the buffer text via `tabulated-list-id' rather than
+    ;; stubbing `tabulated-list-get-id': it is a defsubst that inlines to
+    ;; `get-text-property' when the command is byte-compiled, so a function
+    ;; stub would not take effect there.
     (it "visits the sole related location of the error at point"
       (let* ((loc (flycheck-related-location-new :line 2 :column 1 :message "a"))
              (err (flycheck-error-new-at 1 1 'error "x" :checker 'emacs-lisp
                                          :relations (list loc)))
              visited)
-        (cl-letf (((symbol-function 'tabulated-list-get-id) (lambda (&rest _) err))
-                  ((symbol-function 'flycheck-goto-related-location)
-                   (lambda (location &rest _) (setq visited location))))
-          (flycheck-error-list-visit-related-location)
-          (expect visited :to-be loc))))
+        (with-temp-buffer
+          (insert (propertize "row" 'tabulated-list-id err))
+          (goto-char (point-min))
+          (cl-letf (((symbol-function 'flycheck-goto-related-location)
+                     (lambda (location &rest _) (setq visited location))))
+            (flycheck-error-list-visit-related-location)))
+        (expect visited :to-be loc)))
 
     (it "signals a user-error when the error at point has no related locations"
-      (cl-letf (((symbol-function 'tabulated-list-get-id)
-                 (lambda (&rest _)
-                   (flycheck-error-new-at 1 1 'error "x" :checker 'emacs-lisp))))
+      (with-temp-buffer
+        (insert (propertize "row" 'tabulated-list-id
+                            (flycheck-error-new-at 1 1 'error "x"
+                                                   :checker 'emacs-lisp)))
+        (goto-char (point-min))
         (expect (flycheck-error-list-visit-related-location)
                 :to-throw 'user-error))))
 
