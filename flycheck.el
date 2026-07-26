@@ -8158,6 +8158,7 @@ in another window; otherwise reuse the current one."
          (line (flycheck-related-location-line location))
          (column (flycheck-related-location-column location))
          (buffer (if filename (find-file-noselect filename) (current-buffer))))
+    (require 'xref)
     (xref-push-marker-stack)
     (unless (eq buffer (current-buffer))
       (if (eq (window-buffer) (get-buffer flycheck-error-list-buffer))
