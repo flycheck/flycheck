@@ -4158,29 +4158,69 @@ non-nil, then only do this and skip per-buffer teardown.)"
 
 
 ;;; Errors from syntax checks
+(cl-defstruct (flycheck-related-location
+               (:constructor flycheck-related-location-new)
+               (:copier nil))
+  "A secondary source location attached to a `flycheck-error'.
+
+Many checkers attach one or more secondary locations to an error,
+pointing at other places that explain or contribute to it (for example
+the earlier definition behind a \"redefined here\" error, or the borrow
+behind a Rust lifetime error).  Language servers report these as an LSP
+diagnostic's `relatedInformation'.
+
+Unlike an error's group (see `flycheck-related-errors'), a related
+location is not itself an error: it carries only a position and a
+message, and it may live in a different file than the error it belongs
+to.  See the `relations' slot of `flycheck-error' and
+`flycheck-visit-related-location'.
+
+Slots:
+
+`filename'
+     The file the location refers to, as a string.  Defaults to the
+     error's own file.
+
+`line'
+     The line the location starts on, as a 1-based number.
+
+`column' (optional)
+     The column the location starts at, as a 1-based number.
+
+`end-line' (optional)
+     The line the location ends on.
+
+`end-column' (optional)
+     The column the location ends at, right-open like a
+     `flycheck-error' span.
+
+`message' (optional)
+     The message describing the location, as a string."
+  filename line column end-line end-column message)
+
 (cl-defstruct (flycheck-error
                (:constructor nil)
                (:constructor
                 flycheck-error-new
                 (&key
                  line column end-line end-column
-                 buffer checker filename message level id group fix
+                 buffer checker filename message level id group fix relations
                  &aux (-end-line end-line) (-end-column end-column)
-                 (-fix fix)))
+                 (-fix fix) (-relations relations)))
                (:constructor
                 flycheck-error-new-at
                 (line
                  column
                  &optional level message
-                 &key end-line end-column checker id group fix
+                 &key end-line end-column checker id group fix relations
                  (filename (buffer-file-name)) (buffer (current-buffer))
                  &aux (-end-line end-line) (-end-column end-column)
-                 (-fix fix)))
+                 (-fix fix) (-relations relations)))
                (:constructor
                 flycheck-error-new-at-pos
                 (pos
                  &optional level message
-                 &key end-pos checker id group fix
+                 &key end-pos checker id group fix relations
                  (filename (buffer-file-name)) (buffer (current-buffer))
                  &aux
                  ((line . column)
@@ -4189,7 +4229,7 @@ non-nil, then only do this and skip per-buffer teardown.)"
                  ((-end-line . -end-column)
                   (if end-pos (flycheck-line-column-at-pos end-pos)
                     '(nil . nil)))
-                 (-fix fix))))
+                 (-fix fix) (-relations relations))))
   "Structure representing an error reported by a syntax checker.
 Slots:
 
@@ -4247,12 +4287,21 @@ Slots:
      collected by a checker should have the same `group` value,
      in order to be able to present them to the user.
 
-     See `flycheck-related-errors`."
+     See `flycheck-related-errors`.
+
+`relations' (optional)
+     A list of `flycheck-related-location' objects pointing at
+     secondary source locations that explain or contribute to the
+     error, such as an earlier definition or a borrow behind a
+     lifetime error.  These come from an LSP diagnostic's
+     `relatedInformation' and may live in other files.
+
+     See `flycheck-visit-related-location`."
   buffer checker filename line column message level id group
   ;; The fields below are at the end of the record to preserve backwards
   ;; compatibility; see https://github.com/flycheck/flycheck/pull/1400 and
   ;; https://lists.gnu.org/archive/html/emacs-devel/2018-07/msg00436.html
-  -end-line -end-column -fix)
+  -end-line -end-column -fix -relations)
 
 ;; These accessors are defined for backwards compatibility
 ;; FIXME: Clean up once package.el learns how to recompile dependencies.
@@ -4301,6 +4350,23 @@ either way."
     (args-out-of-range nil)))
 
 (gv-define-simple-setter flycheck-error-fix flycheck-error--set-fix)
+
+(defun flycheck-error-relations (err)
+  "Return the related locations of a Flycheck error ERR, as a list.
+
+Each element is a `flycheck-related-location' pointing at a secondary
+source location that explains or contributes to ERR; see
+`flycheck-visit-related-location'.  Returns nil when ERR has none."
+  (condition-case nil (flycheck-error--relations err)
+    (args-out-of-range nil)))
+
+(defun flycheck-error--set-relations (err relations)
+  "Set the related locations of a Flycheck error ERR to RELATIONS."
+  (condition-case nil (setf (flycheck-error--relations err) relations)
+    (args-out-of-range nil)))
+
+(gv-define-simple-setter flycheck-error-relations
+                         flycheck-error--set-relations)
 
 (defun flycheck-error-resolve-fix (err)
   "Return the concrete `flycheck-fix' for ERR, or nil.
