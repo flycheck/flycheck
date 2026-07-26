@@ -154,7 +154,24 @@ Line 2 gets an error and a warning; line 4 gets a warning."
                (ov (flycheck-annotate-below-style errs eol t))
                (s (overlay-get ov 'after-string)))
           ;; char 1 is the connector itself, no stretch space
-          (expect (get-text-property 1 'display s) :to-be nil)))))
+          (expect (get-text-property 1 'display s) :to-be nil))))
+
+    (it "trails an error's related locations on their own lines"
+      (flycheck-buttercup-with-temp-buffer
+        (insert "abcdef\n")
+        (let* ((eol (save-excursion (goto-char (point-min)) (line-end-position)))
+               (errs (list (flycheck-error-new-at
+                            1 1 'error "redefined" :checker 'emacs-lisp
+                            :relations
+                            (list (flycheck-related-location-new
+                                   :line 5 :column 2 :message "first here")))))
+               (flycheck-annotate--overlays nil)
+               (ov (flycheck-annotate-below-style errs eol t))
+               (s (substring-no-properties (overlay-get ov 'after-string))))
+          (expect s :to-match "redefined")
+          (expect s :to-match "↳ first here (5:2)")
+          ;; leading newline, the message line, then the related-location line
+          (expect (length (split-string s "\n")) :to-equal 3)))))
 
   (describe "flycheck-annotate-sideline-style"
     (it "right-aligns the compact message with an align-to spacer"

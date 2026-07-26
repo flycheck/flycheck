@@ -168,6 +168,40 @@
                     (list message 'type 'flycheck-error-list
                           'help-echo message)))))))
 
+  (describe "Related locations"
+    (it "badges an error that carries related locations in the message cell"
+      (let* ((err (flycheck-error-new-at
+                   1 1 'error "redefined" :checker 'emacs-lisp
+                   :relations
+                   (list (flycheck-related-location-new :line 2 :message "a")
+                         (flycheck-related-location-new :line 3 :message "b"))))
+             (cells (cadr (flycheck-error-list-make-entry err))))
+        (expect (substring-no-properties (car (aref cells 5))) :to-match "↳2")))
+
+    (it "does not badge an error without related locations"
+      (let* ((err (flycheck-error-new-at 1 1 'error "plain" :checker 'emacs-lisp))
+             (cells (cadr (flycheck-error-list-make-entry err))))
+        (expect (substring-no-properties (car (aref cells 5)))
+                :not :to-match "↳")))
+
+    (it "visits the sole related location of the error at point"
+      (let* ((loc (flycheck-related-location-new :line 2 :column 1 :message "a"))
+             (err (flycheck-error-new-at 1 1 'error "x" :checker 'emacs-lisp
+                                         :relations (list loc)))
+             visited)
+        (cl-letf (((symbol-function 'tabulated-list-get-id) (lambda (&rest _) err))
+                  ((symbol-function 'flycheck-goto-related-location)
+                   (lambda (location &rest _) (setq visited location))))
+          (flycheck-error-list-visit-related-location)
+          (expect visited :to-be loc))))
+
+    (it "signals a user-error when the error at point has no related locations"
+      (cl-letf (((symbol-function 'tabulated-list-get-id)
+                 (lambda (&rest _)
+                   (flycheck-error-new-at 1 1 'error "x" :checker 'emacs-lisp))))
+        (expect (flycheck-error-list-visit-related-location)
+                :to-throw 'user-error))))
+
   (describe "Grouping by file"
     (let ((errors (list (flycheck-error-new-at 3 1 'error "in b"
                                                :filename "/p/b.el" :checker 'x)
