@@ -1,6 +1,10 @@
 ``master`` (unreleased)
 =======================
 
+- [#2214]: ``flycheck-lsp-servers`` gains built-in entries for Taplo (TOML),
+  TFLint (Terraform), Buf (Protobuf) and Harper (Markdown prose), alongside the
+  existing RuboCop, Ruff and Biome.  Each is only used when its program is
+  installed.
 - [#2213]: Flycheck can now talk to a diagnostics language server directly,
   without Eglot.  Enable ``global-flycheck-lsp-mode`` and configure a server
   per major mode in ``flycheck-lsp-servers`` (``rubocop --lsp`` out of the

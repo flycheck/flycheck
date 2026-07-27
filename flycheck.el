@@ -10483,7 +10483,14 @@ backend and a command checker both contribute.  Shared by the `lsp' and
     (json-ts-mode "biome" "lsp-proxy")
     (jsonc-mode "biome" "lsp-proxy")
     (css-mode "biome" "lsp-proxy")
-    (css-ts-mode "biome" "lsp-proxy"))
+    (css-ts-mode "biome" "lsp-proxy")
+    (toml-mode "taplo" "lsp" "stdio")
+    (toml-ts-mode "taplo" "lsp" "stdio")
+    (conf-toml-mode "taplo" "lsp" "stdio")
+    (terraform-mode "tflint" "--langserver")
+    (protobuf-mode "buf" "lsp" "serve")
+    (markdown-mode "harper-ls" "--stdio")
+    (gfm-mode "harper-ls" "--stdio"))
   "Alist mapping a major mode to a diagnostics LSP server command.
 
 Each entry is (MAJOR-MODE PROGRAM ARG...): a buffer in MAJOR-MODE that
@@ -10491,14 +10498,23 @@ enables `flycheck-lsp-mode' has PROGRAM started with the ARGs as an LSP
 server, is fed the buffer's text, and reports the diagnostics the server
 pushes back through the `lsp' checker.
 
-The default entries cover single-purpose linters that ship an LSP mode --
-RuboCop (Ruby), Ruff (Python) and Biome (JavaScript, TypeScript, JSON,
-CSS).  An entry is only used when its PROGRAM is on `exec-path' (see
-`executable-find'), so listing a server you have not installed is
-harmless; add your own the same way, e.g.
+The default entries cover single-purpose linters that ship a native LSP
+mode: RuboCop (Ruby), Ruff (Python), Biome (JavaScript, TypeScript, JSON,
+CSS), Taplo (TOML), TFLint (Terraform), Buf (Protobuf) and Harper
+(Markdown prose).  An entry is only used when its PROGRAM is on
+`exec-path' (see `executable-find'), so listing a server you have not
+installed is harmless.
 
-    (add-to-list \\='flycheck-lsp-servers
-                 \\='(terraform-mode \"tflint\" \"--langserver\"))
+A major mode maps to a single server.  To use a different one, replace
+the entry -- e.g. Standard instead of RuboCop for Ruby, or Oxlint instead
+of Biome for JavaScript:
+
+    (setf (alist-get \\='ruby-mode flycheck-lsp-servers)
+          \\='(\"standardrb\" \"--lsp\"))
+
+To cover a mode that has no default, add an entry:
+
+    (add-to-list \\='flycheck-lsp-servers \\='(php-mode \"psalm-language-server\"))
 
 The server needs to speak LSP over stdio and publish diagnostics.  For a
 full language server (hover, completion, rename) you usually want Eglot

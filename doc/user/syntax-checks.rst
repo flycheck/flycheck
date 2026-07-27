@@ -242,10 +242,11 @@ Turn it on everywhere with:
 
    (global-flycheck-lsp-mode 1)
 
-Out of the box this covers RuboCop for Ruby, Ruff for Python and Biome for
-JavaScript, TypeScript, JSON and CSS.  A server is only used when its program
-is installed, so enabling the mode globally does nothing in a buffer whose
-language server you don't have.
+Out of the box this covers RuboCop (Ruby), Ruff (Python), Biome (JavaScript,
+TypeScript, JSON, CSS), Taplo (TOML), TFLint (Terraform), Buf (Protobuf) and
+Harper (Markdown prose).  A server is only used when its program is installed,
+so enabling the mode globally does nothing in a buffer whose language server
+you don't have.
 
 .. minor-mode:: flycheck-lsp-mode
 
@@ -304,19 +305,32 @@ Configuring servers
 .. defcustom:: flycheck-lsp-servers
 
    An alist mapping a major mode to the server command, as ``(MAJOR-MODE
-   PROGRAM ARG...)``.  The defaults map the Ruby, Python, JavaScript,
-   TypeScript, JSON and CSS modes to RuboCop, Ruff and Biome.
+   PROGRAM ARG...)``.  The defaults are:
 
-   To add a server for another mode, push an entry.  For example, TFLint for
-   Terraform, or Vale for prose::
+   ==============================  ========  ========================
+   Language / mode                 Server    Command
+   ==============================  ========  ========================
+   Ruby                            RuboCop   ``rubocop --lsp``
+   Python                          Ruff      ``ruff server``
+   JavaScript/TypeScript/JSON/CSS  Biome     ``biome lsp-proxy``
+   TOML                            Taplo     ``taplo lsp stdio``
+   Terraform                       TFLint    ``tflint --langserver``
+   Protobuf                        Buf       ``buf lsp serve``
+   Markdown (prose)                Harper    ``harper-ls --stdio``
+   ==============================  ========  ========================
 
-      (add-to-list 'flycheck-lsp-servers '(terraform-mode "tflint" "--langserver"))
-      (add-to-list 'flycheck-lsp-servers '(markdown-mode "vale-ls"))
+   A major mode maps to a single server.  To use a different one, replace the
+   entry - e.g. Standard instead of RuboCop, or Oxlint instead of Biome::
 
-   To point a mode at a different server, or drop one of the defaults, edit the
-   alist - e.g. use Ruff for Python but nothing for CSS::
+      (setf (alist-get 'ruby-mode flycheck-lsp-servers) '("standardrb" "--lsp"))
+      (setf (alist-get 'js-ts-mode flycheck-lsp-servers) '("oxlint" "--lsp"))
 
-      (setf (alist-get 'python-mode flycheck-lsp-servers) '("ruff" "server"))
+   To cover a mode that has no default, add an entry - e.g. Psalm for PHP::
+
+      (add-to-list 'flycheck-lsp-servers '(php-mode "psalm-language-server"))
+
+   To drop a default, remove it::
+
       (setq flycheck-lsp-servers
             (assq-delete-all 'css-mode flycheck-lsp-servers))
 
