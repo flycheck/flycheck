@@ -283,7 +283,7 @@ server you actually want:
      - Eglot (built in since Emacs 29)
      - the external ``lsp-mode`` package
    * - Provides
-     - diagnostics only
+     - diagnostics + quickfix code actions
      - full LSP (hover, completion, rename, ...)
      - full LSP
    * - Owns the buffer
@@ -348,12 +348,28 @@ Configuring servers
    that supports the buffer's major mode, so the server and a command checker
    both contribute.
 
+.. defcustom:: flycheck-lsp-code-actions
+
+   When non-nil (the default), offer the server's ``quickfix`` code actions as
+   Flycheck fixes: ``C-c ! f`` applies the fix of the error at point, ``C-c !
+   F`` applies all, and the error list marks fixable errors with ``[fix]``.
+   The action is fetched from the server only when you apply a fix, so every
+   diagnostic is shown as potentially fixable even if the server has nothing
+   for it.  Set to nil to turn this off.  Only servers that advertise code
+   actions offer fixes - Ruff, Biome and Harper do; RuboCop, which autocorrects
+   through formatting rather than per-diagnostic actions, does not.
+
 .. defcustom:: flycheck-lsp-initialize-timeout
 
    How many seconds to wait for a server to answer the ``initialize``
-   handshake, which runs synchronously on the first check of a buffer.
+   handshake.  The handshake runs asynchronously and does not block Emacs: the
+   first check of a buffer whose server is still starting reports no
+   diagnostics, and the buffer is rechecked once the handshake finishes.  A
+   server that does not answer in time is torn down and retried later.
    Defaults to 5.
 
 Diagnostics from the ``lsp`` checker carry the same detail as Eglot's - error
 level, id, an explanation URL from ``codeDescription``, and the secondary
-locations of ``relatedInformation`` (visit them with ``C-c ! j``).
+locations of ``relatedInformation`` (visit them with ``C-c ! j``).  When the
+server offers code actions, they are available as fixes as well (see
+``flycheck-lsp-code-actions`` above).

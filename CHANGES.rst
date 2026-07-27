@@ -1,6 +1,11 @@
 ``master`` (unreleased)
 =======================
 
+- The native ``lsp`` checker now offers a server's ``quickfix`` code actions as
+  Flycheck fixes (``C-c ! f``, ``C-c ! F``, ``[fix]`` in the error list) when
+  the server advertises them, and its ``initialize`` handshake runs
+  asynchronously so starting a server no longer briefly blocks Emacs.
+  Customize ``flycheck-lsp-code-actions`` to turn the fixes off.
 - [#2214]: ``flycheck-lsp-servers`` gains built-in entries for Taplo (TOML),
   TFLint (Terraform), Buf (Protobuf) and Harper (Markdown prose), alongside the
   existing RuboCop, Ruff and Biome.  Each is only used when its program is
