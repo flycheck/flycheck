@@ -1,6 +1,14 @@
 ``master`` (unreleased)
 =======================
 
+- [#2213]: Flycheck can now talk to a diagnostics language server directly,
+  without Eglot.  Enable ``global-flycheck-lsp-mode`` and configure a server
+  per major mode in ``flycheck-lsp-servers`` (``rubocop --lsp`` out of the
+  box); the new ``lsp`` checker starts it over the built-in ``jsonrpc``
+  library, feeds it the buffer's text, and reports its diagnostics.  This suits
+  single-purpose LSP linters (rubocop, ruff, biome) you want as a Flycheck
+  checker without handing the buffer to a full LSP client - for that, keep
+  using ``flycheck-eglot-mode``.
 - [#2212]: Flycheck errors can now carry secondary source locations - the
   earlier definition behind a redefinition, the borrow behind a Rust lifetime
   error, and so on.
