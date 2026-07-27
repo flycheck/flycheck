@@ -10426,6 +10426,57 @@ Maps the diagnostic's `relatedInformation' entries to
   (mapcar #'flycheck-lsp--related-location
           (append (plist-get lsp :relatedInformation) nil)))
 
+(defun flycheck-lsp--text-edit (tedit)
+  "Convert the LSP TextEdit TEDIT to a `flycheck-fix-edit'.
+LSP positions are zero-based and end-exclusive; Flycheck's are one-based
+and end-exclusive, so only the line/column need incrementing."
+  (let ((start (plist-get (plist-get tedit :range) :start))
+        (end (plist-get (plist-get tedit :range) :end)))
+    (flycheck-fix-edit-new
+     :line (1+ (plist-get start :line))
+     :column (1+ (plist-get start :character))
+     :end-line (1+ (plist-get end :line))
+     :end-column (1+ (plist-get end :character))
+     :replacement (plist-get tedit :newText))))
+
+(defun flycheck-lsp--workspace-edit-fix (wedit description)
+  "Build a `flycheck-fix' from the LSP WorkspaceEdit WEDIT, or nil.
+
+A fix is built only when WEDIT edits a single file that is the current
+buffer, since a `flycheck-fix' applies to one buffer; a multi-file edit,
+or one with resource operations (create, rename, delete), is declined.
+DESCRIPTION becomes the fix's description.  The tick is the buffer's
+current one: the edit was just fetched against this buffer state, and the
+fix is applied right after."
+  (let* ((this (buffer-file-name))
+         (dchanges (append (plist-get wedit :documentChanges) nil))
+         (targets
+          (cond
+           ;; `documentChanges' with a resource operation (an entry without a
+           ;; `:textDocument') is not a plain text fix; decline it whole.
+           ((seq-some (lambda (tde) (null (plist-get tde :textDocument)))
+                      dchanges)
+            nil)
+           ;; `documentChanges' (preferred): array of TextDocumentEdit.
+           (dchanges
+            (mapcar (lambda (tde)
+                      (cons (flycheck-lsp--uri-to-path
+                             (plist-get (plist-get tde :textDocument) :uri))
+                            (plist-get tde :edits)))
+                    dchanges))
+           ;; `changes' (legacy): a plist of uri -> edits.
+           (t
+            (cl-loop for (uri edits) on (plist-get wedit :changes) by #'cddr
+                     collect (cons (flycheck-lsp--uri-to-path uri) edits))))))
+    (when (and this
+               (= (length targets) 1)
+               (flycheck-same-files-p (caar targets) this)
+               (cdar targets))
+      (flycheck-fix-new
+       :description description
+       :edits (mapcar #'flycheck-lsp--text-edit (append (cdar targets) nil))
+       :tick (buffer-chars-modified-tick)))))
+
 (defun flycheck-lsp--register-checker (checker exclusive)
   "Teach CHECKER the current buffer's major mode and set up its chaining.
 
@@ -10547,6 +10598,20 @@ start."
   :group 'flycheck
   :package-version '(flycheck . "38"))
 
+(defcustom flycheck-lsp-code-actions t
+  "Whether the `lsp' checker offers LSP quick-fix code actions as fixes.
+
+When non-nil (the default) and the server advertises code actions, each
+diagnostic carries a lazy fix (see `flycheck-error-resolve-fix') that
+requests the server's \"quickfix\" code action for it when applied with
+\\[flycheck-fix-error-at-point].  Because the fix is only computed on
+demand, every diagnostic is shown as potentially fixable even when the
+server has no action for it; set this to nil to turn the feature off."
+  :type 'boolean
+  :safe #'booleanp
+  :group 'flycheck
+  :package-version '(flycheck . "38"))
+
 (cl-defstruct (flycheck-lsp--doc (:constructor flycheck-lsp--doc-create)
                                  (:copier nil))
   "The state of one document open on a server.
@@ -10559,8 +10624,9 @@ VERSION is nil until the document has been opened."
   "A running diagnostics LSP server and the state of its open documents.
 
 The `documents' table maps a document's canonical path (see
-`flycheck-lsp--doc-key') to a `flycheck-lsp--doc'."
-  connection root command stderr
+`flycheck-lsp--doc-key') to a `flycheck-lsp--doc'.  `capabilities' is the
+server's advertised capability plist from its `initialize' reply."
+  connection root command stderr capabilities
   (documents (make-hash-table :test 'equal)))
 
 (defvar flycheck-lsp--servers (make-hash-table :test 'equal)
@@ -10641,6 +10707,20 @@ fresh diagnostics are published (guarded against recursion)."
       (puthash key (flycheck-lsp--doc-create)
                (flycheck-lsp--server-documents server))))
 
+(defun flycheck-lsp--initialize-params (root)
+  "Return the LSP `initialize' params for a server rooted at ROOT."
+  (list :processId (emacs-pid)
+        :rootUri (flycheck-lsp--path-to-uri root)
+        :capabilities
+        (list :textDocument
+              (list :publishDiagnostics '(:relatedInformation t)
+                    ;; Advertise that we can apply a quickfix's edit, so a
+                    ;; server that gates code actions on client support offers
+                    ;; them (see `flycheck-lsp--code-action-fix').
+                    :codeAction
+                    '(:codeActionLiteralSupport
+                      (:codeActionKind (:valueSet ["quickfix"])))))))
+
 (defun flycheck-lsp--start-server (root command)
   "Start and initialize an LSP server running COMMAND under ROOT.
 Return the `flycheck-lsp--server', or nil if it could not be started."
@@ -10665,13 +10745,11 @@ Return the `flycheck-lsp--server', or nil if it could not be started."
           (setf (flycheck-lsp--server-connection server) conn)
           ;; The handshake is synchronous, so this can block Emacs briefly on
           ;; the first check; `flycheck-lsp-initialize-timeout' bounds the wait.
-          (jsonrpc-request conn 'initialize
-                           (list :processId (emacs-pid)
-                                 :rootUri (flycheck-lsp--path-to-uri root)
-                                 :capabilities
-                                 '(:textDocument
-                                   (:publishDiagnostics (:relatedInformation t))))
-                           :timeout flycheck-lsp-initialize-timeout)
+          (let ((result (jsonrpc-request conn 'initialize
+                                         (flycheck-lsp--initialize-params root)
+                                         :timeout flycheck-lsp-initialize-timeout)))
+            (setf (flycheck-lsp--server-capabilities server)
+                  (plist-get result :capabilities)))
           (jsonrpc-notify conn 'initialized (make-hash-table :test 'eq))
           server)
       (error
@@ -10695,6 +10773,21 @@ Return the `flycheck-lsp--server', or nil if it could not be started."
 (defun flycheck-lsp--notify (server method params)
   "Send an LSP notification METHOD with PARAMS to SERVER."
   (jsonrpc-notify (flycheck-lsp--server-connection server) method params))
+
+(defun flycheck-lsp--request (server method params)
+  "Send the LSP request METHOD with PARAMS to SERVER and return its result."
+  (jsonrpc-request (flycheck-lsp--server-connection server) method params))
+
+(defun flycheck-lsp--capable (server &rest path)
+  "Return SERVER's advertised capability at PATH, or nil.
+
+PATH is a sequence of keyword keys walked into the capability plist, e.g.
+\(flycheck-lsp--capable server :codeActionProvider :resolveProvider).  A
+JSON `false' (which `jsonrpc' decodes to `:json-false', truthy in Elisp)
+is treated as absent."
+  (let ((caps (flycheck-lsp--server-capabilities server)))
+    (dolist (key path (unless (eq caps :json-false) caps))
+      (setq caps (if (listp caps) (plist-get caps key) nil)))))
 
 (defun flycheck-lsp--sync-document (server doc uri language)
   "Send the current buffer's text to SERVER for the document DOC at URI.
@@ -10744,9 +10837,67 @@ accordingly to land on the right buffer position."
           (forward-char 1))
         (point)))))
 
-(defun flycheck-lsp--diagnostic->error (lsp buffer)
+(defun flycheck-lsp--resolve-action (server action)
+  "Return ACTION with its edit filled in, resolving it against SERVER if needed.
+A server may omit an action's `edit' until it is resolved via
+`codeAction/resolve'."
+  (if (and (null (plist-get action :edit))
+           (plist-get action :data)
+           (flycheck-lsp--capable server :codeActionProvider :resolveProvider))
+      (flycheck-lsp--request server 'codeAction/resolve action)
+    action))
+
+(defun flycheck-lsp--code-action-fix (server uri lsp)
+  "Resolve a \"quickfix\" code action for the LSP diagnostic into a fix, or nil.
+
+Runs at apply time.  Sync the buffer first, so the server computes the
+edit against its current text -- otherwise a change since the last check
+yields stale coordinates that the fix's tick guard cannot catch.  Then
+request SERVER's quickfix actions for the diagnostic LSP in the document
+URI, prefer an `isPreferred' one, resolve its edit, and convert a
+single-file WorkspaceEdit into a `flycheck-fix' stamped with the current
+tick.  Any error talking to the server yields nil, so the fix just reports
+as unavailable."
+  (when (flycheck-lsp--server-live-p server)
+    ;; A jsonrpc timeout or error must degrade to nil, not abort the fix
+    ;; command (or a `flycheck-fix-all-errors' batch).
+    (ignore-errors
+      (flycheck-lsp--sync-document
+       server (flycheck-lsp--document server (flycheck-lsp--doc-key uri))
+       uri (flycheck-lsp--language-id major-mode))
+      (when-let* ((actions (append
+                            (flycheck-lsp--request
+                             server 'textDocument/codeAction
+                             (list :textDocument (list :uri uri)
+                                   :range (plist-get lsp :range)
+                                   :context (list :diagnostics (vector lsp)
+                                                  :only ["quickfix"])))
+                            nil))
+                  (action (or (seq-find (lambda (a)
+                                          (eq (plist-get a :isPreferred) t))
+                                        actions)
+                              (car actions)))
+                  (edit (plist-get (flycheck-lsp--resolve-action server action)
+                                   :edit)))
+        (flycheck-lsp--workspace-edit-fix edit (plist-get action :title))))))
+
+(defun flycheck-lsp--fix-provider (server uri lsp)
+  "Return a lazy code-action fix provider for the LSP diagnostic, or nil.
+
+Non-nil only when `flycheck-lsp-code-actions' is on and SERVER advertises
+code actions.  The provider (see `flycheck-error-fix') closes over SERVER,
+the document URI and the raw diagnostic LSP, and requests its quickfix on
+demand via `flycheck-lsp--code-action-fix'."
+  (when (and flycheck-lsp-code-actions
+             (flycheck-lsp--capable server :codeActionProvider))
+    (lambda (_err) (flycheck-lsp--code-action-fix server uri lsp))))
+
+(defun flycheck-lsp--diagnostic->error (lsp buffer server uri)
   "Convert the raw LSP diagnostic plist LSP for BUFFER to a `flycheck-error'.
-Reuses the shared LSP mapping for the level, id and related locations."
+
+Reuses the shared LSP mapping for the level, id and related locations, and
+attaches a lazy quickfix from SERVER for the document URI (see
+`flycheck-lsp--fix-provider')."
   (with-current-buffer buffer
     (let* ((range (plist-get lsp :range))
            (start (plist-get range :start))
@@ -10760,6 +10911,7 @@ Reuses the shared LSP mapping for the level, id and related locations."
                  (plist-get end :line) (plist-get end :character))
        :id (flycheck-lsp--diagnostic-id lsp)
        :relations (flycheck-lsp--related-locations lsp)
+       :fix (flycheck-lsp--fix-provider server uri lsp)
        :checker 'lsp
        :buffer buffer
        :filename (buffer-file-name buffer)))))
@@ -10787,7 +10939,8 @@ fails to start still yields no diagnostics rather than an error."
             (flycheck-lsp--sync-document
              server doc uri (flycheck-lsp--language-id major-mode))
             (funcall callback 'finished
-                     (mapcar (lambda (d) (flycheck-lsp--diagnostic->error d buffer))
+                     (mapcar (lambda (d)
+                               (flycheck-lsp--diagnostic->error d buffer server uri))
                              (flycheck-lsp--doc-diags doc))))))
     (error (funcall callback 'errored (error-message-string err)))))
 
@@ -11039,58 +11192,6 @@ advertises code actions; see `flycheck-eglot--code-action-fix'."
                   beg)))
       (cons beg end))))
 
-(defun flycheck-eglot--text-edit (tedit)
-  "Convert the LSP TextEdit TEDIT to a `flycheck-fix-edit'.
-LSP positions are zero-based and end-exclusive; Flycheck's are one-based
-and end-exclusive, so only the line/column need incrementing."
-  (let ((start (plist-get (plist-get tedit :range) :start))
-        (end (plist-get (plist-get tedit :range) :end)))
-    (flycheck-fix-edit-new
-     :line (1+ (plist-get start :line))
-     :column (1+ (plist-get start :character))
-     :end-line (1+ (plist-get end :line))
-     :end-column (1+ (plist-get end :character))
-     :replacement (plist-get tedit :newText))))
-
-(defun flycheck-eglot--workspace-edit-fix (wedit description)
-  "Build a `flycheck-fix' from WEDIT, or nil.
-
-WEDIT is an LSP WorkspaceEdit.  A fix is built only when WEDIT edits a
-single file that is the current buffer, since a `flycheck-fix' applies to
-one buffer; a multi-file edit, or one with resource operations (create,
-rename, delete), is declined and left to Eglot's own commands.
-DESCRIPTION becomes the fix's description.  The tick is the buffer's
-current one: the action was just fetched against this buffer state, and
-the fix is applied right after."
-  (let* ((this (buffer-file-name))
-         (dchanges (append (plist-get wedit :documentChanges) nil))
-         (targets
-          (cond
-           ;; `documentChanges' with a resource operation (an entry without a
-           ;; `:textDocument') is not a plain text fix; decline it whole.
-           ((seq-some (lambda (tde) (null (plist-get tde :textDocument)))
-                      dchanges)
-            nil)
-           ;; `documentChanges' (preferred): array of TextDocumentEdit.
-           (dchanges
-            (mapcar (lambda (tde)
-                      (cons (eglot-uri-to-path
-                             (plist-get (plist-get tde :textDocument) :uri))
-                            (plist-get tde :edits)))
-                    dchanges))
-           ;; `changes' (legacy): a plist of uri -> edits.
-           (t
-            (cl-loop for (uri edits) on (plist-get wedit :changes) by #'cddr
-                     collect (cons (eglot-uri-to-path uri) edits))))))
-    (when (and this
-               (= (length targets) 1)
-               (flycheck-same-files-p (caar targets) this)
-               (cdar targets))
-      (flycheck-fix-new
-       :description description
-       :edits (mapcar #'flycheck-eglot--text-edit (append (cdar targets) nil))
-       :tick (buffer-chars-modified-tick)))))
-
 (defun flycheck-eglot--resolve-action (action)
   "Return ACTION with its edit filled in, resolving it if necessary.
 A server may omit the `edit' until the action is resolved via
@@ -11120,7 +11221,7 @@ talking to the server yields nil, so the fix just reports as unavailable."
                                 (car actions)))
                     (edit (plist-get (flycheck-eglot--resolve-action action)
                                      :edit)))
-          (flycheck-eglot--workspace-edit-fix
+          (flycheck-lsp--workspace-edit-fix
            edit (plist-get action :title)))))))
 
 (defun flycheck-eglot--report (diags &rest _)

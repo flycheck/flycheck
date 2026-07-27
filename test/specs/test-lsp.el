@@ -99,6 +99,64 @@
         (expect (flycheck-related-location-line (nth 1 locs))
                 :to-equal 10))))
 
+  (describe "workspace-edit fixes (shared)"
+    (it "converts an LSP TextEdit to a fix edit, one-basing positions"
+      (let ((fe (flycheck-lsp--text-edit
+                 '(:range (:start (:line 0 :character 4)
+                           :end (:line 0 :character 9))
+                   :newText "hello"))))
+        (expect (flycheck-fix-edit-line fe) :to-equal 1)
+        (expect (flycheck-fix-edit-column fe) :to-equal 5)
+        (expect (flycheck-fix-edit-end-line fe) :to-equal 1)
+        (expect (flycheck-fix-edit-end-column fe) :to-equal 10)
+        (expect (flycheck-fix-edit-replacement fe) :to-equal "hello")))
+
+    (it "builds a fix from a single-file WorkspaceEdit"
+      (flycheck-buttercup-with-temp-buffer
+        (setq buffer-file-name "/proj/a.el")
+        (cl-letf (((symbol-function 'flycheck-same-files-p) #'equal))
+          (let ((fix (flycheck-lsp--workspace-edit-fix
+                      '(:documentChanges
+                        [(:textDocument (:uri "/proj/a.el")
+                          :edits [(:range (:start (:line 0 :character 0)
+                                           :end (:line 0 :character 3))
+                                   :newText "X")])])
+                      "Fix it")))
+            (expect (flycheck-fix-description fix) :to-equal "Fix it")
+            (expect (length (flycheck-fix-edits fix)) :to-equal 1)))))
+
+    (it "declines a multi-file WorkspaceEdit"
+      (flycheck-buttercup-with-temp-buffer
+        (setq buffer-file-name "/proj/a.el")
+        (cl-letf (((symbol-function 'flycheck-same-files-p) #'equal))
+          (expect (flycheck-lsp--workspace-edit-fix
+                   '(:documentChanges
+                     [(:textDocument (:uri "/proj/a.el")
+                       :edits [(:range (:start (:line 0 :character 0)
+                                        :end (:line 0 :character 1))
+                                :newText "X")])
+                      (:textDocument (:uri "/proj/b.el")
+                       :edits [(:range (:start (:line 0 :character 0)
+                                        :end (:line 0 :character 1))
+                                :newText "Y")])])
+                   "x")
+                  :to-be nil))))
+
+    (it "declines a WorkspaceEdit with a resource operation"
+      (flycheck-buttercup-with-temp-buffer
+        (setq buffer-file-name "/proj/a.el")
+        (cl-letf (((symbol-function 'flycheck-same-files-p) #'equal))
+          ;; a file-creation op alongside a text edit is not a plain fix
+          (expect (flycheck-lsp--workspace-edit-fix
+                   '(:documentChanges
+                     [(:kind "create" :uri "/proj/new.el")
+                      (:textDocument (:uri "/proj/a.el")
+                       :edits [(:range (:start (:line 0 :character 0)
+                                        :end (:line 0 :character 1))
+                                :newText "X")])])
+                   "mix")
+                  :to-be nil)))))
+
   (describe "the native lsp checker"
 
     (describe "flycheck-lsp--language-id"
@@ -147,14 +205,17 @@
                       '(:severity 2 :message "oops" :code "C1"
                         :range (:start (:line 0 :character 1)
                                 :end (:line 0 :character 4)))
-                      (current-buffer))))
+                      (current-buffer)
+                      (flycheck-lsp--server-create) "file:///x")))
             (expect (flycheck-error-level err) :to-be 'warning)
             (expect (flycheck-error-message err) :to-equal "oops")
             (expect (substring-no-properties (flycheck-error-id err))
                     :to-equal "C1")
             (expect (flycheck-error-line err) :to-equal 1)
             (expect (flycheck-error-column err) :to-equal 2)
-            (expect (flycheck-error-checker err) :to-be 'lsp)))))
+            (expect (flycheck-error-checker err) :to-be 'lsp)
+            ;; a server with no code-action capability -> no fix
+            (expect (flycheck-error-fix err) :to-be nil)))))
 
     (describe "flycheck-lsp--enabled-p"
       (it "is non-nil only with the mode on, a file, and an installed server"
@@ -252,6 +313,96 @@
             (flycheck-lsp--start 'lsp (lambda (status &optional data)
                                         (setq reported (cons status data))))
             (expect reported :to-equal '(finished))))))
+
+    (describe "flycheck-lsp--capable"
+      (it "walks the capability plist"
+        (let ((server (flycheck-lsp--server-create
+                       :capabilities '(:codeActionProvider (:resolveProvider t)))))
+          (expect (flycheck-lsp--capable server :codeActionProvider)
+                  :to-equal '(:resolveProvider t))
+          (expect (flycheck-lsp--capable
+                   server :codeActionProvider :resolveProvider)
+                  :to-be t)))
+      (it "is nil past a boolean capability, and for a missing one"
+        (let ((server (flycheck-lsp--server-create
+                       :capabilities '(:codeActionProvider t))))
+          (expect (flycheck-lsp--capable
+                   server :codeActionProvider :resolveProvider)
+                  :to-be nil)
+          (expect (flycheck-lsp--capable server :hoverProvider) :to-be nil)))
+      (it "treats a JSON false capability as absent"
+        ;; jsonrpc decodes JSON `false' to `:json-false', which is truthy.
+        (let ((server (flycheck-lsp--server-create
+                       :capabilities '(:codeActionProvider :json-false))))
+          (expect (flycheck-lsp--capable server :codeActionProvider)
+                  :to-be nil))))
+
+    (describe "flycheck-lsp--fix-provider"
+      (it "is a function when enabled and the server is capable"
+        (let ((server (flycheck-lsp--server-create
+                       :capabilities '(:codeActionProvider t)))
+              (flycheck-lsp-code-actions t))
+          (expect (functionp
+                   (flycheck-lsp--fix-provider server "file:///a" '(:range nil)))
+                  :to-be-truthy)))
+      (it "is nil when the server has no code actions"
+        (let ((server (flycheck-lsp--server-create :capabilities nil))
+              (flycheck-lsp-code-actions t))
+          (expect (flycheck-lsp--fix-provider server "file:///a" nil) :to-be nil)))
+      (it "is nil when the feature is off"
+        (let ((server (flycheck-lsp--server-create
+                       :capabilities '(:codeActionProvider t)))
+              (flycheck-lsp-code-actions nil))
+          (expect (flycheck-lsp--fix-provider server "file:///a" nil) :to-be nil))))
+
+    (describe "flycheck-lsp--code-action-fix"
+      (it "requests, prefers the isPreferred action, and builds a fix"
+        (flycheck-buttercup-with-temp-buffer
+          (setq buffer-file-name "/proj/a.rb")
+          (let ((server (flycheck-lsp--server-create :connection 'conn))
+                (edit '(:documentChanges
+                        [(:textDocument (:uri "/proj/a.rb")
+                          :edits [(:range (:start (:line 0 :character 0)
+                                           :end (:line 0 :character 1))
+                                   :newText "Y")])])))
+            (cl-letf (((symbol-function 'jsonrpc-running-p) (lambda (_) t))
+                      ((symbol-function 'flycheck-lsp--sync-document) #'ignore)
+                      ((symbol-function 'flycheck-same-files-p) #'equal)
+                      ((symbol-function 'flycheck-lsp--request)
+                       (lambda (_s method _p)
+                         (when (eq method 'textDocument/codeAction)
+                           (vector (list :title "skip")
+                                   (list :title "do it" :isPreferred t
+                                         :edit edit))))))
+              (let ((fix (flycheck-lsp--code-action-fix
+                          server "file:///proj/a.rb" '(:range nil))))
+                (expect (flycheck-fix-description fix) :to-equal "do it")
+                (expect (length (flycheck-fix-edits fix)) :to-equal 1))))))
+      (it "resolves an action that has data but no edit"
+        (flycheck-buttercup-with-temp-buffer
+          (setq buffer-file-name "/proj/a.rb")
+          (let ((server (flycheck-lsp--server-create
+                         :connection 'conn
+                         :capabilities '(:codeActionProvider (:resolveProvider t))))
+                (edit '(:documentChanges
+                        [(:textDocument (:uri "/proj/a.rb")
+                          :edits [(:range (:start (:line 0 :character 0)
+                                           :end (:line 0 :character 1))
+                                   :newText "Z")])])))
+            (cl-letf (((symbol-function 'jsonrpc-running-p) (lambda (_) t))
+                      ((symbol-function 'flycheck-lsp--sync-document) #'ignore)
+                      ((symbol-function 'flycheck-same-files-p) #'equal)
+                      ((symbol-function 'flycheck-lsp--request)
+                       (lambda (_s method _p)
+                         (pcase method
+                           ('textDocument/codeAction
+                            (vector (list :title "lazy" :data "d")))
+                           ('codeAction/resolve
+                            (list :title "lazy" :data "d" :edit edit))))))
+              (let ((fix (flycheck-lsp--code-action-fix
+                          server "file:///proj/a.rb" '(:range nil))))
+                (expect (flycheck-fix-description fix) :to-equal "lazy")
+                (expect (length (flycheck-fix-edits fix)) :to-equal 1)))))))
 
     (describe "the lsp generic checker"
       (it "is a registered generic checker"
