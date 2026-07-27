@@ -10509,6 +10509,9 @@ backend and a command checker both contribute.  Shared by the `lsp' and
 ;; a `:start' syncs the buffer to its server and reports the diagnostics
 ;; cached so far; the server's later `publishDiagnostics' push updates the
 ;; cache and re-triggers a check so the fresh diagnostics reach the buffer.
+;; The `initialize' handshake runs asynchronously, so starting a server
+;; never blocks Emacs; a check that arrives before it finishes reports
+;; nothing and is re-run when the handshake completes.
 ;;
 ;; One server process is shared per (project root, command); a buffer opens
 ;; its document on the matching server on the first check and closes it when
@@ -10516,6 +10519,7 @@ backend and a command checker both contribute.  Shared by the `lsp' and
 ;; document closes.
 
 (declare-function jsonrpc-request "jsonrpc" (connection method params &rest _))
+(declare-function jsonrpc-async-request "jsonrpc" (connection method params &rest _))
 (declare-function jsonrpc-notify "jsonrpc" (connection method params))
 (declare-function jsonrpc-shutdown "jsonrpc" (connection &optional cleanup))
 (declare-function jsonrpc-running-p "jsonrpc" (connection))
@@ -10590,10 +10594,11 @@ and a command checker can both contribute."
 (defcustom flycheck-lsp-initialize-timeout 5
   "Seconds to wait for a language server to answer `initialize'.
 
-The handshake is synchronous, so the first check of a buffer whose server
-is not running yet blocks Emacs for up to this long while the server
-starts.  A server that does not answer in time is treated as failed to
-start."
+The handshake runs asynchronously and does not block Emacs: the first
+check of a buffer whose server is still starting reports no diagnostics,
+and the buffer is rechecked once the handshake finishes.  A server that
+does not answer within this many seconds is torn down and retried on the
+next check."
   :type 'number
   :group 'flycheck
   :package-version '(flycheck . "38"))
@@ -10625,8 +10630,9 @@ VERSION is nil until the document has been opened."
 
 The `documents' table maps a document's canonical path (see
 `flycheck-lsp--doc-key') to a `flycheck-lsp--doc'.  `capabilities' is the
-server's advertised capability plist from its `initialize' reply."
-  connection root command stderr capabilities
+server's advertised capability plist from its `initialize' reply, filled
+in once `initialized' turns non-nil (the handshake runs asynchronously)."
+  connection root command stderr capabilities initialized
   (documents (make-hash-table :test 'equal)))
 
 (defvar flycheck-lsp--servers (make-hash-table :test 'equal)
@@ -10721,9 +10727,46 @@ fresh diagnostics are published (guarded against recursion)."
                     '(:codeActionLiteralSupport
                       (:codeActionKind (:valueSet ["quickfix"])))))))
 
+(defun flycheck-lsp--server-key (server)
+  "Return SERVER's key in `flycheck-lsp--servers'."
+  (cons (flycheck-lsp--server-root server)
+        (flycheck-lsp--server-command server)))
+
+(defun flycheck-lsp--on-initialized (server result)
+  "Finish SERVER's handshake with the `initialize' RESULT.
+
+Store the server's capabilities, send the `initialized' notification, and
+re-trigger a check in every buffer that opened a document while the
+handshake was still in flight, so their diagnostics finally come through.
+A no-op if the connection died in the meantime."
+  (when (flycheck-lsp--server-live-p server)
+    (setf (flycheck-lsp--server-capabilities server)
+          (plist-get result :capabilities)
+          (flycheck-lsp--server-initialized server) t)
+    (flycheck-lsp--notify server 'initialized (make-hash-table :test 'eq))
+    (maphash (lambda (_key doc)
+               (when-let* ((buffer (flycheck-lsp--doc-buffer doc))
+                           ((buffer-live-p buffer)))
+                 (with-current-buffer buffer
+                   (when flycheck-mode (flycheck-buffer-automatically)))))
+             (flycheck-lsp--server-documents server))))
+
+(defun flycheck-lsp--init-failed (server reason)
+  "Tear SERVER down after its handshake failed for REASON.
+Remove it from the registry so a later check starts a fresh one."
+  (message "Flycheck LSP: %s failed to initialize (%s)"
+           (car (flycheck-lsp--server-command server)) reason)
+  (flycheck-lsp--shutdown-server server)
+  (remhash (flycheck-lsp--server-key server) flycheck-lsp--servers))
+
 (defun flycheck-lsp--start-server (root command)
-  "Start and initialize an LSP server running COMMAND under ROOT.
-Return the `flycheck-lsp--server', or nil if it could not be started."
+  "Start an LSP server running COMMAND under ROOT and initialize it.
+
+The `initialize' handshake runs asynchronously, so this returns the
+`flycheck-lsp--server' before it is ready (its `initialized' slot is still
+nil).  When the reply arrives, `flycheck-lsp--on-initialized' finishes the
+handshake and re-checks the waiting buffers; a failure or timeout tears
+the server down.  Return nil if the process could not be spawned at all."
   (require 'jsonrpc)
   (add-hook 'kill-emacs-hook #'flycheck-lsp--shutdown-all)
   (let* ((default-directory root)
@@ -10743,14 +10786,15 @@ Return the `flycheck-lsp--server', or nil if it could not be started."
                        (flycheck-lsp--handle-notification server method params))
                      :request-dispatcher (lambda (&rest _) nil))))
           (setf (flycheck-lsp--server-connection server) conn)
-          ;; The handshake is synchronous, so this can block Emacs briefly on
-          ;; the first check; `flycheck-lsp-initialize-timeout' bounds the wait.
-          (let ((result (jsonrpc-request conn 'initialize
-                                         (flycheck-lsp--initialize-params root)
-                                         :timeout flycheck-lsp-initialize-timeout)))
-            (setf (flycheck-lsp--server-capabilities server)
-                  (plist-get result :capabilities)))
-          (jsonrpc-notify conn 'initialized (make-hash-table :test 'eq))
+          (jsonrpc-async-request
+           conn 'initialize (flycheck-lsp--initialize-params root)
+           :timeout flycheck-lsp-initialize-timeout
+           :success-fn (lambda (result)
+                         (flycheck-lsp--on-initialized server result))
+           :error-fn (lambda (err)
+                       (flycheck-lsp--init-failed
+                        server (or (plist-get err :message) err)))
+           :timeout-fn (lambda () (flycheck-lsp--init-failed server "timeout")))
           server)
       (error
        (ignore-errors (delete-process proc))
@@ -10923,7 +10967,12 @@ Ensure the buffer's server is running, sync the document to it, and report
 the diagnostics cached for the buffer so far.  The server's later push
 re-triggers the check to deliver fresh diagnostics.  The command, file and
 server are all guaranteed by the checker's predicate, but a server that
-fails to start still yields no diagnostics rather than an error."
+fails to start still yields no diagnostics rather than an error.
+
+While the server is still finishing its asynchronous `initialize'
+handshake, report nothing and leave the document registered: the
+handshake's completion re-triggers the check (see
+`flycheck-lsp--on-initialized')."
   (condition-case err
       (let* ((command (flycheck-lsp--command major-mode))
              (uri (flycheck-lsp--buffer-uri))
@@ -10936,12 +10985,14 @@ fails to start still yields no diagnostics rather than an error."
                  (doc (flycheck-lsp--document
                        server (expand-file-name buffer-file-name))))
             (setf (flycheck-lsp--doc-buffer doc) buffer)
-            (flycheck-lsp--sync-document
-             server doc uri (flycheck-lsp--language-id major-mode))
-            (funcall callback 'finished
-                     (mapcar (lambda (d)
-                               (flycheck-lsp--diagnostic->error d buffer server uri))
-                             (flycheck-lsp--doc-diags doc))))))
+            (if (not (flycheck-lsp--server-initialized server))
+                (funcall callback 'finished nil)
+              (flycheck-lsp--sync-document
+               server doc uri (flycheck-lsp--language-id major-mode))
+              (funcall callback 'finished
+                       (mapcar (lambda (d)
+                                 (flycheck-lsp--diagnostic->error d buffer server uri))
+                               (flycheck-lsp--doc-diags doc)))))))
     (error (funcall callback 'errored (error-message-string err)))))
 
 (defun flycheck-lsp--enabled-p ()

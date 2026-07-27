@@ -312,7 +312,52 @@
                 (reported 'unset))
             (flycheck-lsp--start 'lsp (lambda (status &optional data)
                                         (setq reported (cons status data))))
-            (expect reported :to-equal '(finished))))))
+            (expect reported :to-equal '(finished)))))
+      (it "reports nothing but registers the doc while the server initializes"
+        (flycheck-buttercup-with-temp-buffer
+          (setq-local major-mode 'ruby-mode)
+          (let* ((buffer-file-name "/x/a.rb")
+                 (flycheck-lsp-servers '((ruby-mode "rubocop" "--lsp")))
+                 (server (flycheck-lsp--server-create)) ; initialized nil
+                 (reported 'unset))
+            (cl-letf (((symbol-function 'flycheck-lsp--ensure-server)
+                       (lambda (&rest _) server))
+                      ((symbol-function 'flycheck-lsp--sync-document)
+                       (lambda (&rest _) (error "must not sync before init"))))
+              (flycheck-lsp--start 'lsp (lambda (status &optional data)
+                                          (setq reported (cons status data)))))
+            (expect reported :to-equal '(finished))
+            ;; the document is registered so the init callback can recheck it
+            (expect (flycheck-lsp--doc-buffer
+                     (gethash (expand-file-name "/x/a.rb")
+                              (flycheck-lsp--server-documents server)))
+                    :to-be (current-buffer))))))
+
+    (describe "flycheck-lsp--on-initialized"
+      (it "stores caps, marks the server ready, and rechecks waiting buffers"
+        (flycheck-buttercup-with-temp-buffer
+          (setq-local flycheck-mode t)
+          (spy-on 'flycheck-buffer-automatically)
+          (let* ((server (flycheck-lsp--server-create :connection 'conn))
+                 (doc (flycheck-lsp--document server "/x/a.rb")))
+            (setf (flycheck-lsp--doc-buffer doc) (current-buffer))
+            (cl-letf (((symbol-function 'jsonrpc-notify) #'ignore)
+                      ((symbol-function 'jsonrpc-running-p) (lambda (_) t)))
+              (flycheck-lsp--on-initialized server '(:capabilities (:x t))))
+            (expect (flycheck-lsp--server-initialized server) :to-be-truthy)
+            (expect (flycheck-lsp--server-capabilities server) :to-equal '(:x t))
+            (expect 'flycheck-buffer-automatically :to-have-been-called)))))
+
+    (describe "flycheck-lsp--init-failed"
+      (it "shuts the server down and drops it from the registry"
+        (let* ((server (flycheck-lsp--server-create
+                        :root "/p/" :command '("rubocop" "--lsp")))
+               (key (flycheck-lsp--server-key server))
+               (flycheck-lsp--servers (make-hash-table :test 'equal)))
+          (puthash key server flycheck-lsp--servers)
+          (cl-letf (((symbol-function 'flycheck-lsp--shutdown-server) #'ignore))
+            (flycheck-lsp--init-failed server "timeout"))
+          (expect (gethash key flycheck-lsp--servers) :to-be nil))))
 
     (describe "flycheck-lsp--capable"
       (it "walks the capability plist"
