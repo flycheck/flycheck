@@ -225,3 +225,121 @@ server has nothing for it.
 
 This obsoletes the third-party ``flycheck-eglot`` package; drop it from your
 configuration if you used it.
+
+
+LSP diagnostics without Eglot
+=============================
+
+Some language servers do nothing but report diagnostics - linters like
+``rubocop --lsp``, ``ruff server`` or ``biome lsp-proxy``.  For those you may
+not want a full LSP client at all.  ``flycheck-lsp-mode`` talks to such a
+server directly, over Emacs' built-in ``jsonrpc`` library, and reports its
+diagnostics through the ``lsp`` checker - no Eglot involved.
+
+Turn it on everywhere with:
+
+.. code-block:: elisp
+
+   (global-flycheck-lsp-mode 1)
+
+Out of the box this covers RuboCop for Ruby, Ruff for Python and Biome for
+JavaScript, TypeScript, JSON and CSS.  A server is only used when its program
+is installed, so enabling the mode globally does nothing in a buffer whose
+language server you don't have.
+
+.. minor-mode:: flycheck-lsp-mode
+
+   Start the LSP server configured for the buffer's major mode, send it the
+   buffer's text, and report the diagnostics it pushes back through the ``lsp``
+   checker.  Does nothing in a buffer whose major mode has no configured,
+   installed server.
+
+.. minor-mode:: global-flycheck-lsp-mode
+
+   Enable ``flycheck-lsp-mode`` in every buffer whose major mode has an
+   installed server in `flycheck-lsp-servers`.
+
+Which LSP integration should I use?
+-----------------------------------
+
+Flycheck can get LSP diagnostics three ways.  Pick by how much of a language
+server you actually want:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 24 25 25 26
+
+   * -
+     - ``flycheck-lsp-mode``
+     - ``flycheck-eglot-mode``
+     - ``lsp-mode``
+   * - Runs the server
+     - Flycheck, over built-in ``jsonrpc``
+     - Eglot
+     - ``lsp-mode``
+   * - Extra dependency
+     - none
+     - Eglot (built in since Emacs 29)
+     - the external ``lsp-mode`` package
+   * - Provides
+     - diagnostics only
+     - full LSP (hover, completion, rename, ...)
+     - full LSP
+   * - Owns the buffer
+     - no - runs like any checker, can chain to a command checker
+     - yes
+     - yes
+   * - Best for
+     - single-purpose linters as a Flycheck checker
+     - a real language server you also edit with
+     - if you already run ``lsp-mode``
+
+In short: reach for ``flycheck-lsp-mode`` when you just want a linter that
+happens to speak LSP, and for ``flycheck-eglot-mode`` (see above) when you want
+a full language server whose diagnostics Flycheck should own.
+
+Configuring servers
+-------------------
+
+.. defcustom:: flycheck-lsp-servers
+
+   An alist mapping a major mode to the server command, as ``(MAJOR-MODE
+   PROGRAM ARG...)``.  The defaults map the Ruby, Python, JavaScript,
+   TypeScript, JSON and CSS modes to RuboCop, Ruff and Biome.
+
+   To add a server for another mode, push an entry.  For example, TFLint for
+   Terraform, or Vale for prose::
+
+      (add-to-list 'flycheck-lsp-servers '(terraform-mode "tflint" "--langserver"))
+      (add-to-list 'flycheck-lsp-servers '(markdown-mode "vale-ls"))
+
+   To point a mode at a different server, or drop one of the defaults, edit the
+   alist - e.g. use Ruff for Python but nothing for CSS::
+
+      (setf (alist-get 'python-mode flycheck-lsp-servers) '("ruff" "server"))
+      (setq flycheck-lsp-servers
+            (assq-delete-all 'css-mode flycheck-lsp-servers))
+
+   The server must speak LSP over stdio and publish diagnostics; a full
+   language server works too, but for one of those you usually want Eglot.  An
+   entry whose PROGRAM is not on `exec-path` is ignored, so listing a server
+   you have not installed is harmless.  Flycheck starts one process per project
+   root and command, feeds it the buffer's unsaved text, and shuts it down when
+   Emacs exits.
+
+.. defcustom:: flycheck-lsp-exclusive
+
+   When non-nil (the default), a buffer reports only the language server's
+   diagnostics.  Set to nil to have ``lsp`` chain to the first command checker
+   that supports the buffer's major mode, so the server and a command checker
+   both contribute.
+
+.. defcustom:: flycheck-lsp-initialize-timeout
+
+   How many seconds to wait for a server to answer the ``initialize``
+   handshake, which runs synchronously on the first check of a buffer.
+   Defaults to 5.
+
+Diagnostics from the ``lsp`` checker carry the same detail as Eglot's - error
+level, id, an explanation URL from ``codeDescription``, and the secondary
+locations of ``relatedInformation`` (visit them with ``C-c ! j``).
