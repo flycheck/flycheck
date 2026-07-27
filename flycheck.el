@@ -10345,6 +10345,86 @@ SYMBOL with `flycheck-def-executable-var'."
          :working-directory ',(plist-get properties :working-directory)))))
 
 
+;;; LSP diagnostics
+;;
+;; Shared machinery for turning a Language Server Protocol diagnostic into a
+;; `flycheck-error'.  Both the Eglot bridge (`eglot-check', below) and the
+;; native `lsp' checker use it, so the two produce identical errors -- the
+;; same level, id, related locations and codeDescription -- regardless of how
+;; the diagnostic reached Flycheck.  These helpers operate on the raw LSP
+;; diagnostic object (a plist), not on any client's data structures.
+
+(defun flycheck-lsp--severity-level (severity)
+  "Map an LSP diagnostic SEVERITY (1-4) to a Flycheck error level.
+A missing severity is treated as an error, as Eglot does."
+  (pcase severity
+    (1 'error)
+    (2 'warning)
+    (3 'info)
+    (4 'info)                           ; LSP \"hint\"
+    (_ 'error)))
+
+(defun flycheck-lsp--diagnostic-id (lsp)
+  "Return the Flycheck error id for the LSP diagnostic plist LSP.
+
+Built from the diagnostic's `code', carrying its `codeDescription' href
+\(if any) as an `explainer-url' text property so
+`flycheck-explain-error-at-point' can open it."
+  (when-let* ((code (plist-get lsp :code)))
+    (let ((id (format "%s" code))
+          (href (plist-get (plist-get lsp :codeDescription) :href)))
+      (if href (propertize id 'explainer-url href) id))))
+
+(defun flycheck-lsp--uri-to-path (uri)
+  "Convert a `file:' URI to a local file path.
+
+Handles percent-encoding and the leading slash of a Windows drive URI
+\(file:///c:/...).  A non-`file:' URI is returned unchanged."
+  (if (string-prefix-p "file://" uri)
+      (let* ((enc (substring uri (length "file://")))
+             ;; Drop an authority component (file://host/path).
+             (enc (if (string-prefix-p "/" enc) enc
+                    (if-let* ((slash (string-search "/" enc)))
+                        (substring enc slash) enc)))
+             (path (url-unhex-string enc)))
+        (if (string-match-p "\\`/[a-zA-Z]:" path) (substring path 1) path))
+    uri))
+
+(defun flycheck-lsp--path-to-uri (path)
+  "Return a `file:' URI for the local PATH."
+  (let ((enc (url-hexify-string (expand-file-name path)
+                                (cons ?/ url-unreserved-chars))))
+    (concat "file://" (if (string-prefix-p "/" enc) enc (concat "/" enc)))))
+
+(defun flycheck-lsp--related-location (info)
+  "Convert one LSP `relatedInformation' entry INFO to a related location.
+
+INFO is a plist with a `location' (a `uri' and a `range') and a
+`message'.  LSP positions are 0-based; Flycheck columns are 1-based, so
+each is incremented.  The range end is exclusive in both, so it maps
+directly to Flycheck's right-open end column."
+  (let* ((location (plist-get info :location))
+         (uri (plist-get location :uri))
+         (range (plist-get location :range))
+         (start (plist-get range :start))
+         (end (plist-get range :end)))
+    (flycheck-related-location-new
+     :filename (and uri (flycheck-lsp--uri-to-path uri))
+     :line (and start (1+ (plist-get start :line)))
+     :column (and start (1+ (plist-get start :character)))
+     :end-line (and end (1+ (plist-get end :line)))
+     :end-column (and end (1+ (plist-get end :character)))
+     :message (plist-get info :message))))
+
+(defun flycheck-lsp--related-locations (lsp)
+  "Return the related locations of the LSP diagnostic plist LSP, as a list.
+
+Maps the diagnostic's `relatedInformation' entries to
+`flycheck-related-location' objects; nil when there are none."
+  (mapcar #'flycheck-lsp--related-location
+          (append (plist-get lsp :relatedInformation) nil)))
+
+
 ;;; Eglot integration
 ;;
 ;; Eglot, Emacs' built-in LSP client, renders its diagnostics through
@@ -10431,67 +10511,12 @@ is never selected unless the mode opted in."
   (and (bound-and-true-p flycheck-eglot-mode)
        (flycheck-eglot--available-p)))
 
-(defun flycheck-eglot--severity-level (severity)
-  "Map an LSP diagnostic SEVERITY (1-4) to a Flycheck error level.
-A missing severity is treated as an error, as Eglot does."
-  (pcase severity
-    (1 'error)
-    (2 'warning)
-    (3 'info)
-    (4 'info)                           ; LSP \"hint\"
-    (_ 'error)))
-
 (defun flycheck-eglot--type-level (type)
   "Map an Eglot Flymake diagnostic TYPE to a Flycheck error level."
   (pcase type
     ('eglot-note 'info)
     ('eglot-warning 'warning)
     (_ 'error)))
-
-(defun flycheck-eglot--diagnostic-id (lsp)
-  "Return the Flycheck error id for the LSP diagnostic plist LSP.
-
-Built from the diagnostic's `code', carrying its `codeDescription' href
-\(if any) as an `explainer-url' text property so
-`flycheck-explain-error-at-point' can open it."
-  (when-let* ((code (plist-get lsp :code)))
-    (let ((id (format "%s" code))
-          (href (plist-get (plist-get lsp :codeDescription) :href)))
-      (if href (propertize id 'explainer-url href) id))))
-
-(defun flycheck-eglot--uri-to-path (uri)
-  "Convert an LSP document URI to a file path, across Eglot versions."
-  (cond ((fboundp 'eglot-uri-to-path) (eglot-uri-to-path uri))
-        ((fboundp 'eglot--uri-to-path) (eglot--uri-to-path uri))
-        (t uri)))
-
-(defun flycheck-eglot--related-location (info)
-  "Convert one LSP `relatedInformation' entry INFO to a related location.
-
-INFO is a plist with a `location' (a `uri' and a `range') and a
-`message'.  LSP positions are 0-based; Flycheck columns are 1-based, so
-each is incremented.  The range end is exclusive in both, so it maps
-directly to Flycheck's right-open end column."
-  (let* ((location (plist-get info :location))
-         (uri (plist-get location :uri))
-         (range (plist-get location :range))
-         (start (plist-get range :start))
-         (end (plist-get range :end)))
-    (flycheck-related-location-new
-     :filename (and uri (flycheck-eglot--uri-to-path uri))
-     :line (and start (1+ (plist-get start :line)))
-     :column (and start (1+ (plist-get start :character)))
-     :end-line (and end (1+ (plist-get end :line)))
-     :end-column (and end (1+ (plist-get end :character)))
-     :message (plist-get info :message))))
-
-(defun flycheck-eglot--related-locations (lsp)
-  "Return the related locations of the LSP diagnostic plist LSP, as a list.
-
-Maps the diagnostic's `relatedInformation' entries to
-`flycheck-related-location' objects; nil when there are none."
-  (mapcar #'flycheck-eglot--related-location
-          (append (plist-get lsp :relatedInformation) nil)))
 
 (defun flycheck-eglot--convert-diagnostic (diag)
   "Convert the Eglot Flymake diagnostic DIAG to a `flycheck-error'.
@@ -10505,14 +10530,14 @@ as a fallback."
     (flycheck-error-new-at-pos
      (flymake-diagnostic-beg diag)
      (if lsp
-         (flycheck-eglot--severity-level (plist-get lsp :severity))
+         (flycheck-lsp--severity-level (plist-get lsp :severity))
        (flycheck-eglot--type-level (flymake-diagnostic-type diag)))
      (if lsp
          (plist-get lsp :message)
        (format "%s" (flymake-diagnostic-text diag)))
      :end-pos (flymake-diagnostic-end diag)
-     :id (and lsp (flycheck-eglot--diagnostic-id lsp))
-     :relations (and lsp (flycheck-eglot--related-locations lsp))
+     :id (and lsp (flycheck-lsp--diagnostic-id lsp))
+     :relations (and lsp (flycheck-lsp--related-locations lsp))
      :fix (flycheck-eglot--fix-provider)
      :checker 'eglot-check
      :buffer (current-buffer)
