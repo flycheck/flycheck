@@ -66,9 +66,12 @@
                                                 languages)))
 
         (it "documents all syntax checkers"
-          ;; `eglot-check' is not a per-language command checker; it is
-          ;; documented in the Eglot section of the manual, not languages.rst.
-          (expect (seq-difference (remq 'eglot-check flycheck-checkers) checkers)
+          ;; `eglot-check' and `lsp' are not per-language command checkers;
+          ;; they are documented in the LSP sections of the manual, not
+          ;; languages.rst.
+          (expect (seq-difference
+                   (seq-difference flycheck-checkers '(eglot-check lsp))
+                   checkers)
                   :to-equal nil))
 
         (it "doesn't document syntax checkers that don't exist"
