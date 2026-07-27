@@ -244,7 +244,9 @@
     yaml-jsyaml
     yaml-yamllint
     ;; Only ever selected when `flycheck-eglot-mode' is on (see its predicate).
-    eglot-check)
+    eglot-check
+    ;; Only ever selected when `flycheck-lsp-mode' is on (see its predicate).
+    lsp)
   "Syntax checkers available for automatic selection.
 
 A list of Flycheck syntax checkers to choose from when syntax
@@ -10131,20 +10133,23 @@ information about SARIF."
             .results))))
      .runs)))
 
+(defun flycheck--file-uri-to-path (uri)
+  "Strip a `file://' scheme and authority from URI and percent-decode it.
+
+Both file:///abs/path and file://host/abs/path leave the leading slash of
+the path.  `url-unhex-string' returns the raw bytes of the percent
+escapes, which must be decoded, as file URIs percent-encode UTF-8."
+  (when uri
+    (when (string-match "\\`file://[^/]*" uri)
+      (setq uri (substring uri (match-end 0))))
+    (decode-coding-string (url-unhex-string uri) 'utf-8)))
+
 (defun flycheck-parse-sarif--uri (uri)
   "Turn a SARIF artifact-location URI into a file name.
 
-Strip a `file://' scheme and percent-decode URI; return relative
-URIs unchanged, for Flycheck to expand against the working
-directory."
-  (when uri
-    ;; Strip a file:// scheme and any authority: file:///abs/path and
-    ;; file://host/abs/path both leave the leading slash of the path
-    (when (string-match "\\`file://[^/]*" uri)
-      (setq uri (substring uri (match-end 0))))
-    ;; `url-unhex-string' returns the raw bytes of percent escapes, which
-    ;; must be decoded, as file URIs percent-encode UTF-8
-    (decode-coding-string (url-unhex-string uri) 'utf-8)))
+Strip a `file://' scheme and percent-decode URI; return relative URIs
+unchanged, for Flycheck to expand against the working directory."
+  (and uri (flycheck--file-uri-to-path uri)))
 
 (defun flycheck-parse-rustc (output checker buffer)
   "Parse rustc errors from OUTPUT and return a list of `flycheck-error'.
@@ -10378,15 +10383,12 @@ Built from the diagnostic's `code', carrying its `codeDescription' href
 (defun flycheck-lsp--uri-to-path (uri)
   "Convert a `file:' URI to a local file path.
 
-Handles percent-encoding and the leading slash of a Windows drive URI
-\(file:///c:/...).  A non-`file:' URI is returned unchanged."
+Percent-decoding and authority stripping are shared with the SARIF parser
+via `flycheck--file-uri-to-path'; this additionally trims the leading
+slash of a Windows drive URI (file:///c:/...).  A non-`file:' URI is
+returned unchanged."
   (if (string-prefix-p "file://" uri)
-      (let* ((enc (substring uri (length "file://")))
-             ;; Drop an authority component (file://host/path).
-             (enc (if (string-prefix-p "/" enc) enc
-                    (if-let* ((slash (string-search "/" enc)))
-                        (substring enc slash) enc)))
-             (path (url-unhex-string enc)))
+      (let ((path (flycheck--file-uri-to-path uri)))
         (if (string-match-p "\\`/[a-zA-Z]:" path) (substring path 1) path))
     uri))
 
@@ -10423,6 +10425,459 @@ Maps the diagnostic's `relatedInformation' entries to
 `flycheck-related-location' objects; nil when there are none."
   (mapcar #'flycheck-lsp--related-location
           (append (plist-get lsp :relatedInformation) nil)))
+
+(defun flycheck-lsp--register-checker (checker exclusive)
+  "Teach CHECKER the current buffer's major mode and set up its chaining.
+
+With EXCLUSIVE non-nil, CHECKER is the buffer's sole checker; otherwise it
+chains to the first other checker that supports the mode, so an LSP
+backend and a command checker both contribute.  Shared by the `lsp' and
+`eglot-check' bridges."
+  (unless (flycheck-checker-supports-major-mode-p checker major-mode)
+    (flycheck-add-mode checker major-mode))
+  (if exclusive
+      (setf (flycheck-checker-get checker 'next-checkers) nil)
+    (when-let* ((next (seq-find
+                       (lambda (c)
+                         (and (not (eq c checker))
+                              (flycheck-checker-supports-major-mode-p c major-mode)))
+                       flycheck-checkers)))
+      (flycheck-add-next-checker checker next 'append))))
+
+
+;;; Native LSP diagnostics client
+;;
+;; The `lsp' checker talks to a diagnostics language server directly, over
+;; the built-in `jsonrpc' library -- no Eglot required.  It is meant for the
+;; single-purpose LSP linters (`rubocop --lsp', `ruff server', ...), letting
+;; Flycheck use them like any other checker without handing the buffer to a
+;; full LSP client.
+;;
+;; LSP pushes diagnostics whenever it wants, which does not line up with
+;; Flycheck's on-demand model.  The reconciliation mirrors the Eglot bridge:
+;; a `:start' syncs the buffer to its server and reports the diagnostics
+;; cached so far; the server's later `publishDiagnostics' push updates the
+;; cache and re-triggers a check so the fresh diagnostics reach the buffer.
+;;
+;; One server process is shared per (project root, command); a buffer opens
+;; its document on the matching server on the first check and closes it when
+;; the buffer or the mode goes away, shutting the server down once its last
+;; document closes.
+
+(declare-function jsonrpc-request "jsonrpc" (connection method params &rest _))
+(declare-function jsonrpc-notify "jsonrpc" (connection method params))
+(declare-function jsonrpc-shutdown "jsonrpc" (connection &optional cleanup))
+(declare-function jsonrpc-running-p "jsonrpc" (connection))
+(declare-function project-current "project" (&optional maybe-prompt directory))
+
+(defcustom flycheck-lsp-servers
+  '((ruby-mode "rubocop" "--lsp")
+    (ruby-ts-mode "rubocop" "--lsp")
+    (python-mode "ruff" "server")
+    (python-ts-mode "ruff" "server")
+    (js-mode "biome" "lsp-proxy")
+    (js-ts-mode "biome" "lsp-proxy")
+    (typescript-ts-mode "biome" "lsp-proxy")
+    (tsx-ts-mode "biome" "lsp-proxy")
+    (json-mode "biome" "lsp-proxy")
+    (json-ts-mode "biome" "lsp-proxy")
+    (jsonc-mode "biome" "lsp-proxy")
+    (css-mode "biome" "lsp-proxy")
+    (css-ts-mode "biome" "lsp-proxy"))
+  "Alist mapping a major mode to a diagnostics LSP server command.
+
+Each entry is (MAJOR-MODE PROGRAM ARG...): a buffer in MAJOR-MODE that
+enables `flycheck-lsp-mode' has PROGRAM started with the ARGs as an LSP
+server, is fed the buffer's text, and reports the diagnostics the server
+pushes back through the `lsp' checker.
+
+The default entries cover single-purpose linters that ship an LSP mode --
+RuboCop (Ruby), Ruff (Python) and Biome (JavaScript, TypeScript, JSON,
+CSS).  An entry is only used when its PROGRAM is on `exec-path' (see
+`executable-find'), so listing a server you have not installed is
+harmless; add your own the same way, e.g.
+
+    (add-to-list \\='flycheck-lsp-servers
+                 \\='(terraform-mode \"tflint\" \"--langserver\"))
+
+The server needs to speak LSP over stdio and publish diagnostics.  For a
+full language server (hover, completion, rename) you usually want Eglot
+and `flycheck-eglot-mode' instead."
+  :type '(alist :key-type (symbol :tag "Major mode")
+                :value-type (repeat (string :tag "Command argument")))
+  :group 'flycheck
+  :package-version '(flycheck . "38"))
+
+(defcustom flycheck-lsp-exclusive t
+  "Whether the `lsp' checker is the only checker or chains to others.
+
+When non-nil (the default), a buffer using `flycheck-lsp-mode' reports
+only the language server's diagnostics.  When nil, `lsp' chains to the
+first other checker that supports the buffer's major mode, so the server
+and a command checker can both contribute."
+  :type 'boolean
+  :safe #'booleanp
+  :group 'flycheck
+  :package-version '(flycheck . "38"))
+
+(defcustom flycheck-lsp-initialize-timeout 5
+  "Seconds to wait for a language server to answer `initialize'.
+
+The handshake is synchronous, so the first check of a buffer whose server
+is not running yet blocks Emacs for up to this long while the server
+starts.  A server that does not answer in time is treated as failed to
+start."
+  :type 'number
+  :group 'flycheck
+  :package-version '(flycheck . "38"))
+
+(cl-defstruct (flycheck-lsp--doc (:constructor flycheck-lsp--doc-create)
+                                 (:copier nil))
+  "The state of one document open on a server.
+VERSION is nil until the document has been opened."
+  buffer version tick
+  (diags nil))                          ; latest raw LSP diagnostics
+
+(cl-defstruct (flycheck-lsp--server (:constructor flycheck-lsp--server-create)
+                                    (:copier nil))
+  "A running diagnostics LSP server and the state of its open documents.
+
+The `documents' table maps a document's canonical path (see
+`flycheck-lsp--doc-key') to a `flycheck-lsp--doc'."
+  connection root command stderr
+  (documents (make-hash-table :test 'equal)))
+
+(defvar flycheck-lsp--servers (make-hash-table :test 'equal)
+  "Live `flycheck-lsp--server's, keyed by (ROOT . COMMAND).")
+
+(defvar flycheck-lsp--suppress-recheck nil
+  "When non-nil, a diagnostics push does not re-trigger a check.
+Bound while a push-triggered check runs, so it cannot recurse.")
+
+(defun flycheck-lsp--command (mode)
+  "Return the LSP server command configured for major MODE, or nil."
+  (alist-get mode flycheck-lsp-servers))
+
+(defun flycheck-lsp--available-command (mode)
+  "Return the server command for MODE if its program is installed, else nil.
+Uses `flycheck-executable-find', so it honours the user's setting and TRAMP."
+  (when-let* ((command (flycheck-lsp--command mode)))
+    (and (funcall flycheck-executable-find (car command)) command)))
+
+(defun flycheck-lsp--language-id (mode)
+  "Return a best-effort LSP languageId string for major MODE."
+  (replace-regexp-in-string "\\(?:-ts\\)?-mode\\'" "" (symbol-name mode)))
+
+(defvar-local flycheck-lsp--cached-root nil
+  "Cached workspace root for this buffer; see `flycheck-lsp--root'.")
+
+(defun flycheck-lsp--root ()
+  "Return the workspace root for the current buffer, as an absolute path.
+The result is cached buffer-locally, as `project-current' is not free and
+the root does not change over a buffer's life."
+  (or flycheck-lsp--cached-root
+      (setq flycheck-lsp--cached-root
+            (or (when-let* ((project (and (fboundp 'project-current)
+                                          (project-current))))
+                  (expand-file-name (project-root project)))
+                (and buffer-file-name (file-name-directory buffer-file-name))
+                (expand-file-name default-directory)))))
+
+(defun flycheck-lsp--buffer-uri ()
+  "Return the `file:' URI of the current buffer's file, or nil."
+  (and buffer-file-name (flycheck-lsp--path-to-uri buffer-file-name)))
+
+(defun flycheck-lsp--doc-key (uri)
+  "Return the canonical key (an absolute path) for the document URI.
+
+The client and the server may spell the same file's URI differently (a
+re-encoded percent escape, an authority component, a Windows drive
+case).  Keying open documents and their diagnostics on the decoded,
+expanded path -- rather than the raw URI -- makes both sides agree."
+  (expand-file-name (flycheck-lsp--uri-to-path uri)))
+
+(defun flycheck-lsp--server-live-p (server)
+  "Return non-nil when SERVER's connection is still running."
+  (let ((conn (flycheck-lsp--server-connection server)))
+    (and conn (jsonrpc-running-p conn))))
+
+(defun flycheck-lsp--handle-notification (server method params)
+  "Handle an LSP notification METHOD with PARAMS from SERVER.
+
+Only `textDocument/publishDiagnostics' is used: cache the diagnostics on
+their document and, if a live buffer owns it, re-trigger its check so the
+fresh diagnostics are published (guarded against recursion)."
+  (when (eq method 'textDocument/publishDiagnostics)
+    (let ((doc (flycheck-lsp--document
+                server (flycheck-lsp--doc-key (plist-get params :uri)))))
+      (setf (flycheck-lsp--doc-diags doc)
+            (append (plist-get params :diagnostics) nil))
+      (when-let* ((buffer (flycheck-lsp--doc-buffer doc))
+                  ((buffer-live-p buffer)))
+        (with-current-buffer buffer
+          (when (and flycheck-mode (not flycheck-lsp--suppress-recheck))
+            (let ((flycheck-lsp--suppress-recheck t))
+              (flycheck-buffer-automatically))))))))
+
+(defun flycheck-lsp--document (server key)
+  "Return the `flycheck-lsp--doc' for KEY on SERVER, creating it if needed."
+  (or (gethash key (flycheck-lsp--server-documents server))
+      (puthash key (flycheck-lsp--doc-create)
+               (flycheck-lsp--server-documents server))))
+
+(defun flycheck-lsp--start-server (root command)
+  "Start and initialize an LSP server running COMMAND under ROOT.
+Return the `flycheck-lsp--server', or nil if it could not be started."
+  (require 'jsonrpc)
+  (add-hook 'kill-emacs-hook #'flycheck-lsp--shutdown-all)
+  (let* ((default-directory root)
+         (name (format "flycheck-lsp:%s" (car command)))
+         (stderr (get-buffer-create (format " *%s stderr*" name)))
+         (server (flycheck-lsp--server-create :root root :command command
+                                              :stderr stderr))
+         (proc (make-process
+                :name name :command command :connection-type 'pipe
+                :coding 'utf-8-emacs-unix :noquery t :stderr stderr)))
+    (condition-case err
+        (let ((conn (make-instance
+                     'jsonrpc-process-connection
+                     :name name :process proc
+                     :notification-dispatcher
+                     (lambda (_conn method params)
+                       (flycheck-lsp--handle-notification server method params))
+                     :request-dispatcher (lambda (&rest _) nil))))
+          (setf (flycheck-lsp--server-connection server) conn)
+          ;; The handshake is synchronous, so this can block Emacs briefly on
+          ;; the first check; `flycheck-lsp-initialize-timeout' bounds the wait.
+          (jsonrpc-request conn 'initialize
+                           (list :processId (emacs-pid)
+                                 :rootUri (flycheck-lsp--path-to-uri root)
+                                 :capabilities
+                                 '(:textDocument
+                                   (:publishDiagnostics (:relatedInformation t))))
+                           :timeout flycheck-lsp-initialize-timeout)
+          (jsonrpc-notify conn 'initialized (make-hash-table :test 'eq))
+          server)
+      (error
+       (ignore-errors (delete-process proc))
+       (ignore-errors (kill-buffer stderr))
+       (message "Flycheck LSP: %s failed to start: %s"
+                (car command) (error-message-string err))
+       nil))))
+
+(defun flycheck-lsp--ensure-server (root command)
+  "Return a live server for ROOT and COMMAND, starting one if needed."
+  (let* ((key (cons root command))
+         (server (gethash key flycheck-lsp--servers)))
+    (unless (and server (flycheck-lsp--server-live-p server))
+      (setq server (flycheck-lsp--start-server root command))
+      (if server
+          (puthash key server flycheck-lsp--servers)
+        (remhash key flycheck-lsp--servers)))
+    server))
+
+(defun flycheck-lsp--notify (server method params)
+  "Send an LSP notification METHOD with PARAMS to SERVER."
+  (jsonrpc-notify (flycheck-lsp--server-connection server) method params))
+
+(defun flycheck-lsp--sync-document (server doc uri language)
+  "Send the current buffer's text to SERVER for the document DOC at URI.
+
+LANGUAGE is the LSP languageId.  Send `textDocument/didOpen' the first
+time the document is seen (DOC's version is nil), then
+`textDocument/didChange' with the whole text whenever the buffer changed
+since the last sync (tracked by `buffer-chars-modified-tick'), and nothing
+when it did not -- so a push-triggered recheck does not re-send.  The
+whole-buffer copy is taken only when a message is actually sent."
+  (let ((tick (buffer-chars-modified-tick))
+        (version (flycheck-lsp--doc-version doc)))
+    (cond
+     ((null version)
+      (flycheck-lsp--notify
+       server 'textDocument/didOpen
+       (list :textDocument
+             (list :uri uri :languageId language :version 1
+                   :text (buffer-substring-no-properties (point-min) (point-max)))))
+      (setf (flycheck-lsp--doc-version doc) 1
+            (flycheck-lsp--doc-tick doc) tick))
+     ((/= (flycheck-lsp--doc-tick doc) tick)
+      (cl-incf (flycheck-lsp--doc-version doc))
+      (flycheck-lsp--notify
+       server 'textDocument/didChange
+       (list :textDocument (list :uri uri :version (flycheck-lsp--doc-version doc))
+             :contentChanges
+             (vector (list :text (buffer-substring-no-properties
+                                  (point-min) (point-max))))))
+      (setf (flycheck-lsp--doc-tick doc) tick)))))
+
+(defun flycheck-lsp--position-to-point (line character)
+  "Return the buffer point for 0-based LINE and UTF-16 CHARACTER.
+
+LSP counts a character offset in UTF-16 code units, so a character
+outside the Basic Multilingual Plane counts as two; step over the line
+accordingly to land on the right buffer position."
+  (save-excursion
+    (save-restriction
+      (widen)
+      (goto-char (point-min))
+      (forward-line line)
+      (let ((remaining character)
+            (eol (line-end-position)))
+        (while (and (> remaining 0) (< (point) eol))
+          (setq remaining (- remaining (if (<= #x10000 (char-after)) 2 1)))
+          (forward-char 1))
+        (point)))))
+
+(defun flycheck-lsp--diagnostic->error (lsp buffer)
+  "Convert the raw LSP diagnostic plist LSP for BUFFER to a `flycheck-error'.
+Reuses the shared LSP mapping for the level, id and related locations."
+  (with-current-buffer buffer
+    (let* ((range (plist-get lsp :range))
+           (start (plist-get range :start))
+           (end (plist-get range :end)))
+      (flycheck-error-new-at-pos
+       (flycheck-lsp--position-to-point
+        (plist-get start :line) (plist-get start :character))
+       (flycheck-lsp--severity-level (plist-get lsp :severity))
+       (plist-get lsp :message)
+       :end-pos (flycheck-lsp--position-to-point
+                 (plist-get end :line) (plist-get end :character))
+       :id (flycheck-lsp--diagnostic-id lsp)
+       :relations (flycheck-lsp--related-locations lsp)
+       :checker 'lsp
+       :buffer buffer
+       :filename (buffer-file-name buffer)))))
+
+(defun flycheck-lsp--start (_checker callback)
+  "Start the `lsp' syntax check, reporting through CALLBACK.
+
+Ensure the buffer's server is running, sync the document to it, and report
+the diagnostics cached for the buffer so far.  The server's later push
+re-triggers the check to deliver fresh diagnostics.  The command, file and
+server are all guaranteed by the checker's predicate, but a server that
+fails to start still yields no diagnostics rather than an error."
+  (condition-case err
+      (let* ((command (flycheck-lsp--command major-mode))
+             (uri (flycheck-lsp--buffer-uri))
+             (server (and command uri
+                          (flycheck-lsp--ensure-server (flycheck-lsp--root)
+                                                       command))))
+        (if (not server)
+            (funcall callback 'finished nil)
+          (let* ((buffer (current-buffer))
+                 (doc (flycheck-lsp--document
+                       server (expand-file-name buffer-file-name))))
+            (setf (flycheck-lsp--doc-buffer doc) buffer)
+            (flycheck-lsp--sync-document
+             server doc uri (flycheck-lsp--language-id major-mode))
+            (funcall callback 'finished
+                     (mapcar (lambda (d) (flycheck-lsp--diagnostic->error d buffer))
+                             (flycheck-lsp--doc-diags doc))))))
+    (error (funcall callback 'errored (error-message-string err)))))
+
+(defun flycheck-lsp--enabled-p ()
+  "Return non-nil when the `lsp' checker may run in the current buffer.
+
+That is, `flycheck-lsp-mode' is on, the buffer visits a file, and its
+major mode has a server in `flycheck-lsp-servers' whose program is
+installed.  Used as the checker's predicate so `lsp' is never selected
+unless the mode opted in and the server is actually available."
+  (and (bound-and-true-p flycheck-lsp-mode)
+       buffer-file-name
+       (flycheck-lsp--available-command major-mode)
+       t))
+
+(flycheck-define-generic-checker 'lsp
+  "Report the diagnostics of a Language Server Protocol server.
+
+Talks to the server configured for the buffer's major mode in
+`flycheck-lsp-servers' directly, over the built-in `jsonrpc' library, with
+no Eglot involved.  Enabled by `flycheck-lsp-mode'."
+  :start #'flycheck-lsp--start
+  :predicate #'flycheck-lsp--enabled-p
+  :modes '(prog-mode text-mode))
+
+(defun flycheck-lsp--shutdown-server (server)
+  "Politely shut SERVER's language server down and free its buffers."
+  (let ((conn (flycheck-lsp--server-connection server)))
+    (when (and conn (jsonrpc-running-p conn))
+      (ignore-errors (jsonrpc-request conn 'shutdown nil :timeout 1))
+      (ignore-errors (jsonrpc-notify conn 'exit nil))
+      (ignore-errors (jsonrpc-shutdown conn t))))
+  (when-let* ((stderr (flycheck-lsp--server-stderr server)))
+    (when (buffer-live-p stderr) (kill-buffer stderr))))
+
+(defun flycheck-lsp--close-buffer ()
+  "Close the current buffer's document on any server holding it.
+
+The server itself is left running -- like Eglot, it is kept for the rest
+of the session and torn down only when Emacs exits (see
+`flycheck-lsp--shutdown-all') -- so reopening or checking another of its
+files does not pay to restart it."
+  (when-let* ((uri (flycheck-lsp--buffer-uri))
+              (key (expand-file-name buffer-file-name)))
+    (maphash
+     (lambda (_server-key server)
+       (when (gethash key (flycheck-lsp--server-documents server))
+         (remhash key (flycheck-lsp--server-documents server))
+         (when (flycheck-lsp--server-live-p server)
+           (ignore-errors
+             (flycheck-lsp--notify server 'textDocument/didClose
+                                   (list :textDocument (list :uri uri)))))))
+     flycheck-lsp--servers)))
+
+(defun flycheck-lsp--shutdown-all ()
+  "Shut down every running LSP server.
+Added to `kill-emacs-hook' the first time a server starts."
+  (maphash (lambda (key server)
+             (flycheck-lsp--shutdown-server server)
+             (remhash key flycheck-lsp--servers))
+           flycheck-lsp--servers))
+
+(defun flycheck-lsp--enable ()
+  "Set up the current buffer to report its LSP server's diagnostics.
+A no-op unless the mode's server is configured and installed."
+  (when (flycheck-lsp--available-command major-mode)
+    (flycheck-lsp--register-checker 'lsp flycheck-lsp-exclusive)
+    (setq flycheck-checker 'lsp)
+    (unless flycheck-mode (flycheck-mode 1))
+    (flycheck-buffer-deferred)))
+
+(defun flycheck-lsp--disable ()
+  "Undo `flycheck-lsp--enable' in the current buffer."
+  (flycheck-lsp--close-buffer)
+  (when (eq flycheck-checker 'lsp)
+    (setq flycheck-checker nil))
+  (when flycheck-mode
+    (flycheck-buffer-deferred)))
+
+;;;###autoload
+(define-minor-mode flycheck-lsp-mode
+  "Minor mode to report a Language Server's diagnostics through Flycheck.
+
+When enabled, and the buffer's major mode has a server configured in
+`flycheck-lsp-servers', Flycheck starts that server and shows the
+diagnostics it reports (via the `lsp' checker), talking LSP directly
+without Eglot.  With `flycheck-lsp-exclusive' nil, `lsp' chains to the
+command checkers so both contribute.
+
+Enable it for every configured buffer with `global-flycheck-lsp-mode'.
+For a full language server, prefer Eglot and `flycheck-eglot-mode'."
+  :lighter nil
+  :group 'flycheck
+  (if flycheck-lsp-mode
+      (progn
+        (add-hook 'kill-buffer-hook #'flycheck-lsp--close-buffer nil t)
+        (flycheck-lsp--enable))
+    (remove-hook 'kill-buffer-hook #'flycheck-lsp--close-buffer t)
+    (flycheck-lsp--disable)))
+
+;;;###autoload
+(define-globalized-minor-mode global-flycheck-lsp-mode
+  flycheck-lsp-mode
+  (lambda ()
+    (when (flycheck-lsp--available-command major-mode) (flycheck-lsp-mode 1)))
+  :group 'flycheck)
 
 
 ;;; Eglot integration
@@ -10695,27 +11150,10 @@ ORIG is the advised function; BEG, END and ARGS are its arguments."
                          (or (null beg) (<= beg de)))))
                 flycheck-eglot--diagnostics)))
 
-(defun flycheck-eglot--register ()
-  "Prepare `eglot-check' for the current buffer's major mode.
-
-`eglot-check' is already in `flycheck-checkers'; this just teaches it the
-buffer's major mode when needed and sets up chaining per
-`flycheck-eglot-exclusive'."
-  (unless (flycheck-checker-supports-major-mode-p 'eglot-check major-mode)
-    (flycheck-add-mode 'eglot-check major-mode))
-  (if flycheck-eglot-exclusive
-      (setf (flycheck-checker-get 'eglot-check 'next-checkers) nil)
-    (when-let* ((next (seq-find
-                       (lambda (c)
-                         (and (not (eq c 'eglot-check))
-                              (flycheck-checker-supports-major-mode-p c major-mode)))
-                       flycheck-checkers)))
-      (flycheck-add-next-checker 'eglot-check next 'append))))
-
 (defun flycheck-eglot--enable ()
   "Set up the current buffer to report Eglot diagnostics through Flycheck."
   (when (flycheck-eglot--available-p)
-    (flycheck-eglot--register)
+    (flycheck-lsp--register-checker 'eglot-check flycheck-eglot-exclusive)
     (setq flycheck-checker 'eglot-check)
     ;; Suppress the recheck the synchronous report may fire; the trailing
     ;; `flycheck-buffer-deferred' triggers the first check instead.
