@@ -114,6 +114,17 @@
                   :to-equal '("rubocop" "--lsp"))
           (expect (flycheck-lsp--command 'python-mode) :to-be nil))))
 
+    (describe "the default flycheck-lsp-servers"
+      (it "maps every mode to a non-empty command of strings"
+        (dolist (entry flycheck-lsp-servers)
+          (expect (symbolp (car entry)) :to-be-truthy)
+          (expect (cdr entry) :to-be-truthy)
+          (expect (seq-every-p #'stringp (cdr entry)) :to-be-truthy)))
+      (it "covers the shipped languages"
+        (dolist (mode '(ruby-mode python-mode js-ts-mode toml-mode
+                        terraform-mode protobuf-mode markdown-mode))
+          (expect (flycheck-lsp--command mode) :to-be-truthy))))
+
     (describe "flycheck-lsp--position-to-point"
       (it "converts a 0-based line and column to a buffer point"
         (flycheck-buttercup-with-temp-buffer
