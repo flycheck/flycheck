@@ -39,6 +39,8 @@ extensions = [
     'sphinx.ext.intersphinx',
     'sphinx.ext.extlinks',
     'sphinx.ext.todo',
+    # Render the Markdown CHANGELOG on the site
+    'myst_parser',
     # Domain for Emacs Lisp
     'elisp',
     # Cross-references to info nodes
@@ -168,6 +170,10 @@ extlinks = {
     'gh': ('https://github.com/%s', '%s'),
     'flyc': ('https://github.com/flycheck/%s', '%s')
 }
+
+# CHANGELOG.md is included under the "Changes" page title, so it starts at H2
+# by design; silence MyST's "headings start at H2" notice for that.
+suppress_warnings = ['myst.header']
 
 # While still have work to do :)
 # FIXME: Remove when the old Texinfo manual is completely ported

@@ -24,7 +24,7 @@ Describe the checker you added.
 
 Additional relevant information about the checker and its integration into Flycheck.
 
-[Changelog]: https://github.com/flycheck/flycheck/blob/master/CHANGES.rst
+[Changelog]: https://github.com/flycheck/flycheck/blob/master/CHANGELOG.md
 [manual]: https://www.flycheck.org/en/latest/languages.html
 [test/specs/languages]: https://github.com/flycheck/flycheck/tree/master/test/specs/languages
 [flycheck/docker-tools]: https://github.com/flycheck/docker-tools
