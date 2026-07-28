@@ -251,10 +251,10 @@ Turn it on everywhere with:
    (global-flycheck-lsp-mode 1)
 
 Out of the box this covers RuboCop (Ruby), Ruff (Python), Biome (JavaScript,
-TypeScript, JSON, CSS), Taplo (TOML), TFLint (Terraform), Buf (Protobuf) and
-Harper (Markdown prose).  A server is only used when its program is installed,
-so enabling the mode globally does nothing in a buffer whose language server
-you don't have.
+TypeScript, JSON, CSS) and Harper (Markdown prose) - each lints with sensible
+defaults, no project configuration needed.  A server is only used when its
+program is installed, so enabling the mode globally does nothing in a buffer
+whose language server you don't have.
 
 .. minor-mode:: flycheck-lsp-mode
 
@@ -321,21 +321,24 @@ Configuring servers
    Ruby                            RuboCop   ``rubocop --lsp``
    Python                          Ruff      ``ruff server``
    JavaScript/TypeScript/JSON/CSS  Biome     ``biome lsp-proxy``
-   TOML                            Taplo     ``taplo lsp stdio``
-   Terraform                       TFLint    ``tflint --langserver``
-   Protobuf                        Buf       ``buf lsp serve``
    Markdown (prose)                Harper    ``harper-ls --stdio``
    ==============================  ========  ========================
+
+   These lint out of the box.  Other linters ship an LSP server too but need
+   project configuration before they report anything - TFLint wants a
+   ``.tflint.hcl`` and plugins, Buf wants a module, Taplo wants a workspace
+   config it fetches over ``workspace/configuration`` (which the ``lsp`` checker
+   does not answer) - so they are left out of the defaults.  Add them once your
+   project is set up::
+
+      (add-to-list 'flycheck-lsp-servers '(terraform-mode "tflint" "--langserver"))
+      (add-to-list 'flycheck-lsp-servers '(protobuf-mode "buf" "lsp" "serve"))
 
    A major mode maps to a single server.  To use a different one, replace the
    entry - e.g. Standard instead of RuboCop, or Oxlint instead of Biome::
 
       (setf (alist-get 'ruby-mode flycheck-lsp-servers) '("standardrb" "--lsp"))
       (setf (alist-get 'js-ts-mode flycheck-lsp-servers) '("oxlint" "--lsp"))
-
-   To cover a mode that has no default, add an entry - e.g. Psalm for PHP::
-
-      (add-to-list 'flycheck-lsp-servers '(php-mode "psalm-language-server"))
 
    To drop a default, remove it::
 
