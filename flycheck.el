@@ -11322,7 +11322,11 @@ talking to the server yields nil, so the fix just reports as unavailable."
       ;; not abort the fix command (or a `flycheck-fix-all-errors' batch).
       (ignore-errors
         (when-let* ((actions (eglot-code-actions beg end "quickfix" nil))
-                    (action (or (seq-find (lambda (a) (plist-get a :isPreferred))
+                    ;; `eq' to t, not bare truthiness: jsonrpc decodes JSON
+                    ;; `false' to `:json-false', which is truthy in Elisp, so a
+                    ;; server sending `isPreferred: false' must not be picked.
+                    (action (or (seq-find (lambda (a)
+                                            (eq (plist-get a :isPreferred) t))
                                           actions)
                                 (car actions)))
                     (edit (plist-get (flycheck-eglot--resolve-action action)
