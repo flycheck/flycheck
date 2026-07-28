@@ -1,262 +1,172 @@
 ``master`` (unreleased)
 =======================
 
-- [#2218]: The ``lsp`` checker (and the Eglot bridge) now offer RuboCop's and
-  standardrb's autocorrects as fixes.  These servers ship each diagnostic's
-  quickfix inline in the diagnostic's data rather than answering a
-  ``textDocument/codeAction`` request, so Flycheck reads it from there -- and
-  since the fix is already in the payload, it costs nothing.
+------------------
+Inline diagnostics
+------------------
 
-- [#2217]: A code-action fix returned as a legacy ``changes`` WorkspaceEdit
-  (which Ruff and other servers use) now applies correctly; the URI keys jsonrpc
-  decodes to keywords were mishandled, so the fix silently did nothing.  Affects
-  both the ``lsp`` checker and the Eglot bridge.
-- The native ``lsp`` checker now offers a server's ``quickfix`` code actions as
-  Flycheck fixes (``C-c ! f``, ``C-c ! F``, ``[fix]`` in the error list) when
-  the server advertises them, and its ``initialize`` handshake runs
-  asynchronously so starting a server no longer briefly blocks Emacs.
-  Customize ``flycheck-lsp-code-actions`` to turn the fixes off.
-- [#2214]: ``flycheck-lsp-servers`` gains a built-in entry for Harper (Markdown
-  prose), alongside the existing RuboCop, Ruff and Biome.  These lint out of the
-  box; linters that need project configuration first (TFLint, Buf, Taplo) are
-  documented as opt-in entries rather than defaults.  Each entry is only used
-  when its program is installed.
-- [#2213]: Flycheck can now talk to a diagnostics language server directly,
-  without Eglot.  Enable ``global-flycheck-lsp-mode`` and configure a server
-  per major mode in ``flycheck-lsp-servers`` (``rubocop --lsp`` out of the
-  box); the new ``lsp`` checker starts it over the built-in ``jsonrpc``
-  library, feeds it the buffer's text, and reports its diagnostics.  This suits
-  single-purpose LSP linters (rubocop, ruff, biome) you want as a Flycheck
-  checker without handing the buffer to a full LSP client - for that, keep
-  using ``flycheck-eglot-mode``.
-- [#2212]: Flycheck errors can now carry secondary source locations - the
-  earlier definition behind a redefinition, the borrow behind a Rust lifetime
-  error, and so on.
-
-  - ``flycheck-eglot-mode`` populates them from an LSP diagnostic's
-    ``relatedInformation``, which Flymake discards.
-  - Visit one with ``C-c ! j`` (``flycheck-visit-related-location``) and step
-    through the rest with ``flycheck-next-related-location`` and
-    ``flycheck-previous-related-location``.
-  - Each is shown after its error's message in the echo area, Eldoc, the
-    help-echo tooltip and, under ``flycheck-annotate-mode``, inline below the
-    code; the error list badges such errors with ``↳N`` and visits them with
-    ``j``.
-- [#2211]: With ``flycheck-eglot-mode``, an LSP diagnostic's ``quickfix`` code
-  action is now offered as a Flycheck fix: ``C-c ! f`` applies it (``C-c ! F`` applies all,
-  ``[fix]`` marks it in the error list).  The action is fetched from the server
-  only when you apply a fix.  Customize ``flycheck-eglot-code-actions`` to turn
-  it off.  This is something Flymake, which shows Eglot's diagnostics but not its
-  fixes, does not offer.
-- [#2210]: A ``flycheck-error``'s fix (the ``:fix`` slot) may now be a function
-  that produces the fix on demand instead of a ready ``flycheck-fix``.  Flycheck
-  resolves it with ``flycheck-error-resolve-fix`` only when the fix is applied,
-  so a checker can offer fixes that are expensive to compute (such as an LSP
-  code action) without paying the cost up front.
-- [#2209]: Flycheck now integrates with Eglot out of the box.  Enable
-  ``global-flycheck-eglot-mode`` to report an LSP server's diagnostics (as seen
-  by Eglot) through Flycheck via the new ``eglot-check`` checker, so a buffer
-  can use Eglot for LSP features while Flycheck owns the error display,
-  navigation and the error list.  ``flycheck-eglot-exclusive`` (on by default)
-  makes it the sole checker, or chains to the command checkers when nil.  This
-  obsoletes the third-party ``flycheck-eglot`` package.
-- [#2208]: A line whose error carries a fix now gets a distinct fringe bitmap or
-  margin string, in the error's colour, so fixable errors stand out like an
-  editor's "fix available" lightbulb.  Customize ``flycheck-fixable-indicator``
-  to turn it off.
-- [#2207]: ``C-c ! F`` (``flycheck-fix-all-errors``) applies every machine-applicable
-  fix in the buffer at once, as a single undoable change, skipping fixes that
-  would conflict; ``X`` does the same from the error list.  ``flycheck-annotate-mode``
-  marks a fixable error's inline message with ``flycheck-annotate-fix-marker``
-  (``[fix] `` by default).
-- [#2206]: ``flycheck-annotate-mode`` can now filter annotations per tier:
+- [#2202]: Add ``flycheck-annotate-mode``, which shows error messages inline
+  next to the code they refer to, in the spirit of VS Code's Error Lens and the
+  inline diagnostics of Neovim, Helix and Zed.  Two styles ship out of the box:
+  ``eol`` appends a compact message after the line, ``below`` lays the full
+  messages out underneath.  Obsoletes the third-party ``flycheck-inline`` package.
+- [#2203]: ``flycheck-annotate-mode`` can tint each error's whole line with a
+  subtle background in its severity colour (``flycheck-annotate-background``).
+- [#2204]: Add a ``sideline`` annotation style that flushes the compact message
+  to the window's right edge, in the manner of ``lsp-ui-sideline``.
+- [#2205]: Align ``below``-style connectors to the error's real display column,
+  so they line up under tab-indented code and past a line-number gutter.
+- [#2206]: Filter inline annotations per tier via
   ``flycheck-annotate-current-line-levels`` and
-  ``flycheck-annotate-other-lines-levels`` restrict the line at point and the
-  other lines independently (each inheriting ``flycheck-annotate-levels`` by
-  default), so the focused line can show every level while the rest show only
-  errors, the way Helix limits its non-cursor lines.
-- [#2205]: ``flycheck-annotate-mode``'s ``below`` style now aligns each message's
-  connector to the error's real display column, so it lines up correctly under
-  tab-indented code and past a line-number gutter.
-- [#2204]: ``flycheck-annotate-mode`` gains a ``sideline`` style that flushes the
-  compact message to the window's right edge, in the manner of
-  ``lsp-ui-sideline``.  Set ``flycheck-annotate-current-line-style`` or
-  ``flycheck-annotate-other-lines-style`` to ``sideline`` to use it.
-- [#2203]: ``flycheck-annotate-mode`` can now tint the whole line of each error
-  with a subtle background in its severity colour, in the spirit of VS Code's
-  Error Lens.  Set ``flycheck-annotate-background`` to enable it; the tint
-  applies to every visible error line, independent of the message style.
-- [#2202]: Flycheck can now show error messages inline in the buffer, next to
-  the code they refer to, in the spirit of VS Code's Error Lens and the inline
-  diagnostics of Neovim, Helix and Zed.  ``flycheck-annotate-mode`` enables
-  this.  Two styles ship out of the box: ``eol`` appends a compact message
-  after the line, and ``below`` lays the full messages out on their own
-  lines underneath.  By default the line at point uses ``below`` and the
-  rest use ``eol`` (see ``flycheck-annotate-current-line-style`` and
-  ``flycheck-annotate-other-lines-style``; set either to nil to leave those
-  lines alone).  ``flycheck-annotate-levels`` restricts which levels appear,
-  ``flycheck-annotate-style-functions`` lets you register new styles, and by
-  default the redundant echo-area message for the errors at point is
-  suppressed while the mode is on (``flycheck-annotate-suppress-echo``).  This
-  obsoletes the third-party ``flycheck-inline`` package.
-- The error list no longer scans all of its rows on every cursor movement
-  to highlight the errors at point, so keeping it open next to a large
-  project-scope list is much cheaper.
-- The error list can group its errors by file (``M-2``), syntax checker
-  (``M-3``) or level (``M-4``), laying them out under a header per group
-  instead of a flat list (``M-1``), which helps a lot in project scope.
-  The keys toggle each dimension and combine, so ``M-2`` then ``M-3``
-  nests the errors by checker within each file.  Press ``TAB`` on a group
-  to collapse or expand it.  The groupings are shown in a strip at the top
-  of the error list; click a grouping there or a group header to drive it
-  all with the mouse.
-- ``python-ruff`` and ``sh-shellcheck`` now carry the fixes their tools
-  suggest, applicable with the quick-fix commands.  Both switched to their
-  JSON output (ruff ``--output-format=json``, shellcheck ``--format
-  json1``) to get the fix data; ruff findings no longer show the ``[*]``
-  auto-fixable marker in their message, since the error list marks them
-  ``[fix]`` instead.  ``sh-shellcheck`` now needs shellcheck 0.7 or newer.
-- Flycheck can now apply machine-applicable fixes that checkers suggest.
-  ``C-c ! f`` (``flycheck-fix-error-at-point``) applies the fix of the
-  error at point, and ``x`` does the same for the selected row in the
-  error list, where fixable errors are marked ``[fix]``.  The
-  ``javascript-eslint`` (``--fix``), ``rust``/``rust-cargo``/``rust-clippy``
-  (machine-applicable suggestions) and SARIF-based checkers (e.g.
-  ``dockerfile-hadolint``) now carry these fixes, which were previously
-  parsed and discarded.  Error parsers can attach a ``flycheck-fix`` to a
-  ``flycheck-error`` via the new ``:fix`` slot.
-- The error list can now show whole-project diagnostics.  Press ``P``
-  (``flycheck-error-list-toggle-scope``) to switch it between the current
-  buffer and the project, where it aggregates the errors of every open
+  ``flycheck-annotate-other-lines-levels``, so the focused line and the rest can
+  show different levels.
+
+--------------
+Applying fixes
+--------------
+
+- [#2193]: Add a quick-fix API.  ``C-c ! f`` (``flycheck-fix-error-at-point``)
+  and ``x`` in the error list apply a checker's machine-applicable fix, attached
+  to a ``flycheck-error`` via the new ``:fix`` slot.  Wired into
+  ``javascript-eslint``, the Rust checkers and SARIF-based checkers, whose fixes
+  were previously parsed and discarded.
+- [#2195]: ``python-ruff`` and ``sh-shellcheck`` now carry the fixes their tools
+  suggest (shellcheck 0.7 or newer required).
+- [#2207]: ``C-c ! F`` (``flycheck-fix-all-errors``) applies every fix in the
+  buffer at once as a single undoable change; ``X`` does the same from the error
+  list.
+- [#2208]: Mark a fixable error's line with a distinct fringe or margin
+  indicator, like an editor's "fix available" lightbulb
+  (``flycheck-fixable-indicator``).
+- [#2210]: A ``:fix`` may be a function that computes the fix on demand, so
+  expensive fixes (such as an LSP code action) cost nothing until applied.
+
+-----------------
+Eglot integration
+-----------------
+
+- [#2209]: Integrate with Eglot out of the box: ``global-flycheck-eglot-mode``
+  reports an Eglot-managed server's diagnostics through Flycheck via the new
+  ``eglot-check`` checker.  Obsoletes the third-party ``flycheck-eglot`` package,
+  whose mode names it reuses -- uninstall that package first, or the two will
+  clash.
+- [#2211]: Offer an Eglot diagnostic's ``quickfix`` code action as a Flycheck
+  fix, fetched from the server only when you apply it
+  (``flycheck-eglot-code-actions``).
+
+------------------
+Native LSP support
+------------------
+
+- [#2213]: Add a native ``lsp`` checker that talks to a diagnostics language
+  server directly over the built-in ``jsonrpc`` library, without Eglot or
+  ``lsp-mode``.  Enable ``global-flycheck-lsp-mode`` and configure a server per
+  major mode in ``flycheck-lsp-servers``.
+- [#2214]: Ship built-in ``flycheck-lsp-servers`` entries for RuboCop, Ruff,
+  Biome and Harper, each used only when its program is installed.
+- [#2215]: Offer the server's ``quickfix`` code actions as fixes
+  (``flycheck-lsp-code-actions``), and run the ``initialize`` handshake
+  asynchronously so starting a server no longer briefly blocks Emacs.
+- [#2217]: Fix a code-action fix returned as a legacy ``changes`` WorkspaceEdit
+  (as Ruff emits) silently doing nothing; affects the ``lsp`` checker and the
+  Eglot bridge.
+- [#2218]: Read RuboCop's and standardrb's autocorrects, which those servers
+  ship inline in each diagnostic's data, as fixes.
+
+----------
+Error list
+----------
+
+- [#2192]: Show whole-project diagnostics: ``P``
+  (``flycheck-error-list-toggle-scope``) aggregates errors across every open
   Flycheck buffer together with the cross-file errors that checkers like
-  ``tsc``, ``cargo check`` and ``mypy`` report but the per-buffer view
-  drops.  A buffer's project is Emacs' ``project-current`` when found, and
-  the checker's working directory otherwise.
-- [#1816]: Flycheck now runs syntax checkers over TRAMP.  When a buffer
-  visits a remote file, command checkers execute on the remote host
-  (their executables must be installed there) instead of being unable to
-  run.  ``global-flycheck-mode`` enables Flycheck in remote buffers by
-  default.  Because each check spawns a remote process, remote buffers
-  are checked on fewer triggers by default (``save`` and
-  ``mode-enabled``); customize
-  ``flycheck-check-syntax-automatically-remote`` to change this.  Builds
-  on the earlier work in [#1842].
+  ``tsc``, ``cargo check`` and ``mypy`` report but the per-buffer view drops.
+- [#2196]: Group the error list by file (``M-2``), checker (``M-3``) or level
+  (``M-4``), nest and combine the dimensions, collapse a group with ``TAB``, and
+  drive it all from a strip at the top with the mouse.
+- [#2197]: Stop scanning every error-list row on cursor movement, so keeping a
+  large project-scope list open is much cheaper.
+
+------------------
+Other improvements
+------------------
+
+- [#2212]: Errors can carry secondary source locations (from an LSP diagnostic's
+  ``relatedInformation``, which Flymake discards).  Visit them with ``C-c ! j``;
+  they show up inline and are badged ``↳N`` in the error list.
+- [#2191]: Run syntax checkers over TRAMP: a remote buffer is checked on the
+  remote host, where before it could not run (executables must be installed
+  there).  See ``flycheck-check-syntax-automatically-remote``.
 
 37.0 (2026-07-18)
 =================
 
 - Drop support for Emacs 27; Flycheck now requires Emacs 28.1 or newer.
-- The ``dockerfile-hadolint`` checker now parses hadolint's SARIF output
-  (``--format sarif``) via ``flycheck-parse-sarif`` instead of matching
-  its text output with error patterns, so it no longer breaks when
-  hadolint tweaks its human-readable format.
-- ``flycheck-parse-sarif`` now treats a zero-width SARIF region (where
-  the start and end positions coincide, as some tools emit for
-  line-level findings) as spanning the whole line, instead of producing
-  an empty highlight.
-- Add ``flycheck-parse-sarif``, a ready-made ``:error-parser`` for the
-  SARIF output format that many analyzers can emit.  Like the existing
-  ``flycheck-parse-checkstyle``, checker definitions can point
-  ``:error-parser`` at it instead of matching output text with
-  ``:error-patterns``.
-- [#1129]: ``javascript-eslint`` no longer probes for a configuration
-  file with a blocking ``--print-config`` call before the first check in
-  every buffer, which used to freeze Emacs for its duration (the
-  interactive ``flycheck-verify-setup`` still probes).  A fatal eslint
-  failure (a missing or broken configuration) is now diagnosed from the
-  check's own exit status: the checker disables itself in the buffer
-  with an echo-area notice naming the reason, and a fallback checker
-  takes over on the next automatic check.  Checker authors can use the
-  same mechanism by returning ``disable`` or ``(disable . reason)`` from
-  ``:handle-suspicious``.
-- A new syntax check now interrupts a still-running one and starts
-  immediately, instead of waiting for it to finish and displaying its
-  stale results in the meantime.  This makes slow checkers (cargo, mypy
-  and friends) feel much more responsive.  The new option
-  ``flycheck-interrupt-running-checks`` controls this: with the default
-  value of ``10``, only checks younger than ten seconds are interrupted,
-  so long-running checks still complete and publish their results
-  instead of being restarted forever; ``t`` always interrupts and
-  ``nil`` (also usable file- or directory-locally) restores the old
-  queueing behavior.  Checks triggered on every keystroke (the
-  ``new-line`` condition) always coalesce behind a running check, and
-  checkers without an ``:interrupt`` function are never interrupted.
-  Interactive checks (``C-c ! c``) now also restart a running check
-  instead of doing nothing, without the age limit; Lisp calls to
-  ``flycheck-buffer`` keep the old do-nothing-while-running behavior.
-- The error list pops up in a bottom side window by default, a quarter of
-  the frame tall.  Customize the new option
-  ``flycheck-error-list-display-buffer-action`` to change that;
-  ``display-buffer-alist`` entries still take precedence.  Note that side
-  windows are unaffected by ``C-x 1``; dismiss the list with ``q``.
-- The error list can now also be filtered by syntax checker (``c``) and
-  by a regexp matching the error message or ID (``/``), in addition to
-  the existing minimum-level filter (``f``); ``F`` resets all filters.
-- The File and ID columns of the error list adapt their width to the
-  errors on display instead of truncating at fixed widths.
-- Errors at point are now documented through Eldoc by default, composing
-  with other Eldoc sources (e.g. Eglot) and honoring Eldoc display
-  customizations.  The previous behavior remains available by setting
-  ``flycheck-display-errors-function`` to
-  ``flycheck-display-error-messages``; custom display functions and
-  extensions like flycheck-posframe keep working unchanged.
-- The error counts in the mode line are clickable: ``mouse-1`` pops up
-  the error list.
-- ``flycheck-verify-setup`` and ``flycheck-verify-checker`` now ask
-  before saving a modified buffer instead of saving it silently.
-- [#1787]: Add the ``:handle-suspicious`` property to command checkers.
-  It lets a checker translate a "suspicious state" (a non-zero exit
-  status with no parsable errors, e.g. a missing dependency) into
-  regular errors shown in the buffer, instead of the generic
-  suspicious-state warning.
-- Syntax checkers that exceed ``flycheck-checker-error-threshold`` are no
-  longer silently disabled.  Flycheck now shows the most severe errors up
-  to the threshold and signals the truncation in the mode line (e.g.
-  ``FlyC:400|12|3+``) and the error list.  Set the new option
-  ``flycheck-checker-error-threshold-action`` to ``disable`` to get the
-  old behavior, minus the ``*Warnings*`` popup: the notification is now a
-  plain echo-area message that says how to re-enable the checker.  Note
-  that with the new default, level-conditioned ``:next-checkers`` see the
-  kept errors and behave as they would in any buffer with that many real
-  errors; previously they ran unconditionally because the whole result
-  was discarded.
-- ``flycheck-indication-mode`` defaults to the new value ``auto``, which
-  picks the left fringe on graphical displays and the left margin on text
-  terminals.  Previously the default was ``left-fringe``, which silently
-  displayed nothing in terminal Emacs.  When the chosen margin isn't
-  visible, Flycheck now widens it automatically and restores it when the
-  mode is disabled.  ``flycheck-set-indication-mode`` no longer overrides
-  fringe and margin widths configured by you or other packages.
+- A new syntax check now interrupts a still-running one instead of waiting for
+  it to finish and showing stale results, so slow checkers (cargo, mypy) feel
+  much more responsive.  ``flycheck-interrupt-running-checks`` controls this
+  (default ``10``: only checks younger than ten seconds are interrupted).
+- The error list pops up in a bottom side window by default
+  (``flycheck-error-list-display-buffer-action``); dismiss it with ``q``.
+- Filter the error list by syntax checker (``c``) and by a regexp on the message
+  or ID (``/``), on top of the minimum-level filter (``f``); ``F`` resets all
+  filters.
+- The File and ID columns of the error list size to their contents instead of
+  truncating at fixed widths.
+- Document errors at point through Eldoc by default, composing with other Eldoc
+  sources (e.g. Eglot); restore the old behaviour via
+  ``flycheck-display-errors-function``.
+- The error counts in the mode line are clickable: ``mouse-1`` pops up the error
+  list.
+- Checkers exceeding ``flycheck-checker-error-threshold`` are no longer silently
+  disabled; Flycheck shows the most severe errors up to the threshold and flags
+  the truncation in the mode line and error list.  Set
+  ``flycheck-checker-error-threshold-action`` to ``disable`` for the old
+  behaviour.
+- ``flycheck-indication-mode`` defaults to ``auto`` (left fringe on graphical
+  displays, left margin on terminals), and widens the margin when needed instead
+  of silently showing nothing.
+- ``flycheck-verify-setup`` and ``flycheck-verify-checker`` now ask before saving
+  a modified buffer instead of saving it silently.
+- Add ``flycheck-parse-sarif``, a ready-made ``:error-parser`` for the SARIF
+  output format that many analyzers can emit.  A zero-width SARIF region is
+  treated as spanning the whole line.
+- ``dockerfile-hadolint`` now parses hadolint's SARIF output (``--format sarif``)
+  via ``flycheck-parse-sarif``, so it no longer breaks when hadolint tweaks its
+  human-readable format.
+- Add ``asciidoc-mode`` support to the ``asciidoctor`` and ``textlint`` checkers.
+- Add ``neocaml-opam-mode`` support to the ``opam`` checker.
+- [#1129]: ``javascript-eslint`` no longer makes a blocking ``--print-config``
+  probe before the first check in every buffer (which used to freeze Emacs); a
+  fatal eslint failure is diagnosed from the check's exit status and disables the
+  checker with an echo-area notice.  Checker authors can return ``disable`` or
+  ``(disable . reason)`` from ``:handle-suspicious``.
+- [#1787]: Add the ``:handle-suspicious`` command-checker property, letting a
+  checker turn a suspicious state (a non-zero exit with no parsable errors) into
+  regular errors instead of the generic warning.
+- [#1946]: Fix ``flycheck-lintr-linters`` being ignored by recent lintr versions,
+  which require linters to be passed as a named argument.
+- [#2159]: Mitigate CVE-2024-53920 in the ``emacs-lisp`` checker by requiring
+  files to be trusted (via ``trusted-content``) on Emacs 30+;
+  ``emacs-lisp-checkdoc`` stays enabled.
 - [#2161]: Fix the ``org-lint`` checker erroring out on Emacs 31, where
   ``org-lint`` reports line numbers as strings.
-- [#2174]: Fix the ``haskell-ghc`` and ``haskell-stack-ghc`` checkers
-  passing a broken ``-x`` flag in ``haskell-ts-mode``.
-- [#2177]: Avoid ``\N{...}`` character escapes, which break native
-  compilation on Emacs 32.
-- [#2175]: Compose the error indicator with pre-existing ``wrap-prefix``
-  text properties (e.g. from ``visual-wrap-prefix-mode``), so error
-  overlays no longer reset the indentation of soft-wrapped lines.
-- [#2164]: Recognize unresolved-identifier errors in the
-  ``scheme-chicken`` checker.
-- [#1946]: Fix ``flycheck-lintr-linters`` being ignored by recent lintr
-  versions, which require linters to be passed as a named argument.
-- Add ``asciidoc-mode`` support to the ``asciidoctor`` and ``textlint``
-  checkers, alongside the existing ``adoc-mode``.
-- Add ``neocaml-opam-mode`` support to the ``opam`` checker.
-- [#2169]: Parse the severity-tagged output format introduced by Ruff 0.15.7
-  in preview mode (e.g. ``error[F401]`` instead of ``F401``).
+- [#2163]: Disable native compilation in the ``emacs-lisp`` checker subprocess so
+  it no longer writes stray ``.eln`` files to the native-comp cache.
+- [#2164]: Recognize unresolved-identifier errors in the ``scheme-chicken``
+  checker.
 - [#2166]: Fix ``awk-gawk`` reporting a suspicious checker state for valid
   scripts.
-- [#2163]: Disable native compilation in the ``emacs-lisp`` checker subprocess
-  so it no longer writes stray ``.eln`` files to the native-comp cache.
+- [#2169]: Parse the severity-tagged output format introduced by Ruff 0.15.7
+  (e.g. ``error[F401]`` instead of ``F401``).
 - [#2170]: Force English checker output with ``LC_MESSAGES=C`` instead of
-  ``LC_ALL=C``, so the character encoding is left untouched.  ``LC_ALL=C``
-  broke checkers reading UTF-8 input, such as ``hledger``.
-- [#2159]: Properly mitigate CVE-2024-53920 in the ``emacs-lisp`` checker
-  by requiring files to be marked as trusted (via ``trusted-content``) on
-  Emacs 30+.  Byte-compilation triggers macro expansion which can execute
-  arbitrary code, so the checker is now disabled for untrusted files.
-  ``emacs-lisp-checkdoc`` doesn't expand macros and stays enabled.
+  ``LC_ALL=C``, which broke checkers reading UTF-8 input, such as ``hledger``.
+- [#2174]: Fix the ``haskell-ghc`` and ``haskell-stack-ghc`` checkers passing a
+  broken ``-x`` flag in ``haskell-ts-mode``.
+- [#2175]: Compose the error indicator with pre-existing ``wrap-prefix`` text
+  properties (e.g. from ``visual-wrap-prefix-mode``).
+- [#2177]: Avoid ``\N{...}`` character escapes, which break native compilation on
+  Emacs 32.
 
 36.0 (2026-02-19)
 ======================
