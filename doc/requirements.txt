@@ -1,5 +1,7 @@
 # Sphinx
 Sphinx>=7.0
+# Markdown support (renders CHANGELOG.md)
+myst-parser>=2.0
 # Automatically build documentation on changes
 sphinx-autobuild
 # Sphinx theme

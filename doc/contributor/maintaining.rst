@@ -134,7 +134,7 @@ still have to check a few things before merging:
   tests, and not all tests are run on CI, so contributors should make sure to
   run them on their side.
 * Should the PR warrant a line in the changelog?  User-facing changes should be
-  documented in ``CHANGES.rst``.
+  documented in ``CHANGELOG.md``.
 
 For new features:
 
@@ -234,7 +234,7 @@ To make a release:
 
 1. Update the ``Version:`` header in ``flycheck.el`` and the version in
    ``Eask``.
-2. Update ``CHANGES.rst``: replace the ``master (unreleased)`` header with the
+2. Update ``CHANGELOG.md``: replace the ``master (unreleased)`` header with the
    version and date, and add a fresh unreleased section above it.
 3. Commit the changes with a message like ``Release X.Y``.
 4. Tag the commit (e.g. ``git tag vX.Y``).
