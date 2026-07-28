@@ -78,3 +78,22 @@ The same menu also pops up when you click on the mode line lighter:
 .. figure:: /images/flycheck-mode-line-menu.png
 
    The mode line menu of Flycheck
+
+What else Flycheck can do
+=========================
+
+The basics above are only the start.  A few highlights worth knowing about:
+
+- **Inline error messages.**  Flycheck can show each message right next to the
+  code it refers to, in the spirit of VS Code's Error Lens - turn on
+  ``flycheck-annotate-mode`` (see :doc:`error-reports`).
+- **Fixes.**  Some checkers report a machine-applicable fix; apply the one at
+  point with :kbd:`C-c ! f`, or every fix in the buffer with :kbd:`C-c ! F`
+  (see :doc:`error-interaction`).
+- **Related locations.**  When an error points at other places (an earlier
+  definition, a borrow), jump to them with :kbd:`C-c ! j` (see
+  :doc:`error-interaction`).
+- **Language servers.**  Flycheck can report a language server's diagnostics -
+  either through Eglot (``flycheck-eglot-mode``) or by talking to a diagnostics
+  linter directly, with no full LSP client (``flycheck-lsp-mode``).  See
+  :doc:`syntax-checks`.

@@ -1572,7 +1572,11 @@ Key bindings:
   \\[flycheck-list-errors]     List all errors
 
   \\[flycheck-copy-errors-as-kill]   Copy error messages at point
-  \\[flycheck-display-error-at-point]     Explain error at point
+  \\[flycheck-display-error-at-point]     Show error at point
+  \\[flycheck-explain-error-at-point]     Explain error at point
+  \\[flycheck-visit-related-location]     Visit a related location
+  \\[flycheck-fix-error-at-point]     Apply fix at point
+  \\[flycheck-fix-all-errors]     Apply all fixes in buffer
 ")))
         (help-mode)
         (read-only-mode 0)
