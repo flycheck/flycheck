@@ -125,6 +125,25 @@
             (expect (flycheck-fix-description fix) :to-equal "Fix it")
             (expect (length (flycheck-fix-edits fix)) :to-equal 1)))))
 
+    (it "builds a fix from a legacy `changes' WorkspaceEdit"
+      ;; jsonrpc decodes the changes object's URI keys to keywords
+      ;; (`:file:///...'); the fix must strip the leading colon.  Ruff and
+      ;; other servers use this form, so this path must work.
+      (flycheck-buttercup-with-temp-buffer
+        (setq buffer-file-name "/proj/a.el")
+        (cl-letf (((symbol-function 'flycheck-same-files-p) #'equal))
+          (let ((fix (flycheck-lsp--workspace-edit-fix
+                      '(:changes
+                        (:file:///proj/a.el
+                         [(:range (:start (:line 0 :character 0)
+                                   :end (:line 1 :character 0))
+                           :newText "")]))
+                      "Remove import")))
+            (expect (flycheck-fix-description fix) :to-equal "Remove import")
+            (expect (length (flycheck-fix-edits fix)) :to-equal 1)
+            (expect (flycheck-fix-edit-replacement (car (flycheck-fix-edits fix)))
+                    :to-equal "")))))
+
     (it "declines a multi-file WorkspaceEdit"
       (flycheck-buttercup-with-temp-buffer
         (setq buffer-file-name "/proj/a.el")
@@ -179,8 +198,7 @@
           (expect (cdr entry) :to-be-truthy)
           (expect (seq-every-p #'stringp (cdr entry)) :to-be-truthy)))
       (it "covers the shipped languages"
-        (dolist (mode '(ruby-mode python-mode js-ts-mode toml-mode
-                        terraform-mode protobuf-mode markdown-mode))
+        (dolist (mode '(ruby-mode python-mode js-ts-mode css-mode markdown-mode))
           (expect (flycheck-lsp--command mode) :to-be-truthy))))
 
     (describe "flycheck-lsp--position-to-point"

@@ -1,15 +1,20 @@
 ``master`` (unreleased)
 =======================
 
+- [#2217]: A code-action fix returned as a legacy ``changes`` WorkspaceEdit
+  (which Ruff and other servers use) now applies correctly; the URI keys jsonrpc
+  decodes to keywords were mishandled, so the fix silently did nothing.  Affects
+  both the ``lsp`` checker and the Eglot bridge.
 - The native ``lsp`` checker now offers a server's ``quickfix`` code actions as
   Flycheck fixes (``C-c ! f``, ``C-c ! F``, ``[fix]`` in the error list) when
   the server advertises them, and its ``initialize`` handshake runs
   asynchronously so starting a server no longer briefly blocks Emacs.
   Customize ``flycheck-lsp-code-actions`` to turn the fixes off.
-- [#2214]: ``flycheck-lsp-servers`` gains built-in entries for Taplo (TOML),
-  TFLint (Terraform), Buf (Protobuf) and Harper (Markdown prose), alongside the
-  existing RuboCop, Ruff and Biome.  Each is only used when its program is
-  installed.
+- [#2214]: ``flycheck-lsp-servers`` gains a built-in entry for Harper (Markdown
+  prose), alongside the existing RuboCop, Ruff and Biome.  These lint out of the
+  box; linters that need project configuration first (TFLint, Buf, Taplo) are
+  documented as opt-in entries rather than defaults.  Each entry is only used
+  when its program is installed.
 - [#2213]: Flycheck can now talk to a diagnostics language server directly,
   without Eglot.  Enable ``global-flycheck-lsp-mode`` and configure a server
   per major mode in ``flycheck-lsp-servers`` (``rubocop --lsp`` out of the

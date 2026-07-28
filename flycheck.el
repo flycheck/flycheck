@@ -10464,10 +10464,16 @@ fix is applied right after."
                              (plist-get (plist-get tde :textDocument) :uri))
                             (plist-get tde :edits)))
                     dchanges))
-           ;; `changes' (legacy): a plist of uri -> edits.
+           ;; `changes' (legacy): a JSON object of uri -> edits, which jsonrpc
+           ;; decodes to a plist whose keys are keywords (`:file:///...'), so
+           ;; strip the leading colon before resolving each URI.
            (t
             (cl-loop for (uri edits) on (plist-get wedit :changes) by #'cddr
-                     collect (cons (flycheck-lsp--uri-to-path uri) edits))))))
+                     collect (cons (flycheck-lsp--uri-to-path
+                                    (if (keywordp uri)
+                                        (substring (symbol-name uri) 1)
+                                      uri))
+                                   edits))))))
     (when (and this
                (= (length targets) 1)
                (flycheck-same-files-p (caar targets) this)
@@ -10539,11 +10545,6 @@ backend and a command checker both contribute.  Shared by the `lsp' and
     (jsonc-mode "biome" "lsp-proxy")
     (css-mode "biome" "lsp-proxy")
     (css-ts-mode "biome" "lsp-proxy")
-    (toml-mode "taplo" "lsp" "stdio")
-    (toml-ts-mode "taplo" "lsp" "stdio")
-    (conf-toml-mode "taplo" "lsp" "stdio")
-    (terraform-mode "tflint" "--langserver")
-    (protobuf-mode "buf" "lsp" "serve")
     (markdown-mode "harper-ls" "--stdio")
     (gfm-mode "harper-ls" "--stdio"))
   "Alist mapping a major mode to a diagnostics LSP server command.
@@ -10553,12 +10554,12 @@ enables `flycheck-lsp-mode' has PROGRAM started with the ARGs as an LSP
 server, is fed the buffer's text, and reports the diagnostics the server
 pushes back through the `lsp' checker.
 
-The default entries cover single-purpose linters that ship a native LSP
-mode: RuboCop (Ruby), Ruff (Python), Biome (JavaScript, TypeScript, JSON,
-CSS), Taplo (TOML), TFLint (Terraform), Buf (Protobuf) and Harper
-(Markdown prose).  An entry is only used when its PROGRAM is on
-`exec-path' (see `executable-find'), so listing a server you have not
-installed is harmless.
+The default entries are linters that ship a native LSP server and lint out
+of the box, with no project configuration: RuboCop (Ruby), Ruff (Python),
+Biome (JavaScript, TypeScript, JSON, CSS) and Harper (Markdown prose).  An
+entry is only used when its PROGRAM is on `exec-path' (see
+`executable-find'), so listing a server you have not installed is
+harmless.
 
 A major mode maps to a single server.  To use a different one, replace
 the entry -- e.g. Standard instead of RuboCop for Ruby, or Oxlint instead
@@ -10567,9 +10568,13 @@ of Biome for JavaScript:
     (setf (alist-get \\='ruby-mode flycheck-lsp-servers)
           \\='(\"standardrb\" \"--lsp\"))
 
-To cover a mode that has no default, add an entry:
+To cover a mode that has no default, add an entry.  Some linters ship an
+LSP server but need project configuration to report anything (a TFLint
+config and plugins, a Buf module), so they are left out of the defaults;
+add them once your project is set up:
 
-    (add-to-list \\='flycheck-lsp-servers \\='(php-mode \"psalm-language-server\"))
+    (add-to-list \\='flycheck-lsp-servers
+                 \\='(terraform-mode \"tflint\" \"--langserver\"))
 
 The server needs to speak LSP over stdio and publish diagnostics.  For a
 full language server (hover, completion, rename) you usually want Eglot
