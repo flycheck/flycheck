@@ -144,6 +144,34 @@
             (expect (flycheck-fix-p fix) :to-be t)
             (expect (flycheck-fix-description fix) :to-equal "Quick fix")))))
 
+    (it "does not treat isPreferred `:json-false' as preferred"
+      ;; jsonrpc decodes JSON `false' to `:json-false', which is truthy; the
+      ;; first action here carries it and must not be mistaken for preferred.
+      (flycheck-buttercup-with-temp-buffer
+        (setq buffer-file-name "/proj/a.el")
+        (insert "line one\n")
+        (cl-letf (((symbol-function 'eglot-managed-p) (lambda () t))
+                  ((symbol-function 'eglot-uri-to-path) #'identity)
+                  ((symbol-function 'flycheck-same-files-p) #'equal)
+                  ((symbol-function 'eglot-code-actions)
+                   (lambda (&rest _)
+                     (list '(:title "Not preferred" :isPreferred :json-false
+                             :edit (:documentChanges
+                                    [(:textDocument (:uri "/proj/a.el")
+                                      :edits [(:range (:start (:line 0 :character 0)
+                                                       :end (:line 0 :character 1))
+                                               :newText "X")])]))
+                           '(:title "The real one" :isPreferred t
+                             :edit (:documentChanges
+                                    [(:textDocument (:uri "/proj/a.el")
+                                      :edits [(:range (:start (:line 0 :character 0)
+                                                       :end (:line 0 :character 4))
+                                               :newText "LINE")])]))))))
+          (let ((fix (flycheck-eglot--code-action-fix
+                      (flycheck-error-new-at 1 1 'error "x"
+                                             :buffer (current-buffer)))))
+            (expect (flycheck-fix-description fix) :to-equal "The real one")))))
+
     (it "returns no fix when the server offers no actions"
       (flycheck-buttercup-with-temp-buffer
         (insert "x\n")
