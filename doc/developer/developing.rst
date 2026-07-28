@@ -331,6 +331,60 @@ external program and parsing its output, checking for a plugin, etc.).
    serve as useful examples you can draw from, and all core functions are
    documented.
 
+Suggesting fixes
+----------------
+
+A checker can attach a *machine-applicable fix* to an error, which the user
+applies with ``C-c ! f`` (`flycheck-fix-error-at-point`), ``C-c ! F``
+(`flycheck-fix-all-errors`), or ``x`` in the error list.  The fix lives in the
+``:fix`` slot of a `flycheck-error`, so you set it from an ``:error-parser`` or
+``:error-filter`` -- wherever you already build the error and have the fix data
+(a linter's suggested replacement, a SARIF ``fix``, an LSP code action).
+
+A fix is a `flycheck-fix`: a description and a list of `flycheck-fix-edit`
+objects applied together as one undoable change.  Each edit replaces the region
+from one-based ``LINE``/``COLUMN`` to ``END-LINE``/``END-COLUMN`` with
+``REPLACEMENT`` (an insertion has the two positions equal; a deletion has an
+empty replacement):
+
+.. code-block:: elisp
+
+   (setf (flycheck-error-fix err)
+         (flycheck-fix-new
+          :description "Remove unused import"
+          :edits (list (flycheck-fix-edit-new
+                        :line 1 :column 1 :end-line 2 :end-column 1
+                        :replacement ""))
+          :tick (buffer-chars-modified-tick)))
+
+Set ``:tick`` to the buffer's `buffer-chars-modified-tick` when you build the
+fix: `flycheck-apply-fix` refuses to apply a fix if the buffer changed since,
+so stale positions can never silently corrupt the buffer.
+
+If computing the fix is expensive (an LSP code-action request, say), make
+``:fix`` a *function* of one argument, the error, instead of a ready
+`flycheck-fix`.  Flycheck calls it only when the user applies the fix (see
+`flycheck-error-resolve-fix`), so a non-nil ``:fix`` still marks the error as
+fixable without paying the cost up front.
+
+Related locations
+-----------------
+
+When an error points at more than one place -- the earlier definition behind a
+"redefined" error, the borrow behind a Rust lifetime error -- attach the
+secondary places as the error's ``:relations``, a list of
+`flycheck-related-location` objects.  The user visits them with ``C-c ! j``
+(`flycheck-visit-related-location`), and they show up after the message in the
+echo area, Eldoc, the error list and the inline annotations.  A related
+location carries only a position and a message, and may live in another file:
+
+.. code-block:: elisp
+
+   (setf (flycheck-error-relations err)
+         (list (flycheck-related-location-new
+                :filename "other.rb" :line 12 :column 3
+                :message "first defined here")))
+
 Sharing your checker
 --------------------
 
