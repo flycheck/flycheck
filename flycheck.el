@@ -10930,16 +10930,36 @@ as unavailable."
                                    :edit)))
         (flycheck-lsp--workspace-edit-fix edit (plist-get action :title))))))
 
-(defun flycheck-lsp--fix-provider (server uri lsp)
-  "Return a lazy code-action fix provider for the LSP diagnostic, or nil.
+(defun flycheck-lsp--inline-fix (lsp)
+  "Build a fix from a quickfix CodeAction embedded in the diagnostic LSP, or nil.
 
-Non-nil only when `flycheck-lsp-code-actions' is on and SERVER advertises
-code actions.  The provider (see `flycheck-error-fix') closes over SERVER,
-the document URI and the raw diagnostic LSP, and requests its quickfix on
-demand via `flycheck-lsp--code-action-fix'."
-  (when (and flycheck-lsp-code-actions
-             (flycheck-lsp--capable server :codeActionProvider))
-    (lambda (_err) (flycheck-lsp--code-action-fix server uri lsp))))
+RuboCop and standardrb do not answer `textDocument/codeAction'; they ship
+their autocorrect actions inline in each diagnostic's `data' slot, as a
+`code_actions' array.  Pick the `isPreferred' one that carries an edit
+\(the autocorrect, not the \"disable for this line\" action) and convert
+its WorkspaceEdit into a `flycheck-fix'.  Returns the fix eagerly -- it is
+already in the payload, so no request is needed."
+  (when-let* ((actions (append (plist-get (plist-get lsp :data) :code_actions)
+                               nil))
+              (action (seq-find (lambda (a)
+                                  (and (eq (plist-get a :isPreferred) t)
+                                       (plist-get a :edit)))
+                                actions))
+              (edit (plist-get action :edit)))
+    (flycheck-lsp--workspace-edit-fix edit (plist-get action :title))))
+
+(defun flycheck-lsp--fix-provider (server uri lsp)
+  "Return a code-action fix, or a lazy provider, for the diagnostic LSP, or nil.
+
+With `flycheck-lsp-code-actions' on, prefer a quickfix action the server
+embedded in the diagnostic's `data' (see `flycheck-lsp--inline-fix'),
+building the fix eagerly.  Otherwise, when SERVER advertises code actions,
+return a lazy provider (see `flycheck-error-fix') that requests the
+quickfix from SERVER on demand via `flycheck-lsp--code-action-fix'."
+  (when flycheck-lsp-code-actions
+    (or (flycheck-lsp--inline-fix lsp)
+        (and (flycheck-lsp--capable server :codeActionProvider)
+             (lambda (_err) (flycheck-lsp--code-action-fix server uri lsp))))))
 
 (defun flycheck-lsp--diagnostic->error (lsp buffer server uri)
   "Convert the raw LSP diagnostic plist LSP for BUFFER to a `flycheck-error'.
@@ -11218,7 +11238,10 @@ as a fallback."
      :end-pos (flymake-diagnostic-end diag)
      :id (and lsp (flycheck-lsp--diagnostic-id lsp))
      :relations (and lsp (flycheck-lsp--related-locations lsp))
-     :fix (flycheck-eglot--fix-provider)
+     ;; Prefer a quickfix the server embedded in the diagnostic's data
+     ;; (rubocop, standardrb); fall back to Eglot's on-demand code actions.
+     :fix (or (and flycheck-eglot-code-actions lsp (flycheck-lsp--inline-fix lsp))
+              (flycheck-eglot--fix-provider))
      :checker 'eglot-check
      :buffer (current-buffer)
      :filename (buffer-file-name))))

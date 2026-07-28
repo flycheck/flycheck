@@ -1,6 +1,12 @@
 ``master`` (unreleased)
 =======================
 
+- [#2218]: The ``lsp`` checker (and the Eglot bridge) now offer RuboCop's and
+  standardrb's autocorrects as fixes.  These servers ship each diagnostic's
+  quickfix inline in the diagnostic's data rather than answering a
+  ``textDocument/codeAction`` request, so Flycheck reads it from there -- and
+  since the fix is already in the payload, it costs nothing.
+
 - [#2217]: A code-action fix returned as a legacy ``changes`` WorkspaceEdit
   (which Ruff and other servers use) now applies correctly; the URI keys jsonrpc
   decodes to keywords were mishandled, so the fix silently did nothing.  Affects

@@ -364,11 +364,14 @@ Configuring servers
    When non-nil (the default), offer the server's ``quickfix`` code actions as
    Flycheck fixes: ``C-c ! f`` applies the fix of the error at point, ``C-c !
    F`` applies all, and the error list marks fixable errors with ``[fix]``.
-   The action is fetched from the server only when you apply a fix, so every
-   diagnostic is shown as potentially fixable even if the server has nothing
-   for it.  Set to nil to turn this off.  Only servers that advertise code
-   actions offer fixes - Ruff, Biome and Harper do; RuboCop, which autocorrects
-   through formatting rather than per-diagnostic actions, does not.
+   Set to nil to turn this off.
+
+   Flycheck gets these actions two ways.  Some servers (RuboCop, standardrb)
+   ship each diagnostic's autocorrect inline, in the diagnostic's data;
+   Flycheck uses it directly, for free.  Others (Ruff, Biome, Oxlint) answer a
+   ``textDocument/codeAction`` request, which Flycheck sends only when you
+   apply a fix - so with those, a diagnostic is shown as potentially fixable
+   even when the server turns out to have nothing for it.
 
 .. defcustom:: flycheck-lsp-initialize-timeout
 
