@@ -416,7 +416,52 @@
         (let ((server (flycheck-lsp--server-create
                        :capabilities '(:codeActionProvider t)))
               (flycheck-lsp-code-actions nil))
-          (expect (flycheck-lsp--fix-provider server "file:///a" nil) :to-be nil))))
+          (expect (flycheck-lsp--fix-provider server "file:///a" nil) :to-be nil)))
+      (it "returns an inline fix eagerly, not a lazy provider"
+        (flycheck-buttercup-with-temp-buffer
+          (setq buffer-file-name "/proj/a.rb")
+          (cl-letf (((symbol-function 'flycheck-same-files-p) #'equal))
+            (let* ((server (flycheck-lsp--server-create))  ; no codeActionProvider
+                   (flycheck-lsp-code-actions t)
+                   (lsp '(:data (:correctable t :code_actions
+                                 [(:title "Autocorrect" :kind "quickfix" :isPreferred t
+                                   :edit (:documentChanges
+                                          [(:textDocument (:uri "/proj/a.rb")
+                                            :edits [(:range (:start (:line 0 :character 0)
+                                                     :end (:line 0 :character 1))
+                                                     :newText "")])]))])))
+                   (fix (flycheck-lsp--fix-provider server "file:///proj/a.rb" lsp)))
+              (expect (flycheck-fix-p fix) :to-be-truthy)
+              (expect (flycheck-fix-description fix) :to-equal "Autocorrect"))))))
+
+    (describe "flycheck-lsp--inline-fix"
+      (it "builds a fix from the isPreferred inline code action"
+        (flycheck-buttercup-with-temp-buffer
+          (setq buffer-file-name "/proj/a.rb")
+          (cl-letf (((symbol-function 'flycheck-same-files-p) #'equal))
+            (let ((fix (flycheck-lsp--inline-fix
+                        '(:data (:correctable t :code_actions
+                                 [(:title "Autocorrect X" :kind "quickfix" :isPreferred t
+                                   :edit (:documentChanges
+                                          [(:textDocument (:uri "/proj/a.rb")
+                                            :edits [(:range (:start (:line 0 :character 0)
+                                                     :end (:line 0 :character 1))
+                                                     :newText "")])]))
+                                  (:title "Disable X" :kind "quickfix"
+                                   :edit (:documentChanges
+                                          [(:textDocument (:uri "/proj/a.rb")
+                                            :edits [(:range (:start (:line 0 :character 0)
+                                                     :end (:line 0 :character 0))
+                                                     :newText "# disable\n")])]))])))))
+              (expect (flycheck-fix-description fix) :to-equal "Autocorrect X")))))
+      (it "is nil when no inline action is preferred (only disable)"
+        (expect (flycheck-lsp--inline-fix
+                 '(:data (:correctable :json-false :code_actions
+                          [(:title "Disable X" :kind "quickfix"
+                            :edit (:documentChanges []))])))
+                :to-be nil))
+      (it "is nil when the diagnostic carries no inline actions"
+        (expect (flycheck-lsp--inline-fix '(:code "X")) :to-be nil)))
 
     (describe "flycheck-lsp--code-action-fix"
       (it "requests, prefers the isPreferred action, and builds a fix"
