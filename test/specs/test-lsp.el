@@ -191,6 +191,20 @@
                   :to-equal '("rubocop" "--lsp"))
           (expect (flycheck-lsp--command 'python-mode) :to-be nil))))
 
+    (describe "flycheck-lsp--available-command"
+      (it "caches its result per mode instead of re-probing the executable"
+        (flycheck-buttercup-with-temp-buffer
+          (setq-local major-mode 'ruby-mode)
+          (let ((flycheck-lsp-servers '((ruby-mode "rubocop" "--lsp")))
+                (flycheck-executable-find (lambda (_p) "/usr/bin/rubocop")))
+            ;; first call caches the positive result
+            (expect (flycheck-lsp--available-command 'ruby-mode)
+                    :to-equal '("rubocop" "--lsp"))
+            ;; even once the program looks absent, the cached command stands
+            (setq flycheck-executable-find (lambda (_p) nil))
+            (expect (flycheck-lsp--available-command 'ruby-mode)
+                    :to-equal '("rubocop" "--lsp"))))))
+
     (describe "the default flycheck-lsp-servers"
       (it "maps every mode to a non-empty command of strings"
         (dolist (entry flycheck-lsp-servers)

@@ -210,6 +210,48 @@
         (expect (flycheck-error-list-visit-related-location)
                 :to-throw 'user-error))))
 
+  (describe "Applying fixes"
+    (it "applies the fix of the error at point"
+      (let* ((fix (flycheck-fix-new :description "Fix it" :edits nil :tick 0))
+             (err (flycheck-error-new-at 1 1 'error "x" :checker 'emacs-lisp
+                                         :fix fix))
+             applied)
+        (with-temp-buffer
+          (insert (propertize "row" 'tabulated-list-id err))
+          (goto-char (point-min))
+          (cl-letf (((symbol-function 'flycheck--error-fix-buffer)
+                     (lambda (_e) (current-buffer)))
+                    ((symbol-function 'flycheck-apply-fix)
+                     (lambda (f _b) (setq applied f)))
+                    ((symbol-function 'flycheck-error-list-refresh) #'ignore))
+            (flycheck-error-list-apply-fix)))
+        (expect applied :to-be fix)))
+
+    (it "signals a user-error when the error at point has no fix"
+      (with-temp-buffer
+        (insert (propertize "row" 'tabulated-list-id
+                            (flycheck-error-new-at 1 1 'error "x"
+                                                   :checker 'emacs-lisp)))
+        (goto-char (point-min))
+        (expect (flycheck-error-list-apply-fix) :to-throw 'user-error)))
+
+    (it "fixes all errors in the source buffer"
+      (let ((src (generate-new-buffer " src")) called)
+        (unwind-protect
+            (with-temp-buffer
+              (setq-local flycheck-error-list-source-buffer src)
+              (cl-letf (((symbol-function 'flycheck-fix-all-errors)
+                         (lambda () (interactive) (setq called t)))
+                        ((symbol-function 'flycheck-error-list-refresh) #'ignore))
+                (flycheck-error-list-fix-all))
+              (expect called :to-be t))
+          (kill-buffer src))))
+
+    (it "signals a user-error when there is no live source buffer"
+      (with-temp-buffer
+        (setq-local flycheck-error-list-source-buffer nil)
+        (expect (flycheck-error-list-fix-all) :to-throw 'user-error))))
+
   (describe "Grouping by file"
     (let ((errors (list (flycheck-error-new-at 3 1 'error "in b"
                                                :filename "/p/b.el" :checker 'x)

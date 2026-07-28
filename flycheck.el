@@ -10521,8 +10521,9 @@ backend and a command checker both contribute.  Shared by the `lsp' and
 ;;
 ;; One server process is shared per (project root, command); a buffer opens
 ;; its document on the matching server on the first check and closes it when
-;; the buffer or the mode goes away, shutting the server down once its last
-;; document closes.
+;; the buffer or the mode goes away.  The server itself is kept for the rest
+;; of the session and shut down only when Emacs exits, so reopening or
+;; checking another of its files does not pay to restart it.
 
 (declare-function jsonrpc-request "jsonrpc" (connection method params &rest _))
 (declare-function jsonrpc-async-request "jsonrpc" (connection method params &rest _))
@@ -10590,7 +10591,10 @@ and `flycheck-eglot-mode' instead."
 When non-nil (the default), a buffer using `flycheck-lsp-mode' reports
 only the language server's diagnostics.  When nil, `lsp' chains to the
 first other checker that supports the buffer's major mode, so the server
-and a command checker can both contribute."
+and a command checker can both contribute.
+
+Note that this takes effect globally when a buffer enables the mode: it is
+stored in `lsp's chain, not per buffer."
   :type 'boolean
   :safe #'booleanp
   :group 'flycheck
@@ -10643,19 +10647,35 @@ in once `initialized' turns non-nil (the handshake runs asynchronously)."
 (defvar flycheck-lsp--servers (make-hash-table :test 'equal)
   "Live `flycheck-lsp--server's, keyed by (ROOT . COMMAND).")
 
-(defvar flycheck-lsp--suppress-recheck nil
+(defvar-local flycheck-lsp--suppress-recheck nil
   "When non-nil, a diagnostics push does not re-trigger a check.
-Bound while a push-triggered check runs, so it cannot recurse.")
+Bound while a push-triggered check runs, so it cannot recurse.  Buffer-local
+so a synchronous round-trip during one buffer's check cannot suppress a
+push that arrives for another buffer.")
 
 (defun flycheck-lsp--command (mode)
   "Return the LSP server command configured for major MODE, or nil."
   (alist-get mode flycheck-lsp-servers))
 
+(defvar-local flycheck-lsp--command-cache nil
+  "Cached (MODE . RESULT) of `flycheck-lsp--available-command' for this buffer.
+A server installed mid-session is not noticed until the cache is rebuilt
+\(on a major-mode change, which clears buffer-local variables).")
+
 (defun flycheck-lsp--available-command (mode)
   "Return the server command for MODE if its program is installed, else nil.
-Uses `flycheck-executable-find', so it honours the user's setting and TRAMP."
-  (when-let* ((command (flycheck-lsp--command mode)))
-    (and (funcall flycheck-executable-find (car command)) command)))
+
+Uses `flycheck-executable-find', so it honours the user's setting and TRAMP.
+The result is cached buffer-locally, keyed on MODE: `executable-find' scans
+`exec-path' (and probes the remote host over TRAMP), and the `lsp' checker's
+predicate calls this on every check."
+  (if (eq (car flycheck-lsp--command-cache) mode)
+      (cdr flycheck-lsp--command-cache)
+    (let ((result (when-let* ((command (flycheck-lsp--command mode)))
+                    (and (funcall flycheck-executable-find (car command))
+                         command))))
+      (setq-local flycheck-lsp--command-cache (cons mode result))
+      result)))
 
 (defun flycheck-lsp--language-id (mode)
   "Return a best-effort LSP languageId string for major MODE."
@@ -10873,12 +10893,15 @@ whole-buffer copy is taken only when a message is actually sent."
 
 LSP counts a character offset in UTF-16 code units, so a character
 outside the Basic Multilingual Plane counts as two; step over the line
-accordingly to land on the right buffer position."
+accordingly to land on the right buffer position.
+
+Seek the line through `flycheck-goto-line', whose cache turns the many
+in-order lookups of a check (two per diagnostic) into a single forward
+pass instead of rescanning from `point-min' each time."
   (save-excursion
     (save-restriction
       (widen)
-      (goto-char (point-min))
-      (forward-line line)
+      (flycheck-goto-line (1+ line))
       (let ((remaining character)
             (eol (line-end-position)))
         (while (and (> remaining 0) (< (point) eol))
@@ -11008,7 +11031,7 @@ handshake's completion re-triggers the check (see
             (funcall callback 'finished nil)
           (let* ((buffer (current-buffer))
                  (doc (flycheck-lsp--document
-                       server (expand-file-name buffer-file-name))))
+                       server (flycheck-lsp--doc-key uri))))
             (setf (flycheck-lsp--doc-buffer doc) buffer)
             (if (not (flycheck-lsp--server-initialized server))
                 (funcall callback 'finished nil)
@@ -11060,7 +11083,7 @@ of the session and torn down only when Emacs exits (see
 `flycheck-lsp--shutdown-all') -- so reopening or checking another of its
 files does not pay to restart it."
   (when-let* ((uri (flycheck-lsp--buffer-uri))
-              (key (expand-file-name buffer-file-name)))
+              (key (flycheck-lsp--doc-key uri)))
     (maphash
      (lambda (_server-key server)
        (when (gethash key (flycheck-lsp--server-documents server))
@@ -11085,6 +11108,10 @@ A no-op unless the mode's server is configured and installed."
   (when (flycheck-lsp--available-command major-mode)
     (flycheck-lsp--register-checker 'lsp flycheck-lsp-exclusive)
     (setq flycheck-checker 'lsp)
+    ;; Give the recheck guard a real buffer-local binding, so the `let' that
+    ;; sets it around a push-triggered check isolates to this buffer instead
+    ;; of leaking a global value to others (see `flycheck-lsp--suppress-recheck').
+    (setq-local flycheck-lsp--suppress-recheck nil)
     (unless flycheck-mode (flycheck-mode 1))
     (flycheck-buffer-deferred)))
 
