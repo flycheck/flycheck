@@ -333,6 +333,7 @@ Configuring servers
 
       (add-to-list 'flycheck-lsp-servers '(terraform-mode "tflint" "--langserver"))
       (add-to-list 'flycheck-lsp-servers '(protobuf-mode "buf" "lsp" "serve"))
+      (add-to-list 'flycheck-lsp-servers '(toml-mode "taplo" "lsp" "stdio"))
 
    A major mode maps to a single server.  To use a different one, replace the
    entry - e.g. Standard instead of RuboCop, or Oxlint instead of Biome::
