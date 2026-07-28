@@ -1471,6 +1471,8 @@ Only has effect when variable `global-flycheck-mode' is non-nil."
      ["Go to next error" flycheck-next-error flycheck-mode]
      ["Go to previous error" flycheck-previous-error flycheck-mode]
      ["Show all errors" flycheck-list-errors flycheck-mode]
+     ["Show messages inline" flycheck-annotate-mode
+      :style toggle :selected (bound-and-true-p flycheck-annotate-mode)]
      "---"
      ["Copy messages at point" flycheck-copy-errors-as-kill
       (flycheck-overlays-at (point))]

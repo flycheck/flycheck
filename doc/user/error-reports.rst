@@ -390,18 +390,6 @@ competing for attention.
      (``flycheck-annotate-suppress-echo``), and user-registrable styles
      (``flycheck-annotate-style-functions``).
 
-.. note::
-
-   Two rough edges in the ``below`` layout:
-
-   * Under ``display-line-numbers-mode`` the annotation's own lines are not
-     blanked in the line-number gutter.
-   * The virtual lines and the whole-line tint are not coordinated with
-     ``hl-line-mode``.
-
-   Neither affects correctness; if either bothers you, use the ``eol`` layout
-   for those lines (``flycheck-annotate-current-line-style``).
-
 Mode line
 =========
 
