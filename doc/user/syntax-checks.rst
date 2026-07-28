@@ -230,11 +230,19 @@ configuration if you used it.
 LSP diagnostics without Eglot
 =============================
 
-Some language servers do nothing but report diagnostics - linters like
-``rubocop --lsp``, ``ruff server`` or ``biome lsp-proxy``.  For those you may
-not want a full LSP client at all.  ``flycheck-lsp-mode`` talks to such a
-server directly, over Emacs' built-in ``jsonrpc`` library, and reports its
-diagnostics through the ``lsp`` checker - no Eglot involved.
+A growing number of linters ship their own LSP server - RuboCop
+(``rubocop --lsp``), Ruff (``ruff server``), Biome (``biome lsp-proxy``) and
+more.  ``flycheck-lsp-mode`` talks to one of these directly, over Emacs'
+built-in ``jsonrpc`` library, and reports its diagnostics through the ``lsp``
+checker - no Eglot, and no full LSP client, involved.
+
+This is the setup the native LSP support is built for, and it is worth
+preferring when a linter offers it.  A traditional command checker spawns the
+linter afresh on every check, and for a tool with a slow start (RuboCop
+loading your project, say) that startup cost is paid over and over.  The
+linter's own LSP server instead stays resident and lints incrementally, so
+checks are much snappier - and you get that without pulling in a full language
+server and client just to see diagnostics.
 
 Turn it on everywhere with:
 
@@ -373,3 +381,31 @@ level, id, an explanation URL from ``codeDescription``, and the secondary
 locations of ``relatedInformation`` (visit them with ``C-c ! j``).  When the
 server offers code actions, they are available as fixes as well (see
 ``flycheck-lsp-code-actions`` above).
+
+Full language servers
+---------------------
+
+The ``lsp`` checker consumes only diagnostics, so nothing stops you pointing it
+at a *full* language server - clojure-lsp, ruby-lsp, gopls and the like - and
+letting Flycheck surface its diagnostics::
+
+   (add-to-list 'flycheck-lsp-servers '(clojure-mode "clojure-lsp"))
+
+This can be handy: many full servers bundle a linter (clojure-lsp runs
+clj-kondo, ruby-lsp runs RuboCop), so this is one way to get that linting into
+Flycheck without running a full LSP client at all.
+
+But it goes against the grain of what this feature is for.  ``flycheck-lsp-mode``
+is aimed at linters that ship their own LSP server, precisely so you can lint
+without either the repeated startup cost of a command checker or the weight of a
+full server-plus-client stack.  A full language server is the opposite trade:
+you start a process that indexes the whole project to provide completion, hover,
+rename and much more, and Flycheck throws all of that away and keeps only the
+errors.  If you want those features too, run the server through Eglot and use
+``flycheck-eglot-mode``; if you only want diagnostics, a dedicated linter is
+lighter than a language server.
+
+Two caveats if you do point it at a full server: some report diagnostics only
+through LSP *pull* requests rather than pushing them, which the ``lsp`` checker
+does not yet support (it will report nothing), and some need extra
+``initializationOptions`` or workspace configuration to lint the way you expect.
