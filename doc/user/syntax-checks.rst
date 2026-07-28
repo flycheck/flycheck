@@ -226,6 +226,13 @@ server has nothing for it.
 This obsoletes the third-party ``flycheck-eglot`` package; drop it from your
 configuration if you used it.
 
+.. warning::
+
+   The built-in mode uses the same names -- ``flycheck-eglot-mode`` and
+   ``global-flycheck-eglot-mode`` -- as the old package.  If both are
+   installed they define the same commands, so **uninstall the third-party
+   ``flycheck-eglot`` package** before relying on the built-in one.
+
 
 LSP diagnostics without Eglot
 =============================
