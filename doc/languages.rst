@@ -1619,6 +1619,20 @@ to view the docstring of the syntax checker.  Likewise, you may use
          A list of files to resolve terraform variables.  Relative paths are
          relative to the path of the buffer being checked.
 
+      .. syntax-checker-config-file:: flycheck-tflint-config
+
+      .. defcustom:: flycheck-tflint-enabled-rules
+
+         A list of tflint rules to enable, via ``--enable-rule``.
+
+      .. defcustom:: flycheck-tflint-disabled-rules
+
+         A list of tflint rules to disable, via ``--disable-rule``.
+
+      .. defcustom:: flycheck-tflint-args
+
+         A list of additional arguments passed to ``tflint``.
+
 .. supported-language:: Text
 
    .. syntax-checker:: proselint

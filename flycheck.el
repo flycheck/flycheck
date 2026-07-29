@@ -16846,6 +16846,28 @@ Relative files are relative to the file being checked."
   :safe #'flycheck-string-list-p
   :package-version '(flycheck . "32"))
 
+(flycheck-def-config-file-var flycheck-tflint-config terraform-tflint
+                              '(".tflint.hcl"))
+
+(flycheck-def-args-var flycheck-tflint-args terraform-tflint
+  :package-version '(flycheck . "38.4"))
+
+(flycheck-def-option-var flycheck-tflint-enabled-rules nil terraform-tflint
+  "A list of tflint rules to enable, via `--enable-rule'.
+
+Each element is a rule name, such as \"terraform_unused_declarations\"."
+  :type '(repeat (string :tag "Rule name"))
+  :safe #'flycheck-string-list-p
+  :package-version '(flycheck . "38.4"))
+
+(flycheck-def-option-var flycheck-tflint-disabled-rules nil terraform-tflint
+  "A list of tflint rules to disable, via `--disable-rule'.
+
+Each element is a rule name, such as \"terraform_deprecated_syntax\"."
+  :type '(repeat (string :tag "Rule name"))
+  :safe #'flycheck-string-list-p
+  :package-version '(flycheck . "38.4"))
+
 (defun flycheck-parse-tflint-linter (output checker buffer)
   "Parse tflint warnings from JSON OUTPUT.
 
@@ -16877,7 +16899,11 @@ information about tflint."
 
 See URL `https://github.com/terraform-linters/tflint'."
   :command ("tflint" "--format=json" "--force"
-            (option-list "--var-file=" flycheck-tflint-variable-files concat))
+            (config-file "--config" flycheck-tflint-config)
+            (option-list "--enable-rule=" flycheck-tflint-enabled-rules concat)
+            (option-list "--disable-rule=" flycheck-tflint-disabled-rules concat)
+            (option-list "--var-file=" flycheck-tflint-variable-files concat)
+            (eval flycheck-tflint-args))
   :error-parser flycheck-parse-tflint-linter
   :predicate flycheck-buffer-saved-p
   :modes (terraform-mode terraform-ts-mode))
