@@ -7,6 +7,7 @@
 # Packages installed for development
 /.cask/
 /.eask/
+/.eldev/
 
 # linters
 /.elsa/
