@@ -12556,11 +12556,20 @@ ShellCheck link to ShellCheck's wiki."
      ((string-prefix-p "SC" id)
       (cons 'url (format "https://github.com/koalaman/shellcheck/wiki/%s" id))))))
 
+(flycheck-def-config-file-var flycheck-dockerfile-hadolint-config
+    dockerfile-hadolint '(".hadolint.yaml" ".hadolint.yml"))
+
+(flycheck-def-args-var flycheck-dockerfile-hadolint-args dockerfile-hadolint
+  :package-version '(flycheck . "38.4"))
+
 (flycheck-define-checker dockerfile-hadolint
   "A Dockerfile syntax checker using hadolint.
 
 See URL `https://github.com/hadolint/hadolint/'."
-  :command ("hadolint" "--format" "sarif" "-")
+  :command ("hadolint" "--format" "sarif"
+            (config-file "--config" flycheck-dockerfile-hadolint-config)
+            (eval flycheck-dockerfile-hadolint-args)
+            "-")
   :standard-input t
   :error-parser flycheck-parse-sarif
   :error-filter

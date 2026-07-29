@@ -21,4 +21,17 @@ expecting '#', '\\', ADD, ARG, CMD, COPY, ENTRYPOINT, ENV, EXPOSE, FROM, HEALTHC
      '(3 nil error "Use absolute WORKDIR"
          :id "DL3000" :checker dockerfile-hadolint))))
 
+  (describe "the dockerfile-hadolint checker command"
+    (it "adds no config or extra arguments by default"
+      (let ((flycheck-dockerfile-hadolint-config nil)
+            (flycheck-dockerfile-hadolint-args nil))
+        (expect (flycheck-checker-substituted-arguments 'dockerfile-hadolint)
+                :to-equal '("--format" "sarif" "-"))))
+
+    (it "appends flycheck-dockerfile-hadolint-args before the stdin marker"
+      (let ((flycheck-dockerfile-hadolint-config nil)
+            (flycheck-dockerfile-hadolint-args '("--no-fail")))
+        (expect (flycheck-checker-substituted-arguments 'dockerfile-hadolint)
+                :to-equal '("--format" "sarif" "--no-fail" "-")))))
+
 ;;; test-dockerfile.el ends here

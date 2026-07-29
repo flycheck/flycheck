@@ -331,6 +331,12 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       .. _hadolint: https://github.com/hadolint/hadolint
 
+      .. syntax-checker-config-file:: flycheck-dockerfile-hadolint-config
+
+      .. defcustom:: flycheck-dockerfile-hadolint-args
+
+         A list of additional arguments passed to ``hadolint``.
+
 .. supported-language:: Elixir
 
    .. syntax-checker:: elixir-credo
