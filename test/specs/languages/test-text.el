@@ -34,6 +34,15 @@
       (flycheck-buttercup-should-syntax-check
        "language/text/text.txt" '(text-mode markdown-mode)
        '(1 7 error "\"very\" is a weasel word and can weaken meaning"
-           :id "write-good" :checker textlint)))))
+           :id "write-good" :checker textlint))))
+
+  (describe "the textlint checker command"
+    (it "appends flycheck-textlint-args before the source file"
+      (flycheck-buttercup-with-temp-buffer
+        (let ((flycheck-textlint-config nil)
+              (flycheck-textlint-args '("--rule" "no-todo")))
+          (let ((args (flycheck-checker-substituted-arguments 'textlint)))
+            (expect args :to-contain "--rule")
+            (expect args :to-contain "no-todo")))))))
 
 ;;; test-text.el ends here

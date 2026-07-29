@@ -822,6 +822,10 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
          A list of enabled rules.
 
+      .. defcustom:: flycheck-markdown-markdownlint-cli-args
+
+         A list of additional arguments passed to ``markdownlint``.
+
    .. syntax-checker:: markdown-markdownlint-cli2
 
       Check Markdown with markdownlint-cli2_.
@@ -829,6 +833,10 @@ to view the docstring of the syntax checker.  Likewise, you may use
       .. _markdownlint-cli2: https://github.com/DavidAnson/markdownlint-cli2
 
       .. syntax-checker-config-file:: flycheck-markdown-markdownlint-cli2-config
+
+      .. defcustom:: flycheck-markdown-markdownlint-cli2-args
+
+         A list of additional arguments passed to ``markdownlint-cli2``.
 
    .. syntax-checker:: markdown-mdl
 
@@ -1702,6 +1710,10 @@ to view the docstring of the syntax checker.  Likewise, you may use
       Check prose with `textlint <https://textlint.github.io/>`_.
 
       .. syntax-checker-config-file:: flycheck-textlint-config
+
+      .. defcustom:: flycheck-textlint-args
+
+         A list of additional arguments passed to ``textlint``.
 
       .. defcustom:: flycheck-textlint-plugin-alist
 

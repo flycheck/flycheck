@@ -15543,6 +15543,10 @@ See URL `https://github.com/rpm-software-management/rpmlint'."
   :safe #'flycheck-string-list-p
   :package-version '(flycheck . "33"))
 
+(flycheck-def-args-var flycheck-markdown-markdownlint-cli-args
+    markdown-markdownlint-cli
+  :package-version '(flycheck . "38.4"))
+
 (defun flycheck-markdownlint-error-filter (errors)
   "Error filter for markdownlint checkers."
   (flycheck-sanitize-errors
@@ -15563,6 +15567,7 @@ See URL `https://github.com/igorshubovych/markdownlint-cli'."
             (config-file "--config" flycheck-markdown-markdownlint-cli-config)
             (option-list "--disable" flycheck-markdown-markdownlint-cli-disable-rules)
             (option-list "--enable" flycheck-markdown-markdownlint-cli-enable-rules)
+            (eval flycheck-markdown-markdownlint-cli-args)
             "--"
             source)
   :error-patterns
@@ -15588,12 +15593,17 @@ See URL `https://github.com/igorshubovych/markdownlint-cli'."
     '(".markdownlint-cli2.json" ".markdownlint-cli2.jsonc" ".markdownlint-cli2.yaml")
   :package-version '(flycheck . "35"))
 
+(flycheck-def-args-var flycheck-markdown-markdownlint-cli2-args
+    markdown-markdownlint-cli2
+  :package-version '(flycheck . "38.4"))
+
 (flycheck-define-checker markdown-markdownlint-cli2
   "Markdown checker using markdownlint-cli2.
 
 See URL `https://github.com/DavidAnson/markdownlint-cli2'."
   :command ("markdownlint-cli2"
             (config-file "--config" flycheck-markdown-markdownlint-cli2-config)
+            (eval flycheck-markdown-markdownlint-cli2-args)
             "--"
             source)
   :error-patterns
@@ -17062,6 +17072,9 @@ published on NPM."
                 (derived-mode-p mode))))
         flycheck-textlint-plugin-alist)))
 
+(flycheck-def-args-var flycheck-textlint-args textlint
+  :package-version '(flycheck . "38.4"))
+
 (flycheck-define-checker textlint
   "A text prose linter using textlint.
 
@@ -17072,6 +17085,7 @@ See URL `https://textlint.github.io/'."
             ;; get the first matching plugin from plugin-alist
             "--plugin"
             (eval (flycheck--textlint-get-plugin))
+            (eval flycheck-textlint-args)
             source)
   ;; textlint seems to say that its json output is compatible with ESLint.
   ;; https://textlint.github.io/docs/formatter.html

@@ -48,6 +48,25 @@
        '(3 nil error "Multiple consecutive blank lines [Expected: 1, Actual: 2] (no-multiple-blanks)"
            :id "MD012" :checker markdown-pymarkdown)
        '(4 nil error "Trailing spaces [Expected: 0 or 2; Actual: 7] (no-trailing-spaces)"
-           :id "MD009" :checker markdown-pymarkdown)))))
+           :id "MD009" :checker markdown-pymarkdown))))
+
+  (describe "the markdownlint checker commands"
+    (it "appends flycheck-markdown-markdownlint-cli-args before the -- separator"
+      (flycheck-buttercup-with-temp-buffer
+        (let ((flycheck-markdown-markdownlint-cli-config nil)
+              (flycheck-markdown-markdownlint-cli-disable-rules nil)
+              (flycheck-markdown-markdownlint-cli-enable-rules nil)
+              (flycheck-markdown-markdownlint-cli-args '("--dot")))
+          (let ((args (flycheck-checker-substituted-arguments
+                       'markdown-markdownlint-cli)))
+            (expect args :to-contain "--dot")))))
+
+    (it "appends flycheck-markdown-markdownlint-cli2-args"
+      (flycheck-buttercup-with-temp-buffer
+        (let ((flycheck-markdown-markdownlint-cli2-config nil)
+              (flycheck-markdown-markdownlint-cli2-args '("--no-globs")))
+          (let ((args (flycheck-checker-substituted-arguments
+                       'markdown-markdownlint-cli2)))
+            (expect args :to-contain "--no-globs")))))))
 
 ;;; test-markdown.el ends here
