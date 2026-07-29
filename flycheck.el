@@ -7752,17 +7752,33 @@ carries a machine-applicable fix."
   (push overlay flycheck-annotate--overlays)
   overlay)
 
-(defun flycheck-annotate--make-overlay (anchor &rest props)
-  "Create a tracked inline overlay at ANCHOR with PROPS.
+(defun flycheck-annotate--make-overlay (anchor string)
+  "Create a tracked inline overlay showing STRING at end-of-line ANCHOR.
 
-ANCHOR is a buffer position; the overlay is empty and carries the
-`flycheck-annotate' property so it can be found and deleted.  PROPS is a
-plist of additional overlay properties, e.g. `after-string'.  Return the
+The overlay spans ANCHOR's trailing newline and shows STRING as a
+`before-string', so the annotation renders right after the code.  A
+`cursor' text property on STRING keeps the cursor pinned to ANCHOR -- the
+end of the code -- rather than to the end of the annotation, so `C-e' and
+typing behave as if the annotation were not there.  This is the same
+technique Flymake uses for its end-of-line diagnostics.  Return the
 overlay."
-  (let ((ov (make-overlay anchor anchor nil t)))
+  (let* ((end (min (point-max) (1+ anchor)))
+         (ov (make-overlay anchor end nil t nil)))
     (overlay-put ov 'priority 100)
-    (while props
-      (overlay-put ov (pop props) (pop props)))
+    ;; Evaporate once the spanned newline is gone, but not when the overlay is
+    ;; empty from the start (end of buffer, no trailing newline to span) -- an
+    ;; empty evaporating overlay would delete itself and drop the annotation.
+    (overlay-put ov 'evaporate (/= anchor end))
+    ;; The cursor is drawn on the first character of the before-string.  Anchor
+    ;; it to a dedicated plain space so `C-e' and typing park at the end of the
+    ;; code rather than inside the annotation.  A plain space is required: the
+    ;; `cursor' property is ignored on a newline (which the `below' style's
+    ;; string starts with) and lands at the far end of the `sideline' style's
+    ;; `:align-to' stretch, both leaving the cursor stranded.
+    (overlay-put ov 'before-string
+                 (if (> (length string) 0)
+                     (concat (propertize " " 'cursor t) string)
+                   string))
     (flycheck-annotate--track ov)))
 
 (defun flycheck-annotate--background-face (level)
@@ -7817,7 +7833,7 @@ first) with a count of the rest, propertized with its level face."
 Only the most severe error's message is shown, with a count of the rest.
 FOCUSED is ignored."
   (flycheck-annotate--make-overlay
-   anchor 'after-string (concat "  " (flycheck-annotate--compact-text errors))))
+   anchor (concat "  " (flycheck-annotate--compact-text errors))))
 
 (defun flycheck-annotate-sideline-style (errors anchor _focused)
   "Render ERRORS flushed to the window's right edge past line ANCHOR.
@@ -7829,7 +7845,7 @@ instead.  FOCUSED is ignored."
   (let* ((text (flycheck-annotate--compact-text errors))
          (width (string-width text))
          (spacer (propertize " " 'display `(space :align-to (- right ,width)))))
-    (flycheck-annotate--make-overlay anchor 'after-string (concat spacer text))))
+    (flycheck-annotate--make-overlay anchor (concat spacer text))))
 
 (defun flycheck-annotate--display-column (err bol eol)
   "Return the display column of ERR's start on the line from BOL to EOL.
@@ -7878,7 +7894,7 @@ gutter.  FOCUSED is ignored."
                                           'face 'shadow)))
                     (flycheck-error-relations err) "")))
         (push (concat "\n" pad conn msg rels) lines)))
-    (flycheck-annotate--make-overlay anchor 'after-string
+    (flycheck-annotate--make-overlay anchor
                                    (apply #'concat (nreverse lines)))))
 
 (defun flycheck-annotate--clear ()
