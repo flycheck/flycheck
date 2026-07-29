@@ -30,63 +30,82 @@ This table gives an overview of the differences and similarities between
 Flycheck and Flymake.  The rest of this page describes each point in more
 detail.
 
-+---------------------------+-----------------------+-----------------------+
-|                           |Flycheck               |Flymake                |
-+===========================+=======================+=======================+
-|Supports Emacs versions    ||min-emacs|            |26.1+                  |
-+---------------------------+-----------------------+-----------------------+
-|Built-in                   |no                     |yes                    |
-+---------------------------+-----------------------+-----------------------+
-|`Supported languages`_     |100+ built-in,         |~10 built-in,          |
-|                           |200+ w/ 3rd-party      |50+ w/ 3rd party       |
-+---------------------------+-----------------------+-----------------------+
-|`Automatic syntax          |built-in               |manual                 |
-|checking`_                 |                       |                       |
-+---------------------------+-----------------------+-----------------------+
-|Check triggers             |save, newline, change, |save, newline, change  |
-|                           |buffer switch, revert  |                       |
-+---------------------------+-----------------------+-----------------------+
-|Asynchronous checking      |yes                    |yes                    |
-+---------------------------+-----------------------+-----------------------+
-|`Automatic syntax checker  |by major mode and      |no                     |
-|selection <Syntax checker  |custom predicates      |                       |
-|selection_>`_              |                       |                       |
-+---------------------------+-----------------------+-----------------------+
-|`Multiple syntax checkers  |yes (configurable      |yes (all at once)      |
-|per buffer`_               |chain)                 |                       |
-+---------------------------+-----------------------+-----------------------+
-|`Definition of new         |single declarative     |arbitrary function     |
-|syntax checkers`_          |macro                  |[#]_                   |
-+---------------------------+-----------------------+-----------------------+
-|Configuration debugging    |built-in (C-c ! v)     |none                   |
-+---------------------------+-----------------------+-----------------------+
-|`Error identifiers`_       |yes                    |no                     |
-+---------------------------+-----------------------+-----------------------+
-|`Error explanations`_      |yes                    |no                     |
-+---------------------------+-----------------------+-----------------------+
-|`Error parsing helpers     |for regexp, JSON and   |none                   |
-|<Error parsing_>`_         |XML                    |                       |
-+---------------------------+-----------------------+-----------------------+
-|Fringe icons for errors    |yes                    |yes                    |
-+---------------------------+-----------------------+-----------------------+
-|Error highlighting         |faces, brackets, mixed |faces only             |
-+---------------------------+-----------------------+-----------------------+
-|`Error indicators          |fringes (incl HiDPI),  |fringes only           |
-|<margins>`_                |margins                |                       |
-+---------------------------+-----------------------+-----------------------+
-|`Error message display`_   |tooltip, echo area,    |tooltip, echo area     |
-|                           |fully customizable     |                       |
-|                           |(e.g. tooltip, popup   |                       |
-|                           |w/ 3rd party packages) |                       |
-+---------------------------+-----------------------+-----------------------+
-|List of all errors         |yes; filterable by     |yes; project-wide      |
-|                           |error level            |diagnostics (28+)      |
-+---------------------------+-----------------------+-----------------------+
-|`Supported by Eglot`_      |yes                    |yes (built-in)         |
-|                           |(``flycheck-eglot-mode``)|                     |
-+---------------------------+-----------------------+-----------------------+
-|`Supported by lsp-mode`_   |yes                    |yes                    |
-+---------------------------+-----------------------+-----------------------+
+.. list-table::
+   :header-rows: 1
+   :widths: 26 38 36
+
+   * -
+     - Flycheck
+     - Flymake
+   * - Supports Emacs versions
+     - |min-emacs|
+     - 26.1+
+   * - Built-in
+     - no
+     - yes
+   * - `Supported languages`_
+     - 100+ built-in, 200+ w/ 3rd-party
+     - ~10 built-in, 50+ w/ 3rd party
+   * - `Automatic syntax checking`_
+     - built-in
+     - manual
+   * - Check triggers
+     - save, newline, change, buffer switch, revert
+     - save, newline, change
+   * - Asynchronous checking
+     - yes
+     - yes
+   * - `Automatic syntax checker selection <Syntax checker selection_>`_
+     - by major mode and custom predicates
+     - no
+   * - `Multiple syntax checkers per buffer`_
+     - yes (configurable chain)
+     - yes (all at once)
+   * - `Definition of new syntax checkers`_
+     - single declarative macro [#]_
+     - arbitrary function
+   * - Configuration debugging
+     - built-in (``C-c ! v``)
+     - none
+   * - `Error identifiers`_
+     - yes
+     - no
+   * - `Error explanations`_
+     - yes
+     - no
+   * - `Error parsing helpers <Error parsing_>`_
+     - for regexp, JSON, XML and SARIF
+     - none
+   * - Fringe icons for errors
+     - yes
+     - yes
+   * - Error highlighting
+     - faces, brackets, mixed
+     - faces only
+   * - `Error indicators <margins>`_
+     - fringes (incl. HiDPI), margins
+     - fringes only
+   * - `Error message display`_
+     - tooltip, echo area, inline, fully customizable
+     - tooltip, echo area, inline eol (30+)
+   * - `Inline diagnostics`_
+     - eol, below, sideline, background tint
+     - end-of-line summary (30+)
+   * - `Applying fixes`_
+     - yes (``C-c ! f``, fix-all, LSP code actions)
+     - via Eglot code actions
+   * - List of all errors
+     - yes; grouping, filtering, project-wide
+     - yes; project-wide (28+)
+   * - `Native LSP diagnostics`_
+     - yes (built-in ``lsp`` checker)
+     - no (needs Eglot)
+   * - `Supported by Eglot`_
+     - yes (``flycheck-eglot-mode``)
+     - yes (built-in)
+   * - `Supported by lsp-mode`_
+     - yes
+     - yes
 
 Detailed review
 ===============
@@ -254,6 +273,18 @@ Error explanations
 Some **Flycheck** checkers can use error identifiers to provide error
 explanations in a help buffer (see `flycheck-explain-error-at-point`).
 
+Applying fixes
+~~~~~~~~~~~~~~
+
+**Flymake** has no built-in facility to apply fixes.  Code actions are available
+only through a separate client such as Eglot (``eglot-code-actions``).
+
+**Flycheck** can apply the machine-applicable fixes that checkers suggest:
+``C-c ! f`` fixes the error at point and ``C-c ! F`` fixes the whole buffer at
+once, as a single undoable change.  ``eslint --fix``, Clippy's suggestions,
+``ruff``, ``shellcheck``, SARIF-based checkers and LSP ``quickfix`` code actions
+all feed this, and fixable errors get a distinct "fix available" indicator.
+
 .. _margins:
 
 Error indicators
@@ -275,8 +306,8 @@ parsing JSON or XML formats.
 **Flycheck** checkers can use regular expressions as well as custom parsing functions.
 The preferred way to define a checker is to use the `rx` syntax, extended with
 custom forms for readable error patterns.  Flycheck includes some ready-to-use
-parsing functions for common output formats, such as Checkstyle XML, or JSON
-interleaved with plain text.
+parsing functions for common output formats, such as Checkstyle XML, JSON
+interleaved with plain text, or SARIF.
 
 Error message display
 ~~~~~~~~~~~~~~~~~~~~~
@@ -290,6 +321,19 @@ messages in the echo area if the point is at an error location.  This feature is
 fully customizable via `flycheck-display-errors-function`, and several
 `extensions <flycheck-extensions>` already provide alternative ways to display
 errors.
+
+Inline diagnostics
+~~~~~~~~~~~~~~~~~~
+
+**Flymake**, since Emacs 30, can show a compact diagnostic summary at the end of
+the offending line with ``flymake-show-diagnostics-at-end-of-line``.
+
+**Flycheck** renders error messages inline as well, with more layout control,
+via ``flycheck-annotate-mode`` (or ``global-flycheck-annotate-mode`` to enable it
+everywhere Flycheck checks).  Messages can appear as a compact summary at the end
+of the line, stacked on their own lines below the code with connectors to the
+offending column, or flushed to the window's right edge; error lines can also get
+an Error Lens-style background tint.
 
 Supported by Eglot
 ~~~~~~~~~~~~~~~~~~
@@ -309,6 +353,18 @@ Supported by lsp-mode
 
 `lsp-mode <https://github.com/emacs-lsp/lsp-mode>`_ is a popular alternative to
 Eglot that supports both Flycheck and Flymake out of the box.
+
+Native LSP diagnostics
+~~~~~~~~~~~~~~~~~~~~~~
+
+Both Eglot and ``lsp-mode`` are full LSP clients.  **Flymake** relies on one of
+them (usually Eglot) for any LSP diagnostics.
+
+**Flycheck** can also talk to a diagnostics language server directly, over the
+built-in ``jsonrpc`` library, with no Eglot or ``lsp-mode`` involved.  Enable
+``global-flycheck-lsp-mode`` and Flycheck starts the server itself and reports
+its diagnostics; this suits single-purpose LSP linters such as RuboCop, Ruff,
+Biome and Harper.  See :doc:`syntax-checks`.
 
 .. rubric:: Footnotes
 
