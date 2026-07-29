@@ -243,6 +243,11 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
          Whether to run stylelint in quiet mode via ``--quiet``.
 
+      .. defcustom:: flycheck-stylelint-args
+
+         A list of additional arguments passed to ``stylelint`` by all four
+         stylelint checkers, for options such as ``--custom-syntax``.
+
 .. supported-language:: CUDA C/C++
    :index_as: CUDA
 
