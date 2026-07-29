@@ -98,7 +98,7 @@ detail.
      - yes; grouping, filtering, project-wide
      - yes; project-wide (28+)
    * - `Native LSP diagnostics`_
-     - yes (built-in ``lsp`` checker)
+     - yes (built-in ``flycheck-lsp`` checker)
      - no (needs Eglot)
    * - `Supported by Eglot`_
      - yes (``flycheck-eglot-mode``)

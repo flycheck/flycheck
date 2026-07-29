@@ -246,7 +246,7 @@
     ;; Only ever selected when `flycheck-eglot-mode' is on (see its predicate).
     eglot-check
     ;; Only ever selected when `flycheck-lsp-mode' is on (see its predicate).
-    lsp)
+    flycheck-lsp)
   "Syntax checkers available for automatic selection.
 
 A list of Flycheck syntax checkers to choose from when syntax
@@ -10385,7 +10385,7 @@ SYMBOL with `flycheck-def-executable-var'."
 ;;
 ;; Shared machinery for turning a Language Server Protocol diagnostic into a
 ;; `flycheck-error'.  Both the Eglot bridge (`eglot-check', below) and the
-;; native `lsp' checker use it, so the two produce identical errors -- the
+;; native `flycheck-lsp' checker use it, so the two produce identical errors -- the
 ;; same level, id, related locations and codeDescription -- regardless of how
 ;; the diagnostic reached Flycheck.  These helpers operate on the raw LSP
 ;; diagnostic object (a plist), not on any client's data structures.
@@ -10519,7 +10519,7 @@ fix is applied right after."
 
 With EXCLUSIVE non-nil, CHECKER is the buffer's sole checker; otherwise it
 chains to the first other checker that supports the mode, so an LSP
-backend and a command checker both contribute.  Shared by the `lsp' and
+backend and a command checker both contribute.  Shared by the `flycheck-lsp' and
 `eglot-check' bridges."
   (unless (flycheck-checker-supports-major-mode-p checker major-mode)
     (flycheck-add-mode checker major-mode))
@@ -10535,7 +10535,7 @@ backend and a command checker both contribute.  Shared by the `lsp' and
 
 ;;; Native LSP diagnostics client
 ;;
-;; The `lsp' checker talks to a diagnostics language server directly, over
+;; The `flycheck-lsp' checker talks to a diagnostics language server directly, over
 ;; the built-in `jsonrpc' library -- no Eglot required.  It is meant for the
 ;; single-purpose LSP linters (`rubocop --lsp', `ruff server', ...), letting
 ;; Flycheck use them like any other checker without handing the buffer to a
@@ -10584,7 +10584,7 @@ backend and a command checker both contribute.  Shared by the `lsp' and
 Each entry is (MAJOR-MODE PROGRAM ARG...): a buffer in MAJOR-MODE that
 enables `flycheck-lsp-mode' has PROGRAM started with the ARGs as an LSP
 server, is fed the buffer's text, and reports the diagnostics the server
-pushes back through the `lsp' checker.
+pushes back through the `flycheck-lsp' checker.
 
 The default entries are linters that ship a native LSP server and lint out
 of the box, with no project configuration: RuboCop (Ruby), Ruff (Python),
@@ -10617,15 +10617,15 @@ and `flycheck-eglot-mode' instead."
   :package-version '(flycheck . "38"))
 
 (defcustom flycheck-lsp-exclusive t
-  "Whether the `lsp' checker is the only checker or chains to others.
+  "Whether the `flycheck-lsp' checker is the only checker or chains to others.
 
 When non-nil (the default), a buffer using `flycheck-lsp-mode' reports
-only the language server's diagnostics.  When nil, `lsp' chains to the
+only the language server's diagnostics.  When nil, `flycheck-lsp' chains to the
 first other checker that supports the buffer's major mode, so the server
 and a command checker can both contribute.
 
 Note that this takes effect globally when a buffer enables the mode: it is
-stored in `lsp's chain, not per buffer."
+stored in `flycheck-lsp's chain, not per buffer."
   :type 'boolean
   :safe #'booleanp
   :group 'flycheck
@@ -10644,7 +10644,7 @@ next check."
   :package-version '(flycheck . "38"))
 
 (defcustom flycheck-lsp-code-actions t
-  "Whether the `lsp' checker offers LSP quick-fix code actions as fixes.
+  "Whether the `flycheck-lsp' checker offers LSP quick-fix code actions as fixes.
 
 When non-nil (the default) and the server advertises code actions, each
 diagnostic carries a lazy fix (see `flycheck-error-resolve-fix') that
@@ -10698,7 +10698,7 @@ A server installed mid-session is not noticed until the cache is rebuilt
 
 Uses `flycheck-executable-find', so it honours the user's setting and TRAMP.
 The result is cached buffer-locally, keyed on MODE: `executable-find' scans
-`exec-path' (and probes the remote host over TRAMP), and the `lsp' checker's
+`exec-path' (and probes the remote host over TRAMP), and the `flycheck-lsp' checker's
 predicate calls this on every check."
   (if (eq (car flycheck-lsp--command-cache) mode)
       (cdr flycheck-lsp--command-cache)
@@ -11035,12 +11035,12 @@ attaches a lazy quickfix from SERVER for the document URI (see
        :id (flycheck-lsp--diagnostic-id lsp)
        :relations (flycheck-lsp--related-locations lsp)
        :fix (flycheck-lsp--fix-provider server uri lsp)
-       :checker 'lsp
+       :checker 'flycheck-lsp
        :buffer buffer
        :filename (buffer-file-name buffer)))))
 
 (defun flycheck-lsp--start (_checker callback)
-  "Start the `lsp' syntax check, reporting through CALLBACK.
+  "Start the `flycheck-lsp' syntax check, reporting through CALLBACK.
 
 Ensure the buffer's server is running, sync the document to it, and report
 the diagnostics cached for the buffer so far.  The server's later push
@@ -11075,18 +11075,18 @@ handshake's completion re-triggers the check (see
     (error (funcall callback 'errored (error-message-string err)))))
 
 (defun flycheck-lsp--enabled-p ()
-  "Return non-nil when the `lsp' checker may run in the current buffer.
+  "Return non-nil when the `flycheck-lsp' checker may run in the current buffer.
 
 That is, `flycheck-lsp-mode' is on, the buffer visits a file, and its
 major mode has a server in `flycheck-lsp-servers' whose program is
-installed.  Used as the checker's predicate so `lsp' is never selected
+installed.  Used as the checker's predicate so `flycheck-lsp' is never selected
 unless the mode opted in and the server is actually available."
   (and (bound-and-true-p flycheck-lsp-mode)
        buffer-file-name
        (flycheck-lsp--available-command major-mode)
        t))
 
-(flycheck-define-generic-checker 'lsp
+(flycheck-define-generic-checker 'flycheck-lsp
   "Report the diagnostics of a Language Server Protocol server.
 
 Talks to the server configured for the buffer's major mode in
@@ -11137,8 +11137,8 @@ Added to `kill-emacs-hook' the first time a server starts."
   "Set up the current buffer to report its LSP server's diagnostics.
 A no-op unless the mode's server is configured and installed."
   (when (flycheck-lsp--available-command major-mode)
-    (flycheck-lsp--register-checker 'lsp flycheck-lsp-exclusive)
-    (setq flycheck-checker 'lsp)
+    (flycheck-lsp--register-checker 'flycheck-lsp flycheck-lsp-exclusive)
+    (setq flycheck-checker 'flycheck-lsp)
     ;; Give the recheck guard a real buffer-local binding, so the `let' that
     ;; sets it around a push-triggered check isolates to this buffer instead
     ;; of leaking a global value to others (see `flycheck-lsp--suppress-recheck').
@@ -11149,7 +11149,7 @@ A no-op unless the mode's server is configured and installed."
 (defun flycheck-lsp--disable ()
   "Undo `flycheck-lsp--enable' in the current buffer."
   (flycheck-lsp--close-buffer)
-  (when (eq flycheck-checker 'lsp)
+  (when (eq flycheck-checker 'flycheck-lsp)
     (setq flycheck-checker nil))
   (when flycheck-mode
     (flycheck-buffer-deferred)))
@@ -11160,8 +11160,8 @@ A no-op unless the mode's server is configured and installed."
 
 When enabled, and the buffer's major mode has a server configured in
 `flycheck-lsp-servers', Flycheck starts that server and shows the
-diagnostics it reports (via the `lsp' checker), talking LSP directly
-without Eglot.  With `flycheck-lsp-exclusive' nil, `lsp' chains to the
+diagnostics it reports (via the `flycheck-lsp' checker), talking LSP directly
+without Eglot.  With `flycheck-lsp-exclusive' nil, `flycheck-lsp' chains to the
 command checkers so both contribute.
 
 Enable it for every configured buffer with `global-flycheck-lsp-mode'.
