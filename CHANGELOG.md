@@ -6,6 +6,10 @@
 
 ## master (unreleased)
 
+### Bugs fixed
+
+- [#2227](https://github.com/flycheck/flycheck/pull/2227): Fix `flycheck-annotate-mode` drawing the cursor past the inline annotation, so the line at point read as if the cursor were inside the message (most visibly with the multi-line `below` style) and editing the line was awkward.
+
 ## 38.0 (2026-07-29)
 
 ### New Features

@@ -40,13 +40,19 @@ Line 2 gets an error and a warning; line 4 gets a warning."
     (setq flycheck-current-errors (list e2 e2b e4))
     (mapc #'flycheck-add-overlay flycheck-current-errors)))
 
+(defun test-annotate/text (ov)
+  "Return OV's annotation string, minus the leading cursor-anchor space.
+Return nil for overlays that carry no annotation, such as tint overlays,
+so it doubles as a predicate for the message overlays."
+  (when-let* ((s (overlay-get ov 'before-string)))
+    (if (get-text-property 0 'cursor s) (substring s 1) s)))
+
 (defun test-annotate/anchors ()
   "Return an alist mapping each message overlay's line to its text."
   (mapcar (lambda (ov)
             (cons (line-number-at-pos (overlay-start ov))
-                  (substring-no-properties (overlay-get ov 'after-string))))
-          (seq-filter (lambda (ov) (overlay-get ov 'after-string))
-                      flycheck-annotate--overlays)))
+                  (substring-no-properties (test-annotate/text ov))))
+          (seq-filter #'test-annotate/text flycheck-annotate--overlays)))
 
 (defun test-annotate/tints ()
   "Return an alist mapping each tinted line to its background face."
@@ -106,7 +112,7 @@ Line 2 gets an error and a warning; line 4 gets a warning."
                                                   :checker 'emacs-lisp)))
                (flycheck-annotate--overlays nil)
                (ov (flycheck-annotate-eol-style errs (line-end-position) nil))
-               (s (substring-no-properties (overlay-get ov 'after-string))))
+               (s (substring-no-properties (test-annotate/text ov))))
           (expect s :to-match "big")
           (expect s :to-match (regexp-quote "(+1)"))
           (expect (string-prefix-p "\n" s) :to-be nil)))))
@@ -122,7 +128,7 @@ Line 2 gets an error and a warning; line 4 gets a warning."
                                                   :checker 'emacs-lisp)))
                (flycheck-annotate--overlays nil)
                (ov (flycheck-annotate-below-style errs eol t))
-               (s (substring-no-properties (overlay-get ov 'after-string))))
+               (s (substring-no-properties (test-annotate/text ov))))
           (expect (string-prefix-p "\n" s) :to-be t)
           (expect s :to-match "one")
           (expect s :to-match "two")
@@ -139,7 +145,7 @@ Line 2 gets an error and a warning; line 4 gets a warning."
                                                   :checker 'emacs-lisp)))
                (flycheck-annotate--overlays nil)
                (ov (flycheck-annotate-below-style errs eol t))
-               (s (overlay-get ov 'after-string)))
+               (s (test-annotate/text ov)))
           ;; the pad after the newline aligns to display column 8, not 1
           (expect (get-text-property 1 'display s)
                   :to-equal '(space :align-to 8)))))
@@ -152,7 +158,7 @@ Line 2 gets an error and a warning; line 4 gets a warning."
                                                   :checker 'emacs-lisp)))
                (flycheck-annotate--overlays nil)
                (ov (flycheck-annotate-below-style errs eol t))
-               (s (overlay-get ov 'after-string)))
+               (s (test-annotate/text ov)))
           ;; char 1 is the connector itself, no stretch space
           (expect (get-text-property 1 'display s) :to-be nil))))
 
@@ -167,7 +173,7 @@ Line 2 gets an error and a warning; line 4 gets a warning."
                                    :line 5 :column 2 :message "first here")))))
                (flycheck-annotate--overlays nil)
                (ov (flycheck-annotate-below-style errs eol t))
-               (s (substring-no-properties (overlay-get ov 'after-string))))
+               (s (substring-no-properties (test-annotate/text ov))))
           (expect s :to-match "redefined")
           (expect s :to-match "↳ first here (5:2)")
           ;; leading newline, the message line, then the related-location line
@@ -183,7 +189,7 @@ Line 2 gets an error and a warning; line 4 gets a warning."
                                                   :checker 'emacs-lisp)))
                (flycheck-annotate--overlays nil)
                (ov (flycheck-annotate-sideline-style errs (line-end-position) nil))
-               (s (overlay-get ov 'after-string)))
+               (s (test-annotate/text ov)))
           ;; most severe message plus a count, no leading newline
           (expect (substring-no-properties s) :to-match "big")
           (expect (substring-no-properties s) :to-match (regexp-quote "(+1)"))
@@ -207,9 +213,9 @@ Line 2 gets an error and a warning; line 4 gets a warning."
           (let ((flycheck-annotate-current-line-style 'sideline)
                 (flycheck-annotate-other-lines-style nil))
             (flycheck-annotate-mode 1)
-            (let* ((ov (seq-find (lambda (o) (overlay-get o 'after-string))
+            (let* ((ov (seq-find (lambda (o) (test-annotate/text o))
                                  flycheck-annotate--overlays))
-                   (s (overlay-get ov 'after-string)))
+                   (s (test-annotate/text ov)))
               (expect (car (get-text-property 0 'display s)) :to-be 'space)))))))
 
   (describe "the fix marker"
@@ -242,7 +248,7 @@ Line 2 gets an error and a warning; line 4 gets a warning."
       (flycheck-buttercup-with-temp-buffer
         (insert "abc\n")
         (let* ((flycheck-annotate--overlays nil)
-               (ov (flycheck-annotate--make-overlay (point-min) 'after-string "x")))
+               (ov (flycheck-annotate--make-overlay (point-min) "x")))
           (expect (overlay-get ov 'flycheck-annotate) :to-be t)
           (expect (memq ov flycheck-annotate--overlays) :not :to-be nil)))))
 
@@ -292,7 +298,7 @@ Line 2 gets an error and a warning; line 4 gets a warning."
           (forward-line 1)              ; line 2
           (flycheck-annotate-mode 1)
           (let ((anchors (test-annotate/anchors)))
-            ;; line 2 is focused -> below (after-string begins with a newline)
+            ;; line 2 is focused -> below (annotation begins with a newline)
             (expect (string-prefix-p "\n" (cdr (assq 2 anchors))) :to-be t)
             ;; line 4 is unfocused -> eol
             (expect (string-prefix-p "\n" (cdr (assq 4 anchors))) :to-be nil)))))
@@ -355,7 +361,80 @@ Line 2 gets an error and a warning; line 4 gets a warning."
           (flycheck-annotate-mode 1)
           (expect flycheck-annotate--overlays :not :to-be nil)
           (flycheck-clear)
-          (expect flycheck-annotate--overlays :to-be nil)))))
+          (expect flycheck-annotate--overlays :to-be nil))))
+
+    (it "anchors the cursor to the end of the code across every style"
+      ;; Every message overlay spans the trailing newline and renders its text
+      ;; as a `before-string' whose first character is a plain space carrying a
+      ;; `cursor' property.  That keeps C-e and typing parked at the end of the
+      ;; code instead of the end of the annotation.  A plain space is essential:
+      ;; the `cursor' property is ignored on a newline (the `below' string) and
+      ;; lands at the far end of the `sideline' `:align-to' stretch.
+      (flycheck-buttercup-with-temp-buffer
+        (save-window-excursion
+          (set-window-buffer (selected-window) (current-buffer))
+          (test-annotate/setup)
+          (dolist (style '(eol below sideline))
+            (let ((flycheck-annotate-current-line-style style)
+                  (flycheck-annotate-other-lines-style style))
+              (flycheck-annotate-mode 1)
+              (let ((msg-ovs (seq-filter #'test-annotate/text
+                                         flycheck-annotate--overlays)))
+                (expect msg-ovs :not :to-be nil)
+                (dolist (ov msg-ovs)
+                  (let ((s (overlay-get ov 'before-string)))
+                    ;; spans exactly the trailing newline
+                    (expect (overlay-end ov) :to-equal (1+ (overlay-start ov)))
+                    ;; plain-space cursor anchor: cursor prop, a real space,
+                    ;; and no `display' spec that would move the cursor away
+                    (expect (get-text-property 0 'cursor s) :to-be t)
+                    (expect (aref s 0) :to-equal ?\s)
+                    (expect (get-text-property 0 'display s) :to-be nil))))
+              (flycheck-annotate-mode -1))))))
+
+    (it "keeps a last-line annotation with no trailing newline"
+      ;; At end of buffer there is no newline to span, so the overlay is empty;
+      ;; it must not evaporate, or the annotation would disappear.
+      (flycheck-buttercup-with-temp-buffer
+        (save-window-excursion
+          (set-window-buffer (selected-window) (current-buffer))
+          (insert "code")               ; deliberately no trailing newline
+          (setq-local flycheck-mode t)
+          (let ((e (flycheck-error-new-at 1 1 'error "boom"
+                                          :buffer (current-buffer)
+                                          :checker 'emacs-lisp)))
+            (setq flycheck-current-errors (list e))
+            (mapc #'flycheck-add-overlay flycheck-current-errors))
+          (goto-char (point-max))
+          (let ((flycheck-annotate-current-line-style 'below)
+                (flycheck-annotate-other-lines-style 'below))
+            (flycheck-annotate-mode 1)
+            (let ((ov (seq-find #'test-annotate/text flycheck-annotate--overlays)))
+              (expect ov :not :to-be nil)
+              (expect (overlay-start ov) :to-equal (point-max))
+              (expect (overlay-get ov 'evaporate) :to-be nil))))))
+
+    (it "leaves the code editable at the end of the line"
+      ;; Typing at end of line inserts into the code, not into the annotation.
+      (flycheck-buttercup-with-temp-buffer
+        (save-window-excursion
+          (set-window-buffer (selected-window) (current-buffer))
+          (insert "code\n")
+          (setq-local flycheck-mode t)
+          (let ((e (flycheck-error-new-at 1 1 'error "boom"
+                                          :buffer (current-buffer)
+                                          :checker 'emacs-lisp)))
+            (setq flycheck-current-errors (list e))
+            (mapc #'flycheck-add-overlay flycheck-current-errors))
+          (goto-char (point-min))
+          (let ((flycheck-annotate-current-line-style 'below)
+                (flycheck-annotate-other-lines-style 'below))
+            (flycheck-annotate-mode 1)
+            (end-of-line)
+            (insert "X")
+            (expect (buffer-substring-no-properties
+                     (point-min) (line-end-position))
+                    :to-equal "codeX"))))))
 
   (describe "the background tint"
     (it "adds no tint when disabled"
