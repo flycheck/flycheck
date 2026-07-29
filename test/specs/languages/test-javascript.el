@@ -107,6 +107,35 @@ Some more explanation here.")
       (spy-on 'flycheck-call-checker-process :and-return-value nil)
       (expect (flycheck-eslint-config-exists-p) :to-be nil)))
 
+  (describe "flycheck-eslint--find-working-directory"
+    (defun test-eslint/root-with (config-file)
+      "Return the detected root for a buffer under a dir holding CONFIG-FILE."
+      (let* ((root (make-temp-file "flycheck-eslint" 'dir))
+             (srcdir (expand-file-name "src/" root))
+             (src (expand-file-name "app.js" srcdir)))
+        (unwind-protect
+            (progn
+              (make-directory srcdir)
+              (write-region "" nil (expand-file-name config-file root))
+              (write-region "" nil src)
+              (with-temp-buffer
+                (setq buffer-file-name src)
+                (flycheck-eslint--find-working-directory nil)))
+          (delete-directory root 'recursive))))
+
+    (it "detects a project root from a flat config file"
+      (dolist (name '("eslint.config.js" "eslint.config.mjs"
+                      "eslint.config.cjs" "eslint.config.ts"))
+        (expect (test-eslint/root-with name) :not :to-be nil)))
+
+    (it "still detects a project root from a legacy .eslintrc"
+      (dolist (name '(".eslintrc" ".eslintrc.js" ".eslintrc.json"
+                      ".eslintrc.yml"))
+        (expect (test-eslint/root-with name) :not :to-be nil)))
+
+    (it "does not treat an unrelated dotfile as a config"
+      (expect (test-eslint/root-with ".prettierrc") :to-be nil)))
+
   (describe "Checker tests"
     (flycheck-buttercup-def-checker-test javascript-eslint javascript error
       (let ((inhibit-message t))
