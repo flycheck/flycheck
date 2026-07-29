@@ -434,7 +434,37 @@ so it doubles as a predicate for the message overlays."
             (insert "X")
             (expect (buffer-substring-no-properties
                      (point-min) (line-end-position))
-                    :to-equal "codeX"))))))
+                    :to-equal "codeX")))))
+
+    (it "rebuilds after an edit that leaves point on its line"
+      ;; An edit such as `open-line' changes the buffer without moving point
+      ;; off its line or scrolling the window, so the line/window check alone
+      ;; would not rebuild.  The buffer-change (tick) check must catch it.
+      (flycheck-buttercup-with-temp-buffer
+        (save-window-excursion
+          (set-window-buffer (selected-window) (current-buffer))
+          (insert "abcdef\n")
+          (setq-local flycheck-mode t)
+          (let ((e (flycheck-error-new-at 1 1 'error "boom"
+                                          :buffer (current-buffer)
+                                          :checker 'emacs-lisp)))
+            (setq flycheck-current-errors (list e))
+            (mapc #'flycheck-add-overlay flycheck-current-errors))
+          (goto-char (point-min))
+          (let ((flycheck-annotate-current-line-style 'eol)
+                (flycheck-annotate-other-lines-style 'eol))
+            (flycheck-annotate-mode 1)
+            (let ((line0 flycheck-annotate--last-line-start)
+                  (win0 flycheck-annotate--last-window-start))
+              ;; edit later on the same line, leaving point put
+              (save-excursion (goto-char (+ (point-min) 3)) (insert "X"))
+              ;; the line/window check would skip: neither has changed
+              (expect (line-beginning-position) :to-equal line0)
+              (expect (window-start) :to-equal win0)
+              ;; but the buffer changed, so post-command must rebuild
+              (flycheck-annotate--post-command)
+              (expect flycheck-annotate--last-tick
+                      :to-equal (buffer-chars-modified-tick))))))))
 
   (describe "the background tint"
     (it "adds no tint when disabled"

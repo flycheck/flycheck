@@ -6,6 +6,10 @@
 
 ## master (unreleased)
 
+### Bugs fixed
+
+- [#2229](https://github.com/flycheck/flycheck/pull/2229): Keep `flycheck-annotate-mode`'s inline messages on the right line while editing - an edit that left point on its line (such as `open-line`) could strand an annotation on the wrong line until the next check.
+
 ## 38.2 (2026-07-29)
 
 ### Bugs fixed
