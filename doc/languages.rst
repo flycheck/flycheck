@@ -1231,6 +1231,23 @@ to view the docstring of the syntax checker.  Likewise, you may use
          Whether to suppress warnings about style issues, via the ``--lint``
          option.
 
+      .. defcustom:: flycheck-rubocop-server
+
+         Whether to run RuboCop in server mode, via ``--server``, keeping a warm
+         server process alive between runs to cut startup latency.
+
+      .. defcustom:: flycheck-rubocop-only
+
+         A list of cops or departments to run exclusively, via ``--only``.
+
+      .. defcustom:: flycheck-rubocop-except
+
+         A list of cops or departments to disable, via ``--except``.
+
+      .. defcustom:: flycheck-rubocop-args
+
+         A list of additional arguments passed to ``rubocop``.
+
       .. syntax-checker-config-file:: flycheck-rubocoprc
 
    .. syntax-checker:: ruby-standard

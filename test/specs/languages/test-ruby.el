@@ -68,6 +68,43 @@
                                         :buffer 'buffer
                                         :filename "app/controllers/application_controller.rb"))))))
 
+  (describe "the ruby-rubocop checker command"
+    ;; Bind the config-file var to nil so argument substitution never locates a
+    ;; .rubocop.yml and adds a stray --config.
+    (it "adds no extra flags by default"
+      (let ((flycheck-rubocoprc nil)
+            (flycheck-rubocop-lint-only nil)
+            (flycheck-rubocop-server nil)
+            (flycheck-rubocop-only nil)
+            (flycheck-rubocop-except nil)
+            (flycheck-rubocop-args nil))
+        (let ((args (flycheck-checker-substituted-arguments 'ruby-rubocop)))
+          (expect args :not :to-contain "--server")
+          (expect args :not :to-contain "--only")
+          (expect args :not :to-contain "--except"))))
+
+    (it "passes --server when enabled"
+      (let ((flycheck-rubocoprc nil)
+            (flycheck-rubocop-server t))
+        (expect (flycheck-checker-substituted-arguments 'ruby-rubocop)
+                :to-contain "--server")))
+
+    (it "passes --only and --except as comma-separated cop lists"
+      (let ((flycheck-rubocoprc nil)
+            (flycheck-rubocop-only '("Style/StringLiterals" "Lint"))
+            (flycheck-rubocop-except '("Metrics")))
+        (let ((args (flycheck-checker-substituted-arguments 'ruby-rubocop)))
+          (expect args :to-contain "--only")
+          (expect args :to-contain "Style/StringLiterals,Lint")
+          (expect args :to-contain "--except")
+          (expect args :to-contain "Metrics"))))
+
+    (it "appends flycheck-rubocop-args"
+      (let ((flycheck-rubocoprc nil)
+            (flycheck-rubocop-args '("--display-time")))
+        (expect (flycheck-checker-substituted-arguments 'ruby-rubocop)
+                :to-contain "--display-time"))))
+
   (describe "Checker tests"
     (flycheck-buttercup-def-checker-test ruby-rubocop ruby syntax-error
       (flycheck-buttercup-should-syntax-check
