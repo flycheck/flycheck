@@ -15,6 +15,7 @@
 - [#2238](https://github.com/flycheck/flycheck/pull/2238): Add `flycheck-python-mypy-args` for passing arbitrary arguments (such as `--strict` or `--ignore-missing-imports`) to `mypy`.
 - [#2239](https://github.com/flycheck/flycheck/pull/2239): Add `flycheck-dockerfile-hadolint-config` to point `dockerfile-hadolint` at a `.hadolint.yaml` file (via `--config`) and `flycheck-dockerfile-hadolint-args` for arbitrary arguments.
 - [#2240](https://github.com/flycheck/flycheck/pull/2240): Expose more `terraform-tflint` options: `flycheck-tflint-config` for a `.tflint.hcl` file (`--config`), `flycheck-tflint-enabled-rules`/`flycheck-tflint-disabled-rules` (`--enable-rule`/`--disable-rule`), and `flycheck-tflint-args` for arbitrary arguments.
+- [#2241](https://github.com/flycheck/flycheck/pull/2241): Turn `flycheck-stylelint-args` into a real user option, so the four stylelint checkers (`css`/`scss`/`sass`/`less`) accept arbitrary arguments such as `--custom-syntax`.
 
 ### Bugs fixed
 

@@ -12206,8 +12206,9 @@ See URL `https://coffeescript.org/'."
           ": error: " (message) line-end))
   :modes coffee-mode)
 
-(defconst flycheck-stylelint-args '("--formatter" "json")
-  "Common arguments to stylelint invocations.")
+(flycheck-def-args-var flycheck-stylelint-args
+    (css-stylelint scss-stylelint sass-stylelint less-stylelint)
+  :package-version '(flycheck . "38.4"))
 
 ;; Limit the length of the generated docstring by including only the first three
 ;; checker symbols, otherwise emacs will complain about the docstring length
@@ -12351,6 +12352,7 @@ about the JSON format of stylelint."
 
 See URL `https://stylelint.io/'."
   :command ("stylelint"
+            "--formatter" "json"
             (eval flycheck-stylelint-args)
             (option-flag "--quiet" flycheck-stylelint-quiet)
             (config-file "--config" flycheck-stylelintrc)
@@ -14150,6 +14152,7 @@ See URL `https://lesscss.org'."
 
 See URL `https://stylelint.io/'."
   :command ("stylelint"
+            "--formatter" "json"
             (eval flycheck-stylelint-args)
             (option-flag "--quiet" flycheck-stylelint-quiet)
             (config-file "--config" flycheck-stylelintrc))
@@ -16520,6 +16523,7 @@ See URL `https://call-cc.org/'."
 
 See URL `https://stylelint.io/'."
   :command ("stylelint"
+            "--formatter" "json"
             (eval flycheck-stylelint-args)
             (option-flag "--quiet" flycheck-stylelint-quiet)
             (config-file "--config" flycheck-stylelintrc))
@@ -16536,6 +16540,7 @@ See URL `https://stylelint.io/'."
 
 See URL `https://stylelint.io/'."
   :command ("stylelint"
+            "--formatter" "json"
             (eval flycheck-stylelint-args)
             (option-flag "--quiet" flycheck-stylelint-quiet)
             (config-file "--config" flycheck-stylelintrc))
