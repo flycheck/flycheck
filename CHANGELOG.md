@@ -11,6 +11,10 @@
 - [#2231](https://github.com/flycheck/flycheck/pull/2231): Make the `rust-clippy` checker configurable with `flycheck-rust-clippy-args` (extra `cargo clippy` arguments) and the `flycheck-rust-clippy-tests`, `flycheck-rust-clippy-all-targets` and `flycheck-rust-clippy-all-features` toggles; `flycheck-rust-features` now applies to `rust-clippy` as well (originally proposed in [#2087](https://github.com/flycheck/flycheck/pull/2087) and [#2125](https://github.com/flycheck/flycheck/pull/2125)).
 - [#2231](https://github.com/flycheck/flycheck/pull/2231): Add `flycheck-rust-edition` to set the edition (`--edition`) for the `rust` checker when checking single-file crates outside a Cargo project.
 
+### Bugs fixed
+
+- [#2233](https://github.com/flycheck/flycheck/pull/2233): Fix `flycheck-annotate-mode`'s `below` style trapping vertical motion on the annotated line - `next-line` needed an extra press to get past it and `evil-next-visual-line` could not move past it at all. The multi-line message now hangs off the following line instead of the annotated line's newline.
+
 ## 38.3 (2026-07-29)
 
 ### New Features
