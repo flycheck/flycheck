@@ -6,6 +6,8 @@
 
 ## master (unreleased)
 
+## 38.2 (2026-07-29)
+
 ### Bugs fixed
 
 - [#2228](https://github.com/flycheck/flycheck/pull/2228): Rename the native LSP checker from `lsp` to `flycheck-lsp`, so it no longer clobbers the `lsp` checker `lsp-mode` registers for its own Flycheck integration - which had left lsp-mode users with an empty error list and no highlighting ([#2226](https://github.com/flycheck/flycheck/issues/2226)).
