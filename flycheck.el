@@ -7729,6 +7729,14 @@ start of the buffer on every command.")
 (defvar-local flycheck-annotate--last-window-start nil
   "Window start the inline overlays were last built for.")
 
+(defvar-local flycheck-annotate--last-tick nil
+  "Buffer-modification tick the inline overlays were last built for.
+
+Tracked so `flycheck-annotate--post-command' also rebuilds after an edit
+that left point on its line -- e.g. `open-line', which inserts a newline
+but keeps point put -- and would otherwise strand an annotation on the
+wrong line until the next check.")
+
 (defun flycheck-annotate--level-face (level)
   "Return the inline face for error LEVEL."
   (pcase level
@@ -7964,7 +7972,8 @@ Records the line and window start the overlays were built for, so
 `flycheck-annotate--post-command' can skip rebuilds that would not change
 anything."
   (setq flycheck-annotate--last-line-start (line-beginning-position)
-        flycheck-annotate--last-window-start (window-start))
+        flycheck-annotate--last-window-start (window-start)
+        flycheck-annotate--last-tick (buffer-chars-modified-tick))
   (flycheck-annotate--clear)
   (when (and (bound-and-true-p flycheck-annotate-mode) flycheck-mode)
     (pcase-let ((`(,beg . ,end) (flycheck-annotate--region))
@@ -7993,12 +8002,18 @@ anything."
               (funcall render errors anchor focused))))))))
 
 (defun flycheck-annotate--post-command ()
-  "Rebuild the inline overlays if point or the window has moved.
+  "Rebuild the inline overlays if point, the window or the buffer changed.
 
-Only rebuilds when point changed line or the window scrolled, since the
-annotations are otherwise unaffected by point motion within a line."
+Skips the rebuild only when nothing that affects the annotations happened:
+point stayed on its line, the window did not scroll, and the buffer was not
+edited.  The buffer-change check catches edits that leave point on its line
+\(such as `open-line'), which the line and window checks alone would miss,
+and keeps a `below'-style connector aligned as the code under it changes.
+The check runs once per command, so a bulk edit rebuilds once rather than
+once per change."
   (unless (and (eql (line-beginning-position) flycheck-annotate--last-line-start)
-               (eql (window-start) flycheck-annotate--last-window-start))
+               (eql (window-start) flycheck-annotate--last-window-start)
+               (eql (buffer-chars-modified-tick) flycheck-annotate--last-tick))
     (flycheck-annotate--refresh)))
 
 (defun flycheck-annotate--suppresses-echo-p ()
