@@ -29,6 +29,16 @@
      '(2 nil error "foo::bar not in autoload module layout (autoloader_layout)"
          :checker puppet-lint)
      '(3 nil warning "case statement without a default case (case_without_default)"
-         :checker puppet-lint))))
+         :checker puppet-lint)))
+
+  (describe "the puppet-lint checker command"
+    (it "appends flycheck-puppet-lint-args before the source file"
+      (flycheck-buttercup-with-temp-buffer
+        (setq buffer-file-name (make-temp-file "flycheck-puppet" nil ".pp"))
+        (let ((flycheck-puppet-lint-rc nil)
+              (flycheck-puppet-lint-disabled-checks nil)
+              (flycheck-puppet-lint-args '("--relative")))
+          (expect (flycheck-checker-substituted-arguments 'puppet-lint)
+                  :to-contain "--relative"))))))
 
 ;;; test-puppet.el ends here

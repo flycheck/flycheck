@@ -14660,6 +14660,9 @@ are relative to the file being checked."
   :package-version '(flycheck . "32"))
 (make-variable-buffer-local 'flycheck-protoc-import-path)
 
+(flycheck-def-args-var flycheck-protoc-args protobuf-protoc
+  :package-version '(flycheck . "38.4"))
+
 (flycheck-define-checker protobuf-protoc
   "A protobuf syntax checker using the protoc compiler.
 
@@ -14675,6 +14678,7 @@ See URL `https://developers.google.com/protocol-buffers/'."
             ;; directory to produce the right output.  See URL
             ;; `https://github.com/flycheck/flycheck/pull/1655'
             (option-list "--proto_path=" flycheck-protoc-import-path concat)
+            (eval flycheck-protoc-args)
             source-inplace)
   :error-patterns
   ((info line-start (file-name) ":" line ":" column
@@ -14772,6 +14776,9 @@ and their names."
   "Create an argument to disable a puppetlint CHECK."
   (concat "--no-" check "-check"))
 
+(flycheck-def-args-var flycheck-puppet-lint-args puppet-lint
+  :package-version '(flycheck . "38.4"))
+
 (flycheck-define-checker puppet-lint
   "A Puppet DSL style checker using puppet-lint.
 
@@ -14787,6 +14794,7 @@ See URL `https://puppet-lint.com/'."
             "%{path}:%{line}:%{kind}: %{message} (%{check})"
             (option-list "" flycheck-puppet-lint-disabled-checks concat
                          flycheck-puppet-lint-disabled-arg-name)
+            (eval flycheck-puppet-lint-args)
             source-original)
   :error-patterns
   ((warning line-start (file-name) ":" line ":warning: " (message) line-end)
@@ -15738,11 +15746,16 @@ information about statix."
                  :end-column .at.to.column))))
           (alist-get 'report (car (flycheck-parse-json output)))))
 
+(flycheck-def-args-var flycheck-statix-args statix
+  :package-version '(flycheck . "38.4"))
+
 (flycheck-define-checker statix
   "Nix checker using statix.
 
 See URL `https://github.com/nerdypepper/statix'."
-  :command ("statix" "check" "-o=json" source)
+  :command ("statix" "check" "-o=json"
+            (eval flycheck-statix-args)
+            source)
   :error-parser flycheck-parse-statix
   :modes (nix-mode nix-ts-mode))
 
