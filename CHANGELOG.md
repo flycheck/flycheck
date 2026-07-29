@@ -18,6 +18,7 @@
 - [#2241](https://github.com/flycheck/flycheck/pull/2241): Turn `flycheck-stylelint-args` into a real user option, so the four stylelint checkers (`css`/`scss`/`sass`/`less`) accept arbitrary arguments such as `--custom-syntax`.
 - [#2242](https://github.com/flycheck/flycheck/pull/2242): Add `flycheck-luacheck-globals` to allow extra globals (`--globals`) and `flycheck-luacheck-args` for arbitrary arguments to `lua-luacheck`.
 - [#2243](https://github.com/flycheck/flycheck/pull/2243): Add `flycheck-yamllint-args` for passing arbitrary arguments to `yamllint`.
+- [#2245](https://github.com/flycheck/flycheck/pull/2245): Add `flycheck-flake8-args` and `flycheck-pylint-args` for passing arbitrary arguments (such as flake8's `--select`/`--ignore` or pylint's `--disable`/`--load-plugins`) to the `python-flake8` and `python-pylint` checkers.
 
 ### Bugs fixed
 

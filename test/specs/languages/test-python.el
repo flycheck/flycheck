@@ -54,6 +54,24 @@
           (expect args :to-contain "--strict")
           (expect args :to-contain "--ignore-missing-imports")))))
 
+  (describe "the python-flake8 checker command"
+    (it "appends flycheck-flake8-args before the stdin marker"
+      (let ((flycheck-flake8rc nil)
+            (flycheck-flake8-args '("--select=F401" "--max-doc-length=72")))
+        (let ((args (flycheck-checker-substituted-arguments 'python-flake8)))
+          (expect args :to-contain "--select=F401")
+          (expect args :to-contain "--max-doc-length=72")
+          ;; the stdin marker stays last
+          (expect (car (last args)) :to-equal "-")))))
+
+  (describe "the python-pylint checker command"
+    (it "appends flycheck-pylint-args"
+      (let ((flycheck-pylintrc nil)
+            (flycheck-pylint-args '("--disable=C0114" "--jobs=2")))
+        (let ((args (flycheck-checker-substituted-arguments 'python-pylint)))
+          (expect args :to-contain "--disable=C0114")
+          (expect args :to-contain "--jobs=2")))))
+
   (flycheck-buttercup-def-checker-test python-ruff python syntax-error
     (let ((flycheck-disabled-checkers '(python-flake8))
           (flycheck-checkers '(python-ruff))
