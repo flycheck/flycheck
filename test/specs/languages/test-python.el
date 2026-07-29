@@ -120,6 +120,46 @@
                          'python-ruff (current-buffer)))))
           (expect (flycheck-error-fix err) :to-be nil)))))
 
+  (describe "the python-ruff checker command"
+    ;; Bind the config-file var to nil so argument substitution never locates a
+    ;; pyproject.toml/ruff.toml and adds a stray --config.
+    (it "passes only check, JSON output and stdin by default"
+      (let ((flycheck-python-ruff-config nil)
+            (flycheck-python-ruff-select nil)
+            (flycheck-python-ruff-extend-select nil)
+            (flycheck-python-ruff-ignore nil)
+            (flycheck-python-ruff-target-version nil)
+            (flycheck-python-ruff-preview nil)
+            (flycheck-python-ruff-args nil))
+        (expect (flycheck-checker-substituted-arguments 'python-ruff)
+                :to-equal '("check" "--output-format=json" "-"))))
+
+    (it "passes --select, --extend-select and --ignore as comma lists"
+      (let ((flycheck-python-ruff-config nil)
+            (flycheck-python-ruff-select '("E" "F" "I"))
+            (flycheck-python-ruff-extend-select '("B"))
+            (flycheck-python-ruff-ignore '("E501" "D")))
+        (let ((args (flycheck-checker-substituted-arguments 'python-ruff)))
+          (expect args :to-contain "--select=E,F,I")
+          (expect args :to-contain "--extend-select=B")
+          (expect args :to-contain "--ignore=E501,D"))))
+
+    (it "passes --target-version and --preview"
+      (let ((flycheck-python-ruff-config nil)
+            (flycheck-python-ruff-target-version "py312")
+            (flycheck-python-ruff-preview t))
+        (let ((args (flycheck-checker-substituted-arguments 'python-ruff)))
+          (expect args :to-contain "--target-version=py312")
+          (expect args :to-contain "--preview"))))
+
+    (it "keeps --output-format=json last so it wins over user args"
+      (let ((flycheck-python-ruff-config nil)
+            (flycheck-python-ruff-args '("--output-format=text")))
+        (let* ((args (flycheck-checker-substituted-arguments 'python-ruff))
+               (formats (seq-filter (lambda (a) (string-prefix-p "--output-format" a))
+                                    args)))
+          (expect (car (last formats)) :to-equal "--output-format=json")))))
+
   (flycheck-buttercup-def-checker-test python-pylint python nil
     (let ((flycheck-disabled-checkers '(python-flake8 python-mypy))
           (flycheck-python-pylint-executable "python3"))

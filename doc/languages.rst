@@ -1072,6 +1072,35 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       .. syntax-checker-config-file:: flycheck-python-ruff-config
 
+      .. defcustom:: flycheck-python-ruff-args
+
+         A list of additional arguments passed to ``ruff check``.
+
+      .. defcustom:: flycheck-python-ruff-select
+
+         A list of rule codes to enable, via ``--select``.  Each item is a rule
+         code or prefix such as ``E``, ``F401`` or ``I``, or the special value
+         ``ALL``.  Replaces the selection Ruff would take from its
+         configuration.
+
+      .. defcustom:: flycheck-python-ruff-extend-select
+
+         A list of rule codes to enable on top of Ruff's configuration, via
+         ``--extend-select``.
+
+      .. defcustom:: flycheck-python-ruff-ignore
+
+         A list of rule codes to disable, via ``--ignore``.
+
+      .. defcustom:: flycheck-python-ruff-target-version
+
+         The minimum Python version to assume, via ``--target-version``, as a
+         string such as ``py312``.
+
+      .. defcustom:: flycheck-python-ruff-preview
+
+         Whether to enable Ruff's preview rules and fixes, via ``--preview``.
+
    .. syntax-checker:: python-pyright
 
       Type check Python with `pyright <https://github.com/microsoft/pyright>`_.

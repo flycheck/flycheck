@@ -14935,6 +14935,58 @@ Requires Flake8 3.0 or newer. See URL
 (flycheck-def-config-file-var flycheck-python-ruff-config python-ruff
                               '("pyproject.toml" "ruff.toml" ".ruff.toml"))
 
+(flycheck-def-args-var flycheck-python-ruff-args python-ruff
+  :package-version '(flycheck . "38.4"))
+
+(flycheck-def-option-var flycheck-python-ruff-select nil python-ruff
+  "A list of rule codes to enable in Ruff, via `--select'.
+
+Each element is a rule code or prefix, such as \"E\", \"F401\" or \"I\", or
+the special value \"ALL\".  Passed to `ruff check' as a comma-separated
+`--select' argument, replacing the selection Ruff would otherwise take from
+its configuration.  When nil, Ruff's configured or default selection is
+used."
+  :type '(repeat (string :tag "Rule code"))
+  :safe #'flycheck-string-list-p
+  :package-version '(flycheck . "38.4"))
+
+(flycheck-def-option-var flycheck-python-ruff-extend-select nil python-ruff
+  "A list of rule codes to enable in Ruff on top of its configuration.
+
+Like `flycheck-python-ruff-select', but passed via `--extend-select', so it
+adds to the rules selected in `pyproject.toml' or `ruff.toml' rather than
+replacing them."
+  :type '(repeat (string :tag "Rule code"))
+  :safe #'flycheck-string-list-p
+  :package-version '(flycheck . "38.4"))
+
+(flycheck-def-option-var flycheck-python-ruff-ignore nil python-ruff
+  "A list of rule codes to disable in Ruff, via `--ignore'.
+
+Each element is a rule code or prefix, such as \"E501\" or \"D\"."
+  :type '(repeat (string :tag "Rule code"))
+  :safe #'flycheck-string-list-p
+  :package-version '(flycheck . "38.4"))
+
+(flycheck-def-option-var flycheck-python-ruff-target-version nil python-ruff
+  "The minimum Python version Ruff should assume, via `--target-version'.
+
+A string such as \"py38\" or \"py312\", or nil to let Ruff infer the version
+from the project's configuration."
+  :type '(choice (const :tag "Inferred" nil)
+                 (const "py37") (const "py38") (const "py39")
+                 (const "py310") (const "py311") (const "py312")
+                 (const "py313") (const "py314")
+                 (string :tag "Version tag"))
+  :safe #'string-or-null-p
+  :package-version '(flycheck . "38.4"))
+
+(flycheck-def-option-var flycheck-python-ruff-preview nil python-ruff
+  "Whether to enable Ruff's preview rules and fixes, via `--preview'."
+  :type 'boolean
+  :safe #'booleanp
+  :package-version '(flycheck . "38.4"))
+
 (defun flycheck--explain-error-via-checker (checker &rest args)
   "Return an explainer function that calls CHECKER with ARGS.
 The checker output is fontified as Markdown."
@@ -15007,8 +15059,18 @@ See URL `https://docs.astral.sh/ruff/'."
   :command ("ruff"
             "check"
             (config-file "--config" flycheck-python-ruff-config)
+            (option "--select=" flycheck-python-ruff-select concat
+                    flycheck-option-comma-separated-list)
+            (option "--extend-select=" flycheck-python-ruff-extend-select concat
+                    flycheck-option-comma-separated-list)
+            (option "--ignore=" flycheck-python-ruff-ignore concat
+                    flycheck-option-comma-separated-list)
+            (option "--target-version=" flycheck-python-ruff-target-version concat)
+            (option-flag "--preview" flycheck-python-ruff-preview)
+            (eval flycheck-python-ruff-args)
             ;; JSON carries the machine-applicable fixes ruff computes (see
-            ;; `flycheck-parse-ruff'); "--output-format" needs ruff >= 0.2.
+            ;; `flycheck-parse-ruff'); "--output-format" needs ruff >= 0.2.  Keep
+            ;; it last so it wins over any --output-format in the args above.
             "--output-format=json"
             (eval (when buffer-file-name
                     (list "--stdin-filename" (flycheck-buffer-file-local-name))))

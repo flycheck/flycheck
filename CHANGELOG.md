@@ -10,6 +10,7 @@
 
 - [#2231](https://github.com/flycheck/flycheck/pull/2231): Make the `rust-clippy` checker configurable with `flycheck-rust-clippy-args` (extra `cargo clippy` arguments) and the `flycheck-rust-clippy-tests`, `flycheck-rust-clippy-all-targets` and `flycheck-rust-clippy-all-features` toggles; `flycheck-rust-features` now applies to `rust-clippy` as well (originally proposed in [#2087](https://github.com/flycheck/flycheck/pull/2087) and [#2125](https://github.com/flycheck/flycheck/pull/2125)).
 - [#2231](https://github.com/flycheck/flycheck/pull/2231): Add `flycheck-rust-edition` to set the edition (`--edition`) for the `rust` checker when checking single-file crates outside a Cargo project.
+- [#2234](https://github.com/flycheck/flycheck/pull/2234): Make the `python-ruff` checker configurable without a config file: `flycheck-python-ruff-select`, `flycheck-python-ruff-extend-select` and `flycheck-python-ruff-ignore` for rule tuning, `flycheck-python-ruff-target-version`, `flycheck-python-ruff-preview`, and `flycheck-python-ruff-args` for arbitrary `ruff check` arguments.
 
 ### Bugs fixed
 
