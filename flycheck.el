@@ -14925,6 +14925,9 @@ of 79 characters if there is no configuration with this setting."
                  (integer :tag "Maximum line length in characters"))
   :safe #'integerp)
 
+(flycheck-def-args-var flycheck-flake8-args python-flake8
+  :package-version '(flycheck . "38.4"))
+
 (defun flycheck-flake8-fix-error-level (err)
   "Fix the error level of ERR.
 
@@ -14955,6 +14958,7 @@ Requires Flake8 3.0 or newer. See URL
             (eval (when buffer-file-name
                     (concat "--stdin-display-name="
                             (flycheck-buffer-file-local-name))))
+            (eval flycheck-flake8-args)
             "-")
   :standard-input t
   :working-directory flycheck-python-find-project-root
@@ -15145,6 +15149,9 @@ which should be used and reported to the user."
   :safe #'booleanp
   :package-version '(flycheck . "0.25"))
 
+(flycheck-def-args-var flycheck-pylint-args python-pylint
+  :package-version '(flycheck . "38.4"))
+
 (defun flycheck-parse-pylint (output checker buffer)
   "Parse JSON OUTPUT of CHECKER on BUFFER as Pylint errors."
   (mapcar (lambda (err)
@@ -15182,6 +15189,7 @@ See URL `https://www.pylint.org/'."
             "--reports=n"
             "--output-format=json"
             (config-file "--rcfile=" flycheck-pylintrc concat)
+            (eval flycheck-pylint-args)
             ;; Need `source-inplace' for relative imports (e.g. `from .foo
             ;; import bar'), see https://github.com/flycheck/flycheck/issues/280
             source-inplace)

@@ -1084,6 +1084,11 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
          The maximum length of lines.
 
+      .. defcustom:: flycheck-flake8-args
+
+         A list of additional arguments passed to ``flake8``, for options such
+         as ``--select`` or ``--extend-ignore``.
+
       .. syntax-checker-config-file:: flycheck-flake8rc
 
    .. syntax-checker:: python-ruff
@@ -1168,6 +1173,11 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
          Whether to report symbolic (e.g. ``no-name-in-module``) or numeric
          (e.g. ``E0611``) message identifiers.
+
+      .. defcustom:: flycheck-pylint-args
+
+         A list of additional arguments passed to ``pylint``, for options such
+         as ``--disable`` or ``--load-plugins``.
 
       .. syntax-checker-config-file:: flycheck-pylintrc
 
