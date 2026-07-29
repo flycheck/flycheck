@@ -306,9 +306,12 @@ current row, or :kbd:`X` (``flycheck-error-list-fix-all``) to apply every
 fix in the list's source buffer.
 
 A fix is applied as a single undoable change, so :kbd:`C-/` reverts it.  The
-checkers that currently provide fixes are ``javascript-eslint``, the ``rust``
-checkers (from ``cargo clippy``'s machine-applicable suggestions), and any
-checker whose SARIF output includes fixes (e.g. ``dockerfile-hadolint``).
+checkers that currently provide fixes are ``javascript-eslint``,
+``python-ruff``, ``sh-shellcheck``, the ``rust`` checkers (from ``cargo
+clippy``'s machine-applicable suggestions), and any checker whose SARIF output
+includes fixes (e.g. ``dockerfile-hadolint``).  LSP servers that offer
+``quickfix`` code actions provide fixes too, through ``flycheck-eglot-mode`` or
+the native ``lsp`` checker (see :doc:`syntax-checks`).
 
 
 Kill errors

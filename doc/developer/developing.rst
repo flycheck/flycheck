@@ -295,6 +295,11 @@ checked, and the third one is for errors from other files.  In the
 XML format, so the definition above uses Flycheck's built-in CheckStyle parser,
 and an ``:error-filter`` to replace ``-`` by the current buffer's filename.
 
+Besides ``flycheck-parse-checkstyle``, Flycheck ships ``flycheck-parse-sarif``
+for the SARIF output format that many analyzers can emit.  Point
+``:error-parser`` at it the same way; it also reads the machine-applicable fixes
+a SARIF result carries into the error's ``:fix`` slot.
+
 Both checkers use a new ``:predicate`` property to determine when the checker
 can be called.  In addition to the ``:modes`` property which restricts the
 ``protoc`` checker to buffers in ``protobuf-mode``, the ``:predicate`` property
