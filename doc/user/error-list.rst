@@ -88,6 +88,8 @@ The project of a buffer is Emacs' project (see `project-current`) when one is
 found, and the checker's working directory otherwise.  The current scope is
 shown as ``[project]`` in the error list's mode line.
 
+.. image:: /images/flycheck-error-list-project.png
+
 Group the errors under a header per file, syntax checker or level with
 :kbd:`M-2`, :kbd:`M-3` and :kbd:`M-4`; :kbd:`M-1` switches back to a flat list.
 Grouping makes a project-wide list much easier to scan.  The keys toggle each

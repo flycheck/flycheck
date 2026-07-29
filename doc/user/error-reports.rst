@@ -286,14 +286,20 @@ competing for attention.
       Append a compact message after the code.  When a line has several
       errors, show the most severe one and a count of the rest.
 
+      .. image:: /images/flycheck-annotate-eol.png
+
    ``below``
       Lay the full messages out on their own lines underneath the code, one
       per error, each pointing at its column.
+
+      .. image:: /images/flycheck-annotate-below.png
 
    ``sideline``
       Like ``eol``, but flush the message to the window's right edge, the way
       ``lsp-ui-sideline`` does.  When the code leaves no room, the message
       simply follows it.
+
+      .. image:: /images/flycheck-annotate-sideline.png
 
    ``nil``
       Do not annotate those lines.  Setting ``flycheck-annotate-other-lines-style``
@@ -333,6 +339,8 @@ competing for attention.
    The tint applies to every visible error line that passes
    ``flycheck-annotate-levels``, independent of the message style, so it shows
    even on lines whose style is ``nil``.  Off by default.
+
+   .. image:: /images/flycheck-annotate-background.png
 
 .. defcustom:: flycheck-annotate-format-function
 
