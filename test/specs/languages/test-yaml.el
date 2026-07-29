@@ -43,6 +43,13 @@
       (flycheck-buttercup-should-syntax-check
        "language/yaml.yaml" 'yaml-mode
        '(4 5 error "syntax error: mapping values are not allowed here"
-           :checker yaml-yamllint)))))
+           :checker yaml-yamllint))))
+
+  (describe "the yaml-yamllint checker command"
+    (it "appends flycheck-yamllint-args before the stdin marker"
+      (let ((flycheck-yamllintrc nil)
+            (flycheck-yamllint-args '("--strict")))
+        (expect (flycheck-checker-substituted-arguments 'yaml-yamllint)
+                :to-equal '("-f" "parsable" "--strict" "-"))))))
 
 ;;; test-yaml.el ends here
