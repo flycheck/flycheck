@@ -7766,13 +7766,15 @@ carries a machine-applicable fix."
 (defun flycheck-annotate--make-overlay (anchor string)
   "Create a tracked inline overlay showing STRING at end-of-line ANCHOR.
 
-The overlay spans ANCHOR's trailing newline and shows STRING as a
-`before-string', so the annotation renders right after the code.  A
-`cursor' text property on STRING keeps the cursor pinned to ANCHOR -- the
-end of the code -- rather than to the end of the annotation, so `C-e' and
-typing behave as if the annotation were not there.  This is the same
-technique Flymake uses for its end-of-line diagnostics.  Return the
-overlay."
+STRING must be a single display line -- the `eol' and `sideline' styles
+use this; the multi-line `below' style has its own placement, see
+`flycheck-annotate--make-below-overlay'.  The overlay spans ANCHOR's
+trailing newline and shows STRING as a `before-string', so the annotation
+renders right after the code.  A `cursor' text property on STRING keeps the
+cursor pinned to ANCHOR -- the end of the code -- rather than to the end of
+the annotation, so `C-e' and typing behave as if the annotation were not
+there.  This is the same technique Flymake uses for its end-of-line
+diagnostics.  Return the overlay."
   (let* ((end (min (point-max) (1+ anchor)))
          (ov (make-overlay anchor end nil t nil)))
     (overlay-put ov 'priority 100)
@@ -7783,9 +7785,8 @@ overlay."
     ;; The cursor is drawn on the first character of the before-string.  Anchor
     ;; it to a dedicated plain space so `C-e' and typing park at the end of the
     ;; code rather than inside the annotation.  A plain space is required: the
-    ;; `cursor' property is ignored on a newline (which the `below' style's
-    ;; string starts with) and lands at the far end of the `sideline' style's
-    ;; `:align-to' stretch, both leaving the cursor stranded.
+    ;; `cursor' property lands at the far end of the `sideline' style's
+    ;; `:align-to' stretch, leaving the cursor stranded.
     (overlay-put ov 'before-string
                  (if (> (length string) 0)
                      (concat (propertize " " 'cursor t) string)
@@ -7871,6 +7872,29 @@ clamped to the line so a checker column past the end still lands on it."
       (forward-char offset)
       (current-column))))
 
+(defun flycheck-annotate--make-below-overlay (anchor block)
+  "Create a tracked overlay rendering BLOCK on its own lines below ANCHOR.
+
+BLOCK is the annotation text without surrounding newlines.  It is hung off
+the beginning of the following line as a `before-string' ending in a
+newline, so its extra screen rows belong to that line's buffer position
+rather than to ANCHOR's line.  That keeps visual-line motion working:
+`next-line' (with `line-move-visual') and `evil-next-visual-line' move
+point onto the next line of code instead of stalling on -- or, under Evil,
+getting stuck before -- the annotation.  On the last line of the buffer,
+where there is no following line, the block is hung off ANCHOR with a
+leading newline and a `cursor'-anchored space instead.  Return the overlay."
+  (if (< anchor (point-max))
+      (let ((ov (make-overlay (1+ anchor) (1+ anchor) nil t nil)))
+        (overlay-put ov 'priority 100)
+        (overlay-put ov 'before-string (concat block "\n"))
+        (flycheck-annotate--track ov))
+    (let ((ov (make-overlay anchor anchor nil t nil)))
+      (overlay-put ov 'priority 100)
+      (overlay-put ov 'before-string
+                   (concat (propertize " " 'cursor t) "\n" block))
+      (flycheck-annotate--track ov))))
+
 (defun flycheck-annotate-below-style (errors anchor _focused)
   "Render ERRORS on their own lines below the line ending at ANCHOR.
 
@@ -7904,9 +7928,9 @@ gutter.  FOCUSED is ignored."
                               (propertize (flycheck-related-location-format loc)
                                           'face 'shadow)))
                     (flycheck-error-relations err) "")))
-        (push (concat "\n" pad conn msg rels) lines)))
-    (flycheck-annotate--make-overlay anchor
-                                   (apply #'concat (nreverse lines)))))
+        (push (concat pad conn msg rels) lines)))
+    (flycheck-annotate--make-below-overlay
+     anchor (string-join (nreverse lines) "\n"))))
 
 (defun flycheck-annotate--clear ()
   "Delete all inline overlays in the current buffer."
