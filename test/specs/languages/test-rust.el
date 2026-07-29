@@ -315,6 +315,52 @@
            :end-line 2 :end-column 16)
        '(2 5 info "remove `return`: `true`"
            :checker rust-clippy :id "clippy::needless_return" :group 1
-           :end-line 2 :end-column 16)))))
+           :end-line 2 :end-column 16))))
+
+  (describe "the `rust' checker command"
+    ;; Pin the crate root so argument substitution never touches the
+    ;; buffer's file name.
+    (it "omits --edition when `flycheck-rust-edition' is nil"
+      (let ((flycheck-rust-edition nil)
+            (flycheck-rust-crate-root "root.rs"))
+        (expect (flycheck-checker-substituted-arguments 'rust)
+                :not :to-contain "--edition")))
+
+    (it "passes --edition when `flycheck-rust-edition' is set"
+      (let ((flycheck-rust-edition "2021")
+            (flycheck-rust-crate-root "root.rs"))
+        (let ((args (flycheck-checker-substituted-arguments 'rust)))
+          (expect args :to-contain "--edition")
+          (expect args :to-contain "2021")))))
+
+  (describe "the `rust-clippy' checker command"
+    (it "passes only --message-format by default"
+      (let ((flycheck-rust-features nil)
+            (flycheck-rust-clippy-tests nil)
+            (flycheck-rust-clippy-all-targets nil)
+            (flycheck-rust-clippy-all-features nil)
+            (flycheck-rust-clippy-args nil))
+        (expect (flycheck-checker-substituted-arguments 'rust-clippy)
+                :to-equal '("clippy" "--message-format=json"))))
+
+    (it "passes --features from `flycheck-rust-features'"
+      (let ((flycheck-rust-features '("foo" "bar")))
+        (expect (flycheck-checker-substituted-arguments 'rust-clippy)
+                :to-contain "--features=foo,bar")))
+
+    (it "passes the clippy option flags when enabled"
+      (let ((flycheck-rust-clippy-tests t)
+            (flycheck-rust-clippy-all-targets t)
+            (flycheck-rust-clippy-all-features t))
+        (let ((args (flycheck-checker-substituted-arguments 'rust-clippy)))
+          (expect args :to-contain "--tests")
+          (expect args :to-contain "--all-targets")
+          (expect args :to-contain "--all-features"))))
+
+    (it "appends `flycheck-rust-clippy-args' after --message-format"
+      (let ((flycheck-rust-clippy-args '("--" "-W" "clippy::pedantic")))
+        (expect (flycheck-checker-substituted-arguments 'rust-clippy)
+                :to-equal '("clippy" "--message-format=json"
+                            "--" "-W" "clippy::pedantic"))))))
 
 ;;; test-rust.el ends here
