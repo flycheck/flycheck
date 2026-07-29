@@ -412,4 +412,28 @@ Line 2 gets an error and a warning; line 4 gets a warning."
               (expect (overlay-start ov) :to-equal (line-beginning-position))
               (expect (overlay-end ov) :to-equal (1+ (line-end-position))))))))))
 
+(describe "global-flycheck-annotate-mode"
+  (after-each
+    ;; The globalized mode toggles the minor mode across all buffers and
+    ;; installs a global hook, so make sure it never leaks between specs.
+    (global-flycheck-annotate-mode -1))
+
+  (it "enables flycheck-annotate-mode in buffers Flycheck may check"
+    (let ((buffer (get-buffer-create "test-annotate-global-eligible")))
+      (unwind-protect
+          (with-current-buffer buffer
+            (text-mode)
+            (global-flycheck-annotate-mode 1)
+            (expect flycheck-annotate-mode :to-be-truthy))
+        (kill-buffer buffer))))
+
+  (it "leaves buffers Flycheck skips alone"
+    (let ((buffer (get-buffer-create "test-annotate-global-special")))
+      (unwind-protect
+          (with-current-buffer buffer
+            (special-mode)
+            (global-flycheck-annotate-mode 1)
+            (expect flycheck-annotate-mode :to-be nil))
+        (kill-buffer buffer)))))
+
 ;;; test-annotate.el ends here

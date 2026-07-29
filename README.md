@@ -47,7 +47,7 @@ few more things:
   :ensure t
   :hook ((after-init . global-flycheck-mode)
          ;; Show diagnostics inline, next to the code (Error Lens style)
-         (flycheck-mode . flycheck-annotate-mode))
+         (after-init . global-flycheck-annotate-mode))
   :config
   ;; Report Eglot's LSP diagnostics through Flycheck
   (global-flycheck-eglot-mode 1))

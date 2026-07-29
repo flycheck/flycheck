@@ -250,16 +250,22 @@ Inline error messages
 Beyond the fringe or margin indicators, Flycheck can render the error messages
 themselves right next to the code they refer to, in the spirit of VS Code's
 Error Lens and the inline diagnostics of Neovim, Helix and Zed.  Enable
-``flycheck-annotate-mode`` to turn this on:
+``flycheck-annotate-mode`` to turn this on in the current buffer, or
+``global-flycheck-annotate-mode`` to turn it on everywhere Flycheck checks:
 
 .. code-block:: elisp
 
-   (add-hook 'flycheck-mode-hook #'flycheck-annotate-mode)
+   (add-hook 'after-init-hook #'global-flycheck-annotate-mode)
 
 .. minor-mode:: flycheck-annotate-mode
 
    Toggle the inline display of Flycheck error messages in the current buffer.
    The annotations appear only while ``flycheck-mode`` is on.
+
+.. minor-mode:: global-flycheck-annotate-mode
+
+   Toggle ``flycheck-annotate-mode`` in every buffer Flycheck may check, the
+   same set of buffers ``global-flycheck-mode`` enables.
 
 Flycheck picks the display style per line: the line at point uses
 ``flycheck-annotate-current-line-style`` and every other line uses

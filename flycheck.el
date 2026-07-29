@@ -8037,6 +8037,15 @@ annotated on the next command."
                  #'flycheck-annotate--refresh t)
     (flycheck-annotate--clear))))
 
+;;;###autoload
+(define-globalized-minor-mode global-flycheck-annotate-mode
+  flycheck-annotate-mode
+  (lambda ()
+    ;; Enable inline annotations in exactly the buffers `global-flycheck-mode'
+    ;; checks; the mode stays inert until a check runs there anyway.
+    (when (flycheck-may-enable-mode) (flycheck-annotate-mode 1)))
+  :group 'flycheck)
+
 
 ;;; Working with errors
 (defun flycheck-copy-errors-as-kill (pos &optional formatter)

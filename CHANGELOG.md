@@ -13,6 +13,7 @@
 - [#2204](https://github.com/flycheck/flycheck/pull/2204): Add a `sideline` annotation style that flushes the compact message to the window's right edge, in the manner of `lsp-ui-sideline`.
 - [#2205](https://github.com/flycheck/flycheck/pull/2205): Align `below`-style connectors to the error's real display column, so they line up under tab-indented code and past a line-number gutter.
 - [#2206](https://github.com/flycheck/flycheck/pull/2206): Filter inline annotations per tier via `flycheck-annotate-current-line-levels` and `flycheck-annotate-other-lines-levels`, so the focused line and the rest can show different levels.
+- [#2225](https://github.com/flycheck/flycheck/pull/2225): Add `global-flycheck-annotate-mode` to turn inline diagnostics on in every buffer Flycheck checks.
 - [#2193](https://github.com/flycheck/flycheck/pull/2193): Add a quick-fix API. `C-c ! f` (`flycheck-fix-error-at-point`) and `x` in the error list apply a checker's machine-applicable fix, attached to a `flycheck-error` via the new `:fix` slot. Wired into `javascript-eslint`, the Rust checkers and SARIF-based checkers, whose fixes were previously parsed and discarded.
 - [#2195](https://github.com/flycheck/flycheck/pull/2195): `python-ruff` and `sh-shellcheck` now carry the fixes their tools suggest (shellcheck 0.7 or newer required).
 - [#2207](https://github.com/flycheck/flycheck/pull/2207): `C-c ! F` (`flycheck-fix-all-errors`) applies every fix in the buffer at once as a single undoable change; `X` does the same from the error list.
