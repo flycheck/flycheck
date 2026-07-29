@@ -868,6 +868,10 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       .. _statix: https://github.com/nerdypepper/statix
 
+      .. defcustom:: flycheck-statix-args
+
+         A list of additional arguments passed to ``statix check``.
+
 .. supported-language:: Org mode
 
    Flycheck supports checking Org mode files with the built-in ``org-lint`` command.
@@ -1025,6 +1029,10 @@ to view the docstring of the syntax checker.  Likewise, you may use
          A list of directories to resolve import directives.  Relative paths are
          relative to the path of the buffer being checked.
 
+      .. defcustom:: flycheck-protoc-args
+
+         A list of additional arguments passed to ``protoc``.
+
 .. supported-language:: Pug
 
    .. syntax-checker:: pug
@@ -1046,6 +1054,10 @@ to view the docstring of the syntax checker.  Likewise, you may use
       .. defcustom:: flycheck-puppet-lint-disabled-checks
 
          A list of checks to disable.
+
+      .. defcustom:: flycheck-puppet-lint-args
+
+         A list of additional arguments passed to ``puppet-lint``.
 
       .. syntax-checker-config-file:: flycheck-puppet-lint-rc
 
