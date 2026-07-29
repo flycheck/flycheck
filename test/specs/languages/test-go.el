@@ -53,6 +53,17 @@
                   :filename "/home/gastove/golang/src/github.com/Gastove/test/pkg/lib/lib.go")
                  )))))
 
+  (describe "the go-vet checker command"
+    (it "threads flycheck-go-build-tags into go vet"
+      (let ((flycheck-go-build-tags '("integration" "linux")))
+        (expect (flycheck-checker-substituted-arguments 'go-vet)
+                :to-contain "-tags=integration,linux")))
+
+    (it "omits -tags when no build tags are set"
+      (let ((flycheck-go-build-tags nil))
+        (expect (flycheck-checker-substituted-arguments 'go-vet)
+                :not :to-contain "-tags="))))
+
   (describe "Checker tests"
     (flycheck-buttercup-def-checker-test go-gofmt go syntax-error
       (flycheck-buttercup-should-syntax-check

@@ -13293,7 +13293,10 @@ See URL `https://go.dev/cmd/gofmt/'."
 
 See URL `https://go.dev/cmd/go/' and URL
 `https://pkg.go.dev/cmd/vet/'."
-  :command ("go" "vet" (source ".go"))
+  :command ("go" "vet"
+            (option "-tags=" flycheck-go-build-tags concat
+                    flycheck-option-comma-separated-list)
+            (source ".go"))
   :error-patterns
   ((warning line-start (file-name) ":" line ": " (message) line-end))
   :modes (go-mode go-ts-mode)
@@ -13315,7 +13318,7 @@ See URL `https://go.dev/cmd/go/' and URL
                 :face (if have-vet 'success '(bold error)))))))
 
 (flycheck-def-option-var flycheck-go-build-tags nil
-                         (go-build go-test go-errcheck go-staticcheck)
+                         (go-vet go-build go-test go-errcheck go-staticcheck)
   "A list of tags for `go build'.
 
 Each item is a string with a tag to be given to `go build'."
