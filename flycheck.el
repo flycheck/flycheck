@@ -14443,13 +14443,17 @@ manual at URL `https://phpmd.org/documentation/index.html'."
                  (string :tag "A filename or rule set"))
   :safe #'flycheck-string-list-p)
 
+(flycheck-def-args-var flycheck-phpmd-args php-phpmd
+  :package-version '(flycheck . "38.4"))
+
 (flycheck-define-checker php-phpmd
   "A PHP style checker using PHP Mess Detector.
 
 See URL `https://phpmd.org/'."
   :command ("phpmd" source "xml"
             (eval (flycheck-option-comma-separated-list
-                   flycheck-phpmd-rulesets)))
+                   flycheck-phpmd-rulesets))
+            (eval flycheck-phpmd-args))
   :error-parser flycheck-parse-phpmd
   :modes (php-mode php-ts-mode php+-mode)
   :next-checkers (php-phpcs))
@@ -14464,6 +14468,9 @@ or as path to a standard specification."
   :type '(choice (const :tag "Default standard" nil)
                  (string :tag "Standard name or file"))
   :safe #'string-or-null-p)
+
+(flycheck-def-args-var flycheck-phpcs-args php-phpcs
+  :package-version '(flycheck . "38.4"))
 
 (flycheck-define-checker php-phpcs
   "A PHP style checker using PHP Code Sniffer.
@@ -14489,6 +14496,7 @@ See URL `https://pear.php.net/package/PHP_CodeSniffer/'."
             ;; a single command line argument :|
             (eval (when buffer-file-name
                     (concat "--stdin-path=" (flycheck-buffer-file-local-name))))
+            (eval flycheck-phpcs-args)
             ;; Read from standard input
             "-")
   :standard-input t

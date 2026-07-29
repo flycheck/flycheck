@@ -75,6 +75,25 @@
                                         :buffer 'buffer
                                         :filename "foo.php"))))))
 
+  (describe "the PHP checker commands"
+    (it "appends flycheck-phpcs-args before the stdin marker"
+      (flycheck-buttercup-with-temp-buffer
+        (insert "<?php\n")
+        (let ((flycheck-phpcs-standard nil)
+              (flycheck-phpcs-args '("--severity=5" "--sniffs=Generic.PHP.Syntax")))
+          (let ((args (flycheck-checker-substituted-arguments 'php-phpcs)))
+            (expect args :to-contain "--severity=5")
+            (expect args :to-contain "--sniffs=Generic.PHP.Syntax")
+            (expect (car (last args)) :to-equal "-")))))
+
+    (it "appends flycheck-phpmd-args"
+      (flycheck-buttercup-with-temp-buffer
+        (insert "<?php\n")
+        (let ((flycheck-phpmd-args '("--exclude" "vendor")))
+          (let ((args (flycheck-checker-substituted-arguments 'php-phpmd)))
+            (expect args :to-contain "--exclude")
+            (expect args :to-contain "vendor"))))))
+
   (describe "Checker tests"
     (flycheck-buttercup-def-checker-test php php syntax-error
       (when (version<= emacs-version "25")

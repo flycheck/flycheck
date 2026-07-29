@@ -954,6 +954,10 @@ to view the docstring of the syntax checker.  Likewise, you may use
          A list of rule sets.  Each item is either the name of a default rule
          set, or the path to a custom rule set file.
 
+      .. defcustom:: flycheck-phpmd-args
+
+         A list of additional arguments passed to ``phpmd``.
+
    .. syntax-checker:: php-phpcs
 
       Check style with `PHP Code Sniffer`_.
@@ -968,6 +972,11 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
          The coding standard, either as name of a built-in standard, or as path
          to a standard specification.
+
+      .. defcustom:: flycheck-phpcs-args
+
+         A list of additional arguments passed to ``phpcs``, for options such as
+         ``--sniffs``, ``--exclude`` or ``--severity``.
 
    .. syntax-checker:: php-phpcs-changed
 
