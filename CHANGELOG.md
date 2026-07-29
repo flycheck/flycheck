@@ -6,6 +6,10 @@
 
 ## master (unreleased)
 
+### New Features
+
+- [#2230](https://github.com/flycheck/flycheck/pull/2230): Explain more checkers' diagnostics with `C-c ! e` (`flycheck-explain-error-at-point`): `dockerfile-hadolint`, `go-staticcheck`, `python-mypy`, `ruby-rubocop`/`ruby-standard`, and the `less`/`scss`/`sass` stylelint checkers. Checker authors can now define a URL-based explainer in one line with the new `flycheck-error-explainer-from-url` helper.
+
 ### Bugs fixed
 
 - [#2229](https://github.com/flycheck/flycheck/pull/2229): Keep `flycheck-annotate-mode`'s inline messages on the right line while editing - an edit that left point on its line (such as `open-line`) could strand an annotation on the wrong line until the next check.

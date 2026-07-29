@@ -2354,6 +2354,9 @@ are mandatory.
        be found online at URL.
      - nil if there is no explanation for this error.
 
+     For the common case of a URL keyed by the error ID, build
+     FUNCTION with `flycheck-error-explainer-from-url'.
+
      If URL is provided by the checker, and cannot be composed
      from other elements in the `flycheck-error' object, consider
      passing the URL via text properties:
@@ -8369,6 +8372,26 @@ error at point has a related location."
           (t (error "Unsupported error explanation: %S" explanation)))
          (display-message-or-buffer standard-output nil 'not-this-window)))))
 
+(defun flycheck-error-explainer-from-url (url-format &optional transform)
+  "Return an `:error-explainer' that browses a URL for the error's ID.
+
+URL-FORMAT is a format string with a single %s, replaced by the error's
+`flycheck-error-id' -- first passed through TRANSFORM, a function of the ID
+returning the string to interpolate, when given.  The returned explainer
+yields a (url . STRING) cons, or nil for an error with no ID or whose
+TRANSFORM returns nil (so TRANSFORM can skip errors that have no online
+documentation).
+
+Many tools document their diagnostics online, keyed by the error ID, so
+their checkers can define an explainer in one line, e.g.
+
+    :error-explainer
+    (flycheck-error-explainer-from-url \"https://example.com/rules/%s\")"
+  (lambda (err)
+    (when-let* ((id (flycheck-error-id err))
+                (arg (if transform (funcall transform id) id)))
+      (cons 'url (format url-format arg)))))
+
 
 ;;; Syntax checkers using external commands
 (defun flycheck-command-argument-p (arg)
@@ -10383,7 +10406,13 @@ SYMBOL with `flycheck-def-executable-var'."
          ,@(when handle-suspicious
              `(:handle-suspicious #',handle-suspicious))
          ,@(when explainer
-             `(:error-explainer #',explainer))
+             ;; A symbol or a `lambda' form names the explainer directly; any
+             ;; other form is evaluated, so `:error-explainer' can be produced
+             ;; by a helper such as `flycheck-error-explainer-from-url'.
+             `(:error-explainer ,(if (or (symbolp explainer)
+                                         (eq (car-safe explainer) 'lambda))
+                                     `#',explainer
+                                   explainer)))
          :modes ',(plist-get properties :modes)
          ,@(when predicate
              `(:predicate #',predicate))
@@ -12306,10 +12335,7 @@ See URL `https://stylelint.io/'."
   :predicate flycheck-buffer-nonempty-p
   :modes (css-mode css-ts-mode)
   :error-explainer
-  (lambda (err)
-    (let ((error-code (flycheck-error-id err))
-          (url "https://stylelint.io/user-guide/rules/%s"))
-      (and error-code `(url . ,(format url error-code))))))
+  (flycheck-error-explainer-from-url "https://stylelint.io/user-guide/rules/%s"))
 
 (flycheck-def-option-var flycheck-cuda-language-standard nil cuda-nvcc
   "The CUDA language standard to use in nvcc."
@@ -12492,6 +12518,17 @@ Requires DMD 2.066 or newer.  See URL `https://dlang.org/'."
          (one-or-more " ") (message) line-end))
   :modes d-mode)
 
+(defun flycheck-dockerfile-hadolint-error-explainer (err)
+  "Browse the docs for a hadolint (DL...) or ShellCheck (SC...) error ERR.
+hadolint's own DL rules link to its wiki; the SC rules it forwards from
+ShellCheck link to ShellCheck's wiki."
+  (when-let* ((id (flycheck-error-id err)))
+    (cond
+     ((string-prefix-p "DL" id)
+      (cons 'url (format "https://github.com/hadolint/hadolint/wiki/%s" id)))
+     ((string-prefix-p "SC" id)
+      (cons 'url (format "https://github.com/koalaman/shellcheck/wiki/%s" id))))))
+
 (flycheck-define-checker dockerfile-hadolint
   "A Dockerfile syntax checker using hadolint.
 
@@ -12507,6 +12544,7 @@ See URL `https://github.com/hadolint/hadolint/'."
     (flycheck-sanitize-errors
      (flycheck-remove-error-file-names
       "/dev/stdin" (flycheck-remove-error-file-names "-" errors))))
+  :error-explainer flycheck-dockerfile-hadolint-error-explainer
   :modes (dockerfile-mode dockerfile-ts-mode))
 
 (defun flycheck-credo--working-directory (&rest _ignored)
@@ -13375,6 +13413,8 @@ limited features) if `flycheck-go-version' is set. See URL
             (option "-go" flycheck-go-version))
 
   :error-parser flycheck-parse-go-staticcheck
+  :error-explainer
+  (flycheck-error-explainer-from-url "https://staticcheck.dev/docs/checks#%s")
   :modes (go-mode go-ts-mode))
 
 (flycheck-define-checker groovy
@@ -13929,13 +13969,10 @@ See URL `https://eslint.org/'."
         :message (if have-config "found" "missing or incorrect")
         :face (if have-config 'success '(bold error))))))
   :error-explainer
-  (lambda (err)
-    (let ((error-code (flycheck-error-id err))
-          (url "https://eslint.org/docs/rules/%s"))
-      (and error-code
-           ;; skip non-builtin rules
-           (not (seq-contains-p error-code ?/))
-           `(url . ,(format url error-code))))))
+  (flycheck-error-explainer-from-url
+   "https://eslint.org/docs/rules/%s"
+   ;; skip non-builtin (plugin) rules, which eslint.org does not document
+   (lambda (id) (unless (seq-contains-p id ?/) id))))
 
 (flycheck-define-checker javascript-oxlint
   "A JavaScript and TypeScript linter using oxlint.
@@ -14073,6 +14110,8 @@ See URL `https://stylelint.io/'."
   :verify (lambda (_) (flycheck--stylelint-verify 'less-stylelint))
   :error-parser flycheck-parse-stylelint
   :predicate flycheck-buffer-nonempty-p
+  :error-explainer
+  (flycheck-error-explainer-from-url "https://stylelint.io/user-guide/rules/%s")
   :modes (less-css-mode))
 
 (flycheck-define-checker llvm-llc
@@ -14266,10 +14305,8 @@ See URL `https://metacpan.org/pod/Perl::Critic'."
   :next-checkers (perl-perlimports)
 
   :error-explainer
-  (lambda (err)
-    (let ((error-code (flycheck-error-id err))
-          (url "https://metacpan.org/pod/Perl::Critic::Policy::%s"))
-      (and error-code `(url . ,(format url error-code))))))
+  (flycheck-error-explainer-from-url
+   "https://metacpan.org/pod/Perl::Critic::Policy::%s"))
 
 (defun flycheck-perl-perlimports-parse-errors (output checker buffer)
   "Parse perlimports json output errors from OUTPUT.
@@ -15144,6 +15181,9 @@ See URL `https://mypy-lang.org/'."
           (setf (flycheck-error-id err) (match-string 2 msg)))))
     errors)
   :working-directory flycheck-python-find-project-root
+  :error-explainer
+  (flycheck-error-explainer-from-url
+   "https://mypy.readthedocs.io/en/stable/error_code_list.html#code-%s")
   :modes (python-mode python-ts-mode)
   ;; Ensure the file is saved, to work around
   ;; https://github.com/python/mypy/issues/4746.
@@ -15343,11 +15383,12 @@ See URL `https://github.com/rpm-software-management/rpmlint'."
   (flycheck-sanitize-errors
    (flycheck-remove-error-file-names "(string)" errors)))
 
-(defun flycheck-markdownlint-error-explainer (err)
-  "Error explainer for markdownlint checkers."
-  (let ((error-code (substring (flycheck-error-id err) 0 5))
-        (url "https://github.com/DavidAnson/markdownlint/blob/main/doc/Rules.md#%s"))
-    (and error-code `(url . ,(format url error-code)))))
+(defalias 'flycheck-markdownlint-error-explainer
+  (flycheck-error-explainer-from-url
+   "https://github.com/DavidAnson/markdownlint/blob/main/doc/Rules.md#%s"
+   ;; the ID is "MDNNN/rule-name"; the doc anchor is just the "MDNNN" code
+   (lambda (id) (substring id 0 5)))
+  "Browse the markdownlint rule documentation for the error at point.")
 
 (flycheck-define-checker markdown-markdownlint-cli
   "Markdown checker using markdownlint-cli.
@@ -15631,6 +15672,20 @@ report style issues as well."
   :type 'boolean
   :package-version '(flycheck . "0.16"))
 
+(defun flycheck-ruby-rubocop-error-explainer (err)
+  "Browse the RuboCop documentation for the cop of error ERR.
+The error ID is a DEPARTMENT/CopName cop name.  Only RuboCop's own built-in
+departments are documented at docs.rubocop.org, so cops from extensions
+\(RuboCop RSpec, Rails, ...) yield no explanation rather than a broken link."
+  (when-let* ((id (flycheck-error-id err))
+              ((string-match "\\`\\([A-Z][a-zA-Z]*\\)/" id))
+              (dept (downcase (match-string 1 id)))
+              ((member dept '("bundler" "gemspec" "layout" "lint" "metrics"
+                              "migration" "naming" "security" "style")))
+              (anchor (downcase (replace-regexp-in-string "/" "" id))))
+    (cons 'url (format "https://docs.rubocop.org/rubocop/cops_%s.html#%s"
+                       dept anchor))))
+
 (defconst flycheck-ruby-rubocop-error-patterns
   '((info line-start (file-name) ":" line ":" column ": C: "
           (optional (id (one-or-more (not (any ":")))) ": ") (message) line-end)
@@ -15665,6 +15720,7 @@ See URL `https://rubocop.org/'."
   :working-directory #'flycheck-ruby--find-project-root
   :error-patterns flycheck-ruby-rubocop-error-patterns
   :error-filter #'flycheck-ruby--filter-rubocop-errors
+  :error-explainer #'flycheck-ruby-rubocop-error-explainer
   :modes '(enh-ruby-mode ruby-mode ruby-ts-mode)
   :next-checkers '((warning . ruby-reek)
                    (warning . ruby-chef-cookstyle)))
@@ -15727,6 +15783,7 @@ See URL `https://github.com/testdouble/standard' for more information."
   :working-directory #'flycheck-ruby--find-project-root
   :error-patterns flycheck-ruby-rubocop-error-patterns
   :error-filter #'flycheck-ruby--filter-rubocop-errors
+  :error-explainer #'flycheck-ruby-rubocop-error-explainer
   :modes '(enh-ruby-mode ruby-mode ruby-ts-mode)
   :next-checkers '((warning . ruby-reek)
                    (warning . ruby-chef-cookstyle)))
@@ -16266,6 +16323,8 @@ See URL `https://stylelint.io/'."
   :verify (lambda (_) (flycheck--stylelint-verify 'scss-stylelint))
   :error-parser flycheck-parse-stylelint
   :predicate flycheck-buffer-nonempty-p
+  :error-explainer
+  (flycheck-error-explainer-from-url "https://stylelint.io/user-guide/rules/%s")
   :modes (scss-mode))
 
 (flycheck-define-checker sass-stylelint
@@ -16280,6 +16339,8 @@ See URL `https://stylelint.io/'."
   :verify (lambda (_) (flycheck--stylelint-verify 'sass-stylelint))
   :error-parser flycheck-parse-stylelint
   :predicate flycheck-buffer-nonempty-p
+  :error-explainer
+  (flycheck-error-explainer-from-url "https://stylelint.io/user-guide/rules/%s")
   :modes (sass-mode))
 
 (flycheck-def-args-var flycheck-sh-bash-args (sh-bash)
@@ -16477,10 +16538,7 @@ See URL `https://github.com/koalaman/shellcheck/'."
                 :message (if supports-shell "yes" "no")
                 :face (if supports-shell 'success '(bold warning))))))
   :error-explainer
-  (lambda (err)
-    (let ((error-code (flycheck-error-id err))
-          (url "https://github.com/koalaman/shellcheck/wiki/%s"))
-      (and error-code `(url . ,(format url error-code))))))
+  (flycheck-error-explainer-from-url "https://github.com/koalaman/shellcheck/wiki/%s"))
 
 (flycheck-define-checker slim
   "A Slim syntax checker using the Slim compiler.
