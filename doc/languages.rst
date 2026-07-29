@@ -1771,3 +1771,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
       Check syntax with :program:`yamllint`.
 
       .. syntax-checker-config-file:: flycheck-yamllintrc
+
+      .. defcustom:: flycheck-yamllint-args
+
+         A list of additional arguments passed to ``yamllint``.

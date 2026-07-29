@@ -17190,12 +17190,17 @@ See URL `https://github.com/nodeca/js-yaml'."
       ".yamllint.yml"
       "~/.config/yamllint/config"))
 
+(flycheck-def-args-var flycheck-yamllint-args yaml-yamllint
+  :package-version '(flycheck . "38.4"))
+
 (flycheck-define-checker yaml-yamllint
   "A YAML syntax checker using YAMLLint.
 See URL `https://github.com/adrienverge/yamllint'."
   :standard-input t
-  :command ("yamllint" "-f" "parsable" "-"
-            (config-file "-c" flycheck-yamllintrc))
+  :command ("yamllint" "-f" "parsable"
+            (config-file "-c" flycheck-yamllintrc)
+            (eval flycheck-yamllint-args)
+            "-")
   :error-patterns
   ((error line-start
           "stdin:" line ":" column ": [error] "
