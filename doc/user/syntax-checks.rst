@@ -240,7 +240,7 @@ LSP diagnostics without Eglot
 A growing number of linters ship their own LSP server - RuboCop
 (``rubocop --lsp``), Ruff (``ruff server``), Biome (``biome lsp-proxy``) and
 more.  ``flycheck-lsp-mode`` talks to one of these directly, over Emacs'
-built-in ``jsonrpc`` library, and reports its diagnostics through the ``lsp``
+built-in ``jsonrpc`` library, and reports its diagnostics through the ``flycheck-lsp``
 checker - no Eglot, and no full LSP client, involved.
 
 This is the setup the native LSP support is built for, and it is worth
@@ -266,7 +266,7 @@ whose language server you don't have.
 .. minor-mode:: flycheck-lsp-mode
 
    Start the LSP server configured for the buffer's major mode, send it the
-   buffer's text, and report the diagnostics it pushes back through the ``lsp``
+   buffer's text, and report the diagnostics it pushes back through the ``flycheck-lsp``
    checker.  Does nothing in a buffer whose major mode has no configured,
    installed server.
 
@@ -334,7 +334,7 @@ Configuring servers
    These lint out of the box.  Other linters ship an LSP server too but need
    project configuration before they report anything - TFLint wants a
    ``.tflint.hcl`` and plugins, Buf wants a module, Taplo wants a workspace
-   config it fetches over ``workspace/configuration`` (which the ``lsp`` checker
+   config it fetches over ``workspace/configuration`` (which the ``flycheck-lsp`` checker
    does not answer) - so they are left out of the defaults.  Add them once your
    project is set up::
 
@@ -363,7 +363,7 @@ Configuring servers
 .. defcustom:: flycheck-lsp-exclusive
 
    When non-nil (the default), a buffer reports only the language server's
-   diagnostics.  Set to nil to have ``lsp`` chain to the first command checker
+   diagnostics.  Set to nil to have ``flycheck-lsp`` chain to the first command checker
    that supports the buffer's major mode, so the server and a command checker
    both contribute.
 
@@ -390,7 +390,7 @@ Configuring servers
    server that does not answer in time is torn down and retried later.
    Defaults to 5.
 
-Diagnostics from the ``lsp`` checker carry the same detail as Eglot's - error
+Diagnostics from the ``flycheck-lsp`` checker carry the same detail as Eglot's - error
 level, id, an explanation URL from ``codeDescription``, and the secondary
 locations of ``relatedInformation`` (visit them with ``C-c ! j``).  When the
 server offers code actions, they are available as fixes as well (see
@@ -399,7 +399,7 @@ server offers code actions, they are available as fixes as well (see
 Full language servers
 ---------------------
 
-The ``lsp`` checker consumes only diagnostics, so nothing stops you pointing it
+The ``flycheck-lsp`` checker consumes only diagnostics, so nothing stops you pointing it
 at a *full* language server - clojure-lsp, ruby-lsp, gopls and the like - and
 letting Flycheck surface its diagnostics::
 
@@ -420,6 +420,6 @@ errors.  If you want those features too, run the server through Eglot and use
 lighter than a language server.
 
 Two caveats if you do point it at a full server: some report diagnostics only
-through LSP *pull* requests rather than pushing them, which the ``lsp`` checker
+through LSP *pull* requests rather than pushing them, which the ``flycheck-lsp`` checker
 does not yet support (it will report nothing), and some need extra
 ``initializationOptions`` or workspace configuration to lint the way you expect.

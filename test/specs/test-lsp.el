@@ -245,7 +245,7 @@
                     :to-equal "C1")
             (expect (flycheck-error-line err) :to-equal 1)
             (expect (flycheck-error-column err) :to-equal 2)
-            (expect (flycheck-error-checker err) :to-be 'lsp)
+            (expect (flycheck-error-checker err) :to-be 'flycheck-lsp)
             ;; a server with no code-action capability -> no fix
             (expect (flycheck-error-fix err) :to-be nil)))))
 
@@ -342,7 +342,7 @@
           (let ((flycheck-lsp-servers nil)
                 (buffer-file-name "/x/a.rb")
                 (reported 'unset))
-            (flycheck-lsp--start 'lsp (lambda (status &optional data)
+            (flycheck-lsp--start 'flycheck-lsp (lambda (status &optional data)
                                         (setq reported (cons status data))))
             (expect reported :to-equal '(finished)))))
       (it "reports nothing but registers the doc while the server initializes"
@@ -356,7 +356,7 @@
                        (lambda (&rest _) server))
                       ((symbol-function 'flycheck-lsp--sync-document)
                        (lambda (&rest _) (error "must not sync before init"))))
-              (flycheck-lsp--start 'lsp (lambda (status &optional data)
+              (flycheck-lsp--start 'flycheck-lsp (lambda (status &optional data)
                                           (setq reported (cons status data)))))
             (expect reported :to-equal '(finished))
             ;; the document is registered so the init callback can recheck it
@@ -526,9 +526,15 @@
                 (expect (flycheck-fix-description fix) :to-equal "lazy")
                 (expect (length (flycheck-fix-edits fix)) :to-equal 1)))))))
 
-    (describe "the lsp generic checker"
+    (describe "the flycheck-lsp generic checker"
       (it "is a registered generic checker"
-        (expect (flycheck-valid-checker-p 'lsp) :to-be-truthy)
-        (expect (flycheck-checker-get 'lsp 'start) :to-be #'flycheck-lsp--start)))))
+        (expect (flycheck-valid-checker-p 'flycheck-lsp) :to-be-truthy)
+        (expect (flycheck-checker-get 'flycheck-lsp 'start) :to-be #'flycheck-lsp--start))
+
+      (it "does not define an `lsp' checker, so it never clobbers lsp-mode's"
+        ;; lsp-mode has owned the `lsp' checker name for years; a colliding
+        ;; definition broke its integration (issue #2226), so the native
+        ;; checker is named `flycheck-lsp' instead.
+        (expect (flycheck-valid-checker-p 'lsp) :to-be nil)))))
 
 ;;; test-lsp.el ends here

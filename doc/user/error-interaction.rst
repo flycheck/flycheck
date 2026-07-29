@@ -311,7 +311,7 @@ checkers that currently provide fixes are ``javascript-eslint``,
 clippy``'s machine-applicable suggestions), and any checker whose SARIF output
 includes fixes (e.g. ``dockerfile-hadolint``).  LSP servers that offer
 ``quickfix`` code actions provide fixes too, through ``flycheck-eglot-mode`` or
-the native ``lsp`` checker (see :doc:`syntax-checks`).
+the native ``flycheck-lsp`` checker (see :doc:`syntax-checks`).
 
 
 Kill errors
