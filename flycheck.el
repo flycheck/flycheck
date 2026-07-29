@@ -13857,6 +13857,10 @@ See URL `https://github.com/htacg/tidy-html5'."
 The value of this variable is a list of strings, where each
 string is a directory with custom rules for ESLint.
 
+This passes the `--rulesdir' option, which ESLint 9 removed along
+with the legacy `.eslintrc' configuration; with flat config, load
+custom rules through a plugin in `eslint.config.js' instead.
+
 Refer to the ESLint manual at URL
 `https://eslint.org/docs/user-guide/command-line-interface#--rulesdir'
 for more information about the custom directories."
@@ -13957,10 +13961,15 @@ See URL `https://eslint.org' for more information about ESLint."
 
 This will be the directory that contains the `node_modules'
 directory.  If no such directory is found in the directory
-hierarchy, it looks first for `.eslintignore' and then for
-`.eslintrc' files to detect the project root."
-  (let* ((regex-config (concat "\\`\\.eslintrc"
-                               "\\(\\.\\(js\\|ya?ml\\|json\\)\\)?\\'")))
+hierarchy, it looks for `.eslintignore' and then for a
+configuration file to detect the project root.  Both the flat
+config files ESLint uses since version 9 (`eslint.config.js' and
+its `.mjs'/`.cjs'/`.ts' variants) and the legacy `.eslintrc'
+files are recognized."
+  (let* ((regex-config (concat "\\`\\(?:"
+                               "\\.eslintrc\\(?:\\.\\(?:js\\|ya?ml\\|json\\)\\)?"
+                               "\\|eslint\\.config\\.[cm]?[jt]s"
+                               "\\)\\'")))
     (when buffer-file-name
       (or (locate-dominating-file buffer-file-name "node_modules")
           (locate-dominating-file buffer-file-name ".eslintignore")

@@ -16,6 +16,7 @@
 
 - [#2233](https://github.com/flycheck/flycheck/pull/2233): Fix `flycheck-annotate-mode`'s `below` style trapping vertical motion on the annotated line - `next-line` needed an extra press to get past it and `evil-next-visual-line` could not move past it at all. The multi-line message now hangs off the following line instead of the annotated line's newline.
 - [#2235](https://github.com/flycheck/flycheck/pull/2235): Fix `flycheck-verify-setup` erroring with `Wrong type argument: number-or-marker-p, nil` when `eslint` is not installed ([#2232](https://github.com/flycheck/flycheck/issues/2232)); `flycheck-call-checker-process-for-output` no longer chokes on a missing executable either.
+- [#2236](https://github.com/flycheck/flycheck/pull/2236): Detect the project root of a `javascript-eslint` buffer from a flat config file (`eslint.config.js` and its `.mjs`/`.cjs`/`.ts` variants), not only the legacy `.eslintrc`/`.eslintignore` that ESLint 9 dropped.
 
 ## 38.3 (2026-07-29)
 
