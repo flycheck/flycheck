@@ -1269,8 +1269,6 @@ to view the docstring of the syntax checker.  Likewise, you may use
       compiler is invoked through ``cargo check`` to take Cargo dependencies
       into account.
 
-      `rust-clippy` has no configurable options.
-
       .. note::
 
          `rust-cargo` requires Rust 1.17 or newer.
@@ -1331,7 +1329,8 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
          The value of this variable is a list of strings denoting features
          that will be activated to build the target to check. Features will
-         be passed to ``cargo check --features=FEATURES``.
+         be passed to ``cargo check --features=FEATURES`` and, for
+         `rust-clippy`, to ``cargo clippy --features=FEATURES``.
 
          Empty by default.
 
@@ -1341,6 +1340,39 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
          A list of additional library directories. Relative paths are relative
          to the buffer being checked.
+
+      .. defcustom:: flycheck-rust-edition
+
+         The Rust edition for the `rust` checker, passed to ``rustc`` as
+         ``--edition``, as a string such as ``"2021"`` or ``"2024"``.
+
+         When nil (the default), ``rustc`` falls back to edition 2015, which
+         rejects code written for a newer edition.  Set this to check a
+         single-file crate that is not part of a Cargo project.
+
+         `rust-cargo` takes the edition from ``Cargo.toml`` and ignores this
+         option.
+
+      .. defcustom:: flycheck-rust-clippy-args
+
+         A list of additional arguments passed to the ``cargo clippy``
+         subcommand.  To pass options on to Clippy's own lints, separate them
+         with ``--``, e.g. ``("--" "-W" "clippy::pedantic")``.
+
+      .. defcustom:: flycheck-rust-clippy-tests
+
+         Whether to lint test code with Clippy, by passing ``--tests`` to
+         ``cargo clippy``.  Off by default.
+
+      .. defcustom:: flycheck-rust-clippy-all-targets
+
+         Whether to lint all targets with Clippy, by passing ``--all-targets``
+         to ``cargo clippy``.  Off by default.
+
+      .. defcustom:: flycheck-rust-clippy-all-features
+
+         Whether to lint with all Cargo features enabled in Clippy, by passing
+         ``--all-features`` to ``cargo clippy``.  Off by default.
 
 .. supported-language:: SaltStack
 

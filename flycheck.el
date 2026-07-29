@@ -15906,12 +15906,13 @@ ignored."
   :package-version '(flycheck . "28"))
 (make-variable-buffer-local 'flycheck-rust-binary-name)
 
-(flycheck-def-option-var flycheck-rust-features nil rust-cargo
+(flycheck-def-option-var flycheck-rust-features nil (rust-cargo rust-clippy)
   "List of features to activate during build or check.
 
 The value of this variable is a list of strings denoting features
 that will be activated to build the target to check. Features will
-be passed to `cargo check --features=FEATURES'."
+be passed to `cargo check --features=FEATURES' and, for the
+`rust-clippy' checker, to `cargo clippy --features=FEATURES'."
   :type '(repeat :tag "Features to activate"
                  (string :tag "Feature"))
   :safe #'flycheck-string-list-p
@@ -15927,6 +15928,51 @@ Relative paths are relative to the file being checked."
   :type '(repeat (directory :tag "Library directory"))
   :safe #'flycheck-string-list-p
   :package-version '(flycheck . "0.18"))
+
+(flycheck-def-option-var flycheck-rust-edition nil rust
+  "The Rust edition for the `rust' checker.
+
+Passed to `rustc' as `--edition'.  When nil, `rustc' uses its own
+default, edition 2015, which rejects code written for a newer edition.
+Set this to a string such as \"2021\" or \"2024\" to check single-file
+code that is not part of a Cargo project.  The `rust-cargo' checker takes
+the edition from `Cargo.toml' and ignores this variable."
+  :type '(choice (const :tag "rustc default (2015)" nil)
+                 (const "2015") (const "2018")
+                 (const "2021") (const "2024")
+                 (string :tag "Other edition"))
+  :safe #'string-or-null-p
+  :package-version '(flycheck . "38.4"))
+(make-variable-buffer-local 'flycheck-rust-edition)
+
+(flycheck-def-args-var flycheck-rust-clippy-args (rust-clippy)
+  :package-version '(flycheck . "38.4"))
+
+(flycheck-def-option-var flycheck-rust-clippy-tests nil rust-clippy
+  "Whether to lint test code with Clippy.
+
+When non-nil, `cargo clippy' is passed `--tests', so code marked with
+`#[cfg(test)]' or `#[test]' is linted as well."
+  :type 'boolean
+  :safe #'booleanp
+  :package-version '(flycheck . "38.4"))
+
+(flycheck-def-option-var flycheck-rust-clippy-all-targets nil rust-clippy
+  "Whether to lint all targets with Clippy.
+
+When non-nil, `cargo clippy' is passed `--all-targets', linting tests,
+benches and examples on top of the default targets."
+  :type 'boolean
+  :safe #'booleanp
+  :package-version '(flycheck . "38.4"))
+
+(flycheck-def-option-var flycheck-rust-clippy-all-features nil rust-clippy
+  "Whether to lint with all Cargo features enabled in Clippy.
+
+When non-nil, `cargo clippy' is passed `--all-features'."
+  :type 'boolean
+  :safe #'booleanp
+  :package-version '(flycheck . "38.4"))
 
 (defun flycheck--fontify-as-markdown ()
   "Place current buffer in `markdown-view-mode' and fontify it."
@@ -16088,6 +16134,7 @@ This syntax checker needs Rust 1.18 or newer.  See URL
 `https://www.rust-lang.org'."
   :command ("rustc"
             (option "--crate-type" flycheck-rust-crate-type)
+            (option "--edition" flycheck-rust-edition)
             "--emit=metadata"
             "--out-dir" (eval (file-local-name (flycheck-temp-dir-system))) ; avoid creating binaries
             "--error-format=json"
@@ -16106,7 +16153,14 @@ This syntax checker needs Rust 1.18 or newer.  See URL
   "A Rust syntax checker using clippy.
 
 See URL `https://github.com/rust-lang-nursery/rust-clippy'."
-  :command ("cargo" "clippy" "--message-format=json")
+  :command ("cargo" "clippy"
+            (option "--features=" flycheck-rust-features concat
+                    flycheck-option-comma-separated-list)
+            (option-flag "--tests" flycheck-rust-clippy-tests)
+            (option-flag "--all-targets" flycheck-rust-clippy-all-targets)
+            (option-flag "--all-features" flycheck-rust-clippy-all-features)
+            "--message-format=json"
+            (eval flycheck-rust-clippy-args))
   :error-parser flycheck-parse-cargo-rustc
   :error-filter flycheck-rust-error-filter
   :error-explainer flycheck-rust-error-explainer
