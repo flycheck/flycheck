@@ -15772,6 +15772,37 @@ report style issues as well."
   :type 'boolean
   :package-version '(flycheck . "0.16"))
 
+(flycheck-def-args-var flycheck-rubocop-args ruby-rubocop
+  :package-version '(flycheck . "38.4"))
+
+(flycheck-def-option-var flycheck-rubocop-server nil ruby-rubocop
+  "Whether to run RuboCop in server mode, via `--server'.
+
+When non-nil, RuboCop keeps a warm server process alive between runs,
+which greatly cuts its startup time on repeated checks.  See URL
+`https://docs.rubocop.org/rubocop/usage/server.html'."
+  :type 'boolean
+  :safe #'booleanp
+  :package-version '(flycheck . "38.4"))
+
+(flycheck-def-option-var flycheck-rubocop-only nil ruby-rubocop
+  "A list of cops to run exclusively in RuboCop, via `--only'.
+
+Each element is a cop or department name, such as
+\"Style/StringLiterals\" or \"Lint\"."
+  :type '(repeat (string :tag "Cop or department"))
+  :safe #'flycheck-string-list-p
+  :package-version '(flycheck . "38.4"))
+
+(flycheck-def-option-var flycheck-rubocop-except nil ruby-rubocop
+  "A list of cops to disable in RuboCop, via `--except'.
+
+Each element is a cop or department name, such as
+\"Style/StringLiterals\" or \"Metrics\"."
+  :type '(repeat (string :tag "Cop or department"))
+  :safe #'flycheck-string-list-p
+  :package-version '(flycheck . "38.4"))
+
 (defun flycheck-ruby-rubocop-error-explainer (err)
   "Browse the RuboCop documentation for the cop of error ERR.
 The error ID is a DEPARTMENT/CopName cop name.  Only RuboCop's own built-in
@@ -15811,6 +15842,12 @@ See URL `https://rubocop.org/'."
              "--format" "emacs"
              (config-file "--config" flycheck-rubocoprc)
              (option-flag "--lint" flycheck-rubocop-lint-only)
+             (option-flag "--server" flycheck-rubocop-server)
+             (option "--only" flycheck-rubocop-only nil
+                     flycheck-option-comma-separated-list)
+             (option "--except" flycheck-rubocop-except nil
+                     flycheck-option-comma-separated-list)
+             (eval flycheck-rubocop-args)
              ;; RuboCop takes the original file name as argument when reading
              ;; from standard input, but it chokes when that name is the empty
              ;; string, so fall back to "stdin" in order to handle buffers with
