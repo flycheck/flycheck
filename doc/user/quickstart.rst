@@ -30,7 +30,7 @@ Flycheck surface your language server's diagnostics too:
    (add-hook 'after-init-hook #'global-flycheck-mode)
 
    ;; Show diagnostics inline, next to the code (in the spirit of Error Lens)
-   (add-hook 'flycheck-mode-hook #'flycheck-annotate-mode)
+   (add-hook 'after-init-hook #'global-flycheck-annotate-mode)
 
    ;; Report Eglot's LSP diagnostics through Flycheck
    (global-flycheck-eglot-mode 1)
