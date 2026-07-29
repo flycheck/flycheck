@@ -271,10 +271,8 @@ Here are two examples of more complex checkers:
                 :message (if supports-shell "yes" "no")
                 :face (if supports-shell 'success '(bold warning))))))
      :error-explainer
-     (lambda (err)
-       (let ((error-code (flycheck-error-id err))
-             (url "https://github.com/koalaman/shellcheck/wiki/%s"))
-         (and error-code `(url . ,(format url error-code))))))
+     (flycheck-error-explainer-from-url
+      "https://github.com/koalaman/shellcheck/wiki/%s"))
 
 The ``:command`` forms are longer, as the checkers pass more flags to ``protoc``
 and ``shellcheck``.  Note the use of ``eval``, ``option``, and ``option-flag``
@@ -315,7 +313,10 @@ feedback to users; its output gets included when users invoke
 
 Finally, the ``shellcheck`` checker includes an error explainer, which opens the
 relevant page on the ShellCheck wiki when users run
-`flycheck-explain-error-at-point`.
+`flycheck-explain-error-at-point`.  It is built with
+`flycheck-error-explainer-from-url`, a helper that turns a URL format string
+keyed by the error ID into an explainer; many tools document their diagnostics
+online this way, so their checkers can define an explainer in a single line.
 
 There are other useful properties, depending on your situation.  Most important
 is ``:enabled``, which is like ``:predicate`` but is run only once; it is used
