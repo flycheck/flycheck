@@ -44,6 +44,32 @@
          :end-line 2 :end-column 44)
      '(7 19 error "\"t1.2xlarge\" is an invalid value as instance_type"
          :id "aws_instance_invalid_type" :checker terraform-tflint
-         :end-line 7 :end-column 31))))
+         :end-line 7 :end-column 31)))
+
+  (describe "the terraform-tflint checker command"
+    (it "adds no config or rule flags by default"
+      (let ((flycheck-tflint-config nil)
+            (flycheck-tflint-enabled-rules nil)
+            (flycheck-tflint-disabled-rules nil)
+            (flycheck-tflint-variable-files nil)
+            (flycheck-tflint-args nil))
+        (expect (flycheck-checker-substituted-arguments 'terraform-tflint)
+                :to-equal '("--format=json" "--force"))))
+
+    (it "passes one --enable-rule and --disable-rule per rule"
+      (let ((flycheck-tflint-config nil)
+            (flycheck-tflint-enabled-rules '("terraform_unused_declarations"))
+            (flycheck-tflint-disabled-rules '("terraform_deprecated_syntax"
+                                              "aws_instance_invalid_type")))
+        (let ((args (flycheck-checker-substituted-arguments 'terraform-tflint)))
+          (expect args :to-contain "--enable-rule=terraform_unused_declarations")
+          (expect args :to-contain "--disable-rule=terraform_deprecated_syntax")
+          (expect args :to-contain "--disable-rule=aws_instance_invalid_type"))))
+
+    (it "appends flycheck-tflint-args"
+      (let ((flycheck-tflint-config nil)
+            (flycheck-tflint-args '("--minimum-failure-severity=error")))
+        (expect (flycheck-checker-substituted-arguments 'terraform-tflint)
+                :to-contain "--minimum-failure-severity=error")))))
 
 ;;; test-terraform.el ends here
