@@ -25,6 +25,15 @@
      '(5 nil warning "There are identical sub-expressions to the left and to the right of the '&&' operator."
          :checker elixir-credo)
      '(8 8 warning "length(list) == 0 is expensive. Prefer Enum.empty?/1 or list == []"
-         :checker elixir-credo))))
+         :checker elixir-credo)))
+
+  (describe "the elixir-credo checker command"
+    (it "appends flycheck-elixir-credo-args before --read-from-stdin"
+      (flycheck-buttercup-with-temp-buffer
+        (setq buffer-file-name "/tmp/flycheck-credo.ex")
+        (let ((flycheck-elixir-credo-args '("--config-name" "custom")))
+          (let ((args (flycheck-checker-substituted-arguments 'elixir-credo)))
+            (expect args :to-contain "--config-name")
+            (expect args :to-contain "custom")))))))
 
 ;;; test-elixir.el ends here

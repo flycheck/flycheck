@@ -12598,6 +12598,9 @@ When non-nil, pass the `--strict' flag to credo."
   :safe #'booleanp
   :package-version '(flycheck . "32"))
 
+(flycheck-def-args-var flycheck-elixir-credo-args elixir-credo
+  :package-version '(flycheck . "38.4"))
+
 (flycheck-define-checker elixir-credo
   "An Elixir checker for static code analysis using Credo.
 
@@ -12605,6 +12608,7 @@ See `https://credo-ci.org/'."
   :command ("mix" "credo"
             (option-flag "--strict" flycheck-elixir-credo-strict)
             "--format" "flycheck"
+            (eval flycheck-elixir-credo-args)
             "--read-from-stdin" source-original)
   :standard-input t
   :working-directory flycheck-credo--working-directory
@@ -13062,6 +13066,9 @@ Relative paths are relative to the file being checked."
   :safe #'flycheck-string-list-p
   :package-version '(flycheck . "0.24"))
 
+(flycheck-def-args-var flycheck-erlang-args erlang
+  :package-version '(flycheck . "38.4"))
+
 (flycheck-define-checker erlang
   "An Erlang syntax checker using the Erlang interpreter.
 
@@ -13071,6 +13078,7 @@ See URL `https://www.erlang.org/'."
             (option-list "-I" flycheck-erlang-include-path)
             (option-list "-pa" flycheck-erlang-library-path)
             "-Wall"
+            (eval flycheck-erlang-args)
             source)
   :error-patterns
   ((warning line-start (file-name) ":" line ":" (optional column ":")
@@ -16425,6 +16433,9 @@ See URL `https://www.scala-lang.org/'."
 (flycheck-def-config-file-var flycheck-scalastylerc scala-scalastyle nil
   :package-version '(flycheck . "0.20"))
 
+(flycheck-def-args-var flycheck-scalastyle-args scala-scalastyle
+  :package-version '(flycheck . "38.4"))
+
 (flycheck-define-checker scala-scalastyle
   "A Scala style checker using scalastyle.
 
@@ -16434,6 +16445,7 @@ Note that this syntax checker is not used if
 See URL `https://www.scalastyle.org'."
   :command ("scalastyle"
             (config-file "-c" flycheck-scalastylerc)
+            (eval flycheck-scalastyle-args)
             source)
   :error-patterns
   ((error line-start "error file=" (file-name) " message="
