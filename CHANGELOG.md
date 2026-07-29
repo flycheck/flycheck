@@ -6,6 +6,8 @@
 
 ## master (unreleased)
 
+## 38.0 (2026-07-29)
+
 ### New Features
 
 - [#2202](https://github.com/flycheck/flycheck/pull/2202): Add `flycheck-annotate-mode`, which shows error messages inline next to the code they refer to, in the spirit of VS Code's Error Lens and the inline diagnostics of Neovim, Helix and Zed. Two styles ship out of the box: `eol` appends a compact message after the line, `below` lays the full messages out underneath. Obsoletes the third-party `flycheck-inline` package.
