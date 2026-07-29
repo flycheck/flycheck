@@ -48,6 +48,23 @@
       (flycheck-buttercup-should-syntax-check
        "language/lua/syntax-error.lua" 'lua-mode
        '(5 nil error "unfinished string near '\"oh no'"
-           :checker lua)))))
+           :checker lua))))
+
+  (describe "the lua-luacheck checker command"
+    (it "passes one --globals per allowed global"
+      (let ((flycheck-luacheckrc nil)
+            (flycheck-luacheck-globals '("love" "vim"))
+            (flycheck-luacheck-args nil))
+        (let ((args (flycheck-checker-substituted-arguments 'lua-luacheck)))
+          (expect args :to-contain "--globals")
+          (expect args :to-contain "love")
+          (expect args :to-contain "vim"))))
+
+    (it "appends flycheck-luacheck-args"
+      (let ((flycheck-luacheckrc nil)
+            (flycheck-luacheck-args '("--max-line-length" "120")))
+        (let ((args (flycheck-checker-substituted-arguments 'lua-luacheck)))
+          (expect args :to-contain "--max-line-length")
+          (expect args :to-contain "120"))))))
 
 ;;; test-lua.el ends here

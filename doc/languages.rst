@@ -775,6 +775,15 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
          The luacheck standards to use via one or more ``--std`` arguments.
 
+      .. defcustom:: flycheck-luacheck-globals
+
+         A list of additional globals to allow, via one or more ``--globals``
+         arguments.
+
+      .. defcustom:: flycheck-luacheck-args
+
+         A list of additional arguments passed to ``luacheck``.
+
       .. _Luacheck: https://github.com/mpeterv/luacheck
 
    .. syntax-checker:: lua
