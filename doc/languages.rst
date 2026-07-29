@@ -352,6 +352,10 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
          When non-nil, run credo in strict mode, via ``--strict``.
 
+      .. defcustom:: flycheck-elixir-credo-args
+
+         A list of additional arguments passed to ``mix credo``.
+
 .. supported-language:: Emacs Lisp
 
    Flycheck checks Emacs Lisp with `emacs-lisp` and then with
@@ -434,6 +438,11 @@ to view the docstring of the syntax checker.  Likewise, you may use
       .. defcustom:: flycheck-erlang-library-path
 
          A list of library directories.
+
+      .. defcustom:: flycheck-erlang-args
+
+         A list of additional arguments passed to ``erlc``, for options such as
+         ``-D`` macro definitions.
 
    .. syntax-checker:: erlang-rebar3
 
@@ -1527,6 +1536,10 @@ to view the docstring of the syntax checker.  Likewise, you may use
          A configuration file is mandatory for this syntax checker.  If
          `flycheck-scalastylerc` is not set or the configuration file not found
          this syntax checker will not be applied.
+
+      .. defcustom:: flycheck-scalastyle-args
+
+         A list of additional arguments passed to ``scalastyle``.
 
 .. supported-language:: Scheme
 

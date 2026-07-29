@@ -36,6 +36,12 @@
       (expect (not (file-exists-p
                     (flycheck-buttercup-resource-filename
                      "language/erlang/rebar3/_build/default/lib/dependency/_build")))
-              :to-be-truthy))))
+              :to-be-truthy)))
+
+  (describe "the erlang checker command"
+    (it "appends flycheck-erlang-args before the source file"
+      (let ((flycheck-erlang-args '("-DDEBUG=1")))
+        (expect (flycheck-checker-substituted-arguments 'erlang)
+                :to-contain "-DDEBUG=1")))))
 
 ;;; test-erlang.el ends here

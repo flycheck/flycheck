@@ -44,6 +44,13 @@
       (flycheck-buttercup-should-syntax-check
        "language/scala/style-warning.scala" 'scala-mode
        '(5 9 warning "Redundant braces after class definition"
-           :checker scala-scalastyle)))))
+           :checker scala-scalastyle))))
+
+  (describe "the scala-scalastyle checker command"
+    (it "appends flycheck-scalastyle-args"
+      (let ((flycheck-scalastylerc nil)
+            (flycheck-scalastyle-args '("--quiet" "true")))
+        (expect (flycheck-checker-substituted-arguments 'scala-scalastyle)
+                :to-contain "--quiet")))))
 
 ;;; test-scala.el ends here
