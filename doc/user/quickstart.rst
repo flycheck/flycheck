@@ -18,6 +18,28 @@ syntax checking with Flycheck:
 
    (add-hook 'after-init-hook #'global-flycheck-mode)
 
+A modern setup
+==============
+
+For an experience closer to a modern IDE, turn on inline diagnostics and let
+Flycheck surface your language server's diagnostics too:
+
+.. code-block:: elisp
+
+   ;; Check syntax everywhere
+   (add-hook 'after-init-hook #'global-flycheck-mode)
+
+   ;; Show diagnostics inline, next to the code (in the spirit of Error Lens)
+   (add-hook 'flycheck-mode-hook #'flycheck-annotate-mode)
+
+   ;; Report Eglot's LSP diagnostics through Flycheck
+   (global-flycheck-eglot-mode 1)
+
+If you don't use Eglot but want diagnostics straight from a linter's own LSP
+server (such as RuboCop, Ruff, Biome or Harper), enable
+``global-flycheck-lsp-mode`` instead.  See :ref:`flycheck-syntax-checks` for the
+full story on both LSP integrations.
+
 Install syntax checker programs
 ===============================
 

@@ -38,6 +38,24 @@ Alternatively, if you're into `use-package` you can do the following:
   (add-hook 'after-init-hook #'global-flycheck-mode))
 ```
 
+For a modern setup - on-the-fly checking everywhere, inline diagnostics next to
+the code, and your LSP server's diagnostics flowing through Flycheck - enable a
+few more things:
+
+``` emacs-lisp
+(use-package flycheck
+  :ensure t
+  :hook ((after-init . global-flycheck-mode)
+         ;; Show diagnostics inline, next to the code (Error Lens style)
+         (flycheck-mode . flycheck-annotate-mode))
+  :config
+  ;; Report Eglot's LSP diagnostics through Flycheck
+  (global-flycheck-eglot-mode 1))
+```
+
+Prefer to read diagnostics straight from a linter's own LSP server (RuboCop,
+Ruff, Biome, Harper), without Eglot? Use `global-flycheck-lsp-mode` instead.
+
 Now you can start using any of the [bundled checkers](https://www.flycheck.org/en/latest/languages.html) or install additional checkers.
 
 For a more gentle introduction read the [Installation][] instructions and go
