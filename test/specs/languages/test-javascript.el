@@ -92,6 +92,21 @@ Some more explanation here.")
                'javascript-eslint 1 "[{\"unexpected\": \"format\"}]")
               :to-be 'suspicious)))
 
+  (describe "flycheck-eslint-config-exists-p"
+    (it "is non-nil when eslint exits zero"
+      (spy-on 'flycheck-call-checker-process :and-return-value 0)
+      (expect (flycheck-eslint-config-exists-p) :to-be-truthy))
+
+    (it "is nil when eslint exits non-zero"
+      (spy-on 'flycheck-call-checker-process :and-return-value 1)
+      (expect (flycheck-eslint-config-exists-p) :to-be nil))
+
+    (it "is nil, not an error, when eslint cannot be found"
+      ;; Regression for #2232: `flycheck-call-checker-process' returns nil when
+      ;; the executable is missing, and that nil must not reach `zerop'.
+      (spy-on 'flycheck-call-checker-process :and-return-value nil)
+      (expect (flycheck-eslint-config-exists-p) :to-be nil)))
+
   (describe "Checker tests"
     (flycheck-buttercup-def-checker-test javascript-eslint javascript error
       (let ((inhibit-message t))

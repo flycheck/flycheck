@@ -89,6 +89,20 @@
                              (flycheck-checker-executable ',checker)))
                     :to-equal "some-nice-executable"))))))
 
+  (describe "flycheck-call-checker-process"
+    (it "returns nil when the executable cannot be found"
+      (spy-on 'flycheck-find-checker-executable :and-return-value nil)
+      (expect (flycheck-call-checker-process 'emacs-lisp nil nil nil)
+              :to-be nil)))
+
+  (describe "flycheck-call-checker-process-for-output"
+    (it "returns nil, not an error, when the executable cannot be found"
+      ;; Regression: a nil exit status must not reach `zerop' (see #2232 for the
+      ;; sibling `flycheck-eslint-config-exists-p').
+      (spy-on 'flycheck-find-checker-executable :and-return-value nil)
+      (expect (flycheck-call-checker-process-for-output 'emacs-lisp nil nil)
+              :to-be nil)))
+
   (describe "flycheck-checker-get"
     (it "modes"
       (dolist (checker flycheck-checkers)

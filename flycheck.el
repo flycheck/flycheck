@@ -8744,7 +8744,10 @@ the error checking automatically."
         (let ((exit-code (apply #'flycheck-call-checker-process
                                 checker infile temp error args))
               (output (with-current-buffer temp (buffer-string))))
-          (if (zerop exit-code) output
+          ;; EXIT-CODE is nil when CHECKER cannot be found (and ERROR is nil, so
+          ;; no error was raised) and a string for a signalled process; treat
+          ;; both as failure rather than passing them to `zerop'.
+          (if (eql 0 exit-code) output
             (when error
               (error "Process %s failed with %S (%s)"
                      checker exit-code output))))
@@ -13863,7 +13866,9 @@ for more information about the custom directories."
 
 (defun flycheck-eslint-config-exists-p ()
   "Whether there is a valid eslint config for the current buffer."
-  (zerop (flycheck-call-checker-process
+  ;; `flycheck-call-checker-process' returns nil when eslint cannot be found, so
+  ;; test for a zero exit status rather than passing a possible nil to `zerop'.
+  (eql 0 (flycheck-call-checker-process
           'javascript-eslint nil nil nil
           "--print-config" (flycheck-buffer-file-local-name "index.js"))))
 
