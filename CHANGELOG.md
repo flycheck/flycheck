@@ -6,6 +6,8 @@
 
 ## master (unreleased)
 
+## 38.3 (2026-07-29)
+
 ### New Features
 
 - [#2230](https://github.com/flycheck/flycheck/pull/2230): Explain more checkers' diagnostics with `C-c ! e` (`flycheck-explain-error-at-point`): `dockerfile-hadolint`, `go-staticcheck`, `python-mypy`, `ruby-rubocop`/`ruby-standard`, and the `less`/`scss`/`sass` stylelint checkers. Checker authors can now define a URL-based explainer in one line with the new `flycheck-error-explainer-from-url` helper.
