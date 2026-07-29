@@ -14196,6 +14196,18 @@ non-nil, pass the standards via one or more `--std' options."
   :safe #'flycheck-string-list-p)
 (make-variable-buffer-local 'flycheck-luacheck-standards)
 
+(flycheck-def-option-var flycheck-luacheck-globals nil lua-luacheck
+  "A list of globals to allow in luacheck, via `--globals'.
+
+Each element is the name of an additional global variable to treat as
+defined, such as \"love\" or \"vim\"."
+  :type '(repeat (string :tag "Global"))
+  :safe #'flycheck-string-list-p
+  :package-version '(flycheck . "38.4"))
+
+(flycheck-def-args-var flycheck-luacheck-args lua-luacheck
+  :package-version '(flycheck . "38.4"))
+
 (flycheck-define-checker lua-luacheck
   "A Lua syntax checker using luacheck.
 
@@ -14205,7 +14217,9 @@ See URL `https://github.com/mpeterv/luacheck'."
             "--codes"                   ; Show warning codes
             "--no-color"
             (option-list "--std" flycheck-luacheck-standards)
+            (option-list "--globals" flycheck-luacheck-globals)
             (config-file "--config" flycheck-luacheckrc)
+            (eval flycheck-luacheck-args)
             "--filename" source-original
             ;; Read from standard input
             "-")
