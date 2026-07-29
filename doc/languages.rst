@@ -1131,6 +1131,11 @@ to view the docstring of the syntax checker.  Likewise, you may use
          Python executable to collect the type information from PEP 561
          compliant packages.
 
+      .. defcustom:: flycheck-python-mypy-args
+
+         A list of additional arguments passed to ``mypy``, for options such as
+         ``--strict`` or ``--ignore-missing-imports``.
+
    .. syntax-checker:: python-pylint
 
       Check syntax and lint with `Pylint <https://pylint.org/>`_.

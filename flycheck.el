@@ -15253,6 +15253,9 @@ See URL `https://github.com/microsoft/pyright'."
   :safe #'string-or-null-p
   :package-version '(flycheck . "33"))
 
+(flycheck-def-args-var flycheck-python-mypy-args python-mypy
+  :package-version '(flycheck . "38.4"))
+
 (flycheck-define-checker python-mypy
   "Mypy syntax and type checker.  Requires mypy>=0.730.
 
@@ -15264,6 +15267,7 @@ See URL `https://mypy-lang.org/'."
             (config-file "--config-file" flycheck-python-mypy-config)
             (option "--cache-dir" flycheck-python-mypy-cache-dir)
             (option "--python-executable" flycheck-python-mypy-python-executable)
+            (eval flycheck-python-mypy-args)
             source-original)
   :error-patterns
   ((error line-start (file-name) ":" line (optional ":" column)

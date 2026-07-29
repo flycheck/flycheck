@@ -46,6 +46,14 @@
        '(2 12 error "Incompatible return value type (got \"str\", expected \"int\")"
            :id "return-value" :checker python-mypy))))
 
+  (describe "the python-mypy checker command"
+    (it "appends flycheck-python-mypy-args before the source file"
+      (let ((flycheck-python-mypy-config nil)
+            (flycheck-python-mypy-args '("--strict" "--ignore-missing-imports")))
+        (let ((args (flycheck-checker-substituted-arguments 'python-mypy)))
+          (expect args :to-contain "--strict")
+          (expect args :to-contain "--ignore-missing-imports")))))
+
   (flycheck-buttercup-def-checker-test python-ruff python syntax-error
     (let ((flycheck-disabled-checkers '(python-flake8))
           (flycheck-checkers '(python-ruff))

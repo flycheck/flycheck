@@ -12,6 +12,7 @@
 - [#2231](https://github.com/flycheck/flycheck/pull/2231): Add `flycheck-rust-edition` to set the edition (`--edition`) for the `rust` checker when checking single-file crates outside a Cargo project.
 - [#2234](https://github.com/flycheck/flycheck/pull/2234): Make the `python-ruff` checker configurable without a config file: `flycheck-python-ruff-select`, `flycheck-python-ruff-extend-select` and `flycheck-python-ruff-ignore` for rule tuning, `flycheck-python-ruff-target-version`, `flycheck-python-ruff-preview`, and `flycheck-python-ruff-args` for arbitrary `ruff check` arguments.
 - [#2237](https://github.com/flycheck/flycheck/pull/2237): Expose more `ruby-rubocop` options: `flycheck-rubocop-server` to keep a warm server process alive (`--server`), `flycheck-rubocop-only` and `flycheck-rubocop-except` to focus or suppress cops, and `flycheck-rubocop-args` for arbitrary arguments.
+- [#2238](https://github.com/flycheck/flycheck/pull/2238): Add `flycheck-python-mypy-args` for passing arbitrary arguments (such as `--strict` or `--ignore-missing-imports`) to `mypy`.
 
 ### Bugs fixed
 
