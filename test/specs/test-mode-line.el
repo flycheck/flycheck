@@ -57,6 +57,38 @@
       (expect (get-text-property counts-start 'help-echo text)
               :to-equal "mouse-1: list errors")))
 
+  (it "explains a status that reports no counts, and offers a way to look"
+    ;; These indicators are a single opaque character, which is exactly
+    ;; when a user needs to be told what it means
+    (dolist (status '(no-checker running errored interrupted suspicious))
+      (let* ((text (flycheck-mode-line-status-text status))
+             (pos (1- (length text))))
+        (expect (get-text-property pos 'local-map text)
+                :to-be flycheck-mode-line-status-map)
+        (expect (get-text-property pos 'help-echo text)
+                :to-match "mouse-1: check this buffer's setup")
+        (expect (get-text-property pos 'help-echo text)
+                :to-match (alist-get status flycheck-mode-line-status-help)))))
+
+  (it "leaves the empty not-checked indicator alone"
+    (let ((text (flycheck-mode-line-status-text 'not-checked)))
+      (expect text :to-equal " FlyC")
+      (expect (get-text-property (1- (length text)) 'local-map text)
+              :to-be nil)))
+
+  (it "keeps the error counts pointing at the error list, not the setup"
+    (let* ((flycheck-current-errors
+            (list (flycheck-error-new-at 1 1 'error "boom")))
+           (text (flycheck-mode-line-status-text 'finished)))
+      (expect (get-text-property (1- (length text)) 'local-map text)
+              :to-be flycheck-mode-line-counts-map)))
+
+  (it "binds mouse-1 of a countless status to the setup verification"
+    (expect (lookup-key flycheck-mode-line-status-map [mode-line mouse-1])
+            :to-be 'flycheck-mode-line-verify-setup)
+    (expect (lookup-key flycheck-mode-line-status-map [header-line mouse-1])
+            :to-be 'flycheck-mode-line-verify-setup))
+
   (it "binds mouse-1 to the error list"
     (expect (lookup-key flycheck-mode-line-counts-map [mode-line mouse-1])
             :to-be 'flycheck-mode-line-list-errors)
