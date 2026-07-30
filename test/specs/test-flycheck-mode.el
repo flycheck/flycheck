@@ -194,4 +194,35 @@
           (flycheck-disable-checker 'emacs-lisp 'enable))
         (expect flycheck-disabled-checkers :to-equal '(python-pylint))))))
 
+(describe "Setup verification"
+
+  (describe "flycheck--verify-princ-last-failure"
+    (defun test-verify/render (failure)
+      "Return what FAILURE renders as in the verification buffer."
+      (with-temp-buffer
+        (let ((standard-output (current-buffer)))
+          (flycheck--verify-princ-last-failure failure))
+        (buffer-string)))
+
+    (it "shows nothing when the last check did not fail"
+      (expect (test-verify/render nil) :to-equal ""))
+
+    (it "shows a checker's own output when Flycheck could not read it"
+      ;; The echo area only gets a short message, so the crash dump that
+      ;; explains the problem has to be reachable from here
+      (let ((rendered (test-verify/render
+                       '(python-flake8 suspicious
+                                       "ModuleNotFoundError: pycodestyle"))))
+        (expect rendered :to-match "could not read python-flake8's output")
+        (expect rendered :to-match "ModuleNotFoundError: pycodestyle")
+        (expect rendered :to-match "misconfigured")))
+
+    (it "distinguishes a checker that could not be run at all"
+      (expect (test-verify/render '(python-flake8 errored "no such file"))
+              :to-match "could not run python-flake8"))
+
+    (it "copes with a failure that carried no output"
+      (expect (test-verify/render '(python-flake8 suspicious nil))
+              :to-match "nothing at all"))))
+
 ;;; test-flycheck-mode.el ends here
