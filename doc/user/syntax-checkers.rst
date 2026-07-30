@@ -65,6 +65,16 @@ checks Emacs Lisp with Emacs' own byte compiler.  This syntax checker asks for
 Lisp docstrings.  Thus Flycheck will first run the byte compiler and then
 checkdoc in an Emacs Lisp buffer.
 
+.. note::
+
+   When several syntax checkers support the same language and are *not* chained
+   to each other, order decides which one runs: Flycheck uses the first one in
+   `flycheck-checkers` that is installed, and the others never run.  So if you
+   have several installed but want a particular one—``rust-clippy`` instead of
+   ``rust-cargo``, say, or a different linter than the default—either move it up
+   in `flycheck-checkers` or select it for the buffer with
+   `flycheck-select-checker` (see below).
+
 .. _flycheck-manual-selection:
 
 Select syntax checkers manually

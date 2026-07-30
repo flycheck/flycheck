@@ -174,8 +174,8 @@
     llvm-llc
     lua-luacheck
     lua
-    markdown-markdownlint-cli
     markdown-markdownlint-cli2
+    markdown-markdownlint-cli
     markdown-mdl
     markdown-pymarkdown
     nix
@@ -194,11 +194,11 @@
     pug
     puppet-parser
     puppet-lint
-    python-flake8
     python-ruff
+    python-flake8
     python-pylint
-    python-pycompile
     python-pyright
+    python-pycompile
     python-mypy
     r-lintr
     r
