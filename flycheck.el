@@ -13195,7 +13195,7 @@ Relative paths are relative to the file being checked."
   :safe #'flycheck-string-list-p
   :package-version '(flycheck . "0.20"))
 
-(flycheck-def-option-var flycheck-gfortran-language-standard "f95"
+(flycheck-def-option-var flycheck-gfortran-language-standard nil
                          fortran-gfortran
   "The language standard to use in GFortran.
 
@@ -14540,7 +14540,7 @@ See URL `https://pear.php.net/package/PHP_CodeSniffer/'."
   ;; buffer is empty, see https://github.com/flycheck/flycheck/issues/907
   :predicate flycheck-buffer-nonempty-p)
 
-(flycheck-def-option-var flycheck-phpcs-changed-git-base "trunk"
+(flycheck-def-option-var flycheck-phpcs-changed-git-base "main"
                          php-phpcs-changed
   "The git base branch for PHPCS-Changed.
 
