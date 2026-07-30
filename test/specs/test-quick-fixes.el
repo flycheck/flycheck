@@ -53,6 +53,18 @@
       (let ((err (flycheck-error-new-at 1 1 'error "e" :fix (lambda (_) nil))))
         (expect (flycheck-error-resolve-fix err) :to-be nil))))
 
+  (describe "flycheck-error-known-fix-p"
+    (it "is true for a stored fix"
+      (let* ((fix (flycheck-test--edit 1 1 1 2 "x"))
+             (err (flycheck-error-new-at 1 1 'error "e" :fix fix)))
+        (expect (flycheck-error-known-fix-p err) :to-be-truthy)))
+    (it "is false for a lazy provider, which may yield nothing"
+      (let ((err (flycheck-error-new-at 1 1 'error "e" :fix (lambda (_) nil))))
+        (expect (flycheck-error-known-fix-p err) :to-be nil)))
+    (it "is false for an error with no fix"
+      (expect (flycheck-error-known-fix-p (flycheck-error-new-at 1 1 'error "e"))
+              :to-be nil)))
+
   (describe "flycheck-apply-fix"
 
     (it "replaces the edit's region"

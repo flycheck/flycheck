@@ -189,6 +189,22 @@
             ;; the error's own colour is kept
             (expect face :to-be 'flycheck-fringe-error)))))
 
+    (it "uses the normal bitmap for an error whose fix is only a lazy provider"
+      ;; A provider may still come up empty, so the indicator must not
+      ;; promise a fix.  Every LSP diagnostic carries one when code
+      ;; actions are on, which used to turn the whole buffer into dots.
+      (flycheck-buttercup-with-temp-buffer
+        (insert "Hello\n    World")
+        (let ((flycheck-indication-mode 'left-fringe))
+          (pcase-let* ((err (flycheck-error-new-at
+                             1 1 'error nil :buffer (current-buffer)
+                             :fix (lambda (_err) nil)))
+                       (overlay (flycheck-add-overlay err))
+                       (`(_ ,bitmap _)
+                        (get-text-property
+                         0 'display (overlay-get overlay 'before-string))))
+            (expect bitmap :to-be 'flycheck-fringe-bitmap-double-arrow)))))
+
     (it "uses the normal bitmap for a fixable error when the indicator is off"
       (flycheck-buttercup-with-temp-buffer
         (insert "Hello\n    World")
