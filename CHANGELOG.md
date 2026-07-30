@@ -23,6 +23,7 @@
 - [#2247](https://github.com/flycheck/flycheck/pull/2247): Add args vars to the `elixir-credo`, `erlang` and `scala-scalastyle` checkers: `flycheck-elixir-credo-args`, `flycheck-erlang-args` and `flycheck-scalastyle-args`.
 - [#2248](https://github.com/flycheck/flycheck/pull/2248): Add args vars to the `protobuf-protoc`, `puppet-lint` and `statix` checkers: `flycheck-protoc-args`, `flycheck-puppet-lint-args` and `flycheck-statix-args`.
 - [#2249](https://github.com/flycheck/flycheck/pull/2249): Add args vars to the `markdown-markdownlint-cli`, `markdown-markdownlint-cli2` and `textlint` checkers: `flycheck-markdown-markdownlint-cli-args`, `flycheck-markdown-markdownlint-cli2-args` and `flycheck-textlint-args`.
+- [#2254](https://github.com/flycheck/flycheck/pull/2254): Add args vars to the Go checkers: `flycheck-go-gofmt-args`, `flycheck-go-vet-args`, `flycheck-go-build-args`, `flycheck-go-test-args` and `flycheck-go-errcheck-args`.
 
 ### Bugs fixed
 
