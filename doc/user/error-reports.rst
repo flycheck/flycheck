@@ -445,9 +445,9 @@ You can entirely customise the mode line indicator with `flycheck-mode-line`:
 
    A “mode line construct” for Flycheck’s mode line indicator.
 
-You can also customize the indicator for a successful run (no errors/warnings found) with `flycheck-mode-success-indicator`:
+You can also customize the indicator for a successful run (no errors/warnings found) with `flycheck-mode-line-success-indicator`:
 
-.. defcustom:: flycheck-mode-success-indicator
+.. defcustom:: flycheck-mode-line-success-indicator
 
    Success indicator appended to `flycheck-mode-line-prefix`. Set to ":0" by default.
 
