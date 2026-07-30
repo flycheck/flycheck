@@ -10,7 +10,7 @@
 ;;             Bozhidar Batsov <bozhidar@batsov.dev>
 ;; URL: https://github.com/flycheck/flycheck
 ;; Keywords: convenience, languages, tools
-;; Version: 38.3
+;; Version: 39.0-snapshot
 ;; Package-Requires: ((emacs "28.1") (seq "2.24"))
 
 ;; This file is not part of GNU Emacs.
@@ -1508,11 +1508,12 @@ Only has effect when variable `global-flycheck-mode' is non-nil."
 
 
 
-(defconst flycheck-version "39.0"
+(defconst flycheck-version "39.0-snapshot"
   "The current version of Flycheck.
 
-Should be kept in sync with the package version metadata.
-Used as fallback when `package-get-version' returns nil.")
+Kept in sync with the `Version' header and the Eask package version, which
+a spec enforces.  Used as fallback when `package-get-version' returns nil,
+which is the case when Flycheck was not installed as a package.")
 
 (defun flycheck--pkg-version ()
   "Extract FLYCHECK's package version from its package metadata."
