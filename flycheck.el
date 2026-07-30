@@ -4363,10 +4363,24 @@ machine-applicable fix for ERR; see `flycheck-apply-fix'.  It may instead
 be a function of one argument (ERR) that produces the fix on demand -- a
 lazy fix provider, used when computing the fix is expensive (e.g. an LSP
 code-action request).  Call `flycheck-error-resolve-fix' to get the
-concrete fix; a non-nil value here means ERR is presented as fixable
-either way."
+concrete fix.
+
+A non-nil value means a fix may be applicable, which is what the
+commands act on.  It does not mean one is known to exist, since a
+provider may still come up empty, so the indicators use
+`flycheck-error-known-fix-p' instead."
   (condition-case nil (flycheck-error--fix err)
     (args-out-of-range nil)))
+
+(defun flycheck-error-known-fix-p (err)
+  "Whether ERR is known to carry a fix, without resolving anything.
+
+True only for a fix Flycheck already holds.  A lazy provider (see
+`flycheck-error-fix') may or may not produce a fix once asked, so an
+error carrying one is not known to be fixable, and marking it as such
+would promise a fix that may not exist."
+  (let ((fix (flycheck-error-fix err)))
+    (and fix (not (functionp fix)))))
 
 (defun flycheck-error--set-fix (err fix)
   "Set the suggested fix of a Flycheck error ERR to FIX."
@@ -5827,7 +5841,7 @@ function resolves `conditional' style specifications."
       (setf (overlay-get overlay 'face) nil))
     (when-let* ((side (flycheck--resolve-indication-mode)))
       (let ((fixable (and flycheck-fixable-indicator
-                          (flycheck-error-fix err)
+                          (flycheck-error-known-fix-p err)
                           (flycheck--error-fix-buffer err)
                           t)))
         (setf (overlay-get overlay 'before-string)
@@ -6561,9 +6575,9 @@ already names it in a grouped list."
           (concat
            ;; Flag errors that carry an applicable machine fix (apply with
            ;; `x'/`flycheck-error-list-apply-fix'), for discoverability.  Only
-           ;; badge errors whose fix can actually be applied here, not
-           ;; cross-file ones the apply command would refuse.
-           (when (and (flycheck-error-fix error)
+           ;; badge errors whose fix is known to exist and can actually be
+           ;; applied here, not cross-file ones the apply command would refuse.
+           (when (and (flycheck-error-known-fix-p error)
                       (flycheck--error-fix-buffer error))
              (propertize "[fix] " 'face 'flycheck-error-list-checker-name))
            ;; Flag errors that carry secondary locations (visit with `j'/
@@ -7789,8 +7803,8 @@ wrong line until the next check.")
   "Return the propertized fix marker for ERR, or an empty string.
 
 Non-empty only when `flycheck-annotate-fix-marker' is set and ERR
-carries a machine-applicable fix."
-  (if (and flycheck-annotate-fix-marker (flycheck-error-fix err))
+is known to carry a machine-applicable fix."
+  (if (and flycheck-annotate-fix-marker (flycheck-error-known-fix-p err))
       (propertize flycheck-annotate-fix-marker 'face 'flycheck-annotate-fix)
     ""))
 
@@ -10759,8 +10773,10 @@ When non-nil (the default) and the server advertises code actions, each
 diagnostic carries a lazy fix (see `flycheck-error-resolve-fix') that
 requests the server's \"quickfix\" code action for it when applied with
 \\[flycheck-fix-error-at-point].  Because the fix is only computed on
-demand, every diagnostic is shown as potentially fixable even when the
-server has no action for it; set this to nil to turn the feature off."
+demand, Flycheck cannot know in advance whether the server has an action,
+so these diagnostics carry no fix indicator - try
+\\[flycheck-fix-error-at-point] to ask.  Set this to nil to turn the
+feature off."
   :type 'boolean
   :safe #'booleanp
   :group 'flycheck
@@ -11335,8 +11351,10 @@ When non-nil (the default) and the server supports code actions, each
 Eglot diagnostic carries a lazy fix (see `flycheck-error-resolve-fix')
 that requests the server's \"quickfix\" code action for it when applied
 with \\[flycheck-fix-error-at-point].  Because the fix is only computed on
-demand, every diagnostic is shown as potentially fixable even when the
-server has no action for it; set this to nil to turn the feature off."
+demand, Flycheck cannot know in advance whether the server has an action,
+so these diagnostics carry no fix indicator - try
+\\[flycheck-fix-error-at-point] to ask.  Set this to nil to turn the
+feature off."
   :group 'flycheck
   :type 'boolean
   :safe #'booleanp
