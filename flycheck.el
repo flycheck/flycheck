@@ -3004,6 +3004,31 @@ is applicable from Emacs Lisp code.  Use
         (insert "\n")
         (flycheck--verify-print-footer buffer)))))
 
+(defvar-local flycheck--last-failure nil
+  "What the last failed syntax check reported, or nil.
+
+A list (CHECKER STATUS OUTPUT), recorded when a check ends `errored' or
+`suspicious'.  The echo area only gets a short message about those, so
+the checker's own output is kept here for `flycheck-verify-setup' to
+show, where there is room for it.")
+
+(defun flycheck--verify-princ-last-failure (failure)
+  "Print FAILURE, a `flycheck--last-failure' value, if there is one."
+  (pcase failure
+    (`(,checker ,status ,output)
+     (insert (propertize
+              (pcase status
+                (`suspicious
+                 (format "Flycheck could not read %s's output.\n" checker))
+                (_ (format "Flycheck could not run %s.\n" checker)))
+              'face '(bold warning)))
+     (princ "\nThis usually means the tool is missing, misconfigured, or \
+picking up\nthe wrong environment.  It reported:\n\n")
+     (let ((start (point)))
+       (princ (string-trim-right (or output "nothing at all")))
+       (insert "\n\n")
+       (put-text-property start (point) 'face 'shadow)))))
+
 (defun flycheck-verify-setup ()
   "Check whether Flycheck can be used in this buffer.
 
@@ -3018,6 +3043,7 @@ possible problems are shown."
     (save-buffer))
 
   (let* ((buffer (current-buffer))
+         (last-failure flycheck--last-failure)
          (first-checker (flycheck-get-checker-for-buffer))
          (valid-checkers
           (remq first-checker
@@ -3038,6 +3064,9 @@ possible problems are shown."
         (flycheck-verify-mode)
 
         (flycheck--verify-print-header "Syntax checkers for buffer " buffer)
+
+        ;; Lead with the last failure: it is why most people get here
+        (flycheck--verify-princ-last-failure last-failure)
 
         (if first-checker
             (progn
@@ -3591,6 +3620,8 @@ interruption in `flycheck-buffer-automatically' instead."
           (run-hooks 'flycheck-before-syntax-check-hook)
           (flycheck-clear-errors)
           (setq flycheck--suppressed-error-count 0)
+          ;; A failure describes the cycle that recorded it, not this one
+          (setq flycheck--last-failure nil)
           (flycheck-mark-all-overlays-for-deletion)
           (condition-case err
               (let* ((checker (flycheck-get-checker-for-buffer)))
@@ -3667,13 +3698,20 @@ discarded."
             ((or `errored `interrupted)
              (flycheck-report-failed-syntax-check status)
              (when (eq status 'errored)
+               (setq flycheck--last-failure (list checker 'errored data))
                ;; In case of error, show the error message
                (message "Error from syntax checker %s: %s"
                         checker (or data "UNKNOWN!"))))
             (`suspicious
+             (setq flycheck--last-failure (list checker 'suspicious data))
              (when flycheck-mode
-               (message "Suspicious state from syntax checker %s: %s"
-                        checker (or data "UNKNOWN!")))
+               ;; The output is often a crash dump, far too much for the
+               ;; echo area, so say what happened and where to read it
+               (message
+                (substitute-command-keys
+                 "Flycheck: cannot read %s's output, so it may be \
+misconfigured; \\[flycheck-verify-setup] shows what it printed")
+                checker))
              (flycheck-report-status 'suspicious))
             (`self-disabled
              (when flycheck-mode
@@ -9350,11 +9388,9 @@ Resolve all errors in OUTPUT using CWD as working directory."
             ;; (e.g. includes) even if there are no errors in the file being
             ;; checked.
             (funcall callback 'suspicious
-                     (format "Flycheck checker %S returned %S, but \
-its output contained no errors: %s\nTry installing a more \
-recent version of %S, and please open a bug report if the issue \
-persists in the latest release.  Thanks!"  checker exit-status
-output checker))))))
+                     (format "Exited with status %S, printing output that \
+contained no errors Flycheck could read:\n\n%s"
+                             exit-status output))))))
       (unless self-disabled
         (funcall callback 'finished
                  ;; Fix error file names, by substituting them backwards
