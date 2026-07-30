@@ -22,7 +22,7 @@
 
   (flycheck-buttercup-def-checker-test less-stylelint less nil
     (let ((flycheck-disabled-checkers '(less))
-          (flycheck-stylelintrc
+          (flycheck-stylelint-config
            (flycheck-buttercup-resource-filename
             "language/css/.stylelintrc.json")))
       (flycheck-buttercup-should-syntax-check

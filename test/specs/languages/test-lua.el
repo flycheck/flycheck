@@ -22,7 +22,7 @@
          :id "W221" :checker lua-luacheck)))
 
   (flycheck-buttercup-def-checker-test lua-luacheck lua custom-luacheckrc
-    (let ((flycheck-luacheckrc "custom.luacheckrc"))
+    (let ((flycheck-luacheck-config "custom.luacheckrc"))
       (flycheck-buttercup-should-syntax-check
        "language/lua/warnings.lua" 'lua-mode
        '(1 1 warning "setting non-standard global variable 'global_var'"
@@ -52,7 +52,7 @@
 
   (describe "the lua-luacheck checker command"
     (it "passes one --globals per allowed global"
-      (let ((flycheck-luacheckrc nil)
+      (let ((flycheck-luacheck-config nil)
             (flycheck-luacheck-globals '("love" "vim"))
             (flycheck-luacheck-args nil))
         (let ((args (flycheck-checker-substituted-arguments 'lua-luacheck)))
@@ -61,7 +61,7 @@
           (expect args :to-contain "vim"))))
 
     (it "appends flycheck-luacheck-args"
-      (let ((flycheck-luacheckrc nil)
+      (let ((flycheck-luacheck-config nil)
             (flycheck-luacheck-args '("--max-line-length" "120")))
         (let ((args (flycheck-checker-substituted-arguments 'lua-luacheck)))
           (expect args :to-contain "--max-line-length")

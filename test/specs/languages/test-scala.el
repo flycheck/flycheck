@@ -34,13 +34,13 @@
      '(3 nil error "identifier expected but '{' found." :checker scala)))
 
   (flycheck-buttercup-def-checker-test scala-scalastyle scala error
-    (let ((flycheck-scalastylerc "scalastyle.xml"))
+    (let ((flycheck-scalastyle-config "scalastyle.xml"))
       (flycheck-buttercup-should-syntax-check
        "language/scala/style-error.scala" 'scala-mode
        '(6 5 error "Don't use println" :checker scala-scalastyle))))
 
   (flycheck-buttercup-def-checker-test scala-scalastyle scala warning
-    (let ((flycheck-scalastylerc "scalastyle.xml"))
+    (let ((flycheck-scalastyle-config "scalastyle.xml"))
       (flycheck-buttercup-should-syntax-check
        "language/scala/style-warning.scala" 'scala-mode
        '(5 9 warning "Redundant braces after class definition"
@@ -48,7 +48,7 @@
 
   (describe "the scala-scalastyle checker command"
     (it "appends flycheck-scalastyle-args"
-      (let ((flycheck-scalastylerc nil)
+      (let ((flycheck-scalastyle-config nil)
             (flycheck-scalastyle-args '("--quiet" "true")))
         (expect (flycheck-checker-substituted-arguments 'scala-scalastyle)
                 :to-contain "--quiet")))))

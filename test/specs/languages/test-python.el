@@ -56,7 +56,7 @@
 
   (describe "the python-flake8 checker command"
     (it "appends flycheck-flake8-args before the stdin marker"
-      (let ((flycheck-flake8rc nil)
+      (let ((flycheck-flake8-config nil)
             (flycheck-flake8-args '("--select=F401" "--max-doc-length=72")))
         (let ((args (flycheck-checker-substituted-arguments 'python-flake8)))
           (expect args :to-contain "--select=F401")
