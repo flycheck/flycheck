@@ -1372,7 +1372,7 @@ function must be updated to use this variable."
   :package-version '(flycheck . "26"))
 
 (define-obsolete-variable-alias 'flycheck-mode-success-indicator
-  'flycheck-mode-line-success-indicator "38.4")
+  'flycheck-mode-line-success-indicator "39")
 (defcustom flycheck-mode-line-success-indicator ":0"
   "Success indicator appended to `flycheck-mode-line-prefix'."
   :group 'flycheck
@@ -12246,13 +12246,13 @@ See URL `https://coffeescript.org/'."
 
 (flycheck-def-args-var flycheck-stylelint-args
     (css-stylelint scss-stylelint sass-stylelint less-stylelint)
-  :package-version '(flycheck . "38.4"))
+  :package-version '(flycheck . "39"))
 
 ;; Limit the length of the generated docstring by including only the first three
 ;; checker symbols, otherwise emacs will complain about the docstring length
 ;; and may refuse to compile the package.
 (define-obsolete-variable-alias 'flycheck-stylelintrc
-  'flycheck-stylelint-config "38.4")
+  'flycheck-stylelint-config "39")
 (let ((print-length 3))
   (flycheck-def-config-file-var flycheck-stylelint-config
       (css-stylelint scss-stylelint sass-stylelint less-stylelint) nil))
@@ -12604,7 +12604,7 @@ ShellCheck link to ShellCheck's wiki."
     dockerfile-hadolint '(".hadolint.yaml" ".hadolint.yml"))
 
 (flycheck-def-args-var flycheck-dockerfile-hadolint-args dockerfile-hadolint
-  :package-version '(flycheck . "38.4"))
+  :package-version '(flycheck . "39"))
 
 (flycheck-define-checker dockerfile-hadolint
   "A Dockerfile syntax checker using hadolint.
@@ -12641,7 +12641,7 @@ When non-nil, pass the `--strict' flag to credo."
   :package-version '(flycheck . "32"))
 
 (flycheck-def-args-var flycheck-elixir-credo-args elixir-credo
-  :package-version '(flycheck . "38.4"))
+  :package-version '(flycheck . "39"))
 
 (flycheck-define-checker elixir-credo
   "An Elixir checker for static code analysis using Credo.
@@ -13073,7 +13073,7 @@ the BUFFER that was checked respectively."
           (cdr (car (car (flycheck-parse-json output))))))
 
 (define-obsolete-variable-alias 'flycheck-ember-template-lintrc
-  'flycheck-ember-template-lint-config "38.4")
+  'flycheck-ember-template-lint-config "39")
 (flycheck-def-config-file-var flycheck-ember-template-lint-config
     ember-template
     ".template-lintrc.js")
@@ -13111,7 +13111,7 @@ Relative paths are relative to the file being checked."
   :package-version '(flycheck . "0.24"))
 
 (flycheck-def-args-var flycheck-erlang-args erlang
-  :package-version '(flycheck . "38.4"))
+  :package-version '(flycheck . "39"))
 
 (flycheck-define-checker erlang
   "An Erlang syntax checker using the Erlang interpreter.
@@ -13335,7 +13335,7 @@ See URL https://github.com/rhysd/actionlint/."
                      (buffer-file-name)))))
 
 (flycheck-def-args-var flycheck-go-gofmt-args go-gofmt
-  :package-version '(flycheck . "38.4"))
+  :package-version '(flycheck . "39"))
 
 (flycheck-define-checker go-gofmt
   "A Go syntax and style checker using the gofmt utility.
@@ -13356,7 +13356,7 @@ See URL `https://go.dev/cmd/gofmt/'."
                   (warning . go-staticcheck)))
 
 (flycheck-def-args-var flycheck-go-vet-args go-vet
-  :package-version '(flycheck . "38.4"))
+  :package-version '(flycheck . "39"))
 
 (flycheck-define-checker go-vet
   "A Go syntax checker using the `go vet' command.
@@ -13410,7 +13410,7 @@ details."
   :package-version '(flycheck . "0.32"))
 
 (flycheck-def-args-var flycheck-go-build-args go-build
-  :package-version '(flycheck . "38.4"))
+  :package-version '(flycheck . "39"))
 
 (flycheck-define-checker go-build
   "A Go syntax and type checker using the `go build' command.
@@ -13454,7 +13454,7 @@ See URL `https://go.dev/cmd/go/'."
                   (warning . go-staticcheck)))
 
 (flycheck-def-args-var flycheck-go-test-args go-test
-  :package-version '(flycheck . "38.4"))
+  :package-version '(flycheck . "39"))
 
 (flycheck-define-checker go-test
   "A Go syntax and type checker using the `go test' command.
@@ -13480,7 +13480,7 @@ See URL `https://go.dev/cmd/go/'."
                   (warning . go-staticcheck)))
 
 (flycheck-def-args-var flycheck-go-errcheck-args go-errcheck
-  :package-version '(flycheck . "38.4"))
+  :package-version '(flycheck . "39"))
 
 (flycheck-define-checker go-errcheck
   "A Go checker for unchecked errors.
@@ -13852,7 +13852,7 @@ See URL `https://www.haskell.org/ghc/'."
   :working-directory flycheck-haskell--ghc-find-default-directory)
 
 (define-obsolete-variable-alias 'flycheck-hlintrc
-  'flycheck-hlint-config "38.4")
+  'flycheck-hlint-config "39")
 (flycheck-def-config-file-var flycheck-hlint-config haskell-hlint ".hlint.yaml")
 
 (flycheck-def-args-var flycheck-hlint-args haskell-hlint
@@ -13927,7 +13927,7 @@ See URL `https://github.com/ndmitchell/hlint'."
   :modes (haskell-mode haskell-literate-mode haskell-ts-mode))
 
 (define-obsolete-variable-alias 'flycheck-tidyrc
-  'flycheck-tidy-config "38.4")
+  'flycheck-tidy-config "39")
 (flycheck-def-config-file-var flycheck-tidy-config html-tidy ".tidyrc")
 
 (flycheck-define-checker html-tidy
@@ -14226,7 +14226,7 @@ string is a directory to add to the include path via `-J'."
   :package-version '(flycheck . "35.0"))
 
 (define-obsolete-variable-alias 'flycheck-jsonnet-command-args
-  'flycheck-jsonnet-args "38.4")
+  'flycheck-jsonnet-args "39")
 (flycheck-def-args-var flycheck-jsonnet-args jsonnet
   :package-version '(flycheck . "35.0"))
 
@@ -14313,7 +14313,7 @@ See URL `https://llvm.org/docs/CommandGuide/llc.html'."
   :modes llvm-mode)
 
 (define-obsolete-variable-alias 'flycheck-luacheckrc
-  'flycheck-luacheck-config "38.4")
+  'flycheck-luacheck-config "39")
 (flycheck-def-config-file-var flycheck-luacheck-config lua-luacheck ".luacheckrc")
 
 (flycheck-def-option-var flycheck-luacheck-standards nil lua-luacheck
@@ -14335,10 +14335,10 @@ Each element is the name of an additional global variable to treat as
 defined, such as \"love\" or \"vim\"."
   :type '(repeat (string :tag "Global"))
   :safe #'flycheck-string-list-p
-  :package-version '(flycheck . "38.4"))
+  :package-version '(flycheck . "39"))
 
 (flycheck-def-args-var flycheck-luacheck-args lua-luacheck
-  :package-version '(flycheck . "38.4"))
+  :package-version '(flycheck . "39"))
 
 (flycheck-define-checker lua-luacheck
   "A Lua syntax checker using luacheck.
@@ -14471,7 +14471,7 @@ details."
   :package-version '(flycheck . "32"))
 
 (define-obsolete-variable-alias 'flycheck-perlcriticrc
-  'flycheck-perlcritic-config "38.4")
+  'flycheck-perlcritic-config "39")
 (flycheck-def-config-file-var flycheck-perlcritic-config perl-perlcritic
                               ".perlcriticrc"
   :package-version '(flycheck . "26"))
@@ -14575,7 +14575,7 @@ manual at URL `https://phpmd.org/documentation/index.html'."
   :safe #'flycheck-string-list-p)
 
 (flycheck-def-args-var flycheck-phpmd-args php-phpmd
-  :package-version '(flycheck . "38.4"))
+  :package-version '(flycheck . "39"))
 
 (flycheck-define-checker php-phpmd
   "A PHP style checker using PHP Mess Detector.
@@ -14601,7 +14601,7 @@ or as path to a standard specification."
   :safe #'string-or-null-p)
 
 (flycheck-def-args-var flycheck-phpcs-args php-phpcs
-  :package-version '(flycheck . "38.4"))
+  :package-version '(flycheck . "39"))
 
 (flycheck-define-checker php-phpcs
   "A PHP style checker using PHP Code Sniffer.
@@ -14784,7 +14784,7 @@ are relative to the file being checked."
 (make-variable-buffer-local 'flycheck-protoc-import-path)
 
 (flycheck-def-args-var flycheck-protoc-args protobuf-protoc
-  :package-version '(flycheck . "38.4"))
+  :package-version '(flycheck . "39"))
 
 (flycheck-define-checker protobuf-protoc
   "A protobuf syntax checker using the protoc compiler.
@@ -14880,7 +14880,7 @@ See URL `https://puppet.com/'."
   :next-checkers ((warning . puppet-lint)))
 
 (define-obsolete-variable-alias 'flycheck-puppet-lint-rc
-  'flycheck-puppet-lint-config "38.4")
+  'flycheck-puppet-lint-config "39")
 (flycheck-def-config-file-var flycheck-puppet-lint-config puppet-lint
                               ".puppet-lint.rc"
   :package-version '(flycheck . "26"))
@@ -14903,7 +14903,7 @@ and their names."
   (concat "--no-" check "-check"))
 
 (flycheck-def-args-var flycheck-puppet-lint-args puppet-lint
-  :package-version '(flycheck . "38.4"))
+  :package-version '(flycheck . "39"))
 
 (flycheck-define-checker puppet-lint
   "A Puppet DSL style checker using puppet-lint.
@@ -15014,7 +15014,7 @@ parent directory that doesn't have a __init__.py file."
                  (not (file-exists-p (expand-file-name "__init__.py" dir))))))))
 
 (define-obsolete-variable-alias 'flycheck-flake8rc
-  'flycheck-flake8-config "38.4")
+  'flycheck-flake8-config "39")
 (flycheck-def-config-file-var flycheck-flake8-config python-flake8
                               '(".flake8" "setup.cfg" "tox.ini"))
 
@@ -15078,7 +15078,7 @@ of 79 characters if there is no configuration with this setting."
   :safe #'integerp)
 
 (flycheck-def-args-var flycheck-flake8-args python-flake8
-  :package-version '(flycheck . "38.4"))
+  :package-version '(flycheck . "39"))
 
 (defun flycheck-flake8-fix-error-level (err)
   "Fix the error level of ERR.
@@ -15135,7 +15135,7 @@ Requires Flake8 3.0 or newer. See URL
                               '("pyproject.toml" "ruff.toml" ".ruff.toml"))
 
 (flycheck-def-args-var flycheck-python-ruff-args python-ruff
-  :package-version '(flycheck . "38.4"))
+  :package-version '(flycheck . "39"))
 
 (flycheck-def-option-var flycheck-python-ruff-select nil python-ruff
   "A list of rule codes to enable in Ruff, via `--select'.
@@ -15147,7 +15147,7 @@ its configuration.  When nil, Ruff's configured or default selection is
 used."
   :type '(repeat (string :tag "Rule code"))
   :safe #'flycheck-string-list-p
-  :package-version '(flycheck . "38.4"))
+  :package-version '(flycheck . "39"))
 
 (flycheck-def-option-var flycheck-python-ruff-extend-select nil python-ruff
   "A list of rule codes to enable in Ruff on top of its configuration.
@@ -15157,7 +15157,7 @@ adds to the rules selected in `pyproject.toml' or `ruff.toml' rather than
 replacing them."
   :type '(repeat (string :tag "Rule code"))
   :safe #'flycheck-string-list-p
-  :package-version '(flycheck . "38.4"))
+  :package-version '(flycheck . "39"))
 
 (flycheck-def-option-var flycheck-python-ruff-ignore nil python-ruff
   "A list of rule codes to disable in Ruff, via `--ignore'.
@@ -15165,7 +15165,7 @@ replacing them."
 Each element is a rule code or prefix, such as \"E501\" or \"D\"."
   :type '(repeat (string :tag "Rule code"))
   :safe #'flycheck-string-list-p
-  :package-version '(flycheck . "38.4"))
+  :package-version '(flycheck . "39"))
 
 (flycheck-def-option-var flycheck-python-ruff-target-version nil python-ruff
   "The minimum Python version Ruff should assume, via `--target-version'.
@@ -15178,13 +15178,13 @@ from the project's configuration."
                  (const "py313") (const "py314")
                  (string :tag "Version tag"))
   :safe #'string-or-null-p
-  :package-version '(flycheck . "38.4"))
+  :package-version '(flycheck . "39"))
 
 (flycheck-def-option-var flycheck-python-ruff-preview nil python-ruff
   "Whether to enable Ruff's preview rules and fixes, via `--preview'."
   :type 'boolean
   :safe #'booleanp
-  :package-version '(flycheck . "38.4"))
+  :package-version '(flycheck . "39"))
 
 (defun flycheck--explain-error-via-checker (checker &rest args)
   "Return an explainer function that calls CHECKER with ARGS.
@@ -15302,7 +15302,7 @@ which should be used and reported to the user."
   :package-version '(flycheck . "0.25"))
 
 (flycheck-def-args-var flycheck-pylint-args python-pylint
-  :package-version '(flycheck . "38.4"))
+  :package-version '(flycheck . "39"))
 
 (defun flycheck-parse-pylint (output checker buffer)
   "Parse JSON OUTPUT of CHECKER on BUFFER as Pylint errors."
@@ -15443,7 +15443,7 @@ See URL `https://github.com/microsoft/pyright'."
   :package-version '(flycheck . "33"))
 
 (flycheck-def-args-var flycheck-python-mypy-args python-mypy
-  :package-version '(flycheck . "38.4"))
+  :package-version '(flycheck . "39"))
 
 (flycheck-define-checker python-mypy
   "Mypy syntax and type checker.  Requires mypy>=0.730.
@@ -15656,7 +15656,7 @@ See URL `https://github.com/rpm-software-management/rpmlint'."
   :package-version '(flycheck . "33"))
 
 (define-obsolete-variable-alias 'flycheck-markdown-markdownlint-cli-disable-rules
-  'flycheck-markdown-markdownlint-cli-disabled-rules "38.4")
+  'flycheck-markdown-markdownlint-cli-disabled-rules "39")
 (flycheck-def-option-var flycheck-markdown-markdownlint-cli-disabled-rules
     nil markdown-markdownlint-cli
   "Rules to disable for markdownlint-cli."
@@ -15666,7 +15666,7 @@ See URL `https://github.com/rpm-software-management/rpmlint'."
   :package-version '(flycheck . "33"))
 
 (define-obsolete-variable-alias 'flycheck-markdown-markdownlint-cli-enable-rules
-  'flycheck-markdown-markdownlint-cli-enabled-rules "38.4")
+  'flycheck-markdown-markdownlint-cli-enabled-rules "39")
 (flycheck-def-option-var flycheck-markdown-markdownlint-cli-enabled-rules
     nil markdown-markdownlint-cli
   "Rules to enable for markdownlint-cli."
@@ -15677,7 +15677,7 @@ See URL `https://github.com/rpm-software-management/rpmlint'."
 
 (flycheck-def-args-var flycheck-markdown-markdownlint-cli-args
     markdown-markdownlint-cli
-  :package-version '(flycheck . "38.4"))
+  :package-version '(flycheck . "39"))
 
 (defun flycheck-markdownlint-error-filter (errors)
   "Error filter for markdownlint checkers."
@@ -15727,7 +15727,7 @@ See URL `https://github.com/igorshubovych/markdownlint-cli'."
 
 (flycheck-def-args-var flycheck-markdown-markdownlint-cli2-args
     markdown-markdownlint-cli2
-  :package-version '(flycheck . "38.4"))
+  :package-version '(flycheck . "39"))
 
 (flycheck-define-checker markdown-markdownlint-cli2
   "Markdown checker using markdownlint-cli2.
@@ -15889,7 +15889,7 @@ information about statix."
           (alist-get 'report (car (flycheck-parse-json output)))))
 
 (flycheck-def-args-var flycheck-statix-args statix
-  :package-version '(flycheck . "38.4"))
+  :package-version '(flycheck . "39"))
 
 (flycheck-define-checker statix
   "Nix checker using statix.
@@ -15973,7 +15973,7 @@ This is either a parent directory containing a Gemfile, or nil."
    errors))
 
 (define-obsolete-variable-alias 'flycheck-rubocoprc
-  'flycheck-rubocop-config "38.4")
+  'flycheck-rubocop-config "39")
 (flycheck-def-config-file-var flycheck-rubocop-config ruby-rubocop ".rubocop.yml")
 
 (flycheck-def-option-var flycheck-rubocop-lint-only nil
@@ -15987,7 +15987,7 @@ report style issues as well."
   :package-version '(flycheck . "0.16"))
 
 (flycheck-def-args-var flycheck-rubocop-args ruby-rubocop
-  :package-version '(flycheck . "38.4"))
+  :package-version '(flycheck . "39"))
 
 (flycheck-def-option-var flycheck-rubocop-server nil ruby-rubocop
   "Whether to run RuboCop in server mode, via `--server'.
@@ -15997,7 +15997,7 @@ which greatly cuts its startup time on repeated checks.  See URL
 `https://docs.rubocop.org/rubocop/usage/server.html'."
   :type 'boolean
   :safe #'booleanp
-  :package-version '(flycheck . "38.4"))
+  :package-version '(flycheck . "39"))
 
 (flycheck-def-option-var flycheck-rubocop-only nil ruby-rubocop
   "A list of cops to run exclusively in RuboCop, via `--only'.
@@ -16006,7 +16006,7 @@ Each element is a cop or department name, such as
 \"Style/StringLiterals\" or \"Lint\"."
   :type '(repeat (string :tag "Cop or department"))
   :safe #'flycheck-string-list-p
-  :package-version '(flycheck . "38.4"))
+  :package-version '(flycheck . "39"))
 
 (flycheck-def-option-var flycheck-rubocop-except nil ruby-rubocop
   "A list of cops to disable in RuboCop, via `--except'.
@@ -16015,7 +16015,7 @@ Each element is a cop or department name, such as
 \"Style/StringLiterals\" or \"Metrics\"."
   :type '(repeat (string :tag "Cop or department"))
   :safe #'flycheck-string-list-p
-  :package-version '(flycheck . "38.4"))
+  :package-version '(flycheck . "39"))
 
 (defun flycheck-ruby-rubocop-error-explainer (err)
   "Browse the RuboCop documentation for the cop of error ERR.
@@ -16114,7 +16114,7 @@ See URL `https://github.com/chef/cookstyle'."
   :next-checkers '((warning . ruby-reek)))
 
 (define-obsolete-variable-alias 'flycheck-ruby-standardrc
-  'flycheck-ruby-standard-config "38.4")
+  'flycheck-ruby-standard-config "39")
 (flycheck-def-config-file-var flycheck-ruby-standard-config ruby-standard
                               ".standard.yml")
 
@@ -16142,7 +16142,7 @@ See URL `https://github.com/testdouble/standard' for more information."
                    (warning . ruby-chef-cookstyle)))
 
 (define-obsolete-variable-alias 'flycheck-reekrc
-  'flycheck-reek-config "38.4")
+  'flycheck-reek-config "39")
 (flycheck-def-config-file-var flycheck-reek-config ruby-reek ".reek.yml"
   :package-version '(flycheck . "30"))
 
@@ -16296,11 +16296,11 @@ the edition from `Cargo.toml' and ignores this variable."
                  (const "2021") (const "2024")
                  (string :tag "Other edition"))
   :safe #'string-or-null-p
-  :package-version '(flycheck . "38.4"))
+  :package-version '(flycheck . "39"))
 (make-variable-buffer-local 'flycheck-rust-edition)
 
 (flycheck-def-args-var flycheck-rust-clippy-args (rust-clippy)
-  :package-version '(flycheck . "38.4"))
+  :package-version '(flycheck . "39"))
 
 (flycheck-def-option-var flycheck-rust-clippy-tests nil rust-clippy
   "Whether to lint test code with Clippy.
@@ -16309,7 +16309,7 @@ When non-nil, `cargo clippy' is passed `--tests', so code marked with
 `#[cfg(test)]' or `#[test]' is linted as well."
   :type 'boolean
   :safe #'booleanp
-  :package-version '(flycheck . "38.4"))
+  :package-version '(flycheck . "39"))
 
 (flycheck-def-option-var flycheck-rust-clippy-all-targets nil rust-clippy
   "Whether to lint all targets with Clippy.
@@ -16318,7 +16318,7 @@ When non-nil, `cargo clippy' is passed `--all-targets', linting tests,
 benches and examples on top of the default targets."
   :type 'boolean
   :safe #'booleanp
-  :package-version '(flycheck . "38.4"))
+  :package-version '(flycheck . "39"))
 
 (flycheck-def-option-var flycheck-rust-clippy-all-features nil rust-clippy
   "Whether to lint with all Cargo features enabled in Clippy.
@@ -16326,7 +16326,7 @@ benches and examples on top of the default targets."
 When non-nil, `cargo clippy' is passed `--all-features'."
   :type 'boolean
   :safe #'booleanp
-  :package-version '(flycheck . "38.4"))
+  :package-version '(flycheck . "39"))
 
 (defun flycheck--fontify-as-markdown ()
   "Place current buffer in `markdown-view-mode' and fontify it."
@@ -16591,12 +16591,12 @@ See URL `https://www.scala-lang.org/'."
   :next-checkers ((warning . scala-scalastyle)))
 
 (define-obsolete-variable-alias 'flycheck-scalastylerc
-  'flycheck-scalastyle-config "38.4")
+  'flycheck-scalastyle-config "39")
 (flycheck-def-config-file-var flycheck-scalastyle-config scala-scalastyle nil
   :package-version '(flycheck . "0.20"))
 
 (flycheck-def-args-var flycheck-scalastyle-args scala-scalastyle
-  :package-version '(flycheck . "38.4"))
+  :package-version '(flycheck . "39"))
 
 (flycheck-define-checker scala-scalastyle
   "A Scala style checker using scalastyle.
@@ -17015,7 +17015,7 @@ See URL
   :modes (systemd-mode))
 
 (define-obsolete-variable-alias 'flycheck-chktexrc
-  'flycheck-chktex-config "38.4")
+  'flycheck-chktex-config "39")
 (flycheck-def-config-file-var flycheck-chktex-config tex-chktex ".chktexrc")
 
 (flycheck-define-checker tcl-nagelfar
@@ -17064,7 +17064,7 @@ Relative files are relative to the file being checked."
                               '(".tflint.hcl"))
 
 (flycheck-def-args-var flycheck-tflint-args terraform-tflint
-  :package-version '(flycheck . "38.4"))
+  :package-version '(flycheck . "39"))
 
 (flycheck-def-option-var flycheck-tflint-enabled-rules nil terraform-tflint
   "A list of tflint rules to enable, via `--enable-rule'.
@@ -17072,7 +17072,7 @@ Relative files are relative to the file being checked."
 Each element is a rule name, such as \"terraform_unused_declarations\"."
   :type '(repeat (string :tag "Rule name"))
   :safe #'flycheck-string-list-p
-  :package-version '(flycheck . "38.4"))
+  :package-version '(flycheck . "39"))
 
 (flycheck-def-option-var flycheck-tflint-disabled-rules nil terraform-tflint
   "A list of tflint rules to disable, via `--disable-rule'.
@@ -17080,7 +17080,7 @@ Each element is a rule name, such as \"terraform_unused_declarations\"."
 Each element is a rule name, such as \"terraform_deprecated_syntax\"."
   :type '(repeat (string :tag "Rule name"))
   :safe #'flycheck-string-list-p
-  :package-version '(flycheck . "38.4"))
+  :package-version '(flycheck . "39"))
 
 (defun flycheck-parse-tflint-linter (output checker buffer)
   "Parse tflint warnings from JSON OUTPUT.
@@ -17214,7 +17214,7 @@ published on NPM."
         flycheck-textlint-plugin-alist)))
 
 (flycheck-def-args-var flycheck-textlint-args textlint
-  :package-version '(flycheck . "38.4"))
+  :package-version '(flycheck . "39"))
 
 (flycheck-define-checker textlint
   "A text prose linter using textlint.
@@ -17386,7 +17386,7 @@ See URL `https://github.com/nodeca/js-yaml'."
                   (warning . cwl)))
 
 (define-obsolete-variable-alias 'flycheck-yamllintrc
-  'flycheck-yamllint-config "38.4")
+  'flycheck-yamllint-config "39")
 (flycheck-def-config-file-var flycheck-yamllint-config
     yaml-yamllint
     '(".yamllint"
@@ -17395,7 +17395,7 @@ See URL `https://github.com/nodeca/js-yaml'."
       "~/.config/yamllint/config"))
 
 (flycheck-def-args-var flycheck-yamllint-args yaml-yamllint
-  :package-version '(flycheck . "38.4"))
+  :package-version '(flycheck . "39"))
 
 (flycheck-define-checker yaml-yamllint
   "A YAML syntax checker using YAMLLint.
