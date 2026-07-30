@@ -5148,6 +5148,38 @@ up the error list for the current buffer."
     map)
   "Keymap for the error counts in the mode line.")
 
+(defun flycheck-mode-line-verify-setup (&optional event)
+  "Show the setup of the buffer of EVENT's window.
+
+Without a mouse EVENT, e.g. when invoked from the keyboard, show the
+setup of the current buffer."
+  (interactive (list last-nonmenu-event))
+  (let ((window (and (eventp event)
+                     (posn-window (event-start event)))))
+    (with-selected-window (if (windowp window) window (selected-window))
+      (flycheck-verify-setup))))
+
+(defvar flycheck-mode-line-status-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map [mode-line mouse-1] #'flycheck-mode-line-verify-setup)
+    (define-key map [header-line mouse-1] #'flycheck-mode-line-verify-setup)
+    map)
+  "Keymap for the mode-line indicator of a status that ran no check.")
+
+(defconst flycheck-mode-line-status-help
+  '((not-checked . "Flycheck has not checked this buffer yet")
+    (no-checker . "No syntax checker for this buffer")
+    (running . "Flycheck is checking this buffer")
+    (errored . "The syntax checker could not be run")
+    (interrupted . "The syntax check was interrupted")
+    (suspicious . "The syntax checker returned a result Flycheck did not \
+understand"))
+  "What each mode-line status means, for the indicator's tooltip.
+
+Every status here shows no error counts, so its indicator is a single
+opaque character.  `flycheck-mode-line-status-text' turns these into a
+tooltip and a click that explains the buffer's setup.")
+
 (defun flycheck-mode-line-status-text (&optional status)
   "Get a text describing STATUS for use in the mode line.
 
@@ -5184,6 +5216,20 @@ nil."
                            "mouse-1: list errors"))))
                       (`interrupted ".")
                       (`suspicious "?")))
+         ;; Every other status renders as one opaque character with no
+         ;; counts behind it, which is exactly when a user needs to be
+         ;; told what it means and where to look next.
+         (indicator
+          (if (or (eq current-status 'finished) (string-empty-p indicator))
+              indicator
+            (propertize
+             indicator
+             'local-map flycheck-mode-line-status-map
+             'mouse-face 'mode-line-highlight
+             'help-echo
+             (concat (alist-get current-status flycheck-mode-line-status-help
+                                (symbol-name current-status))
+                     "\nmouse-1: check this buffer's setup"))))
          (face (when flycheck-mode-line-color
                  (pcase current-status
                    (`errored 'error)
