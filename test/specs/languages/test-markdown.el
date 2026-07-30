@@ -54,8 +54,8 @@
     (it "appends flycheck-markdown-markdownlint-cli-args before the -- separator"
       (flycheck-buttercup-with-temp-buffer
         (let ((flycheck-markdown-markdownlint-cli-config nil)
-              (flycheck-markdown-markdownlint-cli-disable-rules nil)
-              (flycheck-markdown-markdownlint-cli-enable-rules nil)
+              (flycheck-markdown-markdownlint-cli-disabled-rules nil)
+              (flycheck-markdown-markdownlint-cli-enabled-rules nil)
               (flycheck-markdown-markdownlint-cli-args '("--dot")))
           (let ((args (flycheck-checker-substituted-arguments
                        'markdown-markdownlint-cli)))

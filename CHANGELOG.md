@@ -30,6 +30,11 @@
 - [#2235](https://github.com/flycheck/flycheck/pull/2235): Fix `flycheck-verify-setup` erroring with `Wrong type argument: number-or-marker-p, nil` when `eslint` is not installed ([#2232](https://github.com/flycheck/flycheck/issues/2232)); `flycheck-call-checker-process-for-output` no longer chokes on a missing executable either.
 - [#2236](https://github.com/flycheck/flycheck/pull/2236): Detect the project root of a `javascript-eslint` buffer from a flat config file (`eslint.config.js` and its `.mjs`/`.cjs`/`.ts` variants), not only the legacy `.eslintrc`/`.eslintignore` that ESLint 9 dropped.
 - [#2244](https://github.com/flycheck/flycheck/pull/2244): Apply `flycheck-go-build-tags` to the `go-vet` checker as well, so a tagged build is checked consistently across the Go checkers.
+- [#2250](https://github.com/flycheck/flycheck/pull/2250): Fix several option-variable defects: `flycheck-cuda-includes` and `flycheck-tflint-variable-files` used a directory widget for options that are lists of files, `flycheck-annotate-format-function` and `flycheck-annotate-style-functions` were missing `:risky`, and a few options carried a malformed `:package-version`.
+
+### Changes
+
+- [#2250](https://github.com/flycheck/flycheck/pull/2250): Tidy up the configuration for consistency: rename `flycheck-mode-success-indicator` to `flycheck-mode-line-success-indicator`, `flycheck-jsonnet-command-args` to `flycheck-jsonnet-args`, and the markdownlint-cli `-enable-rules`/`-disable-rules` options to `-enabled-rules`/`-disabled-rules` (the old names remain as obsolete aliases), and mark more options `:safe` so they can be set as file- or directory-local variables.
 
 ## 38.3 (2026-07-29)
 

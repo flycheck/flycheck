@@ -732,7 +732,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       Checks `Jsonnet <https://jsonnet.org>`_ with the `jsonnet` binary published at `go-jsonnet <https://github.com/google/go-jsonnet>`_.
 
-      .. defcustom:: flycheck-jsonnet-command-args
+      .. defcustom:: flycheck-jsonnet-args
 
          A list of additional arguments that are passed to `jsonnet`.
 
@@ -814,11 +814,11 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       .. syntax-checker-config-file:: flycheck-markdown-markdownlint-cli-config
 
-      .. defcustom:: flycheck-markdown-markdownlint-cli-disable-rules
+      .. defcustom:: flycheck-markdown-markdownlint-cli-disabled-rules
 
          A list of disabled rules.
 
-      .. defcustom:: flycheck-markdown-markdownlint-cli-enable-rules
+      .. defcustom:: flycheck-markdown-markdownlint-cli-enabled-rules
 
          A list of enabled rules.
 

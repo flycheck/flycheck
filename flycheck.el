@@ -372,7 +372,10 @@ to the excessive errors."
   :package-version '(flycheck . "0.22"))
 
 (defcustom flycheck-interrupt-running-checks 10
-  "Whether a new syntax check interrupts a running one.
+  "When a new syntax check should interrupt one already running.
+
+The value is a number of seconds, t or nil (see below); it is not a
+plain on/off flag.
 
 When a syntax check is triggered while one is already running in
 the buffer, the running check can either be interrupted, so that
@@ -1348,9 +1351,10 @@ Set this variable to nil to disable the mode line completely."
   :package-version '(flycheck . "0.20"))
 
 (defcustom flycheck-mode-line-color t
-  "Use colors for Flycheck mode line status."
+  "Whether to color the Flycheck mode line status (on by default)."
   :group 'flycheck
   :type 'boolean
+  :safe #'booleanp
   :package-version '(flycheck . "35"))
 
 (defcustom flycheck-mode-line-prefix "FlyC"
@@ -1363,12 +1367,16 @@ If you've customized `flycheck-mode-line' then the customized
 function must be updated to use this variable."
   :group 'flycheck
   :type 'string
+  :safe #'stringp
   :package-version '(flycheck . "26"))
 
-(defcustom flycheck-mode-success-indicator ":0"
+(define-obsolete-variable-alias 'flycheck-mode-success-indicator
+  'flycheck-mode-line-success-indicator "38.4")
+(defcustom flycheck-mode-line-success-indicator ":0"
   "Success indicator appended to `flycheck-mode-line-prefix'."
   :group 'flycheck
   :type 'string
+  :safe #'stringp
   :package-version '(flycheck . "35"))
 
 (defcustom flycheck-error-list-mode-line
@@ -5143,7 +5151,7 @@ nil."
                            (if (or .error .warning .info)
                                (format ":%s|%s|%s" (or .error 0) (or .warning 0)
                                        (or .info 0))
-                             flycheck-mode-success-indicator)
+                             flycheck-mode-line-success-indicator)
                            ;; Signal that some errors were suppressed over
                            ;; `flycheck-checker-error-threshold', even when
                            ;; the kept errors have no built-in level
@@ -7602,6 +7610,7 @@ teardown.
 Add to this alist to register additional styles."
   :group 'flycheck
   :type '(alist :key-type symbol :value-type function)
+  :risky t
   :package-version '(flycheck . "38"))
 
 (defcustom flycheck-annotate-current-line-style 'below
@@ -7617,6 +7626,7 @@ every other line."
                  (const :tag "Compact message at the right edge" sideline)
                  (const :tag "Do not annotate the current line" nil)
                  (symbol :tag "Other style"))
+  :safe #'symbolp
   :package-version '(flycheck . "38"))
 
 (defcustom flycheck-annotate-other-lines-style 'eol
@@ -7633,6 +7643,7 @@ line at point."
                  (const :tag "Compact message at the right edge" sideline)
                  (const :tag "Annotate only the line at point" nil)
                  (symbol :tag "Other style"))
+  :safe #'symbolp
   :package-version '(flycheck . "38"))
 
 (defcustom flycheck-annotate-levels t
@@ -7648,6 +7659,7 @@ and `flycheck-annotate-other-lines-levels' can narrow it per tier."
   :group 'flycheck
   :type '(choice (const :tag "All levels" t)
                  (repeat :tag "Only these levels" symbol))
+  :safe (lambda (value) (or (eq value t) (flycheck-symbol-list-p value)))
   :package-version '(flycheck . "38"))
 
 (defcustom flycheck-annotate-current-line-levels t
@@ -7660,6 +7672,7 @@ more levels than the rest."
   :group 'flycheck
   :type '(choice (const :tag "Inherit flycheck-annotate-levels" t)
                  (repeat :tag "Only these levels" symbol))
+  :safe (lambda (value) (or (eq value t) (flycheck-symbol-list-p value)))
   :package-version '(flycheck . "38"))
 
 (defcustom flycheck-annotate-other-lines-levels t
@@ -7672,6 +7685,7 @@ its non-cursor lines."
   :group 'flycheck
   :type '(choice (const :tag "Inherit flycheck-annotate-levels" t)
                  (repeat :tag "Only these levels" symbol))
+  :safe (lambda (value) (or (eq value t) (flycheck-symbol-list-p value)))
   :package-version '(flycheck . "38"))
 
 (defcustom flycheck-annotate-format-function #'flycheck-error-format-message-and-id
@@ -7681,6 +7695,7 @@ Called with a single `flycheck-error' and must return the string to
 show for it.  The default renders the message and the error ID."
   :group 'flycheck
   :type 'function
+  :risky t
   :package-version '(flycheck . "38"))
 
 (defcustom flycheck-annotate-fix-marker "[fix] "
@@ -7691,6 +7706,7 @@ a fix (applicable with \\[flycheck-fix-error-at-point]), or nil to show no
 marker.  Uses the `flycheck-annotate-fix' face."
   :group 'flycheck
   :type '(choice (const :tag "No marker" nil) string)
+  :safe #'string-or-null-p
   :package-version '(flycheck . "38"))
 
 (defcustom flycheck-annotate-suppress-echo t
@@ -10711,6 +10727,7 @@ and the buffer is rechecked once the handshake finishes.  A server that
 does not answer within this many seconds is torn down and retried on the
 next check."
   :type 'number
+  :safe #'numberp
   :group 'flycheck
   :package-version '(flycheck . "38"))
 
@@ -12224,7 +12241,7 @@ See URL `https://coffeescript.org/'."
 When non-nil, enable quiet mode, via `--quiet'."
   :type 'boolean
   :safe #'booleanp
-  :package-version '(flycheck . 26))
+  :package-version '(flycheck . "26"))
 
 (defconst flycheck-stylelint-error-re
   (flycheck-rx-to-string
@@ -12389,8 +12406,10 @@ See URL `https://stylelint.io/'."
   :package-version '(flycheck . "32"))
 
 (flycheck-def-option-var flycheck-cuda-includes nil cuda-nvcc
-  "A list of include directories for nvcc."
-  :type '(repeat (directory :tag "Include directory"))
+  "A list of additional include files for nvcc.
+
+Relative paths are relative to the file being checked."
+  :type '(repeat (file :tag "Include file"))
   :safe #'flycheck-string-list-p
   :package-version '(flycheck . "32"))
 
@@ -13185,6 +13204,7 @@ standard, or nil, to use the default standard.  When non-nil,
 pass the language standard via the `-std' option."
   :type '(choice (const :tag "Default standard" nil)
                  (string :tag "Language standard"))
+  :safe #'string-or-null-p
   :package-version '(flycheck . "0.20"))
 
 (flycheck-def-option-var flycheck-gfortran-layout nil fortran-gfortran
@@ -14108,7 +14128,9 @@ string is a directory to add to the include path via `-J'."
   :safe #'flycheck-string-list-p
   :package-version '(flycheck . "35.0"))
 
-(flycheck-def-args-var flycheck-jsonnet-command-args jsonnet
+(define-obsolete-variable-alias 'flycheck-jsonnet-command-args
+  'flycheck-jsonnet-args "38.4")
+(flycheck-def-args-var flycheck-jsonnet-args jsonnet
   :package-version '(flycheck . "35.0"))
 
 (flycheck-define-checker jsonnet
@@ -14118,7 +14140,7 @@ See URL `https://jsonnet.org'."
   :command
   ("jsonnet"
    (option-list "-J" flycheck-jsonnet-include-paths)
-   (eval flycheck-jsonnet-command-args)
+   (eval flycheck-jsonnet-args)
    source-inplace)
   :error-patterns
   ((error line-start "STATIC ERROR: " (file-name) ":"
@@ -14347,7 +14369,7 @@ details."
   :type '(choice (const :tag "None" nil)
                  (string :tag "Theme expression"))
   :safe #'string-or-null-p
-  :package-version '(flycheck . "32-csv"))
+  :package-version '(flycheck . "32"))
 
 (flycheck-def-config-file-var flycheck-perlcriticrc perl-perlcritic
                               ".perlcriticrc"
@@ -14770,6 +14792,7 @@ string is the name of a check to disable (e.g. \"80chars\" or
 See URL `https://puppet-lint.com/checks/' for a list of all checks
 and their names."
   :type '(repeat (string :tag "Check Name"))
+  :safe #'flycheck-string-list-p
   :package-version '(flycheck . "26"))
 
 (defun flycheck-puppet-lint-disabled-arg-name (check)
@@ -14945,7 +14968,7 @@ be reported for any line longer than the value of this variable.
 If set to nil, use the maximum line length from the configuration
 file denoted by `flycheck-flake8rc', or the PEP 8 recommendation
 of 79 characters if there is no configuration with this setting."
-  :type '(choice (const :tag "Default value")
+  :type '(choice (const :tag "Default value" nil)
                  (integer :tag "Maximum line length in characters"))
   :safe #'integerp)
 
@@ -15527,7 +15550,9 @@ See URL `https://github.com/rpm-software-management/rpmlint'."
     '(".markdownlint.json" ".markdownlint.jsonc" ".markdownlint.yaml")
   :package-version '(flycheck . "33"))
 
-(flycheck-def-option-var flycheck-markdown-markdownlint-cli-disable-rules
+(define-obsolete-variable-alias 'flycheck-markdown-markdownlint-cli-disable-rules
+  'flycheck-markdown-markdownlint-cli-disabled-rules "38.4")
+(flycheck-def-option-var flycheck-markdown-markdownlint-cli-disabled-rules
     nil markdown-markdownlint-cli
   "Rules to disable for markdownlint-cli."
   :type '(repeat :tag "Disabled rule"
@@ -15535,7 +15560,9 @@ See URL `https://github.com/rpm-software-management/rpmlint'."
   :safe #'flycheck-string-list-p
   :package-version '(flycheck . "33"))
 
-(flycheck-def-option-var flycheck-markdown-markdownlint-cli-enable-rules
+(define-obsolete-variable-alias 'flycheck-markdown-markdownlint-cli-enable-rules
+  'flycheck-markdown-markdownlint-cli-enabled-rules "38.4")
+(flycheck-def-option-var flycheck-markdown-markdownlint-cli-enabled-rules
     nil markdown-markdownlint-cli
   "Rules to enable for markdownlint-cli."
   :type '(repeat :tag "Enabled rule"
@@ -15565,8 +15592,8 @@ See URL `https://github.com/rpm-software-management/rpmlint'."
 See URL `https://github.com/igorshubovych/markdownlint-cli'."
   :command ("markdownlint"
             (config-file "--config" flycheck-markdown-markdownlint-cli-config)
-            (option-list "--disable" flycheck-markdown-markdownlint-cli-disable-rules)
-            (option-list "--enable" flycheck-markdown-markdownlint-cli-enable-rules)
+            (option-list "--disable" flycheck-markdown-markdownlint-cli-disabled-rules)
+            (option-list "--enable" flycheck-markdown-markdownlint-cli-enabled-rules)
             (eval flycheck-markdown-markdownlint-cli-args)
             "--"
             source)
@@ -16006,7 +16033,6 @@ See URL `https://github.com/testdouble/standard' for more information."
                    (warning . ruby-chef-cookstyle)))
 
 (flycheck-def-config-file-var flycheck-reekrc ruby-reek ".reek.yml"
-  :safe #'string-or-null-p
   :package-version '(flycheck . "30"))
 
 (flycheck-define-checker ruby-reek
@@ -16064,7 +16090,7 @@ For the `rust-cargo' checker: When non-nil, calls `cargo test
 --no-run' instead of `cargo check'."
   :type 'boolean
   :safe #'booleanp
-  :package-version '("flycheck" . "0.19"))
+  :package-version '(flycheck . "0.19"))
 
 (flycheck-def-option-var flycheck-rust-crate-root nil rust
   "A path to the crate root for the current buffer.
@@ -16915,7 +16941,7 @@ See URL `https://www.terraform.io/docs/commands/fmt.html'."
 The value of this variable is a list of strings, where each
 string is a file to add to the terraform variables files.
 Relative files are relative to the file being checked."
-  :type '(repeat (directory :tag "Variable file"))
+  :type '(repeat (file :tag "Variable file"))
   :safe #'flycheck-string-list-p
   :package-version '(flycheck . "32"))
 
