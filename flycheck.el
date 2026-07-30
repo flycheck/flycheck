@@ -11677,6 +11677,106 @@ For `eglot-managed-mode-hook', which fires on both enter and exit."
                  #'flycheck-eglot--managed-mode-update)))
 
 
+;;; Handling checkers that could not run
+
+;; A checker reaches `:handle-suspicious' only when it exited non-zero and
+;; printed nothing Flycheck could read.  For most tools that means a broken
+;; setup rather than a parsing gap on our side: a missing configuration
+;; file, an interpreter without the linter installed, a plugin that failed
+;; to load.  Where a tool distinguishes that from ordinary findings by its
+;; exit status, say so plainly and let the checker step aside, instead of
+;; emptying a crash dump into the echo area on every check.
+
+(defun flycheck--python-traceback-p (output)
+  "Whether OUTPUT contains a Python traceback."
+  (and output
+       (string-match-p (rx bol "Traceback (most recent call last):") output)))
+
+(defun flycheck--fatal-exit-reason (output)
+  "Return the line of OUTPUT that best explains why a checker failed.
+
+A Python traceback ends with the exception that caused it, which is the
+only line worth showing.  Anything else leads with its own summary."
+  (let ((lines (split-string (or output "") "\n" 'omit-nulls "[ \t\r]+")))
+    (cond
+     ((null lines) nil)
+     ((flycheck--python-traceback-p output) (car (last lines)))
+     (t (car lines)))))
+
+(defun flycheck--handle-fatal-exit (exit-status output fatal-statuses)
+  "Disable the checker when EXIT-STATUS says it could not run at all.
+
+FATAL-STATUSES lists the exit statuses with which the tool reports that
+it could not run, as opposed to reporting findings.  Getting here already
+means the check produced nothing readable, so a fatal status leaves the
+checker no way to work in this buffer and it steps aside, explained by
+`flycheck--fatal-exit-reason'.
+
+Any other status stays `suspicious': the tool ran and Flycheck could not
+make sense of what it printed, which is Flycheck's problem to fix."
+  (if (memq exit-status fatal-statuses)
+      (cons 'disable (flycheck--fatal-exit-reason output))
+    'suspicious))
+
+(defun flycheck--python-ruff-handle-suspicious (_checker exit-status output)
+  "Disable `python-ruff' when ruff could not lint.
+
+Ruff exits 2 on a bad invocation or an unparsable configuration file,
+and 0 or 1 when it has actually looked at the code."
+  (flycheck--handle-fatal-exit exit-status output '(2)))
+
+(defun flycheck--python-flake8-handle-suspicious (_checker exit-status output)
+  "Disable `python-flake8' when flake8 could not lint.
+
+Flake8 exits 2 on a bad invocation, but a missing plugin or an
+unreadable configuration crashes it with a traceback and the same
+exit status 1 it uses to report findings, so the traceback is what
+tells the two apart.  This is the usual shape of pointing Flycheck at
+an interpreter that does not have flake8's dependencies installed."
+  (if (and (equal exit-status 1) (flycheck--python-traceback-p output))
+      (cons 'disable (flycheck--fatal-exit-reason output))
+    (flycheck--handle-fatal-exit exit-status output '(2))))
+
+(defun flycheck--python-pylint-handle-suspicious (_checker exit-status output)
+  "Disable `python-pylint' when pylint could not lint.
+
+Pylint's exit status is a bitmask of the message classes it emitted, so
+only 32, its usage error, means it never got as far as looking at the
+code."
+  (flycheck--handle-fatal-exit exit-status output '(32)))
+
+(defun flycheck--python-mypy-handle-suspicious (_checker exit-status output)
+  "Disable `python-mypy' when mypy could not check.
+
+Mypy exits 2 on a fatal error such as a bad flag, and 0 or 1 once it has
+type-checked anything."
+  (flycheck--handle-fatal-exit exit-status output '(2)))
+
+(defun flycheck--rubocop-handle-suspicious (_checker exit-status output)
+  "Disable a RuboCop-based checker when RuboCop could not run.
+
+RuboCop exits 2 on a bad invocation or an unrecognised cop in the
+configuration, and 1 when it found offences."
+  (flycheck--handle-fatal-exit exit-status output '(2)))
+
+(defun flycheck--shellcheck-handle-suspicious (_checker exit-status output)
+  "Disable `sh-shellcheck' when shellcheck could not run.
+
+Shellcheck exits 2 when it cannot read the file and 3 on a bad
+invocation.  Findings, and even an unparsable script, come back as
+JSON with exit status 0 or 1."
+  (flycheck--handle-fatal-exit exit-status output '(2 3)))
+
+(defun flycheck--stylelint-handle-suspicious (_checker exit-status output)
+  "Disable a stylelint checker when stylelint could not lint.
+
+Stylelint is the exception to the usual convention: it exits 2 when it
+found problems, and reports its own failures with 78 for a missing
+configuration file, which is by far the most common way it fails, and
+64 for a bad invocation."
+  (flycheck--handle-fatal-exit exit-status output '(78 64)))
+
+
 ;;; Built-in checkers
 (flycheck-def-args-var flycheck-gnat-args ada-gnat
   :package-version '(flycheck . "0.20"))
@@ -12503,6 +12603,7 @@ See URL `https://stylelint.io/'."
   :verify (lambda (_) (flycheck--stylelint-verify 'css-stylelint))
   :error-parser flycheck-parse-stylelint
   :predicate flycheck-buffer-nonempty-p
+  :handle-suspicious flycheck--stylelint-handle-suspicious
   :modes (css-mode css-ts-mode)
   :error-explainer
   (flycheck-error-explainer-from-url "https://stylelint.io/user-guide/rules/%s"))
@@ -14393,6 +14494,7 @@ See URL `https://stylelint.io/'."
   :predicate flycheck-buffer-nonempty-p
   :error-explainer
   (flycheck-error-explainer-from-url "https://stylelint.io/user-guide/rules/%s")
+  :handle-suspicious flycheck--stylelint-handle-suspicious
   :modes (less-css-mode))
 
 (flycheck-define-checker llvm-llc
@@ -15228,6 +15330,7 @@ Requires Flake8 3.0 or newer. See URL
              (or (not (flycheck-python-needs-module-p 'python-flake8))
                  (flycheck-python-find-module 'python-flake8 "flake8")))
   :verify (lambda (_) (flycheck-python-verify-module 'python-flake8 "flake8"))
+  :handle-suspicious flycheck--python-flake8-handle-suspicious
   :modes (python-mode python-ts-mode)
   :next-checkers ((warning . python-pylint)
                   (warning . python-mypy)))
@@ -15385,6 +15488,7 @@ See URL `https://docs.astral.sh/ruff/'."
                     errors))
   :error-explainer flycheck-python-ruff-explainer
   :working-directory flycheck-python-find-project-root
+  :handle-suspicious flycheck--python-ruff-handle-suspicious
   :modes (python-mode python-ts-mode)
   :next-checkers ((warning . python-mypy)))
 
@@ -15460,6 +15564,7 @@ See URL `https://www.pylint.org/'."
                         (append
                          (flycheck-python-module-args 'python-pylint "pylint")
                          (list (format "--help-msg=%s" id))))))
+  :handle-suspicious flycheck--python-pylint-handle-suspicious
   :modes (python-mode python-ts-mode)
   :next-checkers ((warning . python-mypy)))
 
@@ -15578,6 +15683,7 @@ See URL `https://mypy-lang.org/'."
   :error-explainer
   (flycheck-error-explainer-from-url
    "https://mypy.readthedocs.io/en/stable/error_code_list.html#code-%s")
+  :handle-suspicious flycheck--python-mypy-handle-suspicious
   :modes (python-mode python-ts-mode)
   ;; Ensure the file is saved, to work around
   ;; https://github.com/python/mypy/issues/4746.
@@ -16173,6 +16279,7 @@ See URL `https://rubocop.org/'."
   :error-patterns flycheck-ruby-rubocop-error-patterns
   :error-filter #'flycheck-ruby--filter-rubocop-errors
   :error-explainer #'flycheck-ruby-rubocop-error-explainer
+  :handle-suspicious #'flycheck--rubocop-handle-suspicious
   :modes '(enh-ruby-mode ruby-mode ruby-ts-mode)
   :next-checkers '((warning . ruby-reek)
                    (warning . ruby-chef-cookstyle)))
@@ -16199,6 +16306,7 @@ See URL `https://github.com/chef/cookstyle'."
   :working-directory #'flycheck-ruby--find-project-root
   :error-patterns flycheck-ruby-rubocop-error-patterns
   :error-filter #'flycheck-ruby--filter-rubocop-errors
+  :handle-suspicious #'flycheck--rubocop-handle-suspicious
   :modes '(enh-ruby-mode ruby-mode ruby-ts-mode)
   :predicate
   (lambda ()
@@ -16238,6 +16346,7 @@ See URL `https://github.com/testdouble/standard' for more information."
   :error-patterns flycheck-ruby-rubocop-error-patterns
   :error-filter #'flycheck-ruby--filter-rubocop-errors
   :error-explainer #'flycheck-ruby-rubocop-error-explainer
+  :handle-suspicious #'flycheck--rubocop-handle-suspicious
   :modes '(enh-ruby-mode ruby-mode ruby-ts-mode)
   :next-checkers '((warning . ruby-reek)
                    (warning . ruby-chef-cookstyle)))
@@ -16841,6 +16950,7 @@ See URL `https://stylelint.io/'."
   :predicate flycheck-buffer-nonempty-p
   :error-explainer
   (flycheck-error-explainer-from-url "https://stylelint.io/user-guide/rules/%s")
+  :handle-suspicious flycheck--stylelint-handle-suspicious
   :modes (scss-mode))
 
 (flycheck-define-checker sass-stylelint
@@ -16858,6 +16968,7 @@ See URL `https://stylelint.io/'."
   :predicate flycheck-buffer-nonempty-p
   :error-explainer
   (flycheck-error-explainer-from-url "https://stylelint.io/user-guide/rules/%s")
+  :handle-suspicious flycheck--stylelint-handle-suspicious
   :modes (sass-mode))
 
 (flycheck-def-args-var flycheck-sh-bash-args (sh-bash)
@@ -17044,6 +17155,7 @@ See URL `https://github.com/koalaman/shellcheck/'."
             "-")
   :standard-input t
   :error-parser flycheck-parse-shellcheck
+  :handle-suspicious flycheck--shellcheck-handle-suspicious
   :modes (sh-mode bash-ts-mode)
   :predicate (lambda () (memq sh-shell flycheck-shellcheck-supported-shells))
   :verify (lambda (_)

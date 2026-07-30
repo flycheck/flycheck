@@ -176,6 +176,26 @@
          '(16 nil warning "possibly useless use of == in void context"
               :checker ruby))))
 
-))
+)
+
+  (describe "Fatal-failure handling"
+    ;; RuboCop exits 2 on a bad invocation or an unrecognised cop in the
+    ;; configuration, and 1 when it found offences
+    (it "disables the checker when RuboCop could not run"
+      (expect (flycheck--rubocop-handle-suspicious
+               'ruby-rubocop 2
+               "Error: unrecognized cop NoSuch/Thing found in .rubocop.yml")
+              :to-equal
+              '(disable . "Error: unrecognized cop NoSuch/Thing found in .rubocop.yml")))
+
+    (it "stays suspicious when RuboCop merely found offences"
+      (expect (flycheck--rubocop-handle-suspicious 'ruby-rubocop 1 "")
+              :to-be 'suspicious))
+
+    (it "covers standard and cookstyle too"
+      (dolist (checker '(ruby-standard ruby-chef-cookstyle))
+        (expect (flycheck-checker-get checker 'handle-suspicious)
+                :to-be 'flycheck--rubocop-handle-suspicious))))
+)
 
 ;;; test-ruby.el ends here
