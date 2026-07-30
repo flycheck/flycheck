@@ -266,6 +266,55 @@
   (flycheck-buttercup-def-checker-test python-pycompile python has-no-warnings
     (let ((flycheck-disabled-checkers '(python-flake8 python-pylint python-mypy)))
       (flycheck-buttercup-should-syntax-check
-       "language/python/test.py" 'python-mode))))
+       "language/python/test.py" 'python-mode)))
+
+  (describe "Fatal-failure handling"
+    ;; Exit statuses checked against the real tools.  A handler is only
+    ;; reached when the checker exited non-zero and printed nothing
+    ;; Flycheck could read.
+    (it "disables python-ruff on a bad invocation or config"
+      (expect (flycheck--python-ruff-handle-suspicious
+               'python-ruff 2 "ruff failed\n  Cause: Failed to parse pyproject.toml")
+              :to-equal '(disable . "ruff failed"))
+      (expect (flycheck--python-ruff-handle-suspicious 'python-ruff 1 "huh")
+              :to-be 'suspicious))
+
+    (it "disables python-mypy on a fatal error"
+      (expect (car (flycheck--python-mypy-handle-suspicious
+                    'python-mypy 2 "mypy: error: Unrecognized option"))
+              :to-be 'disable)
+      (expect (flycheck--python-mypy-handle-suspicious 'python-mypy 1 "huh")
+              :to-be 'suspicious))
+
+    (it "disables python-pylint only on its usage error"
+      ;; Pylint's exit status is a bitmask of the message classes it
+      ;; emitted, so 20 means it ran and found things to say
+      (expect (car (flycheck--python-pylint-handle-suspicious
+                    'python-pylint 32 "usage: pylint [options]"))
+              :to-be 'disable)
+      (expect (flycheck--python-pylint-handle-suspicious 'python-pylint 20 "")
+              :to-be 'suspicious))
+
+    (it "disables python-flake8 when it crashed, naming the cause"
+      ;; A missing dependency crashes flake8 with the same exit status it
+      ;; uses for findings, so the traceback is what tells them apart.
+      ;; Its last line is the part worth reading.
+      (expect (flycheck--python-flake8-handle-suspicious
+               'python-flake8 1 "Traceback (most recent call last):
+  File \"/usr/bin/flake8\", line 5, in <module>
+    from flake8.main.cli import main
+ModuleNotFoundError: No module named 'pycodestyle'")
+              :to-equal
+              '(disable . "ModuleNotFoundError: No module named 'pycodestyle'")))
+
+    (it "disables python-flake8 on a bad invocation"
+      (expect (car (flycheck--python-flake8-handle-suspicious
+                    'python-flake8 2 "flake8: error: unrecognized arguments"))
+              :to-be 'disable))
+
+    (it "leaves python-flake8 suspicious without a traceback"
+      (expect (flycheck--python-flake8-handle-suspicious
+               'python-flake8 1 "some output Flycheck could not parse")
+              :to-be 'suspicious))))
 
 ;;; test-python.el ends here

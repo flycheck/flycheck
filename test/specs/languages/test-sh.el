@@ -98,6 +98,22 @@
           (expect (flycheck-error-level err) :to-equal 'info)
           (expect (flycheck-error-id err) :to-equal "SC2086")
           (expect (length edits) :to-equal 2)
-          (expect (flycheck-fix-edit-replacement (car edits)) :to-equal "Q"))))))
+          (expect (flycheck-fix-edit-replacement (car edits)) :to-equal "Q")))))
+
+  (describe "Fatal-failure handling"
+    ;; Shellcheck exits 2 when it cannot read the file and 3 on a bad
+    ;; invocation; findings come back as JSON with 0 or 1
+    (it "disables the checker when shellcheck could not run"
+      (expect (car (flycheck--shellcheck-handle-suspicious
+                    'sh-shellcheck 3 "shellcheck: bad option"))
+              :to-be 'disable)
+      (expect (car (flycheck--shellcheck-handle-suspicious
+                    'sh-shellcheck 2 "t.sh: openBinaryFile: does not exist"))
+              :to-be 'disable))
+
+    (it "stays suspicious on any other status"
+      (expect (flycheck--shellcheck-handle-suspicious 'sh-shellcheck 1 "")
+              :to-be 'suspicious)))
+)
 
 ;;; test-sh.el ends here
