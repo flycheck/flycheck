@@ -50,6 +50,24 @@
       (let ((flycheck-yamllint-config nil)
             (flycheck-yamllint-args '("--strict")))
         (expect (flycheck-checker-substituted-arguments 'yaml-yamllint)
-                :to-equal '("-f" "parsable" "--strict" "-"))))))
+                :to-equal '("-f" "parsable" "--strict" "-")))))
+
+  (describe "the yaml-jsyaml checker command"
+    (it "threads flycheck-yaml-jsyaml-args into js-yaml"
+      (let ((flycheck-yaml-jsyaml-args '("--trace")))
+        (expect (flycheck-checker-substituted-arguments 'yaml-jsyaml)
+                :to-equal '("--trace")))))
+
+  (describe "the yaml-actionlint checker command"
+    (it "passes flycheck-yaml-actionlint-config via -config-file"
+      (let ((flycheck-yaml-actionlint-config "actionlint.yaml"))
+        (spy-on 'flycheck-locate-config-file :and-return-value "/c/actionlint.yaml")
+        (expect (flycheck-checker-substituted-arguments 'yaml-actionlint)
+                :to-contain "-config-file")))
+
+    (it "threads flycheck-yaml-actionlint-args into actionlint"
+      (let ((flycheck-yaml-actionlint-args '("-shellcheck=")))
+        (expect (flycheck-checker-substituted-arguments 'yaml-actionlint)
+                :to-contain "-shellcheck=")))))
 
 ;;; test-yaml.el ends here

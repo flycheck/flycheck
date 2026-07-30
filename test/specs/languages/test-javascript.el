@@ -201,6 +201,33 @@ Some more explanation here.")
          '(4 6 error "'foo' is assigned a value but never used."
              :checker javascript-standard)
          '(4 13 error "Strings must use singlequote."
-             :checker javascript-standard))))))
+             :checker javascript-standard)))))
+
+  (describe "the javascript-oxlint checker command"
+    (it "passes the deny and allow rules as repeated options"
+      (let ((flycheck-javascript-oxlint-deny '("pedantic" "no-debugger"))
+            (flycheck-javascript-oxlint-allow '("no-console")))
+        ;; The trailing argument is the temporary copy of the buffer
+        (expect (butlast (flycheck-checker-substituted-arguments 'javascript-oxlint))
+                :to-equal '("--format" "checkstyle"
+                            "--deny" "pedantic" "--deny" "no-debugger"
+                            "--allow" "no-console"))))
+
+    (it "passes flycheck-javascript-oxlint-config via --config"
+      (let ((flycheck-javascript-oxlint-config ".oxlintrc.json"))
+        (spy-on 'flycheck-locate-config-file :and-return-value "/c/.oxlintrc.json")
+        (expect (flycheck-checker-substituted-arguments 'javascript-oxlint)
+                :to-contain "--config")))
+
+    (it "threads flycheck-javascript-oxlint-args into oxlint"
+      (let ((flycheck-javascript-oxlint-args '("--react-plugin")))
+        (expect (flycheck-checker-substituted-arguments 'javascript-oxlint)
+                :to-contain "--react-plugin"))))
+
+  (describe "the javascript-standard checker command"
+    (it "threads flycheck-javascript-standard-args into standard"
+      (let ((flycheck-javascript-standard-args '("--env" "mocha")))
+        (expect (flycheck-checker-substituted-arguments 'javascript-standard)
+                :to-equal '("--stdin" "--env" "mocha"))))))
 
 ;;; test-javascript.el ends here

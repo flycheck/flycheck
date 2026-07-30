@@ -24,6 +24,7 @@
 - [#2248](https://github.com/flycheck/flycheck/pull/2248): Add args vars to the `protobuf-protoc`, `puppet-lint` and `statix` checkers: `flycheck-protoc-args`, `flycheck-puppet-lint-args` and `flycheck-statix-args`.
 - [#2249](https://github.com/flycheck/flycheck/pull/2249): Add args vars to the `markdown-markdownlint-cli`, `markdown-markdownlint-cli2` and `textlint` checkers: `flycheck-markdown-markdownlint-cli-args`, `flycheck-markdown-markdownlint-cli2-args` and `flycheck-textlint-args`.
 - [#2254](https://github.com/flycheck/flycheck/pull/2254): Add args vars to the Go checkers: `flycheck-go-gofmt-args`, `flycheck-go-vet-args`, `flycheck-go-build-args`, `flycheck-go-test-args` and `flycheck-go-errcheck-args`.
+- [#2256](https://github.com/flycheck/flycheck/pull/2256): Make the JavaScript and data-format checkers configurable: `javascript-oxlint` gains `flycheck-javascript-oxlint-config`, `flycheck-javascript-oxlint-deny` and `flycheck-javascript-oxlint-allow` for rules and categories, and an args var; `yaml-actionlint` gains `flycheck-yaml-actionlint-config`; and `javascript-standard`, `json-jq` and `yaml-jsyaml` gain args vars.
 
 ### Bugs fixed
 
