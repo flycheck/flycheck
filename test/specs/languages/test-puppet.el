@@ -35,7 +35,7 @@
     (it "appends flycheck-puppet-lint-args before the source file"
       (flycheck-buttercup-with-temp-buffer
         (setq buffer-file-name (make-temp-file "flycheck-puppet" nil ".pp"))
-        (let ((flycheck-puppet-lint-rc nil)
+        (let ((flycheck-puppet-lint-config nil)
               (flycheck-puppet-lint-disabled-checks nil)
               (flycheck-puppet-lint-args '("--relative")))
           (expect (flycheck-checker-substituted-arguments 'puppet-lint)

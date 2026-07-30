@@ -5,7 +5,7 @@
 
 (describe "Language CSS"
   (flycheck-buttercup-def-checker-test css-stylelint css syntax-error
-    (let ((flycheck-stylelintrc
+    (let ((flycheck-stylelint-config
            (flycheck-buttercup-resource-filename
             "language/css/.stylelintrc.json")))
       (flycheck-buttercup-should-syntax-check
@@ -15,7 +15,7 @@
 
   (describe "the stylelint checker command"
     (it "always requests JSON output"
-      (let ((flycheck-stylelintrc nil)
+      (let ((flycheck-stylelint-config nil)
             (flycheck-stylelint-args nil))
         (expect (flycheck-checker-substituted-arguments 'css-stylelint)
                 :to-contain "--formatter")
@@ -23,7 +23,7 @@
                 :to-contain "json")))
 
     (it "appends flycheck-stylelint-args after the JSON formatter"
-      (let ((flycheck-stylelintrc nil)
+      (let ((flycheck-stylelint-config nil)
             (flycheck-stylelint-args '("--custom-syntax" "postcss-scss")))
         (let ((args (flycheck-checker-substituted-arguments 'scss-stylelint)))
           (expect args :to-contain "--custom-syntax")

@@ -12230,8 +12230,10 @@ See URL `https://coffeescript.org/'."
 ;; Limit the length of the generated docstring by including only the first three
 ;; checker symbols, otherwise emacs will complain about the docstring length
 ;; and may refuse to compile the package.
+(define-obsolete-variable-alias 'flycheck-stylelintrc
+  'flycheck-stylelint-config "38.4")
 (let ((print-length 3))
-  (flycheck-def-config-file-var flycheck-stylelintrc
+  (flycheck-def-config-file-var flycheck-stylelint-config
       (css-stylelint scss-stylelint sass-stylelint less-stylelint) nil))
 
 (flycheck-def-option-var flycheck-stylelint-quiet
@@ -12372,7 +12374,7 @@ See URL `https://stylelint.io/'."
             "--formatter" "json"
             (eval flycheck-stylelint-args)
             (option-flag "--quiet" flycheck-stylelint-quiet)
-            (config-file "--config" flycheck-stylelintrc)
+            (config-file "--config" flycheck-stylelint-config)
             "--stdin-filename" (eval (flycheck-buffer-file-local-name
                                       "style.css")))
   :standard-input t
@@ -13049,14 +13051,16 @@ the BUFFER that was checked respectively."
                :filename (buffer-file-name buffer))))
           (cdr (car (car (flycheck-parse-json output))))))
 
-(flycheck-def-config-file-var flycheck-ember-template-lintrc
+(define-obsolete-variable-alias 'flycheck-ember-template-lintrc
+  'flycheck-ember-template-lint-config "38.4")
+(flycheck-def-config-file-var flycheck-ember-template-lint-config
     ember-template
     ".template-lintrc.js")
 
 (flycheck-define-checker ember-template
   "An Ember template checker using ember-template-lint."
   :command ("ember-template-lint"
-            (config-file "--config-path" flycheck-ember-template-lintrc)
+            (config-file "--config-path" flycheck-ember-template-lint-config)
             "--filename" source-original
             "--format=json")
   :standard-input t
@@ -13796,7 +13800,9 @@ See URL `https://www.haskell.org/ghc/'."
   :next-checkers ((warning . haskell-hlint))
   :working-directory flycheck-haskell--ghc-find-default-directory)
 
-(flycheck-def-config-file-var flycheck-hlintrc haskell-hlint ".hlint.yaml")
+(define-obsolete-variable-alias 'flycheck-hlintrc
+  'flycheck-hlint-config "38.4")
+(flycheck-def-config-file-var flycheck-hlint-config haskell-hlint ".hlint.yaml")
 
 (flycheck-def-args-var flycheck-hlint-args haskell-hlint
   :package-version '(flycheck . "0.25"))
@@ -13842,7 +13848,7 @@ See URL `https://github.com/ndmitchell/hlint'."
             (option-list "-X" flycheck-hlint-language-extensions concat)
             (option-list "-i=" flycheck-hlint-ignore-rules concat)
             (option-list "-h" flycheck-hlint-hint-packages concat)
-            (config-file "-h" flycheck-hlintrc)
+            (config-file "-h" flycheck-hlint-config)
             (eval flycheck-hlint-args)
             source-inplace)
   :error-patterns
@@ -13869,13 +13875,15 @@ See URL `https://github.com/ndmitchell/hlint'."
           line-end))
   :modes (haskell-mode haskell-literate-mode haskell-ts-mode))
 
-(flycheck-def-config-file-var flycheck-tidyrc html-tidy ".tidyrc")
+(define-obsolete-variable-alias 'flycheck-tidyrc
+  'flycheck-tidy-config "38.4")
+(flycheck-def-config-file-var flycheck-tidy-config html-tidy ".tidyrc")
 
 (flycheck-define-checker html-tidy
   "An HTML syntax and style checker using Tidy.
 
 See URL `https://github.com/htacg/tidy-html5'."
-  :command ("tidy" (config-file "-config" flycheck-tidyrc)
+  :command ("tidy" (config-file "-config" flycheck-tidy-config)
             "-lang" "en"
             "-e" "-q")
   :standard-input t
@@ -14188,7 +14196,7 @@ See URL `https://stylelint.io/'."
             "--formatter" "json"
             (eval flycheck-stylelint-args)
             (option-flag "--quiet" flycheck-stylelint-quiet)
-            (config-file "--config" flycheck-stylelintrc))
+            (config-file "--config" flycheck-stylelint-config))
   :standard-input t
   :verify (lambda (_) (flycheck--stylelint-verify 'less-stylelint))
   :error-parser flycheck-parse-stylelint
@@ -14215,7 +14223,9 @@ See URL `https://llvm.org/docs/CommandGuide/llc.html'."
      (flycheck-remove-error-file-names "<inline asm>" errors)))
   :modes llvm-mode)
 
-(flycheck-def-config-file-var flycheck-luacheckrc lua-luacheck ".luacheckrc")
+(define-obsolete-variable-alias 'flycheck-luacheckrc
+  'flycheck-luacheck-config "38.4")
+(flycheck-def-config-file-var flycheck-luacheck-config lua-luacheck ".luacheckrc")
 
 (flycheck-def-option-var flycheck-luacheck-standards nil lua-luacheck
   "The standards to use in luacheck.
@@ -14251,7 +14261,7 @@ See URL `https://github.com/mpeterv/luacheck'."
             "--no-color"
             (option-list "--std" flycheck-luacheck-standards)
             (option-list "--globals" flycheck-luacheck-globals)
-            (config-file "--config" flycheck-luacheckrc)
+            (config-file "--config" flycheck-luacheck-config)
             (eval flycheck-luacheck-args)
             "--filename" source-original
             ;; Read from standard input
@@ -14371,7 +14381,9 @@ details."
   :safe #'string-or-null-p
   :package-version '(flycheck . "32"))
 
-(flycheck-def-config-file-var flycheck-perlcriticrc perl-perlcritic
+(define-obsolete-variable-alias 'flycheck-perlcriticrc
+  'flycheck-perlcritic-config "38.4")
+(flycheck-def-config-file-var flycheck-perlcritic-config perl-perlcritic
                               ".perlcriticrc"
   :package-version '(flycheck . "26"))
 
@@ -14380,7 +14392,7 @@ details."
 
 See URL `https://metacpan.org/pod/Perl::Critic'."
   :command ("perlcritic" "--no-color" "--verbose" "%f/%l/%c/%s/%p/%m (%e)\n"
-            (config-file "--profile" flycheck-perlcriticrc)
+            (config-file "--profile" flycheck-perlcritic-config)
             (option "--severity" flycheck-perlcritic-severity nil
                     flycheck-option-int)
             (option "--theme" flycheck-perlcritic-theme))
@@ -14778,7 +14790,9 @@ See URL `https://puppet.com/'."
   :modes (puppet-mode puppet-ts-mode)
   :next-checkers ((warning . puppet-lint)))
 
-(flycheck-def-config-file-var flycheck-puppet-lint-rc puppet-lint
+(define-obsolete-variable-alias 'flycheck-puppet-lint-rc
+  'flycheck-puppet-lint-config "38.4")
+(flycheck-def-config-file-var flycheck-puppet-lint-config puppet-lint
                               ".puppet-lint.rc"
   :package-version '(flycheck . "26"))
 
@@ -14812,7 +14826,7 @@ See URL `https://puppet-lint.com/'."
   ;; required to be in a file foo/bar.pp.  Any other place, such as a Flycheck
   ;; temporary file will cause an error.
   :command ("puppet-lint"
-            (config-file "--config" flycheck-puppet-lint-rc)
+            (config-file "--config" flycheck-puppet-lint-config)
             "--log-format"
             "%{path}:%{line}:%{kind}: %{message} (%{check})"
             (option-list "" flycheck-puppet-lint-disabled-checks concat
@@ -14910,7 +14924,9 @@ parent directory that doesn't have a __init__.py file."
          start (lambda (dir)
                  (not (file-exists-p (expand-file-name "__init__.py" dir))))))))
 
-(flycheck-def-config-file-var flycheck-flake8rc python-flake8
+(define-obsolete-variable-alias 'flycheck-flake8rc
+  'flycheck-flake8-config "38.4")
+(flycheck-def-config-file-var flycheck-flake8-config python-flake8
                               '(".flake8" "setup.cfg" "tox.ini"))
 
 (flycheck-def-option-var flycheck-flake8-error-level-alist
@@ -14952,7 +14968,7 @@ integer, report any complexity greater than the value of this
 variable as warning.
 
 If set to an integer, this variable overrules any similar setting
-in the configuration file denoted by `flycheck-flake8rc'."
+in the configuration file denoted by `flycheck-flake8-config'."
   :type '(choice (const :tag "Do not check McCabe complexity" nil)
                  (integer :tag "Maximum complexity"))
   :safe #'integerp)
@@ -14962,11 +14978,11 @@ in the configuration file denoted by `flycheck-flake8rc'."
 
 If set to an integer, the value of this variable denotes the
 maximum length of lines, overruling any similar setting in the
-configuration file denoted by `flycheck-flake8rc'.  An error will
+configuration file denoted by `flycheck-flake8-config'.  An error will
 be reported for any line longer than the value of this variable.
 
 If set to nil, use the maximum line length from the configuration
-file denoted by `flycheck-flake8rc', or the PEP 8 recommendation
+file denoted by `flycheck-flake8-config', or the PEP 8 recommendation
 of 79 characters if there is no configuration with this setting."
   :type '(choice (const :tag "Default value" nil)
                  (integer :tag "Maximum line length in characters"))
@@ -14997,7 +15013,7 @@ Requires Flake8 3.0 or newer. See URL
   :command ("python3"
             (eval (flycheck-python-module-args 'python-flake8 "flake8"))
             "--format=default"
-            (config-file "--append-config" flycheck-flake8rc)
+            (config-file "--append-config" flycheck-flake8-config)
             (option "--max-complexity" flycheck-flake8-maximum-complexity nil
                     flycheck-option-int)
             (option "--max-line-length" flycheck-flake8-maximum-line-length nil
@@ -15867,7 +15883,9 @@ This is either a parent directory containing a Gemfile, or nil."
    (flycheck--file-truename (expand-file-name "stdin"))
    errors))
 
-(flycheck-def-config-file-var flycheck-rubocoprc ruby-rubocop ".rubocop.yml")
+(define-obsolete-variable-alias 'flycheck-rubocoprc
+  'flycheck-rubocop-config "38.4")
+(flycheck-def-config-file-var flycheck-rubocop-config ruby-rubocop ".rubocop.yml")
 
 (flycheck-def-option-var flycheck-rubocop-lint-only nil
                          (ruby-rubocop ruby-standard ruby-chef-cookstyle)
@@ -15947,7 +15965,7 @@ See URL `https://rubocop.org/'."
              "--display-cop-names"
              "--force-exclusion"
              "--format" "emacs"
-             (config-file "--config" flycheck-rubocoprc)
+             (config-file "--config" flycheck-rubocop-config)
              (option-flag "--lint" flycheck-rubocop-lint-only)
              (option-flag "--server" flycheck-rubocop-server)
              (option "--only" flycheck-rubocop-only nil
@@ -15980,7 +15998,7 @@ See URL `https://github.com/chef/cookstyle'."
              "--display-cop-names"
              "--force-exclusion"
              "--format" "emacs"
-             (config-file "--config" flycheck-rubocoprc)
+             (config-file "--config" flycheck-rubocop-config)
              (option-flag "--lint" flycheck-rubocop-lint-only)
              ;; RuboCop takes the original file name as argument when reading
              ;; from standard input, but it chokes when that name is the empty
@@ -16006,7 +16024,9 @@ See URL `https://github.com/chef/cookstyle'."
        (locate-dominating-file parent-dir "cookbooks"))))
   :next-checkers '((warning . ruby-reek)))
 
-(flycheck-def-config-file-var flycheck-ruby-standardrc ruby-standard
+(define-obsolete-variable-alias 'flycheck-ruby-standardrc
+  'flycheck-ruby-standard-config "38.4")
+(flycheck-def-config-file-var flycheck-ruby-standard-config ruby-standard
                               ".standard.yml")
 
 (flycheck-def-executable-var ruby-standard "standardrb")
@@ -16020,7 +16040,7 @@ See URL `https://github.com/testdouble/standard' for more information."
              "--force-exclusion"
              "--format" "emacs"
              "--cache" "false"
-             (config-file "--config" flycheck-ruby-standardrc)
+             (config-file "--config" flycheck-ruby-standard-config)
              (option-flag "--lint" flycheck-rubocop-lint-only)
              "--stdin" source-original)
   :standard-input t
@@ -16032,7 +16052,9 @@ See URL `https://github.com/testdouble/standard' for more information."
   :next-checkers '((warning . ruby-reek)
                    (warning . ruby-chef-cookstyle)))
 
-(flycheck-def-config-file-var flycheck-reekrc ruby-reek ".reek.yml"
+(define-obsolete-variable-alias 'flycheck-reekrc
+  'flycheck-reek-config "38.4")
+(flycheck-def-config-file-var flycheck-reek-config ruby-reek ".reek.yml"
   :package-version '(flycheck . "30"))
 
 (flycheck-define-checker ruby-reek
@@ -16040,7 +16062,7 @@ See URL `https://github.com/testdouble/standard' for more information."
 
 See URL `https://github.com/troessner/reek'."
   :command ("reek" "--format" "json"
-            (config-file "--config" flycheck-reekrc)
+            (config-file "--config" flycheck-reek-config)
             source)
   :error-parser flycheck-parse-reek
   :modes (enh-ruby-mode ruby-mode ruby-ts-mode))
@@ -16479,7 +16501,9 @@ See URL `https://www.scala-lang.org/'."
   :modes (scala-mode scala-ts-mode)
   :next-checkers ((warning . scala-scalastyle)))
 
-(flycheck-def-config-file-var flycheck-scalastylerc scala-scalastyle nil
+(define-obsolete-variable-alias 'flycheck-scalastylerc
+  'flycheck-scalastyle-config "38.4")
+(flycheck-def-config-file-var flycheck-scalastyle-config scala-scalastyle nil
   :package-version '(flycheck . "0.20"))
 
 (flycheck-def-args-var flycheck-scalastyle-args scala-scalastyle
@@ -16489,11 +16513,11 @@ See URL `https://www.scala-lang.org/'."
   "A Scala style checker using scalastyle.
 
 Note that this syntax checker is not used if
-`flycheck-scalastylerc' is nil or refers to a non-existing file.
+`flycheck-scalastyle-config' is nil or refers to a non-existing file.
 
 See URL `https://www.scalastyle.org'."
   :command ("scalastyle"
-            (config-file "-c" flycheck-scalastylerc)
+            (config-file "-c" flycheck-scalastyle-config)
             (eval flycheck-scalastyle-args)
             source)
   :error-patterns
@@ -16508,24 +16532,24 @@ See URL `https://www.scalastyle.org'."
   :predicate
   ;; Inhibit this syntax checker if the JAR or the configuration are unset or
   ;; missing
-  (lambda () (and flycheck-scalastylerc
-                  (flycheck-locate-config-file flycheck-scalastylerc
+  (lambda () (and flycheck-scalastyle-config
+                  (flycheck-locate-config-file flycheck-scalastyle-config
                                                'scala-scalastyle)))
   :verify (lambda (checker)
-            (let ((config-file (and flycheck-scalastylerc
+            (let ((config-file (and flycheck-scalastyle-config
                                     (flycheck-locate-config-file
-                                     flycheck-scalastylerc checker))))
+                                     flycheck-scalastyle-config checker))))
               (list
                (flycheck-verification-result-new
                 :label "Configuration file"
                 :message (cond
-                          ((not flycheck-scalastylerc)
-                           "`flycheck-scalastylerc' not set")
+                          ((not flycheck-scalastyle-config)
+                           "`flycheck-scalastyle-config' not set")
                           ((not config-file)
-                           (format "file %s not found" flycheck-scalastylerc))
+                           (format "file %s not found" flycheck-scalastyle-config))
                           (t (format "found at %s" config-file)))
                 :face (cond
-                       ((not flycheck-scalastylerc) '(bold warning))
+                       ((not flycheck-scalastyle-config) '(bold warning))
                        ((not config-file) '(bold error))
                        (t 'success)))))))
 
@@ -16620,7 +16644,7 @@ See URL `https://stylelint.io/'."
             "--formatter" "json"
             (eval flycheck-stylelint-args)
             (option-flag "--quiet" flycheck-stylelint-quiet)
-            (config-file "--config" flycheck-stylelintrc))
+            (config-file "--config" flycheck-stylelint-config))
   :standard-input t
   :verify (lambda (_) (flycheck--stylelint-verify 'scss-stylelint))
   :error-parser flycheck-parse-stylelint
@@ -16637,7 +16661,7 @@ See URL `https://stylelint.io/'."
             "--formatter" "json"
             (eval flycheck-stylelint-args)
             (option-flag "--quiet" flycheck-stylelint-quiet)
-            (config-file "--config" flycheck-stylelintrc))
+            (config-file "--config" flycheck-stylelint-config))
   :standard-input t
   :verify (lambda (_) (flycheck--stylelint-verify 'sass-stylelint))
   :error-parser flycheck-parse-stylelint
@@ -16901,7 +16925,9 @@ See URL
                    (flycheck-fill-empty-line-numbers errors)))
   :modes (systemd-mode))
 
-(flycheck-def-config-file-var flycheck-chktexrc tex-chktex ".chktexrc")
+(define-obsolete-variable-alias 'flycheck-chktexrc
+  'flycheck-chktex-config "38.4")
+(flycheck-def-config-file-var flycheck-chktex-config tex-chktex ".chktexrc")
 
 (flycheck-define-checker tcl-nagelfar
   "A Tcl syntax checker using Nagelfar.
@@ -17024,7 +17050,7 @@ For example, to ignore warnings 8 and 18, you would set this option to
 
 See URL `https://www.nongnu.org/chktex/'."
   :command ("chktex"
-            (config-file "--localrc" flycheck-chktexrc)
+            (config-file "--localrc" flycheck-chktex-config)
             (option-list "" flycheck-chktex-extra-flags concat)
             ;; Compact error messages, and no version information, and execute
             ;; \input statements
@@ -17267,7 +17293,9 @@ See URL `https://github.com/nodeca/js-yaml'."
   :next-checkers ((warning . yaml-yamllint)
                   (warning . cwl)))
 
-(flycheck-def-config-file-var flycheck-yamllintrc
+(define-obsolete-variable-alias 'flycheck-yamllintrc
+  'flycheck-yamllint-config "38.4")
+(flycheck-def-config-file-var flycheck-yamllint-config
     yaml-yamllint
     '(".yamllint"
       ".yamllint.yaml"
@@ -17282,7 +17310,7 @@ See URL `https://github.com/nodeca/js-yaml'."
 See URL `https://github.com/adrienverge/yamllint'."
   :standard-input t
   :command ("yamllint" "-f" "parsable"
-            (config-file "-c" flycheck-yamllintrc)
+            (config-file "-c" flycheck-yamllint-config)
             (eval flycheck-yamllint-args)
             "-")
   :error-patterns

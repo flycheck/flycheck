@@ -47,7 +47,7 @@
 
   (describe "the yaml-yamllint checker command"
     (it "appends flycheck-yamllint-args before the stdin marker"
-      (let ((flycheck-yamllintrc nil)
+      (let ((flycheck-yamllint-config nil)
             (flycheck-yamllint-args '("--strict")))
         (expect (flycheck-checker-substituted-arguments 'yaml-yamllint)
                 :to-equal '("-f" "parsable" "--strict" "-"))))))

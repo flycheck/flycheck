@@ -5,7 +5,7 @@
 
 (describe "Language SCSS"
   (flycheck-buttercup-def-checker-test scss-stylelint scss syntax-error
-    (let ((flycheck-stylelintrc
+    (let ((flycheck-stylelint-config
            (flycheck-buttercup-resource-filename
             "language/css/.stylelintrc.json")))
       (flycheck-buttercup-should-syntax-check

@@ -237,7 +237,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       .. _stylelint: https://stylelint.io
 
-      .. syntax-checker-config-file:: flycheck-stylelintrc
+      .. syntax-checker-config-file:: flycheck-stylelint-config
 
       .. defcustom:: flycheck-stylelint-quiet
 
@@ -419,7 +419,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
       Check your Ember templates with
       `ember-template-lint <https://github.com/ember-template-lint/ember-template-lint>`_
 
-      .. syntax-checker-config-file:: flycheck-ember-template-lintrc
+      .. syntax-checker-config-file:: flycheck-ember-template-lint-config
 
 .. supported-language:: Erlang
 
@@ -663,7 +663,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
          A list of additional hint packages to include.
 
-      .. syntax-checker-config-file:: flycheck-hlintrc
+      .. syntax-checker-config-file:: flycheck-hlint-config
 
 .. supported-language:: HTML
 
@@ -673,7 +673,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       .. _Tidy HTML5: https://github.com/htacg/tidy-html5
 
-      .. syntax-checker-config-file:: flycheck-tidyrc
+      .. syntax-checker-config-file:: flycheck-tidy-config
 
 .. supported-language:: Javascript
 
@@ -758,7 +758,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       .. _stylelint: https://stylelint.io
 
-      .. syntax-checker-config-file:: flycheck-stylelintrc
+      .. syntax-checker-config-file:: flycheck-stylelint-config
 
       .. defcustom:: flycheck-stylelint-quiet
 
@@ -778,7 +778,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       Check syntax and lint with Luacheck_.
 
-      .. syntax-checker-config-file:: flycheck-luacheckrc
+      .. syntax-checker-config-file:: flycheck-luacheck-config
 
       .. defcustom:: flycheck-luacheck-standards
 
@@ -948,7 +948,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
          The theme expression, passed as the ``--theme`` to ``perlcritic``.
 
-      .. syntax-checker-config-file:: flycheck-perlcriticrc
+      .. syntax-checker-config-file:: flycheck-perlcritic-config
 
    .. syntax-checker:: perl-perlimports
 
@@ -1067,7 +1067,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
          A list of additional arguments passed to ``puppet-lint``.
 
-      .. syntax-checker-config-file:: flycheck-puppet-lint-rc
+      .. syntax-checker-config-file:: flycheck-puppet-lint-config
 
 .. supported-language:: Python
 
@@ -1127,7 +1127,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
          A list of additional arguments passed to ``flake8``, for options such
          as ``--select`` or ``--extend-ignore``.
 
-      .. syntax-checker-config-file:: flycheck-flake8rc
+      .. syntax-checker-config-file:: flycheck-flake8-config
 
    .. syntax-checker:: python-ruff
 
@@ -1321,7 +1321,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
          A list of additional arguments passed to ``rubocop``.
 
-      .. syntax-checker-config-file:: flycheck-rubocoprc
+      .. syntax-checker-config-file:: flycheck-rubocop-config
 
    .. syntax-checker:: ruby-standard
 
@@ -1336,7 +1336,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
          See `flycheck-rubocop-lint-only`.
 
-      .. syntax-checker-config-file:: flycheck-ruby-standardrc
+      .. syntax-checker-config-file:: flycheck-ruby-standard-config
 
    .. syntax-checker:: ruby-reek
 
@@ -1344,11 +1344,11 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       .. _Reek: https://github.com/troessner/reek
 
-      .. syntax-checker-config-file:: flycheck-reekrc
+      .. syntax-checker-config-file:: flycheck-reek-config
 
       .. note::
 
-         ``flycheck-reekrc`` defaults to ``nil``, because Reek can find its own
+         ``flycheck-reek-config`` defaults to ``nil``, because Reek can find its own
          configuration.
 
    .. syntax-checker:: ruby
@@ -1369,7 +1369,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
          Whether to suppress warnings about style issues, via the ``--lint``
          option.
 
-      .. syntax-checker-config-file:: flycheck-rubocoprc
+      .. syntax-checker-config-file:: flycheck-rubocop-config
 
 .. supported-language:: Rust
 
@@ -1511,7 +1511,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       .. _stylelint: https://stylelint.io
 
-      .. syntax-checker-config-file:: flycheck-stylelintrc
+      .. syntax-checker-config-file:: flycheck-stylelint-config
 
       .. defcustom:: flycheck-stylelint-quiet
 
@@ -1523,7 +1523,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       .. _stylelint: https://stylelint.io
 
-      .. syntax-checker-config-file:: flycheck-stylelintrc
+      .. syntax-checker-config-file:: flycheck-stylelint-config
 
       .. defcustom:: flycheck-stylelint-quiet
 
@@ -1549,12 +1549,12 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       Check style with `Scalastyle <https://www.scalastyle.org/>`_.
 
-      .. syntax-checker-config-file:: flycheck-scalastylerc
+      .. syntax-checker-config-file:: flycheck-scalastyle-config
 
       .. important::
 
          A configuration file is mandatory for this syntax checker.  If
-         `flycheck-scalastylerc` is not set or the configuration file not found
+         `flycheck-scalastyle-config` is not set or the configuration file not found
          this syntax checker will not be applied.
 
       .. defcustom:: flycheck-scalastyle-args
@@ -1738,7 +1738,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       Check style with `ChkTeX <https://www.nongnu.org/chktex/>`_.
 
-      .. syntax-checker-config-file:: flycheck-chktexrc
+      .. syntax-checker-config-file:: flycheck-chktex-config
 
       .. defcustom:: flycheck-chktex-extra-flags
 
@@ -1826,7 +1826,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       Check syntax with :program:`yamllint`.
 
-      .. syntax-checker-config-file:: flycheck-yamllintrc
+      .. syntax-checker-config-file:: flycheck-yamllint-config
 
       .. defcustom:: flycheck-yamllint-args
 

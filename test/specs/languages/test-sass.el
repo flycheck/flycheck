@@ -5,7 +5,7 @@
 
 (describe "Language Sass"
   (flycheck-buttercup-def-checker-test sass-stylelint sass nil
-    (let ((flycheck-stylelintrc
+    (let ((flycheck-stylelint-config
            (flycheck-buttercup-resource-filename
             "language/css/.stylelintrc.json")))
       (flycheck-buttercup-should-syntax-check
