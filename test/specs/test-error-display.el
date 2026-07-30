@@ -85,14 +85,31 @@
           (expect (bound-and-true-p eldoc-mode) :to-be-truthy)
           (flycheck-mode -1))))
 
-    (it "keeps the display timer off only while eldoc-mode is active"
+    (it "asks eldoc to document interactively"
+      ;; Left to itself Eldoc keeps out of the echo area unless the
+      ;; command that ran is one of `eldoc-message-commands', which
+      ;; error navigation is not.  See #2201.
+      (let ((interactive 'unset))
+        (cl-letf (((symbol-function 'eldoc-print-current-symbol-info)
+                   (lambda (&optional arg) (setq interactive arg))))
+          (flycheck-display-errors-via-eldoc nil)
+          (expect interactive :to-be-truthy))))
+
+    (it "keeps the display timer off only when eldoc refreshes on its own"
       (flycheck-buttercup-with-temp-buffer
         ;; `eldoc-mode' refuses to activate without a documentation
         ;; source, so register Flycheck's first
         (flycheck-mode 1)
         (eldoc-mode 1)
-        (flycheck-display-error-at-point-soon)
-        (expect flycheck-display-error-at-point-timer :not :to-be-truthy)
+        ;; After ordinary motion Eldoc updates the echo area itself
+        (let ((this-command 'forward-char))
+          (flycheck-display-error-at-point-soon)
+          (expect flycheck-display-error-at-point-timer :not :to-be-truthy))
+        ;; After a jump it does not, so Flycheck has to (see #2201)
+        (let ((this-command 'flycheck-next-error))
+          (flycheck-display-error-at-point-soon)
+          (expect flycheck-display-error-at-point-timer :to-be-truthy)
+          (flycheck-cancel-error-display-error-at-point-timer))
         (eldoc-mode -1)
         ;; Without eldoc-mode the timer must pick up the slack
         (flycheck-display-error-at-point-soon)

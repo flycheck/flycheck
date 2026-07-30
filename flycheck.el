@@ -79,6 +79,7 @@
 (require 'help-mode)             ; `define-button-type'
 (require 'find-func)             ; `find-function-regexp-alist'
 (require 'ansi-color)            ; `flycheck-parse-with-patterns-without-color'
+(require 'eldoc)                 ; The default error display
 (require 'url-util)              ; `url-unhex-string' for `flycheck-parse-sarif'
 
 
@@ -7333,8 +7334,14 @@ sources, including `flycheck-eldoc-function', so refreshing it
 shows the Flycheck errors at point alongside e.g. Eglot's
 documentation.  This works from any display entry point --
 interactive commands, error navigation, automatic display after a
-check -- whether or not variable `eldoc-mode' is enabled."
-  (eldoc-print-current-symbol-info))
+check -- whether or not variable `eldoc-mode' is enabled.
+
+Eldoc is asked to document interactively, because reaching this
+function already means Flycheck decided to show the errors at
+point.  Left to its own devices Eldoc keeps out of the echo area
+unless the command that ran is one of `eldoc-message-commands',
+which error navigation is not, and the errors would go unseen."
+  (eldoc-print-current-symbol-info t))
 
 (defun flycheck-eldoc-function (callback &rest _ignored)
   "Document the Flycheck errors at point by calling CALLBACK.
@@ -7395,17 +7402,31 @@ If there are no errors, clears the error messages at point."
             (flycheck-display-errors errors)
           (flycheck-clear-displayed-errors))))))
 
+(defun flycheck--eldoc-refreshes-echo-area-p ()
+  "Whether Eldoc itself will refresh the echo area for this command.
+
+Eldoc only writes to the echo area after a command registered in
+`eldoc-message-commands' -- ordinary motion and editing.  After any
+other command, such as a jump from `consult-flycheck', it computes its
+documentation but leaves the echo area alone, so Flycheck has to ask
+for the display itself."
+  (and (flycheck--display-errors-via-eldoc-p)
+       (bound-and-true-p eldoc-mode)
+       (symbolp this-command)
+       this-command
+       (intern-soft (symbol-name this-command) eldoc-message-commands)
+       t))
+
 (defun flycheck-display-error-at-point-soon ()
   "Display error messages at point, with a delay."
   (flycheck-cancel-error-display-error-at-point-timer)
-  ;; When errors are displayed through Eldoc and `eldoc-mode' is active,
-  ;; its own post-command refresh covers this path; without `eldoc-mode'
-  ;; fall back to Flycheck's timer, which triggers the refresh itself.
-  ;; When inline display already covers the line at point, skip the
-  ;; echo-area message entirely (see `flycheck-annotate-suppress-echo').
+  ;; When errors are displayed through Eldoc and Eldoc will refresh the
+  ;; echo area on its own, let it; otherwise fall back to Flycheck's
+  ;; timer, which triggers the refresh itself.  When inline display
+  ;; already covers the line at point, skip the echo-area message
+  ;; entirely (see `flycheck-annotate-suppress-echo').
   (unless (or (flycheck-annotate--suppresses-echo-p)
-              (and (flycheck--display-errors-via-eldoc-p)
-                   (bound-and-true-p eldoc-mode)))
+              (flycheck--eldoc-refreshes-echo-area-p))
     (setq flycheck-display-error-at-point-timer
           (run-at-time flycheck-display-errors-delay nil
                        'flycheck-display-error-at-point))))
