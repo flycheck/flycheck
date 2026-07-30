@@ -28,6 +28,7 @@
 
 ### Bugs fixed
 
+- [#2257](https://github.com/flycheck/flycheck/pull/2257): Fix the stale value of `flycheck-version`, which `M-x flycheck-version` reports when Flycheck was not installed as a package. Development builds now report `39.0-snapshot`.
 - [#2259](https://github.com/flycheck/flycheck/pull/2259): Stop marking every LSP diagnostic as fixable. A code-action fix is only fetched when applied, so Flycheck cannot know in advance that one exists, and marking it anyway replaced the familiar double-arrow indicator with the fix indicator on every diagnostic in an Eglot or `flycheck-lsp` buffer. The fix indicator, the error list's `[fix]` badge and the inline fix marker now appear only where a fix is known to exist; `C-c ! f` still asks the server on any diagnostic.
 - [#2259](https://github.com/flycheck/flycheck/pull/2259): Explain the mode-line indicator when no error counts sit behind it: `-`, `!`, `.` and `?` now say what they mean in a tooltip, and clicking one runs `flycheck-verify-setup` on the buffer.
 - [#2259](https://github.com/flycheck/flycheck/pull/2259): Replace the wall of text Flycheck printed to the echo area when it could not read a checker's output. A crashing linter, such as a misconfigured `python-flake8` printing a traceback, now produces one line naming the checker and pointing at `C-c ! v`, which shows what the checker actually printed. Flycheck no longer suggests filing a bug report against itself for what is nearly always a local setup problem.
