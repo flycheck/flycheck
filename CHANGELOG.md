@@ -30,6 +30,7 @@
 - [#2235](https://github.com/flycheck/flycheck/pull/2235): Fix `flycheck-verify-setup` erroring with `Wrong type argument: number-or-marker-p, nil` when `eslint` is not installed ([#2232](https://github.com/flycheck/flycheck/issues/2232)); `flycheck-call-checker-process-for-output` no longer chokes on a missing executable either.
 - [#2236](https://github.com/flycheck/flycheck/pull/2236): Detect the project root of a `javascript-eslint` buffer from a flat config file (`eslint.config.js` and its `.mjs`/`.cjs`/`.ts` variants), not only the legacy `.eslintrc`/`.eslintignore` that ESLint 9 dropped.
 - [#2244](https://github.com/flycheck/flycheck/pull/2244): Apply `flycheck-go-build-tags` to the `go-vet` checker as well, so a tagged build is checked consistently across the Go checkers.
+- [#2255](https://github.com/flycheck/flycheck/pull/2255): Fix the error message not reaching the echo area after `flycheck-next-error` and other jumps, with the default Eldoc-based display ([#2201](https://github.com/flycheck/flycheck/issues/2201)); Eldoc keeps out of the echo area unless the command that ran is one it knows, so Flycheck now asks it to document interactively.
 - [#2250](https://github.com/flycheck/flycheck/pull/2250): Fix several option-variable defects: `flycheck-cuda-includes` and `flycheck-tflint-variable-files` used a directory widget for options that are lists of files, `flycheck-annotate-format-function` and `flycheck-annotate-style-functions` were missing `:risky`, and a few options carried a malformed `:package-version`.
 
 ### Changes
