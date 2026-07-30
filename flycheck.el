@@ -13303,11 +13303,15 @@ See URL https://github.com/rhysd/actionlint/."
                      (rx (or ".github/workflows" ".github\\workflows"))
                      (buffer-file-name)))))
 
+(flycheck-def-args-var flycheck-go-gofmt-args go-gofmt
+  :package-version '(flycheck . "38.4"))
+
 (flycheck-define-checker go-gofmt
   "A Go syntax and style checker using the gofmt utility.
 
 See URL `https://go.dev/cmd/gofmt/'."
-  :command ("gofmt")
+  :command ("gofmt"
+            (eval flycheck-go-gofmt-args))
   :standard-input t
   :error-patterns
   ((error line-start "<standard input>:" line ":" column ": "
@@ -13320,6 +13324,9 @@ See URL `https://go.dev/cmd/gofmt/'."
                   (warning . go-unconvert)
                   (warning . go-staticcheck)))
 
+(flycheck-def-args-var flycheck-go-vet-args go-vet
+  :package-version '(flycheck . "38.4"))
+
 (flycheck-define-checker go-vet
   "A Go syntax checker using the `go vet' command.
 
@@ -13328,6 +13335,7 @@ See URL `https://go.dev/cmd/go/' and URL
   :command ("go" "vet"
             (option "-tags=" flycheck-go-build-tags concat
                     flycheck-option-comma-separated-list)
+            (eval flycheck-go-vet-args)
             (source ".go"))
   :error-patterns
   ((warning line-start (file-name) ":" line ": " (message) line-end))
@@ -13370,6 +13378,9 @@ details."
   :safe #'string-or-null-p
   :package-version '(flycheck . "0.32"))
 
+(flycheck-def-args-var flycheck-go-build-args go-build
+  :package-version '(flycheck . "38.4"))
+
 (flycheck-define-checker go-build
   "A Go syntax and type checker using the `go build' command.
 
@@ -13378,6 +13389,7 @@ See URL `https://go.dev/cmd/go/'."
             ;; multiple tags are comma-separated: "dev,debug"
             (option "-tags=" flycheck-go-build-tags concat
                     flycheck-option-comma-separated-list)
+            (eval flycheck-go-build-args)
             "-o" null-device)
   :error-patterns
   ((error line-start (file-name) ":" line ":"
@@ -13410,6 +13422,9 @@ See URL `https://go.dev/cmd/go/'."
                   (warning . go-unconvert)
                   (warning . go-staticcheck)))
 
+(flycheck-def-args-var flycheck-go-test-args go-test
+  :package-version '(flycheck . "38.4"))
+
 (flycheck-define-checker go-test
   "A Go syntax and type checker using the `go test' command.
 
@@ -13417,6 +13432,7 @@ See URL `https://go.dev/cmd/go/'."
   :command ("go" "test"
             (option "-tags=" flycheck-go-build-tags concat
                     flycheck-option-comma-separated-list)
+            (eval flycheck-go-test-args)
             "-c" "-o" null-device)
   :error-patterns
   ((error line-start (file-name) ":" line ":"
@@ -13432,6 +13448,9 @@ See URL `https://go.dev/cmd/go/'."
                   (warning . go-unconvert)
                   (warning . go-staticcheck)))
 
+(flycheck-def-args-var flycheck-go-errcheck-args go-errcheck
+  :package-version '(flycheck . "38.4"))
+
 (flycheck-define-checker go-errcheck
   "A Go checker for unchecked errors.
 
@@ -13442,6 +13461,7 @@ See URL `https://github.com/kisielk/errcheck'."
             "-abspath"
             (option "-tags=" flycheck-go-build-tags concat
                     flycheck-option-comma-separated-list)
+            (eval flycheck-go-errcheck-args)
             ".")
   :error-patterns
   ((warning line-start

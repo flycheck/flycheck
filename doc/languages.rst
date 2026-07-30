@@ -501,6 +501,10 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       Check Go syntax with `gofmt <https://golang.org/cmd/gofmt/>`_.
 
+      .. defcustom:: flycheck-go-gofmt-args
+
+         A list of additional arguments passed to ``gofmt``.
+
    .. syntax-checker:: go-vet
 
       Check Go for suspicious code with vet_.
@@ -508,6 +512,10 @@ to view the docstring of the syntax checker.  Likewise, you may use
       .. defcustom:: flycheck-go-build-tags
 
          A list of build tags.
+
+      .. defcustom:: flycheck-go-vet-args
+
+         A list of additional arguments passed to ``go vet``.
 
       .. _vet: https://pkg.go.dev/cmd/vet/
 
@@ -522,6 +530,10 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
          See `flycheck-go-build-tags`
 
+      .. defcustom:: flycheck-go-build-args
+
+         A list of additional arguments passed to ``go build``.
+
    .. syntax-checker:: go-test
 
       Check syntax and types of Go tests with the `Go compiler`_.
@@ -530,6 +542,10 @@ to view the docstring of the syntax checker.  Likewise, you may use
          :noindex:
 
          See `flycheck-go-build-tags`
+
+      .. defcustom:: flycheck-go-test-args
+
+         A list of additional arguments passed to ``go test``.
 
    .. syntax-checker:: go-errcheck
 
@@ -546,6 +562,10 @@ to view the docstring of the syntax checker.  Likewise, you may use
          :noindex:
 
          See `flycheck-go-build-tags`
+
+      .. defcustom:: flycheck-go-errcheck-args
+
+         A list of additional arguments passed to ``errcheck``.
 
    .. syntax-checker:: go-unconvert
 

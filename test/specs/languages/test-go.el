@@ -64,6 +64,22 @@
         (expect (flycheck-checker-substituted-arguments 'go-vet)
                 :not :to-contain "-tags="))))
 
+  (describe "the Go checker args vars"
+    (it "threads flycheck-go-gofmt-args into gofmt"
+      (let ((flycheck-go-gofmt-args '("-s")))
+        (expect (flycheck-checker-substituted-arguments 'go-gofmt)
+                :to-contain "-s")))
+
+    (it "threads flycheck-go-build-args into go build"
+      (let ((flycheck-go-build-args '("-race")))
+        (expect (flycheck-checker-substituted-arguments 'go-build)
+                :to-contain "-race")))
+
+    (it "threads flycheck-go-errcheck-args into errcheck"
+      (let ((flycheck-go-errcheck-args '("-blank")))
+        (expect (flycheck-checker-substituted-arguments 'go-errcheck)
+                :to-contain "-blank"))))
+
   (describe "Checker tests"
     (flycheck-buttercup-def-checker-test go-gofmt go syntax-error
       (flycheck-buttercup-should-syntax-check
