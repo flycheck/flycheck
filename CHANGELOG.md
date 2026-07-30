@@ -35,6 +35,7 @@
 ### Changes
 
 - [#2250](https://github.com/flycheck/flycheck/pull/2250): Tidy up the configuration for consistency: rename `flycheck-mode-success-indicator` to `flycheck-mode-line-success-indicator`, `flycheck-jsonnet-command-args` to `flycheck-jsonnet-args`, and the markdownlint-cli `-enable-rules`/`-disable-rules` options to `-enabled-rules`/`-disabled-rules` (the old names remain as obsolete aliases), and mark more options `:safe` so they can be set as file- or directory-local variables.
+- [#2251](https://github.com/flycheck/flycheck/pull/2251): Improve two stale defaults: `flycheck-gfortran-language-standard` now defaults to nil (GFortran's own default) instead of the 1995 standard, and `flycheck-phpcs-changed-git-base` defaults to `"main"` instead of `"trunk"`.
 
 ## 38.3 (2026-07-29)
 
