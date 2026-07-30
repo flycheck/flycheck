@@ -13311,11 +13311,21 @@ Uses GCC's Fortran compiler gfortran.  See URL
             "Warning: " (message) line-end))
   :modes (fortran-mode f90-mode))
 
+(flycheck-def-config-file-var flycheck-yaml-actionlint-config
+                              yaml-actionlint nil
+  :package-version '(flycheck . "39"))
+
+(flycheck-def-args-var flycheck-yaml-actionlint-args yaml-actionlint
+  :package-version '(flycheck . "39"))
+
 (flycheck-define-checker yaml-actionlint
   "A YAML syntax checker using actionlint.
 
 See URL https://github.com/rhysd/actionlint/."
-  :command ("actionlint" "-oneline" source)
+  :command ("actionlint" "-oneline"
+            (config-file "-config-file" flycheck-yaml-actionlint-config)
+            (eval flycheck-yaml-actionlint-args)
+            source)
   :error-patterns ((error line-start (file-name) ":" line ":" column ": " (message) line-end))
   :modes (yaml-mode yaml-ts-mode)
   :predicate (lambda ()
@@ -14103,12 +14113,43 @@ See URL `https://eslint.org/'."
    ;; skip non-builtin (plugin) rules, which eslint.org does not document
    (lambda (id) (unless (seq-contains-p id ?/) id))))
 
+(flycheck-def-config-file-var flycheck-javascript-oxlint-config
+                              javascript-oxlint nil
+  :package-version '(flycheck . "39"))
+
+(flycheck-def-option-var flycheck-javascript-oxlint-deny nil javascript-oxlint
+  "Rules or categories oxlint should report as errors.
+
+The value of this variable is a list of strings, where each
+string is the name of a rule or of a category such as
+`correctness' or `pedantic', passed to oxlint via `--deny'."
+  :type '(repeat (string :tag "Rule or category"))
+  :safe #'flycheck-string-list-p
+  :package-version '(flycheck . "39"))
+
+(flycheck-def-option-var flycheck-javascript-oxlint-allow nil javascript-oxlint
+  "Rules or categories oxlint should not report.
+
+The value of this variable is a list of strings, where each
+string is the name of a rule or of a category such as
+`correctness' or `pedantic', passed to oxlint via `--allow'."
+  :type '(repeat (string :tag "Rule or category"))
+  :safe #'flycheck-string-list-p
+  :package-version '(flycheck . "39"))
+
+(flycheck-def-args-var flycheck-javascript-oxlint-args javascript-oxlint
+  :package-version '(flycheck . "39"))
+
 (flycheck-define-checker javascript-oxlint
   "A JavaScript and TypeScript linter using oxlint.
 
 See URL `https://oxc.rs/'."
   :command ("oxlint"
             "--format" "checkstyle"
+            (config-file "--config" flycheck-javascript-oxlint-config)
+            (option-list "--deny" flycheck-javascript-oxlint-deny)
+            (option-list "--allow" flycheck-javascript-oxlint-allow)
+            (eval flycheck-javascript-oxlint-args)
             source-inplace)
   :error-parser flycheck-parse-checkstyle
   :error-filter
@@ -14117,6 +14158,9 @@ See URL `https://oxc.rs/'."
      (flycheck-dequalify-error-ids errors)))
   :modes (js-mode js-jsx-mode js2-mode js2-jsx-mode js3-mode rjsx-mode
                   typescript-mode js-ts-mode typescript-ts-mode tsx-ts-mode))
+
+(flycheck-def-args-var flycheck-javascript-standard-args javascript-standard
+  :package-version '(flycheck . "39"))
 
 (flycheck-define-checker javascript-standard
   "A Javascript code and style checker for the (Semi-)Standard Style.
@@ -14127,7 +14171,8 @@ to the former.  To use it with the latter, set
 
 See URL `https://github.com/standard/standard' and URL
 `https://github.com/Flet/semistandard'."
-  :command ("standard" "--stdin")
+  :command ("standard" "--stdin"
+            (eval flycheck-javascript-standard-args))
   :standard-input t
   :error-patterns
   ((error line-start "  <text>:" line ":" column ":" (message) line-end))
@@ -14151,6 +14196,9 @@ See URL `https://docs.python.org/3.5/library/json.html#command-line-interface'."
   ;; The JSON parser chokes if the buffer is empty and has no JSON inside
   :predicate flycheck-buffer-nonempty-p)
 
+(flycheck-def-args-var flycheck-json-jq-args json-jq
+  :package-version '(flycheck . "39"))
+
 (flycheck-define-checker json-jq
   "JSON checker using the jq tool.
 
@@ -14158,7 +14206,7 @@ This checker accepts multiple consecutive JSON values in a
 single input, which is useful for jsonlines data.
 
 See URL `https://stedolan.github.io/jq/'."
-  :command ("jq" "." source null-device)
+  :command ("jq" (eval flycheck-json-jq-args) "." source null-device)
   ;; Example error message:
   ;;   parse error: Expected another key-value pair at line 3, column 1
   :error-patterns
@@ -17315,11 +17363,14 @@ The xmllint is part of libxml2, see URL
    (error line-start "-:" line ": " (message) line-end))
   :modes (xml-mode nxml-mode))
 
+(flycheck-def-args-var flycheck-yaml-jsyaml-args yaml-jsyaml
+  :package-version '(flycheck . "39"))
+
 (flycheck-define-checker yaml-jsyaml
   "A YAML syntax checker using JS-YAML.
 
 See URL `https://github.com/nodeca/js-yaml'."
-  :command ("js-yaml")
+  :command ("js-yaml" (eval flycheck-yaml-jsyaml-args))
   :standard-input t
   :error-patterns
   ((error line-start

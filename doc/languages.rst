@@ -723,9 +723,27 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       Lint JavaScript and TypeScript with `oxlint <https://oxc.rs/>`_.
 
+      .. syntax-checker-config-file:: flycheck-javascript-oxlint-config
+
+      .. defcustom:: flycheck-javascript-oxlint-deny
+
+         A list of rules or categories to report, via ``--deny``.
+
+      .. defcustom:: flycheck-javascript-oxlint-allow
+
+         A list of rules or categories to suppress, via ``--allow``.
+
+      .. defcustom:: flycheck-javascript-oxlint-args
+
+         A list of additional arguments passed to ``oxlint``.
+
    .. syntax-checker:: javascript-standard
 
       Check syntax and code style with Standard_ or Semistandard_.
+
+      .. defcustom:: flycheck-javascript-standard-args
+
+         A list of additional arguments passed to ``standard``.
 
       .. _Standard: https://github.com/standard/standard
       .. _Semistandard: https://github.com/standard/semistandard
@@ -743,6 +761,10 @@ to view the docstring of the syntax checker.  Likewise, you may use
       Check JSON with jq_.
 
       This checker accepts multiple consecutive JSON values in a single input, which is useful for jsonlines data.
+
+      .. defcustom:: flycheck-json-jq-args
+
+         A list of additional arguments passed to ``jq``.
 
       .. _jq: https://stedolan.github.io/jq/
 
@@ -1838,9 +1860,19 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       Check syntax with `actionlint <https://github.com/rhysd/actionlint>`_.
 
+      .. syntax-checker-config-file:: flycheck-yaml-actionlint-config
+
+      .. defcustom:: flycheck-yaml-actionlint-args
+
+         A list of additional arguments passed to ``actionlint``.
+
    .. syntax-checker:: yaml-jsyaml
 
       Check syntax with `js-yaml <https://github.com/nodeca/js-yaml>`_.
+
+      .. defcustom:: flycheck-yaml-jsyaml-args
+
+         A list of additional arguments passed to ``js-yaml``.
 
    .. syntax-checker:: yaml-yamllint
 
