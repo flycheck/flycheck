@@ -1259,7 +1259,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
          A list of additional arguments passed to ``pylint``, for options such
          as ``--disable`` or ``--load-plugins``.
 
-      .. syntax-checker-config-file:: flycheck-pylintrc
+      .. syntax-checker-config-file:: flycheck-pylint-config
 
    .. syntax-checker:: python-pycompile
 

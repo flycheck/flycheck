@@ -15637,8 +15637,10 @@ See URL `https://docs.astral.sh/ruff/'."
   :modes (python-mode python-ts-mode)
   :next-checkers ((warning . python-mypy)))
 
+(define-obsolete-variable-alias 'flycheck-pylintrc
+  'flycheck-pylint-config "39")
 (flycheck-def-config-file-var
-    flycheck-pylintrc python-pylint
+    flycheck-pylint-config python-pylint
     '("pylintrc" ".pylintrc" "pyproject.toml" "setup.cfg"))
 
 (flycheck-def-option-var flycheck-pylint-use-symbolic-id t python-pylint
@@ -15690,7 +15692,7 @@ See URL `https://www.pylint.org/'."
             (eval (flycheck-python-module-args 'python-pylint "pylint"))
             "--reports=n"
             "--output-format=json"
-            (config-file "--rcfile=" flycheck-pylintrc concat)
+            (config-file "--rcfile=" flycheck-pylint-config concat)
             (eval flycheck-pylint-args)
             ;; Need `source-inplace' for relative imports (e.g. `from .foo
             ;; import bar'), see https://github.com/flycheck/flycheck/issues/280

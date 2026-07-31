@@ -66,7 +66,7 @@
 
   (describe "the python-pylint checker command"
     (it "appends flycheck-pylint-args"
-      (let ((flycheck-pylintrc nil)
+      (let ((flycheck-pylint-config nil)
             (flycheck-pylint-args '("--disable=C0114" "--jobs=2")))
         (let ((args (flycheck-checker-substituted-arguments 'python-pylint)))
           (expect args :to-contain "--disable=C0114")
