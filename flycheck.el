@@ -7425,6 +7425,21 @@ avoid slowing down editing when the error list is hidden."
   "Whether errors at point are displayed through Eldoc."
   (eq flycheck-display-errors-function #'flycheck-display-errors-via-eldoc))
 
+(defun flycheck--eldoc-echo-area-only ()
+  "Return `eldoc-display-functions' with only the echo area treated as asked for.
+
+Flycheck documents interactively so that the echo area is refreshed even
+after a command Eldoc does not recognise, but that request should not
+reach the other display functions: `eldoc-display-in-buffer' reads it as
+\\[eldoc-doc-buffer] and pops the documentation window open, and jumping
+to an error should not rearrange the frame.  They still run, and still
+update what they render, just not as though the user had asked for them."
+  (mapcar (lambda (display)
+            (if (eq display 'eldoc-display-in-echo-area)
+                display
+              (lambda (docs _interactive) (funcall display docs nil))))
+          eldoc-display-functions))
+
 (defun flycheck-display-errors-via-eldoc (_errors)
   "Trigger Eldoc to document the errors at point.
 
@@ -7439,8 +7454,11 @@ Eldoc is asked to document interactively, because reaching this
 function already means Flycheck decided to show the errors at
 point.  Left to its own devices Eldoc keeps out of the echo area
 unless the command that ran is one of `eldoc-message-commands',
-which error navigation is not, and the errors would go unseen."
-  (eldoc-print-current-symbol-info t))
+which error navigation is not, and the errors would go unseen.
+Only the echo area sees that request, via
+`flycheck--eldoc-echo-area-only'."
+  (let ((eldoc-display-functions (flycheck--eldoc-echo-area-only)))
+    (eldoc-print-current-symbol-info t)))
 
 (defun flycheck-eldoc-function (callback &rest _ignored)
   "Document the Flycheck errors at point by calling CALLBACK.

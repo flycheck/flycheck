@@ -85,6 +85,22 @@
           (expect (bound-and-true-p eldoc-mode) :to-be-truthy)
           (flycheck-mode -1))))
 
+    (it "does not let the interactive request pop the doc window"
+      ;; Documenting interactively is what refreshes the echo area after a
+      ;; jump, but `eldoc-display-in-buffer' reads the same flag as a
+      ;; request to display the *eldoc* window.  See #2201.
+      (let ((seen nil))
+        (let ((eldoc-display-functions
+               (list 'eldoc-display-in-echo-area
+                     (lambda (_docs interactive) (push (cons 'other interactive) seen)))))
+          (cl-letf (((symbol-function 'eldoc-print-current-symbol-info)
+                     (lambda (&optional interactive)
+                       (dolist (f eldoc-display-functions)
+                         (unless (eq f 'eldoc-display-in-echo-area)
+                           (funcall f nil interactive))))))
+            (flycheck-display-errors-via-eldoc nil)))
+        (expect (cdr (assq 'other seen)) :to-be nil)))
+
     (it "asks eldoc to document interactively"
       ;; Left to itself Eldoc keeps out of the echo area unless the
       ;; command that ran is one of `eldoc-message-commands', which
