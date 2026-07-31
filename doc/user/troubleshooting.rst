@@ -33,24 +33,90 @@ running Emacs instance.
 
 .. _exec-path-from-shell: https://github.com/purcell/exec-path-from-shell
 
-Flycheck warns about “non-zero exit code, but no errors”
+Flycheck says it “cannot read” a syntax checker’s output
 --------------------------------------------------------
 
-Make sure that you have the latest version of the syntax checker installed,
-particularly if the message started appearing after you updated Flycheck.
+The message looks like this:
 
-Newer releases of Flycheck may require newer versions of syntax checking tools.
-For instance Flycheck might now pass a command line flag that older versions do
-not understand, or attempt to parse an updated output format.  In these cases
-the syntax checker will show an error message about an unknown flag, or emit
-output that Flycheck does not understand, which prompts Flycheck to warn that
-even though the syntax checker appeared to not have successfully checked the
-buffer content there are no errors to be found.
+.. code-block:: text
 
-If you *are* using the latest version then this message most likely indicates a
-flaw in the syntax checker definition.  In this case please :ref:`report a bug
-<flycheck-bug-reports>` to us so that we can fix the issue.  Please don’t forget
-to say that you are using the latest version!
+   Flycheck: cannot read python-flake8's output, so it may be misconfigured;
+   C-c ! v shows what it printed
+
+It means the tool ran, exited with a failure, and printed nothing Flycheck could
+turn into errors.  Press :kbd:`C-c ! v`: the verification buffer leads with
+whatever the checker actually printed, which is nearly always the answer.
+
+By far the most common cause is the tool being missing from, or broken in, the
+environment Emacs is using.  A ``python-flake8`` pointed at an interpreter
+without flake8’s dependencies prints a Python traceback ending in
+``ModuleNotFoundError``; a linter whose plugin failed to load says so.  Neither
+is a Flycheck problem.  On macOS this is often the ``$PATH`` problem described
+:ref:`above <flycheck-macos-exec-path-from-shell>`, and if you use direnv or
+virtualenvs, check that the tool Emacs finds is the project’s and not a global
+one.
+
+The next most common cause is a version mismatch: newer Flycheck releases may
+pass flags older tools do not understand, or parse an output format they do not
+produce yet.  Update the tool before anything else.
+
+If the tool is current and its output looks like something Flycheck ought to
+have understood, that is a flaw in the checker definition, so please
+:ref:`report a bug <flycheck-bug-reports>` and include what the verification
+buffer showed.
+
+A syntax checker disabled itself
+--------------------------------
+
+.. code-block:: text
+
+   Flycheck: python-flake8 disabled itself in this buffer
+   (ModuleNotFoundError: No module named 'pycodestyle'); C-u C-c ! x re-enables it
+
+Some checkers recognise the exit status their tool uses to say it could not run
+at all, as opposed to reporting findings, and step aside rather than failing the
+same way on every check.  The reason in parentheses comes from the tool.
+
+Fix whatever it names and the checker works again.  To bring it back without
+restarting Emacs, use :kbd:`C-u C-c ! x`.
+
+This is also how a linter with no configuration file behaves.  A stylelint with
+nothing to lint by, for instance, disables itself instead of reporting an error
+on every check.
+
+Flycheck does nothing at all in a buffer
+-----------------------------------------
+
+Look at the mode line first; see :ref:`flycheck-mode-line-troubleshooting`
+below.  ``FlyC-`` means no syntax checker applies to the buffer, which usually
+means the tool is not installed or the buffer’s major mode has no checker.
+:kbd:`C-c ! v` lists every checker that could apply and why each one is or is
+not usable.
+
+.. _flycheck-mode-line-troubleshooting:
+
+Start from the mode line
+========================
+
+Flycheck says what state it is in next to the mode name, and every state that
+is not a set of error counts is a single character:
+
+==============  ==============================================================
+``FlyC``        Not checked yet
+``FlyC-``       No syntax checker for this buffer
+``FlyC*``       A check is running
+``FlyC:2|1|0``  Finished: two errors, one warning, no infos
+``FlyC!``       The syntax checker could not be run
+``FlyC.``       The check was interrupted
+``FlyC?``       The checker returned something Flycheck could not read
+==============  ==============================================================
+
+Every one of these except the counts explains itself if you hover it, and
+clicking it runs :command:`flycheck-verify-setup` on the buffer, which is where
+the answer usually is.  Clicking the error counts opens the error list instead.
+
+A trailing ``+`` on the counts means errors were suppressed because the check
+produced more than `flycheck-checker-error-threshold`.
 
 Verify your setup
 =================
@@ -97,10 +163,17 @@ click on the syntax checker names to show the docstring for a syntax checker.
 
 The verification buffer also shows:
 
-* Whether each checker is **disabled** (manually via `C-c ! x` or automatically
-  due to too many errors).  You can re-enable disabled checkers with `C-u C-c !
-  x`.
+* **What the last failed check reported**, at the very top, when a checker could
+  not be run or printed something Flycheck could not read.  This is the tool’s
+  own output, and it is usually the whole answer.
+* Whether each checker is **disabled** (manually via `C-c ! x`, automatically
+  due to too many errors, or because the checker :ref:`stepped aside
+  <flycheck-common-issues>`).  You can re-enable disabled checkers with `C-u
+  C-c ! x`.
 * The **selected checker** for the current buffer (set via `C-c ! s`), if any.
+* For a buffer backed by a language server, **how many diagnostics its server
+  pushed** and how many of those changed anything.  A server pushing many times
+  a second is a very different problem from a checker that is simply slow.
 * Your **Flycheck version**, **Emacs version** and **operating system**, which
   is useful information when reporting bugs.
 
@@ -109,6 +182,42 @@ The verification buffer also shows:
    When :ref:`reporting a bug <flycheck-bug-reports>`, include the output of
    `C-c ! v` in your report.  It gives maintainers a quick overview of your
    setup.
+
+LSP diagnostics
+===============
+
+Diagnostics that come from a language server, through either
+``flycheck-eglot-mode`` or ``flycheck-lsp-mode``, fail differently from command
+checkers: there is no exit status and no output to read, just a server that may
+or may not be saying anything.  See :ref:`flycheck-syntax-checks` for how the
+two integrations work.
+
+**Nothing appears in an Eglot buffer.**  Eglot renders its diagnostics through
+Flymake by default and provides no Flycheck backend, so Flycheck shows nothing
+until you bridge them with ``global-flycheck-eglot-mode``.  Check the mode is
+actually on in the buffer; it only activates where Eglot manages one.
+
+**Nothing appears with the native checker.**  ``flycheck-lsp-mode`` does nothing
+in a buffer whose major mode has no entry in `flycheck-lsp-servers`, or whose
+server program is not installed.  The verification buffer says which of the two
+it is.  A server that fails its ``initialize`` handshake is torn down and
+retried on the next check, so a buffer that never produces diagnostics may be
+failing to start the server at all.
+
+**Only one of two servers reports.**  Both bridges chain onward only when their
+``exclusive`` option is nil; see :ref:`flycheck-lsp-alongside-eglot`.
+
+**Emacs slows down or stutters.**  A language server publishes diagnostics
+whenever it likes, and some publish continuously while they index or build a
+project.  Each push that carries something new re-runs the check that publishes
+it.  Run :kbd:`C-c ! v` while it is happening and look at the push counts: a
+server pushing many times a second is the problem, not the checks themselves.
+Turning `global-flycheck-annotate-mode` off tells you whether the cost is in the
+number of checks or in what each one draws.
+
+For the underlying protocol traffic, Eglot keeps its own event log.  Set
+``eglot-events-buffer-config`` (``eglot-events-buffer-size`` on Emacs 29 and
+earlier), reproduce, and read the ``*EGLOT … events*`` buffer.
 
 Debug syntax checkers
 =====================
@@ -123,14 +232,10 @@ syntax checker just the way Flycheck would run it:
    Prompt for a syntax checker and run it as a shell command, showing the whole
    output in a separate buffer.
 
-   .. important::
+   .. note::
 
-      The current implementation of this command suffers from a couple of issues,
-      so we’d like to have a replacement in GH-854_ and we could use your help!
-      If you’d like to help out with this task please join the discussion in
-      that issue.
-
-      .. _GH-854: https://github.com/flycheck/flycheck/issues/854
+      This only works for command checkers.  A checker backed by a language
+      server has no command line to reproduce; see `LSP diagnostics`_ above.
 
 The output of this command can provide you helpful clues about what’s going on.
 It also helps to compare the output of the command in Emacs with what happens if
