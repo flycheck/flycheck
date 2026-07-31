@@ -3641,6 +3641,36 @@ interrupted, so that slow checkers eventually complete."
     (apply #'flycheck-report-buffer-checker-status
            syntax-check args)))
 
+(defvar flycheck--modes-without-checker nil
+  "Major modes already reported as having nothing to check them with.
+
+Flycheck mentions this once per major mode per session.  Saying it on
+every check would be constant noise in a buffer nothing can check, and
+saying it never leaves someone who has just enabled Flycheck watching an
+inert mode line with no idea why.")
+
+(defun flycheck--report-no-checker ()
+  "Say once per major mode that no syntax checker can run in this buffer.
+
+Distinguish a mode nothing supports, where there is nothing to be done,
+from one whose checkers are all unusable here, which usually means the
+tool is not installed and is worth looking into."
+  (unless (or (memq major-mode flycheck--modes-without-checker)
+              (flycheck-ephemeral-buffer-p))
+    (push major-mode flycheck--modes-without-checker)
+    (let ((supported (seq-some (lambda (checker)
+                                 (flycheck-checker-supports-major-mode-p
+                                  checker major-mode))
+                               flycheck-checkers)))
+      (message
+       (substitute-command-keys
+        (if supported
+            "Flycheck: no syntax checker for %s can run here; \
+\\[flycheck-verify-setup] shows why"
+          "Flycheck: no syntax checker supports %s; \
+\\[flycheck-verify-setup] lists what there is"))
+       major-mode))))
+
 (defun flycheck-buffer ()
   "Start checking syntax in the current buffer.
 
@@ -3681,6 +3711,7 @@ interruption in `flycheck-buffer-automatically' instead."
                 (if checker
                     (flycheck-start-current-syntax-check checker)
                   (flycheck-clear)
+                  (flycheck--report-no-checker)
                   (flycheck-report-status 'no-checker)))
             (error
              (flycheck-report-failed-syntax-check)

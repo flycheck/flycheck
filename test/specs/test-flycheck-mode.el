@@ -194,6 +194,54 @@
           (flycheck-disable-checker 'emacs-lisp 'enable))
         (expect flycheck-disabled-checkers :to-equal '(python-pylint))))))
 
+(describe "Reporting that nothing can check a buffer"
+  ;; Without this the mode line just sits at "FlyC-" and someone who has
+  ;; only just enabled Flycheck has no idea anything is wrong
+  (defun test-nochecker/messages (mode &optional usable)
+    "Return the messages MODE produces over repeated checks."
+    (let ((buffer (generate-new-buffer "flycheck-test-nochecker"))
+          (messages nil))
+      (unwind-protect
+          (with-current-buffer buffer
+            (funcall mode)
+            (setq-local flycheck-check-syntax-automatically nil)
+            (cl-letf (((symbol-function 'message)
+                       (lambda (fmt &rest args)
+                         (when fmt (push (apply #'format fmt args) messages))))
+                      ((symbol-function 'flycheck-may-use-checker)
+                       (lambda (&rest _) usable)))
+              (flycheck-mode 1)
+              (dotimes (_ 3) (ignore-errors (flycheck-buffer))))
+            (nreverse messages))
+        (kill-buffer buffer))))
+
+  (before-each (setq flycheck--modes-without-checker nil))
+  (after-all (setq flycheck--modes-without-checker nil))
+
+  (it "says so when no checker supports the mode at all"
+    (let ((messages (test-nochecker/messages #'fundamental-mode)))
+      (expect (car messages) :to-match "no syntax checker supports fundamental-mode")))
+
+  (it "says something different when checkers exist but none can run"
+    ;; That usually means the tool is missing, which is worth chasing
+    (let ((messages (test-nochecker/messages #'emacs-lisp-mode)))
+      (expect (car messages) :to-match "can run here")))
+
+  (it "says it once, however many times the buffer is checked"
+    (expect (length (test-nochecker/messages #'fundamental-mode)) :to-equal 1))
+
+  (it "stays quiet for a mode it already mentioned"
+    (test-nochecker/messages #'fundamental-mode)
+    (expect (test-nochecker/messages #'fundamental-mode) :to-be nil))
+
+  (it "keeps out of ephemeral buffers"
+    (flycheck-buttercup-with-temp-buffer
+      (fundamental-mode)
+      (let ((said nil))
+        (cl-letf (((symbol-function 'message) (lambda (&rest _) (setq said t))))
+          (flycheck--report-no-checker))
+        (expect said :to-be nil)))))
+
 (describe "Setup verification"
 
   (describe "flycheck--verify-princ-last-failure"
