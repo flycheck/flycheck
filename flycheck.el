@@ -10719,20 +10719,60 @@ fix is applied right after."
        :edits (mapcar #'flycheck-lsp--text-edit (append (cdar targets) nil))
        :tick (buffer-chars-modified-tick)))))
 
+(defconst flycheck-lsp--bridges '(eglot-check flycheck-lsp)
+  "The LSP bridge checkers, in the order they run when both are active.
+
+Eglot comes first because it is the full language server, with the
+single-purpose lint server behind it.  The order is fixed rather than
+decided by whichever mode happened to enable last, and it is what keeps
+the chaining acyclic: a bridge only ever chains forwards.")
+
+(defun flycheck-lsp--primary-bridge ()
+  "Return the bridge checker that should start the chain in this buffer.
+
+The first of `flycheck-lsp--bridges' whose mode is on, or nil when
+neither is.  Both bridges compute the buffer's checker with this, so
+enabling them in either order settles on the same one."
+  (seq-find (lambda (checker)
+              (pcase checker
+                ('eglot-check (flycheck-eglot--enabled-p))
+                ('flycheck-lsp (flycheck-lsp--enabled-p))))
+            flycheck-lsp--bridges))
+
+(defun flycheck-lsp--select-primary-bridge ()
+  "Point the buffer's `flycheck-checker' at `flycheck-lsp--primary-bridge'.
+
+Leave a checker the user selected by hand alone, and fall back to
+automatic selection once no bridge is left."
+  (when (or (null flycheck-checker)
+            (memq flycheck-checker flycheck-lsp--bridges))
+    (setq flycheck-checker (flycheck-lsp--primary-bridge))))
+
 (defun flycheck-lsp--register-checker (checker exclusive)
   "Teach CHECKER the current buffer's major mode and set up its chaining.
 
-With EXCLUSIVE non-nil, CHECKER is the buffer's sole checker; otherwise it
-chains to the first other checker that supports the mode, so an LSP
-backend and a command checker both contribute.  Shared by the `flycheck-lsp' and
-`eglot-check' bridges."
+With EXCLUSIVE non-nil, CHECKER reports alone.  Otherwise it chains to
+the bridges after it in `flycheck-lsp--bridges', so an Eglot server and a
+lint server both contribute, and then to the first command checker that
+supports the mode, so a command checker contributes too.
+
+Chaining to a bridge is safe whether or not that bridge is on in a given
+buffer: its predicate refuses the buffer, and Flycheck moves on to the
+next entry.  That matters because `next-checkers' is a property of the
+checker, shared by every buffer, while the modes are buffer-local.
+
+Shared by the `flycheck-lsp' and `eglot-check' bridges."
   (unless (flycheck-checker-supports-major-mode-p checker major-mode)
     (flycheck-add-mode checker major-mode))
-  (if exclusive
-      (setf (flycheck-checker-get checker 'next-checkers) nil)
+  ;; Rebuild from scratch, so enabling a mode repeatedly cannot pile up
+  ;; duplicate entries
+  (setf (flycheck-checker-get checker 'next-checkers) nil)
+  (unless exclusive
+    (dolist (bridge (cdr (memq checker flycheck-lsp--bridges)))
+      (flycheck-add-next-checker checker bridge 'append))
     (when-let* ((next (seq-find
                        (lambda (c)
-                         (and (not (eq c checker))
+                         (and (not (memq c flycheck-lsp--bridges))
                               (flycheck-checker-supports-major-mode-p c major-mode)))
                        flycheck-checkers)))
       (flycheck-add-next-checker checker next 'append))))
@@ -10825,9 +10865,13 @@ and `flycheck-eglot-mode' instead."
   "Whether the `flycheck-lsp' checker is the only checker or chains to others.
 
 When non-nil (the default), a buffer using `flycheck-lsp-mode' reports
-only the language server's diagnostics.  When nil, `flycheck-lsp' chains to the
-first other checker that supports the buffer's major mode, so the server
-and a command checker can both contribute.
+only the language server's diagnostics.  When nil, `flycheck-lsp' chains to
+the first command checker that supports the buffer's major mode, so the
+server and a command checker can both contribute.
+
+To run this server behind Eglot's rather than instead of it, turn
+`flycheck-eglot-mode' on as well and clear `flycheck-eglot-exclusive' too;
+Eglot leads and `flycheck-lsp' follows.
 
 Note that this takes effect globally when a buffer enables the mode: it is
 stored in `flycheck-lsp's chain, not per buffer."
@@ -11346,7 +11390,7 @@ Added to `kill-emacs-hook' the first time a server starts."
 A no-op unless the mode's server is configured and installed."
   (when (flycheck-lsp--available-command major-mode)
     (flycheck-lsp--register-checker 'flycheck-lsp flycheck-lsp-exclusive)
-    (setq flycheck-checker 'flycheck-lsp)
+    (flycheck-lsp--select-primary-bridge)
     ;; Give the recheck guard a real buffer-local binding, so the `let' that
     ;; sets it around a push-triggered check isolates to this buffer instead
     ;; of leaking a global value to others (see `flycheck-lsp--suppress-recheck').
@@ -11357,8 +11401,9 @@ A no-op unless the mode's server is configured and installed."
 (defun flycheck-lsp--disable ()
   "Undo `flycheck-lsp--enable' in the current buffer."
   (flycheck-lsp--close-buffer)
-  (when (eq flycheck-checker 'flycheck-lsp)
-    (setq flycheck-checker nil))
+  ;; Hand the buffer to the other bridge if it is still on, else back to
+  ;; automatic selection
+  (flycheck-lsp--select-primary-bridge)
   (when flycheck-mode
     (flycheck-buffer-deferred)))
 
@@ -11447,12 +11492,15 @@ feature off."
   "Whether `eglot-check' is the only checker or chains to others.
 
 When non-nil (the default), a buffer using `flycheck-eglot-mode' reports
-only Eglot's diagnostics.  When nil, `eglot-check' chains to the first
-other checker that supports the buffer's major mode, so an LSP server and
-a command checker can both contribute.
+only Eglot's diagnostics.  When nil, `eglot-check' chains onward: to
+`flycheck-lsp' in a buffer that also uses `flycheck-lsp-mode', so a lint
+server can run behind Eglot's, and then to the first command checker that
+supports the buffer's major mode.
 
 Note that this takes effect globally when a buffer enables the mode: it is
-stored in `eglot-check's chain, not per buffer."
+stored in `eglot-check's chain, not per buffer.  The chain is still safe
+in buffers that use only one of the bridges, because each checker's
+predicate refuses a buffer whose mode is off."
   :group 'flycheck
   :type 'boolean
   :safe #'booleanp
@@ -11622,7 +11670,7 @@ ORIG is the advised function; BEG, END and ARGS are its arguments."
   "Set up the current buffer to report Eglot diagnostics through Flycheck."
   (when (flycheck-eglot--available-p)
     (flycheck-lsp--register-checker 'eglot-check flycheck-eglot-exclusive)
-    (setq flycheck-checker 'eglot-check)
+    (flycheck-lsp--select-primary-bridge)
     ;; Suppress the recheck the synchronous report may fire; the trailing
     ;; `flycheck-buffer-deferred' triggers the first check instead.
     (let ((flycheck-eglot--suppress-recheck t))
@@ -11639,8 +11687,9 @@ ORIG is the advised function; BEG, END and ARGS are its arguments."
   "Undo `flycheck-eglot--enable' in the current buffer."
   (when (flycheck-eglot--available-p)
     (ignore-errors (eglot-flymake-backend #'ignore)))
-  (when (eq flycheck-checker 'eglot-check)
-    (setq flycheck-checker nil))
+  ;; Hand the buffer to the other bridge if it is still on, else back to
+  ;; automatic selection
+  (flycheck-lsp--select-primary-bridge)
   (setq flycheck-eglot--diagnostics nil)
   (when flycheck-mode
     (flycheck-buffer-deferred)))

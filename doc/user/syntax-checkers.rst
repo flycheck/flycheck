@@ -398,6 +398,23 @@ reported, the next checker of the sequence runs and its errors are reported,
 etc. until there are no more checkers in the sequence.  This sequence is called
 a *checker chain*.
 
+.. code-block:: text
+
+   python-mypy  ──▶  python-flake8  ──▶  (end of chain)
+        │                  │
+        ▼                  ▼
+     errors             errors           all reported together
+
+Each checker's errors are added to the ones already reported, so what you end
+up looking at is every checker's findings in one list, not just the last one's.
+
+A chain stops as soon as a checker has no next checker left to run.  At each
+step Flycheck takes the first entry of ``:next-checkers`` that fits: its error
+level has to match (see below) and the checker has to be usable in this buffer.
+An entry that doesn't fit is skipped rather than ending the chain, so a chain
+can name a checker that is only sometimes available and still reach the ones
+behind it.
+
 Some checker chains are already set up by default in Flycheck: e.g.,
 `emacs-lisp` will be followed by `emacs-lisp-checkdoc`, and `python-mypy` will
 be followed by `python-flake8`.

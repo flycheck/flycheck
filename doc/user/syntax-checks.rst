@@ -207,9 +207,10 @@ display, navigation and the error list:
 .. defcustom:: flycheck-eglot-exclusive
 
    When non-nil (the default), an Eglot buffer reports only the LSP server's
-   diagnostics.  Set to nil to have ``eglot-check`` chain to the first command
-   checker that supports the buffer's major mode, so an LSP server and a
-   command checker both contribute.
+   diagnostics.  Set to nil to have ``eglot-check`` chain onward: to
+   ``flycheck-lsp`` when that bridge is on as well, and then to the first
+   command checker that supports the buffer's major mode.  See
+   :ref:`flycheck-lsp-alongside-eglot`.
 
 When the server supports code actions, an Eglot diagnostic's ``quickfix``
 action is offered as a Flycheck fix: press ``C-c ! f`` on the error to apply it
@@ -314,6 +315,69 @@ In short: reach for ``flycheck-lsp-mode`` when you just want a linter that
 happens to speak LSP, and for ``flycheck-eglot-mode`` (see above) when you want
 a full language server whose diagnostics Flycheck should own.
 
+.. _flycheck-lsp-alongside-eglot:
+
+Eglot and a second server together
+----------------------------------
+
+The two are not an either/or.  The common case is a project where one server
+is the one you edit with and another only lints: Tailwind CSS alongside a
+TypeScript or HTML server, ESLint alongside ``typescript-language-server``, and
+so on.  Eglot runs the first, Flycheck runs the second, and both sets of
+diagnostics land in the same error list.
+
+Name the lint server for the mode and turn both bridges on:
+
+.. code-block:: elisp
+
+   ;; Eglot keeps doing completion, hover and rename, as always.
+   (add-to-list 'flycheck-lsp-servers
+                '(html-mode "tailwindcss-language-server" "--stdio"))
+
+   (setq flycheck-eglot-exclusive nil
+         flycheck-lsp-exclusive nil)
+   (global-flycheck-eglot-mode 1)
+   (global-flycheck-lsp-mode 1)
+
+Clearing the two ``exclusive`` options is what asks each bridge to chain onward
+instead of reporting alone.  With both on, the buffer runs:
+
+.. code-block:: text
+
+   eglot-check   ──▶   flycheck-lsp   ──▶   a command checker
+   (Eglot's server)    (Tailwind)           (if one fits the mode)
+        │                   │                      │
+        ▼                   ▼                      ▼
+     errors              errors                 errors
+                                          all in one error list
+
+Eglot leads because it is the full language server, and the order is fixed, so
+it does not matter which mode you enable first or which one connects first.
+
+Each step is skipped when it does not apply to the buffer.  Open a file Eglot
+does not manage and the chain starts at ``flycheck-lsp``; open one with no
+Tailwind server configured and ``eglot-check`` goes straight on to the command
+checker.  So the same configuration is fine to set globally.
+
+Leave either ``exclusive`` option at its default and that bridge reports on its
+own, ending the chain there.  That is the setting to reach for when you want
+just the one server's diagnostics.
+
+.. note::
+
+   ``flycheck-lsp-servers`` maps each major mode to a single server, so
+   Flycheck adds one lint server to a mode, not several.  Eglot's server plus
+   one lint server works; two lint servers on top of Eglot does not, yet.
+
+If you would rather not use the ``eglot-check`` bridge at all, and just have
+Eglot report through Flymake as it normally does while Flycheck runs the lint
+server, enable only ``global-flycheck-lsp-mode``.  To silence Eglot's Flymake
+diagnostics in that setup:
+
+.. code-block:: elisp
+
+   (add-to-list 'eglot-stay-out-of 'flymake)
+
 Configuring servers
 -------------------
 
@@ -363,9 +427,10 @@ Configuring servers
 .. defcustom:: flycheck-lsp-exclusive
 
    When non-nil (the default), a buffer reports only the language server's
-   diagnostics.  Set to nil to have ``flycheck-lsp`` chain to the first command checker
-   that supports the buffer's major mode, so the server and a command checker
-   both contribute.
+   diagnostics.  Set to nil to have ``flycheck-lsp`` chain to the first command
+   checker that supports the buffer's major mode, so the server and a command
+   checker both contribute.  See :ref:`flycheck-lsp-alongside-eglot` for running
+   it behind Eglot's server.
 
 .. defcustom:: flycheck-lsp-code-actions
 
