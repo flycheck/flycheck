@@ -314,6 +314,73 @@ In short: reach for ``flycheck-lsp-mode`` when you just want a linter that
 happens to speak LSP, and for ``flycheck-eglot-mode`` (see above) when you want
 a full language server whose diagnostics Flycheck should own.
 
+Eglot for the language, a separate server for the linting
+----------------------------------------------------------
+
+The three are not mutually exclusive.  A common arrangement is to let Eglot
+run the language server you edit with, and have Flycheck pull diagnostics from
+a *different* server: ESLint's, Tailwind's, Harper's, and so on.  This works
+because ``flycheck-lsp-mode`` knows nothing about Eglot.  It opens its own
+connection to whatever ``flycheck-lsp-servers`` names for the major mode, so
+the two run side by side:
+
+.. code-block:: elisp
+
+   ;; Eglot handles completion, hover and rename as usual.
+   ;; Flycheck lints with ESLint's language server.
+   (add-to-list 'flycheck-lsp-servers
+                '(typescript-ts-mode "vscode-eslint-language-server" "--stdio"))
+   (global-flycheck-lsp-mode 1)
+
+On its own that gives you the lint server's diagnostics in Flycheck, and
+Eglot's still in Flymake, since nothing has told Eglot otherwise.  That may be
+exactly what you want.  If you would rather Flycheck showed nothing but the
+linter, keep Eglot out of Flymake:
+
+.. code-block:: elisp
+
+   (add-to-list 'eglot-stay-out-of 'flymake)
+
+Diagnostics from both servers
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To see both servers' diagnostics in Flycheck, turn on both bridges, let them
+chain, and connect them to each other:
+
+.. code-block:: elisp
+
+   (setq flycheck-eglot-exclusive nil
+         flycheck-lsp-exclusive nil)
+   (global-flycheck-eglot-mode 1)
+   (global-flycheck-lsp-mode 1)
+   (flycheck-add-next-checker 'eglot-check '(t . flycheck-lsp) 'append)
+
+A chained checker's errors are added to those already reported, so the buffer
+ends up with both sets.
+
+That last line is doing real work, and leaving it out is the usual reason this
+does not behave.  Clearing the ``exclusive`` options makes each bridge chain to
+the *first other checker that supports the mode*, in ``flycheck-checkers``
+order, and both bridges sit at the end of that list.  So each one chains to a
+command checker and never to the other bridge, however you order the modes.
+
+Which of the two starts the chain is whichever enabled last, because both set
+the buffer's ``flycheck-checker``.  Eglot usually connects after the major mode
+is set, so ``eglot-check`` normally wins, which is why the chain above runs
+from it.  Pin it yourself if you would rather not depend on that:
+
+.. code-block:: elisp
+
+   (add-hook 'flycheck-mode-hook
+             (lambda () (setq flycheck-checker 'eglot-check)))
+
+.. note::
+
+   ``flycheck-lsp-servers`` maps each major mode to a single server, so
+   Flycheck can add one lint server to a mode, not several.  Running, say,
+   both ESLint's and Tailwind's servers as Flycheck checkers in the same
+   buffer is not possible yet.
+
 Configuring servers
 -------------------
 
