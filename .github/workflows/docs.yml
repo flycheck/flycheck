@@ -31,4 +31,6 @@ jobs:
     - name: Build the manual
       run: |
         pip install -r doc/requirements.txt
-        make -C doc SPHINXOPTS=-n html
+        # -W matches `fail_on_warning' in .readthedocs.yaml, so a broken
+        # reference is caught here rather than on the published site
+        make -C doc SPHINXOPTS="-n -W --keep-going" html
