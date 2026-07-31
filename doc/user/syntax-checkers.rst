@@ -419,6 +419,9 @@ Some checker chains are already set up by default in Flycheck: e.g.,
 `emacs-lisp` will be followed by `emacs-lisp-checkdoc`, and `python-mypy` will
 be followed by `python-flake8`.
 
+The LSP integrations chain too, which is how an Eglot server and a separate
+lint server can both report; see :ref:`flycheck-lsp-alongside-eglot`.
+
 When defining a checker, you can specify which checkers may run after it by
 setting the ``:next-checkers`` property (see the docstring of
 `flycheck-define-generic-checker`).
@@ -456,3 +459,39 @@ You can also customize the next checker property by calling
    .. code-block:: elisp
 
       (flycheck-add-next-checker 'python-flake8 '(warning . python-pylint))
+
+.. defun:: flycheck-remove-next-checker checker next
+
+   Stop *next* running after *checker*.  Use this to undo a chain Flycheck
+   sets up by default, or one you added earlier.
+
+   For instance, to stop `emacs-lisp` handing off to `emacs-lisp-checkdoc`:
+
+   .. code-block:: elisp
+
+      (flycheck-remove-next-checker 'emacs-lisp 'emacs-lisp-checkdoc)
+
+Run two linters over the same buffer
+------------------------------------
+
+Chaining is how you get more than one linter's findings at once, which
+Flycheck otherwise will not do: when several checkers support a language and
+are not chained, only the first installed one in `flycheck-checkers` runs.
+Say you want both Ruff and mypy on Python buffers:
+
+.. code-block:: elisp
+
+   (flycheck-add-next-checker 'python-ruff 'python-mypy)
+
+Both sets of errors end up in the same list.  Add a level to the cons if the
+second should only run when the first found nothing serious, as in the pylint
+example above.
+
+.. important::
+
+   A chain belongs to the *checker*, not to the buffer.  ``:next-checkers`` is
+   a property of the syntax checker itself, so a `flycheck-add-next-checker`
+   call changes what happens in **every** buffer that runs that checker, even
+   if you make it from a mode hook.  Chaining per project or per mode is not
+   supported; use `flycheck-disabled-checkers`, which *is* buffer-local, to
+   hold a checker back where you do not want it.
