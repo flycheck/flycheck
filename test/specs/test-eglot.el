@@ -211,4 +211,77 @@
           (advice-remove 'flymake-diagnostics
                          #'flycheck-eglot--flymake-diagnostics))))))
 
+(describe "Chaining the LSP bridges"
+  ;; Both bridges write to `flycheck-checker' and to checker properties
+  ;; shared by every buffer, so the order the modes happen to enable in
+  ;; must not decide what runs.
+  (defun test-bridges/with-both (order body)
+    "Enable both bridges in ORDER, then call BODY."
+    (flycheck-buttercup-with-temp-buffer
+      (text-mode)
+      (let ((flycheck-eglot-exclusive nil)
+            (flycheck-lsp-exclusive nil)
+            (flycheck-lsp-servers '((text-mode "true"))))
+        (cl-letf (((symbol-function 'eglot-managed-p) (lambda () t))
+                  ((symbol-function 'eglot-flymake-backend) #'ignore)
+                  ((symbol-function 'flycheck-mode) #'ignore)
+                  ((symbol-function 'flymake-mode) #'ignore)
+                  ((symbol-function 'flycheck-lsp--close-buffer) #'ignore)
+                  ((symbol-function 'flycheck-buffer-deferred) #'ignore))
+          (dolist (which order)
+            (pcase which
+              ('eglot (flycheck-eglot-mode 1))
+              ('lsp (flycheck-lsp-mode 1))))
+          (funcall body)
+          (flycheck-eglot-mode -1)
+          (flycheck-lsp-mode -1))
+        (advice-remove 'flymake-diagnostics
+                       #'flycheck-eglot--flymake-diagnostics))))
+
+  (it "starts from the same bridge whichever mode enabled last"
+    (dolist (order '((eglot lsp) (lsp eglot)))
+      (test-bridges/with-both
+       order (lambda () (expect flycheck-checker :to-be 'eglot-check)))))
+
+  (it "chains the leading bridge to the other one"
+    (test-bridges/with-both
+     '(eglot lsp)
+     (lambda ()
+       (expect (flycheck-checker-get 'eglot-check 'next-checkers)
+               :to-contain 'flycheck-lsp))))
+
+  (it "never chains backwards, which would loop forever"
+    (test-bridges/with-both
+     '(eglot lsp)
+     (lambda ()
+       (expect (flycheck-checker-get 'flycheck-lsp 'next-checkers)
+               :not :to-contain 'eglot-check))))
+
+  (it "does not pile up duplicate entries when a mode re-enables"
+    (test-bridges/with-both
+     '(eglot lsp eglot lsp)
+     (lambda ()
+       (let ((next (flycheck-checker-get 'eglot-check 'next-checkers)))
+         (expect (length next) :to-equal (length (delete-dups (copy-sequence next))))))))
+
+  (it "leaves a checker the user selected by hand alone"
+    (flycheck-buttercup-with-temp-buffer
+      (text-mode)
+      (setq flycheck-checker 'emacs-lisp)
+      (cl-letf (((symbol-function 'eglot-managed-p) (lambda () t))
+                ((symbol-function 'eglot-flymake-backend) #'ignore)
+                ((symbol-function 'flycheck-mode) #'ignore)
+                ((symbol-function 'flymake-mode) #'ignore)
+                ((symbol-function 'flycheck-buffer-deferred) #'ignore))
+        (flycheck-eglot-mode 1)
+        (expect flycheck-checker :to-be 'emacs-lisp)
+        (flycheck-eglot-mode -1))
+      (advice-remove 'flymake-diagnostics
+                     #'flycheck-eglot--flymake-diagnostics)))
+
+  (describe "flycheck-lsp--primary-bridge"
+    (it "is nil when neither bridge is on"
+      (flycheck-buttercup-with-temp-buffer
+        (expect (flycheck-lsp--primary-bridge) :to-be nil)))))
+
 ;;; test-eglot.el ends here
