@@ -283,6 +283,12 @@ A fixable error gets a distinct fringe indicator, its ``[fix]`` marker in the
 error list, and, under :mode:`flycheck-annotate-mode`, a ``[fix]`` tag before
 its inline message - like an editor's "fix available" lightbulb.
 
+A language server's fixes work differently: its ``quickfix`` code action is
+only fetched when you apply it, so until then Flycheck cannot tell whether
+there is one.  Those errors get no fringe indicator, since it would promise a
+fix that may not exist, but the error list marks them ``[fix?]``.  Press
+:kbd:`C-c ! f` on one to ask the server.
+
 .. image:: /images/flycheck-quick-fix.png
 
 .. define-key:: C-c ! f

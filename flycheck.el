@@ -6743,11 +6743,20 @@ already names it in a grouped list."
           (concat
            ;; Flag errors that carry an applicable machine fix (apply with
            ;; `x'/`flycheck-error-list-apply-fix'), for discoverability.  Only
-           ;; badge errors whose fix is known to exist and can actually be
-           ;; applied here, not cross-file ones the apply command would refuse.
-           (when (and (flycheck-error-known-fix-p error)
+           ;; badge errors whose fix can actually be applied here, not
+           ;; cross-file ones the apply command would refuse.  A fix that has
+           ;; to be fetched before we know it exists, as an LSP code action
+           ;; does, is badged with a question mark rather than left bare: the
+           ;; indicators cannot promise it, but there is room to mention it
+           ;; here, and otherwise nothing would suggest trying.
+           (when (and (flycheck-error-fix error)
                       (flycheck--error-fix-buffer error))
-             (propertize "[fix] " 'face 'flycheck-error-list-checker-name))
+             (let ((known (flycheck-error-known-fix-p error)))
+               (propertize (if known "[fix] " "[fix?] ")
+                           'face 'flycheck-error-list-checker-name
+                           'help-echo (if known
+                                          "x: apply this fix"
+                                        "x: ask the server for a fix"))))
            ;; Flag errors that carry secondary locations (visit with `j'/
            ;; `flycheck-error-list-visit-related-location'), showing how many
            ;; and listing them in the badge's tooltip.

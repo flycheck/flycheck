@@ -210,6 +210,33 @@
         (expect (flycheck-error-list-visit-related-location)
                 :to-throw 'user-error))))
 
+  (describe "The fix badge"
+    (defun test-fixbadge/render (err)
+      "Return the row the error list builds for ERR, as one string."
+      (cl-letf (((symbol-function 'flycheck--error-fix-buffer)
+                 (lambda (_e) (current-buffer))))
+        ;; each cell is (TEXT . PROPERTIES)
+        (mapconcat (lambda (cell) (if (stringp cell) cell (car cell)))
+                   (cadr (flycheck-error-list-make-entry err)) " ")))
+
+    (it "marks an error whose fix is already in hand"
+      (let ((err (flycheck-error-new-at
+                  1 1 'error "x" :checker 'emacs-lisp
+                  :fix (flycheck-fix-new :description "d" :edits nil :tick 0))))
+        (expect (test-fixbadge/render err) :to-match "\\[fix\\] ")))
+
+    (it "marks a fix that has to be fetched with a question mark"
+      ;; An LSP code action is only requested when applied, so Flycheck
+      ;; cannot promise it exists.  Saying nothing would hide that
+      ;; `C-c ! f' is worth a try.
+      (let ((err (flycheck-error-new-at 1 1 'error "x" :checker 'emacs-lisp
+                                        :fix (lambda (_e) nil))))
+        (expect (test-fixbadge/render err) :to-match "\\[fix\\?\\] ")))
+
+    (it "marks nothing when the error carries no fix at all"
+      (let ((err (flycheck-error-new-at 1 1 'error "x" :checker 'emacs-lisp)))
+        (expect (test-fixbadge/render err) :not :to-match "\\[fix"))))
+
   (describe "Applying fixes"
     (it "applies the fix of the error at point"
       (let* ((fix (flycheck-fix-new :description "Fix it" :edits nil :tick 0))
