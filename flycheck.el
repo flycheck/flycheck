@@ -14915,7 +14915,7 @@ for more information about perlimports."
                          (font-lock-ensure)
                          (buffer-string)))
                :end-line .location.end.line
-               :end-column .location.end.column
+               :end-column (+ 1 .location.end.column)
                :checker checker
                :buffer buffer)))
           (flycheck-parse-json output)))
