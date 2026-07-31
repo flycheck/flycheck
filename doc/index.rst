@@ -80,6 +80,7 @@ in-depth reference to all parts of Flycheck.
 
    user/installation
    user/quickstart
+   user/faq
    user/troubleshooting
    user/syntax-checks
    user/syntax-checkers
