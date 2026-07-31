@@ -84,7 +84,7 @@ Press :kbd:`RET` on an error in another file to jump straight to it.
    checked again, since Flycheck cannot tell that another file changed without
    re-running a check.
 
-The project of a buffer is Emacs' project (see `project-current`) when one is
+The project of a buffer is Emacs' project (see ``project-current``) when one is
 found, and the checker's working directory otherwise.  The current scope is
 shown as ``[project]`` in the error list's mode line.
 
@@ -140,14 +140,14 @@ Tune error list display
 
 By default the error list pops up in a side window at the bottom of the frame,
 a quarter of the frame tall, like similar lists in contemporary IDEs.  Side
-windows are not affected by :kbd:`C-x 1` (`delete-other-windows`); dismiss the
+windows are not affected by :kbd:`C-x 1` (``delete-other-windows``); dismiss the
 error list with :kbd:`q` in its window instead.  You can change or disable
 this behavior:
 
 .. defcustom:: flycheck-error-list-display-buffer-action
 
-   The `display-buffer` action used to display the error list.  Set to ``nil``
-   to fall back to the default behavior of `display-buffer`, where the error
+   The ``display-buffer`` action used to display the error list.  Set to ``nil``
+   to fall back to the default behavior of ``display-buffer``, where the error
    list pops up at an arbitrary place wherever Emacs finds a window for it.
 
 Entries in the built-in option `display-buffer-alist` matching the error list

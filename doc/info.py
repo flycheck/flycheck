@@ -87,11 +87,16 @@ def expand_node_name(node):
 class HTMLXRefDB(object):
     """Cross-reference database for Info manuals."""
 
-    #: URLs of the htmlxref database of GNU Texinfo (split into two files
-    #: since late 2024)
-    XREF_URLS = [
-        'https://ftpmirror.gnu.org/texinfo/htmlxref.d/Texinfo_GNU.cnf',
-        'https://ftpmirror.gnu.org/texinfo/htmlxref.d/Texinfo_nonGNU.cnf',
+    #: Names of the htmlxref database files of GNU Texinfo (split into two
+    #: files since late 2024)
+    XREF_FILES = ['Texinfo_GNU.cnf', 'Texinfo_nonGNU.cnf']
+
+    #: Where to look for them.  ftpmirror redirects to a nearby mirror, which
+    #: is the polite default but is not always healthy, so fall back to the
+    #: canonical host.
+    XREF_BASE_URLS = [
+        'https://ftpmirror.gnu.org/gnu/texinfo/htmlxref.d',
+        'https://ftp.gnu.org/gnu/texinfo/htmlxref.d',
     ]
 
     #: Regular expression to parse entries from an xref DB
@@ -135,18 +140,44 @@ class HTMLXRefDB(object):
             return manual_url + filename + '.html#' + anchor
 
 
+def fetch_htmlxref():
+    """Download and parse the Texinfo htmlxref database.
+
+    Try each base URL in turn and return the first that yields any manuals.
+    Return None when none of them do, so that references resolve quietly
+    instead of warning once per reference about the same missing database.
+    """
+    for base_url in HTMLXRefDB.XREF_BASE_URLS:
+        combined = ''
+        for name in HTMLXRefDB.XREF_FILES:
+            try:
+                response = requests.get('{0}/{1}'.format(base_url, name),
+                                        timeout=30)
+                # A mirror that is unwell answers with an HTML error page,
+                # which parses to nothing at all rather than raising
+                response.raise_for_status()
+                combined += response.text + '\n'
+            except requests.exceptions.RequestException as error:
+                logger.info('htmlxref: %s/%s unavailable (%s)',
+                            base_url, name, error)
+        database = HTMLXRefDB.parse(combined)
+        if database.entries:
+            return database
+    return None
+
+
 def update_htmlxref(app):
     if not isinstance(getattr(app.env, 'info_htmlxref', None), HTMLXRefDB):
         logger.info('fetching Texinfo htmlxref database...')
-        try:
-            combined = ''
-            for url in HTMLXRefDB.XREF_URLS:
-                combined += requests.get(url).text + '\n'
-            app.env.info_htmlxref = HTMLXRefDB.parse(combined)
-        except requests.exceptions.ConnectionError:
-            logger.warning('Failed to load xref DB.  '
-                           'Info references will not be resolved')
-            app.env.info_htmlxref = None
+        database = fetch_htmlxref()
+        if database is None:
+            # Not a warning: the database lives on someone else's server, and
+            # a build that fails on warnings should fail for defects in the
+            # documentation, not because GNU's mirrors are having a bad day.
+            # Info references degrade to plain text when it cannot be had.
+            logger.info('No xref DB available.  '
+                        'Info references will not be resolved')
+        app.env.info_htmlxref = database
 
 
 def resolve_info_references(app, _env, refnode, contnode):

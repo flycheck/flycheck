@@ -314,7 +314,7 @@ feedback to users; its output gets included when users invoke
 Finally, the ``shellcheck`` checker includes an error explainer, which opens the
 relevant page on the ShellCheck wiki when users run
 `flycheck-explain-error-at-point`.  It is built with
-`flycheck-error-explainer-from-url`, a helper that turns a URL format string
+``flycheck-error-explainer-from-url``, a helper that turns a URL format string
 keyed by the error ID into an explainer; many tools document their diagnostics
 online this way, so their checkers can define an explainer in a single line.
 
@@ -347,7 +347,7 @@ applies with ``C-c ! f`` (`flycheck-fix-error-at-point`), ``C-c ! F``
 ``:error-filter`` -- wherever you already build the error and have the fix data
 (a linter's suggested replacement, a SARIF ``fix``, an LSP code action).
 
-A fix is a `flycheck-fix`: a description and a list of `flycheck-fix-edit`
+A fix is a ``flycheck-fix``: a description and a list of ``flycheck-fix-edit``
 objects applied together as one undoable change.  Each edit replaces the region
 from one-based ``LINE``/``COLUMN`` to ``END-LINE``/``END-COLUMN`` with
 ``REPLACEMENT`` (an insertion has the two positions equal; a deletion has an
@@ -363,14 +363,14 @@ empty replacement):
                         :replacement ""))
           :tick (buffer-chars-modified-tick)))
 
-Set ``:tick`` to the buffer's `buffer-chars-modified-tick` when you build the
-fix: `flycheck-apply-fix` refuses to apply a fix if the buffer changed since,
+Set ``:tick`` to the buffer's ``buffer-chars-modified-tick`` when you build the
+fix: ``flycheck-apply-fix`` refuses to apply a fix if the buffer changed since,
 so stale positions can never silently corrupt the buffer.
 
 If computing the fix is expensive (an LSP code-action request, say), make
 ``:fix`` a *function* of one argument, the error, instead of a ready
-`flycheck-fix`.  Flycheck calls it only when the user applies the fix (see
-`flycheck-error-resolve-fix`), so a non-nil ``:fix`` still marks the error as
+``flycheck-fix``.  Flycheck calls it only when the user applies the fix (see
+``flycheck-error-resolve-fix``), so a non-nil ``:fix`` still marks the error as
 fixable without paying the cost up front.
 
 Related locations
@@ -379,7 +379,7 @@ Related locations
 When an error points at more than one place -- the earlier definition behind a
 "redefined" error, the borrow behind a Rust lifetime error -- attach the
 secondary places as the error's ``:relations``, a list of
-`flycheck-related-location` objects.  The user visits them with ``C-c ! j``
+``flycheck-related-location`` objects.  The user visits them with ``C-c ! j``
 (`flycheck-visit-related-location`), and they show up after the message in the
 echo area, Eldoc, the error list and the inline annotations.  A related
 location carries only a position and a message, and may live in another file:

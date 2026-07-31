@@ -110,8 +110,8 @@ customising:
 
 By default Flycheck documents the errors at point through Eldoc, alongside
 other Eldoc sources such as Eglot.  This honors your Eldoc customizations,
-e.g. `eldoc-echo-area-use-multiline-p` or alternative Eldoc frontends like
-`eldoc-box`.  The behaviour is entirely customisable:
+e.g. ``eldoc-echo-area-use-multiline-p`` or alternative Eldoc frontends like
+``eldoc-box``.  The behaviour is entirely customisable:
 
 .. defcustom:: flycheck-display-errors-function
 
@@ -125,7 +125,7 @@ Flycheck provides three built-in functions for this option:
 .. defun:: flycheck-display-errors-via-eldoc errors
 
    The default.  Errors at point are shown through Eldoc.  Messages too
-   long for the echo area (see `eldoc-echo-area-use-multiline-p`) can be
+   long for the echo area (see ``eldoc-echo-area-use-multiline-p``) can be
    read in full with :kbd:`M-x eldoc-doc-buffer`.
 
 .. defun:: flycheck-display-error-messages errors
@@ -235,7 +235,7 @@ Related locations
 Many errors point at more than one place.  A "redefined variable" error
 refers back to the first definition, a Rust lifetime error to the borrow that
 outlives it, and so on.  Language servers report these secondary locations as
-an LSP diagnostic's ``relatedInformation``; with :mode:`flycheck-eglot-mode`
+an LSP diagnostic's ``relatedInformation``; with :mode:`flycheck-eglot`
 Flycheck keeps them (Flymake, which shows Eglot's diagnostics, drops them).
 Other checkers can attach them too, through an error's ``relations`` slot.
 
@@ -243,7 +243,7 @@ Other checkers can attach them too, through an error's ``relations`` slot.
 
 Flycheck shows an error's related locations right after its message - in the
 echo area, through Eldoc, in the help-echo tooltip, and, with
-:mode:`flycheck-annotate-mode`, on their own lines below the code.  Each is a
+:mode:`flycheck-annotate`, on their own lines below the code.  Each is a
 ``↳`` line naming the place and its message.  In the :ref:`error list
 <flycheck-error-list>` an error that carries related locations is badged with
 ``↳N`` (how many), listed in the badge's tooltip.
@@ -262,7 +262,7 @@ Afterwards, step through the rest without prompting:
                 M-x flycheck-previous-related-location
 
    Visit the next (or previous) related location, cycling.  With
-   `repeat-mode` on, :kbd:`n` and :kbd:`p` keep walking.  With a prefix
+   ``repeat-mode`` on, :kbd:`n` and :kbd:`p` keep walking.  With a prefix
    argument, move that many locations.
 
 .. image:: /images/flycheck-related-locations.gif
@@ -280,7 +280,7 @@ Some checkers report a machine-applicable fix along with an error - the
 replacement text a tool like ``eslint --fix``, ``cargo clippy`` or a SARIF
 analyzer already computes.  Flycheck keeps that fix and can apply it for you.
 A fixable error gets a distinct fringe indicator, its ``[fix]`` marker in the
-error list, and, under :mode:`flycheck-annotate-mode`, a ``[fix]`` tag before
+error list, and, under :mode:`flycheck-annotate`, a ``[fix]`` tag before
 its inline message - like an editor's "fix available" lightbulb.
 
 A language server's fixes work differently: its ``quickfix`` code action is

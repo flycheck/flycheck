@@ -139,7 +139,7 @@ You can customise this behaviour with `flycheck-check-syntax-automatically`:
 .. defcustom:: flycheck-check-syntax-automatically-remote
 
    The same as `flycheck-check-syntax-automatically`, but for buffers visiting
-   remote files (see `file-remote-p`).  Checking a remote buffer spawns a
+   remote files (see ``file-remote-p``).  Checking a remote buffer spawns a
    process on the remote host over TRAMP, which is slow, so by default the
    change-driven triggers (``idle-change``, ``new-line`` and
    ``idle-buffer-switch``) are excluded and remote buffers are only checked on
