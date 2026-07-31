@@ -6,7 +6,8 @@ on:
       - master
     paths:
       - '**.yml'
-      - docs/**
+      - 'doc/**'
+      - CHANGELOG.md
   pull_request:
   workflow_dispatch:
 
@@ -17,15 +18,17 @@ concurrency:
 jobs:
   build-manual:
     runs-on: ubuntu-latest
-    
+
     steps:
-    - uses: actions/checkout@v3
-        
-    - uses: actions/setup-python@v4
+    - uses: actions/checkout@v4
+
+    - uses: actions/setup-python@v5
       with:
-        python-version: '3.10' 
-        
-    - name: Run tests
+        # Match the version Read the Docs builds with, so the manual is
+        # checked against the Sphinx that actually publishes it
+        python-version: '3.13'
+
+    - name: Build the manual
       run: |
         pip install -r doc/requirements.txt
         make -C doc SPHINXOPTS=-n html
