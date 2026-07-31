@@ -280,11 +280,17 @@ on `trusted-content-p' (e.g. `emacs-lisp') remain enabled."
           (lambda ()
             (setq flycheck-buttercup-syntax-checker-finished t)))
 
-(defconst flycheck-buttercup-checker-wait-time 10
+(defconst flycheck-buttercup-checker-wait-time
+  (if (memq system-type '(windows-nt ms-dos cygwin)) 30 10)
   "Time to wait until a checker is finished in seconds.
 
 After this time has elapsed, the checker is considered to have
-failed, and the test aborted with failure.")
+failed, and the test aborted with failure.
+
+Windows gets longer.  Spawning a process there costs far more than it
+does elsewhere, and on a loaded CI runner a check that would finish in
+well under a second locally can take longer than ten, which fails specs
+that have nothing wrong with them.")
 
 (define-error 'flycheck-buttercup-syntax-check-timed-out
   "Syntax check timed out.")
