@@ -3013,6 +3013,55 @@ A list (CHECKER STATUS OUTPUT), recorded when a check ends `errored' or
 the checker's own output is kept here for `flycheck-verify-setup' to
 show, where there is room for it.")
 
+;; A server publishes diagnostics whenever it likes, and each push that
+;; carries something new re-runs the check that publishes it.  How often
+;; that happens is entirely the server's business: some publish once and
+;; go quiet, others push continuously while they index or build.  Count
+;; both, so `flycheck-verify-setup' can show the rate.  A report of
+;; Flycheck bogging down in an LSP buffer is otherwise hard to tell apart
+;; from one where each individual check is simply slow.
+
+(defvar-local flycheck-lsp--push-count 0
+  "How many diagnostics pushes this buffer's LSP server has sent.")
+
+(defvar-local flycheck-lsp--recheck-count 0
+  "How many of this buffer's pushes carried new diagnostics and re-ran a check.")
+
+(defvar-local flycheck-lsp--first-push-time nil
+  "When this buffer's LSP server sent its first diagnostics push.")
+
+(defvar-local flycheck-lsp--last-push-time nil
+  "When this buffer's LSP server sent its most recent diagnostics push.")
+
+(defun flycheck--verify-princ-lsp-activity (activity)
+  "Print ACTIVITY, a `flycheck--lsp-activity' value, if there is any.
+
+How often a language server pushes diagnostics is the server's business,
+and a buffer that feels slow because its server pushes constantly looks
+nothing like one where each check is slow.  The counts tell them apart."
+  (pcase activity
+    (`(,pushes ,rechecks ,elapsed ,since)
+     (princ (format "LSP diagnostics pushes: %d, of which %d carried \
+changes and re-ran a check\n" pushes rechecks))
+     ;; A rate over a window too short to measure says nothing
+     (when (and elapsed (>= elapsed 1))
+       (princ (format "                        %.1f per second over %.0fs\n"
+                      (/ pushes (float elapsed)) elapsed)))
+     (when since
+       (princ (format "                        last push %.1fs ago\n" since)))
+     (princ "\n"))))
+
+(defun flycheck--lsp-activity ()
+  "Return this buffer's LSP push counts, or nil when its server sent none."
+  (when (and flycheck-lsp--first-push-time (> flycheck-lsp--push-count 0))
+    (let ((now (float-time)))
+      (list flycheck-lsp--push-count
+            flycheck-lsp--recheck-count
+            (- (or flycheck-lsp--last-push-time now)
+               flycheck-lsp--first-push-time)
+            (and flycheck-lsp--last-push-time
+                 (- now flycheck-lsp--last-push-time))))))
+
 (defun flycheck--verify-princ-last-failure (failure)
   "Print FAILURE, a `flycheck--last-failure' value, if there is one."
   (pcase failure
@@ -3045,6 +3094,7 @@ possible problems are shown."
 
   (let* ((buffer (current-buffer))
          (last-failure flycheck--last-failure)
+         (lsp-activity (flycheck--lsp-activity))
          (first-checker (flycheck-get-checker-for-buffer))
          (valid-checkers
           (remq first-checker
@@ -3113,6 +3163,8 @@ but will not run until properly configured:\n\n")
               (princ "\n"))
             (princ
              "Try adding these syntax checkers to `flycheck-checkers'.\n\n")))
+
+        (flycheck--verify-princ-lsp-activity lsp-activity)
 
         (flycheck--verify-print-footer buffer)
 
@@ -10737,6 +10789,14 @@ fix is applied right after."
        :edits (mapcar #'flycheck-lsp--text-edit (append (cdar targets) nil))
        :tick (buffer-chars-modified-tick)))))
 
+(defun flycheck-lsp--count-push (rechecked)
+  "Record a diagnostics push, RECHECKED non-nil if it triggered a check."
+  (cl-incf flycheck-lsp--push-count)
+  (when rechecked (cl-incf flycheck-lsp--recheck-count))
+  (setq flycheck-lsp--last-push-time (float-time))
+  (unless flycheck-lsp--first-push-time
+    (setq flycheck-lsp--first-push-time flycheck-lsp--last-push-time)))
+
 (defconst flycheck-lsp--bridges '(eglot-check flycheck-lsp)
   "The LSP bridge checkers, in the order they run when both are active.
 
@@ -11022,16 +11082,24 @@ Only `textDocument/publishDiagnostics' is used: cache the diagnostics on
 their document and, if a live buffer owns it, re-trigger its check so the
 fresh diagnostics are published (guarded against recursion)."
   (when (eq method 'textDocument/publishDiagnostics)
-    (let ((doc (flycheck-lsp--document
-                server (flycheck-lsp--doc-key (plist-get params :uri)))))
-      (setf (flycheck-lsp--doc-diags doc)
-            (append (plist-get params :diagnostics) nil))
+    (let* ((doc (flycheck-lsp--document
+                 server (flycheck-lsp--doc-key (plist-get params :uri))))
+           (new (append (plist-get params :diagnostics) nil))
+           ;; A push repeating what we already hold changes nothing about
+           ;; the buffer, and servers republish freely while they index
+           (changed (not (equal new (flycheck-lsp--doc-diags doc)))))
+      (when changed
+        (setf (flycheck-lsp--doc-diags doc) new))
       (when-let* ((buffer (flycheck-lsp--doc-buffer doc))
                   ((buffer-live-p buffer)))
         (with-current-buffer buffer
-          (when (and flycheck-mode (not flycheck-lsp--suppress-recheck))
-            (let ((flycheck-lsp--suppress-recheck t))
-              (flycheck-buffer-automatically))))))))
+          (let ((recheck (and changed
+                              flycheck-mode
+                              (not flycheck-lsp--suppress-recheck))))
+            (flycheck-lsp--count-push recheck)
+            (when recheck
+              (let ((flycheck-lsp--suppress-recheck t))
+                (flycheck-buffer-automatically)))))))))
 
 (defun flycheck-lsp--document (server key)
   "Return the `flycheck-lsp--doc' for KEY on SERVER, creating it if needed."
@@ -11643,11 +11711,21 @@ talking to the server yields nil, so the fix just reports as unavailable."
 
 (defun flycheck-eglot--report (diags &rest _)
   "Cache Eglot's DIAGS and re-run Flycheck to publish them.
-Registered with `eglot-flymake-backend' as its report function."
-  (setq flycheck-eglot--diagnostics (append diags nil))
-  (unless flycheck-eglot--suppress-recheck
-    (let ((flycheck-eglot--suppress-recheck t))
-      (flycheck-buffer-automatically))))
+Registered with `eglot-flymake-backend' as its report function.
+
+A push that repeats what we already hold changes nothing about the
+buffer, so it does not re-run the check.  Servers republish an unchanged
+set freely while they index or build, and every one of those used to cost
+a full check."
+  (let* ((new (append diags nil))
+         (changed (not (equal new flycheck-eglot--diagnostics)))
+         (recheck (and changed (not flycheck-eglot--suppress-recheck))))
+    (flycheck-lsp--count-push recheck)
+    (when changed
+      (setq flycheck-eglot--diagnostics new)
+      (when recheck
+        (let ((flycheck-eglot--suppress-recheck t))
+          (flycheck-buffer-automatically))))))
 
 (defun flycheck-eglot--start (_checker callback)
   "Start the `eglot-check' syntax check, reporting through CALLBACK.

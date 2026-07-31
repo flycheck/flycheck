@@ -211,6 +211,69 @@
           (advice-remove 'flymake-diagnostics
                          #'flycheck-eglot--flymake-diagnostics))))))
 
+(describe "Diagnostics pushes"
+  ;; A server publishes whenever it likes, and some republish an
+  ;; unchanged set continuously while indexing.  Each of those used to
+  ;; cost a full check.
+  (it "does not re-check when the pushed diagnostics are unchanged"
+    (flycheck-buttercup-with-temp-buffer
+      (let ((checks 0))
+        (cl-letf (((symbol-function 'flycheck-buffer-automatically)
+                   (lambda (&rest _) (cl-incf checks))))
+          (let ((diags (list (flymake-make-diagnostic
+                              (current-buffer) 1 2 :error "boom"))))
+            (dotimes (_ 10) (flycheck-eglot--report diags))
+            (expect checks :to-equal 1))))))
+
+  (it "does not re-check for an equal set of freshly made diagnostics"
+    ;; Servers build new objects every time; only the content matters
+    (flycheck-buttercup-with-temp-buffer
+      (let ((checks 0))
+        (cl-letf (((symbol-function 'flycheck-buffer-automatically)
+                   (lambda (&rest _) (cl-incf checks))))
+          (dotimes (_ 10)
+            (flycheck-eglot--report
+             (list (flymake-make-diagnostic (current-buffer) 1 2 :error "boom"))))
+          (expect checks :to-equal 1)))))
+
+  (it "re-checks once the diagnostics actually change"
+    (flycheck-buttercup-with-temp-buffer
+      (let ((checks 0))
+        (cl-letf (((symbol-function 'flycheck-buffer-automatically)
+                   (lambda (&rest _) (cl-incf checks))))
+          (flycheck-eglot--report
+           (list (flymake-make-diagnostic (current-buffer) 1 2 :error "one")))
+          (flycheck-eglot--report
+           (list (flymake-make-diagnostic (current-buffer) 1 2 :error "two")))
+          (expect checks :to-equal 2)))))
+
+  (it "counts every push, including the ones it skipped"
+    (flycheck-buttercup-with-temp-buffer
+      (cl-letf (((symbol-function 'flycheck-buffer-automatically) #'ignore))
+        (let ((diags (list (flymake-make-diagnostic
+                            (current-buffer) 1 2 :error "boom"))))
+          (dotimes (_ 7) (flycheck-eglot--report diags)))
+        (expect flycheck-lsp--push-count :to-equal 7)
+        (expect flycheck-lsp--recheck-count :to-equal 1))))
+
+  (describe "what flycheck-verify-setup reports"
+    (defun test-push/render (activity)
+      (with-temp-buffer
+        (let ((standard-output (current-buffer)))
+          (flycheck--verify-princ-lsp-activity activity))
+        (buffer-string)))
+
+    (it "says nothing when the server sent no pushes"
+      (expect (test-push/render nil) :to-equal ""))
+
+    (it "shows the rate a chatty server pushes at"
+      (let ((rendered (test-push/render '(1247 1247 29.0 0.1))))
+        (expect rendered :to-match "1247")
+        (expect rendered :to-match "43.0 per second")))
+
+    (it "omits a rate measured over too short a window"
+      (expect (test-push/render '(2 1 0.02 0.01)) :not :to-match "per second"))))
+
 (describe "Chaining the LSP bridges"
   ;; Both bridges write to `flycheck-checker' and to checker properties
   ;; shared by every buffer, so the order the modes happen to enable in
