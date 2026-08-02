@@ -87,12 +87,44 @@
           (flycheck-eglot--report diags)
           (expect flycheck-eglot--diagnostics :to-equal diags)
           (expect 'flycheck-buffer-automatically :to-have-been-called))))
-    (it "does not re-trigger while suppressed"
+    (it "does not re-trigger for a report it asked for"
       (flycheck-buttercup-with-temp-buffer
         (spy-on 'flycheck-buffer-automatically)
-        (let ((flycheck-eglot--suppress-recheck t))
-          (flycheck-eglot--report nil))
-        (expect 'flycheck-buffer-automatically :not :to-have-been-called))))
+        (setq flycheck-eglot--report-solicited t)
+        (flycheck-eglot--report
+         (list (test-eglot--diag (current-buffer) 1 2 :error "x")))
+        (expect 'flycheck-buffer-automatically :not :to-have-been-called)))
+
+    (it "goes back to re-triggering once the request is answered"
+      ;; The answer clears the flag, so a diagnostic the server volunteers
+      ;; afterwards still reaches the buffer
+      (flycheck-buttercup-with-temp-buffer
+        (spy-on 'flycheck-buffer-automatically)
+        (setq flycheck-eglot--report-solicited t)
+        (flycheck-eglot--report nil)
+        (flycheck-eglot--report
+         (list (test-eglot--diag (current-buffer) 1 2 :error "x")))
+        (expect 'flycheck-buffer-automatically :to-have-been-called)))
+
+    (it "survives an answer that arrives after the request returned"
+      ;; Under LSP 3.17 pull diagnostics, asking Eglot sends a request and
+      ;; returns; the answer lands long after any dynamic binding would
+      ;; have unwound, and used to start a check that asked again.  See
+      ;; #2262.
+      (flycheck-buttercup-with-temp-buffer
+        (let ((answer nil) (requests 0))
+          (spy-on 'flycheck-buffer-automatically)
+          (cl-letf (((symbol-function 'eglot-flymake-backend)
+                     (lambda (report-fn &rest _)
+                       (cl-incf requests)
+                       (setq answer report-fn)))
+                    ((symbol-function 'flycheck-eglot--convert-diagnostic)
+                     (lambda (_d) (flycheck-error-new-at 1 1 'error "x"))))
+            (flycheck-eglot--start nil #'ignore)
+            (expect requests :to-equal 1)
+            ;; the server answers, well after `:start' returned
+            (funcall answer (list (test-eglot--diag (current-buffer) 1 2 :error "x")))
+            (expect 'flycheck-buffer-automatically :not :to-have-been-called))))))
 
   (describe "flycheck-eglot--flymake-diagnostics"
     (it "serves the cached diagnostics that overlap the query range"
