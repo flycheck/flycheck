@@ -89,17 +89,34 @@
       ;; Documenting interactively is what refreshes the echo area after a
       ;; jump, but `eldoc-display-in-buffer' reads the same flag as a
       ;; request to display the *eldoc* window.  See #2201.
-      (let ((seen nil))
-        (let ((eldoc-display-functions
-               (list 'eldoc-display-in-echo-area
-                     (lambda (_docs interactive) (push (cons 'other interactive) seen)))))
-          (cl-letf (((symbol-function 'eldoc-print-current-symbol-info)
-                     (lambda (&optional interactive)
-                       (dolist (f eldoc-display-functions)
-                         (unless (eq f 'eldoc-display-in-echo-area)
-                           (funcall f nil interactive))))))
-            (flycheck-display-errors-via-eldoc nil)))
-        (expect (cdr (assq 'other seen)) :to-be nil)))
+      (flycheck-buttercup-with-temp-buffer
+        (let ((asked 'unset))
+          (cl-letf (((symbol-function 'eldoc-print-current-symbol-info) #'ignore))
+            (flycheck-display-errors-via-eldoc nil))
+          ;; Eldoc may only get round to displaying long after the request,
+          ;; so the suppression has to outlive it rather than ride on a
+          ;; dynamic binding
+          (flycheck--eldoc-suppress-doc-window
+           (lambda (_docs interactive) (setq asked interactive)) nil t)
+          (expect asked :to-be nil))))
+
+    (it "only suppresses the window for the refresh it asked for"
+      (flycheck-buttercup-with-temp-buffer
+        (let ((asked 'unset))
+          ;; nothing pending: an explicit `M-x eldoc' must still display
+          (flycheck--eldoc-suppress-doc-window
+           (lambda (_docs interactive) (setq asked interactive)) nil t)
+          (expect asked :to-be t))))
+
+    (it "suppresses the window once, not for every later display"
+      (flycheck-buttercup-with-temp-buffer
+        (let ((asked nil))
+          (cl-letf (((symbol-function 'eldoc-print-current-symbol-info) #'ignore))
+            (flycheck-display-errors-via-eldoc nil))
+          (dotimes (_ 2)
+            (flycheck--eldoc-suppress-doc-window
+             (lambda (_docs interactive) (push interactive asked)) nil t))
+          (expect (nreverse asked) :to-equal '(nil t)))))
 
     (it "asks eldoc to document interactively"
       ;; Left to itself Eldoc keeps out of the echo area unless the

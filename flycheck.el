@@ -3386,6 +3386,12 @@ ARG is ‘toggle’; disable the mode otherwise."
     (flycheck-clear)
     (flycheck--sync-margin)
     (add-hook 'eldoc-documentation-functions #'flycheck-eldoc-function nil t)
+    ;; Guarded by a buffer-local flag that only Flycheck sets, so this is
+    ;; inert everywhere else.  It stays for the session: Eldoc displays for
+    ;; whichever buffer answered last, so removing it when one buffer turns
+    ;; Flycheck off would break the buffers that still have it on.
+    (advice-add 'eldoc-display-in-buffer
+                :around #'flycheck--eldoc-suppress-doc-window)
     ;; `global-eldoc-mode' may have skipped this buffer because no
     ;; documentation source was registered when it made its decision;
     ;; give it another chance now that Flycheck provides one.  Buffers
@@ -7517,20 +7523,33 @@ avoid slowing down editing when the error list is hidden."
   "Whether errors at point are displayed through Eldoc."
   (eq flycheck-display-errors-function #'flycheck-display-errors-via-eldoc))
 
-(defun flycheck--eldoc-echo-area-only ()
-  "Return `eldoc-display-functions' with only the echo area treated as asked for.
+(defvar-local flycheck--eldoc-refresh-pending nil
+  "Non-nil while a Flycheck-initiated Eldoc refresh has yet to be displayed.
 
 Flycheck documents interactively so that the echo area is refreshed even
 after a command Eldoc does not recognise, but that request should not
-reach the other display functions: `eldoc-display-in-buffer' reads it as
-\\[eldoc-doc-buffer] and pops the documentation window open, and jumping
-to an error should not rearrange the frame.  They still run, and still
-update what they render, just not as though the user had asked for them."
-  (mapcar (lambda (display)
-            (if (eq display 'eldoc-display-in-echo-area)
-                display
-              (lambda (docs _interactive) (funcall display docs nil))))
-          eldoc-display-functions))
+reach `eldoc-display-in-buffer', which reads it as \\[eldoc-doc-buffer]
+and pops the documentation window open.  Jumping to an error should not
+rearrange the frame.
+
+This cannot be a `let' around the request.  Eldoc gathers documentation
+from every registered source and displays it once they have all
+answered, so a single asynchronous source, such as a language server, is
+enough to push the display past the end of any dynamic binding.  A flag
+that lives until the display happens survives that.")
+
+(defun flycheck--eldoc-suppress-doc-window (display docs interactive)
+  "Keep a Flycheck-initiated refresh from popping the Eldoc window open.
+
+DISPLAY is `eldoc-display-in-buffer', called with DOCS and INTERACTIVE.
+The documentation buffer is still brought up to date; only the request to
+put it on screen is dropped, and only for the refresh Flycheck asked
+for."
+  (if flycheck--eldoc-refresh-pending
+      (progn
+        (setq flycheck--eldoc-refresh-pending nil)
+        (funcall display docs nil))
+    (funcall display docs interactive)))
 
 (defun flycheck-display-errors-via-eldoc (_errors)
   "Trigger Eldoc to document the errors at point.
@@ -7547,10 +7566,10 @@ function already means Flycheck decided to show the errors at
 point.  Left to its own devices Eldoc keeps out of the echo area
 unless the command that ran is one of `eldoc-message-commands',
 which error navigation is not, and the errors would go unseen.
-Only the echo area sees that request, via
-`flycheck--eldoc-echo-area-only'."
-  (let ((eldoc-display-functions (flycheck--eldoc-echo-area-only)))
-    (eldoc-print-current-symbol-info t)))
+`flycheck--eldoc-refresh-pending' keeps that request from reaching the
+documentation window."
+  (setq flycheck--eldoc-refresh-pending t)
+  (eldoc-print-current-symbol-info t))
 
 (defun flycheck-eldoc-function (callback &rest _ignored)
   "Document the Flycheck errors at point by calling CALLBACK.
