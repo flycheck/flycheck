@@ -8201,8 +8201,13 @@ clamped to the line so a checker column past the end still lands on it."
       (forward-char offset)
       (current-column))))
 
-(defun flycheck-annotate--make-below-overlay (anchor block)
+(defun flycheck-annotate--make-below-overlay (anchor block &optional background)
   "Create a tracked overlay rendering BLOCK on its own lines below ANCHOR.
+
+BACKGROUND, when given, is a face put under the whole block so the tinted
+line and its messages read as one region.  The block hangs off the *next*
+line, outside the range the line tint covers, so it has to carry the tint
+itself rather than inherit it.
 
 BLOCK is the annotation text without surrounding newlines.  It is hung off
 the beginning of the following line as a `before-string' ending in a
@@ -8213,15 +8218,19 @@ point onto the next line of code instead of stalling on -- or, under Evil,
 getting stuck before -- the annotation.  On the last line of the buffer,
 where there is no following line, the block is hung off ANCHOR with a
 leading newline and a `cursor'-anchored space instead.  Return the overlay."
-  (if (< anchor (point-max))
-      (let ((ov (make-overlay (1+ anchor) (1+ anchor) nil t nil)))
-        (overlay-put ov 'priority 100)
-        (overlay-put ov 'before-string (concat block "\n"))
-        (flycheck-annotate--track ov))
-    (let ((ov (make-overlay anchor anchor nil t nil)))
+  (let ((string (if (< anchor (point-max))
+                    (concat block "\n")
+                  (concat (propertize " " 'cursor t) "\n" block))))
+    ;; Appended, so the messages keep their own colours and only take the
+    ;; background from the tint.  It has to cover the newlines too, or the
+    ;; tint would stop at the text instead of reaching the window edge.
+    (when background
+      (add-face-text-property 0 (length string) background 'append string))
+    (let ((ov (if (< anchor (point-max))
+                  (make-overlay (1+ anchor) (1+ anchor) nil t nil)
+                (make-overlay anchor anchor nil t nil))))
       (overlay-put ov 'priority 100)
-      (overlay-put ov 'before-string
-                   (concat (propertize " " 'cursor t) "\n" block))
+      (overlay-put ov 'before-string string)
       (flycheck-annotate--track ov))))
 
 (defun flycheck-annotate-below-style (errors anchor _focused)
@@ -8259,7 +8268,11 @@ gutter.  FOCUSED is ignored."
                     (flycheck-error-relations err) "")))
         (push (concat pad conn msg rels) lines)))
     (flycheck-annotate--make-below-overlay
-     anchor (string-join (nreverse lines) "\n"))))
+     anchor (string-join (nreverse lines) "\n")
+     ;; Same level the line tint uses, so the two always agree
+     (and flycheck-annotate-background
+          (flycheck-annotate--background-face
+           (flycheck-error-level (car errors)))))))
 
 (defun flycheck-annotate--clear ()
   "Delete all inline overlays in the current buffer."

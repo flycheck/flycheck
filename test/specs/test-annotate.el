@@ -123,6 +123,47 @@ a newline, so key it back under the code line."
           (expect (string-prefix-p "\n" s) :to-be nil)))))
 
   (describe "flycheck-annotate-below-style"
+    (defun test-annotate/faces-at (ov pos)
+      "Return the face property at POS of OV's annotation string, as a list."
+      (let ((face (get-text-property pos 'face (test-annotate/text ov))))
+        (if (listp face) face (list face))))
+
+    (it "carries the line tint through the whole block"
+      ;; The block hangs off the next line, outside the range the tint
+      ;; overlay covers, so it has to carry the tint itself or the code
+      ;; line and its messages look like separate regions.  See #2276.
+      (flycheck-buttercup-with-temp-buffer
+        (insert "abcdef\nghijkl\n")
+        (let* ((eol (save-excursion (goto-char (point-min)) (line-end-position)))
+               (errs (list (flycheck-error-new-at 1 3 'error "boom"
+                                                  :checker 'emacs-lisp)))
+               (flycheck-annotate-background t)
+               (flycheck-annotate--overlays nil)
+               (ov (flycheck-annotate-below-style errs eol t))
+               (text (test-annotate/text ov)))
+          ;; every character, the trailing newline included, or the tint
+          ;; would stop short of the window edge
+          (dotimes (i (length text))
+            (expect (test-annotate/faces-at ov i)
+                    :to-contain 'flycheck-annotate-error-background))
+          ;; and the message keeps its own colour on top
+          (expect (test-annotate/faces-at ov (string-match "boom" text))
+                  :to-contain 'flycheck-annotate-error))))
+
+    (it "leaves the block untinted when the tint is off"
+      (flycheck-buttercup-with-temp-buffer
+        (insert "abcdef\nghijkl\n")
+        (let* ((eol (save-excursion (goto-char (point-min)) (line-end-position)))
+               (errs (list (flycheck-error-new-at 1 3 'error "boom"
+                                                  :checker 'emacs-lisp)))
+               (flycheck-annotate-background nil)
+               (flycheck-annotate--overlays nil)
+               (ov (flycheck-annotate-below-style errs eol t))
+               (text (test-annotate/text ov)))
+          (dotimes (i (length text))
+            (expect (test-annotate/faces-at ov i)
+                    :not :to-contain 'flycheck-annotate-error-background)))))
+
     (it "stacks each message on its own line under the code"
       (flycheck-buttercup-with-temp-buffer
         (insert "abcdef\n")
