@@ -4770,13 +4770,45 @@ current check (see `flycheck--syntax-check-modified-tick'), so
     (user-error
      "The buffer changed since this fix was computed; re-check first")))
 
+(defun flycheck--check-fix-edit (edit)
+  "Signal a `user-error' when EDIT's coordinates cannot mean what they say.
+
+A checker builds these out of a tool's output, and tools do emit ranges
+that make no sense: a column of zero where Flycheck counts from one, an
+end that comes before its start.  Resolving those anyway lands the edit
+somewhere the checker never pointed at, which for a feature that writes
+to the buffer is the one outcome worth refusing outright.  Positions off
+the end of the buffer are left alone, since a fix that appends a missing
+trailing newline legitimately names one."
+  (let ((line (flycheck-fix-edit-line edit))
+        (column (flycheck-fix-edit-column edit))
+        (end-line (flycheck-fix-edit-end-line edit))
+        (end-column (flycheck-fix-edit-end-column edit)))
+    (unless (and (integerp line) (>= line 1))
+      (user-error "This fix names line %S, which is not a line; not applying it"
+                  line))
+    (when (and column (< column 1))
+      (user-error "This fix names column %S, and columns start at 1; \
+not applying it" column))
+    (when (and end-column (< end-column 1))
+      (user-error "This fix names end column %S, and columns start at 1; \
+not applying it" end-column))
+    (when (and end-line (< end-line line))
+      (user-error "This fix ends on line %S, before it starts on %S; \
+not applying it" end-line line))
+    (when (and end-column column (or (null end-line) (= end-line line))
+               (< end-column column))
+      (user-error "This fix ends at column %S, before it starts at %S; \
+not applying it" end-column column))))
+
 (defun flycheck--apply-edits (edits)
   "Apply EDITS in the current, widened buffer as one undoable change.
 
 EDITS is a list of `flycheck-fix-edit' objects.  They are applied from
 the end of the buffer backwards, so applying one does not shift the
 positions of the ones above it.  Signal a `user-error', touching
-nothing, when the edits overlap."
+nothing, when an edit's coordinates make no sense or the edits overlap."
+  (mapc #'flycheck--check-fix-edit edits)
   (let ((regions
          ;; Apply from the bottom up; break ties on equal starts by the
          ;; larger region first.
