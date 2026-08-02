@@ -11654,10 +11654,19 @@ predicate refuses a buffer whose mode is off."
 (defvar-local flycheck-eglot--diagnostics nil
   "Latest diagnostics Eglot reported for this buffer, in Flymake format.")
 
-(defvar-local flycheck-eglot--suppress-recheck nil
-  "When non-nil, `flycheck-eglot--report' does not re-trigger a check.
-Bound while pulling diagnostics from `:start', so the synchronous report
-that pull may produce does not recurse into another check.")
+(defvar-local flycheck-eglot--report-solicited nil
+  "Non-nil while an answer to Flycheck's own request for diagnostics is due.
+
+A report Flycheck asked for must not start another check, or the two feed
+each other: the check asks Eglot for diagnostics, the answer triggers a
+check, and so on.  Reports the server volunteers still trigger a check,
+which is how pushed diagnostics reach the buffer.
+
+This cannot be a `let' around the request.  Under the pull model of LSP
+3.17, asking Eglot for diagnostics sends `textDocument/diagnostic' and
+returns; the answer arrives long after any dynamic binding has unwound,
+and the loop then runs at hundreds of requests a second.  The flag is
+cleared by whichever report answers the request, synchronous or not.")
 
 (defun flycheck-eglot--available-p ()
   "Return non-nil when Eglot is managing the current buffer."
@@ -11772,25 +11781,33 @@ talking to the server yields nil, so the fix just reports as unavailable."
   "Cache Eglot's DIAGS and re-run Flycheck to publish them.
 Registered with `eglot-flymake-backend' as its report function.
 
-A push that repeats what we already hold changes nothing about the
-buffer, so it does not re-run the check.  Servers republish an unchanged
-set freely while they index or build, and every one of those used to cost
-a full check."
+A report that answers Flycheck's own request never starts a check, since
+that is what closes the loop between the two.  Neither does one that
+repeats what we already hold: servers republish an unchanged set freely
+while they index or build, and every one of those used to cost a full
+check."
   (let* ((new (append diags nil))
+         (solicited flycheck-eglot--report-solicited)
          (changed (not (equal new flycheck-eglot--diagnostics)))
-         (recheck (and changed (not flycheck-eglot--suppress-recheck))))
+         (recheck (and changed (not solicited))))
+    ;; Whatever arrives first answers the request, whether Eglot had the
+    ;; diagnostics to hand or had to go and ask for them
+    (setq flycheck-eglot--report-solicited nil)
     (flycheck-lsp--count-push recheck)
     (when changed
       (setq flycheck-eglot--diagnostics new)
       (when recheck
-        (let ((flycheck-eglot--suppress-recheck t))
-          (flycheck-buffer-automatically))))))
+        (flycheck-buffer-automatically)))))
 
 (defun flycheck-eglot--start (_checker callback)
   "Start the `eglot-check' syntax check, reporting through CALLBACK.
-Pull Eglot's current diagnostics and report their Flycheck conversions."
-  (let ((flycheck-eglot--suppress-recheck t))
-    (eglot-flymake-backend #'flycheck-eglot--report))
+
+Ask Eglot for the buffer's diagnostics and report the conversions of
+whatever it has to hand.  Under the pull model the answer arrives later
+and reaches the buffer through `flycheck-eglot--report'; the flag marks
+it as one Flycheck asked for, so it does not start a further check."
+  (setq flycheck-eglot--report-solicited t)
+  (eglot-flymake-backend #'flycheck-eglot--report)
   (funcall callback 'finished
            (mapcar #'flycheck-eglot--convert-diagnostic
                    flycheck-eglot--diagnostics)))
@@ -11826,10 +11843,11 @@ ORIG is the advised function; BEG, END and ARGS are its arguments."
   (when (flycheck-eglot--available-p)
     (flycheck-lsp--register-checker 'eglot-check flycheck-eglot-exclusive)
     (flycheck-lsp--select-primary-bridge)
-    ;; Suppress the recheck the synchronous report may fire; the trailing
-    ;; `flycheck-buffer-deferred' triggers the first check instead.
-    (let ((flycheck-eglot--suppress-recheck t))
-      (eglot-flymake-backend #'flycheck-eglot--report))
+    ;; Register as Eglot's report function without letting the answer start
+    ;; a check; the trailing `flycheck-buffer-deferred' triggers the first
+    ;; one instead.
+    (setq flycheck-eglot--report-solicited t)
+    (eglot-flymake-backend #'flycheck-eglot--report)
     (advice-add 'flymake-diagnostics :around
                 #'flycheck-eglot--flymake-diagnostics)
     (when (bound-and-true-p flymake-mode)
