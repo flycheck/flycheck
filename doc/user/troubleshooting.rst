@@ -139,27 +139,26 @@ The following image shows a :term:`verification buffer`:
 
 .. image:: /images/flycheck-verify-buffer.png
 
-The buffer shows all syntax checkers for the current buffer.  Note that you can
-click on the syntax checker names to show the docstring for a syntax checker.
+The buffer groups the checkers by what will actually happen to them: the one
+that runs, the ones that would run if you selected them, and the ones that
+cannot run as things stand.  Click a checker's name for its docstring.
 
-* *Green* items indicate *good* configuration.  In the screenshot both
-  `python-flake8` and `python-pycompile` exist.
+* *Green* items indicate *good* configuration.  In the screenshot `python-ruff`
+  and `python-pycompile` were both found.
 
 * *Orange* items indicate a *potential* misconfiguration.  The screenshot shows
-  that no configuration file was found for `python-flake8` which is perfectly
-  fine if there’s no flake8 configuration file in the project, but not so good
-  if you’d like Flycheck to use a configuration file for flake8.  The section
-  :ref:`flycheck-checker-config-files` has more information about configuration
-  files.
+  that no configuration file was found for `python-ruff`, which is perfectly
+  fine if the project has none, but not so good if you meant Flycheck to use
+  one.  The section :ref:`flycheck-checker-config-files` has more information
+  about configuration files.
 
-  Likewise the buffer warns you that a ``demo`` syntax checker (which is not
-  part of Flycheck of course) isn’t registered in `flycheck-checkers`.  If you’d
-  like Flycheck to automatically use this syntax checker you should fix this
-  issue by adding it to `flycheck-checkers` but otherwise it’s safe to ignore
-  this warning.
+* *Red* items indicate *bad* configuration.  Neither `python-flake8` nor
+  `python-pylint` was found in the screenshot, so neither can run in that
+  buffer, and each says it disabled itself rather than failing on every check.
+  :kbd:`C-u C-c ! x` brings a disabled checker back once you have installed it.
 
-* *Red* items indicate *bad* configuration.  `python-pylint` wasn’t found in the
-  screenshot, so you’ll not be able to use pylint in the current buffer.
+A checker that is registered nowhere is called out separately, under a heading
+telling you to add it to `flycheck-checkers`.
 
 The verification buffer also shows:
 
