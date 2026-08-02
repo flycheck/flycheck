@@ -336,6 +336,29 @@
         (expect (flycheck-related-errors (nth 1 flycheck-current-errors))
                 :to-equal (list (nth 1 flycheck-current-errors))))))
 
+  (describe "flycheck-error-tags"
+    (it "defaults to nil"
+      (expect (flycheck-error-tags (flycheck-error-new-at 5 7 'error))
+              :to-be nil))
+
+    (it "round-trips the tags passed to each constructor"
+      (expect (flycheck-error-tags
+               (flycheck-error-new-at 1 1 'warning "m" :tags '(unnecessary)))
+              :to-equal '(unnecessary))
+      (expect (flycheck-error-tags
+               (flycheck-error-new :line 1 :column 1 :tags '(deprecated)))
+              :to-equal '(deprecated)))
+
+    (it "is setf-able"
+      (let ((err (flycheck-error-new-at 5 7 'error)))
+        (setf (flycheck-error-tags err) '(deprecated))
+        (expect (flycheck-error-tags err) :to-equal '(deprecated))))
+
+    (it "leaves the level alone"
+      ;; A tag says what the code is, not how bad the problem is
+      (let ((err (flycheck-error-new-at 1 1 'warning "m" :tags '(unnecessary))))
+        (expect (flycheck-error-level err) :to-be 'warning))))
+
   (describe "flycheck-error-relations"
     (it "defaults to nil"
       (expect (flycheck-error-relations (flycheck-error-new-at 5 7 'error))

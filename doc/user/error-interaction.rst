@@ -229,6 +229,31 @@ checkers produce explanations, the majority do not.  Those that do are:
    Display an explanation for the first explainable error at point.
 
 
+Diagnostic tags
+===============
+
+Some errors say something about the code beyond how serious they are.  A
+language server marks an unused import or an unreachable branch as
+*unnecessary*, and an API you should stop calling as *deprecated*, through an
+LSP diagnostic's ``tags``.  Flycheck keeps them with
+:mode:`flycheck-eglot` and with the native ``flycheck-lsp`` checker.
+
+A tag is not a level.  An unused import is still a warning, so its tag adds a
+face rather than replacing the one the level gives it: unnecessary code is
+dimmed and deprecated code struck through, on top of the usual underline.
+This matches how Eglot renders the same tags under Flymake.
+
+.. defface:: flycheck-unnecessary
+
+   Face added to code an error marks as having no effect.
+
+.. defface:: flycheck-deprecated
+
+   Face added to code an error marks as deprecated.
+
+Checkers that are not LSP-backed can set tags too, through an error's
+``tags`` slot.
+
 Related locations
 =================
 

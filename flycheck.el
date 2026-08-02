@@ -1184,6 +1184,25 @@ is used."
   :package-version '(flycheck . "0.15")
   :group 'flycheck-faces)
 
+(defface flycheck-unnecessary
+  '((t :inherit shadow))
+  "Flycheck face for code an error marks as having no effect.
+
+Added to the error's own face, not used instead of it, so an unused
+import still shows that it is a warning.  Matches how Eglot renders the
+same LSP tag."
+  :package-version '(flycheck . "39")
+  :group 'flycheck-faces)
+
+(defface flycheck-deprecated
+  '((t :inherit shadow :strike-through t))
+  "Flycheck face for code an error marks as deprecated.
+
+Added to the error's own face, not used instead of it.  Matches how
+Eglot renders the same LSP tag."
+  :package-version '(flycheck . "39")
+  :group 'flycheck-faces)
+
 (defface flycheck-fringe-error
   '((t :inherit error))
   "Flycheck face for fringe error indicators."
@@ -4357,22 +4376,23 @@ Slots:
                 (&key
                  line column end-line end-column
                  buffer checker filename message level id group fix relations
+                 tags
                  &aux (-end-line end-line) (-end-column end-column)
-                 (-fix fix) (-relations relations)))
+                 (-fix fix) (-relations relations) (-tags tags)))
                (:constructor
                 flycheck-error-new-at
                 (line
                  column
                  &optional level message
-                 &key end-line end-column checker id group fix relations
+                 &key end-line end-column checker id group fix relations tags
                  (filename (buffer-file-name)) (buffer (current-buffer))
                  &aux (-end-line end-line) (-end-column end-column)
-                 (-fix fix) (-relations relations)))
+                 (-fix fix) (-relations relations) (-tags tags)))
                (:constructor
                 flycheck-error-new-at-pos
                 (pos
                  &optional level message
-                 &key end-pos checker id group fix relations
+                 &key end-pos checker id group fix relations tags
                  (filename (buffer-file-name)) (buffer (current-buffer))
                  &aux
                  ((line . column)
@@ -4381,7 +4401,7 @@ Slots:
                  ((-end-line . -end-column)
                   (if end-pos (flycheck-line-column-at-pos end-pos)
                     '(nil . nil)))
-                 (-fix fix) (-relations relations))))
+                 (-fix fix) (-relations relations) (-tags tags))))
   "Structure representing an error reported by a syntax checker.
 Slots:
 
@@ -4448,12 +4468,23 @@ Slots:
      lifetime error.  These come from an LSP diagnostic's
      `relatedInformation' and may live in other files.
 
-     See `flycheck-visit-related-location`."
+     See `flycheck-visit-related-location`.
+
+`tags' (optional)
+     A list of symbols saying something about the error beyond its
+     severity: `unnecessary' for code that has no effect, such as an
+     unused import or an unreachable branch, and `deprecated' for
+     something that still works but should not be used.
+
+     These come from an LSP diagnostic's `tags'.  They are not levels:
+     an error is unnecessary or deprecated *as well as* being a warning
+     or an error, and Flycheck renders them by adding a face rather than
+     by changing the level."
   buffer checker filename line column message level id group
   ;; The fields below are at the end of the record to preserve backwards
   ;; compatibility; see https://github.com/flycheck/flycheck/pull/1400 and
   ;; https://lists.gnu.org/archive/html/emacs-devel/2018-07/msg00436.html
-  -end-line -end-column -fix -relations)
+  -end-line -end-column -fix -relations -tags)
 
 ;; These accessors are defined for backwards compatibility
 ;; FIXME: Clean up once package.el learns how to recompile dependencies.
@@ -4533,6 +4564,22 @@ source location that explains or contributes to ERR; see
 
 (gv-define-simple-setter flycheck-error-relations
                          flycheck-error--set-relations)
+
+(defun flycheck-error-tags (err)
+  "Return the tags of a Flycheck error ERR, as a list of symbols.
+
+`unnecessary' for code that has no effect and `deprecated' for something
+that still works but should not be used; see `flycheck-error'.  Returns
+nil when ERR has none."
+  (condition-case nil (flycheck-error--tags err)
+    (args-out-of-range nil)))
+
+(defun flycheck-error--set-tags (err tags)
+  "Set the tags of a Flycheck error ERR to TAGS."
+  (condition-case nil (setf (flycheck-error--tags err) tags)
+    (args-out-of-range nil)))
+
+(gv-define-simple-setter flycheck-error-tags flycheck-error--set-tags)
 
 (defun flycheck-error-resolve-fix (err)
   "Return the concrete `flycheck-fix' for ERR, or nil.
@@ -6102,9 +6149,26 @@ Return the created overlay."
     (setf (overlay-get overlay 'flycheck-overlay) t)
     (setf (overlay-get overlay 'flycheck-error) err)
     (setf (overlay-get overlay 'category) category)
+    ;; A tag says something about the code, not about how bad the problem
+    ;; is, so it adds a face rather than replacing the level's.  The
+    ;; category supplies that one, and an explicit `face' overrides the
+    ;; category, so name it again here.
+    (when-let* ((faces (flycheck--error-tag-faces err)))
+      (setf (overlay-get overlay 'face)
+            (append faces (list (get category 'face)))))
     (setf (overlay-get overlay 'help-echo) #'flycheck-help-echo)
     (flycheck--setup-highlighting err overlay)
     overlay))
+
+(defconst flycheck--tag-faces
+  '((unnecessary . flycheck-unnecessary)
+    (deprecated . flycheck-deprecated))
+  "Map of `flycheck-error' tags to the faces that render them.")
+
+(defun flycheck--error-tag-faces (err)
+  "Return the faces rendering ERR's tags, or nil when it has none."
+  (delq nil (mapcar (lambda (tag) (alist-get tag flycheck--tag-faces))
+                    (flycheck-error-tags err))))
 
 (defun flycheck-help-echo (_window object pos)
   "Construct a tooltip message.
@@ -10791,6 +10855,19 @@ Maps the diagnostic's `relatedInformation' entries to
   (mapcar #'flycheck-lsp--related-location
           (append (plist-get lsp :relatedInformation) nil)))
 
+(defconst flycheck-lsp--diagnostic-tags
+  '((1 . unnecessary) (2 . deprecated))
+  "Map of LSP `DiagnosticTag' codes to the symbols Flycheck uses.")
+
+(defun flycheck-lsp--tags (lsp)
+  "Return the tags of the LSP diagnostic plist LSP, as a list of symbols.
+
+Unknown codes are dropped rather than passed through: a tag Flycheck has
+no rendering for would only be a symbol nothing acts on."
+  (delq nil
+        (mapcar (lambda (tag) (alist-get tag flycheck-lsp--diagnostic-tags))
+                (append (plist-get lsp :tags) nil))))
+
 (defun flycheck-lsp--text-edit (tedit)
   "Convert the LSP TextEdit TEDIT to a `flycheck-fix-edit'.
 LSP positions are zero-based and end-exclusive; Flycheck's are one-based
@@ -11431,6 +11508,7 @@ attaches a lazy quickfix from SERVER for the document URI (see
                  (plist-get end :line) (plist-get end :character))
        :id (flycheck-lsp--diagnostic-id lsp)
        :relations (flycheck-lsp--related-locations lsp)
+       :tags (flycheck-lsp--tags lsp)
        :fix (flycheck-lsp--fix-provider server uri lsp)
        :checker 'flycheck-lsp
        :buffer buffer
@@ -11708,6 +11786,7 @@ as a fallback."
      :end-pos (flymake-diagnostic-end diag)
      :id (and lsp (flycheck-lsp--diagnostic-id lsp))
      :relations (and lsp (flycheck-lsp--related-locations lsp))
+     :tags (and lsp (flycheck-lsp--tags lsp))
      ;; Prefer a quickfix the server embedded in the diagnostic's data
      ;; (rubocop, standardrb); fall back to Eglot's on-demand code actions.
      :fix (or (and flycheck-eglot-code-actions lsp (flycheck-lsp--inline-fix lsp))
