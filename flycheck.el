@@ -8156,15 +8156,30 @@ per render so the font probe stays out of the per-error loop."
             "\N{BOX DRAWINGS LIGHT UP AND RIGHT}\N{BOX DRAWINGS LIGHT HORIZONTAL} ")
     (cons "`- " "`- ")))
 
+(defun flycheck-annotate--one-line (text)
+  "Collapse TEXT onto a single line, folding runs of whitespace.
+
+Plenty of checkers wrap a message over several lines: a parser reporting
+\"unexpected newline\" and \"expecting number\" on separate lines, rustc
+explaining itself underneath.  The compact styles hang their message off
+the end of the code, so a newline that reaches the screen gives the line
+extra rows: `eol' stops being after the line, `sideline' loses the
+right-edge alignment that defines it, and both take back the vertical
+motion that keeping annotations off the anchored line bought."
+  (string-trim (replace-regexp-in-string "[ \t]*\n[ \t\n]*" " " text)))
+
 (defun flycheck-annotate--compact-text (errors)
   "Return the one-line summary of ERRORS for the compact styles.
 
 Shows the most severe error's message (ERRORS is sorted most-severe
-first) with a count of the rest, propertized with its level face."
+first) with a count of the rest, propertized with its level face.  A
+message spanning lines is folded onto one; see
+`flycheck-annotate--one-line'."
   (let* ((err (car errors))
          (face (flycheck-annotate--level-face (flycheck-error-level err)))
          (more (when (cdr errors) (format " (+%d)" (length (cdr errors)))))
-         (msg (funcall flycheck-annotate-format-function err)))
+         (msg (flycheck-annotate--one-line
+               (funcall flycheck-annotate-format-function err))))
     (concat (flycheck-annotate--fix-marker err)
             (propertize (concat msg more) 'face face))))
 

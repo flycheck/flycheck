@@ -122,6 +122,43 @@ a newline, so key it back under the code line."
           (expect s :to-match (regexp-quote "(+1)"))
           (expect (string-prefix-p "\n" s) :to-be nil)))))
 
+  (describe "flycheck-annotate--one-line"
+    (it "folds a message that spans lines"
+      (expect (flycheck-annotate--one-line "unexpected newline\nexpecting number")
+              :to-equal "unexpected newline expecting number"))
+
+    (it "folds the indentation a wrapped message carries"
+      (expect (flycheck-annotate--one-line "expected:\n    a number\n    a date")
+              :to-equal "expected: a number a date"))
+
+    (it "folds a run of blank lines to one space"
+      (expect (flycheck-annotate--one-line "a\n\n\nb") :to-equal "a b"))
+
+    (it "trims the edges"
+      (expect (flycheck-annotate--one-line "\nboom\n") :to-equal "boom"))
+
+    (it "leaves a single-line message alone"
+      (expect (flycheck-annotate--one-line "boom") :to-equal "boom")))
+
+  (describe "the compact styles with a multi-line message"
+    ;; They hang the message off the end of the code, so a newline that
+    ;; reaches the screen gives the line extra rows: `eol' stops being
+    ;; after the line and `sideline' loses its alignment.
+    (dolist (style '(eol sideline))
+      (it (format "keeps the %s annotation on one line" style)
+        (flycheck-buttercup-with-temp-buffer
+          (insert "abcdef\n")
+          (let* ((eol (save-excursion (goto-char (point-min)) (line-end-position)))
+                 (errs (list (flycheck-error-new-at
+                              1 3 'error "unexpected newline\nexpecting number"
+                              :checker 'emacs-lisp)))
+                 (flycheck-annotate--overlays nil)
+                 (render (cdr (assq style flycheck-annotate-style-functions)))
+                 (ov (funcall render errs eol t))
+                 (text (substring-no-properties (test-annotate/text ov))))
+            (expect text :not :to-match "\n")
+            (expect text :to-match "unexpected newline expecting number"))))))
+
   (describe "flycheck-annotate-below-style"
     (defun test-annotate/faces-at (ov pos)
       "Return the face property at POS of OV's annotation string, as a list."
