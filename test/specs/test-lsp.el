@@ -76,6 +76,22 @@
                (flycheck-lsp--path-to-uri "/tmp/café.rb"))
               :to-equal (expand-file-name "/tmp/café.rb"))))
 
+  (describe "flycheck-lsp--tags"
+    (it "maps the LSP tag codes onto Flycheck's symbols"
+      (expect (flycheck-lsp--tags '(:tags [1])) :to-equal '(unnecessary))
+      (expect (flycheck-lsp--tags '(:tags [2])) :to-equal '(deprecated))
+      (expect (flycheck-lsp--tags '(:tags [1 2]))
+              :to-equal '(unnecessary deprecated)))
+
+    (it "is nil for a diagnostic with no tags"
+      (expect (flycheck-lsp--tags '(:message "x")) :to-be nil)
+      (expect (flycheck-lsp--tags '(:tags [])) :to-be nil))
+
+    (it "drops a code it has no rendering for"
+      ;; passing it through would only produce a symbol nothing acts on
+      (expect (flycheck-lsp--tags '(:tags [99])) :to-be nil)
+      (expect (flycheck-lsp--tags '(:tags [1 99])) :to-equal '(unnecessary))))
+
   (describe "flycheck-lsp--related-locations"
     (it "returns nil when there is no relatedInformation"
       (expect (flycheck-lsp--related-locations '(:message "x")) :to-be nil))

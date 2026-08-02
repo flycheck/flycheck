@@ -189,6 +189,37 @@
             ;; the error's own colour is kept
             (expect face :to-be 'flycheck-fringe-error)))))
 
+    (it "adds a tag's face to the error's own, rather than replacing it"
+      (flycheck-buttercup-with-temp-buffer
+        (insert "import os\n")
+        (let* ((err (flycheck-error-new-at 1 1 'warning "unused"
+                                           :buffer (current-buffer)
+                                           :tags '(unnecessary)))
+               (overlay (flycheck-add-overlay err)))
+          ;; the level still has to be legible as a warning
+          (expect (overlay-get overlay 'face)
+                  :to-equal '(flycheck-unnecessary flycheck-warning)))))
+
+    (it "renders both tags when an error carries both"
+      (flycheck-buttercup-with-temp-buffer
+        (insert "import os\n")
+        (let* ((err (flycheck-error-new-at 1 1 'error "gone"
+                                           :buffer (current-buffer)
+                                           :tags '(unnecessary deprecated)))
+               (overlay (flycheck-add-overlay err)))
+          (expect (overlay-get overlay 'face)
+                  :to-equal '(flycheck-unnecessary flycheck-deprecated
+                                                   flycheck-error)))))
+
+    (it "leaves an untagged error to the level's category"
+      (flycheck-buttercup-with-temp-buffer
+        (insert "import os\n")
+        (let* ((err (flycheck-error-new-at 1 1 'warning "plain"
+                                           :buffer (current-buffer)))
+               (overlay (flycheck-add-overlay err)))
+          ;; no explicit face of its own; `category' supplies it
+          (expect (overlay-properties overlay) :not :to-contain 'face))))
+
     (it "uses the normal bitmap for an error whose fix is only a lazy provider"
       ;; A provider may still come up empty, so the indicator must not
       ;; promise a fix.  Every LSP diagnostic carries one when code
