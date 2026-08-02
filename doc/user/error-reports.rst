@@ -15,8 +15,8 @@ warnings in the mode line.
 
 The following screenshot illustrates what this looks like in the default Emacs
 color theme.  It shows an info, a warning and an error annotation, from top to
-bottom.  Please also note the fringe indicators on the left side and the
-emphasized mode line indicator in the bottom right corner:
+bottom.  Note the fringe indicators down the left, and the counts in the mode
+line, which read errors, warnings and infos in that order:
 
 .. image:: /images/flycheck-error-reports.png
    :alt: Flycheck showing info, warning and error annotations
