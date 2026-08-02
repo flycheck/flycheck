@@ -65,6 +65,42 @@
       (expect (flycheck-error-known-fix-p (flycheck-error-new-at 1 1 'error "e"))
               :to-be nil)))
 
+  (describe "refusing an edit whose coordinates make no sense"
+    ;; Tools do emit ranges that cannot be resolved.  Applying one anyway
+    ;; edits somewhere the checker never pointed at, which is the outcome
+    ;; a feature that writes to the buffer has to refuse.
+    (defun flycheck-test--refuses (label fix)
+      (with-temp-buffer
+        (insert "abcdef\n")
+        (expect (flycheck-apply-fix fix) :to-throw 'user-error)
+        ;; and nothing was touched on the way to refusing
+        (expect (buffer-string) :to-equal "abcdef\n")
+        (ignore label)))
+
+    (it "refuses a column of zero, where Flycheck counts from one"
+      (flycheck-test--refuses "zero column" (flycheck-test--edit 1 0 1 2 "X")))
+
+    (it "refuses a line that is not a line"
+      (flycheck-test--refuses "negative" (flycheck-test--edit -1 1 -1 2 "X"))
+      (flycheck-test--refuses "nil" (flycheck-test--edit nil 1 nil 2 "X")))
+
+    (it "refuses an end that comes before its start"
+      (flycheck-test--refuses "same line" (flycheck-test--edit 1 5 1 2 "X"))
+      (flycheck-test--refuses "earlier line" (flycheck-test--edit 2 1 1 1 "X")))
+
+    (it "still allows a position past the end, which appends"
+      ;; A fix for a missing trailing newline legitimately names one
+      (with-temp-buffer
+        (insert "ab\n")
+        (flycheck-apply-fix (flycheck-test--edit 9 1 9 1 "X"))
+        (expect (buffer-string) :to-equal "ab\nX")))
+
+    (it "still allows a column past the end of its line"
+      (with-temp-buffer
+        (insert "ab\n")
+        (flycheck-apply-fix (flycheck-test--edit 1 1 1 99 "X"))
+        (expect (buffer-string) :to-equal "X\n"))))
+
   (describe "flycheck-apply-fix"
 
     (it "replaces the edit's region"
