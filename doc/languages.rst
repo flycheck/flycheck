@@ -1741,6 +1741,26 @@ to view the docstring of the syntax checker.  Likewise, you may use
       Check Slim best practices using the `slim-lint
       <https://github.com/sds/slim-lint>`_ linter.
 
+.. supported-language:: Swift
+
+   .. syntax-checker:: swift
+
+      Check Swift syntax with the `Swift <https://www.swift.org/>`_ compiler
+      using ``swiftc -parse``.
+
+      This parses the file without type-checking it, which is a deliberate
+      limit.  Type-checking one file means telling the compiler about the rest
+      of the module, the SDK and the target, and getting any of that wrong
+      reports things like ``cannot find X in scope`` for code that builds fine.
+      Parsing needs none of it and is right for any file, in a package or not.
+
+      For type errors, run sourcekit-lsp through `global-flycheck-eglot-mode`
+      or `flycheck-lsp-mode`: a language server knows how the project is built.
+
+      .. defcustom:: flycheck-swift-args
+
+         A list of additional arguments passed to ``swiftc``.
+
 .. supported-language:: SQL
 
    .. syntax-checker:: sql-sqlint
