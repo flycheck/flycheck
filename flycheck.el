@@ -13508,9 +13508,12 @@ See Info Node `(elisp)Byte Compilation'."
             (message (zero-or-more not-newline)
                      (zero-or-more "\n    " (zero-or-more not-newline)))
             line-end)
+   ;; Up to Emacs 28 the message followed on its own indented line; since
+   ;; Emacs 29 the whole warning is on one line.
    (warning line-start (file-name) ":" line (optional ":" column) ":"
-            (zero-or-more whitespace) "Warning (check-declare): said\n"
-            (message (zero-or-more "    " (zero-or-more not-newline))
+            (zero-or-more whitespace) "Warning (check-declare): said"
+            (or (seq "\n" (one-or-more " ")) " ")
+            (message (zero-or-more not-newline)
                      (zero-or-more "\n    " (zero-or-more not-newline)))
             line-end))
   :error-filter
