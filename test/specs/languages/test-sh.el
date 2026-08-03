@@ -42,7 +42,12 @@
        '(3 nil error "Syntax error: \"(\" unexpected" :checker sh-posix-dash))))
 
   (flycheck-buttercup-def-checker-test sh-posix-bash (sh sh-posix) nil
-    (let ((flycheck-disabled-checkers '(sh-posix-dash))
+    (assume (flycheck-buttercup-bash-rejects-process-substitution-p)
+            "this Bash allows process substitution in POSIX mode")
+    ;; Naming the checker outright: with nothing for Bash to complain
+    ;; about the check succeeds and the chain hands the buffer to
+    ;; shellcheck, which then answers in its place
+    (let ((flycheck-checkers '(sh-posix-bash))
           (inhibit-message t))
       (flycheck-buttercup-should-syntax-check
        "language/sh/posix-syntax-error.sh" 'sh-mode

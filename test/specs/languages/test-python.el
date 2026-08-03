@@ -5,6 +5,9 @@
 
 (describe "Language Python"
   (flycheck-buttercup-def-checker-test python-flake8 python syntax-error
+    (assume (flycheck-buttercup-python-module-available-p
+             'python-flake8 "flake8")
+            "flake8 is not installed for this Python")
     (let ((python-indent-guess-indent-offset nil)
           (flycheck-python-flake8-executable "python3"))
       (flycheck-buttercup-should-syntax-check
@@ -13,6 +16,9 @@
            :checker python-flake8))))
 
   (flycheck-buttercup-def-checker-test python-flake8 python nil
+    (assume (flycheck-buttercup-python-module-available-p
+             'python-flake8 "flake8")
+            "flake8 is not installed for this Python")
     (let ((flycheck-python-flake8-executable "python3"))
       (flycheck-buttercup-should-syntax-check
        "language/python/test.py" 'python-mode
@@ -187,6 +193,9 @@
           (expect (car (last formats)) :to-equal "--output-format=json")))))
 
   (flycheck-buttercup-def-checker-test python-pylint python nil
+    (assume (flycheck-buttercup-python-module-available-p
+             'python-pylint "pylint")
+            "pylint is not installed for this Python")
     (let ((flycheck-disabled-checkers '(python-flake8 python-mypy))
           (flycheck-python-pylint-executable "python3"))
       (flycheck-buttercup-should-syntax-check
@@ -215,6 +224,9 @@
             :checker python-pylint))))
 
   (flycheck-buttercup-def-checker-test python-pylint python no-symbolic-id
+    (assume (flycheck-buttercup-python-module-available-p
+             'python-pylint "pylint")
+            "pylint is not installed for this Python")
     (let ((flycheck-disabled-checkers '(python-flake8 python-mypy))
           (flycheck-pylint-use-symbolic-id nil)
           (flycheck-python-pylint-executable "python3"))
@@ -244,6 +256,9 @@
             :checker python-pylint))))
 
   (flycheck-buttercup-def-checker-test python-pylint python negative-columns
+    (assume (flycheck-buttercup-python-module-available-p
+             'python-pylint "pylint")
+            "pylint is not installed for this Python")
     (let ((flycheck-disabled-checkers '(python-flake8 python-mypy))
           (python-indent-guess-indent-offset nil)
           (flycheck-python-pylint-executable "python3"))
@@ -256,7 +271,10 @@
 
   (flycheck-buttercup-def-checker-test python-pycompile python python27
     (assume (executable-find "python2"))
-    (let ((flycheck-disabled-checkers '(python-flake8 python-pylint python-mypy))
+    ;; Naming the checker outright, rather than disabling the ones that
+    ;; existed when this was written, so a checker added later cannot
+    ;; answer in its place on a machine that happens to have the tool
+    (let ((flycheck-checkers '(python-pycompile))
           (flycheck-python-pycompile-executable "python2")
           (python-indent-guess-indent-offset nil))
       (flycheck-buttercup-should-syntax-check
@@ -264,7 +282,7 @@
        `(3 nil error "invalid syntax" :checker python-pycompile))))
 
   (flycheck-buttercup-def-checker-test python-pycompile python has-no-warnings
-    (let ((flycheck-disabled-checkers '(python-flake8 python-pylint python-mypy)))
+    (let ((flycheck-checkers '(python-pycompile)))
       (flycheck-buttercup-should-syntax-check
        "language/python/test.py" 'python-mode)))
 
