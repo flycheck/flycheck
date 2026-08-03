@@ -169,7 +169,9 @@
 
   (describe "flycheck-copy-errors-as-kill"
 
-    (it "copies errors to kill ring"
+    (it "copies every error at point as one entry"
+      ;; One entry, so a single yank pastes the lot; they used to go in
+      ;; separately, leaving the rest behind `yank-pop'
       (flycheck-buttercup-with-temp-buffer
         (insert "A test buffer to copy errors from")
         (let ((flycheck-highlighting-mode 'columns) ; Disable Sexps parsing
@@ -178,11 +180,37 @@
                                                    :id "foo"))))
           (mapc #'flycheck-add-overlay errors)
           (flycheck-copy-errors-as-kill 10)
-          (expect (seq-take kill-ring 2) :to-equal '("1st message" "2nd message"))
+          (expect (car kill-ring) :to-equal "1st message\n2nd message")
           (flycheck-copy-errors-as-kill 10 #'flycheck-error-id)
-          (expect (seq-take kill-ring 1) :to-equal '("foo"))
+          (expect (car kill-ring) :to-equal "foo")
           (flycheck-copy-errors-as-kill 10 #'flycheck-error-format-message-and-id)
-          (expect (seq-take kill-ring 2)
-                  :to-equal '("1st message" "2nd message [foo]")))))))
+          (expect (car kill-ring)
+                  :to-equal "1st message\n2nd message [foo]"))))
+
+    (it "shows everything it copied, not just the first"
+      ;; `nreverse' used to eat the list before `string-join' read it
+      (flycheck-buttercup-with-temp-buffer
+        (insert "A test buffer to copy errors from")
+        (let ((flycheck-highlighting-mode 'columns)
+              (shown nil)
+              (errors (list (flycheck-error-new-at 1 nil 'error "1st message")
+                            (flycheck-error-new-at 1 10 'warning "2nd message"))))
+          (mapc #'flycheck-add-overlay errors)
+          (cl-letf (((symbol-function 'message)
+                     (lambda (fmt &rest args) (setq shown (apply #'format fmt args)))))
+            (flycheck-copy-errors-as-kill 10))
+          (expect shown :to-equal "1st message\n2nd message"))))
+
+    (it "does not treat a message as a format string"
+      (flycheck-buttercup-with-temp-buffer
+        (insert "A test buffer to copy errors from")
+        (let ((flycheck-highlighting-mode 'columns)
+              (shown nil)
+              (errors (list (flycheck-error-new-at 1 nil 'error "100%% done"))))
+          (mapc #'flycheck-add-overlay errors)
+          (cl-letf (((symbol-function 'message)
+                     (lambda (fmt &rest args) (setq shown (apply #'format fmt args)))))
+            (flycheck-copy-errors-as-kill 10))
+          (expect shown :to-equal "100%% done"))))))
 
 ;;; test-error-display.el ends here
