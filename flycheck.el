@@ -14802,9 +14802,12 @@ single input, which is useful for jsonlines data.
 See URL `https://stedolan.github.io/jq/'."
   :command ("jq" (eval flycheck-json-jq-args) "." source null-device)
   ;; Example error message:
-  ;;   parse error: Expected another key-value pair at line 3, column 1
+  ;;   jq: parse error: Expected another key-value pair at line 3, column 1
+  ;; jq 1.7 grew the leading program name; older versions have neither it
+  ;; nor, for some errors, the "parse error" part.
   :error-patterns
   ((error line-start
+          (optional "jq: ")
           (optional "parse error: ")
           (message) "at line " line ", column " column
           (zero-or-more not-newline) line-end))
