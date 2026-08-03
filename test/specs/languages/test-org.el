@@ -14,7 +14,7 @@
        '(33 nil info "Duplicate CUSTOM_ID property \"duplicate-id-123\"" :checker org-lint)
        '(40 nil info "Link to non-existent local file \"file with spaces and \\\"quotes\\\".org\"" :checker org-lint))))
 
-  (flycheck-buttercup-def-checker-test org-lint-valid org nil
+  (flycheck-buttercup-def-checker-test org-lint org valid
     (let ((inhibit-message t))
       (flycheck-buttercup-should-syntax-check
        "language/org/valid.org" 'org-mode))))

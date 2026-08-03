@@ -28,7 +28,7 @@
 (require 'test-helpers)
 
 (describe "Language SQL"
-  (flycheck-buttercup-def-checker-test sqlint sql nil
+  (flycheck-buttercup-def-checker-test sql-sqlint sql nil
     (flycheck-buttercup-should-syntax-check
      "language/sql.sql" 'sql-mode
      `(1 15 error "unterminated quoted string at or near \"';\n  \""
