@@ -354,12 +354,20 @@ Raise an assertion error if errors or overlays remain afterwards."
 Which pair of quotes a tool puts around a name is not something a
 spec should assert.  GCC and gfortran quote with ‘…’ under a UTF-8
 locale and with '…' under C, and Clang, which answers to the name
-`gcc' on macOS, always uses the ASCII ones."
+`gcc' on macOS, always uses the ASCII ones.  Emacs itself has both
+spellings, chosen by `text-quoting-style', so the same byte
+compiler warning reads differently across the versions we test on.
+
+The grave form is only folded as a matching pair, so a message
+about backticks in shell code keeps them."
   (when message
-    (apply #'string
-           (mapcar (lambda (c)
-                     (or (cdr (assq c flycheck-buttercup--quote-alist)) c))
-                   message))))
+    (replace-regexp-in-string
+     "`\\([^`'\n]*\\)'" "'\\1'"
+     (apply #'string
+            (mapcar (lambda (c)
+                      (or (cdr (assq c flycheck-buttercup--quote-alist)) c))
+                    message))
+     'fixedcase)))
 
 (defun flycheck-buttercup-error-without-group (err)
   "Return a copy of ERR with incidental differences flattened.
