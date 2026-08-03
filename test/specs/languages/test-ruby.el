@@ -109,30 +109,37 @@
     (flycheck-buttercup-def-checker-test ruby-rubocop ruby syntax-error
       (flycheck-buttercup-should-syntax-check
        "language/ruby/syntax-error.rb" 'ruby-mode
-       '(5 7 error "unexpected token tCONSTANT (Using Ruby 2.4 parser; configure using `TargetRubyVersion` parameter, under `AllCops`)"
+       `(5 7 error ,(flycheck-buttercup-rubocop-syntax-message
+                     "unexpected constant, expecting end-of-input")
            :id "Lint/Syntax"
            :checker ruby-rubocop)
-       '(5 24 error "unterminated string meets end of file (Using Ruby 2.4 parser; configure using `TargetRubyVersion` parameter, under `AllCops`)"
-           :id "Lint/Syntax"
-           :checker ruby-rubocop)))
+       `(5 25 error ,(flycheck-buttercup-rubocop-syntax-message
+                      "unterminated string meets end of file")
+            :id "Lint/Syntax"
+            :checker ruby-rubocop)))
 
     (flycheck-buttercup-def-checker-test ruby-standard ruby syntax-error
       (let ((flycheck-disabled-checkers '(ruby-rubocop)))
         (flycheck-buttercup-should-syntax-check
          "language/ruby/syntax-error.rb" 'ruby-mode
-         '(5 7 error "unexpected token tCONSTANT (Using Ruby 2.4 parser; configure using `TargetRubyVersion` parameter, under `AllCops`)"
+         `(5 7 error ,(flycheck-buttercup-rubocop-syntax-message
+                     "unexpected constant, expecting end-of-input")
              :id "Lint/Syntax"
              :checker ruby-standard)
-         '(5 24 error "unterminated string meets end of file (Using Ruby 2.4 parser; configure using `TargetRubyVersion` parameter, under `AllCops`)"
-             :id "Lint/Syntax"
-             :checker ruby-standard))))
+         `(5 25 error ,(flycheck-buttercup-rubocop-syntax-message
+                      "unterminated string meets end of file")
+              :id "Lint/Syntax"
+              :checker ruby-standard))))
 
     (flycheck-buttercup-def-checker-test ruby ruby syntax-error
       (let ((flycheck-disabled-checkers '(ruby-rubocop ruby-reek)))
         (flycheck-buttercup-should-syntax-check
          "language/ruby/syntax-error.rb" 'ruby-mode
          '(4 nil warning "assigned but unused variable - days" :checker ruby)
-         '(5 nil error "syntax error, unexpected constant, expecting end-of-input"
+         ;; Ruby 3.4 parses with Prism, which reports differently
+         `(5 nil error ,(if (version<= "3.4" (or (flycheck-buttercup-ruby-version) "0"))
+                            "syntax errors found (SyntaxError)"
+                          "syntax error, unexpected constant, expecting end-of-input")
              :checker ruby))))
 
     (flycheck-buttercup-def-checker-test (ruby-rubocop ruby-reek) ruby warnings

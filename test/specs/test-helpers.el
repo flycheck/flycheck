@@ -86,6 +86,48 @@ instead."
     (eq 0 (call-process python nil nil nil "-c" (format "import %s" module)))))
 
 
+;;; C/C++ helper
+
+(defun flycheck-buttercup-gcc-is-gnu-p ()
+  "Whether the `gcc' the C/C++ checker finds is really GCC.
+
+On macOS the name belongs to Clang, which words its diagnostics
+differently and counts them differently, so expectations written
+against GCC cannot hold there.  What Flycheck reads out of either
+one is covered by the recorded output instead."
+  (when-let* ((gcc (flycheck-find-checker-executable 'c/c++-gcc)))
+    (with-temp-buffer
+      (call-process gcc nil t nil "--version")
+      (goto-char (point-min))
+      (not (re-search-forward "clang" nil 'noerror)))))
+
+
+;;; Ruby helper
+
+(defun flycheck-buttercup-ruby-version ()
+  "The version of the Ruby the `ruby' checker would use."
+  (when-let* ((ruby (flycheck-find-checker-executable 'ruby)))
+    (with-temp-buffer
+      (when (eq 0 (call-process ruby nil t nil "-e" "print RUBY_VERSION"))
+        (buffer-string)))))
+
+(defun flycheck-buttercup-rubocop-syntax-message (message)
+  "MESSAGE followed by the parser note RuboCop appends to syntax errors.
+
+The note names the Ruby that RuboCop parsed with, which follows
+`TargetRubyVersion' and so differs from machine to machine.  It is
+built here rather than written out, so the spec asserts the part
+RuboCop is actually reporting."
+  (format "%s (Using Ruby %s parser; configure using \
+`TargetRubyVersion` parameter, under `AllCops`)"
+          message
+          (let ((version (or (flycheck-buttercup-ruby-version) "")))
+            ;; RuboCop names the series, not the patch level
+            (if (string-match "\\`\\([0-9]+\\.[0-9]+\\)" version)
+                (match-string 1 version)
+              version))))
+
+
 ;;; Shell helper
 
 (defun flycheck-buttercup-bash-rejects-process-substitution-p ()

@@ -149,6 +149,8 @@ against a integer value that is neither 1 nor 0.\">
              :checker c/c++-clang))))
 
     (flycheck-buttercup-def-checker-test c/c++-gcc (c c++) error
+    (assume (flycheck-buttercup-gcc-is-gnu-p)
+            "the gcc here is Clang, which words these differently")
       (let ((flycheck-disabled-checkers '(c/c++-clang)))
         (flycheck-buttercup-should-syntax-check
          "language/c_c++/error.cpp" 'c++-mode
@@ -158,6 +160,8 @@ against a integer value that is neither 1 nor 0.\">
              :id "-Wunknown-pragmas" :checker c/c++-gcc))))
 
     (flycheck-buttercup-def-checker-test c/c++-gcc (c c++) fatal-error
+    (assume (flycheck-buttercup-gcc-is-gnu-p)
+            "the gcc here is Clang, which words these differently")
       (let ((flycheck-disabled-checkers '(c/c++-clang)))
         (flycheck-buttercup-should-syntax-check
          "language/c_c++/includes.c" 'c-mode
@@ -165,6 +169,8 @@ against a integer value that is neither 1 nor 0.\">
              :checker c/c++-gcc))))
 
     (flycheck-buttercup-def-checker-test c/c++-gcc (c c++) warning
+    (assume (flycheck-buttercup-gcc-is-gnu-p)
+            "the gcc here is Clang, which words these differently")
       (let ((flycheck-disabled-checkers '(c/c++-clang c/c++-cppcheck)))
         (flycheck-buttercup-should-syntax-check
          "language/c_c++/warning.c" 'c-mode
@@ -175,6 +181,8 @@ against a integer value that is neither 1 nor 0.\">
          '(8 7 warning "#warning" :id "-Wcpp" :checker c/c++-gcc))))
 
     (flycheck-buttercup-def-checker-test c/c++-gcc (c c++) included-file-warning
+    (assume (flycheck-buttercup-gcc-is-gnu-p)
+            "the gcc here is Clang, which words these differently")
       (let ((flycheck-gcc-include-path '("./include"))
             (flycheck-disabled-checkers '(c/c++-clang))
             (flycheck-relevant-error-other-file-minimum-level 'warning))
@@ -201,7 +209,7 @@ against a integer value that is neither 1 nor 0.\">
 
         (flycheck-buttercup-should-syntax-check
          "language/c_c++/style.cpp" 'c-mode
-         '(12 nil error "Code 'std::string' is invalid C code. Use --std or --language to configure the language."
+         '(12 nil error "Code 'std::string' is invalid C code.: Use --std, -x or --language to enforce C++. Or --cpp-header-probe to identify C++ headers via the Emacs marker."
               :id "syntaxError" :checker c/c++-cppcheck))
 
         (flycheck-buttercup-should-syntax-check
