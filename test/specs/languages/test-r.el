@@ -16,6 +16,10 @@
        '(7 5 error "unexpected end of input" :checker r-lintr))))
 
   (flycheck-buttercup-def-checker-test r r nil
+  ;; Flycheck does not support Windows officially, and this is one of
+  ;; the differences we do not chase (see the contributor guide)
+  (assume (not (eq system-type 'windows-nt))
+          "R reports this error at a different column on Windows")
     (let ((flycheck-disabled-checkers '(r-lintr)))
       (flycheck-buttercup-should-syntax-check
        "language/r.R" 'R-mode
