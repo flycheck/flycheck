@@ -92,6 +92,37 @@ Run ``make help`` to see a list of all available targets.  Some common ones are:
 .. _Eask: https://emacs-eask.github.io/
 .. _Buttercup: https://github.com/jorgenschaefer/emacs-buttercup
 
+.. _flycheck-recorded-output:
+
+Testing a checker without its tool
+==================================
+
+Most of the tools Flycheck drives are not installed on any given machine, and
+a spec that needs a missing tool skips itself.  That keeps the suite runnable
+everywhere, but it also means a checker can stop working without a single test
+going red.
+
+So the part that usually breaks — reading the tool's output — is tested against
+output recorded earlier, which needs nothing installed:
+
+.. code-block:: console
+
+   $ emacs -Q --batch -l test/record-fixture.el \
+       -f flycheck-record-fixture-batch sh-shellcheck language/sh/shellcheck.sh
+
+That runs the checker's own command, the one Flycheck would run, and writes what
+the tool printed to :file:`test/fixtures/{checker}/{resource}.txt`.  A spec then
+asserts what Flycheck reads back out of it:
+
+.. code-block:: elisp
+
+   (flycheck-buttercup-def-parse-test json-jq "language/json.json"
+     '(1 44 error "Expected value before ','"))
+
+Record the output on a machine that has the tool, commit it, and the spec runs
+for everyone.  When a tool changes its format, re-record and the diff shows
+exactly what moved.
+
 Pull requests
 =============
 
