@@ -7,11 +7,11 @@
   (flycheck-buttercup-def-checker-test fortran-gfortran fortran error
     (flycheck-buttercup-should-syntax-check
      "language/fortran/error.f" '(fortran-mode f90-mode)
-     '(1 1 error "Non-numeric character in statement label at (1)"
+     '(1 2 error "Non-numeric character in statement label at (1)"
          :checker fortran-gfortran)
-     '(2 1 error "Non-numeric character in statement label at (1)"
+     '(2 2 error "Non-numeric character in statement label at (1)"
          :checker fortran-gfortran)
-     '(3 1 error "Non-numeric character in statement label at (1)"
+     '(3 2 error "Non-numeric character in statement label at (1)"
          :checker fortran-gfortran)))
 
   (flycheck-buttercup-def-checker-test fortran-gfortran fortran free-form-error

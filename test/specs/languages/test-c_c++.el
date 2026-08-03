@@ -154,7 +154,7 @@ against a integer value that is neither 1 nor 0.\">
          "language/c_c++/error.cpp" 'c++-mode
          '(2 20 error "'struct A' has no member named 'bar'"
              :checker c/c++-gcc)
-         '(8 nil warning "ignoring #pragma nope"
+         '(8 nil warning "ignoring '#pragma nope '"
              :id "-Wunknown-pragmas" :checker c/c++-gcc))))
 
     (flycheck-buttercup-def-checker-test c/c++-gcc (c c++) fatal-error
