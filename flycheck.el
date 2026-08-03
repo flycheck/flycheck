@@ -14894,6 +14894,21 @@ See URL `https://metacpan.org/pod/Perl::Critic'."
   (flycheck-error-explainer-from-url
    "https://metacpan.org/pod/Perl::Critic::Policy::%s"))
 
+(defun flycheck-perl-perlimports-parse-diff (diff)
+  "Return the lines added by DIFF, as a string."
+  (let ((start 0)
+        (replacements ()))
+    (while (string-match (rx line-start
+                             "+"
+                             (group (zero-or-more not-newline))
+                             line-end)
+                         diff
+                         start)
+      (setq start (match-end 0))
+      (setq replacements (nconc replacements
+                                (list (match-string 1 diff)))))
+    (string-join replacements "\n")))
+
 (defun flycheck-perl-perlimports-parse-errors (output checker buffer)
   "Parse perlimports json output errors from OUTPUT.
 
@@ -14917,6 +14932,17 @@ for more information about perlimports."
                :end-line .location.end.line
                :end-column (+ 1 .location.end.column)
                :checker checker
+               :fix (flycheck-fix-new
+                     :description (concat .module " " .reason)
+                     :edits (list
+                             (flycheck-fix-edit-new
+                              :line .location.start.line
+                              :column .location.start.column
+                              :end-line .location.end.line
+                              :end-column (+ 1 .location.end.column)
+                              :replacement (flycheck-perl-perlimports-parse-diff
+                                            .diff)))
+                     :tick (buffer-chars-modified-tick))
                :buffer buffer)))
           (flycheck-parse-json output)))
 
