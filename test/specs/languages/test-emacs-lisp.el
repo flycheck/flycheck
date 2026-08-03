@@ -82,7 +82,9 @@
        "language/emacs-lisp/warnings.el" 'emacs-lisp-mode
        '(12 nil info "First sentence should end with punctuation"
             :checker emacs-lisp-checkdoc)
-       '(16 6 warning "`foobar' called with 1 argument, but accepts only 0"
+       `(16 6 warning ,(if (version< emacs-version "29")
+                            "foobar called with 1 argument, but accepts only 0"
+                          "`foobar' called with 1 argument, but accepts only 0")
             :checker emacs-lisp)
        '(13 4 warning "the function `dummy-package-foo' is not known to be defined."
             :checker emacs-lisp)))
@@ -109,7 +111,9 @@
               :checker emacs-lisp-checkdoc)
          '(12 nil info "First sentence should end with punctuation"
               :checker emacs-lisp-checkdoc)
-         '(16 6 warning "`foobar' called with 1 argument, but accepts only 0"
+         `(16 6 warning ,(if (version< emacs-version "29")
+                              "foobar called with 1 argument, but accepts only 0"
+                            "`foobar' called with 1 argument, but accepts only 0")
               :checker emacs-lisp)
          '(13 4 warning "the function `dummy-package-foo' is not known to be defined."
               :checker emacs-lisp))))
