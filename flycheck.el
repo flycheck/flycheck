@@ -15719,7 +15719,7 @@ Requires Flake8 3.0 or newer. See URL
                   (warning . python-mypy)))
 
 (flycheck-def-config-file-var flycheck-python-ruff-config python-ruff
-                              '("pyproject.toml" "ruff.toml" ".ruff.toml"))
+                              '(".ruff.toml" "ruff.toml" "pyproject.toml"))
 
 (flycheck-def-args-var flycheck-python-ruff-args python-ruff
   :package-version '(flycheck . "39"))
