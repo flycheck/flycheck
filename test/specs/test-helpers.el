@@ -70,6 +70,37 @@ evaluating BODY."
        ,@body)))
 
 
+;;; Python helper
+
+(defun flycheck-buttercup-python-module-available-p (checker module)
+  "Whether CHECKER's interpreter can import MODULE.
+
+The Python checkers run their linter as `INTERPRETER -m MODULE',
+so that switching Python versions switches the linter with it (see
+URL `https://github.com/flycheck/flycheck/issues/1055').  Their
+executable is therefore the interpreter, and finding it says
+nothing about whether the linter is installed: without the module
+the checker steps aside and the next one in the chain answers
+instead."
+  (when-let* ((python (flycheck-find-checker-executable checker)))
+    (eq 0 (call-process python nil nil nil "-c" (format "import %s" module)))))
+
+
+;;; Shell helper
+
+(defun flycheck-buttercup-bash-rejects-process-substitution-p ()
+  "Whether this Bash refuses process substitution in POSIX mode.
+
+Bash 3 rejects `<(…)' under `--posix', later versions accept it,
+which decides whether there is a syntax error for `sh-posix-bash'
+to find at all."
+  (when-let* ((bash (flycheck-find-checker-executable 'sh-posix-bash)))
+    (with-temp-buffer
+      (insert "cat <(echo blah)\n")
+      (/= 0 (call-process-region (point-min) (point-max) bash nil nil nil
+                                 "--posix" "--norc" "-n" "--")))))
+
+
 ;;; Erlang helper
 
 (defun flycheck-buttercup-erlang-shows-column (mode-sym)
