@@ -13433,11 +13433,12 @@ This variable has no effect, if
     ;; compilation buffers, but as these are ephemeral, Flycheck won't check
     ;; them anyway.
     (flycheck-autoloads-file-p)
-    ;; Cask/Carton and dir-locals files contain data, not code, and don't need
-    ;; to follow Checkdoc conventions either.
+    ;; Package-manager manifests and dir-locals files contain data, not
+    ;; code, and don't need to follow Checkdoc conventions either.
     (and (buffer-file-name)
          (member (file-name-nondirectory (buffer-file-name))
-                 '("Cask" "Carton" ".dir-locals.el" ".dir-locals-2.el"))))))
+                 '("Cask" "Carton" "Eask" "Eask-local"
+                   ".dir-locals.el" ".dir-locals-2.el"))))))
 
 (defun flycheck--emacs-lisp-byte-compile-enabled-p ()
   "Check whether to enable the Emacs Lisp byte compiler checker.
@@ -13457,7 +13458,9 @@ enabled for untrusted files, like in Emacs core."
   "Check whether to enable Emacs Lisp Checkdoc in the current buffer."
   (and (flycheck--emacs-lisp-enabled-p)
        ;; These files are valid Lisp, but don't contain "standard" comments.
-       (not (member (buffer-file-name) '("Eldev" "Eldev-local")))))
+       (not (and (buffer-file-name)
+                 (member (file-name-nondirectory (buffer-file-name))
+                         '("Eldev" "Eldev-local"))))))
 
 (flycheck-define-checker emacs-lisp
   "An Emacs Lisp syntax checker using the Emacs Lisp Byte compiler.

@@ -135,10 +135,18 @@
         (expect (flycheck-may-use-checker 'emacs-lisp-checkdoc) :not :to-be-truthy)))
 
     (flycheck-buttercup-def-checker-test (emacs-lisp emacs-lisp-checkdoc) emacs-lisp
-                                         checkdoc-does-not-check-cask-files
+                                         checkdoc-does-not-check-manifests
+      ;; Flycheck's own manifest, which is real Lisp but is data
       (flycheck-buttercup-with-file-buffer
-          (expand-file-name "Cask" flycheck-test-source-directory)
+          (expand-file-name "Eask" flycheck-test-source-directory)
         (expect (flycheck-may-use-checker 'emacs-lisp-checkdoc) :not :to-be-truthy)))
+
+    (it "does not checkdoc an Eldev file"
+      ;; The name was matched against the whole path, so it never matched
+      (flycheck-buttercup-with-temp-buffer
+        (setq buffer-file-name (expand-file-name "Eldev" default-directory))
+        (emacs-lisp-mode)
+        (expect (flycheck--emacs-lisp-checkdoc-enabled-p) :not :to-be-truthy)))
 
     (flycheck-buttercup-def-checker-test (emacs-lisp emacs-lisp-checkdoc) emacs-lisp
                                          does-not-check-with-no-byte-compile
