@@ -119,6 +119,27 @@
     (it "stays suspicious on any other status"
       (expect (flycheck--shellcheck-handle-suspicious 'sh-shellcheck 1 "")
               :to-be 'suspicious)))
-)
+
+
+  (describe "reading shellcheck's output"
+    ;; shellcheck reports through JSON1 rather than error patterns, so this
+    ;; covers the parser and the fix it builds out of the replacements
+    (flycheck-buttercup-def-parse-test sh-shellcheck "language/sh/shellcheck.sh"
+      '(2 5 warning "Tilde does not expand in quotes. Use $HOME." :id "SC2088")
+      '(3 7 error "Double quote array expansions to avoid re-splitting elements."
+          :id "SC2068")
+      '(4 8 warning "Declare and assign separately to avoid masking return values."
+          :id "SC2155")
+      '(4 11 warning "Quote this to prevent word splitting." :id "SC2046")
+      '(4 11 info "Use $(...) notation instead of legacy backticks `...`."
+          :id "SC2006"))
+
+    (it "carries the fixes shellcheck ships in its replacements"
+      (let ((errors (flycheck-buttercup-parse
+                     'sh-shellcheck
+                     (flycheck-buttercup-fixture
+                      'sh-shellcheck "language/sh/shellcheck.sh"))))
+        (expect (seq-filter #'flycheck-error-known-fix-p errors)
+                :to-be-truthy)))))
 
 ;;; test-sh.el ends here

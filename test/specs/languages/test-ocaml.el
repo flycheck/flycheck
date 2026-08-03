@@ -54,6 +54,14 @@
     (flycheck-buttercup-should-syntax-check
      "language/ocaml-dune/lib/typeerror.ml" 'tuareg-mode
      '(4 17 error "This constant has type string but an expression was expected of type\n         int"
-         :end-line 4 :end-column 29 :checker ocaml-dune))))
+         :end-line 4 :end-column 29 :checker ocaml-dune)))
+
+  (describe "reading Dune's output"
+    ;; The location line, the echoed source and the wrapped message all
+    ;; have to be read as one error
+    (flycheck-buttercup-def-parse-test ocaml-dune
+        "language/ocaml-dune/lib/typeerror.ml"
+      '(4 17 error "This constant has type string but an expression was expected of type\n         int"
+          :end-line 4 :end-column 29))))
 
 ;;; test-ocaml.el ends here
