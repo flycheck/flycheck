@@ -589,10 +589,12 @@ case, including assertions and setup code."
                                      (executable-find
                                       (flycheck-checker-executable ',c)))))
                              checkers)))
+    ;; `it' already wraps the body in a function of its own, so an extra
+    ;; `lambda' here would just be evaluated and thrown away, taking every
+    ;; assertion in the body with it
     `(,it-fn ,full-name
-             (lambda ()
-               ,@skip-forms
-               ,@body))))
+             ,@skip-forms
+             ,@body)))
 
 (provide 'flycheck-buttercup)
 
