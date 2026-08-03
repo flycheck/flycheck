@@ -952,6 +952,57 @@ to view the docstring of the syntax checker.  Likewise, you may use
       See the ``org-lint`` documentation in Org mode for details about the checks
       performed.
 
+.. supported-language:: OCaml
+
+   Flycheck has two OCaml checkers and picks between them by whether the file
+   belongs to a `Dune <https://dune.build/>`_ project, since the compiler on its
+   own cannot resolve references to sibling modules.
+
+   .. syntax-checker:: ocaml-dune
+
+      Check a Dune project with ``dune build @check``.
+
+      Dune type-checks the whole project without linking it, so this checker
+      resolves references to other modules and to the project's dependencies.
+      It only runs once the buffer is saved, because Dune reads the files from
+      disk, and it reports errors from the whole project, not only the file you
+      are visiting.
+
+      Dune only reports what it rebuilds.  A target that failed is retried on
+      every check, so errors keep being reported, and under the default ``dev``
+      profile that covers warnings too, since Dune promotes them to errors
+      there.  A project that turns that off with ``-warn-error -a`` gets its
+      warnings reported once, on the check that compiles the file.
+
+      .. defcustom:: flycheck-ocaml-dune-profile
+
+         The build profile to pass to Dune via ``--profile``.  When nil, let
+         Dune pick.
+
+      .. defcustom:: flycheck-ocaml-dune-args
+
+         A list of additional arguments passed to ``dune build``.
+
+   .. syntax-checker:: ocaml
+
+      Check a standalone OCaml file with the `OCaml <https://ocaml.org/>`_
+      compiler via ``ocamlfind ocamlc``.
+
+      This checker compiles the file on its own, so it only knows about the
+      modules named in `flycheck-ocaml-packages`.  It steps aside inside
+      a Dune project, where every reference to a sibling module would otherwise
+      be reported as an unbound module, and `ocaml-dune` takes
+      over.
+
+      .. defcustom:: flycheck-ocaml-packages
+
+         A list of findlib package names passed to ``ocamlfind`` via
+         ``-package``.
+
+      .. defcustom:: flycheck-ocaml-args
+
+         A list of additional arguments passed to ``ocamlfind ocamlc``.
+
 .. supported-language:: Opam
 
    .. syntax-checker:: opam

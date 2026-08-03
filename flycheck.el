@@ -180,6 +180,8 @@
     markdown-mdl
     markdown-pymarkdown
     nix
+    ocaml-dune
+    ocaml
     opam
     org-lint
     perl
@@ -15007,6 +15009,134 @@ See URL `https://opam.ocaml.org/doc/man/opam-lint.html'."
     (flycheck-increment-error-columns
      (flycheck-fill-empty-line-numbers errors)))
   :modes (tuareg-opam-mode neocaml-opam-mode))
+
+(defconst flycheck-ocaml-error-patterns
+  ;; A location line is followed by the offending source lines, which the
+  ;; compiler echoes back with a line number or a caret underneath, and
+  ;; then by the message.  Both always start with a digit or a space,
+  ;; which is what keeps the skip from running past the message and into
+  ;; the next diagnostic.
+  '((error line-start
+           "File \"" (file-name) "\", line" (? "s") " " line (? "-" end-line)
+           ", characters " column "-" end-column ":"
+           (zero-or-more "\n" (any " " digit) (zero-or-more not-newline))
+           "\nError: "
+           (message (one-or-more not-newline)
+                    (zero-or-more "\n" (one-or-more " ")
+                                  (one-or-more not-newline)))
+           line-end)
+    ;; Dune's dev profile, and `ocamlc -warn-error', report warnings as
+    ;; errors but still say which warning it was.  They are warnings.
+    (warning line-start
+             "File \"" (file-name) "\", line" (? "s") " " line (? "-" end-line)
+             ", characters " column "-" end-column ":"
+             (zero-or-more "\n" (any " " digit) (zero-or-more not-newline))
+             "\n" (or "Warning " "Error (warning ")
+             (id (one-or-more digit))
+             (? " [" (one-or-more (any "a-z0-9-")) "]")
+             (? ")") ": "
+             (message (one-or-more not-newline)
+                      (zero-or-more "\n" (one-or-more " ")
+                                    (one-or-more not-newline)))
+             line-end))
+  "Error patterns shared by the OCaml checkers.")
+
+(defun flycheck-ocaml--dune-root ()
+  "Return the root directory of the Dune project of the current buffer.
+
+Return nil if the buffer's file is not inside a Dune project."
+  (and buffer-file-name
+       (locate-dominating-file buffer-file-name "dune-project")))
+
+(defun flycheck-ocaml--filter-errors (errors)
+  "Sanitize ERRORS from an OCaml compiler, whose columns are 0-based."
+  (flycheck-sanitize-errors (flycheck-increment-error-columns errors)))
+
+(flycheck-def-option-var flycheck-ocaml-packages nil ocaml
+  "A list of findlib packages for the OCaml checker.
+
+The value of this variable is a list of strings, where each
+string is a findlib package name."
+  :type '(repeat (string :tag "Package name"))
+  :safe #'flycheck-string-list-p
+  :package-version '(flycheck . "39"))
+
+(flycheck-def-args-var flycheck-ocaml-args ocaml
+  :package-version '(flycheck . "39"))
+
+(flycheck-def-executable-var ocaml "ocamlfind")
+(flycheck-define-command-checker 'ocaml
+  "An OCaml syntax and type checker using the OCaml compiler.
+
+This checker compiles the file on its own, so it only knows about
+the modules it is told about via `flycheck-ocaml-packages'.  That
+is right for a standalone file, but not for a file that is part of
+a larger project, where every reference to a sibling module would
+be reported as an unbound module.  It therefore steps aside inside
+a Dune project, where `ocaml-dune' takes over.
+
+See URL `https://ocaml.org/'."
+  :command '("ocamlfind" "ocamlc"
+             (option-list "-package" flycheck-ocaml-packages)
+             (eval flycheck-ocaml-args)
+             "-c" source)
+  :error-patterns flycheck-ocaml-error-patterns
+  :error-filter #'flycheck-ocaml--filter-errors
+  :predicate (lambda () (not (flycheck-ocaml--dune-root)))
+  :modes '(tuareg-mode caml-mode neocaml-mode))
+
+(flycheck-def-option-var flycheck-ocaml-dune-profile nil ocaml-dune
+  "The build profile for the Dune checker.
+
+When non-nil, pass this profile to Dune via `--profile'.  When
+nil, let Dune pick, which means the `dev' profile unless the
+project says otherwise."
+  :type '(choice (const :tag "Default profile" nil)
+                 (const :tag "Development" "dev")
+                 (const :tag "Release" "release")
+                 (string :tag "Profile name"))
+  :safe #'string-or-null-p
+  :package-version '(flycheck . "39"))
+
+(flycheck-def-args-var flycheck-ocaml-dune-args ocaml-dune
+  :package-version '(flycheck . "39"))
+
+(flycheck-def-executable-var ocaml-dune "dune")
+(flycheck-define-command-checker 'ocaml-dune
+  "An OCaml syntax and type checker using Dune.
+
+Runs `dune build @check', which type-checks the whole project
+without linking it, so unlike `ocaml' it resolves references to
+other modules and to the project's dependencies.
+
+Two things follow from Dune doing the build.  It reads the files
+from disk, so this checker only runs once the buffer is saved.
+And it reports the whole project, so errors may well belong to a
+file other than the one you are visiting; Flycheck lists those in
+the error list under their own file.
+
+Dune only reports what it rebuilds.  A target that failed is
+retried on every check, so errors keep being reported, and under
+the default `dev' profile that covers warnings too, since Dune
+promotes them to errors there.  A project that turns that off with
+`-warn-error -a' gets its warnings reported once, on the check
+that compiles the file, and not again until it changes.
+
+Dune takes a lock on the build directory, so a check waits for any
+`dune build' already running in a terminal, and vice versa, and
+the first check of a cold project pays for the whole build.
+
+See URL `https://dune.build/'."
+  :command '("dune" "build"
+             (option "--profile" flycheck-ocaml-dune-profile)
+             (eval flycheck-ocaml-dune-args)
+             "@check")
+  :error-patterns flycheck-ocaml-error-patterns
+  :error-filter #'flycheck-ocaml--filter-errors
+  :working-directory (lambda (_checker) (flycheck-ocaml--dune-root))
+  :predicate (lambda ()
+               (and (flycheck-ocaml--dune-root) (flycheck-buffer-saved-p)))
+  :modes '(tuareg-mode caml-mode neocaml-mode))
 
 (flycheck-def-option-var flycheck-perl-include-path nil perl
   "A list of include directories for Perl.
