@@ -38,6 +38,17 @@
      '(9 nil info "Suspicious variable name \"val_${val}\""
          :checker tcl-nagelfar)
      '(12 nil error "Wrong number of arguments \(4\) to \"set\""
-          :checker tcl-nagelfar))))
+          :checker tcl-nagelfar)))
+
+  (describe "the tcl-nagelfar checker command"
+    (it "passes each syntax database with its own -s"
+      (let ((flycheck-tcl-nagelfar-syntax-databases '("proj.syntax" "extra.syntax")))
+        (expect (butlast (flycheck-checker-substituted-arguments 'tcl-nagelfar))
+                :to-equal '("-H" "-s" "proj.syntax" "-s" "extra.syntax"))))
+
+    (it "threads flycheck-tcl-nagelfar-args into nagelfar"
+      (let ((flycheck-tcl-nagelfar-args '("-filter" "*Unknown command*")))
+        (expect (flycheck-checker-substituted-arguments 'tcl-nagelfar)
+                :to-contain "-filter")))))
 
 ;;; test-tcl.el ends here

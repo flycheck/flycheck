@@ -8496,7 +8496,11 @@ annotated on the next command."
 
 ;;; Working with errors
 (defun flycheck-copy-errors-as-kill (pos &optional formatter)
-  "Copy each error at POS into kill ring, using FORMATTER.
+  "Copy the errors at POS into the kill ring, using FORMATTER.
+
+All of them go in as one entry, a line each, so a single yank pastes
+everything reported at POS.  They used to go in one at a time, which put
+the rest behind \[yank-pop] and left a paste showing only one of them.
 
 FORMATTER is a function to turn an error into a string,
 defaulting to `flycheck-error-message'.
@@ -8513,8 +8517,10 @@ universal prefix arg, and only the id with normal prefix arg."
   (let ((messages (delq nil (mapcar (or formatter #'flycheck-error-message)
                                      (flycheck-overlay-errors-at pos)))))
     (when messages
-      (seq-do #'kill-new (nreverse messages))
-      (message (string-join messages "\n")))))
+      (let ((text (string-join messages "\n")))
+        (kill-new text)
+        ;; Not as a format string: a message may well contain a `%'
+        (message "%s" text)))))
 
 (defun flycheck-explain-error-at-point ()
   "Display an explanation for the first explainable error at point.
@@ -17616,11 +17622,31 @@ See URL
   'flycheck-chktex-config "39")
 (flycheck-def-config-file-var flycheck-chktex-config tex-chktex ".chktexrc")
 
+(flycheck-def-option-var flycheck-tcl-nagelfar-syntax-databases nil tcl-nagelfar
+  "A list of syntax database files for Nagelfar, passed with `-s'.
+
+Nagelfar only knows the commands in its databases, so in a project whose
+procedures live across several files it reports the ones it has not seen
+as unknown commands.  Running Nagelfar with `-header' over the project
+writes a database describing them; listing it here quiets those reports
+when checking a single file.
+
+Relative paths are relative to the file being checked."
+  :type '(repeat (file :tag "Database file"))
+  :safe #'flycheck-string-list-p
+  :package-version '(flycheck . "39"))
+
+(flycheck-def-args-var flycheck-tcl-nagelfar-args tcl-nagelfar
+  :package-version '(flycheck . "39"))
+
 (flycheck-define-checker tcl-nagelfar
   "A Tcl syntax checker using Nagelfar.
 
 See URL `https://nagelfar.sourceforge.net/'."
-  :command ("nagelfar" "-H" source)
+  :command ("nagelfar" "-H"
+            (option-list "-s" flycheck-tcl-nagelfar-syntax-databases)
+            (eval flycheck-tcl-nagelfar-args)
+            source)
   :error-patterns
   ;; foo.tcl: 29: E Wrong number of arguments (4) to "set"
   ;; foo.tcl: 29: W Expr without braces

@@ -1710,6 +1710,17 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       Check Tcl syntax with `Nagelfar <https://nagelfar.sourceforge.io/>`_.
 
+      .. defcustom:: flycheck-tcl-nagelfar-syntax-databases
+
+         A list of syntax database files, passed with ``-s``.  Nagelfar
+         reports commands it has no database for as unknown, so a project
+         whose procedures span several files wants the database that
+         ``nagelfar -header`` writes for it listed here.
+
+      .. defcustom:: flycheck-tcl-nagelfar-args
+
+         A list of additional arguments passed to ``nagelfar``.
+
 .. supported-language:: Terraform
 
    .. syntax-checker:: terraform
