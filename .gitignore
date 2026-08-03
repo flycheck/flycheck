@@ -21,3 +21,6 @@
 
 # Directory local variables
 .dir-locals.el
+
+# Dune build output from the OCaml checker specs
+_build/
