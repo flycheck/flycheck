@@ -82,10 +82,10 @@
        "language/emacs-lisp/warnings.el" 'emacs-lisp-mode
        '(12 nil info "First sentence should end with punctuation"
             :checker emacs-lisp-checkdoc)
-       '(16 6 warning "foobar called with 1 argument, but accepts only 0"
+       '(16 6 warning "`foobar' called with 1 argument, but accepts only 0"
             :checker emacs-lisp)
-       '(21 1 warning "the function `dummy-package-foo' is not known to be defined."
-            :checker emacs-lisp )))
+       '(13 4 warning "the function `dummy-package-foo' is not known to be defined."
+            :checker emacs-lisp)))
 
     (flycheck-buttercup-def-checker-test (emacs-lisp emacs-lisp-checkdoc) emacs-lisp
                                          uses-right-major-mode
@@ -104,18 +104,24 @@
       (let ((inhibit-message t))
         (flycheck-buttercup-should-syntax-check
          "language/emacs-lisp/warnings.el.gz" 'emacs-lisp-mode
+         ;; Checkdoc reads the footer against the name without the .gz
+         '(20 nil info "The footer should be: (provide 'warnings.el)\\n;;; warnings.el.gz ends here"
+              :checker emacs-lisp-checkdoc)
          '(12 nil info "First sentence should end with punctuation"
               :checker emacs-lisp-checkdoc)
-         '(16 6 warning "foobar called with 1 argument, but accepts only 0"
+         '(16 6 warning "`foobar' called with 1 argument, but accepts only 0"
               :checker emacs-lisp)
-         '(21 1 warning "the function `dummy-package-foo' is not known to be defined."
+         '(13 4 warning "the function `dummy-package-foo' is not known to be defined."
               :checker emacs-lisp))))
 
     (flycheck-buttercup-def-checker-test emacs-lisp emacs-lisp syntax-error
       (let ((flycheck-disabled-checkers '(emacs-lisp-checkdoc)))
         (flycheck-buttercup-should-syntax-check
          "language/emacs-lisp/syntax-error.el" 'emacs-lisp-mode
-         '(3 1 error "End of file during parsing" :checker emacs-lisp))))
+         ;; Emacs 29 stopped pointing at the last line it managed to read
+         (if (version< emacs-version "29")
+             '(3 1 error "End of file during parsing" :checker emacs-lisp)
+           '(0 nil error "End of file during parsing" :checker emacs-lisp)))))
 
     (flycheck-buttercup-def-checker-test (emacs-lisp emacs-lisp-checkdoc) emacs-lisp
                                          without-file-name
