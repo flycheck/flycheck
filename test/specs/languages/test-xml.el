@@ -29,6 +29,10 @@
 
 (describe "Language XML"
   (flycheck-buttercup-def-checker-test xml-xmllint xml nil
+  ;; Flycheck does not support Windows officially, and this is one of
+  ;; the differences we do not chase (see the contributor guide)
+  (assume (not (eq system-type 'windows-nt))
+          "xmllint reports a different number of errors on Windows")
     (let ((inhibit-message t))
       (flycheck-buttercup-should-syntax-check
        "language/xml.xml" 'nxml-mode

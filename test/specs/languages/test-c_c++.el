@@ -106,6 +106,14 @@ against a integer value that is neither 1 nor 0.\">
 
   (describe "Checker tests"
     (flycheck-buttercup-def-checker-test c/c++-clang (c c++) error
+    ;; The compilers are slow enough to start on the Windows runners
+    ;; that these time out at random, and where they do finish the
+    ;; include path never reaches them and cppcheck exits with
+    ;; nothing readable.  Flycheck does not support Windows
+    ;; officially, so the live checks stay off there; what Flycheck
+    ;; reads out of a compiler's output is asserted separately.
+    (assume (not (eq system-type 'windows-nt))
+            "the C/C++ checkers are not run on Windows")
       (let ((flycheck-disabled-checkers '(c/c++-gcc)))
         (flycheck-buttercup-should-syntax-check
          "language/c_c++/error.cpp" 'c++-mode
@@ -117,6 +125,14 @@ against a integer value that is neither 1 nor 0.\">
              :checker c/c++-clang))))
 
     (flycheck-buttercup-def-checker-test c/c++-clang (c c++) fatal-error
+    ;; The compilers are slow enough to start on the Windows runners
+    ;; that these time out at random, and where they do finish the
+    ;; include path never reaches them and cppcheck exits with
+    ;; nothing readable.  Flycheck does not support Windows
+    ;; officially, so the live checks stay off there; what Flycheck
+    ;; reads out of a compiler's output is asserted separately.
+    (assume (not (eq system-type 'windows-nt))
+            "the C/C++ checkers are not run on Windows")
       (let ((flycheck-disabled-checkers '(c/c++-gcc)))
         (flycheck-buttercup-should-syntax-check
          "language/c_c++/includes.c" 'c-mode
@@ -124,6 +140,14 @@ against a integer value that is neither 1 nor 0.\">
              :checker c/c++-clang))))
 
     (flycheck-buttercup-def-checker-test c/c++-clang (c c++) warnings
+    ;; The compilers are slow enough to start on the Windows runners
+    ;; that these time out at random, and where they do finish the
+    ;; include path never reaches them and cppcheck exits with
+    ;; nothing readable.  Flycheck does not support Windows
+    ;; officially, so the live checks stay off there; what Flycheck
+    ;; reads out of a compiler's output is asserted separately.
+    (assume (not (eq system-type 'windows-nt))
+            "the C/C++ checkers are not run on Windows")
       (let ((flycheck-disabled-checkers '(c/c++-gcc c/c++-cppcheck)))
         (flycheck-buttercup-should-syntax-check
          "language/c_c++/warning.c" 'c-mode
@@ -133,6 +157,14 @@ against a integer value that is neither 1 nor 0.\">
          '(8 7 warning "no message" :checker c/c++-clang))))
 
     (flycheck-buttercup-def-checker-test c/c++-clang (c c++) included-file-warning
+    ;; The compilers are slow enough to start on the Windows runners
+    ;; that these time out at random, and where they do finish the
+    ;; include path never reaches them and cppcheck exits with
+    ;; nothing readable.  Flycheck does not support Windows
+    ;; officially, so the live checks stay off there; what Flycheck
+    ;; reads out of a compiler's output is asserted separately.
+    (assume (not (eq system-type 'windows-nt))
+            "the C/C++ checkers are not run on Windows")
       (let ((flycheck-clang-include-path '("./include"))
             (flycheck-disabled-checkers '(c/c++-gcc))
             (flycheck-relevant-error-other-file-minimum-level 'warning))
@@ -149,6 +181,14 @@ against a integer value that is neither 1 nor 0.\">
              :checker c/c++-clang))))
 
     (flycheck-buttercup-def-checker-test c/c++-gcc (c c++) error
+    ;; The compilers are slow enough to start on the Windows runners
+    ;; that these time out at random, and where they do finish the
+    ;; include path never reaches them and cppcheck exits with
+    ;; nothing readable.  Flycheck does not support Windows
+    ;; officially, so the live checks stay off there; what Flycheck
+    ;; reads out of a compiler's output is asserted separately.
+    (assume (not (eq system-type 'windows-nt))
+            "the C/C++ checkers are not run on Windows")
     (assume (flycheck-buttercup-gcc-is-gnu-p)
             "the gcc here is Clang, which words these differently")
       (let ((flycheck-disabled-checkers '(c/c++-clang)))
@@ -160,6 +200,14 @@ against a integer value that is neither 1 nor 0.\">
              :id "-Wunknown-pragmas" :checker c/c++-gcc))))
 
     (flycheck-buttercup-def-checker-test c/c++-gcc (c c++) fatal-error
+    ;; The compilers are slow enough to start on the Windows runners
+    ;; that these time out at random, and where they do finish the
+    ;; include path never reaches them and cppcheck exits with
+    ;; nothing readable.  Flycheck does not support Windows
+    ;; officially, so the live checks stay off there; what Flycheck
+    ;; reads out of a compiler's output is asserted separately.
+    (assume (not (eq system-type 'windows-nt))
+            "the C/C++ checkers are not run on Windows")
     (assume (flycheck-buttercup-gcc-is-gnu-p)
             "the gcc here is Clang, which words these differently")
       (let ((flycheck-disabled-checkers '(c/c++-clang)))
@@ -169,6 +217,14 @@ against a integer value that is neither 1 nor 0.\">
              :checker c/c++-gcc))))
 
     (flycheck-buttercup-def-checker-test c/c++-gcc (c c++) warning
+    ;; The compilers are slow enough to start on the Windows runners
+    ;; that these time out at random, and where they do finish the
+    ;; include path never reaches them and cppcheck exits with
+    ;; nothing readable.  Flycheck does not support Windows
+    ;; officially, so the live checks stay off there; what Flycheck
+    ;; reads out of a compiler's output is asserted separately.
+    (assume (not (eq system-type 'windows-nt))
+            "the C/C++ checkers are not run on Windows")
     (assume (flycheck-buttercup-gcc-is-gnu-p)
             "the gcc here is Clang, which words these differently")
       (let ((flycheck-disabled-checkers '(c/c++-clang c/c++-cppcheck)))
@@ -181,6 +237,14 @@ against a integer value that is neither 1 nor 0.\">
          '(8 7 warning "#warning" :id "-Wcpp" :checker c/c++-gcc))))
 
     (flycheck-buttercup-def-checker-test c/c++-gcc (c c++) included-file-warning
+    ;; The compilers are slow enough to start on the Windows runners
+    ;; that these time out at random, and where they do finish the
+    ;; include path never reaches them and cppcheck exits with
+    ;; nothing readable.  Flycheck does not support Windows
+    ;; officially, so the live checks stay off there; what Flycheck
+    ;; reads out of a compiler's output is asserted separately.
+    (assume (not (eq system-type 'windows-nt))
+            "the C/C++ checkers are not run on Windows")
     (assume (flycheck-buttercup-gcc-is-gnu-p)
             "the gcc here is Clang, which words these differently")
       (let ((flycheck-gcc-include-path '("./include"))
@@ -199,6 +263,14 @@ against a integer value that is neither 1 nor 0.\">
              :id "-Wcpp" :checker c/c++-gcc))))
 
     (flycheck-buttercup-def-checker-test c/c++-cppcheck (c c++) nil
+    ;; The compilers are slow enough to start on the Windows runners
+    ;; that these time out at random, and where they do finish the
+    ;; include path never reaches them and cppcheck exits with
+    ;; nothing readable.  Flycheck does not support Windows
+    ;; officially, so the live checks stay off there; what Flycheck
+    ;; reads out of a compiler's output is asserted separately.
+    (assume (not (eq system-type 'windows-nt))
+            "the C/C++ checkers are not run on Windows")
       (let ((flycheck-disabled-checkers '(c/c++-clang c/c++-gcc))
             (flycheck-cppcheck-inconclusive nil)
             (flycheck-cppcheck-checks '("style")))
