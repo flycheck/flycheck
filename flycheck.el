@@ -230,6 +230,7 @@
     sh-shellcheck
     slim
     slim-lint
+    swift
     sql-sqlint
     statix
     systemd-analyze
@@ -17711,6 +17712,37 @@ See URL `https://github.com/sds/slim-lint'."
   :command ("slim-lint" "--reporter=checkstyle" source)
   :error-parser flycheck-parse-checkstyle
   :modes slim-mode)
+
+(flycheck-def-args-var flycheck-swift-args swift
+  :package-version '(flycheck . "39"))
+
+(flycheck-define-checker swift
+  "A Swift syntax checker using the Swift compiler.
+
+Runs `swiftc -parse', which parses the file without type-checking
+it.  That is a deliberate limit: type-checking a single file means
+telling the compiler about the rest of the module, the SDK and the
+target, and getting any of it wrong reports things like `cannot
+find X in scope' for code that builds perfectly well.  Parsing
+needs none of that and is right for any file, in a package or not.
+
+For type errors, run sourcekit-lsp through
+`global-flycheck-eglot-mode' or `flycheck-lsp-mode'; a language
+server knows how the project is built and Flycheck does not have
+to guess.
+
+See URL `https://www.swift.org/'."
+  :command ("swiftc" "-parse" "-diagnostic-style" "llvm"
+            (eval flycheck-swift-args)
+            source)
+  :error-patterns
+  ((error line-start (file-name) ":" line ":" column ": "
+          "error: " (message) line-end)
+   (warning line-start (file-name) ":" line ":" column ": "
+            "warning: " (message) line-end)
+   (info line-start (file-name) ":" line ":" column ": "
+         "note: " (message) line-end))
+  :modes swift-mode)
 
 (flycheck-define-checker sql-sqlint
   "A SQL syntax checker using the sqlint tool.

@@ -77,6 +77,7 @@
  (depends-on "scala-mode")
  (depends-on "scss-mode")
  (depends-on "slim-mode")
+ (depends-on "swift-mode")
  (depends-on "systemd")
  (depends-on "terraform-mode")
  (depends-on "tuareg")
