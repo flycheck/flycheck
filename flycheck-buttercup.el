@@ -383,10 +383,20 @@ ERROR is a Flycheck error object."
          (category (flycheck-error-level-overlay-category level))
          (face (get category 'face))
          ;; With indication disabled there is no icon at all
-         (indicator-icon (when-let* ((side (flycheck--resolve-indication-mode)))
-                           (get-char-property
-                            0 'display
-                            (flycheck-error-level-make-indicator level side))))
+         (indicator-icon
+          (when-let* ((side (flycheck--resolve-indication-mode)))
+            ;; Whether a checker attaches a fix is asserted separately, so
+            ;; take the indicator from what the error actually carries
+            ;; rather than assume it carries nothing
+            (let* ((actual (and overlay (overlay-get overlay 'flycheck-error)))
+                   (fixable (and actual
+                                 flycheck-fixable-indicator
+                                 (flycheck-error-known-fix-p actual)
+                                 (flycheck--error-fix-buffer actual)
+                                 t)))
+              (get-char-property
+               0 'display
+               (flycheck-error-level-make-indicator level side nil fixable)))))
          (before-string (and overlay (overlay-get overlay 'before-string))))
     (expect overlay :to-be-truthy)
     (expect (overlay-get overlay 'flycheck-overlay) :to-be-truthy)
