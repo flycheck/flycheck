@@ -291,6 +291,15 @@ against a integer value that is neither 1 nor 0.\">
              :checker c/c++-cppcheck)
          '(9 nil error "Division by zero." :id "zerodiv" :checker c/c++-cppcheck)
          '(12 nil warning "Parameter 'foo' is passed by value. It could be passed as a const reference which is usually faster and recommended in C++."
-              :id "passedByValue" :checker c/c++-cppcheck))))))
+              :id "passedByValue" :checker c/c++-cppcheck)))))
+
+  (describe "reading the compiler's output"
+    ;; Recorded from Clang, which is what answers to the name gcc on
+    ;; macOS.  GNU GCC words these differently, which is exactly the sort
+    ;; of divergence a live check cannot pin down on one machine.
+    (flycheck-buttercup-def-parse-test c/c++-gcc "language/c_c++/error.cpp"
+      '(8 9 warning "unknown pragma ignored" :id "-Wunknown-pragmas")
+      '(2 20 error "no member named 'bar' in 'A'")
+      '(6 19 info "in instantiation of function template specialization 'foo<A>' requested here"))))
 
 ;;; test-c_c++.el ends here

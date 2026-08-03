@@ -1,0 +1,10 @@
+<stdin>:8:9: warning: unknown pragma ignored [-Wunknown-pragmas]
+    8 | #pragma nope
+      |         ^
+<stdin>:2:20: error: no member named 'bar' in 'A'
+    2 | void foo(T& x) { x.bar(); }
+      |                  ~ ^
+<stdin>:6:19: note: in instantiation of function template specialization 'foo<A>' requested here
+    6 | void bar() { A a; foo(a); }
+      |                   ^
+1 warning and 1 error generated.

@@ -203,6 +203,14 @@
       (dolist (checker '(ruby-standard ruby-chef-cookstyle))
         (expect (flycheck-checker-get checker 'handle-suspicious)
                 :to-be 'flycheck--rubocop-handle-suspicious))))
-)
+
+
+  (describe "reading rubocop's output"
+    (flycheck-buttercup-def-parse-test ruby-rubocop
+        "language/ruby/syntax-error.rb"
+      '(5 7 error "unexpected constant, expecting end-of-input (Using Ruby 3.4 parser; configure using `TargetRubyVersion` parameter, under `AllCops`)"
+          :id "Lint/Syntax")
+      '(5 25 error "unterminated string meets end of file (Using Ruby 3.4 parser; configure using `TargetRubyVersion` parameter, under `AllCops`)"
+          :id "Lint/Syntax"))))
 
 ;;; test-ruby.el ends here
