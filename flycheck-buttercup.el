@@ -344,15 +344,35 @@ Raise an assertion error if errors or overlays remain afterwards."
 
 ;;; Error utilities
 
-(defun flycheck-buttercup-error-without-group (err)
-  "Return a copy of ERR with the `group' and `fix' properties set to nil.
+(defconst flycheck-buttercup--quote-alist
+  '((?\‘ . ?\') (?\’ . ?\') (?\“ . ?\") (?\” . ?\"))
+  "Typographic quotes and the ASCII ones specs write instead.")
 
-Language checker specs compare errors without asserting on these
-incidental slots: `group' holds an uninterned symbol, and `fix'
-holds a machine-applicable suggestion that is verified separately."
+(defun flycheck-buttercup-normalize-quotes (message)
+  "Replace typographic quotes in MESSAGE with their ASCII equivalents.
+
+Which pair of quotes a tool puts around a name is not something a
+spec should assert.  GCC and gfortran quote with ‘…’ under a UTF-8
+locale and with '…' under C, and Clang, which answers to the name
+`gcc' on macOS, always uses the ASCII ones."
+  (when message
+    (apply #'string
+           (mapcar (lambda (c)
+                     (or (cdr (assq c flycheck-buttercup--quote-alist)) c))
+                   message))))
+
+(defun flycheck-buttercup-error-without-group (err)
+  "Return a copy of ERR with incidental differences flattened.
+
+Language checker specs do not assert on these: `group' holds an
+uninterned symbol, `fix' holds a machine-applicable suggestion that
+is verified separately, and a message's quote glyphs depend on the
+tool and the locale (see `flycheck-buttercup-normalize-quotes')."
   (let ((copy (copy-flycheck-error err)))
     (setf (flycheck-error-group copy) nil)
     (setf (flycheck-error-fix copy) nil)
+    (setf (flycheck-error-message copy)
+          (flycheck-buttercup-normalize-quotes (flycheck-error-message copy)))
     copy))
 
 (defun flycheck-buttercup-sort-errors (errors)
