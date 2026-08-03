@@ -1,0 +1,4 @@
+jq: parse error: Expected value before ',' at line 1, column 44
+{
+  "Comment": "Test two top-level objects"
+}

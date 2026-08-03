@@ -15,6 +15,16 @@
        "language/json.json" 'json-mode
        '(1 44 error "Expected value before ','" :checker json-jq))))
 
+  (describe "reading jq's output"
+    ;; Runs whether or not jq is installed, so a change to the patterns
+    ;; cannot pass unnoticed on a machine that happens to lack it
+    (flycheck-buttercup-def-parse-test json-jq "language/json.json"
+      '(1 44 error "Expected value before ','"))
+
+    (it "drops the program name jq 1.7 prefixes"
+      (expect (flycheck-buttercup-fixture 'json-jq "language/json.json")
+              :to-match "\\`jq: parse error: ")))
+
   (describe "the json-jq checker command"
     (it "threads flycheck-json-jq-args in before the filter"
       (let ((flycheck-json-jq-args '("--seq")))
