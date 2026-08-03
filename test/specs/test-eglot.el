@@ -90,7 +90,7 @@
     (it "does not re-trigger for a report it asked for"
       (flycheck-buttercup-with-temp-buffer
         (spy-on 'flycheck-buffer-automatically)
-        (setq flycheck-eglot--report-solicited t)
+        (setq flycheck-eglot--awaiting-answer t)
         (flycheck-eglot--report
          (list (test-eglot--diag (current-buffer) 1 2 :error "x")))
         (expect 'flycheck-buffer-automatically :not :to-have-been-called)))
@@ -100,11 +100,62 @@
       ;; afterwards still reaches the buffer
       (flycheck-buttercup-with-temp-buffer
         (spy-on 'flycheck-buffer-automatically)
-        (setq flycheck-eglot--report-solicited t)
+        (setq flycheck-eglot--awaiting-answer t)
         (flycheck-eglot--report nil)
         (flycheck-eglot--report
          (list (test-eglot--diag (current-buffer) 1 2 :error "x")))
         (expect 'flycheck-buffer-automatically :to-have-been-called)))
+
+    (it "survives an answer split over two reports"
+      ;; `eglot--flymake-report-push+pulled' hands over the pulled
+      ;; diagnostics and then the pushed ones, so one request produces two
+      ;; reports.  Treating only the first as the answer made the second
+      ;; look volunteered, and the check it started asked again.  The
+      ;; recursion runs through `flycheck-perform-deferred-syntax-check',
+      ;; so it exhausts the Lisp stack rather than merely spinning.  See
+      ;; #2201.
+      (flycheck-buttercup-with-temp-buffer
+        (let ((requests 0) (checks 0))
+          (cl-letf (((symbol-function 'eglot-flymake-backend)
+                     (lambda (report-fn &rest _)
+                       (cl-incf requests)
+                       (funcall report-fn
+                                (list (test-eglot--diag (current-buffer) 1 2
+                                                        :error "pulled")))
+                       (funcall report-fn
+                                (list (test-eglot--diag (current-buffer) 1 2
+                                                        :error "pushed")))))
+                    ((symbol-function 'flycheck-eglot--convert-diagnostic)
+                     (lambda (_d) (flycheck-error-new-at 1 1 'error "x")))
+                    ((symbol-function 'flycheck-buffer-automatically)
+                     (lambda (&rest _)
+                       (cl-incf checks)
+                       (when (> checks 10) (error "runaway"))
+                       (flycheck-eglot--start nil #'ignore))))
+            (flycheck-eglot--start nil #'ignore))
+          (expect requests :to-equal 1)
+          (expect checks :to-equal 0))))
+
+    (it "still hears the next report once a synchronous answer arrived"
+      ;; The request closes when it is answered during the call, or a
+      ;; genuine push afterwards would be swallowed
+      (flycheck-buttercup-with-temp-buffer
+        (let ((triggered 0))
+          (cl-letf (((symbol-function 'eglot-flymake-backend)
+                     (lambda (report-fn &rest _)
+                       (funcall report-fn
+                                (list (test-eglot--diag (current-buffer) 1 2
+                                                        :error "a")))))
+                    ((symbol-function 'flycheck-eglot--convert-diagnostic)
+                     (lambda (_d) (flycheck-error-new-at 1 1 'error "x")))
+                    ((symbol-function 'flycheck-buffer-automatically)
+                     (lambda (&rest _) (cl-incf triggered))))
+            (flycheck-eglot--start nil #'ignore)
+            (expect triggered :to-equal 0)
+            ;; the server volunteers something new
+            (flycheck-eglot--report
+             (list (test-eglot--diag (current-buffer) 1 2 :error "b")))
+            (expect triggered :to-equal 1)))))
 
     (it "survives an answer that arrives after the request returned"
       ;; Under LSP 3.17 pull diagnostics, asking Eglot sends a request and
