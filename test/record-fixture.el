@@ -273,6 +273,16 @@ whose tool is not installed."
                          (read-before (flycheck-fixture--reads checker was))
                          (read-now (flycheck-fixture--reads checker now)))
                     (cond
+                     ((string-blank-p now)
+                      ;; Nothing to read is not the same as unreadable:
+                      ;; this build of the tool has no complaint about
+                      ;; the file, the way Bash 5 allows what Bash 3
+                      ;; refuses
+                      (message "  %s: %s had nothing to say about %s here"
+                               checker
+                               (file-name-nondirectory
+                                (flycheck-checker-default-executable checker))
+                               (file-name-nondirectory resource)))
                      ((and (> read-before 0) (= read-now 0))
                       (push (cons checker
                                   (format "reads nothing out of %s now, \
