@@ -102,6 +102,11 @@ compile:
 specs: compile
 	$(EASK) exec buttercup -L . -L test/specs test/specs
 
+.PHONY: verify-fixtures
+verify-fixtures:
+	$(EASK) exec emacs --batch -L . -l test/record-fixture.el \
+		-f flycheck-verify-fixtures-batch
+
 .PHONY: images
 images: $(IMGS)
 
@@ -114,6 +119,7 @@ help:
 	@echo '  check:   Check all Emacs Lisp sources'
 	@echo '  compile: Byte-compile Emacs Lisp sources'
 	@echo '  specs:   Run all buttercup specs for Flycheck'
+	@echo '  verify-fixtures: Check recorded checker output against the tools'
 	@echo '  images:  Generate PNG images from SVG sources'
 	@echo '  clean:   Clean compiled files'
 	@echo '  purge:   Clean everything'
