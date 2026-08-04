@@ -18157,8 +18157,9 @@ See URL `https://proselint.com/' for more information about proselint."
                      :id .check
                      :buffer buffer
                      :checker checker
-                     ;; See https://github.com/amperser/proselint/issues/1048
-                     :end-pos .end)))
+                     :end-pos (+ .end (flycheck--proselint-off-by-one-correction
+                                       buffer
+                                       .end)))))
                 (let-alist (car response)
                   .data.errors))
       ;; Proselint versions >= 0.16.0
@@ -18174,6 +18175,22 @@ See URL `https://proselint.com/' for more information about proselint."
                    :end-pos (nth 1 .span))))
               (let-alist (car response)
                 .result.<stdin>.diagnostics)))))
+
+;; Proselint 0.14 will often tell us that an error extends one character
+;; further than it actually does.  This is fairly trivial until we try
+;; to apply a replacement, at which point it causes us trouble.
+;; https://github.com/amperser/proselint/issues/1048
+(defun flycheck--proselint-off-by-one-correction (buffer end-pos)
+  "Return an offset if END-POS of BUFFER doesn't look like the end of an error."
+  (with-current-buffer buffer
+    (let ((penultimate-char (char-before (- end-pos 1)))
+          (ultimate-char (char-before end-pos)))
+      (if (and penultimate-char
+               ultimate-char
+               (not (char-equal (char-syntax penultimate-char)
+                                (char-syntax ultimate-char))))
+          -1
+        0))))
 
 ;; A hash table (not the scalar of earlier versions -- hence the new name,
 ;; so an in-session reload does not leave a stale non-table value that
