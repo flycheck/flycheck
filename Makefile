@@ -102,6 +102,23 @@ compile:
 specs: compile
 	$(EASK) exec buttercup -L . -L test/specs test/specs
 
+DOCKER ?= docker
+CHECKER_IMAGE ?= flycheck-checkers
+
+.PHONY: checker-image
+checker-image:
+	$(DOCKER) build -t $(CHECKER_IMAGE) test/docker
+
+.PHONY: record-fixtures
+record-fixtures: checker-image
+	$(DOCKER) run --rm -v "$(CURDIR)":/flycheck -u "$$(id -u):$$(id -g)" \
+		$(CHECKER_IMAGE)
+
+.PHONY: checker-shell
+checker-shell: checker-image
+	$(DOCKER) run --rm -it -v "$(CURDIR)":/flycheck -u "$$(id -u):$$(id -g)" \
+		$(CHECKER_IMAGE) bash
+
 .PHONY: verify-fixtures
 verify-fixtures:
 	$(EASK) exec emacs --batch -L . -l test/record-fixture.el \
@@ -120,6 +137,8 @@ help:
 	@echo '  compile: Byte-compile Emacs Lisp sources'
 	@echo '  specs:   Run all buttercup specs for Flycheck'
 	@echo '  verify-fixtures: Check recorded checker output against the tools'
+	@echo '  record-fixtures: Record checker output in a container of checkers'
+	@echo '  checker-shell:   A shell in that container'
 	@echo '  images:  Generate PNG images from SVG sources'
 	@echo '  clean:   Clean compiled files'
 	@echo '  purge:   Clean everything'
