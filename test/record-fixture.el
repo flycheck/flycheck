@@ -163,9 +163,9 @@ Return the file the fixture was written to."
 ;; A recording says what a tool printed on the day it was recorded.  The
 ;; specs that read it keep passing whatever the tool does afterwards,
 ;; which is the point on a machine without the tool and a blind spot
-;; everywhere else.  Re-running the tools and comparing closes it: a
-;; difference is not a broken test, it is a tool that changed its output
-;; and a checker that may no longer read it.
+;; everywhere else.  Running the tools again closes it, by asking whether
+;; the checker can still read them rather than whether they print the
+;; same bytes; see `flycheck-verify-fixtures'.
 
 (defconst flycheck-record-fixture-unstable
   '((rust-clippy . "cargo reports whether the crate was already built, \
@@ -212,11 +212,34 @@ by matching that name under the resources directory."
     (when matches
       (file-relative-name (car matches) root))))
 
-(defun flycheck-verify-fixtures ()
-  "Compare every recording against what its tool prints now.
+(defun flycheck-fixture--reads (checker output)
+  "How many errors CHECKER reads out of OUTPUT."
+  (length (flycheck-filter-errors
+           (flycheck-parse-output output checker (current-buffer))
+           checker)))
 
-Returns a list of (CHECKER . REASON) for the recordings that no
-longer match, skipping the ones whose tool is not installed."
+(defun flycheck-verify-fixtures ()
+  "Check that every checker can still read what its tool prints.
+
+The question is not whether the tool prints the same bytes as when
+its output was recorded.  It will not: a recording is made on
+somebody's machine, and the same checker faces a different build of
+the tool elsewhere, so Clang answers for GCC and every version
+differs in wording.  Comparing the text would report all of that,
+every week, until nobody read the report.
+
+What matters is whether Flycheck can still make sense of the
+output.  Every bug this was built for looked the same from here:
+jq grew a prefix, rebar3 replaced its format, the byte compiler
+moved a warning onto one line, and each time the checker went from
+reading errors to reading none.
+
+So the tool is run again and its output parsed.  A checker that
+read errors when the output was recorded and reads none now has
+stopped understanding its tool.
+
+Returns a list of (CHECKER . REASON) for those, skipping the ones
+whose tool is not installed."
   (let (drifted (checked 0) (skipped 0) (unstable 0))
     (dolist (dir (directory-files flycheck-record-fixture-directory
                                   'full "\\`[^.]"))
@@ -246,12 +269,25 @@ longer match, skipping the ones whose tool is not installed."
                                            checker
                                            (flycheck-record-fixture--resource
                                             resource))))
-                                (error (format "<could not run: %S>" err)))))
-                    (unless (equal was now)
+                                (error (format "<could not run: %S>" err))))
+                         (read-before (flycheck-fixture--reads checker was))
+                         (read-now (flycheck-fixture--reads checker now)))
+                    (cond
+                     ((and (> read-before 0) (= read-now 0))
                       (push (cons checker
-                                  (format "%s now prints something else"
-                                          (file-name-nondirectory recorded)))
-                            drifted)))))))
+                                  (format "reads nothing out of %s now, \
+where the recording gives it %d"
+                                          (file-name-nondirectory
+                                           (flycheck-checker-default-executable
+                                            checker))
+                                          read-before))
+                            drifted))
+                     ((not (equal was now))
+                      ;; Worth saying, not worth failing over: a different
+                      ;; build of the tool words things differently
+                      (message "  %s prints something else than the \
+recording, and still reads as %d error(s)"
+                               checker read-now))))))))
           (push (cons (file-name-nondirectory (directory-file-name dir))
                       "is not a checker")
                 drifted))))
@@ -261,15 +297,15 @@ longer match, skipping the ones whose tool is not installed."
     (nreverse drifted)))
 
 (defun flycheck-verify-fixtures-batch ()
-  "Report recordings that no longer match their tool, and exit non-zero."
+  "Report checkers that no longer read their tool, and exit non-zero."
   (let ((drifted (flycheck-verify-fixtures)))
     (if (null drifted)
-        (message "Every recording still matches its tool.")
-      (message "\n%d recording(s) no longer match:" (length drifted))
+        (message "Every checker still reads its tool.")
+      (message "\n%d checker(s) no longer read their tool:" (length drifted))
       (dolist (d drifted)
         (message "  %s: %s" (car d) (cdr d)))
-      (message "\nRe-record with test/record-fixture.el and check what the \
-checker now reads out of the new output.")
+      (message "\nRun the tool by hand and compare with the recording under \
+test/fixtures: the format has changed and the checker needs to follow it.")
       (kill-emacs 1))))
 
 (provide 'record-fixture)

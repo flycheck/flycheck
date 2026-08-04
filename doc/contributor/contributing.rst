@@ -126,10 +126,18 @@ exactly what moved.
 The catch is that a recording says what the tool printed on the day it was
 made, and the spec reading it keeps passing whatever the tool does afterwards.
 ``make verify-fixtures`` closes that: it runs the tools that are installed and
-compares.  A difference there is not a broken test, it means a tool changed
-what it prints and the checker reading it may need to change too.  A weekly
-job runs the same target, so a format change turns up as a dated notification
-rather than as a bug report months later.
+checks that Flycheck still reads errors out of them.
+
+It deliberately does not compare the text.  A recording is made on somebody's
+machine, and the same checker meets a different build of the tool elsewhere, so
+comparing would report a difference every week until nobody read the report.
+A checker that read errors when its output was recorded and reads none now has
+stopped understanding its tool, which is what every one of these has looked
+like: jq grew a prefix, rebar3 replaced its format, the byte compiler moved a
+warning onto one line.
+
+A weekly job runs the same target, so a format change turns up as a dated
+notification rather than as a bug report months later.
 
 Pull requests
 =============
