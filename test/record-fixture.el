@@ -395,7 +395,12 @@ recorded."
         (when (and (flycheck-checker-get checker 'command)
                    (flycheck-record-fixture-tool-available-p checker))
           (condition-case err
-              (let ((written (flycheck-record-fixture checker resource)))
+              (let* ((target (flycheck-record-fixture-file checker resource))
+                     (previous (when (file-exists-p target)
+                                 (with-temp-buffer
+                                   (insert-file-contents target)
+                                   (buffer-string))))
+                     (written (flycheck-record-fixture checker resource)))
                 ;; A tool that will not start still prints something, and
                 ;; writing that down gives a spec asserting how the
                 ;; failure looks.  What the checker reads is the test of
@@ -407,15 +412,26 @@ recorded."
                                   (buffer-string)))
                        0)
                     (setq recorded (1+ recorded))
-                  (delete-file written)
-                  ;; And the directory it was the only thing in, so a
-                  ;; checker with nothing recorded looks like one with
-                  ;; nothing recorded
-                  (ignore-errors (delete-directory (file-name-directory written)))
-                  (push (cons checker
-                              "ran, but the checker reads nothing out of \
+                  (if previous
+                      ;; Somebody else's machine got something out of this
+                      ;; tool.  Whatever is wrong with it here, throwing
+                      ;; their recording away is not the answer.
+                      (progn
+                        (with-temp-file written (insert previous))
+                        (push (cons checker
+                                    "reads nothing out of this tool here; \
+kept the recording that was already there")
+                              failed))
+                    (delete-file written)
+                    ;; And the directory it was the only thing in, so a
+                    ;; checker with nothing recorded looks like one with
+                    ;; nothing recorded
+                    (ignore-errors
+                      (delete-directory (file-name-directory written)))
+                    (push (cons checker
+                                "ran, but the checker reads nothing out of \
 what it printed; record it by hand if that is really what it says")
-                        failed)))
+                          failed))))
             (error (push (cons checker (error-message-string err)) failed))))))
     (message "\nrecorded %d, failed %d" recorded (length failed))
     (nreverse failed)))
