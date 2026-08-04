@@ -1,0 +1,8 @@
+(stdin):1: MD002 First header should be a top level header
+(stdin):4: MD009 Trailing spaces
+(stdin):3: MD012 Multiple consecutive blank lines
+
+Further documentation is available for these failures:
+ - MD002: https://github.com/markdownlint/markdownlint/blob/main/docs/RULES.md#md002---first-header-should-be-a-top-level-header
+ - MD009: https://github.com/markdownlint/markdownlint/blob/main/docs/RULES.md#md009---trailing-spaces
+ - MD012: https://github.com/markdownlint/markdownlint/blob/main/docs/RULES.md#md012---multiple-consecutive-blank-lines

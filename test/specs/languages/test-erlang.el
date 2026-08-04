@@ -63,7 +63,7 @@
     ;; not the tool is installed here
 
     (flycheck-buttercup-def-parse-test erlang "language/erlang/erlang/error.erl"
-      '(7 1 error "head mismatch: previous function great_func/0 is distinct from error_func/0. Is the semicolon in great_func/0 unwanted?")
+      '(7 1 error "head mismatch")
       '(3 2 warning "export_all flag enabled - all functions will be exported"))))
 
 ;;; test-erlang.el ends here

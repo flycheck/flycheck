@@ -36,6 +36,17 @@
      '(7 nil error "misplaced {" :checker texinfo)
      '(7 nil error "misplaced }" :checker texinfo)
      '(9 nil warning "printindex before document beginning: @printindex cp"
-         :checker texinfo))))
+         :checker texinfo)))
+
+  (describe "reading the tool's output"
+    ;; Read from output recorded earlier, so this runs whether or
+    ;; not the tool is installed here
+
+    (flycheck-buttercup-def-parse-test texinfo "language/texinfo.texi"
+      '(3 nil warning "@settitle missing argument")
+      '(7 nil error "unknown command `bold'")
+      '(7 nil error "misplaced {")
+      '(7 nil error "misplaced }")
+      '(9 nil warning "printindex before document beginning: @printindex cp"))))
 
 ;;; test-texinfo.el ends here

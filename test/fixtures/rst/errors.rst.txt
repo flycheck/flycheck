@@ -1,0 +1,18 @@
+<stdin>:8: (WARNING/2) Title underline too short.
+
+A title with short underline
+====
+<stdin>:14: (ERROR/3) Unexpected section title.
+
+Foo
+===
+<stdin>:19: (WARNING/2) Title underline too short.
+
+Oh now, this one is too
+----
+<stdin>:26: (ERROR/3) Unexpected section title.
+
+Bar
+===
+<stdin>:16: (ERROR/3) Unknown target name: "restructuredtext".
+<stdin>:21: (ERROR/3) Unknown target name: "cool".

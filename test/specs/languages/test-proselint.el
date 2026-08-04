@@ -49,6 +49,15 @@
              :id "sexism.misc"
              :checker proselint
              :end-line 3
-             :end-column 17))))))
+             :end-column 17)))))
+
+  (describe "reading the tool's output"
+    ;; Read from output recorded earlier, so this runs whether or
+    ;; not the tool is installed here
+
+    (flycheck-buttercup-def-parse-test proselint "language/text/text.txt"
+      '(1 1 warning "Substitute 'damn' every time you're inclined to write 'very'; your editor will delete it and the writing will be just as it should be." :id "weasel_words.very" :end-line 1 :end-column 1)
+      '(1 1 warning "Redundancy. Use 'associate' instead of 'associate together'." :id "redundancy.misc.garner" :end-line 1 :end-column 1)
+      '(1 1 warning "Gender bias. Use 'lawyer' instead of 'lady lawyer'." :id "social_awareness.sexism" :end-line 1 :end-column 1))))
 
 ;;; test-proselint.el ends here

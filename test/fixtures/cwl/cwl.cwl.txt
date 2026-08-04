@@ -1,0 +1,80 @@
+While validating schema 'test/resources/language/cwl/flycheck_cwl.cwl':
+flycheck_cwl.cwl:1:1: Object 'flycheck_cwl.cwl' is not valid because
+                        - tried 'SaladRecordSchema' but
+                          * missing required field 'type'
+                          * invalid field 'cwlVersion', expected one of: 'name', 'inVocab',
+                          'fields', 'type', 'doc', 'docParent', 'docChild', 'docAfter',
+                          'jsonldPredicate', 'documentRoot', 'abstract', 'extends', 'specialize'
+flycheck_cwl.cwl:2:1:     * invalid field 'class', expected one of: 'name', 'inVocab', 'fields',
+                          'type', 'doc', 'docParent', 'docChild', 'docAfter', 'jsonldPredicate',
+                          'documentRoot', 'abstract', 'extends', 'specialize'
+flycheck_cwl.cwl:3:1:     * invalid field 'baseCommand', expected one of: 'name', 'inVocab',
+                          'fields', 'type', 'doc', 'docParent', 'docChild', 'docAfter',
+                          'jsonldPredicate', 'documentRoot', 'abstract', 'extends', 'specialize'
+flycheck_cwl.cwl:4:1:     * invalid field 'inputs', expected one of: 'name', 'inVocab', 'fields',
+                          'type', 'doc', 'docParent', 'docChild', 'docAfter', 'jsonldPredicate',
+                          'documentRoot', 'abstract', 'extends', 'specialize'
+flycheck_cwl.cwl:8:1:     * invalid field 'outputs', expected one of: 'name', 'inVocab', 'fields',
+                          'type', 'doc', 'docParent', 'docChild', 'docAfter', 'jsonldPredicate',
+                          'documentRoot', 'abstract', 'extends', 'specialize'
+flycheck_cwl.cwl:1:1:   - tried 'SaladEnumSchema' but
+                          * missing required field 'symbols'
+                          * missing required field 'type'
+                          * invalid field 'cwlVersion', expected one of: 'name', 'inVocab',
+                          'symbols', 'type', 'doc', 'docParent', 'docChild', 'docAfter',
+                          'jsonldPredicate', 'documentRoot', 'extends'
+flycheck_cwl.cwl:2:1:     * invalid field 'class', expected one of: 'name', 'inVocab', 'symbols',
+                          'type', 'doc', 'docParent', 'docChild', 'docAfter', 'jsonldPredicate',
+                          'documentRoot', 'extends'
+flycheck_cwl.cwl:3:1:     * invalid field 'baseCommand', expected one of: 'name', 'inVocab',
+                          'symbols', 'type', 'doc', 'docParent', 'docChild', 'docAfter',
+                          'jsonldPredicate', 'documentRoot', 'extends'
+flycheck_cwl.cwl:4:1:     * invalid field 'inputs', expected one of: 'name', 'inVocab', 'symbols',
+                          'type', 'doc', 'docParent', 'docChild', 'docAfter', 'jsonldPredicate',
+                          'documentRoot', 'extends'
+flycheck_cwl.cwl:8:1:     * invalid field 'outputs', expected one of: 'name', 'inVocab', 'symbols',
+                          'type', 'doc', 'docParent', 'docChild', 'docAfter', 'jsonldPredicate',
+                          'documentRoot', 'extends'
+flycheck_cwl.cwl:1:1:   - tried 'SaladMapSchema' but
+                          * missing required field 'type'
+                          * missing required field 'values'
+                          * invalid field 'cwlVersion', expected one of: 'name', 'inVocab', 'type',
+                          'values', 'doc', 'docParent', 'docChild', 'docAfter', 'jsonldPredicate',
+                          'documentRoot'
+flycheck_cwl.cwl:2:1:     * invalid field 'class', expected one of: 'name', 'inVocab', 'type',
+                          'values', 'doc', 'docParent', 'docChild', 'docAfter', 'jsonldPredicate',
+                          'documentRoot'
+flycheck_cwl.cwl:3:1:     * invalid field 'baseCommand', expected one of: 'name', 'inVocab',
+                          'type', 'values', 'doc', 'docParent', 'docChild', 'docAfter',
+                          'jsonldPredicate', 'documentRoot'
+flycheck_cwl.cwl:4:1:     * invalid field 'inputs', expected one of: 'name', 'inVocab', 'type',
+                          'values', 'doc', 'docParent', 'docChild', 'docAfter', 'jsonldPredicate',
+                          'documentRoot'
+flycheck_cwl.cwl:8:1:     * invalid field 'outputs', expected one of: 'name', 'inVocab', 'type',
+                          'values', 'doc', 'docParent', 'docChild', 'docAfter', 'jsonldPredicate',
+                          'documentRoot'
+flycheck_cwl.cwl:1:1:   - tried 'SaladUnionSchema' but
+                          * missing required field 'names'
+                          * missing required field 'type'
+                          * invalid field 'cwlVersion', expected one of: 'name', 'inVocab',
+                          'names', 'type', 'doc', 'docParent', 'docChild', 'docAfter', 'documentRoot'
+flycheck_cwl.cwl:2:1:     * invalid field 'class', expected one of: 'name', 'inVocab', 'names',
+                          'type', 'doc', 'docParent', 'docChild', 'docAfter', 'documentRoot'
+flycheck_cwl.cwl:3:1:     * invalid field 'baseCommand', expected one of: 'name', 'inVocab',
+                          'names', 'type', 'doc', 'docParent', 'docChild', 'docAfter', 'documentRoot'
+flycheck_cwl.cwl:4:1:     * invalid field 'inputs', expected one of: 'name', 'inVocab', 'names',
+                          'type', 'doc', 'docParent', 'docChild', 'docAfter', 'documentRoot'
+flycheck_cwl.cwl:8:1:     * invalid field 'outputs', expected one of: 'name', 'inVocab', 'names',
+                          'type', 'doc', 'docParent', 'docChild', 'docAfter', 'documentRoot'
+flycheck_cwl.cwl:1:1:   - tried 'Documentation' but
+                          * missing required field 'type'
+                          * invalid field 'cwlVersion', expected one of: 'name', 'inVocab', 'doc',
+                          'docParent', 'docChild', 'docAfter', 'type'
+flycheck_cwl.cwl:2:1:     * invalid field 'class', expected one of: 'name', 'inVocab', 'doc',
+                          'docParent', 'docChild', 'docAfter', 'type'
+flycheck_cwl.cwl:3:1:     * invalid field 'baseCommand', expected one of: 'name', 'inVocab', 'doc',
+                          'docParent', 'docChild', 'docAfter', 'type'
+flycheck_cwl.cwl:4:1:     * invalid field 'inputs', expected one of: 'name', 'inVocab', 'doc',
+                          'docParent', 'docChild', 'docAfter', 'type'
+flycheck_cwl.cwl:8:1:     * invalid field 'outputs', expected one of: 'name', 'inVocab', 'doc',
+                          'docParent', 'docChild', 'docAfter', 'type'

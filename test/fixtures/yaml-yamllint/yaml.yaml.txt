@@ -1,0 +1,2 @@
+stdin:3:1: [warning] missing document start "---" (document-start)
+stdin:4:5: [error] syntax error: mapping values are not allowed here (syntax)

@@ -1,0 +1,5 @@
+-:3: warning: @settitle missing argument
+-:7: unknown command `bold'
+-:7: misplaced {
+-:7: misplaced }
+-:9: warning: printindex before document beginning: @printindex cp

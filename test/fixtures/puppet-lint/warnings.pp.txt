@@ -1,0 +1,3 @@
+test/resources/language/puppet/warnings.pp:2:error: foo::bar not in autoload module layout (autoloader_layout)
+test/resources/language/puppet/warnings.pp:3:warning: case statement without a default case (case_without_default)
+test/resources/language/puppet/warnings.pp:3:warning: legacy fact 'operatingsystem' (legacy_facts)

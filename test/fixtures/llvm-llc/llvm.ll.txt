@@ -1,0 +1,3 @@
+/usr/bin/llc: error: /usr/bin/llc: llvm.ll:4:19: error: '%tmp' defined with type 'i32' but expected 'i64'
+  %tmp2 = add i64 %tmp, %z
+                  ^

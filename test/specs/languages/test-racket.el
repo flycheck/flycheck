@@ -9,6 +9,13 @@
     (let ((inhibit-message t))
       (flycheck-buttercup-should-syntax-check
        "language/racket.rkt" 'racket-mode
-       '(4 3 error "read: expected a `)' to close `('" :checker racket)))))
+       '(4 3 error "read: expected a `)' to close `('" :checker racket))))
+
+  (describe "reading the tool's output"
+    ;; Read from output recorded earlier, so this runs whether or
+    ;; not the tool is installed here
+
+    (flycheck-buttercup-def-parse-test racket "language/racket.rkt"
+      '(4 3 error "read-syntax: expected a `)` to close `(`"))))
 
 ;;; test-racket.el ends here

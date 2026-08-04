@@ -1,4 +1,4 @@
-error.erl:7:1: head mismatch: previous function great_func/0 is distinct from error_func/0. Is the semicolon in great_func/0 unwanted?
+error.erl:7:1: head mismatch
 %    7| error_func() ->
 %     | ^
 

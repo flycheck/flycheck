@@ -235,6 +235,15 @@ Some more explanation here.")
     ;; not the tool is installed here
 
     (flycheck-buttercup-def-parse-test javascript-oxlint "language/javascript/warnings.js"
-      '(4 9 warning "Variable 'foo' is declared but never used. Unused variables should start with a '_'." :id "eslint(no-unused-vars)"))))
+      '(4 9 warning "Variable 'foo' is declared but never used. Unused variables should start with a '_'." :id "eslint(no-unused-vars)"))
+    (flycheck-buttercup-def-parse-test javascript-standard "language/javascript/style.js"
+      '(3 10 error "Missing space before function parentheses. (space-before-function-paren)")
+      '(4 1 error "Unexpected tab character. (no-tabs)")
+      '(4 1 error "Expected indentation of 2 spaces but found 1 tab. (indent)")
+      '(4 2 error "Unexpected var, use let or const instead. (no-var) (warning)")
+      '(4 6 error "'foo' is assigned a value but never used. (no-unused-vars)")
+      '(4 13 error "Strings must use singlequote. (quotes)")
+      '(4 27 error "Extra semicolon. (semi)")
+      '(5 5 error "Extra semicolon. (semi)"))))
 
 ;;; test-javascript.el ends here

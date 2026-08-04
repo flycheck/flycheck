@@ -79,6 +79,15 @@
       '(4 15 error "Trailing spaces [Expected: 0 or 2; Actual: 7]" :id "MD009/no-trailing-spaces"))
     (flycheck-buttercup-def-parse-test markdown-markdownlint-cli2 "language/markdown.md"
       '(3 nil error "Multiple consecutive blank lines [Expected: 1; Actual: 2]" :id "MD012/no-multiple-blanks")
-      '(4 15 error "Trailing spaces [Expected: 0 or 2; Actual: 7]" :id "MD009/no-trailing-spaces"))))
+      '(4 15 error "Trailing spaces [Expected: 0 or 2; Actual: 7]" :id "MD009/no-trailing-spaces"))
+    (flycheck-buttercup-def-parse-test markdown-mdl "language/markdown.md"
+      '(1 nil error "First header should be a top level header" :id "MD002")
+      '(4 nil error "Trailing spaces" :id "MD009")
+      '(3 nil error "Multiple consecutive blank lines" :id "MD012"))
+    (flycheck-buttercup-def-parse-test markdown-pymarkdown "language/markdown.md"
+      '(1 1 error "Headings should be surrounded by blank lines. [Expected: 1; Actual: 2; Below] (blanks-around-headings,blanks-around-headers)" :id "MD022")
+      '(1 1 error "First line in file should be a top level heading (first-line-heading,first-line-h1)" :id "MD041")
+      '(3 1 error "Multiple consecutive blank lines [Expected: 1, Actual: 2] (no-multiple-blanks)" :id "MD012")
+      '(4 15 error "Trailing spaces [Expected: 0 or 2; Actual: 7] (no-trailing-spaces)" :id "MD009"))))
 
 ;;; test-markdown.el ends here

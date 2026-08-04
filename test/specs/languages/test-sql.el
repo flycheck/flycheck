@@ -32,6 +32,13 @@
     (flycheck-buttercup-should-syntax-check
      "language/sql.sql" 'sql-mode
      `(1 15 error "unterminated quoted string at or near \"';\n  \""
-         :checker sql-sqlint))))
+         :checker sql-sqlint)))
+
+  (describe "reading the tool's output"
+    ;; Read from output recorded earlier, so this runs whether or
+    ;; not the tool is installed here
+
+    (flycheck-buttercup-def-parse-test sql-sqlint "language/sql.sql"
+      '(1 15 error "unterminated quoted string at or near \"';\n  \""))))
 
 ;;; test-sql.el ends here

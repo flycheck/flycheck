@@ -35,6 +35,8 @@
     ;; not the tool is installed here
 
     (flycheck-buttercup-def-parse-test less-stylelint "language/less/syntax-error.less"
-      '(1 1 error "Unclosed block (CssSyntaxError)" :id "CssSyntaxError"))))
+      '(1 nil error "Unexpected token 'with'" :id "SyntaxError"))
+    (flycheck-buttercup-def-parse-test less "language/less/file-error.less"
+      '(3 1 error "'no-such-file.less' wasn't found. Tried - no-such-file.less,npm://no-such-file.less,no-such-file.less"))))
 
 ;;; test-less.el ends here

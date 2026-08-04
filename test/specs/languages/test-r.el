@@ -23,6 +23,13 @@
     (let ((flycheck-disabled-checkers '(r-lintr)))
       (flycheck-buttercup-should-syntax-check
        "language/r.R" 'R-mode
-       '(8 0 error "unexpected end of input" :checker r)))))
+       '(8 0 error "unexpected end of input" :checker r))))
+
+  (describe "reading the tool's output"
+    ;; Read from output recorded earlier, so this runs whether or
+    ;; not the tool is installed here
+
+    (flycheck-buttercup-def-parse-test r "language/r.R"
+      '(8 nil error "unexpected end of input"))))
 
 ;;; test-r.el ends here

@@ -4,5 +4,4 @@ Errors.
            warning 25: Missing field 'authors'
            warning 35: Missing field 'homepage'
            warning 36: Missing field 'bug-reports'
-             error 57: Synopsis must not be empty
-           warning 68: Missing field 'license'
+             error 57: Synopsis and description must not be both empty

@@ -1,0 +1,20 @@
+/usr/local/lib/node_modules/handlebars/dist/cjs/handlebars/compiler/parser.js:267
+            throw new Error(str);
+            ^
+
+Error: Parse error on line 2:
+... class="entry">  {{! This comment will 
+----------------------^
+Expecting 'ID', 'STRING', 'NUMBER', 'BOOLEAN', 'UNDEFINED', 'NULL', 'DATA', got 'INVALID'
+    at Parser.parseError (/usr/local/lib/node_modules/handlebars/dist/cjs/handlebars/compiler/parser.js:267:19)
+    at Parser.parse (/usr/local/lib/node_modules/handlebars/dist/cjs/handlebars/compiler/parser.js:336:30)
+    at parseWithoutProcessing (/usr/local/lib/node_modules/handlebars/dist/cjs/handlebars/compiler/base.js:53:33)
+    at HandlebarsEnvironment.parse (/usr/local/lib/node_modules/handlebars/dist/cjs/handlebars/compiler/base.js:59:13)
+    at Object.precompile (/usr/local/lib/node_modules/handlebars/dist/cjs/handlebars/compiler/compiler.js:485:17)
+    at hb.precompile (/usr/local/lib/node_modules/handlebars/dist/cjs/handlebars.js:42:40)
+    at /usr/local/lib/node_modules/handlebars/dist/cjs/precompiler.js:238:34
+    at Array.forEach (<anonymous>)
+    at module.exports.cli (/usr/local/lib/node_modules/handlebars/dist/cjs/precompiler.js:225:18)
+    at /usr/local/lib/node_modules/handlebars/bin/handlebars:116:17
+
+Node.js v18.19.1

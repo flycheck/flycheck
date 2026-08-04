@@ -16679,9 +16679,13 @@ part of a Sphinx project."
 (flycheck-define-checker rst
   "A ReStructuredText (RST) syntax checker using Docutils.
 
+Docutils 0.21 dropped the `.py' from the names of its front ends, so
+this looks for `rst2pseudoxml'.  On an older Docutils, point
+`flycheck-rst-executable' at `rst2pseudoxml.py'.
+
 See URL `https://docutils.sourceforge.io/'."
   ;; include:: directives
-  :command ("rst2pseudoxml.py" "--report=2" "--halt=5"
+  :command ("rst2pseudoxml" "--report=2" "--halt=5"
             ;; Read from standard input and throw output away
             "-" null-device)
   :standard-input t

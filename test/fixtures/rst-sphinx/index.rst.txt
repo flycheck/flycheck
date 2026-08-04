@@ -1,0 +1,6 @@
+test/resources/language/rst/sphinx/index.rst:2: WARNING: Title underline too short.
+
+An dummy documentation
+=================== [docutils]
+test/resources/language/rst/sphinx/index.rst:9: ERROR: Unknown target name: "cool". [docutils]
+test/resources/language/rst/sphinx/index.rst:9: WARNING: 'envvar' reference target not found: FOO [ref.envvar]

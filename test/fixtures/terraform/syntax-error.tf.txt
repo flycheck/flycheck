@@ -1,0 +1,17 @@
+
+Error: Invalid character
+
+  on <stdin> line 2, in provider "aws":
+   2:   region = "us-east-1";
+
+The ";" character is not valid. Use newlines to separate arguments and
+blocks, and commas to separate items in collection values.
+
+
+Error: Missing newline after argument
+
+  on <stdin> line 2, in provider "aws":
+   2:   region = "us-east-1";
+
+An argument definition must end with a newline.
+

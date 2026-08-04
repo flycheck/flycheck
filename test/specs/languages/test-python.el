@@ -358,6 +358,10 @@ ModuleNotFoundError: No module named 'pycodestyle'")
     (flycheck-buttercup-def-parse-test python-ruff "language/python/syntax-error.py"
       '(1 1 info "Invalid module name: 'syntax-error'" :id "N999")
       '(3 7 error "Expected an identifier, but found a keyword `import` that cannot be used here")
-      '(3 14 error "Simple statements must be separated by newlines or semicolons"))))
+      '(3 14 error "Simple statements must be separated by newlines or semicolons"))
+    (flycheck-buttercup-def-parse-test python-mypy "language/python/invalid_type.py"
+      '(2 12 error " Incompatible return value type (got \"str\", expected \"int\")" :id "return-value"))
+    (flycheck-buttercup-def-parse-test python-pyright "language/python/invalid_type.py"
+      '(2 12 error "Type \"str\" is not assignable to return type \"int\"\n  \"str\" is not assignable to \"int\"" :id "reportReturnType" :end-line 2 :end-column 13))))
 
 ;;; test-python.el ends here

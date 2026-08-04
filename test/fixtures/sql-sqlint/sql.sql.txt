@@ -1,0 +1,2 @@
+stdin:1:15:ERROR unterminated quoted string at or near "';
+  "

@@ -41,6 +41,16 @@
        '(5 nil warning "missing `\\@' before `.' in \"GNU.\""
            :checker tex-lacheck)
        '(7 nil warning "possible unwanted space at \"{\""
-           :checker tex-lacheck)))))
+           :checker tex-lacheck))))
+
+  (describe "reading the tool's output"
+    ;; Read from output recorded earlier, so this runs whether or
+    ;; not the tool is installed here
+
+    (flycheck-buttercup-def-parse-test tex-chktex "language/tex.tex"
+      '(5 29 warning "Intersentence spacing (`\\@') should perhaps be used." :id "13"))
+    (flycheck-buttercup-def-parse-test tex-lacheck "language/tex.tex"
+      '(5 nil warning "missing `\\@' before `.' in \"GNU.\"")
+      '(7 nil warning "possible unwanted space at \"{\""))))
 
 ;;; test-tex.el ends here

@@ -32,6 +32,13 @@
     (flycheck-buttercup-should-syntax-check
      "language/vhdl.vhd" 'vhdl-mode
      '(4 1 error "';' is expected instead of '<EOF>'"
-         :checker vhdl-ghdl))))
+         :checker vhdl-ghdl)))
+
+  (describe "reading the tool's output"
+    ;; Read from output recorded earlier, so this runs whether or
+    ;; not the tool is installed here
+
+    (flycheck-buttercup-def-parse-test vhdl-ghdl "language/vhdl.vhd"
+      '(2 24 error "missing \";\" at end of entity"))))
 
 ;;; test-vhdl.el ends here
