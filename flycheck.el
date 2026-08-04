@@ -15864,8 +15864,10 @@ Requires Flake8 3.0 or newer. See URL
   :next-checkers ((warning . python-pylint)
                   (warning . python-mypy)))
 
+;; same precedence as ruff when multiple configuration file detected
+;; https://docs.astral.sh/ruff/configuration/#config-file-discovery
 (flycheck-def-config-file-var flycheck-python-ruff-config python-ruff
-                              '("pyproject.toml" "ruff.toml" ".ruff.toml"))
+                              '(".ruff.toml" "ruff.toml" "pyproject.toml"))
 
 (flycheck-def-args-var flycheck-python-ruff-args python-ruff
   :package-version '(flycheck . "39"))
