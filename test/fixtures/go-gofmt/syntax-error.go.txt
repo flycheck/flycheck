@@ -1,0 +1,2 @@
+<standard input>:5:9: expected '(', found ta
+<standard input>:6:1: expected ')', found '}'

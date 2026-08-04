@@ -56,6 +56,14 @@
     (it "appends flycheck-erlang-args before the source file"
       (let ((flycheck-erlang-args '("-DDEBUG=1")))
         (expect (flycheck-checker-substituted-arguments 'erlang)
-                :to-contain "-DDEBUG=1")))))
+                :to-contain "-DDEBUG=1"))))
+
+  (describe "reading the tool's output"
+    ;; Read from output recorded earlier, so this runs whether or
+    ;; not the tool is installed here
+
+    (flycheck-buttercup-def-parse-test erlang "language/erlang/erlang/error.erl"
+      '(7 1 error "head mismatch: previous function great_func/0 is distinct from error_func/0. Is the semicolon in great_func/0 unwanted?")
+      '(3 2 warning "export_all flag enabled - all functions will be exported"))))
 
 ;;; test-erlang.el ends here

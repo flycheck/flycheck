@@ -1,0 +1,2 @@
+asciidoctor: WARNING: <stdin>: line 4: section title out of sequence: expected level 1, got level 2
+asciidoctor: ERROR: <stdin>: line 6: unmatched preprocessor directive: endif::[]

@@ -1,0 +1,5 @@
+Slim::Parser::SyntaxError: Unexpected indentation
+  STDIN, Line 2, Column 1
+    html
+    ^
+  Use --trace for backtrace.

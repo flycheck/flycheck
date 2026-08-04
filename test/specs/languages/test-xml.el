@@ -39,6 +39,14 @@
        '(4 nil error "parser error : Opening and ending tag mismatch: spam line 3 and with"
            :checker xml-xmllint)
        '(5 nil error "parser error : Extra content at the end of the document"
-           :checker xml-xmllint)))))
+           :checker xml-xmllint))))
+
+  (describe "reading the tool's output"
+    ;; Read from output recorded earlier, so this runs whether or
+    ;; not the tool is installed here
+
+    (flycheck-buttercup-def-parse-test xml-xmllint "language/xml.xml"
+      '(4 nil error "parser error : Opening and ending tag mismatch: spam line 3 and with")
+      '(5 nil error "parser error : Extra content at the end of the document"))))
 
 ;;; test-xml.el ends here

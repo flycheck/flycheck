@@ -28,6 +28,13 @@
       (flycheck-buttercup-should-syntax-check
        "language/less/syntax-error.less" 'less-css-mode
        '(1 1 error "Unclosed block (CssSyntaxError)"
-           :id "CssSyntaxError" :checker less-stylelint)))))
+           :id "CssSyntaxError" :checker less-stylelint))))
+
+  (describe "reading the tool's output"
+    ;; Read from output recorded earlier, so this runs whether or
+    ;; not the tool is installed here
+
+    (flycheck-buttercup-def-parse-test less-stylelint "language/less/syntax-error.less"
+      '(1 1 error "Unclosed block (CssSyntaxError)" :id "CssSyntaxError"))))
 
 ;;; test-less.el ends here

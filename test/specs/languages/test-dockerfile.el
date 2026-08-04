@@ -32,6 +32,13 @@ expecting '#', '\\', ADD, ARG, CMD, COPY, ENTRYPOINT, ENV, EXPOSE, FROM, HEALTHC
       (let ((flycheck-dockerfile-hadolint-config nil)
             (flycheck-dockerfile-hadolint-args '("--no-fail")))
         (expect (flycheck-checker-substituted-arguments 'dockerfile-hadolint)
-                :to-equal '("--format" "sarif" "--no-fail" "-")))))
+                :to-equal '("--format" "sarif" "--no-fail" "-"))))
+
+  (describe "reading the tool's output"
+    ;; Read from output recorded earlier, so this runs whether or
+    ;; not the tool is installed here
+
+    (flycheck-buttercup-def-parse-test dockerfile-hadolint "language/dockerfile/Dockerfile.error"
+      '(2 nil error "unexpected 'I'\nexpecting '#', '\\', ADD, ARG, CMD, COPY, ENTRYPOINT, ENV, EXPOSE, FROM, HEALTHCHECK, LABEL, MAINTAINER, ONBUILD, RUN, SHELL, STOPSIGNAL, USER, VOLUME, WORKDIR, a pragma, at least one space, or end of input" :id "DL1000"))))
 
 ;;; test-dockerfile.el ends here

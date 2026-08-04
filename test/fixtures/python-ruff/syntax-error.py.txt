@@ -1,0 +1,40 @@
+[
+  {
+    "cell": null,
+    "code": "invalid-syntax",
+    "end_location": {
+      "column": 13,
+      "row": 3
+    },
+    "filename": "/Users/bbatsov/projects/flycheck/test/resources/language/python/syntax-error.py",
+    "fix": null,
+    "location": {
+      "column": 7,
+      "row": 3
+    },
+    "message": "Expected an identifier, but found a keyword `import` that cannot be used here",
+    "name": "invalid-syntax",
+    "noqa_row": null,
+    "severity": "error",
+    "url": null
+  },
+  {
+    "cell": null,
+    "code": "invalid-syntax",
+    "end_location": {
+      "column": 17,
+      "row": 3
+    },
+    "filename": "/Users/bbatsov/projects/flycheck/test/resources/language/python/syntax-error.py",
+    "fix": null,
+    "location": {
+      "column": 14,
+      "row": 3
+    },
+    "message": "Simple statements must be separated by newlines or semicolons",
+    "name": "invalid-syntax",
+    "noqa_row": null,
+    "severity": "error",
+    "url": null
+  }
+]

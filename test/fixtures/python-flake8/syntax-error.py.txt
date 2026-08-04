@@ -1,0 +1,1 @@
+/Users/bbatsov/projects/flycheck/test/resources/language/python/syntax-error.py:3:8: E999 SyntaxError: invalid syntax

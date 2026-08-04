@@ -1,0 +1,1 @@
+[{"source":"<input css 1>","deprecations":[],"invalidOptionWarnings":[],"parseErrors":[],"errored":true,"warnings":[{"line":3,"column":11,"endLine":3,"endColumn":15,"rule":"CssSyntaxError","severity":"error","text":"Unknown word olor (CssSyntaxError)"}]}]

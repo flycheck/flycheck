@@ -55,6 +55,13 @@
                          sass-stylelint less-stylelint))
         (expect (flycheck-checker-get checker 'handle-suspicious)
                 :to-be 'flycheck--stylelint-handle-suspicious))))
-)
+
+
+  (describe "reading the tool's output"
+    ;; Read from output recorded earlier, so this runs whether or
+    ;; not the tool is installed here
+
+    (flycheck-buttercup-def-parse-test css-stylelint "language/css/syntax-error.css"
+      '(4 5 error "Unknown word font-size (CssSyntaxError)" :id "CssSyntaxError"))))
 
 ;;; test-css.el ends here

@@ -1,0 +1,8 @@
+Errors.
+             error  3: File format error in 'maintainers' at line 2, column 0: Invalid field maintainers
+             error 23: Missing field 'maintainer'
+           warning 25: Missing field 'authors'
+           warning 35: Missing field 'homepage'
+           warning 36: Missing field 'bug-reports'
+             error 57: Synopsis must not be empty
+           warning 68: Missing field 'license'

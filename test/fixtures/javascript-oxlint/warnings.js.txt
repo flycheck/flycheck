@@ -1,0 +1,1 @@
+<?xml version="1.0" encoding="utf-8"?><checkstyle version="4.3"><file name="flycheck_warnings.js"><error line="4" column="9" severity="warning" message="Variable &apos;foo&apos; is declared but never used. Unused variables should start with a &apos;_&apos;." source="eslint(no-unused-vars)" /></file></checkstyle>

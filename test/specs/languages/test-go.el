@@ -150,6 +150,16 @@
            '(12 39 error "calling strings.Replace with n == 0 will return no results, did you mean -1?"
                 :checker go-staticcheck :id "SA1018")
            '(16 6 error "func unused is unused"
-                :checker go-staticcheck :id "U1000")))))))
+                :checker go-staticcheck :id "U1000"))))))
+
+  (describe "reading the tool's output"
+    ;; Read from output recorded earlier, so this runs whether or
+    ;; not the tool is installed here
+
+    (flycheck-buttercup-def-parse-test go-gofmt "language/go/src/syntax/syntax-error.go"
+      '(5 9 error "expected '(', found ta")
+      '(6 1 error "expected ')', found '}'"))
+    (flycheck-buttercup-def-parse-test go-vet "language/go/src/warnings.go"
+      '(2 nil warning "undefined: fmt"))))
 
 ;;; test-go.el ends here

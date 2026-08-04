@@ -1,0 +1,1 @@
+[{"source":"<input css 1>","deprecations":[],"invalidOptionWarnings":[],"parseErrors":[],"errored":true,"warnings":[{"line":1,"column":1,"rule":"CssSyntaxError","severity":"error","text":"Unclosed block (CssSyntaxError)"}]}]

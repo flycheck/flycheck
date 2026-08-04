@@ -31,6 +31,13 @@
   (flycheck-buttercup-def-checker-test slim slim nil
     (flycheck-buttercup-should-syntax-check
      "language/slim.slim" 'slim-mode
-     `(2 1 error "Unexpected indentation" :checker slim))))
+     `(2 1 error "Unexpected indentation" :checker slim)))
+
+  (describe "reading the tool's output"
+    ;; Read from output recorded earlier, so this runs whether or
+    ;; not the tool is installed here
+
+    (flycheck-buttercup-def-parse-test slim "language/slim.slim"
+      '(2 1 error "Unexpected indentation"))))
 
 ;;; test-slim.el ends here

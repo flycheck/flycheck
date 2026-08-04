@@ -29,6 +29,13 @@
     (it "threads flycheck-json-jq-args in before the filter"
       (let ((flycheck-json-jq-args '("--seq")))
         (expect (flycheck-checker-substituted-arguments 'json-jq)
-                :to-contain "--seq")))))
+                :to-contain "--seq"))))
+
+  (describe "reading the tool's output"
+    ;; Read from output recorded earlier, so this runs whether or
+    ;; not the tool is installed here
+
+    (flycheck-buttercup-def-parse-test json-python-json "language/json.json"
+      '(1 44 error "Extra data"))))
 
 ;;; test-json.el ends here

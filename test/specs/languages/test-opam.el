@@ -16,6 +16,19 @@
      '(0 nil warning "Missing field 'bug-reports'"
          :id "36" :checker opam)
      '(2 1 error "Invalid field maintainers"
-         :id "3" :checker opam))))
+         :id "3" :checker opam)))
+
+  (describe "reading the tool's output"
+    ;; Read from output recorded earlier, so this runs whether or
+    ;; not the tool is installed here
+
+    (flycheck-buttercup-def-parse-test opam "language/opam.opam"
+      '(2 1 error "Invalid field maintainers" :id "3")
+      '(0 nil error "Missing field 'maintainer'" :id "23")
+      '(0 nil warning "Missing field 'authors'" :id "25")
+      '(0 nil warning "Missing field 'homepage'" :id "35")
+      '(0 nil warning "Missing field 'bug-reports'" :id "36")
+      '(0 nil error "Synopsis must not be empty" :id "57")
+      '(0 nil warning "Missing field 'license'" :id "68"))))
 
 ;;; test-opam.el ends here

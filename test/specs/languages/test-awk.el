@@ -14,6 +14,13 @@
     ;; harness exits non-zero.  See URL
     ;; `https://github.com/flycheck/flycheck/issues/2166'.
     (flycheck-buttercup-should-syntax-check
-     "language/awk/valid.awk" 'awk-mode)))
+     "language/awk/valid.awk" 'awk-mode))
+
+  (describe "reading the tool's output"
+    ;; Read from output recorded earlier, so this runs whether or
+    ;; not the tool is installed here
+
+    (flycheck-buttercup-def-parse-test awk-gawk "language/awk/syntax-error.awk"
+      '(2 nil warning "x=|\n  ^ syntax error"))))
 
 ;;; test-awk.el ends here

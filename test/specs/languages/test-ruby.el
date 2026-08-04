@@ -211,6 +211,14 @@
       '(5 7 error "unexpected constant, expecting end-of-input (Using Ruby 3.4 parser; configure using `TargetRubyVersion` parameter, under `AllCops`)"
           :id "Lint/Syntax")
       '(5 25 error "unterminated string meets end of file (Using Ruby 3.4 parser; configure using `TargetRubyVersion` parameter, under `AllCops`)"
-          :id "Lint/Syntax"))))
+          :id "Lint/Syntax")))
+
+  (describe "reading the tool's output"
+    ;; Read from output recorded earlier, so this runs whether or
+    ;; not the tool is installed here
+
+    (flycheck-buttercup-def-parse-test ruby "language/ruby/syntax-error.rb"
+      '(4 nil warning "assigned but unused variable - days")
+      '(5 nil error "syntax errors found (SyntaxError)"))))
 
 ;;; test-ruby.el ends here

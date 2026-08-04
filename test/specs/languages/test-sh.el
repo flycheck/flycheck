@@ -140,6 +140,21 @@
                      (flycheck-buttercup-fixture
                       'sh-shellcheck "language/sh/shellcheck.sh"))))
         (expect (seq-filter #'flycheck-error-known-fix-p errors)
-                :to-be-truthy)))))
+                :to-be-truthy))))
+
+  (describe "reading the tool's output"
+    ;; Read from output recorded earlier, so this runs whether or
+    ;; not the tool is installed here
+
+    (flycheck-buttercup-def-parse-test sh-bash "language/sh/bash-syntax-error.bash"
+      '(5 nil error "syntax error near unexpected token `fi'")
+      '(5 nil error "`fi'"))
+    (flycheck-buttercup-def-parse-test sh-posix-bash "language/sh/posix-syntax-error.sh"
+      '(3 nil error "syntax error near unexpected token `('")
+      '(3 nil error "`cat <(echo blah)'"))
+    (flycheck-buttercup-def-parse-test sh-posix-dash "language/sh/posix-syntax-error.sh"
+      '(3 nil error "Syntax error: \"(\" unexpected"))
+    (flycheck-buttercup-def-parse-test sh-zsh "language/sh/zsh-syntax-error.zsh"
+      '(5 nil error "parse error near `fi'"))))
 
 ;;; test-sh.el ends here

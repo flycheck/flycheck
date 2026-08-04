@@ -333,6 +333,30 @@ ModuleNotFoundError: No module named 'pycodestyle'")
     (it "leaves python-flake8 suspicious without a traceback"
       (expect (flycheck--python-flake8-handle-suspicious
                'python-flake8 1 "some output Flycheck could not parse")
-              :to-be 'suspicious))))
+              :to-be 'suspicious)))
+
+  (describe "reading the tool's output"
+    ;; Read from output recorded earlier, so this runs whether or
+    ;; not the tool is installed here
+
+    (flycheck-buttercup-def-parse-test python-flake8 "language/python/syntax-error.py"
+      '(3 8 error "SyntaxError: invalid syntax" :id "E999"))
+    (flycheck-buttercup-def-parse-test python-pycompile "language/python/syntax-error.py"
+      '(3 nil error "invalid syntax"))
+    (flycheck-buttercup-def-parse-test python-pylint "language/python/test.py"
+      '(1 1 info "Missing module docstring" :id "missing-module-docstring")
+      '(5 1 error "No name 'antigravit' in module 'python'" :id "no-name-in-module")
+      '(7 1 info "Missing class docstring" :id "missing-class-docstring")
+      '(7 1 warning "Class 'Spam' inherits from object, can be safely removed from bases in python3" :id "useless-object-inheritance")
+      '(9 5 info "Missing function or method docstring" :id "missing-function-docstring")
+      '(9 5 info "Method name \"withEggs\" doesn't conform to snake_case naming style" :id "invalid-name")
+      '(12 5 info "Missing function or method docstring" :id "missing-function-docstring")
+      '(14 16 error "Module 'sys' has no 'python_version' member" :id "no-member")
+      '(12 5 warning "Either all return statements in a function should return an expression, or none of them should." :id "inconsistent-return-statements")
+      '(22 1 error "Undefined variable 'antigravity'" :id "undefined-variable")
+      '(5 1 warning "Unused import antigravit" :id "unused-import"))
+    (flycheck-buttercup-def-parse-test python-ruff "language/python/syntax-error.py"
+      '(3 7 error "Expected an identifier, but found a keyword `import` that cannot be used here")
+      '(3 14 error "Simple statements must be separated by newlines or semicolons"))))
 
 ;;; test-python.el ends here

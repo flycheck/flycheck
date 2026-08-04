@@ -1,0 +1,2 @@
+Global symbol "$x" requires explicit package name (did you forget to declare "my $x"?) at - line 6.
+BEGIN not safe after errors--compilation aborted at - line 6.
