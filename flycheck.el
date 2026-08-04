@@ -15615,8 +15615,7 @@ See URL `https://proselint.com/' for more information about proselint."
                      :id .check
                      :buffer buffer
                      :checker checker
-                     ;; See https://github.com/amperser/proselint/issues/1048
-                     :end-pos .end)))
+                     :end-pos (- .end 1))))
                 (let-alist (car response)
                   .data.errors))
       ;; Proselint versions >= 0.16.0
