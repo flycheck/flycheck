@@ -1,1 +1,1 @@
-../../../../../../../../../var/folders/1l/xqbgb73s21vd3wrrp_tyxmy00000gn/T/flycheckwE6FLF/test-action.yml:6:23: property "foo" is not defined in object type {} [expression]
+test-action.yml:6:23: property "foo" is not defined in object type {} [expression]

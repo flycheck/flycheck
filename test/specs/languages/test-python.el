@@ -356,6 +356,7 @@ ModuleNotFoundError: No module named 'pycodestyle'")
       '(22 1 error "Undefined variable 'antigravity'" :id "undefined-variable")
       '(5 1 warning "Unused import antigravit" :id "unused-import"))
     (flycheck-buttercup-def-parse-test python-ruff "language/python/syntax-error.py"
+      '(1 1 info "Invalid module name: 'syntax-error'" :id "N999")
       '(3 7 error "Expected an identifier, but found a keyword `import` that cannot be used here")
       '(3 14 error "Simple statements must be separated by newlines or semicolons"))))
 

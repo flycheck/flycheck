@@ -1,8 +1,8 @@
-/var/folders/1l/xqbgb73s21vd3wrrp_tyxmy00000gn/T/flycheckCwbIGh/error.erl:7:1: head mismatch: previous function great_func/0 is distinct from error_func/0. Is the semicolon in great_func/0 unwanted?
+error.erl:7:1: head mismatch: previous function great_func/0 is distinct from error_func/0. Is the semicolon in great_func/0 unwanted?
 %    7| error_func() ->
 %     | ^
 
-/var/folders/1l/xqbgb73s21vd3wrrp_tyxmy00000gn/T/flycheckCwbIGh/error.erl:3:2: Warning: export_all flag enabled - all functions will be exported
+error.erl:3:2: Warning: export_all flag enabled - all functions will be exported
 %    3| -compile(export_all).
 %     |  ^
 
