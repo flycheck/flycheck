@@ -13796,10 +13796,61 @@ directory name is \"test\" or \"eqc\", or else \"default\"."
                           (file-name-directory buffer-file-name)))))
    "default"))
 
+(defconst flycheck-rebar3--diagnostic-rx
+  (rx line-start (zero-or-more " ") "┌─ " (group (one-or-more (not (any "\n"))))
+      ":" (zero-or-more " ") "\n"
+      ;; The empty gutter line above the source
+      (zero-or-more " ") "│" (zero-or-more " ") "\n"
+      ;; The offending line, echoed after its number
+      (zero-or-more " ") (group (one-or-more digit)) " │"
+      (group (zero-or-more " ")) (zero-or-more (not (any "\n"))) "\n"
+      ;; And the message, under a mark sitting at the column it means
+      (zero-or-more " ") "│" (group (zero-or-more " ")) "╰"
+      (one-or-more "─") " " (group (one-or-more (not (any "\n")))))
+  "Matches one diagnostic in the format rebar3 3.24 introduced.")
+
+(defun flycheck-parse-rebar3--boxed (output checker buffer)
+  "Parse the diagnostics rebar3 draws in a box out of OUTPUT.
+
+CHECKER and BUFFER are as in `flycheck-parse-output'.
+
+The mark under the offending line is what says which column the
+diagnostic is about, so the column is the distance between that
+mark and the start of the echoed source."
+  (let (errors (start 0))
+    (while (string-match flycheck-rebar3--diagnostic-rx output start)
+      (setq start (match-end 0))
+      (let* ((file (match-string 1 output))
+             (line (string-to-number (match-string 2 output)))
+             (source-indent (length (match-string 3 output)))
+             (mark-indent (length (match-string 4 output)))
+             (message (match-string 5 output))
+             (warningp (string-prefix-p "Warning: " message)))
+        (push (flycheck-error-new-at
+               line
+               (max 1 (1+ (- mark-indent source-indent)))
+               (if warningp 'warning 'error)
+               (if warningp (substring message (length "Warning: ")) message)
+               :checker checker :buffer buffer :filename file)
+              errors)))
+    (nreverse errors)))
+
+(defun flycheck-parse-rebar3 (output checker buffer)
+  "Parse rebar3's OUTPUT, in either of the two shapes it comes in.
+
+CHECKER and BUFFER are as in `flycheck-parse-output'.
+
+rebar3 3.24 replaced `file:line:column: message' with a box drawn
+around the offending line.  Older rebar3 is still about, so the
+plain form is still read when the boxed one finds nothing."
+  (let ((plain (ansi-color-filter-apply output)))
+    (or (flycheck-parse-rebar3--boxed plain checker buffer)
+        (flycheck-parse-with-patterns plain checker buffer))))
+
 (flycheck-define-checker erlang-rebar3
   "An Erlang syntax checker using the rebar3 build tool."
   :command ("rebar3" "as" (eval (flycheck-erlang-rebar3-get-profile)) "compile")
-  :error-parser flycheck-parse-with-patterns-without-color
+  :error-parser flycheck-parse-rebar3
   :error-patterns
   ((warning line-start (file-name) ":" line ":" (optional column ":")
             " Warning:" (message) line-end)

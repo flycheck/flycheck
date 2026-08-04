@@ -25,27 +25,25 @@
                                     " list, but the argument list contains 1 argument")
               :checker erlang))))
 
-  ;; rebar3 3.24 replaced its compiler diagnostics with a rich format that
-  ;; draws a box around the offending line and colours it, so the file name,
-  ;; the line number and the message each land on a line of their own with
-  ;; escape sequences in between, and none of the patterns match any more.
-  ;; `{compiler_error_format, minimal}' in rebar.config restores the old
-  ;; `file:line:column: message' output, but only the project can set that.
   (flycheck-buttercup-def-checker-test erlang-rebar3 erlang error
-    :expected-result :failed
     (let ((col (flycheck-buttercup-erlang-shows-column 'erlang-rebar3)))
       (flycheck-buttercup-should-syntax-check
        "language/erlang/rebar3/src/erlang-error.erl" 'erlang-mode
        `(3 ,(when col 2) warning "export_all flag enabled - all functions will be exported" :checker erlang-rebar3)
-       `(7 ,(when col 1) error "head mismatch" :checker erlang-rebar3))))
+       `(7 ,(when col 1) error ,(concat "head mismatch: previous function great_func/0 is"
+                        " distinct from error_func/0. Is the semicolon in"
+                        " great_func/0 unwanted?")
+           :checker erlang-rebar3))))
 
   (flycheck-buttercup-def-checker-test erlang-rebar3 erlang build
-    :expected-result :failed
     (let ((col (flycheck-buttercup-erlang-shows-column 'erlang-rebar3)))
       (shut-up
         (flycheck-buttercup-should-syntax-check
          "language/erlang/rebar3/_checkouts/dependency/src/dependency.erl" 'erlang-mode
-         `(7 ,(when col 1) error "head mismatch" :checker erlang-rebar3
+         `(7 ,(when col 1) error ,(concat "head mismatch: previous function great_func/0 is"
+                        " distinct from error_func/0. Is the semicolon in"
+                        " great_func/0 unwanted?")
+             :checker erlang-rebar3
              :filename ,(flycheck-buttercup-resource-filename "language/erlang/rebar3/src/erlang-error.erl"))))
       (expect (not (file-exists-p
                     (flycheck-buttercup-resource-filename
@@ -64,6 +62,9 @@
 
     (flycheck-buttercup-def-parse-test erlang "language/erlang/erlang/error.erl"
       '(7 1 error "head mismatch")
+      '(3 2 warning "export_all flag enabled - all functions will be exported"))
+    (flycheck-buttercup-def-parse-test erlang-rebar3 "language/erlang/rebar3/src/erlang-error.erl"
+      '(7 1 error "head mismatch: previous function great_func/0 is distinct from error_func/0. Is the semicolon in great_func/0 unwanted?")
       '(3 2 warning "export_all flag enabled - all functions will be exported"))))
 
 ;;; test-erlang.el ends here
