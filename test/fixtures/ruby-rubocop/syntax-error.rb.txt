@@ -294,5 +294,5 @@ Style/SwapValues: # new in 1.1
 Style/YAMLFileRead: # new in 1.53
   Enabled: true
 For more information: https://docs.rubocop.org/rubocop/versioning.html
-/Users/bbatsov/projects/flycheck/test/resources/language/ruby/syntax-error.rb:5:7: F: Lint/Syntax: unexpected constant, expecting end-of-input (Using Ruby 3.4 parser; configure using `TargetRubyVersion` parameter, under `AllCops`)
-/Users/bbatsov/projects/flycheck/test/resources/language/ruby/syntax-error.rb:5:25: F: Lint/Syntax: unterminated string meets end of file (Using Ruby 3.4 parser; configure using `TargetRubyVersion` parameter, under `AllCops`)
+test/resources/language/ruby/syntax-error.rb:5:7: F: Lint/Syntax: unexpected constant, expecting end-of-input (Using Ruby 3.4 parser; configure using `TargetRubyVersion` parameter, under `AllCops`)
+test/resources/language/ruby/syntax-error.rb:5:25: F: Lint/Syntax: unterminated string meets end of file (Using Ruby 3.4 parser; configure using `TargetRubyVersion` parameter, under `AllCops`)

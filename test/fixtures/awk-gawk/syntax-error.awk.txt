@@ -1,2 +1,2 @@
-gawk: /var/folders/1l/xqbgb73s21vd3wrrp_tyxmy00000gn/T/flycheckXPsdME/syntax-error.awk:2: x=|
-gawk: /var/folders/1l/xqbgb73s21vd3wrrp_tyxmy00000gn/T/flycheckXPsdME/syntax-error.awk:2:   ^ syntax error
+gawk: syntax-error.awk:2: x=|
+gawk: syntax-error.awk:2:   ^ syntax error

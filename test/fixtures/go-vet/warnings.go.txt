@@ -1,2 +1,2 @@
 # command-line-arguments
-vet: /var/folders/1l/xqbgb73s21vd3wrrp_tyxmy00000gn/T/flycheckQBCue9/warnings.go:8:2: undefined: fmt
+vet: warnings.go:8:2: undefined: fmt

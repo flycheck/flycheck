@@ -1,4 +1,4 @@
-  File "/var/folders/1l/xqbgb73s21vd3wrrp_tyxmy00000gn/T/flycheckpC3DZA/syntax-error.py", line 3
+  File "syntax-error.py", line 3
     foo = import bar
           ^^^^^^
 SyntaxError: invalid syntax

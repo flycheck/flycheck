@@ -1,1 +1,1 @@
-/var/folders/1l/xqbgb73s21vd3wrrp_tyxmy00000gn/T/flycheckOO2gjY/zsh-syntax-error.zsh:5: parse error near `fi'
+zsh-syntax-error.zsh:5: parse error near `fi'

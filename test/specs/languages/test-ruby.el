@@ -206,12 +206,9 @@
 
 
   (describe "reading rubocop's output"
-    (flycheck-buttercup-def-parse-test ruby-rubocop
-        "language/ruby/syntax-error.rb"
-      '(5 7 error "unexpected constant, expecting end-of-input (Using Ruby 3.4 parser; configure using `TargetRubyVersion` parameter, under `AllCops`)"
-          :id "Lint/Syntax")
-      '(5 25 error "unterminated string meets end of file (Using Ruby 3.4 parser; configure using `TargetRubyVersion` parameter, under `AllCops`)"
-          :id "Lint/Syntax")))
+    (flycheck-buttercup-def-parse-test ruby-rubocop "language/ruby/syntax-error.rb"
+      '(5 7 error "unexpected constant, expecting end-of-input (Using Ruby 3.4 parser; configure using `TargetRubyVersion` parameter, under `AllCops`)" :id "Lint/Syntax")
+      '(5 25 error "unterminated string meets end of file (Using Ruby 3.4 parser; configure using `TargetRubyVersion` parameter, under `AllCops`)" :id "Lint/Syntax")))
 
   (describe "reading the tool's output"
     ;; Read from output recorded earlier, so this runs whether or

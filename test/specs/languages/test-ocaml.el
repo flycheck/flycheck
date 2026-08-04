@@ -59,10 +59,8 @@
   (describe "reading Dune's output"
     ;; The location line, the echoed source and the wrapped message all
     ;; have to be read as one error
-    (flycheck-buttercup-def-parse-test ocaml-dune
-        "language/ocaml-dune/lib/typeerror.ml"
-      '(4 17 error "This constant has type string but an expression was expected of type\n         int"
-          :end-line 4 :end-column 29)))
+    (flycheck-buttercup-def-parse-test ocaml-dune "language/ocaml-dune/lib/typeerror.ml"
+      '(4 17 error "This constant has type string but an expression was expected of type\n         int" :end-line 4 :end-column 29)))
 
   (describe "reading the tool's output"
     ;; Read from output recorded earlier, so this runs whether or

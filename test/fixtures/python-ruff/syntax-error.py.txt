@@ -1,12 +1,31 @@
 [
   {
     "cell": null,
+    "code": "N999",
+    "end_location": {
+      "column": 1,
+      "row": 1
+    },
+    "filename": "test/resources/language/python/syntax-error.py",
+    "fix": null,
+    "location": {
+      "column": 1,
+      "row": 1
+    },
+    "message": "Invalid module name: 'syntax-error'",
+    "name": "invalid-module-name",
+    "noqa_row": 1,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/invalid-module-name"
+  },
+  {
+    "cell": null,
     "code": "invalid-syntax",
     "end_location": {
       "column": 13,
       "row": 3
     },
-    "filename": "/Users/bbatsov/projects/flycheck/test/resources/language/python/syntax-error.py",
+    "filename": "test/resources/language/python/syntax-error.py",
     "fix": null,
     "location": {
       "column": 7,
@@ -25,7 +44,7 @@
       "column": 17,
       "row": 3
     },
-    "filename": "/Users/bbatsov/projects/flycheck/test/resources/language/python/syntax-error.py",
+    "filename": "test/resources/language/python/syntax-error.py",
     "fix": null,
     "location": {
       "column": 14,
