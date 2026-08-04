@@ -10,8 +10,8 @@
       (clrhash flycheck--proselint-old-args-by-host))
 
     (it "probes a host once and caches the detected version"
-      ;; Exit 0 -> old proselint, which takes the "--json -" arguments.
-      (spy-on 'process-file :and-return-value 0)
+      ;; Exit 2 -> old proselint, which takes the "--json -" arguments.
+      (spy-on 'process-file :and-return-value 2)
       (let ((default-directory "/tmp/"))
         (expect (flycheck--proselint-args) :to-equal '("--json" "-"))
         (expect (flycheck--proselint-args) :to-equal '("--json" "-")))
@@ -22,7 +22,7 @@
       ;; can be faked per host without a live remote.
       (spy-on 'process-file :and-call-fake
               (lambda (&rest _)
-                (if (file-remote-p default-directory) 1 0)))
+                (if (file-remote-p default-directory) 0 1)))
       (let ((default-directory "/tmp/"))
         (expect (flycheck--proselint-args) :to-equal '("--json" "-")))
       (let ((default-directory "/ssh:host:/tmp/"))
