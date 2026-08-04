@@ -25,6 +25,7 @@
 ;;; Code:
 
 (require 'flycheck-buttercup)
+(require 'record-fixture)
 (require 'shut-up)
 
 
@@ -69,6 +70,86 @@ evaluating BODY."
        (goto-char (point-min))
        ,@body)))
 
+
+;;; Fixture-driven checker specs
+;;
+;; A checker integration is three separable things: the command Flycheck
+;; builds, the output the tool prints, and the errors Flycheck reads back
+;; out of it.  Only the middle one needs the tool installed.  Recording
+;; what a tool printed once (see test/record-fixture.el) lets the other
+;; two be tested everywhere, so coverage stops depending on which
+;; binaries happen to be on the machine.
+
+(defun flycheck-buttercup-fixture (checker resource)
+  "Return CHECKER's recorded output over RESOURCE."
+  (let ((file (flycheck-record-fixture-file checker resource)))
+    (unless (file-exists-p file)
+      (error "No recorded output for %s over %s; record it with %s"
+             checker resource "test/record-fixture.el"))
+    (with-temp-buffer
+      ;; Recordings hold whatever bytes the tool emitted, and some hold
+      ;; UTF-8 that a machine with another locale would otherwise mangle:
+      ;; pyright indents with non-breaking spaces
+      (let ((coding-system-for-read 'utf-8))
+        (insert-file-contents file))
+      (buffer-string))))
+
+(defun flycheck-buttercup-parse (checker output &optional buffer)
+  "Parse OUTPUT as CHECKER would, and return the errors.
+
+Runs the same parser and error filter a real check runs, so this
+covers everything between the tool's output and the errors Flycheck
+reports, without the tool having to be installed."
+  (flycheck-filter-errors
+   (flycheck-parse-output output checker (or buffer (current-buffer)))
+   checker))
+
+(defun flycheck-buttercup--comparable-error (err)
+  "Return ERR reduced to the fields a parse spec asserts on.
+
+The buffer and the file name depend on where the check ran, not on
+how the output was read, and are dropped."
+  (let ((copy (flycheck-buttercup-error-without-group err)))
+    (setf (flycheck-error-buffer copy) nil)
+    (setf (flycheck-error-filename copy) nil)
+    copy))
+
+(defun flycheck-buttercup-should-parse (checker resource &rest errors)
+  "Test that CHECKER reads its recorded output over RESOURCE as ERRORS.
+
+ERRORS are given as arguments to `flycheck-error-new-at', as in
+`flycheck-buttercup-should-errors'.  The tool is never run."
+  (let* ((output (flycheck-buttercup-fixture checker resource))
+         (parsed (flycheck-buttercup-parse checker output))
+         (expected (mapcar (lambda (err)
+                             (apply #'flycheck-error-new-at
+                                    (append err (list :checker checker))))
+                           errors)))
+    (expect (mapcar #'flycheck-buttercup--comparable-error parsed)
+            :to-equal
+            (mapcar #'flycheck-buttercup--comparable-error expected))))
+
+(defmacro flycheck-buttercup-def-parse-test (checker resource &rest errors)
+  "Define a spec that CHECKER reads its output over RESOURCE as ERRORS.
+
+The spec runs everywhere, because it reads recorded output instead
+of running the tool."
+  (declare (indent 2))
+  `(it ,(format "reads %s's output over %s"
+                checker (file-name-nondirectory resource))
+     (flycheck-buttercup-should-parse ',checker ,resource ,@errors)))
+
+(defun flycheck-buttercup-command (checker resource)
+  "Return the command CHECKER would run over RESOURCE.
+
+The executable is reported by name rather than resolved, so this
+works whether or not the tool is installed."
+  (flycheck-buttercup-with-resource-buffer resource
+    (cons (flycheck-checker-default-executable checker)
+          (condition-case nil
+              (flycheck-checker-substituted-arguments checker)
+            ;; Substitution can want a saved buffer or a project root
+            (error nil)))))
 
 ;;; Python helper
 

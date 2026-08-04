@@ -66,15 +66,26 @@
   (it "keep every recorded fixture attached to a checker"
     ;; A renamed checker leaves its recordings behind, where they look
     ;; like coverage and are never read again
-    (let* ((dir (file-name-directory
-                 (flycheck-buttercup-fixture-file 'flycheck "x")))
-           (root (file-name-directory (directory-file-name dir))))
+    (let ((root flycheck-record-fixture-directory))
       (when (file-directory-p root)
         (let (orphans)
           (dolist (sub (directory-files root nil "\\`[^.]"))
             (let ((checker (intern (replace-regexp-in-string "_" "/" sub))))
               (unless (flycheck-valid-checker-p checker)
                 (push sub orphans))))
-          (expect (nreverse orphans) :to-equal nil))))))
+          (expect (nreverse orphans) :to-equal nil)))))
+
+  (it "record every recording under the resource it was made from"
+    ;; The resource is read back off the recording's own path rather than
+    ;; searched for by name, which several of them share
+    (let (astray)
+      (dolist (recording (directory-files-recursively
+                          flycheck-record-fixture-directory "\\.txt\\'"))
+        (let ((resource (flycheck-record-fixture-resource-of recording)))
+          (unless (and resource
+                       (file-exists-p (flycheck-record-fixture--resource resource)))
+            (push (file-relative-name recording flycheck-record-fixture-directory)
+                  astray))))
+      (expect (nreverse astray) :to-equal nil))))
 
 ;;; test-checker-specs.el ends here
