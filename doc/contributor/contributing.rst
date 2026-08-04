@@ -123,6 +123,14 @@ Record the output on a machine that has the tool, commit it, and the spec runs
 for everyone.  When a tool changes its format, re-record and the diff shows
 exactly what moved.
 
+The catch is that a recording says what the tool printed on the day it was
+made, and the spec reading it keeps passing whatever the tool does afterwards.
+``make verify-fixtures`` closes that: it runs the tools that are installed and
+compares.  A difference there is not a broken test, it means a tool changed
+what it prints and the checker reading it may need to change too.  A weekly
+job runs the same target, so a format change turns up as a dated notification
+rather than as a bug report months later.
+
 Pull requests
 =============
 

@@ -1,0 +1,48 @@
+name: Recorded output
+
+# A recording says what a tool printed on the day it was recorded, and the
+# specs that read it keep passing whatever the tool does afterwards.  That
+# is the point on a machine without the tool, and a blind spot everywhere
+# else, so the tools that are here get run again and compared.
+#
+# A difference is not a broken test.  It means a tool changed what it
+# prints, and the checker that reads it may need to change too.
+
+on:
+  schedule:
+    # Mondays, early enough to be waiting when the week starts
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'test/fixtures/**'
+      - 'test/record-fixture.el'
+
+jobs:
+  compare:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v6
+
+    - uses: jcs090218/setup-emacs@master
+      with:
+        version: 30.2
+
+    - uses: emacs-eask/setup-eask@master
+      with:
+        version: 'snapshot'
+
+    - name: Install the checkers the runner does not already have
+      run: |
+        sudo apt-get update
+        sudo apt-get install --yes --no-install-recommends \
+          cppcheck gawk tidy lua5.4 shellcheck libxml2-utils
+        pip install --quiet flake8 pylint
+        npm install --global --silent stylelint stylelint-config-standard \
+          markdownlint-cli markdownlint-cli2 oxlint
+
+    - run: make init
+
+    - name: Compare the recordings against the tools
+      run: make verify-fixtures
