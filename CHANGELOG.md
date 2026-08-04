@@ -36,7 +36,9 @@
 
 ### Bugs fixed
 
+- [#2297](https://github.com/flycheck/flycheck/pull/2297): Read rebar3's diagnostics again. rebar3 3.24 replaced `file:line:column: message` with a box drawn around the offending line, which none of the patterns matched, so `erlang-rebar3` has been reporting nothing since. The mark under the offending line says which column it means, so the column survives. Older rebar3's plain output is still read.
 - [#2297](https://github.com/flycheck/flycheck/pull/2297): Read a parse error from the byte compiler on Emacs 31 and newer, which goes on to name the buffer it was reading and so no longer matched.
+- [#2297](https://github.com/flycheck/flycheck/pull/2297): Point the `rst` checker at `rst2pseudoxml`. Docutils 0.21 dropped the `.py` from its front ends, so `rst2pseudoxml.py` has not existed since April 2024 and the checker had nothing to run.
 - [#2289](https://github.com/flycheck/flycheck/pull/2289): Report `check-declare` warnings again on Emacs 29 and newer. Emacs 29 put the whole warning on one line where earlier versions broke it across two, which the pattern did not allow, so `flycheck-emacs-lisp-check-declare` has been finding nothing since.
 - [#2289](https://github.com/flycheck/flycheck/pull/2289): Stop byte-compiling and checkdoc'ing `Eask` files, which hold data rather than code. The list of such files still named only Cask and Carton, and the `Eldev` exclusion beside it compared a whole path against a bare file name, so it never applied either.
 - [#2289](https://github.com/flycheck/flycheck/pull/2289): Drop the program name jq 1.7 puts in front of its diagnostics, so a `json-jq` message reads `Expected value before ','` rather than `jq: parse error: Expected value before ','`.
