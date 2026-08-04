@@ -189,6 +189,16 @@
     (flycheck-buttercup-def-checker-test emacs-lisp emacs-lisp disable-check-declare
       (let ((flycheck-emacs-lisp-check-declare nil))
         (flycheck-buttercup-should-syntax-check
-         "language/emacs-lisp/check-declare-warnings.el" 'emacs-lisp-mode)))))
+         "language/emacs-lisp/check-declare-warnings.el" 'emacs-lisp-mode))))
+
+  (describe "reading the tool's output"
+    ;; Read from output recorded earlier, so this runs whether or
+    ;; not the tool is installed here
+
+    (flycheck-buttercup-def-parse-test emacs-lisp "language/emacs-lisp/warnings.el"
+      '(16 6 warning "‘foobar’ called with 1 argument, but accepts only 0")
+      '(13 4 warning "the function ‘dummy-package-foo’ is not known to be defined."))
+    (flycheck-buttercup-def-parse-test emacs-lisp-checkdoc "language/emacs-lisp/warnings.el"
+      '(12 nil info "First sentence should end with punctuation"))))
 
 ;;; test-emacs-lisp.el ends here

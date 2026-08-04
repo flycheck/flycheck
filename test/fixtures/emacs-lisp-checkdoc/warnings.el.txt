@@ -1,0 +1,5 @@
+
+
+
+*** ../../../../../../../../var/folders/1l/xqbgb73s21vd3wrrp_tyxmy00000gn/T/flycheck22gkx7/warnings.el: checkdoc-current-buffer
+../../../../../../../../var/folders/1l/xqbgb73s21vd3wrrp_tyxmy00000gn/T/flycheck22gkx7/warnings.el:12: First sentence should end with punctuation

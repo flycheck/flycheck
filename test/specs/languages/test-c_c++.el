@@ -300,6 +300,17 @@ against a integer value that is neither 1 nor 0.\">
     (flycheck-buttercup-def-parse-test c/c++-gcc "language/c_c++/error.cpp"
       '(8 9 warning "unknown pragma ignored" :id "-Wunknown-pragmas")
       '(2 20 error "no member named 'bar' in 'A'")
-      '(6 19 info "in instantiation of function template specialization 'foo<A>' requested here"))))
+      '(6 19 info "in instantiation of function template specialization 'foo<A>' requested here")))
+
+  (describe "reading the tool's output"
+    ;; Read from output recorded earlier, so this runs whether or
+    ;; not the tool is installed here
+
+    (flycheck-buttercup-def-parse-test c/c++-clang "language/c_c++/error.cpp"
+      '(8 9 warning "unknown pragma ignored")
+      '(2 20 error "no member named 'bar' in 'A'")
+      '(6 19 info "in instantiation of function template specialization 'foo<A>' requested here"))
+    (flycheck-buttercup-def-parse-test c/c++-cppcheck "language/c_c++/style2.cpp"
+      '(3 nil info "The scope of the variable 'i' can be reduced. Warning: Be careful when fixing this message, especially when there are inner loops. Here is an example where cppcheck will write that the scope for 'i' can be reduced:\nvoid f(int x)\n{\n    int i = 0;\n    if (x) {\n        // it's safe to move 'int i = 0;' here\n        for (int n = 0; n < 10; ++n) {\n            // it is possible but not safe to move 'int i = 0;' here\n            do_something(&i);\n        }\n    }\n}\nWhen you see this message it is always safe to reduce the variable scope 1 level." :id "variableScope"))))
 
 ;;; test-c_c++.el ends here

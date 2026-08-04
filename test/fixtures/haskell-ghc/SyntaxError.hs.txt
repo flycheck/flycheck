@@ -1,0 +1,7 @@
+[1 of 1] Compiling Main             ( /var/folders/1l/xqbgb73s21vd3wrrp_tyxmy00000gn/T/flycheck5GBm0m/SyntaxError.hs, /var/folders/1l/xqbgb73s21vd3wrrp_tyxmy00000gn/T/flycheck-haskell-ghc-cacheuStIIM/Main.o )
+/var/folders/1l/xqbgb73s21vd3wrrp_tyxmy00000gn/T/flycheck5GBm0m/SyntaxError.hs:3:1: error: [GHC-58481]
+    parse error on input ‘module’
+  |
+3 | module Haskell.SyntaxError where
+  | ^^^^^^
+

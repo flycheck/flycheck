@@ -1,0 +1,6 @@
+
+In toplevel form:
+flycheck_warnings.el:16:6: Warning: ‘foobar’ called with 1 argument, but accepts only 0
+
+In end of data:
+flycheck_warnings.el:13:4: Warning: the function ‘dummy-package-foo’ is not known to be defined.

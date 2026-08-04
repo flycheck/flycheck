@@ -1,0 +1,2 @@
+/bin/bash: line 3: syntax error near unexpected token `('
+/bin/bash: line 3: `cat <(echo blah)'

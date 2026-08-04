@@ -361,6 +361,18 @@
       (let ((flycheck-rust-clippy-args '("--" "-W" "clippy::pedantic")))
         (expect (flycheck-checker-substituted-arguments 'rust-clippy)
                 :to-equal '("clippy" "--message-format=json"
-                            "--" "-W" "clippy::pedantic"))))))
+                            "--" "-W" "clippy::pedantic")))))
+
+  (describe "reading the tool's output"
+    ;; Read from output recorded earlier, so this runs whether or
+    ;; not the tool is installed here
+
+    (flycheck-buttercup-def-parse-test rust "language/rust/flycheck-test/src/syntax-error.rs"
+      '(4 5 error "cannot find value `bla` in this scope (not found in this scope)" :id "E0425" :end-line 4 :end-column 8))
+    (flycheck-buttercup-def-parse-test rust-clippy "language/rust/clippy-test/src/main.rs"
+      '(2 5 warning "unneeded `return` statement" :id "clippy::needless_return" :end-line 2 :end-column 16)
+      '(2 5 info "for further information visit https://rust-lang.github.io/rust-clippy/rust-1.91.0/index.html#needless_return" :id "clippy::needless_return" :end-line 2 :end-column 16)
+      '(2 5 info "`#[warn(clippy::needless_return)]` on by default" :id "clippy::needless_return" :end-line 2 :end-column 16)
+      '(2 5 info "remove `return`: `true`" :id "clippy::needless_return" :end-line 2 :end-column 16))))
 
 ;;; test-rust.el ends here

@@ -1,0 +1,12 @@
+/var/folders/1l/xqbgb73s21vd3wrrp_tyxmy00000gn/T/flycheckMgrJ5q/syntaxerror.swift:5:1: error: expected ')' in expression list
+
+^
+/var/folders/1l/xqbgb73s21vd3wrrp_tyxmy00000gn/T/flycheckMgrJ5q/syntaxerror.swift:4:8: note: to match this opening '('
+  print("hello"
+       ^
+/var/folders/1l/xqbgb73s21vd3wrrp_tyxmy00000gn/T/flycheckMgrJ5q/syntaxerror.swift:5:1: error: expected '}' at end of brace statement
+
+^
+/var/folders/1l/xqbgb73s21vd3wrrp_tyxmy00000gn/T/flycheckMgrJ5q/syntaxerror.swift:3:14: note: to match this opening '{'
+func hello() {
+             ^

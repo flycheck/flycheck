@@ -11,6 +11,13 @@
       (flycheck-buttercup-should-syntax-check
        "language/scss/error.scss" 'scss-mode
        '(3 11 error "Unknown word olor (CssSyntaxError)"
-           :id "CssSyntaxError" :checker scss-stylelint)))))
+           :id "CssSyntaxError" :checker scss-stylelint))))
+
+  (describe "reading the tool's output"
+    ;; Read from output recorded earlier, so this runs whether or
+    ;; not the tool is installed here
+
+    (flycheck-buttercup-def-parse-test scss-stylelint "language/scss/error.scss"
+      '(3 11 error "Unknown word olor (CssSyntaxError)" :id "CssSyntaxError"))))
 
 ;;; test-scss.el ends here

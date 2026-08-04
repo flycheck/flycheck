@@ -30,6 +30,14 @@
     (let ((flycheck-perl-include-path '("."))
           (flycheck-perl-module-list '("DependencyA" "DependencyB")))
       (flycheck-buttercup-should-syntax-check
-       "language/perl/Script.pl" '(perl-mode cperl-mode)))))
+       "language/perl/Script.pl" '(perl-mode cperl-mode))))
+
+  (describe "reading the tool's output"
+    ;; Read from output recorded earlier, so this runs whether or
+    ;; not the tool is installed here
+
+    (flycheck-buttercup-def-parse-test perl "language/perl.pl"
+      '(6 nil error "Global symbol \"$x\" requires explicit package name (did you forget to declare \"my $x\"?)")
+      '(6 nil error "BEGIN not safe after errors--compilation aborted"))))
 
 ;;; test-perl.el ends here

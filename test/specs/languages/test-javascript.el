@@ -228,6 +228,13 @@ Some more explanation here.")
     (it "threads flycheck-javascript-standard-args into standard"
       (let ((flycheck-javascript-standard-args '("--env" "mocha")))
         (expect (flycheck-checker-substituted-arguments 'javascript-standard)
-                :to-equal '("--stdin" "--env" "mocha"))))))
+                :to-equal '("--stdin" "--env" "mocha")))))
+
+  (describe "reading the tool's output"
+    ;; Read from output recorded earlier, so this runs whether or
+    ;; not the tool is installed here
+
+    (flycheck-buttercup-def-parse-test javascript-oxlint "language/javascript/warnings.js"
+      '(4 9 warning "Variable 'foo' is declared but never used. Unused variables should start with a '_'." :id "eslint(no-unused-vars)"))))
 
 ;;; test-javascript.el ends here

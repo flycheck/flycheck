@@ -65,6 +65,13 @@
             (flycheck-luacheck-args '("--max-line-length" "120")))
         (let ((args (flycheck-checker-substituted-arguments 'lua-luacheck)))
           (expect args :to-contain "--max-line-length")
-          (expect args :to-contain "120"))))))
+          (expect args :to-contain "120")))))
+
+  (describe "reading the tool's output"
+    ;; Read from output recorded earlier, so this runs whether or
+    ;; not the tool is installed here
+
+    (flycheck-buttercup-def-parse-test lua "language/lua/syntax-error.lua"
+      '(5 nil error "unfinished string near '\"oh no'"))))
 
 ;;; test-lua.el ends here

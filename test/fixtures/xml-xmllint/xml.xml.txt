@@ -1,0 +1,6 @@
+-:4: parser error : Opening and ending tag mismatch: spam line 3 and with
+  </with>
+         ^
+-:5: parser error : Extra content at the end of the document
+</spam>
+^

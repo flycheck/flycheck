@@ -1,0 +1,3 @@
+/var/folders/1l/xqbgb73s21vd3wrrp_tyxmy00000gn/T/flycheckXSjzYR/markdown.md:1 error MD041/first-line-heading/first-line-h1 First line in a file should be a top-level heading [Context: "## Second Header First"]
+/var/folders/1l/xqbgb73s21vd3wrrp_tyxmy00000gn/T/flycheckXSjzYR/markdown.md:3 error MD012/no-multiple-blanks Multiple consecutive blank lines [Expected: 1; Actual: 2]
+/var/folders/1l/xqbgb73s21vd3wrrp_tyxmy00000gn/T/flycheckXSjzYR/markdown.md:4:15 error MD009/no-trailing-spaces Trailing spaces [Expected: 0 or 2; Actual: 7]

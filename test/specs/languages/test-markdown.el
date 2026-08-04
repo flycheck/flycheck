@@ -67,6 +67,18 @@
               (flycheck-markdown-markdownlint-cli2-args '("--no-globs")))
           (let ((args (flycheck-checker-substituted-arguments
                        'markdown-markdownlint-cli2)))
-            (expect args :to-contain "--no-globs")))))))
+            (expect args :to-contain "--no-globs"))))))
+
+  (describe "reading the tool's output"
+    ;; Read from output recorded earlier, so this runs whether or
+    ;; not the tool is installed here
+
+    (flycheck-buttercup-def-parse-test markdown-markdownlint-cli "language/markdown.md"
+      '(1 nil error "First line in a file should be a top-level heading [Context: \"## Second Header First\"]" :id "MD041/first-line-heading/first-line-h1")
+      '(3 nil error "Multiple consecutive blank lines [Expected: 1; Actual: 2]" :id "MD012/no-multiple-blanks")
+      '(4 15 error "Trailing spaces [Expected: 0 or 2; Actual: 7]" :id "MD009/no-trailing-spaces"))
+    (flycheck-buttercup-def-parse-test markdown-markdownlint-cli2 "language/markdown.md"
+      '(3 nil error "Multiple consecutive blank lines [Expected: 1; Actual: 2]" :id "MD012/no-multiple-blanks")
+      '(4 15 error "Trailing spaces [Expected: 0 or 2; Actual: 7]" :id "MD009/no-trailing-spaces"))))
 
 ;;; test-markdown.el ends here

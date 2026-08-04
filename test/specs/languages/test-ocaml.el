@@ -62,6 +62,13 @@
     (flycheck-buttercup-def-parse-test ocaml-dune
         "language/ocaml-dune/lib/typeerror.ml"
       '(4 17 error "This constant has type string but an expression was expected of type\n         int"
-          :end-line 4 :end-column 29))))
+          :end-line 4 :end-column 29)))
+
+  (describe "reading the tool's output"
+    ;; Read from output recorded earlier, so this runs whether or
+    ;; not the tool is installed here
+
+    (flycheck-buttercup-def-parse-test ocaml "language/ocaml/syntaxerror.ml"
+      '(4 1 error "Syntax error" :end-line 4 :end-column 1))))
 
 ;;; test-ocaml.el ends here

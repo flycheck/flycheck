@@ -175,6 +175,13 @@ Perhaps:
 Found:
   (putStrLn \"hello world\")
 Perhaps:
-  putStrLn \"hello world\"" :checker haskell-hlint))))))
+  putStrLn \"hello world\"" :checker haskell-hlint)))))
+
+  (describe "reading the tool's output"
+    ;; Read from output recorded earlier, so this runs whether or
+    ;; not the tool is installed here
+
+    (flycheck-buttercup-def-parse-test haskell-ghc "language/haskell/SyntaxError.hs"
+      '(3 1 error "parse error on input ‘module’" :id "GHC-58481"))))
 
 ;;; test-haskell.el ends here

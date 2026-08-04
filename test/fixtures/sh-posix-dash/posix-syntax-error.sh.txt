@@ -1,0 +1,1 @@
+/bin/dash: 3: Syntax error: "(" unexpected
