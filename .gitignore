@@ -24,3 +24,9 @@
 
 # Dune build output from the OCaml checker specs
 _build/
+
+# Build output the checkers leave in the test resources when they run
+/test/resources/**/target/
+/test/resources/**/_build/
+/test/resources/**/Cargo.lock
+rebar3.crashdump
