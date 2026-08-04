@@ -8229,6 +8229,13 @@ FOCUSED is ignored."
 (defun flycheck-annotate--reserved-columns ()
   "Columns at the right edge that text must not be aligned into.
 
+Without a right fringe to draw it in, the rightmost column belongs to
+the glyph marking a line that continues or was truncated, so text
+flush against `right' lands in it and spills onto the next line.  A
+terminal has no fringes; a graphical frame can have had them turned
+off just the same."
+  (if (zerop (or (nth 1 (window-fringes)) 0)) 1 0))
+
 (defun flycheck-annotate-sideline-style (errors anchor _focused)
   "Render ERRORS flushed to the window's right edge past line ANCHOR.
 
@@ -8438,6 +8445,29 @@ once per change."
                (eql (buffer-chars-modified-tick) flycheck-annotate--last-tick))
     (flycheck-annotate--refresh)))
 
+(defvar-local flycheck-annotate--rebuilding nil
+  "Whether a rebuild is already under way in this buffer.")
+
+(defun flycheck-annotate--after-scroll (window _start)
+  "Rebuild the overlays for WINDOW after it scrolled.
+
+`post-command-hook' runs before redisplay, so a command that sends
+point off screen has not scrolled the window by the time the overlays
+are rebuilt: `window-start' still describes where the window was, and
+the line being jumped to is not part of what looks visible.  Nothing
+is annotated, and nothing rebuilds it until the next command happens
+to come along.  See #2293.
+
+Scrolling is reported during redisplay instead, which is late enough
+to know where the window ended up."
+  (when (and (window-live-p window)
+             (eq (window-buffer window) (current-buffer))
+             (not flycheck-annotate--rebuilding))
+    (let ((flycheck-annotate--rebuilding t))
+      ;; Laying out an annotation can scroll the window again, and this
+      ;; runs inside redisplay, so guard against coming back round
+      (flycheck-annotate--post-command))))
+
 (defun flycheck-annotate--suppresses-echo-p ()
   "Return non-nil when inline display covers the at-point echo message.
 
@@ -8481,11 +8511,13 @@ annotated on the next command."
   (cond
    (flycheck-annotate-mode
     (add-hook 'post-command-hook #'flycheck-annotate--post-command nil t)
+    (add-hook 'window-scroll-functions #'flycheck-annotate--after-scroll nil t)
     (add-hook 'flycheck-after-syntax-check-hook
               #'flycheck-annotate--refresh nil t)
     (flycheck-annotate--refresh))
    (t
     (remove-hook 'post-command-hook #'flycheck-annotate--post-command t)
+    (remove-hook 'window-scroll-functions #'flycheck-annotate--after-scroll t)
     (remove-hook 'flycheck-after-syntax-check-hook
                  #'flycheck-annotate--refresh t)
     (flycheck-annotate--clear))))
