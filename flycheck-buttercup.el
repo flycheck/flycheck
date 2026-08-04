@@ -672,7 +672,11 @@ flattened rather than read as directories."
       (error "No recorded output for %s over %s; record it with %s"
              checker resource "test/record-fixture.el"))
     (with-temp-buffer
-      (insert-file-contents file)
+      ;; Recordings hold whatever bytes the tool emitted, and some hold
+      ;; UTF-8 that a machine with another locale would otherwise mangle:
+      ;; pyright indents with non-breaking spaces
+      (let ((coding-system-for-read 'utf-8))
+        (insert-file-contents file))
       (buffer-string))))
 
 (defun flycheck-buttercup-parse (checker output &optional buffer)
