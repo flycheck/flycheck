@@ -123,6 +123,10 @@ Record the output on a machine that has the tool, commit it, and the spec runs
 for everyone.  When a tool changes its format, re-record and the diff shows
 exactly what moved.
 
+:ref:`Testing your checker <flycheck-testing-a-checker>` in the developer's
+guide covers this from the other end, for somebody adding a checker rather than
+maintaining one, and lists the mistakes that keep being made.
+
 The catch is that a recording says what the tool printed on the day it was
 made, and the spec reading it keeps passing whatever the tool does afterwards.
 ``make verify-fixtures`` closes that: it runs the tools that are installed and
