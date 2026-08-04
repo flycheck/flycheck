@@ -116,8 +116,19 @@ Tests
   :file:`test/specs/`.  Check whether the specs fit into an existing spec file,
   or add a new file instead.  In doubt, use a new file.
 
-* For new syntax checkers add at least one syntax checker test to
-  :file:`test/specs/languages/`.
+* For a new syntax checker, add both kinds of spec to
+  :file:`test/specs/languages/`: a ``flycheck-buttercup-def-parse-test``
+  reading output recorded from the tool, and a
+  ``flycheck-buttercup-def-checker-test`` running the tool itself.  Only the
+  second needs the tool installed, which is why the first is the one that keeps
+  the checker honest on everybody else's machine.  :ref:`Testing your checker
+  <flycheck-testing-a-checker>` walks through it, including how to record the
+  output and what not to assert.
+
+* Do not assert on anything the machine decides: a tool's version, which
+  compiler answers to a name, or which quotes it prints around a symbol.  Those
+  differ between contributors and between CI runners, and a spec that pins them
+  fails for people who changed nothing.
 
 Documentation
 =============

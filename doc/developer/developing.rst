@@ -391,6 +391,74 @@ location carries only a position and a message, and may live in another file:
                 :filename "other.rb" :line 12 :column 3
                 :message "first defined here")))
 
+.. _flycheck-testing-a-checker:
+
+Testing your checker
+--------------------
+
+A checker is three separable things: the command Flycheck builds, the output the
+tool prints, and the errors Flycheck reads back out of it.  Only the middle one
+needs the tool installed, and that matters more than it sounds: Flycheck drives
+over a hundred different programs, nobody has them all, and a spec that needs a
+missing tool skips itself.  A checker whose parsing breaks would then go red
+nowhere.
+
+So the parsing is tested against output recorded from the tool, which runs
+everywhere:
+
+.. code-block:: elisp
+
+   (flycheck-buttercup-def-parse-test json-jq "language/json.json"
+     '(1 44 error "Expected value before ','"))
+
+Record that output with :file:`test/record-fixture.el`, on a machine that has
+the tool:
+
+.. code-block:: console
+
+   $ emacs -Q --batch -l test/record-fixture.el \
+       -f flycheck-record-fixture-batch json-jq language/json.json
+
+It runs the checker's own command, substituted the way a real check substitutes
+it, and writes what the tool printed to
+:file:`test/fixtures/{checker}/{resource}.txt`.  Commit that alongside the spec.
+If you do not have the tool, ``make record-fixtures`` records in a container
+that has most of them; see :ref:`the contributor's guide
+<flycheck-recorded-output>`.
+
+Add a live check as well, which runs the real tool where it is installed and
+skips where it is not:
+
+.. code-block:: elisp
+
+   (flycheck-buttercup-def-checker-test json-jq json nil
+     (flycheck-buttercup-should-syntax-check
+      "language/json.json" 'json-mode
+      '(1 44 error "Expected value before ','" :checker json-jq)))
+
+Both go in :file:`test/specs/languages/`, in the file for the language.
+
+A few things are worth knowing before you write the expectations, because each
+of them has bitten us:
+
+* **Name the checker under test.**  ``(flycheck-checkers '(your-checker))`` beats
+  disabling the others, which silently stops covering anything the day somebody
+  adds a checker for the same language ahead of yours.
+
+* **Do not assert what the machine decides.**  Tool versions word things
+  differently, GCC quotes with ``‘…’`` where Clang uses ``'…'``, and the name
+  ``gcc`` belongs to Clang on macOS.  Ask the version, the way the Erlang and
+  Ruby specs do, or let the recorded output carry it.
+
+* **The skip guard tests the name you give it.**  Name a checker that does not
+  exist and it guards nothing, so the spec runs with the tool missing and fails
+  for a reason that has nothing to do with your change.  There is a spec that
+  checks this, and one that checks no recording is left behind by a rename.
+
+* **An interpreter is not a linter.**  A checker that runs ``python3 -m flake8``
+  has ``python3`` for an executable, and finding it says nothing about flake8
+  being installed.  Ask whether the module imports.
+
 Sharing your checker
 --------------------
 
