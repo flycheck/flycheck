@@ -213,10 +213,17 @@ by matching that name under the resources directory."
       (file-relative-name (car matches) root))))
 
 (defun flycheck-fixture--reads (checker output)
-  "How many errors CHECKER reads out of OUTPUT."
-  (length (flycheck-filter-errors
-           (flycheck-parse-output output checker (current-buffer))
-           checker)))
+  "How many errors CHECKER reads out of OUTPUT.
+
+None, if reading it raises: a parser that chokes has understood the
+output no better than one that finds nothing in it.  Cargo printing
+that it has no library target rather than the JSON the checker
+expects gets here."
+  (condition-case nil
+      (length (flycheck-filter-errors
+               (flycheck-parse-output output checker (current-buffer))
+               checker))
+    (error 0)))
 
 (defun flycheck-verify-fixtures ()
   "Check that every checker can still read what its tool prints.
@@ -317,6 +324,113 @@ recording, and still reads as %d error(s)"
       (message "\nRun the tool by hand and compare with the recording under \
 test/fixtures: the format has changed and the checker needs to follow it.")
       (kill-emacs 1))))
+
+;;; Recording everything that can be recorded
+
+;; Which file to run a checker over is already written down, in the
+;; resource its own spec checks, so the specs are read for it rather than
+;; keeping a second list that could disagree with them.
+
+(defun flycheck-record-fixture--walk (form fn)
+  "Call FN on FORM and every sub-form of it.
+
+Walks car and cdr rather than iterating, because specs contain
+dotted pairs such as (disable . \"reason\")."
+  (funcall fn form)
+  (when (consp form)
+    (flycheck-record-fixture--walk (car form) fn)
+    (flycheck-record-fixture--walk (cdr form) fn)))
+
+(defun flycheck-record-fixture--resource-in (body)
+  "The first resource file BODY checks, if any."
+  (let (found)
+    (flycheck-record-fixture--walk
+     body
+     (lambda (f)
+       (when (and (not found) (consp f)
+                  (eq (car-safe f) 'flycheck-buttercup-should-syntax-check)
+                  (stringp (nth 1 f)))
+         (setq found (nth 1 f)))))
+    found))
+
+(defun flycheck-record-fixture-spec-resources ()
+  "Map every checker a spec names to the resource that spec checks."
+  (let ((table (make-hash-table :test #'eq))
+        (dir (expand-file-name
+              "specs/languages" flycheck-record-fixture--test-directory)))
+    (dolist (file (directory-files dir t "\\.el\\'"))
+      (with-temp-buffer
+        (insert-file-contents file)
+        (goto-char (point-min))
+        (condition-case nil
+            (while t
+              (flycheck-record-fixture--walk
+               (read (current-buffer))
+               (lambda (f)
+                 (when (and (consp f)
+                            (eq (car-safe f)
+                                'flycheck-buttercup-def-checker-test))
+                   (let* ((raw (nth 1 f))
+                          (checkers (if (listp raw) raw (list raw)))
+                          (resource (flycheck-record-fixture--resource-in
+                                     (nthcdr 4 f))))
+                     (dolist (c checkers)
+                       (when (and resource (not (gethash c table)))
+                         (puthash c resource table))))))))
+          (end-of-file nil))))
+    table))
+
+(defun flycheck-record-fixture-all ()
+  "Record every checker whose tool is installed and whose spec names a file.
+
+Returns a list of (CHECKER . REASON) for the ones that could not be
+recorded."
+  (let ((table (flycheck-record-fixture-spec-resources))
+        (recorded 0) failed pairs)
+    (maphash (lambda (c r) (push (cons c r) pairs)) table)
+    (dolist (pair (sort pairs (lambda (a b)
+                                (string< (symbol-name (car a))
+                                         (symbol-name (car b))))))
+      (let ((checker (car pair)) (resource (cdr pair)))
+        (when (and (flycheck-checker-get checker 'command)
+                   (flycheck-record-fixture-tool-available-p checker))
+          (condition-case err
+              (let ((written (flycheck-record-fixture checker resource)))
+                ;; A tool that will not start still prints something, and
+                ;; writing that down gives a spec asserting how the
+                ;; failure looks.  What the checker reads is the test of
+                ;; whether the tool actually ran: credo without a mix.exs
+                ;; and the Go checkers without a module land here.
+                (if (> (flycheck-fixture--reads
+                        checker (with-temp-buffer
+                                  (insert-file-contents written)
+                                  (buffer-string)))
+                       0)
+                    (setq recorded (1+ recorded))
+                  (delete-file written)
+                  ;; And the directory it was the only thing in, so a
+                  ;; checker with nothing recorded looks like one with
+                  ;; nothing recorded
+                  (ignore-errors (delete-directory (file-name-directory written)))
+                  (push (cons checker
+                              "ran, but the checker reads nothing out of \
+what it printed; record it by hand if that is really what it says")
+                        failed)))
+            (error (push (cons checker (error-message-string err)) failed))))))
+    (message "\nrecorded %d, failed %d" recorded (length failed))
+    (nreverse failed)))
+
+(defun flycheck-record-fixture-all-batch ()
+  "Record everything recordable, and say what could not be."
+  (let ((failed (flycheck-record-fixture-all)))
+    (when failed
+      (message "\nnot recorded:")
+      (dolist (f failed)
+        (message "  %s: %s" (car f) (cdr f))))
+    ;; Not an error: a tool that will not run here is the normal case,
+    ;; and the recordings that did work are still worth keeping
+    (message "\nReview what was written before committing it.  A recording \
+of a tool failing to start is worse than no recording at all.")))
 
 (provide 'record-fixture)
 
