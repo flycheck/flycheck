@@ -50,19 +50,60 @@
 (defun flycheck-record-fixture-file (checker resource)
   "The file holding CHECKER's recorded output over RESOURCE.
 
-Checker names can contain slashes, as `c/c++-gcc' does, so they are
+RESOURCE keeps its path under the checker's directory, so the resource
+a recording came from can be read back off the recording rather than
+searched for: several of them share a name, and `main.rs' alone
+matches four.
+
+Checker names can contain slashes, as `c/c++-gcc' does, so those are
 flattened rather than read as directories."
   (expand-file-name
-   (format "%s/%s.txt"
-           (replace-regexp-in-string "/" "_" (symbol-name checker))
-           (file-name-nondirectory resource))
+   (concat (replace-regexp-in-string "/" "_" (symbol-name checker))
+           "/" resource ".txt")
    flycheck-record-fixture-directory))
+
+(defun flycheck-record-fixture-resource-of (recording)
+  "The resource RECORDING was made from.
+
+The inverse of `flycheck-record-fixture-file': the path under the
+checker's directory is the resource, without the `.txt'."
+  (let* ((root (file-name-as-directory flycheck-record-fixture-directory))
+         (relative (file-relative-name recording root)))
+    (unless (string-prefix-p ".." relative)
+      (let ((under-checker (mapconcat #'identity
+                                      (cdr (split-string relative "/")) "/")))
+        (when (string-suffix-p ".txt" under-checker)
+          (substring under-checker 0 (- (length ".txt"))))))))
 
 (defun flycheck-record-fixture--resource (resource)
   "Absolute name of RESOURCE under the test resources directory."
   (expand-file-name
    resource
    (expand-file-name "resources" flycheck-record-fixture--test-directory)))
+
+(defconst flycheck-record-fixture-quirks
+  '((css-stylelint  :config "language/css/.stylelintrc.json")
+    (scss-stylelint :config "language/css/.stylelintrc.json")
+    (sass-stylelint :config "language/css/.stylelintrc.json")
+    (less-stylelint :config "language/css/.stylelintrc.json")
+    (python-flake8  :module "flake8")
+    (python-pylint  :module "pylint")
+    (rust-clippy    :uncomparable "cargo reports whether the crate was \
+already built, so its output depends on the state of the target directory"))
+  "What is unusual about a checker, when recording or checking a recording.
+
+Each entry is a checker followed by a plist:
+
+`:config'        a configuration file the tool needs pointing at before
+                it says anything, as the specs point it
+`:module'        the module a checker runs through an interpreter, whose
+                presence says nothing about the linter being installed
+`:uncomparable'  why a later run of this tool cannot be compared with a
+                recording of it, and what to say instead of failing")
+
+(defun flycheck-record-fixture-quirk (checker property)
+  "PROPERTY of CHECKER from `flycheck-record-fixture-quirks', or nil."
+  (plist-get (cdr (assq checker flycheck-record-fixture-quirks)) property))
 
 (defun flycheck-record-fixture-settings (checker)
   "Variables to bind while running CHECKER, as an alist.
@@ -71,10 +112,8 @@ Some checkers need pointing at a configuration file before they say
 anything, the way the specs point them.  Recording and checking a
 recording both go through here, so they cannot disagree about how
 the tool was run."
-  (cond
-   ((memq checker '(css-stylelint scss-stylelint sass-stylelint less-stylelint))
-    `((flycheck-stylelint-config
-       . ,(flycheck-record-fixture--resource "language/css/.stylelintrc.json"))))))
+  (when-let* ((config (flycheck-record-fixture-quirk checker :config)))
+    `((flycheck-stylelint-config . ,(flycheck-record-fixture--resource config)))))
 
 (defun flycheck-record-fixture--run (checker file)
   "Run CHECKER's command over FILE and return (COMMAND EXIT-STATUS OUTPUT).
@@ -142,7 +181,10 @@ Return the file the fixture was written to."
          (status (nth 1 recorded))
          (output (flycheck-record-fixture--stabilize (nth 2 recorded)))
          (target (or output-file
-                     (flycheck-record-fixture-file checker file))))
+                     ;; RESOURCE, not FILE: the recording keeps the
+                     ;; resource's path, not the absolute one it was
+                     ;; read from
+                     (flycheck-record-fixture-file checker resource))))
     (make-directory (file-name-directory target) 'parents)
     (let ((coding-system-for-write 'utf-8))
       (with-temp-file target (insert output)))
@@ -168,27 +210,10 @@ Return the file the fixture was written to."
 ;; the checker can still read them rather than whether they print the
 ;; same bytes; see `flycheck-verify-fixtures'.
 
-(defconst flycheck-record-fixture-unstable
-  '((rust-clippy . "cargo reports whether the crate was already built, \
-so its output depends on the state of the target directory"))
-  "Checkers whose output cannot be compared between runs, and why.
-
-Their recordings are still worth having, since the specs that read
-them only care what Flycheck makes of the output.  It is the
-comparison against a later run that cannot mean anything.")
-
-(defconst flycheck-record-fixture-modules
-  '((python-flake8 . "flake8")
-    (python-pylint . "pylint"))
-  "Checkers whose executable is an interpreter, and the module they run.
-
-Finding the interpreter says nothing about whether the linter is
-installed for it, so these are asked the fuller question.")
-
 (defun flycheck-record-fixture-tool-available-p (checker)
   "Whether CHECKER's tool can actually run here."
   (when-let* ((program (flycheck-find-checker-executable checker)))
-    (if-let* ((module (cdr (assq checker flycheck-record-fixture-modules))))
+    (if-let* ((module (flycheck-record-fixture-quirk checker :module)))
         (eq 0 (call-process program nil nil nil "-c" (format "import %s" module)))
       t)))
 
@@ -198,20 +223,6 @@ installed for it, so these are asked the fuller question.")
                        "_" "/" (file-name-nondirectory
                                 (directory-file-name directory))))))
     (and (flycheck-valid-checker-p name) name)))
-
-(defun flycheck-fixture--resource-for (checker recorded)
-  "The resource RECORDED came from, for CHECKER, or nil.
-
-Recordings are named after the resource, so the resource is found
-by matching that name under the resources directory."
-  (let* ((base (file-name-base recorded))
-         (root (expand-file-name
-                "resources" flycheck-record-fixture--test-directory))
-         (matches (directory-files-recursively
-                   root (concat "\\`" (regexp-quote base) "\\'"))))
-    (ignore checker)
-    (when matches
-      (file-relative-name (car matches) root))))
 
 (defun flycheck-fixture--reads (checker output)
   "How many errors CHECKER reads out of OUTPUT.
@@ -225,6 +236,9 @@ expects gets here."
                (flycheck-parse-output output checker (current-buffer))
                checker))
     (error 0)))
+
+(defvar flycheck-verify-fixtures--checked 0
+  "How many recordings the last check actually compared.")
 
 (defun flycheck-verify-fixtures ()
   "Check that every checker can still read what its tool prints.
@@ -253,17 +267,19 @@ whose tool is not installed."
                                   'full "\\`[^.]"))
       (when (file-directory-p dir)
         (if-let* ((checker (flycheck-fixture--checker-of dir)))
-            (dolist (recorded (directory-files dir 'full "\\.txt\\'"))
-              (let ((resource (flycheck-fixture--resource-for checker recorded)))
+            ;; Recordings keep the resource's path under the checker's
+            ;; directory, so they are nested as deep as the resource was
+            (dolist (recorded (directory-files-recursively dir "\\.txt\\'"))
+              (let ((resource (flycheck-record-fixture-resource-of recorded)))
                 (cond
                  ((not resource)
                   (push (cons checker "the resource it was recorded from is gone")
                         drifted))
-                 ((assq checker flycheck-record-fixture-unstable)
+                 ((flycheck-record-fixture-quirk checker :uncomparable)
                   (setq unstable (1+ unstable))
                   (message "  not compared: %s, because %s" checker
-                           (cdr (assq checker
-                                      flycheck-record-fixture-unstable))))
+                           (flycheck-record-fixture-quirk
+                            checker :uncomparable)))
                  ((not (flycheck-record-fixture-tool-available-p checker))
                   (setq skipped (1+ skipped)))
                  (t
@@ -310,6 +326,7 @@ recording, and still reads as %d error(s)"
           (push (cons (file-name-nondirectory (directory-file-name dir))
                       "is not a checker")
                 drifted))))
+    (setq flycheck-verify-fixtures--checked checked)
     (message "checked %d recording(s); %d skipped for a missing tool, \
 %d not comparable"
              checked skipped unstable)
@@ -318,6 +335,13 @@ recording, and still reads as %d error(s)"
 (defun flycheck-verify-fixtures-batch ()
   "Report checkers that no longer read their tool, and exit non-zero."
   (let ((drifted (flycheck-verify-fixtures)))
+    (when (zerop flycheck-verify-fixtures--checked)
+      ;; Nothing compared reads as success and is not: either no tool
+      ;; here is one we have a recording for, or the recordings stopped
+      ;; being found where they are looked for
+      (message "Nothing was compared.  If any of these tools are \
+installed, the recordings are not being found.")
+      (kill-emacs 1))
     (if (null drifted)
         (message "Every checker still reads its tool.")
       (message "\n%d checker(s) no longer read their tool:" (length drifted))

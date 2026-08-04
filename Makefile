@@ -100,7 +100,7 @@ compile:
 
 .PHONY: specs
 specs: compile
-	$(EASK) exec buttercup -L . -L test/specs test/specs
+	$(EASK) exec buttercup -L . -L test -L test/specs test/specs
 
 DOCKER ?= docker
 CHECKER_IMAGE ?= flycheck-checkers
