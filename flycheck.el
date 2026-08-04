@@ -13502,6 +13502,9 @@ See Info Node `(elisp)Byte Compilation'."
                             (zero-or-more not-newline))))
           (optional "," (zero-or-more whitespace) line
                     "," (zero-or-more whitespace) column)
+          ;; Emacs 31 goes on to name the buffer it was reading, which is
+          ;; always the compiler's own and tells nobody anything
+          (optional ":" (zero-or-more not-newline))
           line-end)
    (warning line-start (file-name) ":" line ":" column ":"
             (zero-or-more whitespace) "Warning:" (zero-or-more whitespace)
