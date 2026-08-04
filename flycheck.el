@@ -15969,13 +15969,13 @@ absent from the table has not been probed yet.")
                ;; Probe on the host the check will run on (remote over TRAMP).
                (zerop (process-file
                        (or flycheck-proselint-executable "proselint")
-                       nil nil nil "--version"))
+                       nil nil nil "version"))
                flycheck--proselint-old-args-by-host))
     (if (gethash host flycheck--proselint-old-args-by-host)
-        ;; Proselint versions <= 0.14.0:
-        (list "--json" "-")
-      ;; Proselint versions >= 0.16.0
-      (list "check" "--output-format=json"))))
+        ;; Proselint versions >= 0.16.0
+        (list "check" "--output-format=json")
+      ;; Proselint versions <= 0.14.0:
+      (list "--json" "-"))))
 
 (flycheck-define-checker proselint
   "Flycheck checker using Proselint.
