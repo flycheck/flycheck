@@ -587,6 +587,58 @@ a newline, so key it back under the code line."
                      (point-min) (line-end-position))
                     :to-equal "codeX")))))
 
+    (it "rebuilds when the window scrolls"
+      ;; `post-command-hook' runs before redisplay, so a jump that sends
+      ;; point off screen rebuilds while `window-start' still describes
+      ;; where the window was, and the line jumped to is not yet part of
+      ;; what looks visible.  Scrolling has to rebuild too.  See #2293.
+      (flycheck-buttercup-with-temp-buffer
+        (save-window-excursion
+          (set-window-buffer (selected-window) (current-buffer))
+          (dotimes (i 400) (ignore i) (insert "a line of code\n"))
+          (setq-local flycheck-mode t)
+          (let ((e (flycheck-error-new-at 380 1 'error "far away"
+                                          :buffer (current-buffer)
+                                          :checker 'emacs-lisp)))
+            (setq flycheck-current-errors (list e))
+            (mapc #'flycheck-add-overlay flycheck-current-errors))
+          (goto-char (point-min))
+          (let ((flycheck-annotate-current-line-style 'eol)
+                (flycheck-annotate-other-lines-style 'eol))
+            (flycheck-annotate-mode 1)
+            ;; Nothing is annotated while the error is far off screen
+            (expect (seq-filter #'test-annotate/text flycheck-annotate--overlays)
+                    :to-be nil)
+            ;; Jump there without redisplay, the way a command does
+            (goto-char (point-min))
+            (forward-line 379)
+            (flycheck-annotate--post-command)
+            ;; The window has not scrolled yet, so this found nothing
+            (expect (seq-filter #'test-annotate/text flycheck-annotate--overlays)
+                    :to-be nil)
+            ;; Redisplay scrolls and reports it, which is what rebuilds
+            (set-window-start (selected-window) (line-beginning-position))
+            (flycheck-annotate--after-scroll (selected-window) (window-start))
+            (expect (seq-filter #'test-annotate/text flycheck-annotate--overlays)
+                    :to-be-truthy)
+            (flycheck-annotate-mode -1)))))
+
+    (it "does not rebuild from inside its own rebuild"
+      ;; Laying out an annotation can scroll the window, and the scroll hook
+      ;; runs during redisplay, so it has to refuse to come back round
+      (flycheck-buttercup-with-temp-buffer
+        (save-window-excursion
+          (set-window-buffer (selected-window) (current-buffer))
+          (insert "abcdef\n")
+          (setq-local flycheck-mode t)
+          (let ((calls 0))
+            (cl-letf (((symbol-function 'flycheck-annotate--post-command)
+                       (lambda () (cl-incf calls)
+                         (flycheck-annotate--after-scroll
+                          (selected-window) (window-start)))))
+              (flycheck-annotate--after-scroll (selected-window) (window-start))
+              (expect calls :to-equal 1))))))
+
     (it "rebuilds after an edit that leaves point on its line"
       ;; An edit such as `open-line' changes the buffer without moving point
       ;; off its line or scrolling the window, so the line/window check alone
