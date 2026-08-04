@@ -1,0 +1,3 @@
+vhdl.vhd:2:24:error: missing ";" at end of entity
+end entity syntax_error
+                       ^

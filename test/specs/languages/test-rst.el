@@ -25,6 +25,22 @@
   (flycheck-buttercup-def-checker-test rst-sphinx rst not-outside-of-a-sphinx-project
     (flycheck-buttercup-with-resource-buffer "language/rst/errors.rst"
       (rst-mode)
-      (expect (flycheck-may-use-checker 'rst-sphinx) :not :to-be-truthy))))
+      (expect (flycheck-may-use-checker 'rst-sphinx) :not :to-be-truthy)))
+
+  (describe "reading the tool's output"
+    ;; Read from output recorded earlier, so this runs whether or
+    ;; not the tool is installed here
+
+    (flycheck-buttercup-def-parse-test rst "language/rst/errors.rst"
+      '(8 nil warning "Title underline too short.")
+      '(14 nil error "Unexpected section title.")
+      '(19 nil warning "Title underline too short.")
+      '(26 nil error "Unexpected section title.")
+      '(16 nil error "Unknown target name: \"restructuredtext\".")
+      '(21 nil error "Unknown target name: \"cool\"."))
+    (flycheck-buttercup-def-parse-test rst-sphinx "language/rst/sphinx/index.rst"
+      '(2 nil warning "Title underline too short.")
+      '(9 nil error "Unknown target name: \"cool\". [docutils]")
+      '(9 nil warning "'envvar' reference target not found: FOO [ref.envvar]"))))
 
 ;;; test-rst.el ends here

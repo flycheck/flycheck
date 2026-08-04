@@ -70,6 +70,18 @@
       (let ((flycheck-tflint-config nil)
             (flycheck-tflint-args '("--minimum-failure-severity=error")))
         (expect (flycheck-checker-substituted-arguments 'terraform-tflint)
-                :to-contain "--minimum-failure-severity=error")))))
+                :to-contain "--minimum-failure-severity=error"))))
+
+  (describe "reading the tool's output"
+    ;; Read from output recorded earlier, so this runs whether or
+    ;; not the tool is installed here
+
+    (flycheck-buttercup-def-parse-test terraform "language/terraform/terraform/syntax-error.tf"
+      '(2 nil error "The \";\" character is not valid. Use newlines to separate arguments and\nblocks, and commas to separate items in collection values.")
+      '(2 nil error "An argument definition must end with a newline."))
+    (flycheck-buttercup-def-parse-test terraform-tflint "language/terraform/tflint/error.tf"
+      '(1 1 warning "terraform \"required_version\" attribute is required" :id "terraform_required_version" :end-line 1 :end-column 1)
+      '(2 12 warning "Module source \"git://hashicorp.com/consul.git\" is not pinned" :id "terraform_module_pinned_source" :end-line 2 :end-column 44)
+      '(5 1 warning "Missing version constraint for provider \"aws\" in `required_providers`" :id "terraform_required_providers" :end-line 5 :end-column 30))))
 
 ;;; test-terraform.el ends here

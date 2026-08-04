@@ -27,6 +27,15 @@
      '(1 20 warning "Unused dummy argument 'p' at (1)"
          :checker fortran-gfortran)
      '(18 9 warning "Same actual argument associated with INTENT(IN) argument 'a' and INTENT(OUT) argument 'b' at (1)"
-          :checker fortran-gfortran))))
+          :checker fortran-gfortran)))
+
+  (describe "reading the tool's output"
+    ;; Read from output recorded earlier, so this runs whether or
+    ;; not the tool is installed here
+
+    (flycheck-buttercup-def-parse-test fortran-gfortran "language/fortran/error.f"
+      '(1 2 error "Non-numeric character in statement label at (1)")
+      '(2 2 error "Non-numeric character in statement label at (1)")
+      '(3 2 error "Non-numeric character in statement label at (1)"))))
 
 ;;; test-fortran.el ends here

@@ -1,0 +1,1 @@
+test/resources/language/lua/syntax-error.lua:5:7: (E011) unfinished string

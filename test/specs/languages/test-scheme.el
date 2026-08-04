@@ -54,6 +54,13 @@
     (flycheck-buttercup-should-syntax-check
      "language/chicken/syntax-read-error.scm" 'flycheck/chicken-mode
      '(1 nil error "invalid sharp-sign read syntax: #\\n"
-         :checker scheme-chicken))))
+         :checker scheme-chicken)))
+
+  (describe "reading the tool's output"
+    ;; Read from output recorded earlier, so this runs whether or
+    ;; not the tool is installed here
+
+    (flycheck-buttercup-def-parse-test scheme-chicken "language/chicken/error-no-line-number.scm"
+      '(0 nil error "(cddr) during expansion of (for-each ...) - bad argument type: ()\n\n	Call history:\n\n	<syntax>	  (##core#begin (for-each))\n	<syntax>	  (for-each)	<--"))))
 
 ;;; test-scheme.el ends here

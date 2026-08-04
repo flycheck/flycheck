@@ -1,0 +1,3 @@
+
+Fatal error: Assignments can only happen to writable values in syntax-error.php on line 8
+Errors parsing syntax-error.php

@@ -38,6 +38,14 @@
     (flycheck-buttercup-should-syntax-check
      "language/verilog/verilator_warning.v" 'verilog-mode
      '(2 nil warning "Signal is not driven, nor used: 'val'"
-         :checker verilog-verilator :id "UNUSED"))))
+         :checker verilog-verilator :id "UNUSED")))
+
+  (describe "reading the tool's output"
+    ;; Read from output recorded earlier, so this runs whether or
+    ;; not the tool is installed here
+
+    (flycheck-buttercup-def-parse-test verilog-verilator "language/verilog/verilator_error.v"
+      '(1 8 warning "Filename 'verilator_error' does not match MODULE name: 'verilog_verilator_error'" :id "DECLFILENAME")
+      '(4 10 error "Can't find definition of variable: 'i'"))))
 
 ;;; test-verilog.el ends here

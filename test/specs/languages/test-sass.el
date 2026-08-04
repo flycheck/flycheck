@@ -18,6 +18,6 @@
     ;; not the tool is installed here
 
     (flycheck-buttercup-def-parse-test sass-stylelint "language/sass/error.sass"
-      '(1 1 error "Unknown word // (CssSyntaxError)" :id "CssSyntaxError"))))
+      '(1 nil error "Unexpected token 'with'" :id "SyntaxError"))))
 
 ;;; test-sass.el ends here

@@ -1,0 +1,1 @@
+STDIN/6/6/5/BuiltinFunctions::RequireGlobFunction/Glob written as <...> (See page 167 of PBP)

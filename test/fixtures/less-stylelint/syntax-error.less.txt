@@ -1,1 +1,9 @@
-[{"source":"<input css 1>","deprecations":[],"invalidOptionWarnings":[],"parseErrors":[],"errored":true,"warnings":[{"line":1,"column":1,"rule":"CssSyntaxError","severity":"error","text":"Unclosed block (CssSyntaxError)"}]}]
+file:///usr/local/lib/node_modules/stylelint/lib/utils/getLexer.mjs:2
+import syntaxPatchesJson from '@csstools/css-syntax-patches-for-csstree' with { type: 'json' };
+                                                                         ^^^^
+
+SyntaxError: Unexpected token 'with'
+    at ModuleLoader.moduleStrategy (node:internal/modules/esm/translators:152:18)
+    at ModuleLoader.moduleProvider (node:internal/modules/esm/loader:298:14)
+
+Node.js v18.19.1

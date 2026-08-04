@@ -72,6 +72,8 @@
     ;; not the tool is installed here
 
     (flycheck-buttercup-def-parse-test lua "language/lua/syntax-error.lua"
-      '(5 nil error "unfinished string near '\"oh no'"))))
+      '(5 nil error "unfinished string near '\"oh no'"))
+    (flycheck-buttercup-def-parse-test lua-luacheck "language/lua/syntax-error.lua"
+      '(5 7 error "unfinished string" :id "E011"))))
 
 ;;; test-lua.el ends here

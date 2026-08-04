@@ -1,0 +1,9 @@
+flycheck_racket.rkt:4:2: read-syntax: expected a `)` to close `(`
+  context...:
+   /usr/share/racket/pkgs/compiler-lib/compiler/commands/expand.rkt:32:13
+   /usr/share/racket/pkgs/compiler-lib/compiler/commands/expand.rkt:10:2: show-program
+   body of "/usr/share/racket/pkgs/compiler-lib/compiler/commands/expand.rkt"
+   /usr/share/racket/collects/raco/raco.rkt:41:0
+   body of "/usr/share/racket/collects/raco/raco.rkt"
+   body of "/usr/share/racket/collects/raco/main.rkt"
+(define-values (listener) (#%app (#%top . tcp-listen) '12345))

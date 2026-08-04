@@ -1,0 +1,2 @@
+[libprotobuf WARNING google/protobuf/compiler/parser.cc:646] No syntax specified for the proto file: flycheck_syntax-error.proto. Please use 'syntax = "proto2";' or 'syntax = "proto3";' to specify a syntax version. (Defaulted to proto2 syntax.)
+flycheck_syntax-error.proto:2:23: Missing field number.

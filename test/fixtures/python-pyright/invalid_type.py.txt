@@ -1,0 +1,30 @@
+{
+    "version": "1.1.411",
+    "time": "1785830303310",
+    "generalDiagnostics": [
+        {
+            "file": "test/resources/language/python/flycheck_invalid_type.py",
+            "severity": "error",
+            "message": "Type \"str\" is not assignable to return type \"int\"\n  \"str\" is not assignable to \"int\"",
+            "range": {
+                "start": {
+                    "line": 1,
+                    "character": 11
+                },
+                "end": {
+                    "line": 1,
+                    "character": 12
+                }
+            },
+            "rule": "reportReturnType"
+        }
+    ],
+    "summary": {
+        "filesAnalyzed": 1,
+        "errorCount": 1,
+        "warningCount": 0,
+        "informationCount": 0,
+        "timeInSec": 0.14
+    }
+}
+

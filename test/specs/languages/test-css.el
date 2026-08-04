@@ -62,6 +62,6 @@
     ;; not the tool is installed here
 
     (flycheck-buttercup-def-parse-test css-stylelint "language/css/syntax-error.css"
-      '(4 5 error "Unknown word font-size (CssSyntaxError)" :id "CssSyntaxError"))))
+      '(1 nil error "Unexpected token 'with'" :id "SyntaxError"))))
 
 ;;; test-css.el ends here

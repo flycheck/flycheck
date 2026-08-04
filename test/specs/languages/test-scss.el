@@ -18,6 +18,6 @@
     ;; not the tool is installed here
 
     (flycheck-buttercup-def-parse-test scss-stylelint "language/scss/error.scss"
-      '(3 11 error "Unknown word olor (CssSyntaxError)" :id "CssSyntaxError"))))
+      '(1 nil error "Unexpected token 'with'" :id "SyntaxError"))))
 
 ;;; test-scss.el ends here

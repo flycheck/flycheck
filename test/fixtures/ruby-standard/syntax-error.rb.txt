@@ -1,0 +1,1 @@
+test/resources/language/ruby/syntax-error.rb:5:7: F: Lint/Syntax: unexpected token tCONSTANT (Using Ruby 3.2 parser; configure using `TargetRubyVersion` parameter, under `AllCops`)

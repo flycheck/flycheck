@@ -1,0 +1,9 @@
+
+Error: (cddr) during expansion of (for-each ...) - bad argument type: ()
+
+	Call history:
+
+	<syntax>	  (##core#begin (for-each))
+	<syntax>	  (for-each)	<--
+
+Error: shell command terminated with non-zero exit status 17920: '/usr/bin/chicken' 'error-no-line-number.scm' -output-file 'error-no-line-number.c' -analyze-only -local

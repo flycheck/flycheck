@@ -1,2 +1,2 @@
-/bin/bash: line 5: syntax error near unexpected token `fi'
-/bin/bash: line 5: `fi'
+/usr/bin/bash: line 5: syntax error near unexpected token `fi'
+/usr/bin/bash: line 5: `fi'

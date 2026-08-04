@@ -298,9 +298,8 @@ against a integer value that is neither 1 nor 0.\">
     ;; macOS.  GNU GCC words these differently, which is exactly the sort
     ;; of divergence a live check cannot pin down on one machine.
     (flycheck-buttercup-def-parse-test c/c++-gcc "language/c_c++/error.cpp"
-      '(8 9 warning "unknown pragma ignored" :id "-Wunknown-pragmas")
-      '(2 20 error "no member named 'bar' in 'A'")
-      '(6 19 info "in instantiation of function template specialization 'foo<A>' requested here")))
+      '(8 nil warning "ignoring ‘#pragma nope ’" :id "-Wunknown-pragmas")
+      '(2 20 error "‘struct A’ has no member named ‘bar’")))
 
   (describe "reading the tool's output"
     ;; Read from output recorded earlier, so this runs whether or

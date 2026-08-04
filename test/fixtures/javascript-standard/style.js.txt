@@ -1,0 +1,11 @@
+standard: Use JavaScript Standard Style (https://standardjs.com)
+standard: Some warnings are present which will be errors in the next version (https://standardjs.com)
+standard: Run `standard --fix` to automatically fix some problems.
+  <text>:3:10: Missing space before function parentheses. (space-before-function-paren)
+  <text>:4:1: Unexpected tab character. (no-tabs)
+  <text>:4:1: Expected indentation of 2 spaces but found 1 tab. (indent)
+  <text>:4:2: Unexpected var, use let or const instead. (no-var) (warning)
+  <text>:4:6: 'foo' is assigned a value but never used. (no-unused-vars)
+  <text>:4:13: Strings must use singlequote. (quotes)
+  <text>:4:27: Extra semicolon. (semi)
+  <text>:5:5: Extra semicolon. (semi)

@@ -68,6 +68,16 @@
     (it "threads flycheck-yaml-actionlint-args into actionlint"
       (let ((flycheck-yaml-actionlint-args '("-shellcheck=")))
         (expect (flycheck-checker-substituted-arguments 'yaml-actionlint)
-                :to-contain "-shellcheck=")))))
+                :to-contain "-shellcheck="))))
+
+  (describe "reading the tool's output"
+    ;; Read from output recorded earlier, so this runs whether or
+    ;; not the tool is installed here
+
+    (flycheck-buttercup-def-parse-test yaml-jsyaml "language/yaml.yaml"
+      '(4 5 error "bad indentation of a mapping entry"))
+    (flycheck-buttercup-def-parse-test yaml-yamllint "language/yaml.yaml"
+      '(3 1 warning "missing document start \"---\"" :id "document-start")
+      '(4 5 error "syntax error: mapping values are not allowed here" :id "syntax"))))
 
 ;;; test-yaml.el ends here

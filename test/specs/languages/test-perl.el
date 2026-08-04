@@ -38,6 +38,8 @@
 
     (flycheck-buttercup-def-parse-test perl "language/perl.pl"
       '(6 nil error "Global symbol \"$x\" requires explicit package name (did you forget to declare \"my $x\"?)")
-      '(6 nil error "BEGIN not safe after errors--compilation aborted"))))
+      '(6 nil error "BEGIN not safe after errors--compilation aborted"))
+    (flycheck-buttercup-def-parse-test perl-perlcritic "language/perl.pl"
+      '(6 6 error "Glob written as <...> (See page 167 of PBP)" :id "BuiltinFunctions::RequireGlobFunction"))))
 
 ;;; test-perl.el ends here

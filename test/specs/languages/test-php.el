@@ -139,6 +139,13 @@
        '(26 nil warning "Avoid unused local variables such as '$i'."
             :id "UnusedLocalVariable" :checker php-phpmd)
        '(26 12 error "TRUE, FALSE and NULL must be lowercase; expected \"false\" but found \"FALSE\""
-            :id "Generic.PHP.LowerCaseConstant.Found" :checker php-phpcs)))))
+            :id "Generic.PHP.LowerCaseConstant.Found" :checker php-phpcs))))
+
+  (describe "reading the tool's output"
+    ;; Read from output recorded earlier, so this runs whether or
+    ;; not the tool is installed here
+
+    (flycheck-buttercup-def-parse-test php "language/php/syntax-error.php"
+      '(8 nil error "Assignments can only happen to writable values"))))
 
 ;;; test-php.el ends here

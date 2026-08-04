@@ -1,0 +1,47 @@
+{
+  "result": {
+    "<stdin>": {
+      "diagnostics": [
+        {
+          "check_path": "weasel_words.very",
+          "message": "Substitute 'damn' every time you're inclined to write 'very'; your editor will delete it and the writing will be just as it should be.",
+          "pos": [
+            1,
+            7
+          ],
+          "replacements": null,
+          "span": [
+            7,
+            11
+          ]
+        },
+        {
+          "check_path": "redundancy.misc.garner",
+          "message": "Redundancy. Use 'associate' instead of 'associate together'.",
+          "pos": [
+            2,
+            4
+          ],
+          "replacements": "associate",
+          "span": [
+            21,
+            39
+          ]
+        },
+        {
+          "check_path": "social_awareness.sexism",
+          "message": "Gender bias. Use 'lawyer' instead of 'lady lawyer'.",
+          "pos": [
+            3,
+            5
+          ],
+          "replacements": "lawyer",
+          "span": [
+            44,
+            55
+          ]
+        }
+      ]
+    }
+  }
+}

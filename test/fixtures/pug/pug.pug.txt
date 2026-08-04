@@ -1,0 +1,38 @@
+/usr/local/lib/node_modules/pug-cli/node_modules/pug-parser/index.js:59
+    throw err;
+    ^
+
+Error: test/resources/language/pug/pug.pug:2:1
+    1| doctype html
+  > 2|  html
+-------^
+    3|   head
+    4|     title Pug Examples
+    5|     body
+
+unexpected token "indent"
+    at makeError (/usr/local/lib/node_modules/pug-cli/node_modules/pug-error/index.js:32:13)
+    at Parser.error (/usr/local/lib/node_modules/pug-cli/node_modules/pug-parser/index.js:53:15)
+    at Parser.parseExpr (/usr/local/lib/node_modules/pug-cli/node_modules/pug-parser/index.js:264:14)
+    at Parser.parse (/usr/local/lib/node_modules/pug-cli/node_modules/pug-parser/index.js:112:25)
+    at parse (/usr/local/lib/node_modules/pug-cli/node_modules/pug-parser/index.js:12:20)
+    at Object.parse (/usr/local/lib/node_modules/pug-cli/node_modules/pug/lib/index.js:126:22)
+    at Function.loadString [as string] (/usr/local/lib/node_modules/pug-cli/node_modules/pug-load/index.js:45:21)
+    at compileBody (/usr/local/lib/node_modules/pug-cli/node_modules/pug/lib/index.js:86:18)
+    at exports.compile (/usr/local/lib/node_modules/pug-cli/node_modules/pug/lib/index.js:242:16)
+    at ReadStream.<anonymous> (/usr/local/lib/node_modules/pug-cli/index.js:229:20) {
+  code: 'PUG:INVALID_TOKEN',
+  msg: 'unexpected token "indent"',
+  line: 2,
+  column: 1,
+  filename: 'test/resources/language/pug/pug.pug',
+  src: 'doctype html\n' +
+    ' html\n' +
+    '  head\n' +
+    '    title Pug Examples\n' +
+    '    body\n' +
+    '      h1 Markup example\n',
+  toJSON: [Function (anonymous)]
+}
+
+Node.js v18.19.1

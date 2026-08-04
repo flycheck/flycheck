@@ -1,0 +1,8 @@
+YAMLException: bad indentation of a mapping entry (4:5)
+
+ 1 | # A simple syntax error in YAML
+ 2 | 
+ 3 | A: foo
+ 4 |   a1: bar
+---------^
+ 5 |   a2: baz

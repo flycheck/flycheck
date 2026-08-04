@@ -32,6 +32,13 @@
   (flycheck-buttercup-def-checker-test pug pug type-error
     (flycheck-buttercup-should-syntax-check
      "language/pug/pug-runtime-error.pug" 'pug-mode
-     '(5 nil error "Cannot read property 'bar' of undefined" :checker pug))))
+     '(5 nil error "Cannot read property 'bar' of undefined" :checker pug)))
+
+  (describe "reading the tool's output"
+    ;; Read from output recorded earlier, so this runs whether or
+    ;; not the tool is installed here
+
+    (flycheck-buttercup-def-parse-test pug "language/pug/pug.pug"
+      '(2 1 error "unexpected token \"indent\""))))
 
 ;;; test-pug.el ends here

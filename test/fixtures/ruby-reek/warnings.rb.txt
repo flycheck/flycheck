@@ -1,0 +1,1 @@
+[{"context":"Person","lines":[3],"message":"assumes too much for instance variable '@name'","smell_type":"InstanceVariableAssumption","source":"warnings.rb","assumption":"@name","documentation_link":"https://github.com/troessner/reek/blob/v6.5.0/docs/Instance-Variable-Assumption.md"}]

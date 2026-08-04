@@ -1,0 +1,6 @@
+Error in parse(file = file("stdin"), srcfile = "<stdin>") : 
+  <stdin>:8:0: unexpected end of input
+6: b <- function() {
+7:     b
+  ^
+Execution halted

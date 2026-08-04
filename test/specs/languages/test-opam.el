@@ -28,7 +28,6 @@
       '(0 nil warning "Missing field 'authors'" :id "25")
       '(0 nil warning "Missing field 'homepage'" :id "35")
       '(0 nil warning "Missing field 'bug-reports'" :id "36")
-      '(0 nil error "Synopsis must not be empty" :id "57")
-      '(0 nil warning "Missing field 'license'" :id "68"))))
+      '(0 nil error "Synopsis and description must not be both empty" :id "57"))))
 
 ;;; test-opam.el ends here

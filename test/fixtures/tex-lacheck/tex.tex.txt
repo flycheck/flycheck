@@ -1,0 +1,2 @@
+"test/resources/language/flycheck_tex.tex", line 5: missing `\@' before `.' in "GNU."
+"test/resources/language/flycheck_tex.tex", line 7: possible unwanted space at "{"
