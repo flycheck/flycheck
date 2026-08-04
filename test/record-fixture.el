@@ -144,7 +144,8 @@ Return the file the fixture was written to."
          (target (or output-file
                      (flycheck-record-fixture-file checker file))))
     (make-directory (file-name-directory target) 'parents)
-    (with-temp-file target (insert output))
+    (let ((coding-system-for-write 'utf-8))
+      (with-temp-file target (insert output)))
     (message "%s\n  command : %s\n  exit    : %s\n  bytes   : %d\n  written : %s"
              checker (mapconcat #'identity command " ") status
              (length output) target)
@@ -268,7 +269,8 @@ whose tool is not installed."
                  (t
                   (setq checked (1+ checked))
                   (let* ((was (with-temp-buffer
-                                (insert-file-contents recorded)
+                                (let ((coding-system-for-read 'utf-8))
+                                  (insert-file-contents recorded))
                                 (buffer-string)))
                          (now (condition-case err
                                   (flycheck-record-fixture--stabilize
@@ -398,7 +400,8 @@ recorded."
               (let* ((target (flycheck-record-fixture-file checker resource))
                      (previous (when (file-exists-p target)
                                  (with-temp-buffer
-                                   (insert-file-contents target)
+                                   (let ((coding-system-for-read 'utf-8))
+                                     (insert-file-contents target))
                                    (buffer-string))))
                      (written (flycheck-record-fixture checker resource)))
                 ;; A tool that will not start still prints something, and
@@ -408,7 +411,8 @@ recorded."
                 ;; and the Go checkers without a module land here.
                 (if (> (flycheck-fixture--reads
                         checker (with-temp-buffer
-                                  (insert-file-contents written)
+                                  (let ((coding-system-for-read 'utf-8))
+                                    (insert-file-contents written))
                                   (buffer-string)))
                        0)
                     (setq recorded (1+ recorded))
@@ -417,7 +421,8 @@ recorded."
                       ;; tool.  Whatever is wrong with it here, throwing
                       ;; their recording away is not the answer.
                       (progn
-                        (with-temp-file written (insert previous))
+                        (let ((coding-system-for-write 'utf-8))
+                          (with-temp-file written (insert previous)))
                         (push (cons checker
                                     "reads nothing out of this tool here; \
 kept the recording that was already there")
