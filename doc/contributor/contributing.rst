@@ -139,6 +139,31 @@ warning onto one line.
 A weekly job runs the same target, so a format change turns up as a dated
 notification rather than as a bug report months later.
 
+Recording in bulk
+-----------------
+
+Nobody has all of Flycheck's checkers installed, so there is an image with as
+many of them as is practical:
+
+.. code-block:: console
+
+   $ make record-fixtures
+
+That builds :file:`test/docker/Dockerfile`, mounts your checkout into it, and
+records every checker whose tool it has and whose spec names a file to check.
+``make checker-shell`` drops you into the same container if you would rather
+poke at a tool by hand.  The image is Ubuntu, the same release the CI runners
+use, so what comes out of it matches what the weekly job later sees.
+
+Recording in bulk will not write a recording that its own checker reads nothing
+out of, because that is what a tool failing to start looks like: ``credo``
+without a :file:`mix.exs`, the Go checkers without a module.  Those are
+reported instead, and can be recorded by hand if the output really is what the
+tool has to say.
+
+Read what it wrote before committing it.  A recording nobody looked at is the
+same trap as a spec that never ran.
+
 Pull requests
 =============
 
