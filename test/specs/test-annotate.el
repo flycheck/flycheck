@@ -316,7 +316,37 @@ a newline, so key it back under the code line."
           ;; the leading char is a right-aligning stretch of whitespace
           (expect (car (get-text-property 0 'display s)) :to-be 'space)
           (expect (get-text-property 0 'display s)
-                  :to-equal '(space :align-to (- right 8)))))) ; width of "big (+1)"
+                  :to-equal
+                  ;; the width of "big (+1)", plus whatever the right edge
+                  ;; reserves where this spec is running
+                  `(space :align-to
+                          (- right ,(+ 8 (flycheck-annotate--reserved-columns))))))))
+
+    (it "keeps off the column the continuation glyph needs"
+      ;; Aligned flush to `right' with no fringe to draw the glyph in, the
+      ;; last character lands in the column it needs and wraps.  See #2292.
+      (flycheck-buttercup-with-temp-buffer
+        (insert "abcdef\n")
+        (let* ((errs (list (flycheck-error-new-at 1 1 'error "hi"
+                                                  :checker 'emacs-lisp)))
+               (flycheck-annotate--overlays nil))
+          (cl-letf (((symbol-function 'window-fringes) (lambda (&rest _) '(8 8 nil nil))))
+            (expect (flycheck-annotate--reserved-columns) :to-equal 0)
+            (expect (get-text-property
+                     0 'display
+                     (test-annotate/text
+                      (flycheck-annotate-sideline-style
+                       errs (line-end-position) nil)))
+                    :to-equal '(space :align-to (- right 2))))
+          (setq flycheck-annotate--overlays nil)
+          (cl-letf (((symbol-function 'window-fringes) (lambda (&rest _) '(0 0 nil nil))))
+            (expect (flycheck-annotate--reserved-columns) :to-equal 1)
+            (expect (get-text-property
+                     0 'display
+                     (test-annotate/text
+                      (flycheck-annotate-sideline-style
+                       errs (line-end-position) nil)))
+                    :to-equal '(space :align-to (- right 3)))))))
 
     (it "is registered as a built-in style"
       (expect (cdr (assq 'sideline flycheck-annotate-style-functions))

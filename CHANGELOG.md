@@ -36,6 +36,7 @@
 
 ### Bugs fixed
 
+- [#2299](https://github.com/flycheck/flycheck/pull/2299): Keep a `sideline` annotation off the column the continuation glyph needs, so a message that fits stops spilling onto the next line by one character ([#2292](https://github.com/flycheck/flycheck/issues/2292)). Without a right fringe to draw that glyph in, as on a terminal, the rightmost column is not text's to use.
 - [#2297](https://github.com/flycheck/flycheck/pull/2297): Read rebar3's diagnostics again. rebar3 3.24 replaced `file:line:column: message` with a box drawn around the offending line, which none of the patterns matched, so `erlang-rebar3` has been reporting nothing since. The mark under the offending line says which column it means, so the column survives. Older rebar3's plain output is still read.
 - [#2297](https://github.com/flycheck/flycheck/pull/2297): Read a parse error from the byte compiler on Emacs 31 and newer, which goes on to name the buffer it was reading and so no longer matched.
 - [#2297](https://github.com/flycheck/flycheck/pull/2297): Point the `rst` checker at `rst2pseudoxml`. Docutils 0.21 dropped the `.py` from its front ends, so `rst2pseudoxml.py` has not existed since April 2024 and the checker had nothing to run.

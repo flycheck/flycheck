@@ -8226,6 +8226,9 @@ FOCUSED is ignored."
   (flycheck-annotate--make-overlay
    anchor (concat "  " (flycheck-annotate--compact-text errors))))
 
+(defun flycheck-annotate--reserved-columns ()
+  "Columns at the right edge that text must not be aligned into.
+
 (defun flycheck-annotate-sideline-style (errors anchor _focused)
   "Render ERRORS flushed to the window's right edge past line ANCHOR.
 
@@ -8234,7 +8237,7 @@ a stretch of whitespace, in the manner of `lsp-ui-sideline'.  When the
 code on the line is too long to leave room, the message simply follows it
 instead.  FOCUSED is ignored."
   (let* ((text (flycheck-annotate--compact-text errors))
-         (width (string-width text))
+         (width (+ (string-width text) (flycheck-annotate--reserved-columns)))
          (spacer (propertize " " 'display `(space :align-to (- right ,width)))))
     (flycheck-annotate--make-overlay anchor (concat spacer text))))
 
