@@ -150,6 +150,8 @@ WORKDIR /flycheck
 # owns the checkout rather than leaving root-owned files behind:
 #
 #   docker run --rm -v "$PWD":/flycheck -u "$(id -u):$(id -g)" flycheck-checkers
-CMD ["emacs", "-Q", "--batch", "-L", ".", \
-     "-l", "test/record-fixture.el", \
+# `load-prefer-newer' because a checkout that was compiled on the host
+# carries .elc files this Emacs may not be able to read
+CMD ["emacs", "-Q", "--batch", "--eval", "(setq load-prefer-newer t)", \
+     "-L", ".", "-l", "test/record-fixture.el", \
      "-f", "flycheck-record-fixture-all-batch"]

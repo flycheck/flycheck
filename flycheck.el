@@ -11268,7 +11268,8 @@ A server installed mid-session is not noticed until the cache is rebuilt
 
 Uses `flycheck-executable-find', so it honours the user's setting and TRAMP.
 The result is cached buffer-locally, keyed on MODE: `executable-find' scans
-`exec-path' (and probes the remote host over TRAMP), and the `flycheck-lsp' checker's
+`exec-path' (and probes the remote host over TRAMP), and the
+`flycheck-lsp' checker's
 predicate calls this on every check."
   (if (eq (car flycheck-lsp--command-cache) mode)
       (cdr flycheck-lsp--command-cache)

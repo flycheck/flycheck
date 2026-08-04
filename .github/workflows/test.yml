@@ -46,6 +46,16 @@ jobs:
       with:
         version: 'snapshot'
 
+    # `make init' installs a few dozen major-mode packages so the specs
+    # have modes to run in, which is most of a job's time and does not
+    # change between runs
+    - uses: actions/cache@v4
+      with:
+        path: .eask
+        key: eask-${{ matrix.os }}-${{ matrix.emacs-version }}-${{ hashFiles('Eask') }}
+        restore-keys: |
+          eask-${{ matrix.os }}-${{ matrix.emacs-version }}-
+
     - name: Run tests (Unix)
       if: matrix.os == 'ubuntu-latest' || matrix.os == 'macos-latest'
       run: |

@@ -96,7 +96,7 @@ check: checkdoc
 
 .PHONY: compile
 compile:
-	$(EASK) compile
+	$(EASK) compile --strict
 
 .PHONY: specs
 specs: compile
