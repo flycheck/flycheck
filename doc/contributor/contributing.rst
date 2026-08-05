@@ -140,8 +140,17 @@ stopped understanding its tool, which is what every one of these has looked
 like: jq grew a prefix, rebar3 replaced its format, the byte compiler moved a
 warning onto one line.
 
-A weekly job runs the same target, so a format change turns up as a dated
-notification rather than as a bug report months later.
+That target only reaches the tools the machine running it happens to have, so
+there is a second one that runs the check inside the image described below:
+
+.. code-block:: console
+
+   $ make verify-fixtures-image
+
+This reaches nearly every recording rather than the handful a given machine can
+answer for, which is why it is the one the weekly job runs.  A pull request that
+touches a recording gets the quicker, thinner check instead, so the answer
+arrives while somebody is still looking at it.
 
 Recording in bulk
 -----------------
@@ -156,8 +165,9 @@ many of them as is practical:
 That builds :file:`test/docker/Dockerfile`, mounts your checkout into it, and
 records every checker whose tool it has and whose spec names a file to check.
 ``make checker-shell`` drops you into the same container if you would rather
-poke at a tool by hand.  The image is Ubuntu, the same release the CI runners
-use, so what comes out of it matches what the weekly job later sees.
+poke at a tool by hand.  The image is the current Ubuntu LTS, and the weekly
+job runs inside it too, so what comes out of a recording session is what that
+job later sees.
 
 Recording in bulk will not write a recording that its own checker reads nothing
 out of, because that is what a tool failing to start looks like: ``credo``
@@ -167,6 +177,15 @@ tool has to say.
 
 Read what it wrote before committing it.  A recording nobody looked at is the
 same trap as a spec that never ran.
+
+Because your checkout is mounted rather than copied, anything a build on your
+own machine left in it goes into the container too, and a tool that meets a
+build artefact from a different version of itself can fail in ways that read
+exactly like a checker that stopped understanding its tool.  A stale
+:file:`_build` under the rebar3 resource is the one that has actually happened:
+rebar3 could not read the ``.beam`` files a newer Erlang had written and died
+before it compiled anything.  ``git clean -xfd test/resources`` before a run
+that reports something surprising.
 
 Pull requests
 =============
