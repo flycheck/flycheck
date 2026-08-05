@@ -466,10 +466,9 @@ node `(elisp)Hooks'."
 (defcustom flycheck-auto-display-errors-after-checking t
   "Whether to automatically display errors at the current point after checking.
 
-When being set to `nil', it will prevent Flycheck from automatically displaying
-error messages. This setting is useful when Flycheck is used together with
-`flycheck-posframe', to prevent `flycheck-posframe' from repeatedly displaying
-errors at point."
+Set this to nil to keep Flycheck from displaying error messages on its
+own.  That is useful together with `flycheck-posframe', which would
+otherwise display errors at point over and over."
   :group 'flycheck
   :type 'boolean
   :package-version '(flycheck . "35")
@@ -3649,9 +3648,9 @@ for these would kill and restart the checker without gaining
 anything.")
 
 (defun flycheck--may-interrupt-at-condition-p (condition)
-  "Whether checks triggered at CONDITION may interrupt a running check.
+  "Whether a check triggered at CONDITION may interrupt a running one.
 
-Consults `flycheck-interrupt-running-checks'.  Only conditions in
+Consult `flycheck-interrupt-running-checks'.  Only conditions in
 `flycheck--interrupting-conditions' interrupt, and with a numeric
 option value only checks younger than that many seconds are
 interrupted, so that slow checkers eventually complete."
@@ -4740,16 +4739,17 @@ non-whitespace character of the error line, if ERR has no error column."
 ;;; Applying fixes
 
 (defun flycheck--fix-region (line column end-line end-column)
-  "Return the buffer region (BEG . END) named by LINE, COLUMN, END-LINE,
-END-COLUMN, resolved in the current buffer.  Missing columns default to 1
-and a missing end line to LINE."
+  "Return the buffer region (BEG . END) the coordinates name.
+
+LINE, COLUMN, END-LINE and END-COLUMN are resolved in the current
+buffer.  A missing column defaults to 1 and a missing end line to LINE."
   (let ((beg (flycheck-line-column-to-position line (or column 1)))
         (end (flycheck-line-column-to-position
               (or end-line line) (or end-column column 1))))
     (cons (min beg end) (max beg end))))
 
 (defun flycheck--fix-edit-region (edit)
-  "Return the buffer region (BEG . END) that EDIT replaces.
+  "Return the buffer region (BEG . END) EDIT is to replace.
 
 EDIT is a `flycheck-fix-edit'; positions are resolved in the
 current buffer, so call this in the buffer being fixed."
@@ -6710,9 +6710,11 @@ order, so they always nest file then checker then level."
     ('level #'flycheck-error-list-group-by-level)))
 
 (defun flycheck-error-list--grouping-label (dimension key active)
-  "Return the tab-line label for DIMENSION, its M-KEY, ACTIVE if on.
+  "Return the tab-line label for DIMENSION.
 
-The label toggles DIMENSION when clicked."
+KEY is the digit that toggles the dimension, shown in the label as
+\\=`M-KEY'; ACTIVE is non-nil when the dimension is on.  Clicking the
+label toggles DIMENSION too."
   (let ((label (format "M-%d %s" key (if dimension dimension "flat")))
         (map (make-sparse-keymap)))
     (define-key map [tab-line mouse-1]
@@ -7765,7 +7767,7 @@ for the display itself."
 
 
 (defun flycheck-handle-focus-change ()
-  "Handle frame focus changes for Flycheck error display.
+  "Handle a change of frame focus for Flycheck error display.
 
 When the frame gains focus, schedule error display at point.
 When the frame loses focus, cancel any pending error display."
@@ -8197,7 +8199,7 @@ per render so the font probe stays out of the per-error loop."
     (cons "`- " "`- ")))
 
 (defun flycheck-annotate--one-line (text)
-  "Collapse TEXT onto a single line, folding runs of whitespace.
+  "Collapse TEXT onto a single line, folding each run of whitespace.
 
 Plenty of checkers wrap a message over several lines: a parser reporting
 \"unexpected newline\" and \"expecting number\" on separate lines, rustc
@@ -8278,11 +8280,12 @@ BLOCK is the annotation text without surrounding newlines.  It is hung off
 the beginning of the following line as a `before-string' ending in a
 newline, so its extra screen rows belong to that line's buffer position
 rather than to ANCHOR's line.  That keeps visual-line motion working:
-`next-line' (with `line-move-visual') and `evil-next-visual-line' move
-point onto the next line of code instead of stalling on -- or, under Evil,
-getting stuck before -- the annotation.  On the last line of the buffer,
-where there is no following line, the block is hung off ANCHOR with a
-leading newline and a `cursor'-anchored space instead.  Return the overlay."
+`next-line' (with the variable `line-move-visual') and
+`evil-next-visual-line' move point onto the next line of code, instead of
+stalling on the annotation or, under Evil, getting stuck before it.  On
+the last line of the buffer, where there is no following line, the block
+is hung off ANCHOR with a leading newline and a `cursor'-anchored space
+instead.  Return the overlay."
   (let ((string (if (< anchor (point-max))
                     (concat block "\n")
                   (concat (propertize " " 'cursor t) "\n" block))))
@@ -8722,7 +8725,7 @@ the location last visited.  See `flycheck-next-related-location'.")
                             flycheck-previous-related-location))))
 
 (defun flycheck--related-location-step (n)
-  "Visit the related location N steps from the current one, cycling.
+  "Visit the related location N away from the current one, cycling.
 
 Continue the active walk when one is in progress (see
 `flycheck--related-location-walk'); otherwise start a fresh walk from the
@@ -11164,7 +11167,7 @@ pushes back through the `flycheck-lsp' checker.
 The default entries are linters that ship a native LSP server and lint out
 of the box, with no project configuration: RuboCop (Ruby), Ruff (Python),
 Biome (JavaScript, TypeScript, JSON, CSS) and Harper (Markdown prose).  An
-entry is only used when its PROGRAM is on `exec-path' (see
+entry is only used when its PROGRAM is on the variable `exec-path' (see
 `executable-find'), so listing a server you have not installed is
 harmless.
 
@@ -11279,10 +11282,9 @@ A server installed mid-session is not noticed until the cache is rebuilt
   "Return the server command for MODE if its program is installed, else nil.
 
 Uses `flycheck-executable-find', so it honours the user's setting and TRAMP.
-The result is cached buffer-locally, keyed on MODE: `executable-find' scans
-`exec-path' (and probes the remote host over TRAMP), and the
-`flycheck-lsp' checker's
-predicate calls this on every check."
+The result is cached buffer-locally, keyed on MODE: `executable-find'
+scans the variable `exec-path' (and probes the remote host over TRAMP),
+and the `flycheck-lsp' checker's predicate calls this on every check."
   (if (eq (car flycheck-lsp--command-cache) mode)
       (cdr flycheck-lsp--command-cache)
     (let ((result (when-let* ((command (flycheck-lsp--command mode)))
@@ -11594,7 +11596,10 @@ already in the payload, so no request is needed."
     (flycheck-lsp--workspace-edit-fix edit (plist-get action :title))))
 
 (defun flycheck-lsp--fix-provider (server uri lsp)
-  "Return a code-action fix, or a lazy provider, for the diagnostic LSP, or nil.
+  "Return a code-action fix, or a lazy provider, for the diagnostic LSP.
+
+Return nil when there is none.  SERVER is the connection to ask, and URI
+names the document the diagnostic belongs to.
 
 With `flycheck-lsp-code-actions' on, prefer a quickfix action the server
 embedded in the diagnostic's `data' (see `flycheck-lsp--inline-fix'),
@@ -11870,7 +11875,7 @@ predicate refuses a buffer whose mode is off."
   "Timer that ends the run of reports arriving now, or nil.")
 
 (defun flycheck-eglot--replaces-all-p (region)
-  "Whether a report about REGION replaces the buffer's diagnostics.
+  "Whether a report about REGION is to replace the buffer's diagnostics.
 
 REGION is the `:region' of `flymake-diagnostic-functions': the part of
 the buffer a report accounts for, or nil for the whole of it.  Eglot
@@ -12156,7 +12161,7 @@ For `eglot-managed-mode-hook', which fires on both enter and exit."
 ;; emptying a crash dump into the echo area on every check.
 
 (defun flycheck--python-traceback-p (output)
-  "Whether OUTPUT contains a Python traceback."
+  "Whether OUTPUT has a Python traceback in it."
   (and output
        (string-match-p (rx bol "Traceback (most recent call last):") output)))
 
@@ -12172,7 +12177,10 @@ only line worth showing.  Anything else leads with its own summary."
      (t (car lines)))))
 
 (defun flycheck--handle-fatal-exit (exit-status output fatal-statuses)
-  "Disable the checker when EXIT-STATUS says it could not run at all.
+  "Disable the checker when EXIT-STATUS means it could not run at all.
+
+OUTPUT is what the tool printed, and goes into the message explaining
+why the checker stepped aside.
 
 FATAL-STATUSES lists the exit statuses with which the tool reports that
 it could not run, as opposed to reporting findings.  Getting here already
@@ -12187,14 +12195,18 @@ make sense of what it printed, which is Flycheck's problem to fix."
     'suspicious))
 
 (defun flycheck--python-ruff-handle-suspicious (_checker exit-status output)
-  "Disable `python-ruff' when ruff could not lint.
+  "Disable `python-ruff' when EXIT-STATUS means ruff could not lint.
+
+OUTPUT is what it printed, for the message that says why.
 
 Ruff exits 2 on a bad invocation or an unparsable configuration file,
 and 0 or 1 when it has actually looked at the code."
   (flycheck--handle-fatal-exit exit-status output '(2)))
 
 (defun flycheck--python-flake8-handle-suspicious (_checker exit-status output)
-  "Disable `python-flake8' when flake8 could not lint.
+  "Disable `python-flake8' when EXIT-STATUS means flake8 could not lint.
+
+OUTPUT is what it printed, for the message that says why.
 
 Flake8 exits 2 on a bad invocation, but a missing plugin or an
 unreadable configuration crashes it with a traceback and the same
@@ -12206,7 +12218,9 @@ an interpreter that does not have flake8's dependencies installed."
     (flycheck--handle-fatal-exit exit-status output '(2))))
 
 (defun flycheck--python-pylint-handle-suspicious (_checker exit-status output)
-  "Disable `python-pylint' when pylint could not lint.
+  "Disable `python-pylint' when EXIT-STATUS means pylint could not lint.
+
+OUTPUT is what it printed, for the message that says why.
 
 Pylint's exit status is a bitmask of the message classes it emitted, so
 only 32, its usage error, means it never got as far as looking at the
@@ -12214,21 +12228,27 @@ code."
   (flycheck--handle-fatal-exit exit-status output '(32)))
 
 (defun flycheck--python-mypy-handle-suspicious (_checker exit-status output)
-  "Disable `python-mypy' when mypy could not check.
+  "Disable `python-mypy' when EXIT-STATUS means mypy could not check.
+
+OUTPUT is what it printed, for the message that says why.
 
 Mypy exits 2 on a fatal error such as a bad flag, and 0 or 1 once it has
 type-checked anything."
   (flycheck--handle-fatal-exit exit-status output '(2)))
 
 (defun flycheck--rubocop-handle-suspicious (_checker exit-status output)
-  "Disable a RuboCop-based checker when RuboCop could not run.
+  "Disable a RuboCop-based checker when EXIT-STATUS means it could not run.
+
+OUTPUT is what it printed, for the message that says why.
 
 RuboCop exits 2 on a bad invocation or an unrecognised cop in the
 configuration, and 1 when it found offences."
   (flycheck--handle-fatal-exit exit-status output '(2)))
 
 (defun flycheck--shellcheck-handle-suspicious (_checker exit-status output)
-  "Disable `sh-shellcheck' when shellcheck could not run.
+  "Disable `sh-shellcheck' when EXIT-STATUS means shellcheck could not run.
+
+OUTPUT is what it printed, for the message that says why.
 
 Shellcheck exits 2 when it cannot read the file and 3 on a bad
 invocation.  Findings, and even an unparsable script, come back as
@@ -12236,7 +12256,9 @@ JSON with exit status 0 or 1."
   (flycheck--handle-fatal-exit exit-status output '(2 3)))
 
 (defun flycheck--stylelint-handle-suspicious (_checker exit-status output)
-  "Disable a stylelint checker when stylelint could not lint.
+  "Disable a stylelint checker when EXIT-STATUS means it could not lint.
+
+OUTPUT is what it printed, for the message that says why.
 
 Stylelint is the exception to the usual convention: it exits 2 when it
 found problems, and reports its own failures with 78 for a missing
@@ -14708,7 +14730,9 @@ for more information about the custom directories."
           "--print-config" (flycheck-buffer-file-local-name "index.js"))))
 
 (defun flycheck--eslint-handle-suspicious (_checker exit-status output)
-  "Disable the checker when eslint cannot lint at all.
+  "Disable the checker when EXIT-STATUS means eslint cannot lint at all.
+
+OUTPUT is what it printed, for the message that says why.
 
 Eslint exits with status 2 on any fatal failure -- a missing or
 broken configuration, a crashing plugin -- rather than lint
@@ -16078,7 +16102,7 @@ from the project's configuration."
   :package-version '(flycheck . "39"))
 
 (defun flycheck--explain-error-via-checker (checker &rest args)
-  "Return an explainer function that calls CHECKER with ARGS.
+  "Return an explainer function to call CHECKER with ARGS.
 The checker output is fontified as Markdown."
   (lambda ()
     (apply #'flycheck-call-checker-process
@@ -16576,7 +16600,7 @@ See URL `https://github.com/rpm-software-management/rpmlint'."
   :package-version '(flycheck . "39"))
 
 (defun flycheck-markdownlint-error-filter (errors)
-  "Error filter for markdownlint checkers."
+  "Error filter for markdownlint checkers, applied to ERRORS."
   (flycheck-sanitize-errors
    (flycheck-remove-error-file-names "(string)" errors)))
 
