@@ -2,4 +2,4 @@
 -:5: syntax error, unexpected constant, expecting end-of-input
 puts "Here are the days"
       ^~~~
--: compile error (SyntaxError)
+/usr/bin/ruby: compile error (SyntaxError)

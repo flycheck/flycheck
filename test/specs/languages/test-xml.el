@@ -45,8 +45,9 @@
     ;; Read from output recorded earlier, so this runs whether or
     ;; not the tool is installed here
 
+    ;; libxml2 2.14 stops at the first parser error, where older releases
+    ;; carried on and also reported the extra content that followed
     (flycheck-buttercup-def-parse-test xml-xmllint "language/xml.xml"
-      '(4 nil error "parser error : Opening and ending tag mismatch: spam line 3 and with")
-      '(5 nil error "parser error : Extra content at the end of the document"))))
+      '(4 nil error "parser error : Opening and ending tag mismatch: spam line 3 and with"))))
 
 ;;; test-xml.el ends here

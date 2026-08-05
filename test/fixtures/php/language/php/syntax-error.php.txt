@@ -1,3 +1,5 @@
 
 Fatal error: Assignments can only happen to writable values in syntax-error.php on line 8
+Stack trace:
+#0 {main}
 Errors parsing syntax-error.php

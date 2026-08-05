@@ -219,6 +219,7 @@
     (flycheck-buttercup-def-parse-test ruby-reek "language/ruby/warnings.rb"
       '(3 nil warning "Person assumes too much for instance variable '@name'" :id "InstanceVariableAssumption"))
     (flycheck-buttercup-def-parse-test ruby-standard "language/ruby/syntax-error.rb"
-      '(5 7 error "unexpected token tCONSTANT (Using Ruby 3.2 parser; configure using `TargetRubyVersion` parameter, under `AllCops`)" :id "Lint/Syntax"))))
+      '(5 7 error "unexpected constant, expecting end-of-input (Using Ruby 3.3 parser; configure using `TargetRubyVersion` parameter, under `AllCops`)" :id "Lint/Syntax")
+      '(5 25 error "unterminated string meets end of file (Using Ruby 3.3 parser; configure using `TargetRubyVersion` parameter, under `AllCops`)" :id "Lint/Syntax"))))
 
 ;;; test-ruby.el ends here

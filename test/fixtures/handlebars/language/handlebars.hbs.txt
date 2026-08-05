@@ -17,4 +17,4 @@ Expecting 'ID', 'STRING', 'NUMBER', 'BOOLEAN', 'UNDEFINED', 'NULL', 'DATA', got 
     at module.exports.cli (/usr/local/lib/node_modules/handlebars/dist/cjs/precompiler.js:225:18)
     at /usr/local/lib/node_modules/handlebars/bin/handlebars:116:17
 
-Node.js v18.19.1
+Node.js v22.22.1

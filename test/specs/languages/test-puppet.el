@@ -45,6 +45,8 @@
     ;; Read from output recorded earlier, so this runs whether or
     ;; not the tool is installed here
 
+    (flycheck-buttercup-def-parse-test puppet-parser "language/puppet/parser-error.pp"
+      '(3 9 error "Syntax error at '>'"))
     (flycheck-buttercup-def-parse-test puppet-lint "language/puppet/warnings.pp"
       '(2 nil error "foo::bar not in autoload module layout (autoloader_layout)")
       '(3 nil warning "case statement without a default case (case_without_default)")
