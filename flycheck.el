@@ -11034,10 +11034,17 @@ fix is applied right after."
 (defun flycheck-lsp--count-push (rechecked)
   "Record a diagnostics push, RECHECKED non-nil if it triggered a check."
   (cl-incf flycheck-lsp--push-count)
-  (when rechecked (cl-incf flycheck-lsp--recheck-count))
+  (when rechecked (flycheck-lsp--count-recheck))
   (setq flycheck-lsp--last-push-time (float-time))
   (unless flycheck-lsp--first-push-time
     (setq flycheck-lsp--first-push-time flycheck-lsp--last-push-time)))
+
+(defun flycheck-lsp--count-recheck ()
+  "Record that a diagnostics push started a check.
+Separate from `flycheck-lsp--count-push' for a bridge that decides to
+check once the reports of an answer have all arrived, rather than on the
+report that happens to carry the change."
+  (cl-incf flycheck-lsp--recheck-count))
 
 (defconst flycheck-lsp--bridges '(eglot-check flycheck-lsp)
   "The LSP bridge checkers, in the order they run when both are active.
@@ -11839,41 +11846,69 @@ predicate refuses a buffer whose mode is off."
 (defvar-local flycheck-eglot--diagnostics nil
   "Latest diagnostics Eglot reported for this buffer, in Flymake format.")
 
-;; A report Flycheck asked for must not start another check, or the two feed
-;; each other: the check asks Eglot for diagnostics, the answer starts a
-;; check, and round it goes.  Reports the server volunteers still start one,
-;; which is how pushed diagnostics reach the buffer.
+;; A check must not start another check, or the two feed each other: the
+;; check asks Eglot for diagnostics, the answer starts a check, and round it
+;; goes.  Earlier fixes tried to tell a report Flycheck asked for from one
+;; the server volunteered, and kept missing a shape.  Eglot marks no such
+;; boundary, and how many reports an answer takes is its business: Emacs 30
+;; reports once, Emacs 31 twice, synchronously under the push model and
+;; asynchronously under the pull model of LSP 3.17.
 ;;
-;; Telling the two apart takes both of the flags below, because Eglot answers
-;; in either of two ways and neither alone covers both:
-;;
-;;   - synchronously, and more than once.  `eglot--flymake-report-push+pulled'
-;;     hands over the pulled diagnostics and then the pushed ones, so a single
-;;     request produces two reports.
-;;   - asynchronously, once.  Under the pull model of LSP 3.17 the request
-;;     sends `textDocument/diagnostic' and returns, and the answer lands long
-;;     after any dynamic binding has unwound.
+;; So do not ask who a report belongs to.  Assemble the reports arriving now
+;; into one set, and start a check only when that set differs from what the
+;; checker last published.  Once Flycheck holds what Eglot holds, no report
+;; of the same diagnostics starts anything, whoever asked for it, however
+;; many reports it arrives in.
 
-(defvar-local flycheck-eglot--in-request nil
-  "Non-nil while inside the `eglot-flymake-backend' call Flycheck made.
-Covers however many reports that call produces.")
+(defvar-local flycheck-eglot--pending nil
+  "Diagnostics assembled from the reports arriving now.")
 
-(defvar-local flycheck-eglot--answered nil
-  "Non-nil when a report arrived while `flycheck-eglot--in-request' was set.")
+(defvar-local flycheck-eglot--settle-timer nil
+  "Timer that ends the run of reports arriving now, or nil.")
 
-(defvar-local flycheck-eglot--awaiting-answer nil
-  "Non-nil while an answer that arrives after the request is still due.")
+(defun flycheck-eglot--replaces-all-p (region)
+  "Whether a report about REGION replaces the buffer's diagnostics.
+
+REGION is the `:region' of `flymake-diagnostic-functions': the part of
+the buffer a report accounts for, or nil for the whole of it.  Eglot
+answers one request with two reports, the pulled diagnostics for the
+whole buffer and then the pushed ones for an empty region, meaning add
+these and delete nothing.  Together they are what the server holds."
+  (or (null region)
+      (and (<= (car region) (point-min))
+           (>= (cdr region) (point-max)))))
+
+(defun flycheck-eglot--settle (buffer)
+  "Publish the diagnostics assembled for BUFFER, if they moved."
+  (when (buffer-live-p buffer)
+    (with-current-buffer buffer
+      (setq flycheck-eglot--settle-timer nil)
+      (unless (equal flycheck-eglot--pending flycheck-eglot--diagnostics)
+        (setq flycheck-eglot--diagnostics flycheck-eglot--pending)
+        (flycheck-lsp--count-recheck)
+        (flycheck-buffer-automatically)))))
+
+(defun flycheck-eglot--settle-soon ()
+  "Arrange to settle the reports arriving now, once they stop coming.
+
+The delay is what makes the run of reports one answer rather than
+several, and it keeps the check off the process filter that delivered
+them, where the recursion used to exhaust the Lisp stack."
+  (unless flycheck-eglot--settle-timer
+    (setq flycheck-eglot--settle-timer
+          (run-at-time 0 nil #'flycheck-eglot--settle (current-buffer)))))
+
+(defun flycheck-eglot--take-pending ()
+  "Accept the reports assembled so far without starting a check.
+For a check that is about to publish them itself."
+  (when flycheck-eglot--settle-timer
+    (cancel-timer flycheck-eglot--settle-timer)
+    (setq flycheck-eglot--settle-timer nil))
+  (setq flycheck-eglot--diagnostics flycheck-eglot--pending))
 
 (defun flycheck-eglot--ask-for-diagnostics ()
-  "Ask Eglot for this buffer's diagnostics, and mark its answer as ours."
-  (setq flycheck-eglot--awaiting-answer t
-        flycheck-eglot--answered nil)
-  (let ((flycheck-eglot--in-request t))
-    (eglot-flymake-backend #'flycheck-eglot--report))
-  ;; Answered before the call returned, so nothing more is due.  Leaving the
-  ;; flag up would swallow the next diagnostics the server volunteers.
-  (when flycheck-eglot--answered
-    (setq flycheck-eglot--awaiting-answer nil)))
+  "Ask Eglot for this buffer's diagnostics."
+  (eglot-flymake-backend #'flycheck-eglot--report))
 
 (defun flycheck-eglot--available-p ()
   "Return non-nil when Eglot is managing the current buffer."
@@ -11985,38 +12020,33 @@ talking to the server yields nil, so the fix just reports as unavailable."
           (flycheck-lsp--workspace-edit-fix
            edit (plist-get action :title)))))))
 
-(defun flycheck-eglot--report (diags &rest _)
-  "Cache Eglot's DIAGS and re-run Flycheck to publish them.
-Registered with `eglot-flymake-backend' as its report function.
+(defun flycheck-eglot--report (diags &rest plist)
+  "Take Eglot's DIAGS into the answer being assembled.
+Registered with `eglot-flymake-backend' as its report function.  PLIST
+is the rest of the `flymake-diagnostic-functions' call.
 
-A report that answers Flycheck's own request never starts a check, since
-that is what closes the loop between the two.  Neither does one that
-repeats what we already hold: servers republish an unchanged set freely
-while they index or build, and every one of those used to cost a full
-check."
-  (let* ((new (append diags nil))
-         (ours (or flycheck-eglot--in-request flycheck-eglot--awaiting-answer))
-         (changed (not (equal new flycheck-eglot--diagnostics)))
-         (recheck (and changed (not ours))))
-    (if flycheck-eglot--in-request
-        ;; More reports may follow from the same call, so the request stays
-        ;; open; just record that it was answered
-        (setq flycheck-eglot--answered t)
-      (setq flycheck-eglot--awaiting-answer nil))
-    (flycheck-lsp--count-push recheck)
-    (when changed
-      (setq flycheck-eglot--diagnostics new)
-      (when recheck
-        (flycheck-buffer-automatically)))))
+The diagnostics reach the buffer once the reports arriving now stop, and
+only if they differ from the ones Flycheck already shows.  A server
+republishes an unchanged set freely while it indexes or builds, and
+every one of those used to cost a full check."
+  (let ((new (append diags nil)))
+    (setq flycheck-eglot--pending
+          (if (flycheck-eglot--replaces-all-p (plist-get plist :region))
+              new
+            (append flycheck-eglot--pending new))))
+  (flycheck-lsp--count-push nil)
+  (flycheck-eglot--settle-soon))
 
 (defun flycheck-eglot--start (_checker callback)
   "Start the `eglot-check' syntax check, reporting through CALLBACK.
 
 Ask Eglot for the buffer's diagnostics and report the conversions of
 whatever it has to hand.  Under the pull model the answer arrives later
-and reaches the buffer through `flycheck-eglot--report'; the flag marks
-it as one Flycheck asked for, so it does not start a further check."
+instead, and reaches the buffer through `flycheck-eglot--report'."
   (flycheck-eglot--ask-for-diagnostics)
+  ;; Anything Eglot handed over during the call belongs to this check, so
+  ;; publish it here rather than leaving it to start another one
+  (flycheck-eglot--take-pending)
   (funcall callback 'finished
            (mapcar #'flycheck-eglot--convert-diagnostic
                    flycheck-eglot--diagnostics)))
@@ -12056,6 +12086,7 @@ ORIG is the advised function; BEG, END and ARGS are its arguments."
     ;; a check; the trailing `flycheck-buffer-deferred' triggers the first
     ;; one instead.
     (flycheck-eglot--ask-for-diagnostics)
+    (flycheck-eglot--take-pending)
     (advice-add 'flymake-diagnostics :around
                 #'flycheck-eglot--flymake-diagnostics)
     (when (bound-and-true-p flymake-mode)
@@ -12071,7 +12102,11 @@ ORIG is the advised function; BEG, END and ARGS are its arguments."
   ;; Hand the buffer to the other bridge if it is still on, else back to
   ;; automatic selection
   (flycheck-lsp--select-primary-bridge)
-  (setq flycheck-eglot--diagnostics nil)
+  (when flycheck-eglot--settle-timer
+    (cancel-timer flycheck-eglot--settle-timer)
+    (setq flycheck-eglot--settle-timer nil))
+  (setq flycheck-eglot--diagnostics nil
+        flycheck-eglot--pending nil)
   (when flycheck-mode
     (flycheck-buffer-deferred)))
 

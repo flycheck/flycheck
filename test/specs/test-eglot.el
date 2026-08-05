@@ -33,6 +33,16 @@
   (flymake-make-diagnostic buffer beg end type text
                            (and lsp (list (cons 'eglot-lsp-diag lsp)))))
 
+(defun test-eglot--settle ()
+  "Let the timer that ends a run of Eglot reports run.
+The bridge takes the reports arriving now as one answer, so nothing
+reaches the buffer until they stop; a spec that skips this asserts on a
+half-assembled answer and passes for the wrong reason."
+  (let ((limit 200))
+    (while (and flycheck-eglot--settle-timer (> limit 0))
+      (cl-decf limit)
+      (sit-for 0.001))))
+
 (describe "Eglot integration"
 
   (describe "flycheck-eglot--convert-diagnostic"
@@ -80,39 +90,89 @@
                   :to-equal "first defined here")))))
 
   (describe "flycheck-eglot--report"
-    (it "caches the diagnostics and re-triggers a check"
+    (it "publishes what the server reported, once the reports stop"
       (flycheck-buttercup-with-temp-buffer
         (spy-on 'flycheck-buffer-automatically)
         (let ((diags (list (test-eglot--diag (current-buffer) 1 2 :error "x"))))
           (flycheck-eglot--report diags)
+          ;; nothing yet: more reports may still belong to this answer
+          (expect flycheck-eglot--diagnostics :to-be nil)
+          (test-eglot--settle)
           (expect flycheck-eglot--diagnostics :to-equal diags)
           (expect 'flycheck-buffer-automatically :to-have-been-called))))
-    (it "does not re-trigger for a report it asked for"
+
+    (it "does not check again for a report of what it already shows"
+      ;; A server republishes an unchanged set freely while it indexes
       (flycheck-buttercup-with-temp-buffer
         (spy-on 'flycheck-buffer-automatically)
-        (setq flycheck-eglot--awaiting-answer t)
-        (flycheck-eglot--report
-         (list (test-eglot--diag (current-buffer) 1 2 :error "x")))
-        (expect 'flycheck-buffer-automatically :not :to-have-been-called)))
+        (let ((diags (list (test-eglot--diag (current-buffer) 1 2 :error "x"))))
+          (setq flycheck-eglot--diagnostics diags)
+          (flycheck-eglot--report diags)
+          (test-eglot--settle)
+          (expect 'flycheck-buffer-automatically :not :to-have-been-called))))
 
-    (it "goes back to re-triggering once the request is answered"
-      ;; The answer clears the flag, so a diagnostic the server volunteers
-      ;; afterwards still reaches the buffer
+    (it "keeps the diagnostics a report does not account for"
+      ;; Eglot answers with the pulled diagnostics for the whole buffer and
+      ;; then the pushed ones for an empty region, meaning add these and
+      ;; delete nothing.  Both belong to the buffer.
       (flycheck-buttercup-with-temp-buffer
+        (insert "one\ntwo\n")
         (spy-on 'flycheck-buffer-automatically)
-        (setq flycheck-eglot--awaiting-answer t)
-        (flycheck-eglot--report nil)
-        (flycheck-eglot--report
-         (list (test-eglot--diag (current-buffer) 1 2 :error "x")))
-        (expect 'flycheck-buffer-automatically :to-have-been-called)))
+        (let ((pulled (list (test-eglot--diag (current-buffer) 1 2 :error "a")))
+              (pushed (list (test-eglot--diag (current-buffer) 5 6 :error "b"))))
+          (flycheck-eglot--report
+           pulled :region (cons (point-min) (point-max)))
+          (flycheck-eglot--report
+           pushed :region (cons (point-min) (point-min)))
+          (test-eglot--settle)
+          (expect flycheck-eglot--diagnostics
+                  :to-equal (append pulled pushed)))))
 
-    (it "survives an answer split over two reports"
+    (it "does not loop on an answer that arrives after the request returned"
+      ;; Under the pull model of LSP 3.17, asking Eglot sends
+      ;; `textDocument/diagnostic' and returns; the answer lands long after
+      ;; any dynamic binding has unwound, and takes two reports.  Treating
+      ;; the second as one the server volunteered started a check, which
+      ;; asked again, at a hundred requests a second.  See #2291.
+      (flycheck-buttercup-with-temp-buffer
+        (let ((answer nil) (requests 0) (checks 0)
+              ;; what rust-analyzer answers with a cargo error live: the
+              ;; pulled set empty, the pushed set carrying the error
+              (pushed (list (test-eglot--diag (current-buffer) 1 2
+                                              :error "cannot find value"))))
+          (cl-letf (((symbol-function 'eglot-flymake-backend)
+                     (lambda (report-fn &rest _)
+                       (cl-incf requests)
+                       (setq answer report-fn)))
+                    ((symbol-function 'flycheck-eglot--convert-diagnostic)
+                     (lambda (_d) (flycheck-error-new-at 1 1 'error "x")))
+                    ((symbol-function 'flycheck-buffer-automatically)
+                     (lambda (&rest _)
+                       (cl-incf checks)
+                       (when (> checks 10) (error "runaway"))
+                       (flycheck-eglot--start nil #'ignore))))
+            (flycheck-eglot--start nil #'ignore)
+            ;; answer every request the same way, as the server does
+            (dotimes (_ 5)
+              (when answer
+                (let ((fn answer))
+                  (setq answer nil)
+                  (funcall fn nil :region (cons (point-min) (point-max)))
+                  (funcall fn pushed :region (cons (point-min) (point-min))))
+                (test-eglot--settle))))
+          ;; the first answer moved the diagnostics, so one check; the
+          ;; request it made was answered with the same set, and stopped
+          (expect checks :to-equal 1)
+          (expect requests :to-equal 2)
+          (expect flycheck-eglot--diagnostics :to-equal pushed))))
+
+    (it "survives an answer split over two synchronous reports"
       ;; `eglot--flymake-report-push+pulled' hands over the pulled
       ;; diagnostics and then the pushed ones, so one request produces two
       ;; reports.  Treating only the first as the answer made the second
       ;; look volunteered, and the check it started asked again.  The
       ;; recursion runs through `flycheck-perform-deferred-syntax-check',
-      ;; so it exhausts the Lisp stack rather than merely spinning.  See
+      ;; so it exhausted the Lisp stack rather than merely spinning.  See
       ;; #2201.
       (flycheck-buttercup-with-temp-buffer
         (let ((requests 0) (checks 0))
@@ -132,13 +192,14 @@
                        (cl-incf checks)
                        (when (> checks 10) (error "runaway"))
                        (flycheck-eglot--start nil #'ignore))))
-            (flycheck-eglot--start nil #'ignore))
+            (flycheck-eglot--start nil #'ignore)
+            (test-eglot--settle))
           (expect requests :to-equal 1)
           (expect checks :to-equal 0))))
 
     (it "still hears the next report once a synchronous answer arrived"
-      ;; The request closes when it is answered during the call, or a
-      ;; genuine push afterwards would be swallowed
+      ;; A check publishes what Eglot handed over during the call, and what
+      ;; the server volunteers afterwards must still reach the buffer
       (flycheck-buttercup-with-temp-buffer
         (let ((triggered 0))
           (cl-letf (((symbol-function 'eglot-flymake-backend)
@@ -151,31 +212,25 @@
                     ((symbol-function 'flycheck-buffer-automatically)
                      (lambda (&rest _) (cl-incf triggered))))
             (flycheck-eglot--start nil #'ignore)
+            (test-eglot--settle)
             (expect triggered :to-equal 0)
             ;; the server volunteers something new
             (flycheck-eglot--report
              (list (test-eglot--diag (current-buffer) 1 2 :error "b")))
+            (test-eglot--settle)
             (expect triggered :to-equal 1)))))
 
-    (it "survives an answer that arrives after the request returned"
-      ;; Under LSP 3.17 pull diagnostics, asking Eglot sends a request and
-      ;; returns; the answer lands long after any dynamic binding would
-      ;; have unwound, and used to start a check that asked again.  See
-      ;; #2262.
+    (it "cancels a settle that the mode is turned off under"
       (flycheck-buttercup-with-temp-buffer
-        (let ((answer nil) (requests 0))
-          (spy-on 'flycheck-buffer-automatically)
-          (cl-letf (((symbol-function 'eglot-flymake-backend)
-                     (lambda (report-fn &rest _)
-                       (cl-incf requests)
-                       (setq answer report-fn)))
-                    ((symbol-function 'flycheck-eglot--convert-diagnostic)
-                     (lambda (_d) (flycheck-error-new-at 1 1 'error "x"))))
-            (flycheck-eglot--start nil #'ignore)
-            (expect requests :to-equal 1)
-            ;; the server answers, well after `:start' returned
-            (funcall answer (list (test-eglot--diag (current-buffer) 1 2 :error "x")))
-            (expect 'flycheck-buffer-automatically :not :to-have-been-called))))))
+        (spy-on 'flycheck-buffer-automatically)
+        (spy-on 'flycheck-eglot--available-p :and-return-value nil)
+        (flycheck-eglot--report
+         (list (test-eglot--diag (current-buffer) 1 2 :error "x")))
+        (expect flycheck-eglot--settle-timer :not :to-be nil)
+        (flycheck-eglot--disable)
+        (expect flycheck-eglot--settle-timer :to-be nil)
+        (test-eglot--settle)
+        (expect 'flycheck-buffer-automatically :not :to-have-been-called))))
 
   (describe "flycheck-eglot--flymake-diagnostics"
     (it "serves the cached diagnostics that overlap the query range"
@@ -305,7 +360,9 @@
                    (lambda (&rest _) (cl-incf checks))))
           (let ((diags (list (flymake-make-diagnostic
                               (current-buffer) 1 2 :error "boom"))))
-            (dotimes (_ 10) (flycheck-eglot--report diags))
+            (dotimes (_ 10)
+              (flycheck-eglot--report diags)
+              (test-eglot--settle))
             (expect checks :to-equal 1))))))
 
   (it "does not re-check for an equal set of freshly made diagnostics"
@@ -316,7 +373,8 @@
                    (lambda (&rest _) (cl-incf checks))))
           (dotimes (_ 10)
             (flycheck-eglot--report
-             (list (flymake-make-diagnostic (current-buffer) 1 2 :error "boom"))))
+             (list (flymake-make-diagnostic (current-buffer) 1 2 :error "boom")))
+            (test-eglot--settle))
           (expect checks :to-equal 1)))))
 
   (it "re-checks once the diagnostics actually change"
@@ -326,8 +384,10 @@
                    (lambda (&rest _) (cl-incf checks))))
           (flycheck-eglot--report
            (list (flymake-make-diagnostic (current-buffer) 1 2 :error "one")))
+          (test-eglot--settle)
           (flycheck-eglot--report
            (list (flymake-make-diagnostic (current-buffer) 1 2 :error "two")))
+          (test-eglot--settle)
           (expect checks :to-equal 2)))))
 
   (it "counts every push, including the ones it skipped"
@@ -335,7 +395,9 @@
       (cl-letf (((symbol-function 'flycheck-buffer-automatically) #'ignore))
         (let ((diags (list (flymake-make-diagnostic
                             (current-buffer) 1 2 :error "boom"))))
-          (dotimes (_ 7) (flycheck-eglot--report diags)))
+          (dotimes (_ 7)
+            (flycheck-eglot--report diags)
+            (test-eglot--settle)))
         (expect flycheck-lsp--push-count :to-equal 7)
         (expect flycheck-lsp--recheck-count :to-equal 1))))
 
