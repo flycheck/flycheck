@@ -234,6 +234,11 @@ Some more explanation here.")
     ;; Read from output recorded earlier, so this runs whether or
     ;; not the tool is installed here
 
+    (flycheck-buttercup-def-parse-test javascript-eslint "language/javascript/warnings.js"
+      '(3 2 warning "Use the function form of 'use strict'." :id "strict"
+          :end-line 5 :end-column 2)
+      '(4 9 warning "'foo' is assigned a value but never used."
+          :id "no-unused-vars" :end-line 4 :end-column 12))
     (flycheck-buttercup-def-parse-test javascript-oxlint "language/javascript/warnings.js"
       '(4 9 warning "Variable 'foo' is declared but never used. Unused variables should start with a '_'." :id "eslint(no-unused-vars)"))
     (flycheck-buttercup-def-parse-test javascript-standard "language/javascript/style.js"

@@ -151,25 +151,30 @@ during a real check."
         ;; which the next tool to look at that directory would see
         (flycheck-safe-delete-temporaries)))))
 
-(defconst flycheck-record-fixture--volatile-paths
-  (list
-   ;; The copy Flycheck checks, and the caches some checkers ask for,
-   ;; live in directories named afresh each run
-   "\\(?:[A-Za-z]:\\)?[^ \t\n\"'()]*[/\\\\]flycheck[A-Za-z0-9---]*[/\\\\]"
-   ;; And a checker given the file itself sees wherever the repository is
-   "\\(?:[A-Za-z]:\\)?[^ \t\n\"'()]*[/\\\\]test[/\\\\]resources[/\\\\]")
-  "Patterns for the parts of a tool's output that differ between runs.")
+(defconst flycheck-record-fixture--volatile
+  '(;; The copy Flycheck checks, and the caches some checkers ask for,
+    ;; live in directories named afresh each run
+    ("\\(?:[A-Za-z]:\\)?[^ \t\n\"'()]*[/\\\\]flycheck[A-Za-z0-9---]*[/\\\\]" . "")
+    ;; And a checker given the file itself sees wherever the repository is
+    ("\\(?:[A-Za-z]:\\)?[^ \t\n\"'()]*[/\\\\]test[/\\\\]resources[/\\\\]" . "")
+    ;; pyright stamps each report with when it ran and how long it took,
+    ;; which is enough on its own to make every run differ from the last
+    ("\"time\": \"[0-9]+\"" . "\"time\": \"0\"")
+    ("\"timeInSec\": [0-9.]+" . "\"timeInSec\": 0"))
+  "What in a tool's output differs between runs, and what to put instead.")
 
 (defun flycheck-record-fixture--stabilize (output)
-  "Drop the directories in OUTPUT that differ between runs and machines.
+  "Replace the parts of OUTPUT that differ between runs and machines.
 
 A recording has to be reproducible for it to be worth comparing
 against later, and it should not carry the absolute path of whoever
 recorded it into the repository.  File names are kept; only the
-directories leading to them go."
+directories leading to them go.  A clock reading is replaced rather
+than dropped, so that output which has to stay parseable still is."
   (let ((result output))
-    (dolist (pattern flycheck-record-fixture--volatile-paths result)
-      (setq result (replace-regexp-in-string pattern "" result 'fixedcase)))))
+    (dolist (rule flycheck-record-fixture--volatile result)
+      (setq result (replace-regexp-in-string (car rule) (cdr rule)
+                                             result 'fixedcase)))))
 
 (defun flycheck-record-fixture (checker resource &optional output-file)
   "Record CHECKER's output over RESOURCE into OUTPUT-FILE.
