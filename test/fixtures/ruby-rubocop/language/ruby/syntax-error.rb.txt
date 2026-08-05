@@ -41,6 +41,8 @@ Lint/DataDefineOverride: # new in 1.85
   Enabled: true
 Lint/DeprecatedConstants: # new in 1.8
   Enabled: true
+Lint/DeprecatedReference: # new in 1.89
+  Enabled: true
 Lint/DuplicateBranch: # new in 1.3
   Enabled: true
 Lint/DuplicateMagicComment: # new in 1.37
@@ -68,6 +70,8 @@ Lint/LambdaWithoutLiteralBlock: # new in 1.8
 Lint/LiteralAssignmentInCondition: # new in 1.58
   Enabled: true
 Lint/MixedCaseRange: # new in 1.53
+  Enabled: true
+Lint/NameTypo: # new in 1.89
   Enabled: true
 Lint/NoReturnInBeginEndBlocks: # new in 1.2
   Enabled: true

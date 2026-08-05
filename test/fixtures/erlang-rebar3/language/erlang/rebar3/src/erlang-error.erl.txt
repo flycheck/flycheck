@@ -1,19 +1,19 @@
-[0;32m===> Verifying dependencies...
-[0m[0;32m===> App dependency is a checkout dependency and cannot be locked.
-[0m[0;32m===> Analyzing applications...
-[0m[0;32m===> Compiling dependency
-[0m[0;32m===> Analyzing applications...
-[0m[0;32m===> Compiling erlang-rebar3
-[0m[0;31m===> [1mCompiling src/erlang-error.erl failed
-[0m[0m   ┌─ src/erlang-error.erl:
+===> Verifying dependencies...
+===> App dependency is a checkout dependency and cannot be locked.
+===> Analyzing applications...
+===> Compiling dependency
+===> Analyzing applications...
+===> Compiling erlang-rebar3
+===> Compiling src/erlang-error.erl failed
+   ┌─ src/erlang-error.erl:
    │
- 7 │  [1;31merror_func[0m() ->[0m
-   │  [1;31m╰──[0m[0m head mismatch: previous function great_func/0 is distinct from error_func/0. Is the semicolon in great_func/0 unwanted?
+ 7 │  error_func() ->
+   │  ╰── head mismatch: previous function great_func/0 is distinct from error_func/0. Is the semicolon in great_func/0 unwanted?
 
 
    ┌─ src/erlang-error.erl:
    │
- 3 │  -[1;31mcompile[0m(export_all).[0m
-   │   [1;31m╰──[0m[0m Warning: export_all flag enabled - all functions will be exported
+ 3 │  -compile(export_all).
+   │   ╰── Warning: export_all flag enabled - all functions will be exported
 
 

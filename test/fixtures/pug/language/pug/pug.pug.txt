@@ -35,4 +35,4 @@ unexpected token "indent"
   toJSON: [Function (anonymous)]
 }
 
-Node.js v18.19.1
+Node.js v22.22.1

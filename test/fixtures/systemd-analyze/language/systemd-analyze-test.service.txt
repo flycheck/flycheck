@@ -1,5 +1,5 @@
 systemd-analyze-test.service:3: Invalid URL, ignoring: foo://bar
-systemd-analyze-test.service:6: Unknown key name 'ExecSmart' in section 'Service', ignoring.
+systemd-analyze-test.service:6: Unknown key 'ExecSmart' in section [Service], ignoring.
 systemd-analyze-test.service:8: Unknown section 'Dog'. Ignoring.
 systemd-analyze-test.service: Service has no ExecStart=, ExecStop=, or SuccessAction=. Refusing.
 Unit systemd-analyze-test.service has a bad unit file setting.
