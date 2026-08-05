@@ -19,7 +19,11 @@ on:
       - 'test/record-fixture.el'
 
 jobs:
-  compare:
+  # On a pull request, against whatever the runner can be given quickly.
+  # This is for telling someone their recording is wrong while they are
+  # still looking at it, not for covering every checker.
+  changed:
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
 
     steps:
@@ -46,3 +50,31 @@ jobs:
 
     - name: Compare the recordings against the tools
       run: make verify-fixtures
+
+  # Weekly, against the image, which has nearly every tool we record from.
+  # Hand-listing them above reaches a fraction of the recordings and drifts
+  # from the image besides, so the run that has to be thorough uses the
+  # same thing `make record-fixtures' records with.
+  everything:
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v6
+
+    # The image is large, and a runner arrives with tens of gigabytes of
+    # toolchains this job has no use for.
+    - name: Make room for the image
+      run: |
+        sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/lib/android \
+          /usr/local/share/boost /usr/share/swift
+        df -h /
+
+    # Plain `docker build': the image runs to several gigabytes, which is
+    # not something to push through the Actions cache every week.  Once a
+    # week from scratch is the cheaper trade.
+    - name: Build the image
+      run: make checker-image
+
+    - name: Compare every recording against its tool
+      run: make verify-fixtures-in-image

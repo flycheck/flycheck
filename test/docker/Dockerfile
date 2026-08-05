@@ -1,11 +1,13 @@
 # An image with as many of Flycheck's checkers installed as is practical,
 # for recording what they print.  See test/record-fixture.el.
 #
-# Ubuntu rather than anything smaller, and the same release the CI runners
-# use, so what is recorded here is what the weekly job meets when it asks
-# whether the checkers can still read their tools.
+# Ubuntu rather than anything smaller, and the current LTS rather than the
+# one the runners happen to boot: the weekly job runs inside this image, so
+# what matters is that a checker meets a version of its tool close to the
+# one its users have.  A release behind means recording what a linter
+# printed two years ago and calling the checker current.
 
-FROM ubuntu:24.04
+FROM ubuntu:26.04
 
 ENV DEBIAN_FRONTEND=noninteractive \
     LANG=C.UTF-8 \
@@ -18,7 +20,7 @@ RUN apt-get update && apt-get install --yes --no-install-recommends \
       ca-certificates curl git make unzip xz-utils \
       emacs-nox \
       build-essential clang cppcheck gcc gfortran gnat \
-      cfengine3 chicken-bin ghdl groovy \
+      chicken-bin ghdl groovy \
       llvm luarocks php-cli protobuf-compiler puppet \
       python3 python3-pip python3-venv \
       r-base-core racket ruby ruby-dev \
@@ -81,10 +83,10 @@ RUN gem install --no-document \
       standard \
       puppet-lint
 
-# Ubuntu's Go is a release behind what some of these need to build, so
-# take it from upstream.  The version is whatever is current: this image
-# is for recording, not for shipping, and a checker's output does not
-# depend on the Go that built its linter.
+# Go from upstream rather than apt, so the Go checkers run against the
+# current release however long this Ubuntu has been out.  The version is
+# whatever is current: this image is for recording, not for shipping, and
+# a checker's output does not depend on the Go that built its linter.
 RUN arch="$(dpkg --print-architecture)" \
     && version="$(curl -fsSL 'https://go.dev/VERSION?m=text' | head -1)" \
     && curl -fsSL "https://go.dev/dl/${version}.linux-${arch}.tar.gz" \
@@ -133,6 +135,8 @@ RUN arch="$(dpkg --print-architecture)" \
 
 # Deliberately not here:
 #
+#   cfengine3              dropped from Ubuntu, and there is no recording
+#                          of it to keep working
 #   cuda-nvcc, processing  need toolchains far larger than the rest of
 #                          this image put together
 #   d-dmd, hlint, stack    each pull in a whole language toolchain for

@@ -105,14 +105,24 @@ specs: compile
 DOCKER ?= docker
 CHECKER_IMAGE ?= flycheck-checkers
 
+# Mounting the checkout means anything written lands in it, so run as the
+# user who owns it rather than leaving root-owned files behind.  That user
+# does not own /root, so point HOME somewhere writable: without it `go
+# vet' cannot create its build cache and reports that instead of the code.
+CHECKER_RUN = $(DOCKER) run --rm -v "$(CURDIR)":/flycheck \
+	-u "$$(id -u):$$(id -g)" -e HOME=/tmp $(CHECKER_IMAGE)
+# `load-prefer-newer' because a checkout compiled on the host carries .elc
+# files this Emacs may not be able to read
+CHECKER_EMACS = emacs -Q --batch --eval "(setq load-prefer-newer t)" \
+	-L . -l test/record-fixture.el
+
 .PHONY: checker-image
 checker-image:
 	$(DOCKER) build -t $(CHECKER_IMAGE) test/docker
 
 .PHONY: record-fixtures
 record-fixtures: checker-image
-	$(DOCKER) run --rm -v "$(CURDIR)":/flycheck -u "$$(id -u):$$(id -g)" \
-		$(CHECKER_IMAGE)
+	$(CHECKER_RUN)
 
 .PHONY: checker-shell
 checker-shell: checker-image
@@ -123,6 +133,17 @@ checker-shell: checker-image
 verify-fixtures:
 	$(EASK) exec emacs --batch -L . -l test/record-fixture.el \
 		-f flycheck-verify-fixtures-batch
+
+# The same check against the image, which has far more of the tools than
+# any one machine does, so it reaches recordings `verify-fixtures' skips.
+.PHONY: verify-fixtures-image
+verify-fixtures-image: checker-image verify-fixtures-in-image
+
+# Split out so a build that made the image some other way can run the
+# check without a second `docker build' throwing that work away.
+.PHONY: verify-fixtures-in-image
+verify-fixtures-in-image:
+	$(CHECKER_RUN) $(CHECKER_EMACS) -f flycheck-verify-fixtures-batch
 
 .PHONY: images
 images: $(IMGS)
