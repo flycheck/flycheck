@@ -1,4 +1,4 @@
-aarch64-linux-gnu-gcc-13 -c  -gnatf -gnatef -gnatwa -gnat2012 -I- -o syntaxerror.o syntaxerror.adb
+aarch64-linux-gnu-gcc-14 -c  -gnatf -gnatef -gnatwa -gnat2012 -I- -o syntaxerror.o syntaxerror.adb
 syntaxerror.adb:7:32: error: missing ";"
 syntaxerror.adb:8:05: error: misspelling of "SYNTAXERROR"
 gnatmake: "syntaxerror.adb" compilation error

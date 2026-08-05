@@ -49,7 +49,7 @@
 
     (flycheck-buttercup-def-parse-test systemd-analyze "language/systemd-analyze-test.service"
       '(3 nil error "Invalid URL, ignoring: foo://bar")
-      '(6 nil error "Unknown key name 'ExecSmart' in section 'Service', ignoring.")
+      '(6 nil error "Unknown key 'ExecSmart' in section [Service], ignoring.")
       '(8 nil error "Unknown section 'Dog'. Ignoring.")
       '(0 nil error "Service has no ExecStart=, ExecStop=, or SuccessAction=. Refusing."))))
 

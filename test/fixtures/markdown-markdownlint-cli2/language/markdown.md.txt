@@ -1,6 +1,7 @@
-markdownlint-cli2 v0.21.0 (markdownlint v0.40.0)
+markdownlint-cli2 v0.23.2 (markdownlint v0.41.1)
 Finding: markdown.md
-Linting: 1 file(s)
-Summary: 2 error(s)
+Linting: 1 file
+Summary: 3 issues in 1 file
+markdown.md:1 error MD041/first-line-heading/first-line-h1 First line in a file should be a top-level heading [Context: "## Second Header First"]
 markdown.md:3 error MD012/no-multiple-blanks Multiple consecutive blank lines [Expected: 1; Actual: 2]
 markdown.md:4:15 error MD009/no-trailing-spaces Trailing spaces [Expected: 0 or 2; Actual: 7]

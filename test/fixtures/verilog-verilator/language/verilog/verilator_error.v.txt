@@ -1,7 +1,7 @@
 %Warning-DECLFILENAME: verilator_error.v:1:8: Filename 'verilator_error' does not match MODULE name: 'verilog_verilator_error'
     1 | module verilog_verilator_error;
       |        ^~~~~~~~~~~~~~~~~~~~~~~
-                       ... For warning description see https://verilator.org/warn/DECLFILENAME?v=5.020
+                       ... For warning description see https://verilator.org/warn/DECLFILENAME?v=5.032
                        ... Use "/* verilator lint_off DECLFILENAME */" and lint_on around source to disable this message.
 %Error: verilator_error.v:4:10: Can't find definition of variable: 'i'
     4 |          i = $fopen("test.log");
