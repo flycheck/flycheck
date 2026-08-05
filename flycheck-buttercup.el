@@ -355,7 +355,7 @@ Which pair of quotes a tool puts around a name is not something a
 spec should assert.  GCC and gfortran quote with ‘…’ under a UTF-8
 locale and with '…' under C, and Clang, which answers to the name
 `gcc' on macOS, always uses the ASCII ones.  Emacs itself has both
-spellings, chosen by `text-quoting-style', so the same byte
+spellings, chosen by the option `text-quoting-style', so the same byte
 compiler warning reads differently across the versions we test on.
 
 The grave form is only folded as a matching pair, so a message
