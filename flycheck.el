@@ -159,7 +159,6 @@
     go-unconvert
     go-staticcheck
     groovy
-    haml
     haml-lint
     handlebars
     haskell-stack-ghc
@@ -14313,17 +14312,6 @@ try {
   ((error line-start "input: " line ":" (message)
           " @ line " line ", column " column "." line-end))
   :modes groovy-mode)
-
-(flycheck-define-checker haml
-  "A Haml syntax checker using the Haml compiler.
-
-See URL `https://haml.info'."
-  :command ("haml" "-c" "--stdin")
-  :standard-input t
-  :error-patterns
-  ((error line-start "Syntax error on line " line ": " (message) line-end)
-   (error line-start ":" line ": syntax error, " (message) line-end))
-  :modes haml-mode)
 
 (flycheck-define-checker haml-lint
   "HAML-Lint style checker.

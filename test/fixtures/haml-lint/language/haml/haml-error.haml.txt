@@ -1,0 +1,1 @@
+haml-error.haml:4 [E] Syntax: haml-error.haml:4 - Inconsistent indentation: 3 spaces used for indentation, but the rest of the document was indented using 2 spaces.

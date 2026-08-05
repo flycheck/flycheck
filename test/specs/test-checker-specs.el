@@ -112,14 +112,19 @@ and recursion respectively."
       (expect (nreverse bogus) :to-equal nil)))
 
   (it "keep every recorded fixture attached to a checker"
-    ;; A renamed checker leaves its recordings behind, where they look
-    ;; like coverage and are never read again
+    ;; A renamed or removed checker leaves its recordings behind, where
+    ;; they look like coverage and are never read again.  An empty
+    ;; directory is not that: the recorder makes one before it knows
+    ;; whether the checker reads anything, and leaves it where it refused.
     (let ((root flycheck-record-fixture-directory))
       (when (file-directory-p root)
         (let (orphans)
           (dolist (sub (directory-files root nil "\\`[^.]"))
-            (let ((checker (intern (replace-regexp-in-string "_" "/" sub))))
-              (unless (flycheck-valid-checker-p checker)
+            (let ((dir (expand-file-name sub root))
+                  (checker (intern (replace-regexp-in-string "_" "/" sub))))
+              (when (and (file-directory-p dir)
+                         (directory-files-recursively dir "\\.txt\\'")
+                         (not (flycheck-valid-checker-p checker)))
                 (push sub orphans))))
           (expect (nreverse orphans) :to-equal nil)))))
 

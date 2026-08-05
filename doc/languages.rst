@@ -593,14 +593,12 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
 .. supported-language:: Haml
 
-   .. syntax-checker:: haml
-
-      Check syntax with the `Haml <https://haml.info/>`_ compiler.
-
    .. syntax-checker:: haml-lint
 
       Check style and syntax with the
-      `HAML-Lint <https://github.com/sds/haml-lint/>`_ linter.
+      `HAML-Lint <https://github.com/sds/haml-lint/>`_ linter, which
+      reports a template that does not parse as well as one that parses
+      but reads badly.
 
 .. supported-language:: Handlebars
 
