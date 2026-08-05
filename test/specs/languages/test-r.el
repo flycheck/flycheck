@@ -30,6 +30,8 @@
     ;; not the tool is installed here
 
     (flycheck-buttercup-def-parse-test r "language/r.R"
-      '(8 nil error "unexpected end of input"))))
+      '(8 nil error "unexpected end of input"))
+    (flycheck-buttercup-def-parse-test r-lintr "language/r.R"
+      '(7 6 error "[error] unexpected end of input"))))
 
 ;;; test-r.el ends here

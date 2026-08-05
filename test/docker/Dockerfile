@@ -23,9 +23,9 @@ RUN apt-get update && apt-get install --yes --no-install-recommends \
       chicken-bin ghdl groovy \
       llvm luarocks php-cli protobuf-compiler puppet \
       python3 python3-pip python3-venv \
-      r-base-core racket ruby ruby-dev \
+      r-base-core r-cran-lintr racket ruby ruby-dev \
       nodejs npm \
-      rpmlint shellcheck systemd tcl tidy \
+      rpm rpmlint shellcheck systemd tcl tidy \
       texinfo texlive-extra-utils chktex \
       verilator \
       gawk jq lua5.4 xmlstarlet libxml2-utils \
@@ -49,7 +49,7 @@ RUN npm install --global --no-fund --no-audit \
       pyright \
       standard \
       stylelint stylelint-config-standard \
-      textlint \
+      textlint textlint-rule-write-good \
     && npm cache clean --force
 
 # The Python checkers.  A virtualenv rather than --break-system-packages,

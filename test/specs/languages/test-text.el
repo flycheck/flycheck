@@ -36,6 +36,14 @@
        '(1 7 error "\"very\" is a weasel word and can weaken meaning"
            :id "write-good" :checker textlint))))
 
+  (describe "reading the tool's output"
+    ;; Read from output recorded earlier, so this runs whether or
+    ;; not the tool is installed here
+
+    (flycheck-buttercup-def-parse-test textlint "language/text/text.txt"
+      '(1 7 error "\"very\" is a weasel word and can weaken meaning"
+          :id "write-good")))
+
   (describe "the textlint checker command"
     (it "appends flycheck-textlint-args before the source file"
       (flycheck-buttercup-with-temp-buffer
