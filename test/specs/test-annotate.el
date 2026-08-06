@@ -47,6 +47,25 @@ so it doubles as a predicate for the message overlays."
   (when-let* ((s (overlay-get ov 'before-string)))
     (if (get-text-property 0 'cursor s) (substring s 1) s)))
 
+(defun test-annotate/sideline (code msg-width win-width &optional gutter)
+  "Render a MSG-WIDTH error beside CODE in a fringeless WIN-WIDTH window.
+
+Stubs the window geometry: no fringes (so one column is reserved for
+the continuation glyph) and a line-number gutter of GUTTER columns
+(default none).  Return the rendered annotation string, cursor-anchor
+space stripped."
+  (insert code "\n")
+  (let* ((errs (list (flycheck-error-new-at 1 1 'error (make-string msg-width ?m)
+                                            :checker 'emacs-lisp)))
+         (flycheck-annotate--overlays nil))
+    (cl-letf (((symbol-function 'window-text-width) (lambda (&rest _) win-width))
+              ((symbol-function 'window-fringes) (lambda (&rest _) '(0 0 nil nil)))
+              ((symbol-function 'line-number-display-width)
+               (lambda (&rest _) (or gutter 0))))
+      (test-annotate/text
+       (flycheck-annotate-sideline-style
+        errs (save-excursion (goto-char (point-min)) (line-end-position)) nil)))))
+
 (defun test-annotate/anchors ()
   "Return an alist mapping each message overlay's code line to its text.
 A `below'-style block is hung off the start of the line after the code it
@@ -348,6 +367,49 @@ a newline, so key it back under the code line."
                        errs (line-end-position) nil)))
                     :to-equal '(space :align-to (- right 3)))))))
 
+    (it "truncates a message too wide for the room beside the code"
+      ;; A message wider than the gap between code and window edge would
+      ;; land after the code and wrap, taking back the single line the
+      ;; style promises.  See #2312.
+      (flycheck-buttercup-with-temp-buffer
+        ;; room = 40 wide - 1 reserved - 6 code - 2 slack
+        (let* ((s (test-annotate/sideline "abcdef" 60 40))
+               (text (substring s 1)))
+          (expect (string-width text) :to-equal 31)
+          (expect (substring-no-properties text) :to-match "\\`mmm")
+          (expect (get-text-property 0 'display s)
+                  :to-equal '(space :align-to (- right 32)))
+          ;; the ellipsis keeps the message's face
+          (expect (get-text-property (1- (length text)) 'face text)
+                  :to-equal (get-text-property 0 'face text)))))
+
+    (it "counts the line-number gutter against the room"
+      ;; The gutter is drawn inside the text area, so `window-text-width'
+      ;; includes columns the code cannot use.
+      (flycheck-buttercup-with-temp-buffer
+        ;; room = 40 wide - 4 gutter - 1 reserved - 6 code - 2 slack
+        (let ((s (test-annotate/sideline "abcdef" 60 40 4.0)))
+          (expect (string-width (substring s 1)) :to-equal 27)
+          (expect (get-text-property 0 'display s)
+                  :to-equal '(space :align-to (- right 28))))))
+
+    (it "keeps a message that exactly fills the room whole"
+      (flycheck-buttercup-with-temp-buffer
+        (let ((s (test-annotate/sideline "abcdef" 31 40)))
+          (expect (substring-no-properties (substring s 1))
+                  :to-equal (make-string 31 ?m))
+          (expect (get-text-property 0 'display s)
+                  :to-equal '(space :align-to (- right 32))))))
+
+    (it "leaves a message whole when the code leaves almost no room"
+      ;; Truncated to a couple of columns the message would be mostly
+      ;; ellipsis; trailing the code complete is the lesser evil.
+      (flycheck-buttercup-with-temp-buffer
+        ;; room = 20 - 1 - 15 - 2 = 2, under the useful minimum
+        (let ((s (test-annotate/sideline "abcdefghijklmno" 60 20)))
+          (expect (substring-no-properties (substring s 1))
+                  :to-equal (make-string 60 ?m)))))
+
     (it "is registered as a built-in style"
       (expect (cdr (assq 'sideline flycheck-annotate-style-functions))
               :to-be 'flycheck-annotate-sideline-style))
@@ -435,7 +497,30 @@ a newline, so key it back under the code line."
               (flycheck-annotate-levels '(error)))
           ;; the only error at point is a warning, excluded by the level
           ;; filter, so it must still reach the echo area
-          (expect (flycheck-annotate--suppresses-echo-p) :to-be nil)))))
+          (expect (flycheck-annotate--suppresses-echo-p) :to-be nil))))
+
+    (it "does not suppress an error whose sideline message was truncated"
+      ;; A truncated rendering is an incomplete one, so the full text
+      ;; must still reach the echo area.
+      (flycheck-buttercup-with-temp-buffer
+        (test-annotate/setup)
+        (goto-char (point-min))
+        (forward-line 3)                ; line 4 warning at column 3
+        (forward-char 2)                ; onto the warning
+        (let* ((msg (make-string 60 ?m))
+               (errs (list (flycheck-error-new-at 4 3 'warning msg
+                                                  :checker 'emacs-lisp)))
+               (flycheck-annotate--overlays nil)
+               (flycheck-annotate-mode t)
+               (flycheck-annotate-suppress-echo t)
+               (flycheck-annotate-current-line-style 'sideline)
+               (flycheck-annotate-levels t))
+          (cl-letf (((symbol-function 'window-text-width) (lambda (&rest _) 30))
+                    ((symbol-function 'window-fringes) (lambda (&rest _) '(0 0 nil nil))))
+            ;; room = 30 - 1 reserved - 14 code - 2 slack = 13, message 60
+            (flycheck-annotate-sideline-style errs (line-end-position) t)
+            (expect (flycheck-annotate--truncated-at-point-p) :to-be t)
+            (expect (flycheck-annotate--suppresses-echo-p) :to-be nil))))))
 
   (describe "the two-tier layout"
     (it "uses the below style on the line at point and eol elsewhere"
