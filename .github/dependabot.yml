@@ -1,0 +1,9 @@
+# The workflows pin every action to a commit, so a compromised tag or
+# branch cannot reach CI; this keeps the pins from fossilizing by
+# offering the new commit as a reviewable PR instead.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly

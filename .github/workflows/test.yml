@@ -7,6 +7,9 @@ on:
   pull_request:
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -36,20 +39,20 @@ jobs:
             experimental: true
 
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
 
-    - uses: jcs090218/setup-emacs@master
+    - uses: jcs090218/setup-emacs@54b61ac9c1d7011a54d2b6d66dedbcddf20e2fb9 # master, 2026-08-06
       with:
         version: ${{ matrix.emacs-version }}
 
-    - uses: emacs-eask/setup-eask@master
+    - uses: emacs-eask/setup-eask@5e7d164250e4b5e438fb02a21b57d001a3b189b2 # master, 2026-08-06
       with:
         version: 'snapshot'
 
     # `make init' installs a few dozen major-mode packages so the specs
     # have modes to run in, which is most of a job's time and does not
     # change between runs
-    - uses: actions/cache@v4
+    - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
       with:
         path: .eask
         key: eask-${{ matrix.os }}-${{ matrix.emacs-version }}-${{ hashFiles('Eask') }}

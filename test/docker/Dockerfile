@@ -35,8 +35,10 @@ RUN apt-get update && apt-get install --yes --no-install-recommends \
       dash zsh \
     && rm -rf /var/lib/apt/lists/*
 
-# The Node checkers.  --no-fund and --no-audit keep the log readable.
-RUN npm install --global --no-fund --no-audit \
+# The Node checkers.  --no-fund and --no-audit keep the log readable;
+# --ignore-scripts keeps install hooks from running, which none of these
+# packages need and which is the way the npm worms spread.
+RUN npm install --global --no-fund --no-audit --ignore-scripts \
       coffeescript \
       ember-template-lint \
       eslint \
