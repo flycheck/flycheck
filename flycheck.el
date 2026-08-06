@@ -15615,7 +15615,9 @@ See URL `https://proselint.com/' for more information about proselint."
                      :id .check
                      :buffer buffer
                      :checker checker
-                     :end-pos (- .end 1)
+                     :end-pos (+ .end (flycheck--proselint-off-by-one-correction
+                                       buffer
+                                       .end))
                      :fix (when (and .replacements
                                      ;; Ignore replacement "[\.\?!]  [A-Z]"
                                      ;; from consistency.spacing:
@@ -15632,7 +15634,9 @@ See URL `https://proselint.com/' for more information about proselint."
                                            :line .line
                                            :column .column
                                            :end-line .line
-                                           :end-column (+ .column .extent -1)
+                                           :end-column (+ .column
+                                                          .extent
+                                                          (flycheck--proselint-off-by-one-correction buffer .end))
                                            :replacement .replacements))
                              :tick (buffer-chars-modified-tick))))))
                 (let-alist (car response)
@@ -15662,6 +15666,20 @@ See URL `https://proselint.com/' for more information about proselint."
                            :tick (buffer-chars-modified-tick))))))
               (let-alist (car response)
                 .result.<stdin>.diagnostics)))))
+
+;; Proselint 0.14 will often tell us that an error extends one character
+;; further than it actually does.  This is fairly trivial until we try
+;; to apply a replacement, at which point it causes us trouble.
+;; https://github.com/amperser/proselint/issues/1048
+(defun flycheck--proselint-off-by-one-correction (buffer end-pos)
+  "Return an offset if END-POS of BUFFER doesn't look like the end of an error."
+  (save-excursion
+    (with-current-buffer buffer
+      (if (char-equal
+           (char-syntax (char-before (- end-pos 1)))
+           (char-syntax (char-before end-pos)))
+          0
+        -1))))
 
 ;; A hash table (not the scalar of earlier versions -- hence the new name,
 ;; so an in-session reload does not leave a stale non-table value that
