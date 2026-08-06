@@ -12067,8 +12067,11 @@ as a fallback."
   "Return the lazy code-action fix provider, or nil when unavailable.
 
 Non-nil only when `flycheck-eglot-code-actions' is on and the server
-advertises code actions; see `flycheck-eglot--code-action-fix'."
+advertises code actions; see `flycheck-eglot--code-action-fix'.  The
+capability probe needs a live server, so a buffer Eglot does not
+manage never asks."
   (when (and flycheck-eglot-code-actions
+             (flycheck-eglot--available-p)
              (fboundp 'eglot-server-capable)
              (eglot-server-capable :codeActionProvider))
     #'flycheck-eglot--code-action-fix))
