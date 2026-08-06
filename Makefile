@@ -102,6 +102,13 @@ compile:
 specs: compile
 	$(EASK) exec buttercup -L . -L test -L test/specs test/specs
 
+# Times the hot paths; nothing asserts, the numbers are for comparing a
+# branch against master on the same machine.
+.PHONY: bench
+bench:
+	$(EASK) exec emacs --batch -L . -l test/benchmark.el \
+		-f flycheck-benchmark-batch
+
 DOCKER ?= docker
 CHECKER_IMAGE ?= flycheck-checkers
 

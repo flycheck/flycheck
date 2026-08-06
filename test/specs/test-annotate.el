@@ -754,6 +754,68 @@ a newline, so key it back under the code line."
               (expect flycheck-annotate--last-tick
                       :to-equal (buffer-chars-modified-tick))))))))
 
+    (it "does not rebuild crossing between two clean lines"
+      ;; Which line has point only matters through the current-line tier,
+      ;; and a line without errors renders nothing under any tier.
+      (flycheck-buttercup-with-temp-buffer
+        (save-window-excursion
+          (set-window-buffer (selected-window) (current-buffer))
+          (test-annotate/setup)          ; errors on lines 2 and 4
+          (goto-char (point-min))        ; line 1, clean
+          (flycheck-annotate-mode 1)
+          (spy-on 'flycheck-annotate--refresh)
+          (goto-char (point-max))        ; past line 4, clean line 5
+          (flycheck-annotate--post-command)
+          (expect 'flycheck-annotate--refresh :not :to-have-been-called))))
+
+    (it "rebuilds crossing from a clean line onto an error line"
+      (flycheck-buttercup-with-temp-buffer
+        (save-window-excursion
+          (set-window-buffer (selected-window) (current-buffer))
+          (test-annotate/setup)          ; errors on lines 2 and 4
+          (goto-char (point-min))        ; line 1, clean
+          (flycheck-annotate-mode 1)
+          (spy-on 'flycheck-annotate--refresh)
+          (goto-char (point-min))
+          (forward-line 1)               ; line 2 carries an error
+          (flycheck-annotate--post-command)
+          (expect 'flycheck-annotate--refresh :to-have-been-called))))
+
+    (it "rebuilds leaving an error line for a clean one"
+      (flycheck-buttercup-with-temp-buffer
+        (save-window-excursion
+          (set-window-buffer (selected-window) (current-buffer))
+          (test-annotate/setup)          ; errors on lines 2 and 4
+          (goto-char (point-min))
+          (forward-line 1)               ; line 2 carries an error
+          (flycheck-annotate-mode 1)
+          (spy-on 'flycheck-annotate--refresh)
+          (goto-char (point-min))        ; back to clean line 1
+          (flycheck-annotate--post-command)
+          (expect 'flycheck-annotate--refresh :to-have-been-called))))
+
+    (it "counts an error anchored at the line's very end as the line's"
+      ;; A missing-semicolon style error is reported past the last
+      ;; character, so its overlay starts exactly at eol; the line must
+      ;; not pass for clean, or the annotation sticks in the wrong tier.
+      (flycheck-buttercup-with-temp-buffer
+        (save-window-excursion
+          (set-window-buffer (selected-window) (current-buffer))
+          (insert "ab\ncd\n")
+          (setq-local flycheck-mode t)
+          (let ((e (flycheck-error-new-at 1 3 'error "missing ;"
+                                          :buffer (current-buffer)
+                                          :checker 'emacs-lisp)))
+            (setq flycheck-current-errors (list e))
+            (mapc #'flycheck-add-overlay flycheck-current-errors))
+          (goto-char (point-min))
+          (forward-line 1)               ; line 2, clean
+          (flycheck-annotate-mode 1)
+          (spy-on 'flycheck-annotate--refresh)
+          (goto-char (point-min))        ; onto the annotated line 1
+          (flycheck-annotate--post-command)
+          (expect 'flycheck-annotate--refresh :to-have-been-called))))
+
   (describe "the background tint"
     (it "adds no tint when disabled"
       (flycheck-buttercup-with-temp-buffer
