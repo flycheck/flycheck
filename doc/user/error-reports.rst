@@ -296,8 +296,10 @@ competing for attention.
 
    ``sideline``
       Like ``eol``, but flush the message to the window's right edge, the way
-      ``lsp-ui-sideline`` does.  When the code leaves no room, the message
-      simply follows it.
+      ``lsp-ui-sideline`` does.  A message too wide for the room between the
+      code and the window edge is truncated with an ellipsis; the full text
+      still reaches the echo area and the error list.  When the code leaves
+      almost no room at all, the message simply follows it.
 
       .. image:: /images/flycheck-annotate-sideline.png
 

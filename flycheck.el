@@ -81,6 +81,7 @@
 (require 'ansi-color)            ; `flycheck-parse-with-patterns-without-color'
 (require 'eldoc)                 ; The default error display
 (require 'url-util)              ; `url-unhex-string' for `flycheck-parse-sarif'
+(require 'mule-util)             ; `truncate-string-ellipsis', not autoloaded
 
 
 ;; Declare a bunch of dynamic variables that we need from other modes
@@ -8232,27 +8233,107 @@ FOCUSED is ignored."
   (flycheck-annotate--make-overlay
    anchor (concat "  " (flycheck-annotate--compact-text errors))))
 
-(defun flycheck-annotate--reserved-columns ()
-  "Columns at the right edge that text must not be aligned into.
+(defun flycheck-annotate--reserved-columns (&optional window)
+  "Columns at WINDOW's right edge that text must not be aligned into.
 
-Without a right fringe to draw it in, the rightmost column belongs to
-the glyph marking a line that continues or was truncated, so text
-flush against `right' lands in it and spills onto the next line.  A
-terminal has no fringes; a graphical frame can have had them turned
-off just the same."
-  (if (zerop (or (nth 1 (window-fringes)) 0)) 1 0))
+WINDOW defaults to the selected window.  Without a right fringe to draw
+it in, the rightmost column belongs to the glyph marking a line that
+continues or was truncated, so text flush against `right' lands in it
+and spills onto the next line.  A terminal has no fringes; a graphical
+frame can have had them turned off just the same.
+
+A right margin, such as `diff-hl-margin-mode' takes, needs nothing
+reserved: `right' in an `:align-to' stretch stops at the text area's
+edge, which sits short of any margins (#2312)."
+  (if (zerop (or (nth 1 (window-fringes window)) 0)) 1 0))
+
+(defconst flycheck-annotate--sideline-least 10
+  "Least display columns of message worth showing truncated.
+
+With less room than this beside the code, a truncated message would be
+mostly ellipsis, so the full text is left to trail the code instead.")
+
+(defun flycheck-annotate--window-geometry ()
+  "Measure the window showing the current buffer, as (RESERVED . USABLE).
+
+RESERVED is `flycheck-annotate--reserved-columns' for that window and
+USABLE the display columns text can actually reach: the text area
+minus RESERVED and minus the line-number gutter, which sits inside the
+text area, so `window-text-width' counts columns the code cannot use.
+A window showing another buffer answers for its own gutter; like the
+width itself, it is the one approximation on offer."
+  (let* ((window (or (get-buffer-window) (selected-window)))
+         (reserved (flycheck-annotate--reserved-columns window))
+         (gutter (ceiling (if (eq window (selected-window))
+                              (line-number-display-width 'columns)
+                            (with-selected-window window
+                              (line-number-display-width 'columns))))))
+    (cons reserved (- (window-text-width window) gutter reserved))))
+
+(defvar flycheck-annotate--geometry nil
+  "The window geometry for the render pass under way, or nil outside one.
+
+Bound by `flycheck-annotate--refresh' so the per-line style functions
+do not each measure the window again; see
+`flycheck-annotate--window-geometry' for the shape.")
+
+(defun flycheck-annotate--sideline-fit (text anchor usable)
+  "Truncate TEXT to the room beside the line ending at ANCHOR.
+
+The `:align-to' stretch only absorbs width the window can spare; it
+cannot make room.  A message wider than the gap between the code and
+the right edge lands right after the code and wraps, which takes back
+the single line the style promises.  USABLE is the reachable width of
+the window, per `flycheck-annotate--window-geometry'.  Return TEXT
+itself when it fits, so a caller can tell truncation happened by
+identity.
+
+The truncated text ends in an ellipsis carrying the face of the last
+character kept.  When the room left is less than
+`flycheck-annotate--sideline-least', TEXT is returned whole and trails
+the code as before: complete beats pretty when neither fits."
+  (let* ((line-width (save-excursion (goto-char anchor) (current-column)))
+         ;; Two columns of slack: one for the cursor-anchoring space
+         ;; `flycheck-annotate--make-overlay' prepends, one to keep the
+         ;; message from touching the code.
+         (room (- usable line-width 2)))
+    (if (or (<= (string-width text) room)
+            (< room flycheck-annotate--sideline-least))
+        text
+      ;; Not `truncate-string-to-width's ETC argument: the ellipsis has
+      ;; to carry the face of the last character kept, or it renders in
+      ;; the default face beside a coloured message.  The room floor
+      ;; keeps KEPT from coming out empty.
+      (let* ((ellipsis (truncate-string-ellipsis))
+             (kept (truncate-string-to-width
+                    text (- room (string-width ellipsis)))))
+        (concat kept
+                (propertize ellipsis 'face
+                            (get-text-property (1- (length kept))
+                                               'face kept)))))))
 
 (defun flycheck-annotate-sideline-style (errors anchor _focused)
   "Render ERRORS flushed to the window's right edge past line ANCHOR.
 
 Like `flycheck-annotate-eol-style', but the message is right-aligned with
-a stretch of whitespace, in the manner of `lsp-ui-sideline'.  When the
-code on the line is too long to leave room, the message simply follows it
-instead.  FOCUSED is ignored."
-  (let* ((text (flycheck-annotate--compact-text errors))
-         (width (+ (string-width text) (flycheck-annotate--reserved-columns)))
-         (spacer (propertize " " 'display `(space :align-to (- right ,width)))))
-    (flycheck-annotate--make-overlay anchor (concat spacer text))))
+a stretch of whitespace, in the manner of `lsp-ui-sideline'.  A message
+too wide for the room between the code and the window edge is truncated
+to fit, with an ellipsis; the full text still reaches the echo area and
+the error list.  When the code leaves almost no room at all, the message
+simply follows it instead.  FOCUSED is ignored."
+  (let* ((geometry (or flycheck-annotate--geometry
+                       (flycheck-annotate--window-geometry)))
+         (full (flycheck-annotate--compact-text errors))
+         (text (flycheck-annotate--sideline-fit full anchor (cdr geometry)))
+         (width (+ (string-width text) (car geometry)))
+         (spacer (propertize " " 'display `(space :align-to (- right ,width))))
+         (ov (flycheck-annotate--make-overlay anchor (concat spacer text))))
+    ;; Marks the annotation as an incomplete rendering of its errors, so
+    ;; the echo message is not suppressed on its line; see
+    ;; `flycheck-annotate--suppresses-echo-p'.
+    (unless (eq text full)
+      (overlay-put ov 'flycheck-annotate-truncated t))
+    ov))
 
 (defun flycheck-annotate--display-column (err bol eol)
   "Return the display column of ERR's start on the line from BOL to EOL.
@@ -8413,7 +8494,8 @@ anything."
   (flycheck-annotate--clear)
   (when (and (bound-and-true-p flycheck-annotate-mode) flycheck-mode)
     (pcase-let ((`(,beg . ,end) (flycheck-annotate--region))
-                (point-anchor (line-end-position)))
+                (point-anchor (line-end-position))
+                (flycheck-annotate--geometry (flycheck-annotate--window-geometry)))
       (pcase-dolist (`(,anchor . ,errors)
                      (flycheck-annotate--group-errors beg end))
         ;; The tier (focused vs not) selects both the style and the level
@@ -8475,16 +8557,31 @@ to know where the window ended up."
       ;; runs inside redisplay, so guard against coming back round
       (flycheck-annotate--post-command))))
 
+(defun flycheck-annotate--truncated-at-point-p ()
+  "Return non-nil when the annotation on the current line was truncated."
+  (let ((bol (line-beginning-position))
+        (end (min (point-max) (1+ (line-end-position)))))
+    (seq-some (lambda (ov)
+                (and (overlay-get ov 'flycheck-annotate-truncated)
+                     ;; Evaporated overlays linger in the registry with
+                     ;; no start until the next rebuild clears them.
+                     (when-let* ((start (overlay-start ov)))
+                       (<= bol start end))))
+              flycheck-annotate--overlays)))
+
 (defun flycheck-annotate--suppresses-echo-p ()
   "Return non-nil when inline display covers the at-point echo message.
 
 Only suppresses when the errors at point would actually be rendered
-inline, so an error that the inline display drops (because its level is
-disabled for the current-line tier, or it belongs to another file) is
-still shown through the echo area rather than nowhere."
+inline and in full, so an error that the inline display drops (because
+its level is disabled for the current-line tier, or it belongs to
+another file) or truncates (a `sideline' message too wide for the room
+beside the code) is still shown through the echo area rather than
+nowhere."
   (and (bound-and-true-p flycheck-annotate-mode)
        flycheck-annotate-suppress-echo
        flycheck-annotate-current-line-style
+       (not (flycheck-annotate--truncated-at-point-p))
        (seq-some (lambda (err)
                    (not (flycheck-relevant-error-other-file-p err)))
                  (flycheck-annotate--filter-levels
