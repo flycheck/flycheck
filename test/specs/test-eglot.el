@@ -250,15 +250,23 @@ half-assembled answer and passes for the wrong reason."
 
   (describe "code-action fixes"
 
-    (it "provides the code-action fix only when enabled and supported"
-      (let ((flycheck-eglot-code-actions t))
-        (cl-letf (((symbol-function 'eglot-server-capable) (lambda (&rest _) t)))
-          (expect (flycheck-eglot--fix-provider)
-                  :to-be 'flycheck-eglot--code-action-fix))
-        (cl-letf (((symbol-function 'eglot-server-capable) (lambda (&rest _) nil)))
+    (it "provides the code-action fix only when enabled, managed and supported"
+      (cl-letf (((symbol-function 'eglot-managed-p) (lambda () t)))
+        (let ((flycheck-eglot-code-actions t))
+          (cl-letf (((symbol-function 'eglot-server-capable) (lambda (&rest _) t)))
+            (expect (flycheck-eglot--fix-provider)
+                    :to-be 'flycheck-eglot--code-action-fix))
+          (cl-letf (((symbol-function 'eglot-server-capable) (lambda (&rest _) nil)))
+            (expect (flycheck-eglot--fix-provider) :to-be nil)))
+        (let ((flycheck-eglot-code-actions nil))
           (expect (flycheck-eglot--fix-provider) :to-be nil)))
-      (let ((flycheck-eglot-code-actions nil))
-        (expect (flycheck-eglot--fix-provider) :to-be nil)))
+      ;; The capability probe needs a live server, so an unmanaged buffer
+      ;; must not reach it
+      (cl-letf (((symbol-function 'eglot-managed-p) (lambda () nil))
+                ((symbol-function 'eglot-server-capable)
+                 (lambda (&rest _) (error "No current server"))))
+        (let ((flycheck-eglot-code-actions t))
+          (expect (flycheck-eglot--fix-provider) :to-be nil))))
 
     (it "resolves the preferred quickfix action into a fix"
       (flycheck-buttercup-with-temp-buffer
