@@ -62,6 +62,12 @@ jobs:
     if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: read
+      # A red badge on a scheduled run is a blind spot; drift gets filed
+      # as an issue instead, by the step at the bottom
+      issues: write
+
     steps:
     - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
 
@@ -80,4 +86,32 @@ jobs:
       run: make checker-image
 
     - name: Compare every recording against its tool
-      run: make verify-fixtures-in-image
+      run: |
+        set -o pipefail
+        make verify-fixtures-in-image 2>&1 | tee verify.log
+
+    - name: File the drift as an issue
+      if: failure() && github.event_name == 'schedule'
+      env:
+        GH_TOKEN: ${{ github.token }}
+        RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+      run: |
+        {
+          echo "The weekly check found recordings their tools no longer produce."
+          echo "A difference is not a broken test: it means a tool changed what"
+          echo "it prints, and the checker that reads it may need to change too."
+          echo
+          echo "[Run log]($RUN_URL); the tail of the comparison:"
+          echo
+          echo '```'
+          tail -40 verify.log
+          echo '```'
+        } > body.md
+        existing=$(gh issue list --label fixture-drift --state open \
+                     --json number --jq '.[0].number')
+        if [ -n "$existing" ]; then
+          gh issue comment "$existing" --body-file body.md
+        else
+          gh issue create --title "A checker stopped reading its tool" \
+            --label fixture-drift --body-file body.md
+        fi
