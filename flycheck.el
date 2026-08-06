@@ -15616,7 +15616,16 @@ See URL `https://proselint.com/' for more information about proselint."
                      :buffer buffer
                      :checker checker
                      :end-pos (- .end 1)
-                     :fix (when .replacements
+                     :fix (when (and .replacements
+                                     ;; Ignore replacement "[\.\?!]  [A-Z]"
+                                     ;; from consistency.spacing:
+                                     (not (string-match-p
+                                           (rx string-start
+                                               "[\\.\\?!] "
+                                               (zero-or-one " ")
+                                               "[A-Z]"
+                                               string-end)
+                                           .replacements)))
                             (flycheck-fix-new
                              :description .replacements
                              :edits (list (flycheck-fix-edit-new
