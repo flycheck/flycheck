@@ -8519,20 +8519,53 @@ anything."
                                            flycheck-annotate-style-functions))))
               (funcall render errors anchor focused))))))))
 
+(defun flycheck-annotate--line-clean-p (pos)
+  "Whether the line around POS carries no Flycheck error overlays.
+
+The scan runs through the newline: an error reported past the last
+character, such as a missing semicolon, gets an overlay starting
+exactly at the line's end, and it anchors an annotation on this line
+all the same."
+  (save-excursion
+    (goto-char pos)
+    (not (flycheck-overlays-in (line-beginning-position)
+                               (min (point-max)
+                                    (1+ (line-end-position)))))))
+
 (defun flycheck-annotate--post-command ()
   "Rebuild the inline overlays if point, the window or the buffer changed.
 
-Skips the rebuild only when nothing that affects the annotations happened:
-point stayed on its line, the window did not scroll, and the buffer was not
-edited.  The buffer-change check catches edits that leave point on its line
-\(such as `open-line'), which the line and window checks alone would miss,
-and keeps a `below'-style connector aligned as the code under it changes.
-The check runs once per command, so a bulk edit rebuilds once rather than
-once per change."
-  (unless (and (eql (line-beginning-position) flycheck-annotate--last-line-start)
-               (eql (window-start) flycheck-annotate--last-window-start)
-               (eql (buffer-chars-modified-tick) flycheck-annotate--last-tick))
-    (flycheck-annotate--refresh)))
+Skips the rebuild when nothing that affects the annotations happened:
+point stayed on its line, the window did not scroll, and the buffer was
+not edited.  The buffer-change check catches edits that leave point on
+its line \(such as `open-line'), which the line and window checks alone
+would miss, and keeps a `below'-style connector aligned as the code
+under it changes.  The check runs once per command, so a bulk edit
+rebuilds once rather than once per change.
+
+Crossing between two lines that carry no errors is also a skip: which
+line has point only tells on the rendering through the current-line
+tier, and a line without errors renders nothing under any tier.  Most
+navigation is over clean lines, and every skipped rebuild is a screen's
+worth of overlays not rebuilt mid-keystroke."
+  (let ((same-window-and-text
+         (and (eql (window-start) flycheck-annotate--last-window-start)
+              (eql (buffer-chars-modified-tick) flycheck-annotate--last-tick))))
+    (unless (and same-window-and-text
+                 (or (eql (line-beginning-position)
+                          flycheck-annotate--last-line-start)
+                     ;; The recorded line is a live position: the text is
+                     ;; unedited under this guard, so it has not shifted.
+                     ;; Narrowing does not bump the tick, though, so the
+                     ;; position must still be accessible to be inspected.
+                     (and flycheck-annotate--last-line-start
+                          (<= (point-min)
+                              flycheck-annotate--last-line-start
+                              (point-max))
+                          (flycheck-annotate--line-clean-p (point))
+                          (flycheck-annotate--line-clean-p
+                           flycheck-annotate--last-line-start))))
+      (flycheck-annotate--refresh))))
 
 (defvar-local flycheck-annotate--rebuilding nil
   "Whether a rebuild is already under way in this buffer.")
