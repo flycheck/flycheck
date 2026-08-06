@@ -16699,30 +16699,108 @@ See URL `https://github.com/rpm-software-management/rpmlint'."
    (lambda (id) (substring id 0 5)))
   "Browse the markdownlint rule documentation for the error at point.")
 
+(defun flycheck-parse-markdownlint--column (line index buffer)
+  "Convert markdownlint's 1-based UTF-16 INDEX on LINE of BUFFER to a column.
+
+markdownlint counts JS string indices, which are UTF-16 code units, so
+a character outside the Basic Multilingual Plane counts twice and an
+edit to the right of one lands a column short, inside text it should
+leave alone.  Walk LINE's text consuming INDEX's units; the characters
+walked are the column.  Units left past the line's end, or the whole
+INDEX when BUFFER no longer has the line, count one column each, which
+keeps an edit appending at the end of a line intact."
+  (with-current-buffer buffer
+    (save-excursion
+      (save-restriction
+        (widen)
+        (goto-char (point-min))
+        (forward-line (1- line))
+        (let ((text (buffer-substring-no-properties
+                     (point) (line-end-position)))
+              (units (1- index))
+              (chars 0))
+          (while (and (> units 0) (< chars (length text)))
+            (cl-decf units (if (> (aref text chars) #xFFFF) 2 1))
+            (cl-incf chars))
+          (+ 1 chars (max 0 units)))))))
+
+(defun flycheck-parse-markdownlint--fix (info line description buffer)
+  "Build a `flycheck-fix' for BUFFER from markdownlint's fixInfo INFO.
+
+INFO edits one line, LINE unless it names another: it deletes
+`deleteCount' characters at `editColumn' and puts `insertText' there.
+A `deleteCount' of -1 deletes the whole line, newline included.
+DESCRIPTION describes the fix to the user."
+  (let-alist info
+    (let ((fline (or .lineNumber line)))
+      (flycheck--make-fix
+       buffer description
+       (list (if (eql .deleteCount -1)
+                 (flycheck-fix-edit-new
+                  :line fline :column 1
+                  :end-line (1+ fline) :end-column 1
+                  :replacement "")
+               ;; Both endpoints go through the UTF-16 conversion; the
+               ;; deleted span may itself contain astral characters, so
+               ;; converting deleteCount alone would not do.
+               (let ((start (or .editColumn 1)))
+                 (flycheck-fix-edit-new
+                  :line fline
+                  :column (flycheck-parse-markdownlint--column
+                           fline start buffer)
+                  :end-line fline
+                  :end-column (flycheck-parse-markdownlint--column
+                               fline (+ start (or .deleteCount 0)) buffer)
+                  :replacement (or .insertText "")))))))))
+
+(defun flycheck-parse-markdownlint (output checker buffer)
+  "Parse markdownlint JSON OUTPUT into Flycheck errors.
+
+CHECKER and BUFFER denote the CHECKER that returned OUTPUT and the
+BUFFER that was checked respectively.  OUTPUT is what `--json' prints:
+one array of findings, each carrying the rule's names, an optional
+1-based `errorRange', and, for the auto-fixable findings, a `fixInfo'.
+A clean file prints nothing at all.
+
+See URL `https://github.com/DavidAnson/markdownlint' for more
+information."
+  (seq-map
+   (lambda (finding)
+     (let-alist finding
+       ;; The message mirrors the text output: the rule's description
+       ;; with the detail and the offending context bracketed after it.
+       ;; Only the start column is set, as the text output had it, so
+       ;; the highlighting does not change; the fix carries its own
+       ;; coordinates.
+       (flycheck-error-new-at
+        .lineNumber
+        (and .errorRange (elt .errorRange 0))
+        (if (equal .severity "warning") 'warning 'error)
+        (concat .ruleDescription
+                (when .errorDetail (format " [%s]" .errorDetail))
+                (when .errorContext (format " [Context: \"%s\"]" .errorContext)))
+        :id (string-join .ruleNames "/")
+        :checker checker
+        :buffer buffer
+        :filename .fileName
+        :fix (and .fixInfo
+                  (flycheck-parse-markdownlint--fix
+                   .fixInfo .lineNumber .ruleDescription buffer)))))
+   (car (flycheck-parse-json output))))
+
 (flycheck-define-checker markdown-markdownlint-cli
   "Markdown checker using markdownlint-cli.
 
 See URL `https://github.com/igorshubovych/markdownlint-cli'."
   :command ("markdownlint"
+            "--json"
             (config-file "--config" flycheck-markdown-markdownlint-cli-config)
             (option-list "--disable" flycheck-markdown-markdownlint-cli-disabled-rules)
             (option-list "--enable" flycheck-markdown-markdownlint-cli-enabled-rules)
             (eval flycheck-markdown-markdownlint-cli-args)
             "--"
             source)
-  :error-patterns
-  (;; markdownlint-cli v0.42+/cli2 v0.14+ include a severity word
-   (error line-start
-          (file-name) ":" line
-          (? ":" column) " "
-          (or "error" "warning") " "
-          (id (one-or-more (not (any space))))
-          " " (message) line-end)
-   ;; older versions without severity word
-   (error line-start
-          (file-name) ":" line
-          (? ":" column) " " (id (one-or-more (not (any space))))
-          " " (message) line-end))
+  :error-parser flycheck-parse-markdownlint
   :error-filter flycheck-markdownlint-error-filter
   :modes (markdown-mode gfm-mode)
   :error-explainer flycheck-markdownlint-error-explainer
