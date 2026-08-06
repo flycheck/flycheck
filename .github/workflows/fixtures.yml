@@ -18,6 +18,9 @@ on:
       - 'test/fixtures/**'
       - 'test/record-fixture.el'
 
+permissions:
+  contents: read
+
 jobs:
   # On a pull request, against whatever the runner can be given quickly.
   # This is for telling someone their recording is wrong while they are
@@ -27,13 +30,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
 
-    - uses: jcs090218/setup-emacs@master
+    - uses: jcs090218/setup-emacs@54b61ac9c1d7011a54d2b6d66dedbcddf20e2fb9 # master, 2026-08-06
       with:
         version: 30.2
 
-    - uses: emacs-eask/setup-eask@master
+    - uses: emacs-eask/setup-eask@5e7d164250e4b5e438fb02a21b57d001a3b189b2 # master, 2026-08-06
       with:
         version: 'snapshot'
 
@@ -43,7 +46,7 @@ jobs:
         sudo apt-get install --yes --no-install-recommends \
           cppcheck gawk tidy lua5.4 shellcheck libxml2-utils
         pip install --quiet flake8 pylint
-        npm install --global --silent stylelint stylelint-config-standard \
+        npm install --global --silent --ignore-scripts stylelint stylelint-config-standard \
           markdownlint-cli markdownlint-cli2 oxlint
 
     - run: make init
@@ -60,7 +63,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
 
     # The image is large, and a runner arrives with tens of gigabytes of
     # toolchains this job has no use for.
