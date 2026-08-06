@@ -106,7 +106,7 @@ specs: compile
 # branch against master on the same machine.
 .PHONY: bench
 bench:
-	$(EASK) exec emacs --batch -L . -l test/benchmark.el \
+	$(EASK) exec emacs --batch -L . -l test/flycheck-benchmark.el \
 		-f flycheck-benchmark-batch
 
 DOCKER ?= docker

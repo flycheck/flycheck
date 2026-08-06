@@ -1,4 +1,4 @@
-;;; benchmark.el --- How long Flycheck's hot paths take  -*- lexical-binding: t; -*-
+;;; flycheck-benchmark.el --- How long Flycheck's hot paths take  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2026 Flycheck contributors
 
@@ -88,10 +88,16 @@
     (let ((flycheck-annotate-mode t))
       (flycheck-benchmark--report "annotate refresh of the visible region" 20
         (flycheck-annotate--refresh)))
-    ;; The guard for a command that only moved point between clean lines
-    (let ((flycheck-annotate-mode t))
+    ;; The guard for a command that moved point between two clean lines,
+    ;; which is the skip the guard exists to make cheap; ping-pong so
+    ;; every iteration really crosses
+    (let ((flycheck-annotate-mode t)
+          (here (point-min))
+          (there (save-excursion (goto-char (point-min))
+                                 (forward-line 2) (point))))
       (flycheck-annotate--refresh)
       (flycheck-benchmark--report "post-command guard, clean-line crossing" 200
+        (goto-char (if (eql (point) here) there here))
         (flycheck-annotate--post-command)))))
 
 (defun flycheck-benchmark-batch ()
@@ -99,4 +105,4 @@
   (flycheck-benchmark-run))
 
 (provide 'flycheck-benchmark)
-;;; benchmark.el ends here
+;;; flycheck-benchmark.el ends here
