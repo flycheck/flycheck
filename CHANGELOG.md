@@ -8,6 +8,7 @@
 
 ### New Features
 
+- [#2319](https://github.com/flycheck/flycheck/pull/2319): `markdown-markdownlint-cli` now carries the fixes markdownlint suggests, so `C-c ! f` and `C-c ! F` apply them; the checker reads markdownlint's JSON output, and a rule configured with `severity: warning` now shows as a warning rather than an error.
 - [#2156](https://github.com/flycheck/flycheck/pull/2156): Add OCaml checkers. `ocaml-dune` checks a Dune project with `dune build @check`, so references to sibling modules and to the project's dependencies resolve, and `ocaml` checks a standalone file with `ocamlfind ocamlc`. Flycheck picks between them by whether the file belongs to a Dune project, since the compiler on its own would report every reference to a sibling module as an unbound module.
 - [#2157](https://github.com/flycheck/flycheck/pull/2157): Add a `swift` checker using `swiftc -parse`, which parses a file without type-checking it, so it is right for any Swift file whether or not it belongs to a package. Type errors need a language server that knows how the project is built, through `global-flycheck-eglot-mode` or `flycheck-lsp-mode`.
 - [#2286](https://github.com/flycheck/flycheck/pull/2286): Make `tcl-nagelfar` configurable: `flycheck-tcl-nagelfar-syntax-databases` lists the databases to load with `-s`, so a project whose procedures span several files stops reporting them as unknown commands, and `flycheck-tcl-nagelfar-args` passes arbitrary arguments (originally proposed in [#1906](https://github.com/flycheck/flycheck/pull/1906)).

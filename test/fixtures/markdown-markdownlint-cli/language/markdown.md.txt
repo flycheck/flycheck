@@ -1,3 +1,56 @@
-markdown.md:1 error MD041/first-line-heading/first-line-h1 First line in a file should be a top-level heading [Context: "## Second Header First"]
-markdown.md:3 error MD012/no-multiple-blanks Multiple consecutive blank lines [Expected: 1; Actual: 2]
-markdown.md:4:15 error MD009/no-trailing-spaces Trailing spaces [Expected: 0 or 2; Actual: 7]
+[
+  {
+    "fileName": "markdown.md",
+    "lineNumber": 1,
+    "ruleNames": [
+      "MD041",
+      "first-line-heading",
+      "first-line-h1"
+    ],
+    "ruleDescription": "First line in a file should be a top-level heading",
+    "ruleInformation": "https://github.com/DavidAnson/markdownlint/blob/v0.40.0/doc/md041.md",
+    "errorDetail": null,
+    "errorContext": "## Second Header First",
+    "errorRange": null,
+    "fixInfo": null,
+    "severity": "error"
+  },
+  {
+    "fileName": "markdown.md",
+    "lineNumber": 3,
+    "ruleNames": [
+      "MD012",
+      "no-multiple-blanks"
+    ],
+    "ruleDescription": "Multiple consecutive blank lines",
+    "ruleInformation": "https://github.com/DavidAnson/markdownlint/blob/v0.40.0/doc/md012.md",
+    "errorDetail": "Expected: 1; Actual: 2",
+    "errorContext": null,
+    "errorRange": null,
+    "fixInfo": {
+      "deleteCount": -1
+    },
+    "severity": "error"
+  },
+  {
+    "fileName": "markdown.md",
+    "lineNumber": 4,
+    "ruleNames": [
+      "MD009",
+      "no-trailing-spaces"
+    ],
+    "ruleDescription": "Trailing spaces",
+    "ruleInformation": "https://github.com/DavidAnson/markdownlint/blob/v0.40.0/doc/md009.md",
+    "errorDetail": "Expected: 0 or 2; Actual: 7",
+    "errorContext": null,
+    "errorRange": [
+      15,
+      7
+    ],
+    "fixInfo": {
+      "editColumn": 15,
+      "deleteCount": 7
+    },
+    "severity": "error"
+  }
+]

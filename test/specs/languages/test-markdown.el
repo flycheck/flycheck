@@ -69,6 +69,80 @@
                        'markdown-markdownlint-cli2)))
             (expect args :to-contain "--no-globs"))))))
 
+  (describe "the fixes markdownlint suggests"
+    (it "converts each shape of fixInfo to an edit"
+      (flycheck-buttercup-with-temp-buffer
+        (let* ((output "[
+  {\"fileName\": \"doc.md\", \"lineNumber\": 3,
+   \"ruleNames\": [\"MD009\", \"no-trailing-spaces\"],
+   \"ruleDescription\": \"Trailing spaces\", \"severity\": \"error\",
+   \"fixInfo\": {\"editColumn\": 15, \"deleteCount\": 7}},
+  {\"fileName\": \"doc.md\", \"lineNumber\": 5,
+   \"ruleNames\": [\"MD012\", \"no-multiple-blanks\"],
+   \"ruleDescription\": \"Multiple consecutive blank lines\", \"severity\": \"error\",
+   \"fixInfo\": {\"deleteCount\": -1}},
+  {\"fileName\": \"doc.md\", \"lineNumber\": 7,
+   \"ruleNames\": [\"MD047\", \"single-trailing-newline\"],
+   \"ruleDescription\": \"Files should end with a single newline character\",
+   \"severity\": \"error\",
+   \"fixInfo\": {\"editColumn\": 10, \"insertText\": \"NL\"}},
+  {\"fileName\": \"doc.md\", \"lineNumber\": 9,
+   \"ruleNames\": [\"MD041\", \"first-line-heading\"],
+   \"ruleDescription\": \"First line should be a heading\",
+   \"severity\": \"error\", \"fixInfo\": null}]")
+               (parsed (flycheck-buttercup-parse
+                        'markdown-markdownlint-cli output))
+               (edit (lambda (err)
+                       (car (flycheck-fix-edits (flycheck-error-fix err))))))
+          ;; delete a character range on the line
+          (let ((e (funcall edit (nth 0 parsed))))
+            (expect (flycheck-fix-edit-line e) :to-equal 3)
+            (expect (flycheck-fix-edit-column e) :to-equal 15)
+            (expect (flycheck-fix-edit-end-line e) :to-equal 3)
+            (expect (flycheck-fix-edit-end-column e) :to-equal 22)
+            (expect (flycheck-fix-edit-replacement e) :to-equal ""))
+          ;; -1 deletes the whole line, newline included
+          (let ((e (funcall edit (nth 1 parsed))))
+            (expect (flycheck-fix-edit-line e) :to-equal 5)
+            (expect (flycheck-fix-edit-column e) :to-equal 1)
+            (expect (flycheck-fix-edit-end-line e) :to-equal 6)
+            (expect (flycheck-fix-edit-end-column e) :to-equal 1)
+            (expect (flycheck-fix-edit-replacement e) :to-equal ""))
+          ;; a pure insertion deletes nothing
+          (let ((e (funcall edit (nth 2 parsed))))
+            (expect (flycheck-fix-edit-column e) :to-equal 10)
+            (expect (flycheck-fix-edit-end-column e) :to-equal 10)
+            (expect (flycheck-fix-edit-replacement e) :to-equal "NL"))
+          ;; no fixInfo, no fix
+          (expect (flycheck-error-fix (nth 3 parsed)) :to-be nil))))
+
+    (it "converts markdownlint's UTF-16 indices to character columns"
+      ;; markdownlint counts JS string indices, where a character outside
+      ;; the BMP counts twice; applied as Emacs columns unconverted, the
+      ;; edit lands one column short and corrupts the line.
+      (flycheck-buttercup-with-temp-buffer
+        (insert "🎉 see (docs)[https://example.com] here\n")
+        (let* ((output "[
+  {\"fileName\": \"doc.md\", \"lineNumber\": 1,
+   \"ruleNames\": [\"MD011\", \"no-reversed-links\"],
+   \"ruleDescription\": \"Reversed link syntax\", \"severity\": \"error\",
+   \"fixInfo\": {\"editColumn\": 8, \"deleteCount\": 27,
+                 \"insertText\": \"[docs](https://example.com)\"}}]")
+               (parsed (flycheck-buttercup-parse
+                        'markdown-markdownlint-cli output))
+               (edit (car (flycheck-fix-edits
+                           (flycheck-error-fix (car parsed))))))
+          (expect (flycheck-fix-edit-column edit) :to-equal 7)
+          (expect (flycheck-fix-edit-end-column edit) :to-equal 34)
+          (flycheck-apply-fix (flycheck-error-fix (car parsed)))
+          (expect (buffer-string)
+                  :to-equal "🎉 see [docs](https://example.com) here\n"))))
+
+    (it "reads a clean file's empty output as no errors"
+      (flycheck-buttercup-with-temp-buffer
+        (expect (flycheck-buttercup-parse 'markdown-markdownlint-cli "")
+                :to-be nil))))
+
   (describe "reading the tool's output"
     ;; Read from output recorded earlier, so this runs whether or
     ;; not the tool is installed here
