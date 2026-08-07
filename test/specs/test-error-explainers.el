@@ -74,6 +74,36 @@
       (expect (test-explainer/explain 'javascript-eslint "no-eval")
               :to-equal '(url . "https://eslint.org/docs/rules/no-eval"))
       (expect (test-explainer/explain 'javascript-eslint "react/jsx-key")
+              :to-be nil))
+
+    (it "links yamllint rules through their underscored anchors"
+      (expect (test-explainer/explain 'yaml-yamllint "document-start")
+              :to-equal
+              '(url . "https://yamllint.readthedocs.io/en/stable/rules.html#module-yamllint.rules.document_start")))
+
+    (it "links tflint's terraform rules but skips provider rules"
+      (expect (test-explainer/explain 'terraform-tflint "terraform_deprecated_interpolation")
+              :to-equal
+              '(url . "https://github.com/terraform-linters/tflint-ruleset-terraform/blob/main/docs/rules/terraform_deprecated_interpolation.md"))
+      ;; The provider rulesets keep no documentation file per rule
+      (expect (test-explainer/explain 'terraform-tflint "aws_instance_invalid_type")
+              :to-be nil))
+
+    (it "links reek smells through their hyphenated names"
+      (expect (test-explainer/explain 'ruby-reek "InstanceVariableAssumption")
+              :to-equal
+              '(url . "https://github.com/troessner/reek/blob/master/docs/Instance-Variable-Assumption.md")))
+
+    (it "links pymarkdown rules through their lowercased files"
+      (expect (test-explainer/explain 'markdown-pymarkdown "MD022")
+              :to-equal
+              '(url . "https://github.com/jackdewinter/pymarkdown/blob/main/docs/rules/rule_md022.md")))
+
+    (it "links oxlint rules under their plugin, skipping bare ids"
+      (expect (test-explainer/explain 'javascript-oxlint "eslint(no-unused-vars)")
+              :to-equal
+              '(url . "https://oxc.rs/docs/guide/usage/linter/rules/eslint/no-unused-vars.html"))
+      (expect (test-explainer/explain 'javascript-oxlint "no-unused-vars")
               :to-be nil)))
 
   (describe "flycheck-dockerfile-hadolint-error-explainer"
