@@ -13859,6 +13859,22 @@ The checker runs `checkdoc-current-buffer'."
   (setf (car (flycheck-checker-get checker 'command))
         flycheck-this-emacs-executable))
 
+(declare-function org-lint-checker-name "org-lint")
+(defvar org-lint--checkers)
+
+(flycheck-def-option-var flycheck-org-lint-disabled-checkers
+    '(invalid-id-link) org-lint
+  "Org-lint checkers not to run.
+
+A list of symbols naming entries in `org-lint--checkers'.  The default
+keeps `invalid-id-link' out: it rescans every org-id file the session
+knows about on each invocation, in the main Emacs process, so with an
+org-roam-sized corpus a single check costs tens of seconds per idle
+pause.  Set this to nil to run everything org-lint has."
+  :type '(repeat symbol)
+  :safe #'flycheck-symbol-list-p
+  :package-version '(flycheck . "39"))
+
 (flycheck-define-generic-checker 'org-lint
   "An Org mode syntax checker using `org-lint'.
 
@@ -13866,25 +13882,42 @@ The checker runs `org-lint' in the current Emacs process, so it
 has access to all installed packages and user configuration."
   :start (lambda (checker callback)
            (condition-case err
-               (let ((errors
-                      (delq nil
-                            (mapcar
-                             (lambda (e)
-                               (pcase e
-                                 (`(,_n [,line ,_trust ,desc ,_checker])
-                                  (flycheck-error-new-at
-                                   (if (stringp line)
-                                       (string-to-number line)
-                                     line)
-                                   nil 'info desc
-                                   :checker checker))
-                                 (_
-                                  (flycheck-error-new-at
-                                   1 nil 'warning
-                                   (format "Unexpected org-lint format: %S" e)
-                                   :checker checker))))
-                             (org-lint)))))
-                 (funcall callback 'finished errors))
+               (progn
+                 ;; Loaded before the let binds its registry: were the
+                 ;; load to happen inside, the registrations would land
+                 ;; in the binding and unwind away with it.
+                 (require 'org-lint)
+                 ;; org-lint's list ARG is an allowlist, so a
+                 ;; denylist has to read the registry to compute the
+                 ;; complement anyway; binding it keeps one source of
+                 ;; truth and leaves the nil-ARG call path alone.
+                 (let* ((org-lint--checkers
+                         (if flycheck-org-lint-disabled-checkers
+                             (seq-remove
+                              (lambda (c)
+                                (memq (org-lint-checker-name c)
+                                      flycheck-org-lint-disabled-checkers))
+                              org-lint--checkers)
+                           org-lint--checkers))
+                        (errors
+                         (delq nil
+                               (mapcar
+                                (lambda (e)
+                                  (pcase e
+                                    (`(,_n [,line ,_trust ,desc ,_checker])
+                                     (flycheck-error-new-at
+                                      (if (stringp line)
+                                          (string-to-number line)
+                                        line)
+                                      nil 'info desc
+                                      :checker checker))
+                                    (_
+                                     (flycheck-error-new-at
+                                      1 nil 'warning
+                                      (format "Unexpected org-lint format: %S" e)
+                                      :checker checker))))
+                                (org-lint)))))
+                   (funcall callback 'finished errors)))
              (error (funcall callback 'errored
                              (error-message-string err)))))
   :modes '(org-mode)
@@ -13897,7 +13930,18 @@ has access to all installed packages and user configuration."
                      :message (if (fboundp 'org-lint)
                                   (format "yes (Org %s)" org-version)
                                 "no")
-                     :face (if (fboundp 'org-lint) 'success 'warning))))))
+                     :face (if (fboundp 'org-lint) 'success 'warning))
+                    ;; The answer to "where did my id-link warnings go?"
+                    (flycheck-verification-result-new
+                     :label "Disabled org-lint checkers"
+                     :message (if flycheck-org-lint-disabled-checkers
+                                  (format "%s (see %s)"
+                                          (mapconcat #'symbol-name
+                                                     flycheck-org-lint-disabled-checkers
+                                                     ", ")
+                                          "flycheck-org-lint-disabled-checkers")
+                                "none")
+                     :face 'success)))))
 
 (defun flycheck-ember-template--check-for-config (&rest _ignored)
   "Check the required config file is available up the file system."

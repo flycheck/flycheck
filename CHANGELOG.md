@@ -38,6 +38,7 @@
 
 ### Bugs fixed
 
+- [#2325](https://github.com/flycheck/flycheck/pull/2325): Stop `org-lint` freezing Emacs on large Org setups ([#2161](https://github.com/flycheck/flycheck/issues/2161)): its `invalid-id-link` checker rescans every org-id file in the session on each check, so it sits in the new `flycheck-org-lint-disabled-checkers` by default; set that to nil to run everything org-lint has.
 - [#2324](https://github.com/flycheck/flycheck/pull/2324): Keep the errors earlier checkers in a chain reported when a later checker dies by a signal, and say what killed it, instead of clearing the buffer's whole result ([#1881](https://github.com/flycheck/flycheck/issues/1881)).
 - [#2323](https://github.com/flycheck/flycheck/pull/2323): Fix `flycheck-next-error` cycling forever between two errors when one's region sits inside the other's, and `flycheck-previous-error` skipping the inner one ([#1781](https://github.com/flycheck/flycheck/issues/1781)). Language servers report overlapping regions routinely, so the 2020 bug bites much harder today.
 - [#2299](https://github.com/flycheck/flycheck/pull/2299): Show an annotation straight away when you jump to an error, rather than on the next thing you do ([#2293](https://github.com/flycheck/flycheck/issues/2293)). Annotations are built for the visible part of the buffer from `post-command-hook`, which runs before redisplay, so a jump that sends point off screen was building them while the window still described where it had been.

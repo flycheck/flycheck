@@ -947,6 +947,16 @@ to view the docstring of the syntax checker.  Likewise, you may use
       The checker is enabled by default when ``org-lint`` is available (Org mode
       9.0 or later).
 
+      .. defcustom:: flycheck-org-lint-disabled-checkers
+
+         A list of org-lint checkers (symbols naming entries in
+         ``org-lint--checkers``) not to run.  By default the
+         ``invalid-id-link`` checker is disabled: it rescans every org-id
+         file Emacs knows about on each check, in the current Emacs
+         process, which freezes Emacs for tens of seconds per check on a
+         large Org setup such as org-roam.  Set to ``nil`` to run every
+         checker org-lint has.
+
       See the ``org-lint`` documentation in Org mode for details about the checks
       performed.
 
