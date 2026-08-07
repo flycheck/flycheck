@@ -42,7 +42,27 @@
 
     (flycheck-buttercup-def-parse-test textlint "language/text/text.txt"
       '(1 7 error "\"very\" is a weasel word and can weaken meaning"
-          :id "write-good")))
+          :id "write-good"))
+
+    (it "carries the fixes a fixable rule emits"
+      ;; textlint's JSON rides the eslint parser, whose fix extraction
+      ;; therefore works here too; this pins that compatibility, since
+      ;; nothing else exercises it.  The fix's range is a pair of
+      ;; absolute character offsets, wider here than the diagnostic's.
+      (flycheck-buttercup-with-temp-buffer
+        (insert "This is a occurence of a word.\n")
+        (let* ((output "[{\"messages\": [
+  {\"type\": \"lint\", \"ruleId\": \"common-misspellings\",
+   \"message\": \"This is a commonly misspelled word. Correct it to occurrence\",
+   \"line\": 1, \"column\": 11, \"range\": [10, 11], \"severity\": 2,
+   \"fix\": {\"range\": [10, 19], \"text\": \"occurrence\"}}],
+  \"filePath\": \"text.txt\"}]")
+               (errs (flycheck-parse-eslint output 'textlint (current-buffer)))
+               (fix (flycheck-error-fix (car errs))))
+          (expect fix :not :to-be nil)
+          (flycheck-apply-fix fix)
+          (expect (buffer-string)
+                  :to-equal "This is a occurrence of a word.\n")))))
 
   (describe "the textlint checker command"
     (it "appends flycheck-textlint-args before the source file"
