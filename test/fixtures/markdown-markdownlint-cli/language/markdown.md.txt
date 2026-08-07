@@ -8,7 +8,7 @@
       "first-line-h1"
     ],
     "ruleDescription": "First line in a file should be a top-level heading",
-    "ruleInformation": "https://github.com/DavidAnson/markdownlint/blob/v0.40.0/doc/md041.md",
+    "ruleInformation": "https://github.com/DavidAnson/markdownlint/blob/v0.41.1/doc/md041.md",
     "errorDetail": null,
     "errorContext": "## Second Header First",
     "errorRange": null,
@@ -23,7 +23,7 @@
       "no-multiple-blanks"
     ],
     "ruleDescription": "Multiple consecutive blank lines",
-    "ruleInformation": "https://github.com/DavidAnson/markdownlint/blob/v0.40.0/doc/md012.md",
+    "ruleInformation": "https://github.com/DavidAnson/markdownlint/blob/v0.41.1/doc/md012.md",
     "errorDetail": "Expected: 1; Actual: 2",
     "errorContext": null,
     "errorRange": null,
@@ -40,7 +40,7 @@
       "no-trailing-spaces"
     ],
     "ruleDescription": "Trailing spaces",
-    "ruleInformation": "https://github.com/DavidAnson/markdownlint/blob/v0.40.0/doc/md009.md",
+    "ruleInformation": "https://github.com/DavidAnson/markdownlint/blob/v0.41.1/doc/md009.md",
     "errorDetail": "Expected: 0 or 2; Actual: 7",
     "errorContext": null,
     "errorRange": [

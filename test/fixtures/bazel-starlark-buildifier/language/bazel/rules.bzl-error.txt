@@ -1,0 +1,2 @@
+<stdin>:1:11: syntax error near !
+<stdin> # reformat

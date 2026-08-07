@@ -1,0 +1,16 @@
+error: No compatible architectures found for build
+============================ rpmlint session starts ============================
+rpmlint: 2.7.0
+configuration:
+    /usr/lib/python3/dist-packages/rpmlint/configdefaults.toml
+checks: 27, packages: 1
+
+rpm.spec: E: superfluous-%clean-section
+rpm.spec: E: specfile-error error: No compatible architectures found for build
+rpm.spec: E: specfile-error error: query of specfile rpm.spec failed, can't parse
+rpm.spec: E: specfile-error can't parse specfile rpm.spec
+rpm.spec: W: no-buildroot-tag
+rpm.spec: W: no-%check-section
+rpm.spec:22: W: macro-in-%changelog %{_bindir}
+rpm.spec:7: E: buildarch-instead-of-exclusivearch-tag x86_64
+ 0 packages and 1 specfiles checked; 5 errors, 3 warnings, 0 filtered, 5 badness; has taken 0.0 s 

@@ -1,0 +1,5 @@
+[31m[31m-- [E040] Syntax Error: syntax-error.scala:3:7 [0m[0m
+[31m3 |[0m[33mobject[0m {
+[31m[31m  |[0m       ^[0m
+[31m  |[0m       an identifier expected, but '{' found
+1 error found

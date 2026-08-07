@@ -27,11 +27,31 @@
 (require 'flycheck-buttercup)
 (require 'test-helpers)
 
+(defun test-scala/scalac-major-version ()
+  "The major version of the scalac the `scala' checker would run, or nil."
+  (when-let* ((scalac (flycheck-find-checker-executable 'scala)))
+    (with-temp-buffer
+      ;; scalac prints its version to stderr
+      (call-process scalac nil (list t t) nil "-version")
+      (goto-char (point-min))
+      (when (re-search-forward "version \\([0-9]+\\)\\." nil 'noerror)
+        (string-to-number (match-string 1))))))
+
 (describe "Language Scala"
   (flycheck-buttercup-def-checker-test scala scala nil
+    (assume (eql (test-scala/scalac-major-version) 2)
+            "The installed scalac is not Scala 2")
     (flycheck-buttercup-should-syntax-check
      "language/scala/syntax-error.scala" 'scala-mode
      '(3 nil error "identifier expected but '{' found." :checker scala)))
+
+  (flycheck-buttercup-def-checker-test scala scala scala3
+    (assume (eql (test-scala/scalac-major-version) 3)
+            "The installed scalac is not Scala 3")
+    (flycheck-buttercup-should-syntax-check
+     "language/scala/syntax-error.scala" 'scala-mode
+     '(3 8 error "an identifier expected, but '{' found"
+         :id "E040" :checker scala)))
 
   (flycheck-buttercup-def-checker-test scala-scalastyle scala error
     (let ((flycheck-scalastyle-config "scalastyle.xml"))
@@ -56,6 +76,9 @@
   (describe "reading scalac's output"
     ;; The E008 and E019 samples are verbatim from the reports in
     ;; https://github.com/flycheck/flycheck/pull/2106
+
+    (flycheck-buttercup-def-parse-test scala "language/scala/syntax-error.scala"
+      '(3 8 error "an identifier expected, but '{' found" :id "E040"))
 
     (it "reads a Scala 3 box"
       (expect

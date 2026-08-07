@@ -96,13 +96,15 @@ RUN arch="$(dpkg --print-architecture)" \
     && tar -C /usr/local -xzf /tmp/go.tar.gz && rm /tmp/go.tar.gz \
     && go version
 
-# The Go checkers, which are all `go install'.
-RUN go install github.com/kisielk/errcheck@latest \
-    && go install honnef.co/go/tools/cmd/staticcheck@latest \
-    && go install github.com/mdempsky/unconvert@latest \
-    && go install github.com/bazelbuild/buildtools/buildifier@latest \
-    && go install github.com/google/go-jsonnet/cmd/jsonnet@latest \
-    && go install github.com/rhysd/actionlint/cmd/actionlint@latest \
+# The Go checkers, which are all `go install'.  GOBIN points outside
+# /root, which is unreadable to the uid the recording runs as; a tool
+# under /root/go/bin exists and is invisible at the same time.
+RUN GOBIN=/usr/local/bin go install github.com/kisielk/errcheck@latest \
+    && GOBIN=/usr/local/bin go install honnef.co/go/tools/cmd/staticcheck@latest \
+    && GOBIN=/usr/local/bin go install github.com/mdempsky/unconvert@latest \
+    && GOBIN=/usr/local/bin go install github.com/bazelbuild/buildtools/buildifier@latest \
+    && GOBIN=/usr/local/bin go install github.com/google/go-jsonnet/cmd/jsonnet@latest \
+    && GOBIN=/usr/local/bin go install github.com/rhysd/actionlint/cmd/actionlint@latest \
     && rm -rf /root/.cache/go-build
 
 # hadolint ships as a single binary, named for the architecture the way
