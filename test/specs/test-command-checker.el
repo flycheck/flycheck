@@ -162,6 +162,27 @@ afterwards."
           (expect (shut-up (flycheck-buttercup-should-syntax-check-in-buffer))
                   :to-throw 'flycheck-buttercup-suspicious-checker))))
 
+    (it "keeps earlier chain output when a later checker dies by signal"
+      ;; A crashed checker used to report `interrupted', which cleared
+      ;; everything the checkers before it in the chain had found.  See
+      ;; #1881.
+      (assume (not (memq system-type '(windows-nt ms-dos cygwin)))
+              "Signals work differently on Windows")
+      (assume (executable-find "sh") "No sh to kill")
+      (assume (or (executable-find "python3") (executable-find "python")))
+      (cl-letf* ((flycheck-checkers '(chain-first chain-killed))
+                 (flycheck-checker 'chain-first)
+                 ((symbol-plist 'chain-first) flycheck-test--chain-first)
+                 ((symbol-plist 'chain-killed) flycheck-test--chain-killed))
+        (flycheck-buttercup-with-temp-buffer
+          (chain-crash-mode)
+          (insert "hello\n")
+          (shut-up (flycheck-buttercup-buffer-sync))
+          (expect (mapcar #'flycheck-error-message flycheck-current-errors)
+                  :to-equal '("first checker finding"))
+          (expect (mapcar #'flycheck-error-checker flycheck-current-errors)
+                  :to-equal '(chain-first)))))
+
     (it "reports errors returned by the :handle-suspicious function"
       (assume (or (executable-find "python3") (executable-find "python")))
       (cl-letf* ((flycheck-checker 'suspicious-exit)

@@ -38,6 +38,7 @@
 
 ### Bugs fixed
 
+- [#2324](https://github.com/flycheck/flycheck/pull/2324): Keep the errors earlier checkers in a chain reported when a later checker dies by a signal, and say what killed it, instead of clearing the buffer's whole result ([#1881](https://github.com/flycheck/flycheck/issues/1881)).
 - [#2323](https://github.com/flycheck/flycheck/pull/2323): Fix `flycheck-next-error` cycling forever between two errors when one's region sits inside the other's, and `flycheck-previous-error` skipping the inner one ([#1781](https://github.com/flycheck/flycheck/issues/1781)). Language servers report overlapping regions routinely, so the 2020 bug bites much harder today.
 - [#2299](https://github.com/flycheck/flycheck/pull/2299): Show an annotation straight away when you jump to an error, rather than on the next thing you do ([#2293](https://github.com/flycheck/flycheck/issues/2293)). Annotations are built for the visible part of the buffer from `post-command-hook`, which runs before redisplay, so a jump that sends point off screen was building them while the window still described where it had been.
 - [#2299](https://github.com/flycheck/flycheck/pull/2299): Keep a `sideline` annotation off the column the continuation glyph needs, so a message that fits stops spilling onto the next line by one character ([#2292](https://github.com/flycheck/flycheck/issues/2292)). Without a right fringe to draw that glyph in, as on a terminal, the rightmost column is not text's to use.
