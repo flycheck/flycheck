@@ -38,6 +38,7 @@
 
 ### Bugs fixed
 
+- [#2327](https://github.com/flycheck/flycheck/pull/2327): Read Scala 3's diagnostics. The compiler draws each of them in a box under a `-- [E008] Not Found Error: file:line:column` header, with unconditional coloring, so the `scala` checker has reported nothing on Scala 3 since dotty shipped. Scala 2's plain output is still read ([#2179](https://github.com/flycheck/flycheck/issues/2179)).
 - [#2325](https://github.com/flycheck/flycheck/pull/2325): Stop `org-lint` freezing Emacs on large Org setups ([#2161](https://github.com/flycheck/flycheck/issues/2161)): its `invalid-id-link` checker rescans every org-id file in the session on each check, so it sits in the new `flycheck-org-lint-disabled-checkers` by default; set that to nil to run everything org-lint has.
 - [#2324](https://github.com/flycheck/flycheck/pull/2324): Keep the errors earlier checkers in a chain reported when a later checker dies by a signal, and say what killed it, instead of clearing the buffer's whole result ([#1881](https://github.com/flycheck/flycheck/issues/1881)).
 - [#2323](https://github.com/flycheck/flycheck/pull/2323): Fix `flycheck-next-error` cycling forever between two errors when one's region sits inside the other's, and `flycheck-previous-error` skipping the inner one ([#1781](https://github.com/flycheck/flycheck/issues/1781)). Language servers report overlapping regions routinely, so the 2020 bug bites much harder today.
