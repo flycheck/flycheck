@@ -6307,6 +6307,29 @@ overlays."
             (flycheck-error-level-severity (flycheck-error-level err)))
       t)))
 
+(defun flycheck--error-start-positions ()
+  "Return the sorted, unique starts of the interesting error overlays.
+
+An overlay's start is the only place navigation may land, and errors
+sharing a start count as one stop.  Scanning property-change runs
+instead used to split an overlay around an error nested inside it, so
+the outer error's tail read as one more error to visit and navigation
+jumped backwards to its start, forever (#1781).
+
+Empty overlays, such as an error whose highlighted text was deleted,
+are no stops: they cover no characters, so the property scan never
+saw them either, and a stop nothing at point can be jumped to would
+strand the navigation."
+  (seq-uniq
+   (sort (delq nil
+               (mapcar (lambda (ov)
+                         (when (and (< (overlay-start ov) (overlay-end ov))
+                                    (flycheck-error-level-interesting-p
+                                     (overlay-get ov 'flycheck-error)))
+                           (overlay-start ov)))
+                       (flycheck-overlays-in (point-min) (point-max))))
+         #'<)))
+
 (defun flycheck-next-error-pos (n &optional reset)
   "Get the position of the N-th next error.
 
@@ -6319,40 +6342,15 @@ there is none.  If N is zero, return `point', or `point-min' if
 RESET is non-nil."
   (let ((n (or n 1))
         (pos (if reset (point-min) (point))))
-    (if (>= n 0)
-        ;; Search forwards
-        (while (and pos (> n 0))
-          (setq n (1- n))
-          (when (get-char-property pos 'flycheck-error)
-            ;; Move beyond from the current error if any
-            (setq pos (next-single-char-property-change pos 'flycheck-error)))
-          (while (not (or (= pos (point-max))
-                          (flycheck-error-level-interesting-at-pos-p pos)))
-            ;; Scan for the next error
-            (setq pos (next-single-char-property-change pos 'flycheck-error)))
-          (when (and (= pos (point-max))
-                     (not (flycheck-error-level-interesting-at-pos-p pos)))
-            ;; If we reached the end of the buffer, but no error, we didn't find
-            ;; any
-            (setq pos nil)))
-      ;; Search backwards
-      (while (and pos (< n 0))
-        (setq n (1+ n))
-        ;; Loop until we find an error.  We need to check the position *before*
-        ;; the current one, because `previous-single-char-property-change'
-        ;; always moves to the position *of* the change.
-        (while (not (or (= pos (point-min))
-                        (flycheck-error-level-interesting-at-pos-p (1- pos))))
-          (setq pos (previous-single-char-property-change pos 'flycheck-error)))
-        (when (and (= pos (point-min))
-                   (not (flycheck-error-level-interesting-at-pos-p pos)))
-          ;; We didn't find any error.
-          (setq pos nil))
-        (when pos
-          ;; We found an error, so move to its beginning
-          (setq pos (previous-single-char-property-change pos
-                                                          'flycheck-error)))))
-    pos))
+    (cond
+     ((> n 0)
+      (nth (1- n) (seq-filter (lambda (p) (> p pos))
+                              (flycheck--error-start-positions))))
+     ((< n 0)
+      (nth (1- (- n))
+           (nreverse (seq-filter (lambda (p) (< p pos))
+                                 (flycheck--error-start-positions)))))
+     (t pos))))
 
 (defun flycheck-next-error-function (n reset)
   "Visit the N-th error from the current point.
@@ -6364,7 +6362,16 @@ position.
 
 Intended for use with `next-error-function'."
   (if-let* ((pos (flycheck-next-error-pos n reset))
-            (err (get-char-property pos 'flycheck-error)))
+            ;; The error whose region starts here, not whichever overlay
+            ;; tops the stack: at a nested error's start the outer error
+            ;; is above it, and jumping to that would move backwards.
+            (err (or (seq-some (lambda (ov)
+                                 (when (= (overlay-start ov) pos)
+                                   (let ((e (overlay-get ov 'flycheck-error)))
+                                     (and (flycheck-error-level-interesting-p e)
+                                          e))))
+                               (flycheck-overlays-at pos))
+                     (get-char-property pos 'flycheck-error))))
       (flycheck-jump-to-error err)
     (user-error "No more Flycheck errors")))
 

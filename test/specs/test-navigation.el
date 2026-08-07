@@ -432,4 +432,81 @@
           (flycheck-first-error 2)
           (expect (point) :to-be-at-flycheck-error 2))))))
 
+(defun flycheck-test--nested-nav-setup ()
+  "Give the buffer a nested error pair on line 1 and a plain error on line 3."
+  (insert "nested pair\nplain line\nlater error\n")
+  ;; The variable alone: running the mode would kick off a real check
+  (setq-local flycheck-mode t)
+  (pcase-dolist (`(,line ,col ,end ,level ,msg)
+                 '((1 2 10 warning "outer")
+                   (1 4 7 error "inner")
+                   (3 1 6 error "later")))
+    (let ((err (flycheck-error-new-at line col level msg
+                                      :end-line line :end-column end
+                                      :buffer (current-buffer)
+                                      :checker 'emacs-lisp)))
+      (push err flycheck-current-errors)
+      (flycheck-add-overlay err))))
+
+(describe "Navigation among nested errors"
+  ;; A region nested inside another used to read as one more error each
+  ;; time the outer overlay resumed past it: forward navigation cycled
+  ;; between the two starts forever, and backward silently skipped the
+  ;; inner one.  See #1781.
+
+  (it "visits the nested pair as two stops, then moves on and stops"
+    (flycheck-buttercup-with-temp-buffer
+      (flycheck-test--nested-nav-setup)
+      (goto-char (point-min))
+      (flycheck-next-error)
+      (expect (point) :to-equal (flycheck-line-column-to-position 1 2))
+      (flycheck-next-error)
+      (expect (point) :to-equal (flycheck-line-column-to-position 1 4))
+      (flycheck-next-error)
+      (expect (point) :to-equal (flycheck-line-column-to-position 3 1))
+      (let ((err (should-error (flycheck-next-error) :type 'user-error)))
+        (expect (cadr err) :to-equal "No more Flycheck errors"))))
+
+  (it "visits the inner error backwards too"
+    (flycheck-buttercup-with-temp-buffer
+      (flycheck-test--nested-nav-setup)
+      (goto-char (point-max))
+      (flycheck-previous-error)
+      (expect (point) :to-equal (flycheck-line-column-to-position 3 1))
+      (flycheck-previous-error)
+      (expect (point) :to-equal (flycheck-line-column-to-position 1 4))
+      (flycheck-previous-error)
+      (expect (point) :to-equal (flycheck-line-column-to-position 1 2))
+      (let ((err (should-error (flycheck-previous-error) :type 'user-error)))
+        (expect (cadr err) :to-equal "No more Flycheck errors"))))
+
+  (it "counts errors sharing a start as one stop"
+    (flycheck-buttercup-with-temp-buffer
+      (flycheck-test--nested-nav-setup)
+      ;; A second error at the outer error's exact start
+      (let ((err (flycheck-error-new-at 1 2 'error "twin"
+                                        :end-line 1 :end-column 5
+                                        :buffer (current-buffer)
+                                        :checker 'emacs-lisp)))
+        (push err flycheck-current-errors)
+        (flycheck-add-overlay err))
+      (goto-char (point-min))
+      (flycheck-next-error 2)
+      (expect (point) :to-equal (flycheck-line-column-to-position 1 4))))
+
+  (it "walks past an error whose highlighted text was deleted"
+    ;; Deleting the region collapses the overlay to nothing; a stop
+    ;; there could only fall back to the outer error and jump backwards
+    (flycheck-buttercup-with-temp-buffer
+      (flycheck-test--nested-nav-setup)
+      (delete-region (flycheck-line-column-to-position 1 4)
+                     (flycheck-line-column-to-position 1 7))
+      (goto-char (point-min))
+      (flycheck-next-error)
+      (expect (point) :to-equal (flycheck-line-column-to-position 1 2))
+      (flycheck-next-error)
+      (expect (point) :to-equal (flycheck-line-column-to-position 3 1))
+      (let ((err (should-error (flycheck-next-error) :type 'user-error)))
+        (expect (cadr err) :to-equal "No more Flycheck errors")))))
+
 ;;; test-navigation.el ends here
