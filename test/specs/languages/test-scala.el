@@ -73,6 +73,25 @@ one error found
               :id "E008" :checker 'scala :buffer (current-buffer)
               :filename "/home/cpc/scala3-ansi-colors/src/main/scala/Main.scala"))))
 
+    (it "reads a header too long for any padding dashes"
+      ;; The dashes pad the header to the terminal width, so the long
+      ;; temporary path of a real check leaves none, and every live
+      ;; check parsed nothing while the short sample paths passed.
+      (expect
+       (flycheck-buttercup-parse
+        'scala
+        "-- [E019] Syntax Error: /var/folders/1l/xqbgb73s21vd3wrrp_tyxmy00000gn/T/flycheckB2ap0M/averyveryverylongdirectoryname/anotherlongsubdirectoryname/scala-test.scala:3:17
+3 |  implicit def mi
+  |                 ^
+  |                 Missing return type
+1 error found
+")
+       :to-be-equal-flycheck-errors
+       (list (flycheck-error-new-at
+              3 18 'error "Missing return type"
+              :id "E019" :checker 'scala :buffer (current-buffer)
+              :filename "/var/folders/1l/xqbgb73s21vd3wrrp_tyxmy00000gn/T/flycheckB2ap0M/averyveryverylongdirectoryname/anotherlongsubdirectoryname/scala-test.scala"))))
+
     (it "skips the caret line and the hint about -explain"
       (expect
        (flycheck-buttercup-parse
