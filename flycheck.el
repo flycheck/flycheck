@@ -15095,7 +15095,19 @@ See URL `https://oxc.rs/'."
     (flycheck-sanitize-errors
      (flycheck-dequalify-error-ids errors)))
   :modes (js-mode js-jsx-mode js2-mode js2-jsx-mode js3-mode rjsx-mode
-                  typescript-mode js-ts-mode typescript-ts-mode tsx-ts-mode))
+                  typescript-mode js-ts-mode typescript-ts-mode tsx-ts-mode)
+  :error-explainer
+  ;; Ids come as plugin(rule), and the docs nest each rule's page
+  ;; under its plugin
+  (flycheck-error-explainer-from-url
+   "https://oxc.rs/docs/guide/usage/linter/rules/%s.html"
+   (lambda (id)
+     (when (string-match (rx string-start
+                             (group (one-or-more (not (any "("))))
+                             "(" (group (one-or-more (not (any ")")))) ")"
+                             string-end)
+                         id)
+       (concat (match-string 1 id) "/" (match-string 2 id))))))
 
 (flycheck-def-args-var flycheck-javascript-standard-args javascript-standard
   :package-version '(flycheck . "39"))
@@ -17013,7 +17025,11 @@ See URL `https://pypi.org/project/pymarkdownlnt/'."
     (flycheck-sanitize-errors
      (flycheck-remove-error-file-names "(string)" errors)))
   :modes (markdown-mode gfm-mode)
-  :next-checkers ((warning . proselint)))
+  :next-checkers ((warning . proselint))
+  :error-explainer
+  (flycheck-error-explainer-from-url
+   "https://github.com/jackdewinter/pymarkdown/blob/main/docs/rules/rule_%s.md"
+   #'downcase))
 
 (flycheck-define-checker nix
   "Nix checker using nix-instantiate.
@@ -17343,7 +17359,16 @@ See URL `https://github.com/troessner/reek'."
             (config-file "--config" flycheck-reek-config)
             source)
   :error-parser flycheck-parse-reek
-  :modes (enh-ruby-mode ruby-mode ruby-ts-mode))
+  :modes (enh-ruby-mode ruby-mode ruby-ts-mode)
+  :error-explainer
+  ;; The docs hyphenate the smell's CamelCase name:
+  ;; InstanceVariableAssumption -> Instance-Variable-Assumption.md
+  (flycheck-error-explainer-from-url
+   "https://github.com/troessner/reek/blob/master/docs/%s.md"
+   (lambda (id)
+     ;; Folded search would let [a-z] take the capitals too
+     (let ((case-fold-search nil))
+       (replace-regexp-in-string "\\([a-z]\\)\\([A-Z]\\)" "\\1-\\2" id t)))))
 
 (flycheck-define-checker ruby
   "A Ruby syntax checker using the standard Ruby interpreter.
@@ -18458,7 +18483,13 @@ See URL `https://github.com/terraform-linters/tflint'."
             (eval flycheck-tflint-args))
   :error-parser flycheck-parse-tflint-linter
   :predicate flycheck-buffer-saved-p
-  :modes (terraform-mode terraform-ts-mode))
+  :modes (terraform-mode terraform-ts-mode)
+  :error-explainer
+  ;; Rules come from per-provider rulesets; only the terraform ruleset
+  ;; keeps a documentation file per rule, so the rest are skipped
+  (flycheck-error-explainer-from-url
+   "https://github.com/terraform-linters/tflint-ruleset-terraform/blob/main/docs/rules/%s.md"
+   (lambda (id) (and (string-prefix-p "terraform_" id) id))))
 
 (flycheck-def-option-var flycheck-chktex-extra-flags nil tex-chktex
   "A list of extra arguments to give to chktex.
@@ -18759,7 +18790,13 @@ See URL `https://github.com/adrienverge/yamllint'."
             "stdin:" line ":" column ": [warning] "
             (message) line-end))
   :modes (yaml-mode yaml-ts-mode)
-  :next-checkers ((warning . cwl)))
+  :next-checkers ((warning . cwl))
+  :error-explainer
+  ;; The rule pages anchor on the module name, which spells the rule
+  ;; with underscores where the reported id has hyphens
+  (flycheck-error-explainer-from-url
+   "https://yamllint.readthedocs.io/en/stable/rules.html#module-yamllint.rules.%s"
+   (lambda (id) (string-replace "-" "_" id))))
 
 (provide 'flycheck)
 
