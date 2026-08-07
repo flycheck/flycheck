@@ -51,6 +51,140 @@
       (let ((flycheck-scalastyle-config nil)
             (flycheck-scalastyle-args '("--quiet" "true")))
         (expect (flycheck-checker-substituted-arguments 'scala-scalastyle)
-                :to-contain "--quiet")))))
+                :to-contain "--quiet"))))
+
+  (describe "reading scalac's output"
+    ;; The E008 and E019 samples are verbatim from the reports in
+    ;; https://github.com/flycheck/flycheck/pull/2106
+
+    (it "reads a Scala 3 box"
+      (expect
+       (flycheck-buttercup-parse
+        'scala
+        "-- [E008] Not Found Error: /home/cpc/scala3-ansi-colors/src/main/scala/Main.scala:5:43 --------------------------
+5 |def msg =  \"I was compiled by Scala 3. :)\" / 2
+  |           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |           value / is not a member of String
+one error found
+")
+       :to-be-equal-flycheck-errors
+       (list (flycheck-error-new-at
+              5 44 'error "value / is not a member of String"
+              :id "E008" :checker 'scala :buffer (current-buffer)
+              :filename "/home/cpc/scala3-ansi-colors/src/main/scala/Main.scala"))))
+
+    (it "skips the caret line and the hint about -explain"
+      (expect
+       (flycheck-buttercup-parse
+        'scala
+        "-- [E019] Syntax Error: /tmp/flycheckVLFiiu/foo.scala:2:15 ---------------------
+2 |implicit def mi
+  |               ^
+  |               Missing return type
+  |
+  | longer explanation available when compiling with `-explain`
+1 error found
+")
+       :to-be-equal-flycheck-errors
+       (list (flycheck-error-new-at
+              2 16 'error "Missing return type"
+              :id "E019" :checker 'scala :buffer (current-buffer)
+              :filename "/tmp/flycheckVLFiiu/foo.scala"))))
+
+    (it "reads through the colors Scala 3 always prints"
+      (expect
+       (flycheck-buttercup-parse
+        'scala
+        (concat
+         "\e[31m\e[31m-- [E019] Syntax Error: /tmp/flycheckVLFiiu/foo.scala"
+         ":2:15 ---------------------\e[0m\e[0m\n"
+         "\e[31m2 |\e[0m\e[33mimplicit\e[0m \e[33mdef\e[0m \e[36mmi\e[0m\n"
+         "\e[31m\e[31m  |\e[0m               ^\e[0m\n"
+         "\e[31m  |\e[0m               Missing return type\n"
+         "\e[31m  |\e[0m\n"
+         "\e[31m  |\e[0m longer explanation available when compiling"
+         " with ‘-explain’\n"
+         "1 error found\n"))
+       :to-be-equal-flycheck-errors
+       (list (flycheck-error-new-at
+              2 16 'error "Missing return type"
+              :id "E019" :checker 'scala :buffer (current-buffer)
+              :filename "/tmp/flycheckVLFiiu/foo.scala"))))
+
+    (it "reads a header without an id"
+      (expect
+       (flycheck-buttercup-parse
+        'scala
+        "-- Warning: /tmp/flycheckVLFiiu/foo.scala:3:8 ----------------------------------
+3 |@nowarn(\"id\")
+  |        ^^^^
+  |        Invalid message filter
+1 warning found
+")
+       :to-be-equal-flycheck-errors
+       (list (flycheck-error-new-at
+              3 9 'warning "Invalid message filter"
+              :checker 'scala :buffer (current-buffer)
+              :filename "/tmp/flycheckVLFiiu/foo.scala"))))
+
+    (it "reads every box, keeping a message's lines together"
+      (expect
+       (flycheck-buttercup-parse
+        'scala
+        "-- [E007] Type Mismatch Error: /tmp/flycheckVLFiiu/foo.scala:3:13 --------------
+3 |val i: Int = \"42\"
+  |             ^^^^
+  |             Found:    (\"42\" : String)
+  |             Required: Int
+  |
+  | longer explanation available when compiling with `-explain`
+-- [E198] Unused Symbol Warning: /tmp/flycheckVLFiiu/foo.scala:1:7 -------------
+1 |import scala.util.Try
+  |       ^^^^^^^^^^^^^^
+  |       unused import
+1 warning found
+1 error found
+")
+       :to-be-equal-flycheck-errors
+       (list (flycheck-error-new-at
+              3 14 'error "Found:    (\"42\" : String)\nRequired: Int"
+              :id "E007" :checker 'scala :buffer (current-buffer)
+              :filename "/tmp/flycheckVLFiiu/foo.scala")
+             (flycheck-error-new-at
+              1 8 'warning "unused import"
+              :id "E198" :checker 'scala :buffer (current-buffer)
+              :filename "/tmp/flycheckVLFiiu/foo.scala"))))
+
+    (it "skips indented source and keeps a wrapped message aligned"
+      (expect
+       (flycheck-buttercup-parse
+        'scala
+        "-- [E007] Type Mismatch Error: /tmp/flycheckVLFiiu/foo.scala:4:2 ---------------
+4 |  foo(bar)
+  |  ^^^^^^^^
+  |  Found:    List[
+  |              Int]
+  |  Required: Int
+1 error found
+")
+       :to-be-equal-flycheck-errors
+       (list (flycheck-error-new-at
+              4 3 'error "Found:    List[\n            Int]\nRequired: Int"
+              :id "E007" :checker 'scala :buffer (current-buffer)
+              :filename "/tmp/flycheckVLFiiu/foo.scala"))))
+
+    (it "falls back to the plain form Scala 2 prints"
+      (expect
+       (flycheck-buttercup-parse
+        'scala
+        "/tmp/flycheckVLFiiu/foo.scala:3: error: identifier expected but '{' found.
+object {
+       ^
+")
+       :to-be-equal-flycheck-errors
+       (list (flycheck-error-new-at
+              3 nil 'error "identifier expected but '{' found."
+              :checker 'scala :buffer (current-buffer)
+              :filename "/tmp/flycheckVLFiiu/foo.scala"))))))
 
 ;;; test-scala.el ends here

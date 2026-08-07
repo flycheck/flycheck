@@ -17712,14 +17712,109 @@ CHECKER and BUFFER are used to construct the error objects."
                 errors))
     (json-parse-error nil)))
 
+(defconst flycheck-scala--diagnostic-rx
+  (rx line-start "-- "
+      ;; The bracketed id is usually there, but plain `-- Warning:' exists
+      (optional "[" (group (one-or-more (any "A-Z" "0-9"))) "] ")
+      (zero-or-more (not (any ":" "\n")))
+      (group (or "Error" "Warning")) ": "
+      (group (one-or-more (not (any "\n"))))
+      ":" (group (one-or-more digit)) ":" (group (one-or-more digit))
+      " " (one-or-more "-") "\n"
+      ;; The gutter under the header, holding the echoed source, the
+      ;; caret marks and the message
+      (group (zero-or-more (zero-or-more (any " " digit)) "|"
+                           (zero-or-more (not (any "\n"))) "\n")))
+  "Matches one diagnostic in the box format Scala 3 introduced.")
+
+(defconst flycheck-scala--gutter-rx
+  (rx string-start (group (zero-or-more (any " " digit))) "|"
+      (group (zero-or-more not-newline)))
+  "Splits one gutter line into its prefix and its content.
+
+The prefix spells out the source's line number when the line
+echoes source, and holds only padding otherwise.")
+
+(defun flycheck-scala--message-line (line)
+  "Return the text gutter LINE contributes to the message, or nil.
+
+The echoed source keeps its line number in the gutter, which is
+what tells it apart from the message; the caret marks under it
+and the hint about `-explain' carry no message text either.  The
+content keeps its indentation, so a message spanning lines can be
+dedented as a whole."
+  (when (string-match flycheck-scala--gutter-rx line)
+    (let ((prefix (match-string 1 line))
+          (content (match-string 2 line)))
+      (unless (or (string-match-p (rx digit) prefix)
+                  (string-match-p (rx string-start (zero-or-more " ")
+                                      (one-or-more "^")
+                                      (zero-or-more " ") string-end)
+                                  content)
+                  (string-match-p (rx string-start (zero-or-more " ")
+                                      "longer explanation available")
+                                  content))
+        content))))
+
+(defun flycheck-parse-scala--boxed (output checker buffer)
+  "Parse the diagnostics Scala 3 draws in a box out of OUTPUT.
+
+CHECKER and BUFFER are as in `flycheck-parse-output'.
+
+The header names the position, so the caret under the echoed
+source is only decoration here.  Scala counts columns from zero
+and Emacs from one.  The message ends at the blank separator
+line, after which only trailers like the hint about `-explain'
+follow."
+  (let (errors (start 0))
+    (while (string-match flycheck-scala--diagnostic-rx output start)
+      (setq start (match-end 0))
+      (let ((id (match-string 1 output))
+            (level (match-string 2 output))
+            (file (match-string 3 output))
+            (line (string-to-number (match-string 4 output)))
+            (column (string-to-number (match-string 5 output)))
+            (gutter (split-string (match-string 6 output) "\n" t)))
+        (push (flycheck-error-new-at
+               line (1+ column)
+               (if (string= level "Warning") 'warning 'error)
+               (string-join
+                (seq-take-while
+                 (lambda (content) (not (string-blank-p content)))
+                 (delq nil (mapcar #'flycheck-scala--message-line gutter)))
+                "\n")
+               :id id :checker checker :buffer buffer :filename file)
+              errors)))
+    (nreverse errors)))
+
+(defun flycheck-parse-scala (output checker buffer)
+  "Parse scalac's OUTPUT, in either of the two shapes it comes in.
+
+CHECKER and BUFFER are as in `flycheck-parse-output'.
+
+Scala 3 draws each diagnostic in a box and colors it whether or
+not anyone is watching; the compiler has no flag both major
+versions accept to turn that off.  Scala 2 still prints the plain
+`file:line: error: message' form, so the patterns still read the
+output when no box is found."
+  (let ((plain (ansi-color-filter-apply output)))
+    (or (flycheck-parse-scala--boxed plain checker buffer)
+        (flycheck-parse-with-patterns plain checker buffer))))
+
 (flycheck-define-checker scala
   "A Scala syntax checker using the Scala compiler.
 
 See URL `https://www.scala-lang.org/'."
   :command ("scalac" "-Ystop-after:parser" source)
+  :error-parser flycheck-parse-scala
   :error-patterns
   ((error line-start (file-name) ":" line ": error: " (message) line-end)
    (warning line-start (file-name) ":" line ": warning: " (message) line-end))
+  ;; Dedenting keeps the alignment inside a boxed message, such as a
+  ;; type Scala 3 wraps over several lines
+  :error-filter
+  (lambda (errors)
+    (flycheck-sanitize-errors (flycheck-dedent-error-messages errors)))
   :modes (scala-mode scala-ts-mode)
   :next-checkers ((warning . scala-scalastyle)))
 
