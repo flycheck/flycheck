@@ -17776,7 +17776,10 @@ CHECKER and BUFFER are used to construct the error objects."
       (group (or "Error" "Warning")) ": "
       (group (one-or-more (not (any "\n"))))
       ":" (group (one-or-more digit)) ":" (group (one-or-more digit))
-      " " (one-or-more "-") "\n"
+      ;; The dashes pad the header out to the terminal width, so a path
+      ;; long enough to fill the line on its own, such as the temporary
+      ;; copy Flycheck checks, leaves a bare position, or a lone space
+      (zero-or-more (any " -")) "\n"
       ;; The gutter under the header, holding the echoed source, the
       ;; caret marks and the message
       (group (zero-or-more (zero-or-more (any " " digit)) "|"
