@@ -9763,10 +9763,11 @@ CHECKER."
     (let ((pending-output (process-get process 'flycheck-pending-output)))
       (apply #'concat (nreverse pending-output)))))
 
-(defun flycheck-handle-signal (process _event)
+(defun flycheck-handle-signal (process event)
   "Handle a signal from the syntax checking PROCESS.
 
-_EVENT is ignored."
+EVENT describes how the process died and stands in for the exit
+status when a signal killed it."
   (when (memq (process-status process) '(signal exit))
     (let ((files (process-get process 'flycheck-temporaries))
           (buffer (process-get process 'flycheck-buffer))
@@ -9778,15 +9779,21 @@ _EVENT is ignored."
       (when (buffer-live-p buffer)
         (with-current-buffer buffer
           (condition-case err
-              (pcase (process-status process)
-                (`signal
-                 (funcall callback 'interrupted))
-                (`exit
-                 (flycheck-finish-checker-process
-                  (process-get process 'flycheck-checker)
-                  (or err (process-exit-status process))
-                  files
-                  (flycheck-get-output process) callback cwd)))
+              (flycheck-finish-checker-process
+               (process-get process 'flycheck-checker)
+               ;; A checker killed by a signal is a crashed checker, not
+               ;; an interruption Flycheck asked for: deliberate kills
+               ;; discard their syntax check before killing, so their
+               ;; report never lands anywhere.  Finishing like a
+               ;; non-zero exit keeps what earlier checkers in the chain
+               ;; already reported, where the `interrupted' status threw
+               ;; the whole chain's work away (#1881).
+               (or err
+                   (if (eq (process-status process) 'signal)
+                       (string-trim (or event "killed"))
+                     (process-exit-status process)))
+               files
+               (flycheck-get-output process) callback cwd)
             ((debug error)
              (funcall callback 'errored (error-message-string err)))))))))
 
@@ -9830,9 +9837,14 @@ Resolve all errors in OUTPUT using CWD as working directory."
             ;; (e.g. includes) even if there are no errors in the file being
             ;; checked.
             (funcall callback 'suspicious
-                     (format "Exited with status %S, printing output that \
+                     (format "%s, printing output that \
 contained no errors Flycheck could read:\n\n%s"
-                             exit-status output))))))
+                             ;; A string names the signal that killed the
+                             ;; process; "exited" would misdescribe it
+                             (if (stringp exit-status)
+                                 (format "Died (%s)" exit-status)
+                               (format "Exited with status %S" exit-status))
+                             output))))))
       (unless self-disabled
         (funcall callback 'finished
                  ;; Fix error file names, by substituting them backwards

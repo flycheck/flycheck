@@ -351,6 +351,37 @@ The manifest path is relative to
   "Saved plist for the suspicious-exit checker.")
 
 (setf (symbol-plist 'suspicious-exit) nil)
+
+;;; Chain-crash test helpers (for the mid-chain crash tests)
+
+(define-derived-mode chain-crash-mode prog-mode "chain-crash")
+
+(flycheck-define-command-checker 'chain-first
+  "Report one warning, then hand over to a checker that dies."
+  :command `(,(or (executable-find "python3") "python")
+             "-c" "print('finding:1:first checker finding')")
+  :error-patterns '((warning bol "finding:" line ":" (message) eol))
+  :modes '(chain-crash-mode)
+  :next-checkers '(chain-killed))
+
+(flycheck-define-command-checker 'chain-killed
+  "Die by a signal instead of exiting."
+  :command '("sh" "-c" "kill -9 $$")
+  :error-patterns '((error bol "never-matches:" line ":" (message)))
+  :modes '(chain-crash-mode))
+
+(defconst flycheck-test--chain-first
+  (symbol-plist 'chain-first)
+  "Saved plist for the chain-first checker.")
+
+(defconst flycheck-test--chain-killed
+  (symbol-plist 'chain-killed)
+  "Saved plist for the chain-killed checker.")
+
+(setf (symbol-plist 'chain-first) nil)
+(setf (symbol-plist 'chain-killed) nil)
+
+
 ;;; Excessive-errors test helpers (for error-threshold tests)
 
 (define-derived-mode many-errors-mode prog-mode "many")
