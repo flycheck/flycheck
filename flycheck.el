@@ -15183,6 +15183,17 @@ string is a directory to add to the include path via `-J'."
 (flycheck-def-args-var flycheck-jsonnet-args jsonnet
   :package-version '(flycheck . "35.0"))
 
+(flycheck-def-option-var flycheck-jsonnet-ext-code-files nil jsonnet
+  "External code files for the jsonnet binary.
+
+The value of this variable is a list of strings of the form
+VAR=FILE, each passed via `--ext-code-file' so std.extVar sees VAR
+bound to FILE's contents (originally proposed in
+URL `https://github.com/flycheck/flycheck/pull/1932')."
+  :type '(repeat (string :tag "VAR=FILE"))
+  :safe #'flycheck-string-list-p
+  :package-version '(flycheck . "39"))
+
 (flycheck-define-checker jsonnet
   "A Jsonnet syntax checker using the jsonnet binary.
 
@@ -15190,14 +15201,23 @@ See URL `https://jsonnet.org'."
   :command
   ("jsonnet"
    (option-list "-J" flycheck-jsonnet-include-paths)
+   (option-list "--ext-code-file" flycheck-jsonnet-ext-code-files)
    (eval flycheck-jsonnet-args)
    source-inplace)
   :error-patterns
-  ((error line-start "STATIC ERROR: " (file-name) ":"
+  (;; C++ jsonnet prefixes static errors; go-jsonnet, the binary the
+   ;; docs point at, prints the bare position with a single space
+   ;; before the message
+   (error line-start "STATIC ERROR: " (file-name) ":"
           (or (seq line ":" column (zero-or-one (seq "-" end-column)))
               (seq "(" line ":" column ")" "-"
                    "(" end-line ":" end-column ")"))
           ": " (message) line-end)
+   (error line-start (file-name) ":"
+          (or (seq line ":" column (zero-or-one (seq "-" end-column)))
+              (seq "(" line ":" column ")" "-"
+                   "(" end-line ":" end-column ")"))
+          " " (message) line-end)
    (error line-start "RUNTIME ERROR: " (message) "\n"
           (? "\t" (file-name) ":" ;; first line of the backtrace
              (or (seq line ":" column (zero-or-one (seq "-" end-column)))

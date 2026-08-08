@@ -8,6 +8,7 @@
 
 ### New Features
 
+- [#2331](https://github.com/flycheck/flycheck/pull/2331): Add `flycheck-jsonnet-ext-code-files` to bind external code files (`--ext-code-file`) for the `jsonnet` checker (originally proposed in [#1932](https://github.com/flycheck/flycheck/pull/1932)).
 - [#2329](https://github.com/flycheck/flycheck/pull/2329): Explain more checkers' diagnostics with `C-c ! e`: `yaml-yamllint`, `terraform-tflint`, `ruby-reek`, `markdown-pymarkdown` and `javascript-oxlint` now open the rule's documentation page.
 - [#2322](https://github.com/flycheck/flycheck/pull/2322): `textlint` carries the fixes its fixable rules emit, such as `common-misspellings`, so `C-c ! f` applies them; its eslint-compatible output had the fixes all along, and now a spec keeps it that way.
 - [#2319](https://github.com/flycheck/flycheck/pull/2319): `markdown-markdownlint-cli` now carries the fixes markdownlint suggests, so `C-c ! f` and `C-c ! F` apply them; the checker reads markdownlint's JSON output, and a rule configured with `severity: warning` now shows as a warning rather than an error.
@@ -39,6 +40,7 @@
 
 ### Bugs fixed
 
+- [#2331](https://github.com/flycheck/flycheck/pull/2331): Read go-jsonnet's static errors, which carry no `STATIC ERROR:` prefix and never matched the patterns written against the C++ binary, so the `jsonnet` checker reported nothing on the implementation flycheck's own documentation recommends.
 - [#2327](https://github.com/flycheck/flycheck/pull/2327): Read Scala 3's diagnostics. The compiler draws each of them in a box under a `-- [E008] Not Found Error: file:line:column` header, with unconditional coloring, so the `scala` checker has reported nothing on Scala 3 since dotty shipped. Scala 2's plain output is still read ([#2179](https://github.com/flycheck/flycheck/issues/2179)).
 - [#2325](https://github.com/flycheck/flycheck/pull/2325): Stop `org-lint` freezing Emacs on large Org setups ([#2161](https://github.com/flycheck/flycheck/issues/2161)): its `invalid-id-link` checker rescans every org-id file in the session on each check, so it sits in the new `flycheck-org-lint-disabled-checkers` by default; set that to nil to run everything org-lint has.
 - [#2324](https://github.com/flycheck/flycheck/pull/2324): Keep the errors earlier checkers in a chain reported when a later checker dies by a signal, and say what killed it, instead of clearing the buffer's whole result ([#1881](https://github.com/flycheck/flycheck/issues/1881)).

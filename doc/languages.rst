@@ -782,6 +782,12 @@ to view the docstring of the syntax checker.  Likewise, you may use
          binary via ``-J``. Relative paths are resolved relative to the path
          of the buffer being checked.
 
+      .. defcustom:: flycheck-jsonnet-ext-code-files
+
+         A list of strings of the form ``VAR=FILE``, each passed via
+         ``--ext-code-file`` so that ``std.extVar`` sees ``VAR`` bound to
+         the contents of ``FILE``.
+
 .. supported-language:: Less
 
    .. syntax-checker:: less

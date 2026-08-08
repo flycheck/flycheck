@@ -1,0 +1,7 @@
+test/resources/language/jsonnet/flycheck_static_error.jsonnet:(1:8)-(3:4) Block string literals not allowed in imports
+
+import |||
+  xyz
+|||
+
+
