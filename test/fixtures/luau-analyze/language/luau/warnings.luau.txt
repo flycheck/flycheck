@@ -1,0 +1,2 @@
+language/luau/flycheck_warnings.luau(5,16): FunctionUnused: Function 'unused' is never used; prefix with '_' to silence
+language/luau/flycheck_warnings.luau(9,7): LocalUnused: Variable 'value' is never used; prefix with '_' to silence

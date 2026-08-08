@@ -1,0 +1,1 @@
+language/luau/flycheck_type-error.luau(6,19): TypeError: Expected this to be 'number', but got 'string'

@@ -175,6 +175,9 @@
     less
     less-stylelint
     llvm-llc
+    ;; Ahead of the Lua checkers, whose modes it shares, so that it wins in
+    ;; buffers visiting .luau files (see its predicate).
+    luau-analyze
     lua-luacheck
     lua
     markdown-markdownlint-cli2
@@ -15385,6 +15388,45 @@ See URL `https://www.lua.org/'."
           (minimal-match (zero-or-more not-newline))
           ": stdin:" line ": " (message) line-end))
   :modes (lua-mode lua-ts-mode))
+
+(flycheck-def-args-var flycheck-luau-analyze-args luau-analyze
+  :package-version '(flycheck . "39"))
+
+(defun flycheck-luau--file-p ()
+  "Whether the current buffer visits a Luau file."
+  (and buffer-file-name
+       (string= (file-name-extension buffer-file-name) "luau")))
+
+(flycheck-define-checker luau-analyze
+  "A Luau syntax and type checker using the Luau analyzer.
+
+Luau is a typed dialect of Lua, and `luau-analyze' is the analyzer
+that ships with it.  It reports syntax errors, type errors and
+lint warnings.  How strictly it type-checks follows the file's
+`--!strict' pragma and the nearest `.luaurc', which it finds by
+walking up from the file it is given, so the buffer is checked
+through a copy in its own directory and the project configuration
+applies to contents that are not saved yet.
+
+The analyzer rejects constructs that Luau dropped from Lua, such
+as `goto', so this checker keeps to buffers visiting .luau files
+and leaves plain Lua to the Lua checkers.  It is registered ahead
+of them, so that it wins in those buffers, where luacheck would
+report Luau's own syntax as errors.
+
+See URL `https://luau.org/'."
+  :command ("luau-analyze"
+            (eval flycheck-luau-analyze-args)
+            source-inplace)
+  :error-patterns
+  ((error line-start (file-name) "(" line "," column "): "
+          (id (or "SyntaxError" "TypeError")) ": " (message) line-end)
+   ;; Everything else is a lint warning named after its rule, such as
+   ;; FunctionUnused
+   (warning line-start (file-name) "(" line "," column "): "
+            (id (one-or-more alnum)) ": " (message) line-end))
+  :modes (lua-mode lua-ts-mode)
+  :predicate flycheck-luau--file-p)
 
 (flycheck-define-checker opam
   "An Opam syntax and style checker using opam lint.
