@@ -226,7 +226,9 @@
     scala
     scala-scalastyle
     scheme-chicken
+    sass
     sass-stylelint
+    scss
     scss-stylelint
     sh-bash
     sh-posix-dash
@@ -12399,6 +12401,18 @@ RuboCop exits 2 on a bad invocation or an unrecognised cop in the
 configuration, and 1 when it found offences."
   (flycheck--handle-fatal-exit exit-status output '(2)))
 
+(defun flycheck--sass-handle-suspicious (_checker exit-status output)
+  "Disable a Dart Sass checker when EXIT-STATUS means it could not compile.
+
+OUTPUT is what it printed, for the message that says why.
+
+Dart Sass exits 64 on flags it does not recognise, which is how a
+release older than 1.74, or the long-dead Ruby Sass still answering
+to the same executable name, greets the flags these checkers pass.
+A stylesheet that does not compile is a readable error with exit
+status 65 instead."
+  (flycheck--handle-fatal-exit exit-status output '(64)))
+
 (defun flycheck--shellcheck-handle-suspicious (_checker exit-status output)
   "Disable `sh-shellcheck' when EXIT-STATUS means shellcheck could not run.
 
@@ -18127,6 +18141,49 @@ See URL `https://call-cc.org/'."
                (t '(bold error)))))))
   :modes scheme-mode)
 
+(flycheck-define-checker scss
+  "A SCSS syntax checker using the Dart Sass compiler.
+
+Compiling catches what a linter alone does not: undefined variables
+and mixins, bad arithmetic, a broken partial showing up on the
+`@use' line that pulls it in.  Deprecation warnings and `@warn'
+messages come back as warnings.
+
+Requires Dart Sass 1.74 or newer.  An older release, or the
+long-dead Ruby Sass answering to the same executable name, refuses
+the flags this checker passes, and the checker disables itself
+rather than fail every check.
+
+See URL `https://sass-lang.com/dart-sass/'."
+  :command ("sass" "--stdin" "--no-color" "--no-unicode"
+            ;; Reading standard input, Dart Sass resolves `@use' through
+            ;; the current directory and warns that doing so is
+            ;; deprecated.  Silence that: it would fire on every check of
+            ;; every buffer that uses a local partial.
+            "--silence-deprecation=fs-importer-cwd")
+  :standard-input t
+  :error-patterns
+  ;; Between the message and the position sits a box drawing of the
+  ;; offending source, skipped by the minimal match
+  ((error line-start "Error: " (message (one-or-more not-newline))
+          (minimal-match (zero-or-more "\n" (zero-or-more not-newline)))
+          "\n" (one-or-more " ") "- " line ":" column
+          (one-or-more " ") "root stylesheet" line-end)
+   (warning line-start "DEPRECATION WARNING"
+            ;; Not every release names the deprecation
+            (optional " [" (id (one-or-more (not (any "]")))) "]") ": "
+            (message (one-or-more not-newline))
+            (minimal-match (zero-or-more "\n" (zero-or-more not-newline)))
+            "\n" (one-or-more " ") "- " line ":" column
+            (one-or-more " ") "root stylesheet" line-end)
+   (warning line-start "WARNING: " (message (one-or-more not-newline))
+            (minimal-match (zero-or-more "\n" (zero-or-more not-newline)))
+            "\n" (one-or-more " ") "- " line ":" column
+            (one-or-more " ") "root stylesheet" line-end))
+  :handle-suspicious flycheck--sass-handle-suspicious
+  :modes scss-mode
+  :next-checkers ((warning . scss-stylelint)))
+
 (flycheck-define-checker scss-stylelint
   "A SCSS syntax and style checker using stylelint.
 
@@ -18144,6 +18201,50 @@ See URL `https://stylelint.io/'."
   (flycheck-error-explainer-from-url "https://stylelint.io/user-guide/rules/%s")
   :handle-suspicious flycheck--stylelint-handle-suspicious
   :modes (scss-mode))
+
+(flycheck-define-checker sass
+  "A Sass syntax checker using the Dart Sass compiler.
+
+Like the `scss' checker, but for the indented syntax.  Compiling
+catches what a linter alone does not: undefined variables and
+mixins, inconsistent indentation, a broken partial showing up on
+the `@use' line that pulls it in.  Deprecation warnings and `@warn'
+messages come back as warnings.
+
+Requires Dart Sass 1.74 or newer.  An older release, or the
+long-dead Ruby Sass answering to the same executable name, refuses
+the flags this checker passes, and the checker disables itself
+rather than fail every check.
+
+See URL `https://sass-lang.com/dart-sass/'."
+  :command ("sass" "--stdin" "--indented" "--no-color" "--no-unicode"
+            ;; Reading standard input, Dart Sass resolves `@use' through
+            ;; the current directory and warns that doing so is
+            ;; deprecated.  Silence that: it would fire on every check of
+            ;; every buffer that uses a local partial.
+            "--silence-deprecation=fs-importer-cwd")
+  :standard-input t
+  :error-patterns
+  ;; Between the message and the position sits a box drawing of the
+  ;; offending source, skipped by the minimal match
+  ((error line-start "Error: " (message (one-or-more not-newline))
+          (minimal-match (zero-or-more "\n" (zero-or-more not-newline)))
+          "\n" (one-or-more " ") "- " line ":" column
+          (one-or-more " ") "root stylesheet" line-end)
+   (warning line-start "DEPRECATION WARNING"
+            ;; Not every release names the deprecation
+            (optional " [" (id (one-or-more (not (any "]")))) "]") ": "
+            (message (one-or-more not-newline))
+            (minimal-match (zero-or-more "\n" (zero-or-more not-newline)))
+            "\n" (one-or-more " ") "- " line ":" column
+            (one-or-more " ") "root stylesheet" line-end)
+   (warning line-start "WARNING: " (message (one-or-more not-newline))
+            (minimal-match (zero-or-more "\n" (zero-or-more not-newline)))
+            "\n" (one-or-more " ") "- " line ":" column
+            (one-or-more " ") "root stylesheet" line-end))
+  :handle-suspicious flycheck--sass-handle-suspicious
+  :modes sass-mode
+  :next-checkers ((warning . sass-stylelint)))
 
 (flycheck-define-checker sass-stylelint
   "A Sass syntax and style checker using stylelint.

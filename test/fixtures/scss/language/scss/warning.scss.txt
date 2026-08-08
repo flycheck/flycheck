@@ -1,0 +1,18 @@
+WARNING: .container is deprecated
+    - 2:3  root stylesheet
+
+DEPRECATION WARNING [slash-div]: Using / for division outside of calc() is deprecated and will be removed in Dart Sass 2.0.0.
+
+Recommendation: math.div(36px, 2) or calc(36px / 2)
+
+More info and automated migrator: https://sass-lang.com/d/slash-div
+
+  ,
+3 |   font-size: (36px / 2);
+  |               ^^^^^^^^
+  '
+    - 3:15  root stylesheet
+
+.container {
+  font-size: 18px;
+}
