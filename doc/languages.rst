@@ -845,6 +845,27 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       Check syntax with the `Lua compiler <https://www.lua.org/>`_.
 
+.. supported-language:: Luau
+
+   .. syntax-checker:: luau-analyze
+
+      Check syntax and types with the analyzer that ships with `Luau
+      <https://luau.org/>`_, Roblox's typed dialect of Lua.
+
+      Luau buffers run one of the Lua major modes, since there is no dedicated
+      Luau mode, but the analyzer rejects constructs that Luau dropped from
+      Lua, such as ``goto``, so this checker keeps to buffers visiting
+      ``.luau`` files and leaves plain Lua to the Lua checkers.
+
+      How strictly the analyzer type-checks follows the file's ``--!strict``
+      pragma and the nearest ``.luaurc``, which it finds by walking up from the
+      file, so the buffer is checked through a copy in its own directory and
+      the project configuration applies to unsaved contents.
+
+      .. defcustom:: flycheck-luau-analyze-args
+
+         A list of additional arguments passed to ``luau-analyze``.
+
 .. supported-language:: Markdown
 
    Flycheck checks Markdown with `markdownlint-cli`, `markdownlint-cli2`,

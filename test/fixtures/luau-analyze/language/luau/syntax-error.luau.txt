@@ -1,0 +1,1 @@
+language/luau/flycheck_syntax-error.luau(7,1): SyntaxError: Expected 'end' (to close 'then' at line 5), got <eof>

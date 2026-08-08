@@ -8,6 +8,7 @@
 
 ### New Features
 
+- [#2334](https://github.com/flycheck/flycheck/pull/2334): Add a `luau-analyze` checker for the Luau language, using the analyzer that ships with Luau (originally proposed in [#2167](https://github.com/flycheck/flycheck/pull/2167)). It runs in the Lua major modes but only on `.luau` files, since the analyzer rejects plain Lua constructs like `goto`, and it checks the buffer through a copy next to the original, so the project's `.luaurc` applies to unsaved contents.
 - [#2331](https://github.com/flycheck/flycheck/pull/2331): Add `flycheck-jsonnet-ext-code-files` to bind external code files (`--ext-code-file`) for the `jsonnet` checker (originally proposed in [#1932](https://github.com/flycheck/flycheck/pull/1932)).
 - [#2329](https://github.com/flycheck/flycheck/pull/2329): Explain more checkers' diagnostics with `C-c ! e`: `yaml-yamllint`, `terraform-tflint`, `ruby-reek`, `markdown-pymarkdown` and `javascript-oxlint` now open the rule's documentation page.
 - [#2322](https://github.com/flycheck/flycheck/pull/2322): `textlint` carries the fixes its fixable rules emit, such as `common-misspellings`, so `C-c ! f` applies them; its eslint-compatible output had the fixes all along, and now a spec keeps it that way.
