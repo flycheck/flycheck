@@ -12608,6 +12608,30 @@ See URL `https://github.com/bazelbuild/buildtools/blob/master/buildifier'."
             line-end))
   :modes bazel-workspace-mode)
 
+(defconst flycheck--c/c++-header-suffixes
+  '(".h" ".hh" ".H" ".hp" ".hxx" ".hpp" ".HPP" ".h++" ".tcc")
+  "File suffixes GCC itself treats as C or C++ headers.")
+
+(defun flycheck--c/c++-discard-pragma-once-in-header (errors)
+  "Drop the pragma-once-in-main-file warning from ERRORS in a header buffer.
+
+The C and C++ checkers hand the compiler the buffer on standard input,
+so a header is always the main file and the warning would fire on
+every header using the idiom (#2178).  In a source file it stays:
+`#pragma once' outside a header is what the warning is for.  Matched
+on the message as well as the id, because the flag id only exists
+since GCC 15 and the quoting differs by locale."
+  (if (not (and buffer-file-name
+                (member (concat "." (or (file-name-extension buffer-file-name) ""))
+                        flycheck--c/c++-header-suffixes)))
+      errors
+    (seq-remove
+     (lambda (err)
+       (or (equal (flycheck-error-id err) "-Wpragma-once-outside-header")
+           (string-match-p "#pragma once['\u2019]? in main file"
+                           (or (flycheck-error-message err) ""))))
+     errors)))
+
 (flycheck-def-args-var flycheck-clang-args c/c++-clang
   :package-version '(flycheck . "0.22"))
 
@@ -12805,7 +12829,7 @@ See URL `https://clang.llvm.org/'."
         ;; them past our error filtering
         (setf (flycheck-error-message err)
               (or (flycheck-error-message err) "no message")))
-      errors))
+      (flycheck--c/c++-discard-pragma-once-in-header errors)))
   :modes (c-mode c++-mode c-ts-mode c++-ts-mode)
   :next-checkers ((warning . c/c++-cppcheck)))
 
@@ -12957,6 +12981,10 @@ Requires GCC 4.4 or newer.  See URL `https://gcc.gnu.org/'."
    (error line-start (or "<stdin>" (file-name))
           ":" line (optional ":" column)
           ": " (or "fatal error" "error") ": " (message) line-end))
+  :error-filter
+  (lambda (errors)
+    (flycheck--c/c++-discard-pragma-once-in-header
+     (flycheck-sanitize-errors errors)))
   :modes (c-mode c++-mode c-ts-mode c++-ts-mode)
   :next-checkers ((warning . c/c++-cppcheck)))
 
