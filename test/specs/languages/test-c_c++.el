@@ -293,13 +293,63 @@ against a integer value that is neither 1 nor 0.\">
          '(12 nil warning "Parameter 'foo' is passed by value. It could be passed as a const reference which is usually faster and recommended in C++."
               :id "passedByValue" :checker c/c++-cppcheck)))))
 
+  (describe "the pragma-once filter"
+    ;; Checking a standalone header compiles it as the main file, so the
+    ;; compiler warns about #pragma once on every header that uses the
+    ;; idiom.  See #2178.
+
+    (defun test-c/pragma-errors ()
+      "One pragma-once warning in each observed wording, plus a real one."
+      (list
+       ;; clang, and GCC before 15
+       (flycheck-error-new-at 1 9 'warning "#pragma once in main file")
+       ;; GCC 15 under the C locale
+       (flycheck-error-new-at 1 nil 'warning
+                              "'#pragma once' in main file"
+                              :id "-Wpragma-once-outside-header")
+       ;; GCC 15 under a UTF-8 locale
+       (flycheck-error-new-at 1 nil 'warning
+                              "‘#pragma once’ in main file")
+       (flycheck-error-new-at 4 3 'warning
+                              "comparison of integers of different signs")))
+
+    (it "drops the warning in all its wordings when checking a header"
+      (flycheck-buttercup-with-resource-buffer "language/c_c++/header.h"
+        (let ((kept (flycheck--c/c++-discard-pragma-once-in-header
+                     (test-c/pragma-errors))))
+          (expect (mapcar #'flycheck-error-message kept)
+                  :to-equal '("comparison of integers of different signs")))))
+
+    (it "keeps the warning in a source file, where it means something"
+      (flycheck-buttercup-with-resource-buffer "language/c_c++/error.cpp"
+        (expect (length (flycheck--c/c++-discard-pragma-once-in-header
+                         (test-c/pragma-errors)))
+                :to-equal 4))))
+
   (describe "reading the compiler's output"
     ;; Recorded from Clang, which is what answers to the name gcc on
     ;; macOS.  GNU GCC words these differently, which is exactly the sort
     ;; of divergence a live check cannot pin down on one machine.
     (flycheck-buttercup-def-parse-test c/c++-gcc "language/c_c++/error.cpp"
       '(8 nil warning "ignoring ‘#pragma nope ’" :id "-Wunknown-pragmas")
-      '(2 20 error "‘struct A’ has no member named ‘bar’")))
+      '(2 20 error "‘struct A’ has no member named ‘bar’"))
+
+    ;; Plain `it' forms: the pragma-once filter reads the buffer's file
+    ;; name, so these must parse inside the header's own buffer
+    (it "reads gcc's output over header.h without the pragma warning"
+      (flycheck-buttercup-with-resource-buffer "language/c_c++/header.h"
+        (flycheck-buttercup-should-parse
+         'c/c++-gcc "language/c_c++/header.h"
+         '(4 12 warning "comparison of integer expressions of different \
+signedness: ‘int’ and ‘unsigned int’" :id "-Wsign-compare"))))
+
+    (it "reads clang's output over header.h without the pragma warning"
+      (flycheck-buttercup-with-resource-buffer "language/c_c++/header.h"
+        (flycheck-buttercup-should-parse
+         'c/c++-clang "language/c_c++/header.h"
+         '(4 12 warning "comparison of integers of different signs: \
+'int' and 'unsigned int'")
+         '(3 19 warning "unused function 'flycheck_cmp'")))))
 
   (describe "reading the tool's output"
     ;; Read from output recorded earlier, so this runs whether or

@@ -40,6 +40,7 @@
 
 ### Bugs fixed
 
+- [#2333](https://github.com/flycheck/flycheck/pull/2333): Stop the C/C++ checkers warning about `#pragma once` in every standalone header ([#2178](https://github.com/flycheck/flycheck/issues/2178)): the buffer is always the compiler's main file, so the warning fired on the very idiom headers are supposed to use. In a source file it still fires, as intended.
 - [#2331](https://github.com/flycheck/flycheck/pull/2331): Read go-jsonnet's static errors, which carry no `STATIC ERROR:` prefix and never matched the patterns written against the C++ binary, so the `jsonnet` checker reported nothing on the implementation flycheck's own documentation recommends.
 - [#2327](https://github.com/flycheck/flycheck/pull/2327): Read Scala 3's diagnostics. The compiler draws each of them in a box under a `-- [E008] Not Found Error: file:line:column` header, with unconditional coloring, so the `scala` checker has reported nothing on Scala 3 since dotty shipped. Scala 2's plain output is still read ([#2179](https://github.com/flycheck/flycheck/issues/2179)).
 - [#2325](https://github.com/flycheck/flycheck/pull/2325): Stop `org-lint` freezing Emacs on large Org setups ([#2161](https://github.com/flycheck/flycheck/issues/2161)): its `invalid-id-link` checker rescans every org-id file in the session on each check, so it sits in the new `flycheck-org-lint-disabled-checkers` by default; set that to nil to run everything org-lint has.
