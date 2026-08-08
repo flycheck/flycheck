@@ -10,8 +10,8 @@
       (clrhash flycheck--proselint-old-args-by-host))
 
     (it "probes a host once and caches the detected version"
-      ;; Exit 0 -> old proselint, which takes the "--json -" arguments.
-      (spy-on 'process-file :and-return-value 0)
+      ;; Exit 2 -> old proselint, which takes the "--json -" arguments.
+      (spy-on 'process-file :and-return-value 2)
       (let ((default-directory "/tmp/"))
         (expect (flycheck--proselint-args) :to-equal '("--json" "-"))
         (expect (flycheck--proselint-args) :to-equal '("--json" "-")))
@@ -22,7 +22,7 @@
       ;; can be faked per host without a live remote.
       (spy-on 'process-file :and-call-fake
               (lambda (&rest _)
-                (if (file-remote-p default-directory) 1 0)))
+                (if (file-remote-p default-directory) 0 1)))
       (let ((default-directory "/tmp/"))
         (expect (flycheck--proselint-args) :to-equal '("--json" "-")))
       (let ((default-directory "/ssh:host:/tmp/"))
@@ -39,17 +39,17 @@
              :id "weasel_words.very"
              :checker proselint
              :end-line 1
-             :end-column 12)
+             :end-column 11)
          '(2 4 warning "Redundancy. Use 'associate' instead of 'associate together'."
              :id "redundancy.garner"
              :checker proselint
-             :end-line 3
-             :end-column 1)
+             :end-line 2
+             :end-column 22)
          '(3 5 warning "Gender bias. Use 'lawyer' instead of 'lady lawyer'."
              :id "sexism.misc"
              :checker proselint
              :end-line 3
-             :end-column 17)))))
+             :end-column 16)))))
 
   (describe "reading the tool's output"
     ;; Read from output recorded earlier, so this runs whether or
