@@ -23,7 +23,7 @@
             "language/css/.stylelintrc.json")))
       (flycheck-buttercup-should-syntax-check
        "language/sass/error.sass" 'sass-mode
-       '(1 1 error "Unknown word .a (CssSyntaxError)"
+       '(1 1 error "Unknown word // (CssSyntaxError)"
            :id "CssSyntaxError" :checker sass-stylelint))))
 
   (describe "Fatal-failure handling"
