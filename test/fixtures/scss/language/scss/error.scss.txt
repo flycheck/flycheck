@@ -1,0 +1,6 @@
+Error: expected "{".
+  ,
+3 |         c olor: red;
+  |                    ^
+  '
+  - 3:20  root stylesheet

@@ -49,6 +49,7 @@ RUN npm install --global --no-fund --no-audit --ignore-scripts \
       oxlint \
       pug-cli \
       pyright \
+      sass \
       standard \
       stylelint stylelint-config-standard \
       textlint textlint-rule-write-good \

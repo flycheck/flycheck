@@ -1631,7 +1631,22 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
 .. supported-language:: Sass/SCSS
 
-   Flycheck checks SASS with `sass-stylelint` and SCSS with `scss-stylelint`.
+   Flycheck checks Sass with `sass` and `sass-stylelint`, and SCSS with
+   `scss` and `scss-stylelint`.  The compiler runs first and catches what
+   a linter alone does not, such as undefined variables and mixins; a
+   buffer that compiles with no more than warnings is then handed on to
+   stylelint.
+
+   .. syntax-checker:: sass
+
+      Check the indented syntax with the `Dart Sass
+      <https://sass-lang.com/dart-sass/>`_ compiler.
+
+      .. note::
+
+         This syntax checker requires Dart Sass 1.74 or newer.  With an
+         older release, or with the long-dead Ruby Sass answering to the
+         same executable name, the checker disables itself.
 
    .. syntax-checker:: sass-stylelint
 
@@ -1644,6 +1659,17 @@ to view the docstring of the syntax checker.  Likewise, you may use
       .. defcustom:: flycheck-stylelint-quiet
 
          Whether to run stylelint in quiet mode via ``--quiet``.
+
+   .. syntax-checker:: scss
+
+      Check SCSS syntax with the `Dart Sass
+      <https://sass-lang.com/dart-sass/>`_ compiler.
+
+      .. note::
+
+         This syntax checker requires Dart Sass 1.74 or newer.  With an
+         older release, or with the long-dead Ruby Sass answering to the
+         same executable name, the checker disables itself.
 
    .. syntax-checker:: scss-stylelint
 
