@@ -31,14 +31,13 @@ These extensions change Flycheck’s user interface:
 
 * :flyc:`flycheck-color-mode-line` (*official*) colors the mode line according
   to the Flycheck status.
-* :flyc:`flycheck-pos-tip` (*official*) shows Flycheck error messages in a
-  graphical popup.
 * :gh:`liblit/flycheck-status-emoji` adds cute emoji (e.g. 😱 for errors) to
   Flycheck’s mode line status.
 * :gh:`Wilfred/flycheck-title` shows Flycheck error messages in the frame title.
-* :flyc:`flycheck-inline` shows Flycheck error messages in the buffer, directly
-  below their origin.  It is obsoleted by the built-in ``flycheck-annotate-mode``
-  (see :doc:`/user/error-reports`).
+* :flyc:`flycheck-inline`, :flyc:`flycheck-pos-tip` and
+  :flyc:`flycheck-popup-tip` showed error messages inline or in popups.  All
+  three are obsoleted by the built-in ``flycheck-annotate-mode``, which works
+  in graphical and terminal frames alike (see :doc:`/user/error-reports`).
 
 Eglot
 =====
