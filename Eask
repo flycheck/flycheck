@@ -1,7 +1,7 @@
 ;; -*- mode: eask; lexical-binding: t -*-
 
 (package "flycheck"
-         "39.0-snapshot"
+         "39.0"
          "On-the-fly syntax checking")
 
 (website-url "https://github.com/flycheck/flycheck")

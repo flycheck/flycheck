@@ -6,6 +6,8 @@
 
 ## master (unreleased)
 
+## 39.0 (2026-08-10)
+
 ### New Features
 
 - [#2336](https://github.com/flycheck/flycheck/pull/2336): Carry the rule ids `yaml-actionlint`, `r-lintr` and `puppet-lint` already print, so the error list shows which check fired and `C-c ! e` can explain lintr's linters through their reference pages; messages lose the bracketed or parenthesised id they used to carry inline.
