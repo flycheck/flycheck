@@ -99,6 +99,11 @@
               :to-equal
               '(url . "https://github.com/jackdewinter/pymarkdown/blob/main/docs/rules/rule_md022.md")))
 
+    (it "links lintr's linters to their reference pages"
+      (expect (test-explainer/explain 'r-lintr "assignment_linter")
+              :to-equal
+              '(url . "https://lintr.r-lib.org/reference/assignment_linter.html")))
+
     (it "links oxlint rules under their plugin, skipping bare ids"
       (expect (test-explainer/explain 'javascript-oxlint "eslint(no-unused-vars)")
               :to-equal
