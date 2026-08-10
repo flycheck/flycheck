@@ -13788,6 +13788,7 @@ See Info Node `(elisp)Byte Compilation'."
     (require 'checkdoc)
 
     (let ((source (car command-line-args-left))
+          (source-original (cadr command-line-args-left))
           ;; Remember the default directory of the process
           (process-default-directory default-directory))
       ;; Note that we deliberately use our custom approach even despite of
@@ -13796,7 +13797,8 @@ See Info Node `(elisp)Byte Compilation'."
       ;; for us.
       (with-temp-buffer
         (insert-file-contents source 'visit)
-        (setq buffer-file-name source)
+        (setq buffer-file-name
+              (unless (string-empty-p source-original) source-original))
         ;; And change back to the process default directory to make file-name
         ;; back-substitution work
         (setq default-directory process-default-directory)
@@ -13849,9 +13851,9 @@ The checker runs `checkdoc-current-buffer'."
             "--eval" (eval (flycheck-sexp-to-string
                             (flycheck-emacs-lisp-checkdoc-variables-form)))
             "--eval" (eval flycheck-emacs-lisp-checkdoc-form)
-            "--" source)
+            "--" source source-original)
   :error-patterns
-  ((info line-start (file-name) ":" line ": " (message) line-end))
+  ((info line-start (or "#<buffer  *temp*>" (file-name)) ":" line ": " (message) line-end))
   :modes (emacs-lisp-mode)
   :enabled flycheck--emacs-lisp-checkdoc-enabled-p)
 
