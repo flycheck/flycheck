@@ -15733,17 +15733,17 @@ for more information about perlimports."
                :end-line .location.end.line
                :end-column (+ 1 .location.end.column)
                :checker checker
-               :fix (flycheck-fix-new
-                     :description (concat .module " " .reason)
-                     :edits (list
-                             (flycheck-fix-edit-new
-                              :line .location.start.line
-                              :column .location.start.column
-                              :end-line .location.end.line
-                              :end-column (+ 1 .location.end.column)
-                              :replacement (flycheck-perl-perlimports-parse-diff
-                                            .diff)))
-                     :tick (buffer-chars-modified-tick))
+               :fix (flycheck--make-fix
+                     buffer
+                     (concat .module " " .reason)
+                     (list
+                      (flycheck-fix-edit-new
+                       :line .location.start.line
+                       :column .location.start.column
+                       :end-line .location.end.line
+                       :end-column (+ 1 .location.end.column)
+                       :replacement (flycheck-perl-perlimports-parse-diff
+                                     .diff))))
                :buffer buffer)))
           (flycheck-parse-json output)))
 
