@@ -14318,7 +14318,10 @@ See URL https://github.com/rhysd/actionlint/."
             (config-file "-config-file" flycheck-yaml-actionlint-config)
             (eval flycheck-yaml-actionlint-args)
             source)
-  :error-patterns ((error line-start (file-name) ":" line ":" column ": " (message) line-end))
+  :error-patterns
+  ((error line-start (file-name) ":" line ":" column ": "
+          (message (minimal-match (one-or-more not-newline)))
+          " [" (id (one-or-more (not (any "]")))) "]" line-end))
   :modes (yaml-mode yaml-ts-mode)
   :predicate (lambda ()
                (and buffer-file-name
@@ -16135,8 +16138,12 @@ See URL `https://puppet-lint.com/'."
             (eval flycheck-puppet-lint-args)
             source-original)
   :error-patterns
-  ((warning line-start (file-name) ":" line ":warning: " (message) line-end)
-   (error line-start (file-name) ":" line ":error: " (message) line-end))
+  ((warning line-start (file-name) ":" line ":warning: "
+            (message (minimal-match (one-or-more not-newline)))
+            " (" (id (one-or-more (not (any ")")))) ")" line-end)
+   (error line-start (file-name) ":" line ":error: "
+          (message (minimal-match (one-or-more not-newline)))
+          " (" (id (one-or-more (not (any ")")))) ")" line-end))
   :modes (puppet-mode puppet-ts-mode)
   ;; Since we check the original file, we can only use this syntax checker if
   ;; the buffer is actually linked to a file, and if it is not modified.
@@ -16742,13 +16749,20 @@ See URL `https://github.com/jimhester/lintr'."
                    "))"))
             "--args" source)
   :error-patterns
-  ((info line-start (file-name) ":" line ":" column ": style: " (message)
-         line-end)
-   (warning line-start (file-name) ":" line ":" column ": warning: " (message)
-            line-end)
-   (error line-start (file-name) ":" line ":" column ": error: " (message)
-          line-end))
+  ((info line-start (file-name) ":" line ":" column ": style: "
+         (optional "[" (id (one-or-more (not (any "]")))) "] ")
+         (message) line-end)
+   (warning line-start (file-name) ":" line ":" column ": warning: "
+            (optional "[" (id (one-or-more (not (any "]")))) "] ")
+            (message) line-end)
+   (error line-start (file-name) ":" line ":" column ": error: "
+          ;; Not an id: a parse error brackets the literal word error
+          (optional "[error] ")
+          (message) line-end))
   :modes (ess-mode ess-r-mode)
+  :error-explainer
+  (flycheck-error-explainer-from-url
+   "https://lintr.r-lib.org/reference/%s.html")
   :predicate
   ;; Don't check ESS files which do not contain R, and make sure that lintr is
   ;; actually available
