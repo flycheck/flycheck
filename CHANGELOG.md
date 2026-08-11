@@ -6,6 +6,10 @@
 
 ## master (unreleased)
 
+### Bugs fixed
+
+- [#2338](https://github.com/flycheck/flycheck/pull/2338): `emacs-lisp-checkdoc` no longer complains about missing file comments in buffers that have no backing file, such as org indirect edit buffers.
+
 ## 39.0 (2026-08-10)
 
 ### New Features

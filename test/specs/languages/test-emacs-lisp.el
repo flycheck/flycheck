@@ -137,6 +137,23 @@
         (flycheck-buttercup-buffer-sync)
         (expect flycheck-current-errors :to-be-truthy)))
 
+    (flycheck-buttercup-def-checker-test emacs-lisp-checkdoc emacs-lisp
+                                         skips-file-comments-without-file-name
+      ;; In a buffer that has no backing file, like an org indirect edit
+      ;; buffer, checkdoc should keep the docstring diagnostics but skip the
+      ;; file-comment checks, which make no sense there (#2338).  With a file
+      ;; the same content also draws complaints about the missing headers.
+      (flycheck-buttercup-with-resource-buffer "language/emacs-lisp/checkdoc-headerless.el"
+        (set-visited-file-name nil 'no-query)
+        (emacs-lisp-mode)
+        (let ((flycheck-disabled-checkers '(emacs-lisp)))
+          (flycheck-buttercup-buffer-sync)
+          (expect flycheck-current-errors :to-be-equal-flycheck-errors
+                  (list (flycheck-error-new-at
+                         2 nil 'info "First sentence should end with punctuation"
+                         :checker 'emacs-lisp-checkdoc
+                         :buffer (current-buffer)))))))
+
     (flycheck-buttercup-def-checker-test (emacs-lisp emacs-lisp-checkdoc) emacs-lisp
                                          does-not-check-autoloads-buffers
       ;; Regression test ensuring that Emacs Lisp won't check autoload buffers.
