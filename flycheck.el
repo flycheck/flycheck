@@ -13842,8 +13842,12 @@ See Info Node `(elisp)Byte Compilation'."
       ;; for us.
       (with-temp-buffer
         (insert-file-contents source 'visit)
+        ;; Keep the buffer file-less when the checked buffer has no file, so
+        ;; that checkdoc skips the file-comment checks that make no sense for
+        ;; it.  `string-empty-p' would be cleaner, but subr-x is not preloaded
+        ;; in the batch Emacs before 29.
         (setq buffer-file-name
-              (unless (string-empty-p source-original) source-original))
+              (unless (equal source-original "") source-original))
         ;; And change back to the process default directory to make file-name
         ;; back-substitution work
         (setq default-directory process-default-directory)
