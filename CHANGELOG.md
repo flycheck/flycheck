@@ -8,6 +8,7 @@
 
 ### Bugs fixed
 
+- [#2339](https://github.com/flycheck/flycheck/pull/2339): `perl-perlimports` quick fixes now notice when the buffer changed while the tool ran, instead of applying their edits to shifted positions.
 - [#2338](https://github.com/flycheck/flycheck/pull/2338): `emacs-lisp-checkdoc` no longer complains about missing file comments in buffers that have no backing file, such as org indirect edit buffers.
 
 ## 39.0 (2026-08-10)
