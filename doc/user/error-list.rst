@@ -74,15 +74,21 @@ drops those from the buffer (see `flycheck-relevant-error-other-file-show`), but
 in project scope it keeps them, so you see the whole picture in one place.
 Press :kbd:`RET` on an error in another file to jump straight to it.
 
+Language servers see files you never opened.  A workspace-wide server like
+``gopls`` diagnoses the whole project and pushes errors about unvisited files;
+with ``flycheck-eglot-mode`` or the native ``flycheck-lsp`` checker, project
+scope shows those too.
+
 .. note::
 
    Flycheck does not run checkers on files you haven't opened; project scope
-   surfaces the diagnostics it already has, from open buffers and from the
-   cross-file output of the checks you run.  It does not turn Flycheck into a
-   background whole-project linter.  A cross-file error therefore reflects the
-   last check that reported it: it stays until the buffer that produced it is
-   checked again, since Flycheck cannot tell that another file changed without
-   re-running a check.
+   surfaces the diagnostics it already has, from open buffers, from the
+   cross-file output of the checks you run, and from what a language server
+   volunteered about files that are not visited.  It does not turn Flycheck
+   into a background whole-project linter.  A cross-file error therefore
+   reflects the last check that reported it: it stays until the buffer that
+   produced it is checked again, since Flycheck cannot tell that another file
+   changed without re-running a check.
 
 The project of a buffer is Emacs' project (see ``project-current``) when one is
 found, and the checker's working directory otherwise.  The current scope is

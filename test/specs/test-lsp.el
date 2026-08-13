@@ -24,6 +24,7 @@
 
 ;;; Code:
 
+(require 'cl-lib)
 (require 'flycheck-buttercup)
 
 (describe "LSP diagnostics"
@@ -114,6 +115,112 @@
                 :to-equal "b.el")
         (expect (flycheck-related-location-line (nth 1 locs))
                 :to-equal 10))))
+
+  (describe "project diagnostics for unvisited documents"
+
+    ;; A push is cached for any document, opened or not; the bridge
+    ;; surfaces the unowned ones in the error list's project scope.
+
+    (cl-flet ((server-with-doc (root path diags &optional buffer)
+                (let ((server (flycheck-lsp--server-create
+                               :root root :command '("srv"))))
+                  (let ((doc (flycheck-lsp--document server path)))
+                    (setf (flycheck-lsp--doc-diags doc) diags)
+                    (setf (flycheck-lsp--doc-buffer doc) buffer))
+                  (puthash (cons root '("srv")) server flycheck-lsp--servers)
+                  server)))
+
+      (let ((project (file-name-as-directory (expand-file-name "/proj")))
+            (diag '(:range (:start (:line 27 :character 1)
+                            :end (:line 27 :character 2))
+                    :severity 1 :code "UndeclaredName"
+                    :message "undefined: a")))
+
+        (it "surfaces cached diagnostics of documents no buffer owns"
+          (let ((flycheck-lsp--servers (make-hash-table :test 'equal))
+                (path (expand-file-name "box/box.go" project)))
+            (spy-on 'flycheck-lsp--server-live-p :and-return-value t)
+            (server-with-doc project path (list diag))
+            (flycheck-buttercup-with-temp-buffer
+              (setq-local flycheck-lsp-mode t)
+              (expect (flycheck-lsp--project-extra-errors project nil)
+                      :to-be-equal-flycheck-errors
+                      (list (flycheck-error-new-at
+                             28 2 'error "undefined: a"
+                             :id "UndeclaredName" :checker 'flycheck-lsp
+                             :filename path :buffer nil))))))
+
+        (it "skips a document a live buffer owns"
+          (let ((flycheck-lsp--servers (make-hash-table :test 'equal))
+                (owner (generate-new-buffer " owner")))
+            (spy-on 'flycheck-lsp--server-live-p :and-return-value t)
+            (unwind-protect
+                (progn
+                  (server-with-doc project (expand-file-name "owned" project)
+                                   (list diag) owner)
+                  (flycheck-buttercup-with-temp-buffer
+                    (setq-local flycheck-lsp-mode t)
+                    (expect (flycheck-lsp--project-extra-errors project nil)
+                            :to-be nil)))
+              (kill-buffer owner))))
+
+        (it "skips a server that died"
+          (let ((flycheck-lsp--servers (make-hash-table :test 'equal)))
+            (spy-on 'flycheck-lsp--server-live-p :and-return-value nil)
+            (server-with-doc project (expand-file-name "x" project) (list diag))
+            (flycheck-buttercup-with-temp-buffer
+              (setq-local flycheck-lsp-mode t)
+              (expect (flycheck-lsp--project-extra-errors project nil)
+                      :to-be nil))))
+
+        (it "skips a server rooted outside the project"
+          (let ((flycheck-lsp--servers (make-hash-table :test 'equal))
+                (other (file-name-as-directory (expand-file-name "/elsewhere"))))
+            (spy-on 'flycheck-lsp--server-live-p :and-return-value t)
+            (server-with-doc other (expand-file-name "x" other) (list diag))
+            (flycheck-buttercup-with-temp-buffer
+              (setq-local flycheck-lsp-mode t)
+              (expect (flycheck-lsp--project-extra-errors project nil)
+                      :to-be nil))))
+
+        (it "skips a document outside the project on a server inside it"
+          ;; e.g. a server diagnosing a dependency it was told about
+          (let ((flycheck-lsp--servers (make-hash-table :test 'equal)))
+            (spy-on 'flycheck-lsp--server-live-p :and-return-value t)
+            (server-with-doc project (expand-file-name "/elsewhere/dep")
+                             (list diag))
+            (flycheck-buttercup-with-temp-buffer
+              (setq-local flycheck-lsp-mode t)
+              (expect (flycheck-lsp--project-extra-errors project nil)
+                      :to-be nil))))
+
+        (it "skips a file some buffer visits with the bridge off"
+          ;; That buffer reports the file's problems its own way; showing
+          ;; the cached push too would state the same problems twice.
+          (let* ((flycheck-lsp--servers (make-hash-table :test 'equal))
+                 (path (expand-file-name "visited.rb" project))
+                 (visiting (generate-new-buffer " visiting")))
+            (spy-on 'flycheck-lsp--server-live-p :and-return-value t)
+            (unwind-protect
+                (progn
+                  (with-current-buffer visiting
+                    (set-visited-file-name path 'no-query))
+                  (server-with-doc project path (list diag))
+                  (flycheck-buttercup-with-temp-buffer
+                    (setq-local flycheck-lsp-mode t)
+                    (expect (flycheck-lsp--project-extra-errors project nil)
+                            :to-be nil)))
+              (with-current-buffer visiting
+                (set-buffer-modified-p nil)
+                (kill-buffer)))))
+
+        (it "contributes nothing while the bridge is off everywhere"
+          (let ((flycheck-lsp--servers (make-hash-table :test 'equal)))
+            (spy-on 'flycheck-lsp--server-live-p :and-return-value t)
+            (server-with-doc project (expand-file-name "x" project) (list diag))
+            (flycheck-buttercup-with-temp-buffer
+              (expect (flycheck-lsp--project-extra-errors project nil)
+                      :to-be nil)))))))
 
   (describe "workspace-edit fixes (shared)"
     (it "converts an LSP TextEdit to a fix edit, one-basing positions"

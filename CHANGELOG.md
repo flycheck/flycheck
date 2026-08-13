@@ -6,6 +6,10 @@
 
 ## master (unreleased)
 
+### New Features
+
+- [#2341](https://github.com/flycheck/flycheck/pull/2341): The error list's project scope now shows the diagnostics a language server pushed for files that are not open in any buffer, with both the Eglot bridge and the native `flycheck-lsp` checker ([#2340](https://github.com/flycheck/flycheck/issues/2340)).
+
 ### Bugs fixed
 
 - [#2339](https://github.com/flycheck/flycheck/pull/2339): `perl-perlimports` quick fixes now notice when the buffer changed while the tool ran, instead of applying their edits to shifted positions.
