@@ -170,6 +170,76 @@ platform (Windows `expand-file-name' prepends the current drive)."
           ;; The dead entry is pruned, not merely skipped.
           (expect (gethash buffer flycheck--project-error-store) :to-be nil))))
 
+    (describe "extra diagnostics contributors"
+
+      (before-each
+        (spy-on 'project-current :and-return-value nil))
+
+      (it "folds contributed errors into the aggregation"
+        (let ((flycheck--project-extra-errors-functions
+               (list (lambda (key _buffers)
+                       (list (flycheck-error-new-at
+                              3 1 'warning "unvisited"
+                              :filename (concat key "sub/file")
+                              :checker 'x :buffer nil))))))
+          (expect (length (flycheck-test--project-errors "/proj/"))
+                  :to-equal 1)))
+
+      (it "passes the project's contributing buffers to each contributor"
+        (let* ((seen 'unset)
+               (flycheck--project-extra-errors-functions
+                (list (lambda (_key buffers) (setq seen buffers) nil))))
+          (with-current-buffer (flycheck-test--project-buffer " c" "/proj/")
+            (flycheck--project-record-errors
+             (list (flycheck-error-new-at 1 1 'error "e" :filename "/proj/x"))))
+          (flycheck-test--project-errors "/proj/")
+          (expect (length seen) :to-equal 1)))
+
+      (it "drops a contribution that duplicates a buffer's error"
+        (let ((err (flycheck-error-new-at 5 3 'error "dup"
+                                          :filename "/proj/shared" :checker 'x)))
+          (with-current-buffer (flycheck-test--project-buffer " d" "/proj/")
+            (flycheck--project-record-errors (list err)))
+          (let ((flycheck--project-extra-errors-functions
+                 (list (lambda (_key _buffers) (list err)))))
+            (expect (length (flycheck-test--project-errors "/proj/"))
+                    :to-equal 1))))
+
+      (it "drops contributed errors the store would not record either"
+        (let ((flycheck--project-extra-errors-functions
+               (list (lambda (_key _buffers)
+                       (list (flycheck-error-new-at nil nil 'error "no line"
+                                                    :filename "/proj/x")
+                             (flycheck-error-new-at 1 1 'error ""
+                                                    :filename "/proj/x"))))))
+          (expect (flycheck-test--project-errors "/proj/") :to-be nil)))
+
+      (it "survives a contributor that signals"
+        (let ((flycheck--project-extra-errors-functions
+               (list (lambda (_key _buffers) (error "Broken"))
+                     (lambda (_key _buffers)
+                       (list (flycheck-error-new-at 1 1 'error "kept"
+                                                    :filename "/proj/x"
+                                                    :checker 'x :buffer nil))))))
+          (expect (length (flycheck-test--project-errors "/proj/"))
+                  :to-equal 1)))
+
+      (it "lists contributed errors after the buffers' own, in their order"
+        (with-current-buffer (flycheck-test--project-buffer " o" "/proj/")
+          (flycheck--project-record-errors
+           (list (flycheck-error-new-at 1 1 'error "own" :filename "/proj/x"))))
+        (let ((flycheck--project-extra-errors-functions
+               (list (lambda (_key _buffers)
+                       (list (flycheck-error-new-at 2 1 'error "extra-1"
+                                                    :filename "/proj/y"
+                                                    :checker 'x :buffer nil)
+                             (flycheck-error-new-at 3 1 'error "extra-2"
+                                                    :filename "/proj/z"
+                                                    :checker 'x :buffer nil))))))
+          (expect (mapcar #'flycheck-error-message
+                          (flycheck-test--project-errors "/proj/"))
+                  :to-equal '("own" "extra-1" "extra-2")))))
+
     (describe "capture during a syntax check"
 
       (before-each

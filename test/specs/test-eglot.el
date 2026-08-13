@@ -25,6 +25,7 @@
 
 ;;; Code:
 
+(require 'cl-lib)
 (require 'flycheck-buttercup)
 (require 'flymake)
 
@@ -88,6 +89,94 @@ half-assembled answer and passes for the wrong reason."
           (expect (flycheck-related-location-end-column rel) :to-equal 10)
           (expect (flycheck-related-location-message rel)
                   :to-equal "first defined here")))))
+
+  (describe "project diagnostics for unvisited files"
+
+    ;; Eglot parks a push about a file no buffer visits in Flymake's
+    ;; `flymake-list-only-diagnostics', as (LINE . COLUMN) file diagnostics
+    ;; with no LSP payload; the bridge folds them into the project view.
+
+    (cl-flet ((parked (file line col type text)
+                (cons file (list (flymake-make-diagnostic
+                                  file (cons line col) nil type text)))))
+
+      (let ((project (file-name-as-directory (expand-file-name "/proj"))))
+
+        (it "converts a parked diagnostic to an error of the unvisited file"
+          (let* ((file (expand-file-name "box/box.go" project))
+                 (flymake-list-only-diagnostics
+                  (list (parked file 28 2 'eglot-error
+                                "compiler [UndeclaredName]: undefined: a"))))
+            (flycheck-buttercup-with-temp-buffer
+              (setq-local flycheck-eglot-mode t)
+              (expect (flycheck-eglot--project-extra-errors project nil)
+                      :to-be-equal-flycheck-errors
+                      (list (flycheck-error-new-at
+                             28 2 'error
+                             "compiler [UndeclaredName]: undefined: a"
+                             :checker 'eglot-check
+                             :filename file :buffer nil))))))
+
+        (it "maps the flymake types onto Flycheck levels"
+          (let ((flymake-list-only-diagnostics
+                 (list (parked (expand-file-name "w" project) 1 1
+                               'eglot-warning "w")
+                       (parked (expand-file-name "n" project) 2 1
+                               'eglot-note "n"))))
+            (flycheck-buttercup-with-temp-buffer
+              (setq-local flycheck-eglot-mode t)
+              (expect (mapcar #'flycheck-error-level
+                              (flycheck-eglot--project-extra-errors project nil))
+                      :to-equal '(warning info)))))
+
+        (it "skips a parked file outside the project"
+          (let ((flymake-list-only-diagnostics
+                 (list (parked (expand-file-name "/elsewhere/x") 1 1
+                               'eglot-error "e"))))
+            (flycheck-buttercup-with-temp-buffer
+              (setq-local flycheck-eglot-mode t)
+              (expect (flycheck-eglot--project-extra-errors project nil)
+                      :to-be nil))))
+
+        (it "skips a parked file that has a buffer by now"
+          (let* ((file (expand-file-name "opened.go" project))
+                 (flymake-list-only-diagnostics
+                  (list (parked file 1 1 'eglot-error "e")))
+                 (visiting (generate-new-buffer " opened")))
+            (unwind-protect
+                (progn
+                  (with-current-buffer visiting
+                    (set-visited-file-name file 'no-query))
+                  (flycheck-buttercup-with-temp-buffer
+                    (setq-local flycheck-eglot-mode t)
+                    (expect (flycheck-eglot--project-extra-errors project nil)
+                            :to-be nil)))
+              (with-current-buffer visiting
+                (set-buffer-modified-p nil)
+                (kill-buffer)))))
+
+        (it "contributes nothing while the bridge is off everywhere"
+          (let ((flymake-list-only-diagnostics
+                 (list (parked (expand-file-name "x" project) 1 1
+                               'eglot-error "e"))))
+            (flycheck-buttercup-with-temp-buffer
+              (expect (flycheck-eglot--project-extra-errors project nil)
+                      :to-be nil))))
+
+        (it "accepts the bridge being on in another buffer of the project"
+          (let ((flymake-list-only-diagnostics
+                 (list (parked (expand-file-name "x" project) 1 1
+                               'eglot-error "e")))
+                (other (generate-new-buffer " bridged")))
+            (unwind-protect
+                (progn
+                  (with-current-buffer other
+                    (setq-local flycheck-eglot-mode t))
+                  (flycheck-buttercup-with-temp-buffer
+                    (expect (length (flycheck-eglot--project-extra-errors
+                                     project (list other)))
+                            :to-equal 1)))
+              (kill-buffer other)))))))
 
   (describe "flycheck-eglot--report"
     (it "publishes what the server reported, once the reports stop"

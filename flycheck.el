@@ -3123,6 +3123,12 @@ possible problems are shown."
   (let* ((buffer (current-buffer))
          (last-failure flycheck--last-failure)
          (lsp-activity (flycheck--lsp-activity))
+         ;; In the source buffer: the contributors consult its local modes
+         (unvisited-count
+          (length (ignore-errors
+                    (flycheck--project-extra-errors
+                     (flycheck--project-directory) (list buffer)
+                     (make-hash-table :test 'equal)))))
          (first-checker (flycheck-get-checker-for-buffer))
          (valid-checkers
           (remq first-checker
@@ -3193,6 +3199,10 @@ but will not run until properly configured:\n\n")
              "Try adding these syntax checkers to `flycheck-checkers'.\n\n")))
 
         (flycheck--verify-princ-lsp-activity lsp-activity)
+
+        (when (> unvisited-count 0)
+          (princ (format "Project-wide diagnostics for unvisited files: %d \
+(shown in the error list's project scope)\n\n" unvisited-count)))
 
         (flycheck--verify-print-footer buffer)
 
@@ -5128,6 +5138,23 @@ check.  The result is an expanded directory name."
                (project-root project)))
         default-directory))))
 
+(defun flycheck--project-key-prefixes (project-key)
+  "Return the directory prefixes that place a file under PROJECT-KEY.
+
+That is PROJECT-KEY itself and, when it differs, its truename: a
+language server may resolve symlinks in the paths it reports (macOS
+mounts /tmp on /private/tmp), and a project opened through the symlink
+would otherwise never match what the server says about it."
+  (let ((truename (ignore-errors
+                    (file-name-as-directory (file-truename project-key)))))
+    (if (and truename (not (equal truename project-key)))
+        (list project-key truename)
+      (list project-key))))
+
+(defun flycheck--path-under-prefixes-p (path prefixes)
+  "Whether the absolute PATH extends one of the directory PREFIXES."
+  (seq-some (lambda (prefix) (string-prefix-p prefix path)) prefixes))
+
 (defun flycheck--project-storable-errors (errors)
   "Return the subset of ERRORS worth recording project-wide.
 
@@ -5179,12 +5206,50 @@ from different unsaved buffers are not mistaken for duplicates."
         (flycheck-error-id err)
         (flycheck-error-checker err)))
 
+(defvar flycheck--project-extra-errors-functions nil
+  "Functions contributing project diagnostics no open buffer covers.
+
+Each function is called with the project key (see
+`flycheck--project-directory') and the list of live buffers whose checks
+contributed to the project, and returns a list of `flycheck-error'
+objects for files of that project that no buffer's check reported --
+e.g. the diagnostics an LSP server pushed about files that are not
+visited.  The LSP bridges register here.  The results pass the same
+filter as recorded errors (see `flycheck--project-storable-errors') and
+deduplicate against the buffers' contributions; each error should carry
+a file name, or identical diagnostics from different contributors
+collapse into one.
+
+The buffer list holds the project's live buffers whose checks
+contributed to the store, or just the buffer on whose behalf the
+aggregation runs.  The functions run in the buffer the error list was
+opened from, so they can also consult its buffer-local modes.")
+
+(defun flycheck--project-extra-errors (project-key buffers owner)
+  "Return the extra diagnostics contributed for PROJECT-KEY.
+
+Calls `flycheck--project-extra-errors-functions' with PROJECT-KEY and
+BUFFERS, dropping errors whose identity is already claimed in OWNER (see
+`flycheck--project-error-identity') and errors the store would not
+record either.  A misbehaving contributor must not abort the error-list
+refresh, so each is guarded."
+  (let ((result nil))
+    (dolist (fn flycheck--project-extra-errors-functions)
+      (dolist (err (flycheck--project-storable-errors
+                    (ignore-errors (funcall fn project-key buffers))))
+        (let ((identity (flycheck--project-error-identity err nil)))
+          (unless (gethash identity owner)
+            (puthash identity t owner)
+            (push err result)))))
+    (nreverse result)))
+
 (defun flycheck--project-errors (project-key)
   "Return the deduplicated diagnostics recorded for PROJECT-KEY.
 
 Aggregate the errors every live buffer of the project contributed,
-dropping duplicates (see `flycheck--project-error-identity').  Dead
-buffers are pruned from the store on the way.
+dropping duplicates (see `flycheck--project-error-identity'), then
+whatever `flycheck--project-extra-errors-functions' add for files no
+buffer covers.  Dead buffers are pruned from the store on the way.
 
 Cross-file errors reflect the last check that reported them: an
 error a checker reported about another file stays until the buffer
@@ -5196,6 +5261,7 @@ the file changed without running a check."
   ;; buffers -- e.g. one `cargo check' error reported from each open crate
   ;; file -- collapses to a single entry.
   (let ((owner (make-hash-table :test 'equal))
+        (buffers nil)
         (dead nil)
         (result nil))
     (when project-key
@@ -5210,6 +5276,7 @@ the file changed without running a check."
                         (ignore-errors
                           (with-current-buffer buffer
                             (flycheck--project-directory))))
+             (push buffer buffers)
              (dolist (err errors)
                (let* ((identity (flycheck--project-error-identity err buffer))
                       (seen-in (gethash identity owner)))
@@ -5218,8 +5285,11 @@ the file changed without running a check."
                    (push err result)))))))
        flycheck--project-error-store)
       (dolist (buffer dead)
-        (remhash buffer flycheck--project-error-store)))
-    (nreverse result)))
+        (remhash buffer flycheck--project-error-store))
+      (setq result
+            (nconc (nreverse result)
+                   (flycheck--project-extra-errors project-key buffers owner))))
+    result))
 
 (defun flycheck-fill-and-expand-error-file-names (errors directory)
   "Fill and expand file names in ERRORS relative to DIRECTORY.
@@ -6931,12 +7001,14 @@ errors of `flycheck-error-list-source-buffer'.  With `project',
 read the project-wide diagnostics of that buffer's project."
   (when (buffer-live-p flycheck-error-list-source-buffer)
     (if (eq flycheck-error-list-scope 'project)
-        (flycheck--project-errors
-         ;; Guard the project lookup: a misbehaving project backend must
-         ;; not abort the error-list refresh that runs after every check.
-         (ignore-errors
-           (with-current-buffer flycheck-error-list-source-buffer
-             (flycheck--project-directory))))
+        ;; In the source buffer, so the extra-diagnostics contributors can
+        ;; consult its buffer-local modes (see
+        ;; `flycheck--project-extra-errors-functions').
+        (with-current-buffer flycheck-error-list-source-buffer
+          (flycheck--project-errors
+           ;; Guard the project lookup: a misbehaving project backend must
+           ;; not abort the error-list refresh that runs after every check.
+           (ignore-errors (flycheck--project-directory))))
       (buffer-local-value 'flycheck-current-errors
                           flycheck-error-list-source-buffer))))
 
@@ -11509,6 +11581,66 @@ fresh diagnostics are published (guarded against recursion)."
               (let ((flycheck-lsp--suppress-recheck t))
                 (flycheck-buffer-automatically)))))))))
 
+(defun flycheck-lsp--list-only-error (path lsp)
+  "Convert the raw LSP diagnostic plist LSP about the unvisited PATH.
+
+The positions come straight from the LSP range: the one-based line is
+exact, but the column counts UTF-16 code units, and without the file's
+text there is nothing to convert it against, so it can be off on a line
+with astral characters and no end position is attempted at all."
+  (let ((start (plist-get (plist-get lsp :range) :start)))
+    (flycheck-error-new-at
+     (1+ (or (plist-get start :line) 0))
+     (1+ (or (plist-get start :character) 0))
+     (flycheck-lsp--severity-level (plist-get lsp :severity))
+     (plist-get lsp :message)
+     :id (flycheck-lsp--diagnostic-id lsp)
+     :checker 'flycheck-lsp
+     :filename path
+     :buffer nil)))
+
+(defun flycheck-lsp--project-extra-errors (project-key buffers)
+  "Return cached diagnostics for unvisited documents under PROJECT-KEY.
+
+A server push is cached for any document, including one no buffer has
+opened (a workspace-wide server diagnosing files that are not visited;
+see `flycheck-lsp--handle-notification').  Surface those in the
+project-wide view when the bridge is on here or in any of the project's
+BUFFERS.  A document owned by a live buffer is covered by that buffer's
+own check and skipped; so is a file some buffer visits with the bridge
+off, whose problems that buffer reports its own way; so is a server
+that died, whose cache is stale; and so is a document outside the
+project, which a server rooted inside it may still be told about (a
+dependency, a generated file elsewhere)."
+  (when (or (bound-and-true-p flycheck-lsp-mode)
+            (seq-some (lambda (buffer)
+                        (buffer-local-value 'flycheck-lsp-mode buffer))
+                      buffers))
+    (let ((prefixes (flycheck--project-key-prefixes project-key))
+          (result nil))
+      (maphash
+       (lambda (_key server)
+         (when (and (flycheck-lsp--server-live-p server)
+                    (flycheck--path-under-prefixes-p
+                     (file-name-as-directory
+                      (expand-file-name (flycheck-lsp--server-root server)))
+                     prefixes))
+           (maphash
+            (lambda (path doc)
+              (let ((buffer (flycheck-lsp--doc-buffer doc)))
+                (unless (or (and buffer (buffer-live-p buffer))
+                            (not (flycheck--path-under-prefixes-p
+                                  path prefixes))
+                            (get-file-buffer path))
+                  (dolist (lsp (flycheck-lsp--doc-diags doc))
+                    (push (flycheck-lsp--list-only-error path lsp) result)))))
+            (flycheck-lsp--server-documents server))))
+       flycheck-lsp--servers)
+      (nreverse result))))
+
+(add-hook 'flycheck--project-extra-errors-functions
+          #'flycheck-lsp--project-extra-errors)
+
 (defun flycheck-lsp--document (server key)
   "Return the `flycheck-lsp--doc' for KEY on SERVER, creating it if needed."
   (or (gethash key (flycheck-lsp--server-documents server))
@@ -12132,6 +12264,63 @@ manage never asks."
              (fboundp 'eglot-server-capable)
              (eglot-server-capable :codeActionProvider))
     #'flycheck-eglot--code-action-fix))
+
+(declare-function flymake--diag-beg "flymake" (diag))
+(declare-function flymake--diag-orig-beg "flymake" (diag))
+(defvar flymake-list-only-diagnostics)
+
+(defun flycheck-eglot--list-only-error (file diag)
+  "Convert DIAG, parked by Eglot for the unvisited FILE, to an error.
+
+DIAG is a Flymake diagnostic whose locus is a file name rather than a
+buffer: its position is a (LINE . COLUMN) cons, both one-based, and it
+carries no LSP data, so there is no id, no related locations and no end
+position.  Returns nil when the position cannot be read."
+  ;; Flymake's own project listing reads the position off the raw slot,
+  ;; with the same fallback; the public `flymake-diagnostic-beg' wants an
+  ;; annotated diagnostic and these are never annotated.
+  (when-let* ((beg (or (and (fboundp 'flymake--diag-beg)
+                            (let ((beg (flymake--diag-beg diag)))
+                              (and (consp beg) beg)))
+                       (and (fboundp 'flymake--diag-orig-beg)
+                            (let ((beg (flymake--diag-orig-beg diag)))
+                              (and (consp beg) beg))))))
+    (flycheck-error-new-at
+     (car beg) (cdr beg)
+     (flycheck-eglot--type-level (flymake-diagnostic-type diag))
+     (format "%s" (flymake-diagnostic-text diag))
+     :checker 'eglot-check
+     :filename file
+     :buffer nil)))
+
+(defun flycheck-eglot--project-extra-errors (project-key buffers)
+  "Return Eglot's diagnostics for unvisited files under PROJECT-KEY.
+
+A server push about a file no buffer visits never reaches a Flycheck
+buffer; Eglot parks it in `flymake-list-only-diagnostics', the Flymake
+variable made for project listings.  Fold those into the project-wide
+view when the bridge is on here or in any of the project's BUFFERS.
+Eglot drops a file's entry once the file gets a managed buffer, but a
+freshly visited file keeps its entry until the server republishes, so a
+file with a live buffer is skipped rather than shown twice."
+  (when (and (boundp 'flymake-list-only-diagnostics)
+             (or (bound-and-true-p flycheck-eglot-mode)
+                 (seq-some (lambda (buffer)
+                             (buffer-local-value 'flycheck-eglot-mode buffer))
+                           buffers)))
+    (let ((prefixes (flycheck--project-key-prefixes project-key))
+          (result nil))
+      (pcase-dolist (`(,file . ,diags) flymake-list-only-diagnostics)
+        (when (and (stringp file)
+                   (flycheck--path-under-prefixes-p file prefixes)
+                   (not (get-file-buffer file)))
+          (dolist (diag diags)
+            (when-let* ((err (flycheck-eglot--list-only-error file diag)))
+              (push err result)))))
+      (nreverse result))))
+
+(add-hook 'flycheck--project-extra-errors-functions
+          #'flycheck-eglot--project-extra-errors)
 
 (defun flycheck-eglot--error-region (err)
   "Return the (BEG . END) buffer region of ERR, for a code-action request."
