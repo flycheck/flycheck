@@ -18,8 +18,8 @@
     (flycheck-buttercup-should-syntax-check
      "language/rst/sphinx/index.rst" 'rst-mode
      '(2 nil warning "Title underline too short." :checker rst-sphinx)
-     '(9 nil warning "Unknown target name: \"cool\"." :checker rst-sphinx)
-     '(9 nil warning "'envvar' reference target not found: FOO"
+     '(9 nil error "Unknown target name: \"cool\". [docutils]" :checker rst-sphinx)
+     '(9 nil warning "'envvar' reference target not found: FOO [ref.envvar]"
          :checker rst-sphinx)))
 
   (flycheck-buttercup-def-checker-test rst-sphinx rst not-outside-of-a-sphinx-project
