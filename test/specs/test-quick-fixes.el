@@ -53,6 +53,44 @@
       (let ((err (flycheck-error-new-at 1 1 'error "e" :fix (lambda (_) nil))))
         (expect (flycheck-error-resolve-fix err) :to-be nil))))
 
+  (describe "flycheck-fix-edit-new-at-pos"
+    (it "converts buffer positions to one-based lines and columns"
+      (flycheck-buttercup-with-temp-buffer
+        (insert "first line\nsecond line\n")
+        ;; "second" is positions 12-18: line 2, columns 1-7 right-open
+        (let ((edit (flycheck-fix-edit-new-at-pos 12 18 "next")))
+          (expect (flycheck-fix-edit-line edit) :to-equal 2)
+          (expect (flycheck-fix-edit-column edit) :to-equal 1)
+          (expect (flycheck-fix-edit-end-line edit) :to-equal 2)
+          (expect (flycheck-fix-edit-end-column edit) :to-equal 7)
+          (expect (flycheck-fix-edit-replacement edit) :to-equal "next"))))
+
+    (it "builds an insertion from an empty region"
+      (flycheck-buttercup-with-temp-buffer
+        (insert "ab\n")
+        (let ((edit (flycheck-fix-edit-new-at-pos 2 2 "x")))
+          (expect (flycheck-fix-edit-line edit) :to-equal 1)
+          (expect (flycheck-fix-edit-column edit) :to-equal 2)
+          (expect (flycheck-fix-edit-end-line edit) :to-equal 1)
+          (expect (flycheck-fix-edit-end-column edit) :to-equal 2))))
+
+    (it "builds the same edit flycheck-fix-edit-new would"
+      (flycheck-buttercup-with-temp-buffer
+        (insert "first line\nsecond line\n")
+        (expect (flycheck-fix-edit-new-at-pos 12 18 "next")
+                :to-equal (flycheck-fix-edit-new
+                           :line 2 :column 1 :end-line 2 :end-column 7
+                           :replacement "next"))))
+
+    (it "applies like any other edit"
+      (flycheck-buttercup-with-temp-buffer
+        (insert "first line\nsecond line\n")
+        (let ((fix (flycheck-fix-new
+                    :edits (list (flycheck-fix-edit-new-at-pos 12 18 "next"))
+                    :tick (buffer-chars-modified-tick))))
+          (flycheck-apply-fix fix)
+          (expect (buffer-string) :to-equal "first line\nnext line\n")))))
+
   (describe "flycheck-error-known-fix-p"
     (it "is true for a stored fix"
       (let* ((fix (flycheck-test--edit 1 1 1 2 "x"))

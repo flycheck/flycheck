@@ -4613,14 +4613,30 @@ out to be available."
   (let ((fix (flycheck-error-fix err)))
     (if (functionp fix) (funcall fix err) fix)))
 
-(cl-defstruct (flycheck-fix-edit (:constructor flycheck-fix-edit-new))
+(cl-defstruct (flycheck-fix-edit
+               (:constructor flycheck-fix-edit-new)
+               (:constructor
+                flycheck-fix-edit-new-at-pos
+                (pos end-pos replacement
+                 &aux
+                 ((line . column) (flycheck-line-column-at-pos pos))
+                 ((end-line . end-column)
+                  (flycheck-line-column-at-pos end-pos)))))
   "A single text edit of a `flycheck-fix'.
 
 Replace the region from LINE, COLUMN to END-LINE, END-COLUMN with
 REPLACEMENT.  Positions are one-based, as in `flycheck-error'; an
 edit that only inserts text has END-LINE, END-COLUMN equal to
 LINE, COLUMN, and an edit that only deletes has an empty
-REPLACEMENT."
+REPLACEMENT.
+
+`flycheck-fix-edit-new-at-pos' builds an edit from buffer
+positions instead, as `flycheck-error-new-at-pos' does for
+errors: POS and END-POS are positions in the current buffer,
+converted at construction time.  A buffer region excludes the
+character at its end, which is exactly the right-open span the
+edit wants, so no adjustment is needed.  POS must not exceed
+END-POS; a reversed region is refused when the fix is applied."
   line column end-line end-column replacement)
 
 (cl-defstruct (flycheck-fix (:constructor flycheck-fix-new))
