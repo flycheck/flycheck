@@ -363,6 +363,12 @@ empty replacement):
                         :replacement ""))
           :tick (buffer-chars-modified-tick)))
 
+When you have buffer positions rather than lines and columns -- from a regexp
+match or an overlay, say -- build the edit with ``flycheck-fix-edit-new-at-pos``
+instead, the counterpart of ``flycheck-error-new-at-pos``: it takes the start
+position, the (exclusive) end position and the replacement, and converts them
+in the current buffer.
+
 Set ``:tick`` to the buffer's ``buffer-chars-modified-tick`` when you build the
 fix: ``flycheck-apply-fix`` refuses to apply a fix if the buffer changed since,
 so stale positions can never silently corrupt the buffer.
