@@ -353,6 +353,28 @@ TEST=1
           ;; the right-open end and beyond, as `overlays-at' reads a span
           (expect (flycheck-eglot--flymake-diagnostics #'ignore 17) :to-be nil)
           (expect (flycheck-eglot--flymake-diagnostics #'ignore 18) :to-be nil))))
+    (it "keeps the strict edges of a range query, as overlays-in does"
+      ;; A diagnostic merely touching a boundary is not in the range;
+      ;; the expectations mirror probed overlays-in behavior exactly
+      (flycheck-buttercup-with-temp-buffer
+        (insert "# comment\nTEST=1\nmore text\n")
+        (let* ((flycheck-eglot-mode t)
+               (diag (test-eglot--diag (current-buffer) 11 17 :warning "unused"))
+               (flycheck-eglot--diagnostics (list diag)))
+          ;; regions ending at the start or starting at the exclusive end
+          (expect (flycheck-eglot--flymake-diagnostics #'ignore 1 11) :to-be nil)
+          (expect (flycheck-eglot--flymake-diagnostics #'ignore 17 20) :to-be nil)
+          ;; overlapping and contained regions
+          (expect (flycheck-eglot--flymake-diagnostics #'ignore 16 20)
+                  :to-equal (list diag))
+          (expect (flycheck-eglot--flymake-diagnostics #'ignore 12 13)
+                  :to-equal (list diag))
+          ;; empty regions: nothing at the span's start, the span at a
+          ;; strictly inside position - eglot's code-action fallback asks
+          ;; for (point) (point)
+          (expect (flycheck-eglot--flymake-diagnostics #'ignore 11 11) :to-be nil)
+          (expect (flycheck-eglot--flymake-diagnostics #'ignore 16 16)
+                  :to-equal (list diag)))))
     (it "delegates to the original when the mode is off"
       (let ((flycheck-eglot-mode nil))
         (expect (flycheck-eglot--flymake-diagnostics
