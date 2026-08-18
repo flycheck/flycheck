@@ -1386,6 +1386,26 @@ Set this variable to nil to disable the mode line completely."
   :safe #'booleanp
   :package-version '(flycheck . "35"))
 
+(defcustom flycheck-mode-line-scope 'buffer
+  "The scope of the error counts in the mode line.
+
+With `buffer' (the default) the counter shows the current buffer's
+errors, as it always has.  With `project' it shows the project-wide
+diagnostics instead - what the error list displays in its project scope,
+including what a language server reported about files that are not open
+- and the indicator's color follows those counts.  The other status
+indicators (running, errored, ...) always describe the current buffer's
+check.
+
+The project-wide counts are cached and refreshed when a check finishes
+or a language server pushes diagnostics, so the counter can lag behind
+by one such event after merely visiting or killing a file."
+  :group 'flycheck
+  :type '(choice (const :tag "Current buffer" buffer)
+                 (const :tag "Whole project" project))
+  :safe (lambda (value) (memq value '(buffer project)))
+  :package-version '(flycheck . "40"))
+
 (defcustom flycheck-mode-line-prefix "FlyC"
   "Base mode line lighter for Flycheck.
 
@@ -1572,6 +1592,10 @@ just return nil."
   (when (lookup-key global-map [menu-bar tools])
     (easy-menu-remove-item nil '("Tools") (cadr flycheck-mode-menu-map)))
   (remove-hook 'kill-emacs-hook #'flycheck-global-teardown)
+  ;; Or the next set of the watched variable calls an unbound function,
+  ;; from inside Eglot's process filter of all places
+  (remove-variable-watcher 'flymake-list-only-diagnostics
+                           #'flycheck--project-diagnostics-changed)
   (setq find-function-regexp-alist
         (assq-delete-all 'flycheck-checker find-function-regexp-alist)))
 
@@ -5161,8 +5185,9 @@ That is PROJECT-KEY itself and, when it differs, its truename: a
 language server may resolve symlinks in the paths it reports (macOS
 mounts /tmp on /private/tmp), and a project opened through the symlink
 would otherwise never match what the server says about it."
-  (let ((truename (ignore-errors
-                    (file-name-as-directory (file-truename project-key)))))
+  (let ((truename (unless (file-remote-p project-key)
+                    (ignore-errors
+                      (file-name-as-directory (file-truename project-key))))))
     (if (and truename (not (equal truename project-key)))
         (list project-key truename)
       (list project-key))))
@@ -5196,13 +5221,74 @@ what the buffer itself shows for its file."
     (puthash buffer
              (append (flycheck--project-storable-errors errors)
                      (gethash buffer flycheck--project-error-store))
-             flycheck--project-error-store)))
+             flycheck--project-error-store)
+    (flycheck--project-diagnostics-changed)))
 
 (defun flycheck--project-forget-buffer (&optional buffer)
   "Drop BUFFER's contribution to the project store.
 
 BUFFER defaults to the current buffer."
-  (remhash (or buffer (current-buffer)) flycheck--project-error-store))
+  (remhash (or buffer (current-buffer)) flycheck--project-error-store)
+  (flycheck--project-diagnostics-changed))
+
+(defvar flycheck--project-diagnostics-generation 0
+  "Bumped whenever the project-wide diagnostics may have changed.
+The mode line's project counter caches against it; see
+`flycheck--project-counts'.")
+
+(defun flycheck--project-diagnostics-changed (&rest _)
+  "Note that the project-wide diagnostics may have changed.
+
+Also called from a variable watcher on `flymake-list-only-diagnostics',
+where Eglot parks pushes about unvisited files without going through
+Flycheck; the ignored arguments are the watcher's."
+  (cl-incf flycheck--project-diagnostics-generation)
+  ;; A buffer-local `project' scope refreshes with its window's next
+  ;; ordinary mode-line update instead; not worth flagging every window
+  ;; frame-wide on every check for
+  (when (eq (default-value 'flycheck-mode-line-scope) 'project)
+    (force-mode-line-update 'all)))
+
+(defvar flycheck--project-counts-cache (make-hash-table :test 'equal)
+  "Cached project-wide error counts for the mode line.
+
+Maps a key from `flycheck--project-counts' to a cons of the
+generation the counts were computed at and the alist
+`flycheck-count-errors' returned.  Entries go stale together when
+`flycheck--project-diagnostics-generation' moves on.")
+
+(defvar-local flycheck--cached-project-key nil
+  "This buffer's `flycheck--project-directory', resolved once.
+Like `flycheck-lsp--cached-root': `project-current' is not free, and a
+buffer's project does not change over its life.")
+
+(defun flycheck--buffer-project-key ()
+  "Return the current buffer's project key, cached buffer-locally.
+A failing project backend is remembered as `failed', so it is not
+retried on every redisplay."
+  (let ((key (or flycheck--cached-project-key
+                 (setq flycheck--cached-project-key
+                       (or (ignore-errors (flycheck--project-directory))
+                           'failed)))))
+    (unless (eq key 'failed) key)))
+
+(defun flycheck--project-counts (project-key)
+  "Return `flycheck-count-errors' over PROJECT-KEY's diagnostics.
+
+Cached against `flycheck--project-diagnostics-generation', so the mode
+line does not aggregate on every redisplay.  The cache key includes the
+buffer-local bridge modes, which gate what the aggregation includes."
+  (let* ((key (list project-key
+                    (and (bound-and-true-p flycheck-eglot-mode) t)
+                    (and (bound-and-true-p flycheck-lsp-mode) t)))
+         (cached (gethash key flycheck--project-counts-cache)))
+    (if (and cached (= (car cached) flycheck--project-diagnostics-generation))
+        (cdr cached)
+      (let ((counts (flycheck-count-errors
+                     (flycheck--project-errors project-key))))
+        (puthash key (cons flycheck--project-diagnostics-generation counts)
+                 flycheck--project-counts-cache)
+        counts))))
 
 (defun flycheck--project-error-identity (err buffer)
   "Return a value uniquely identifying ERR contributed by BUFFER.
@@ -5251,8 +5337,9 @@ record either.  A misbehaving contributor must not abort the error-list
 refresh, so each is guarded."
   (let ((result nil))
     (dolist (fn flycheck--project-extra-errors-functions)
-      (dolist (err (flycheck--project-storable-errors
-                    (ignore-errors (funcall fn project-key buffers))))
+      (dolist (err (ignore-errors
+                      (flycheck--project-storable-errors
+                       (funcall fn project-key buffers))))
         (let ((identity (flycheck--project-error-identity err nil)))
           (unless (gethash identity owner)
             (puthash identity t owner)
@@ -5486,19 +5573,32 @@ Every status here shows no error counts, so its indicator is a single
 opaque character.  `flycheck-mode-line-status-text' turns these into a
 tooltip and a click that explains the buffer's setup.")
 
+(defun flycheck--mode-line-counts ()
+  "Return the error counts the mode line shows, honoring the scope.
+
+With `flycheck-mode-line-scope' `project', the counts of the
+project-wide diagnostics (see `flycheck--project-counts'); the current
+buffer's own otherwise, or when the project cannot be determined."
+  (if-let* (((eq flycheck-mode-line-scope 'project))
+            (key (flycheck--buffer-project-key)))
+      (flycheck--project-counts key)
+    (flycheck-count-errors flycheck-current-errors)))
+
 (defun flycheck-mode-line-status-text (&optional status)
   "Get a text describing STATUS for use in the mode line.
 
 STATUS defaults to `flycheck-last-status-change' if omitted or
 nil."
   (let* ((current-status (or status flycheck-last-status-change))
+         (counts (and (eq current-status 'finished)
+                      (flycheck--mode-line-counts)))
          (indicator (pcase current-status
                       (`not-checked "")
                       (`no-checker "-")
                       (`running "*")
                       (`errored "!")
                       (`finished
-                       (let-alist (flycheck-count-errors flycheck-current-errors)
+                       (let-alist counts
                          (propertize
                           (concat
                            (if (or .error .warning .info)
@@ -5540,7 +5640,7 @@ nil."
                  (pcase current-status
                    (`errored 'error)
                    (`finished
-                    (let-alist (flycheck-count-errors flycheck-current-errors)
+                    (let-alist counts
                       (if (or .error .warning) 'error 'success))))))
          (text (format " %s%s" flycheck-mode-line-prefix indicator)))
     (when face
@@ -11585,7 +11685,8 @@ fresh diagnostics are published (guarded against recursion)."
            ;; the buffer, and servers republish freely while they index
            (changed (not (equal new (flycheck-lsp--doc-diags doc)))))
       (when changed
-        (setf (flycheck-lsp--doc-diags doc) new))
+        (setf (flycheck-lsp--doc-diags doc) new)
+        (flycheck--project-diagnostics-changed))
       (when-let* ((buffer (flycheck-lsp--doc-buffer doc))
                   ((buffer-live-p buffer)))
         (with-current-buffer buffer
@@ -11994,13 +12095,18 @@ no Eglot involved.  Enabled by `flycheck-lsp-mode'."
   :predicate #'flycheck-lsp--enabled-p
   :modes '(prog-mode text-mode))
 
+(defun flycheck--lsp-server-gone ()
+  "Note that a server's cached diagnostics no longer count."
+  (flycheck--project-diagnostics-changed))
+
 (defun flycheck-lsp--shutdown-server (server)
   "Politely shut SERVER's language server down and free its buffers."
   (let ((conn (flycheck-lsp--server-connection server)))
     (when (and conn (jsonrpc-running-p conn))
       (ignore-errors (jsonrpc-request conn 'shutdown nil :timeout 1))
       (ignore-errors (jsonrpc-notify conn 'exit nil))
-      (ignore-errors (jsonrpc-shutdown conn t))))
+      (ignore-errors (jsonrpc-shutdown conn t))
+      (flycheck--lsp-server-gone)))
   (when-let* ((stderr (flycheck-lsp--server-stderr server)))
     (when (buffer-live-p stderr) (kill-buffer stderr))))
 
@@ -12337,6 +12443,12 @@ file with a live buffer is skipped rather than shown twice."
 
 (add-hook 'flycheck--project-extra-errors-functions
           #'flycheck-eglot--project-extra-errors)
+
+;; Eglot parks a push about an unvisited file straight into
+;; `flymake-list-only-diagnostics'; nothing of Flycheck's runs, so watch
+;; the variable to keep the mode line's project counter fresh.
+(add-variable-watcher 'flymake-list-only-diagnostics
+                      #'flycheck--project-diagnostics-changed)
 
 (defun flycheck-eglot--error-region (err)
   "Return the (BEG . END) buffer region of ERR, for a code-action request."

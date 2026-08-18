@@ -8,6 +8,7 @@
 
 ### New Features
 
+- [#2346](https://github.com/flycheck/flycheck/pull/2346): New `flycheck-mode-line-scope` option to make the mode-line counter show the project-wide diagnostics instead of the current buffer's ([#2340](https://github.com/flycheck/flycheck/issues/2340)).
 - [#2344](https://github.com/flycheck/flycheck/pull/2344): New `flycheck-fix-edit-new-at-pos` constructor building a fix edit from buffer positions, as `flycheck-error-new-at-pos` does for errors ([#2343](https://github.com/flycheck/flycheck/issues/2343)).
 - [#2341](https://github.com/flycheck/flycheck/pull/2341): The error list's project scope now shows the diagnostics a language server pushed for files that are not open in any buffer, with both the Eglot bridge and the native `flycheck-lsp` checker ([#2340](https://github.com/flycheck/flycheck/issues/2340)).
 

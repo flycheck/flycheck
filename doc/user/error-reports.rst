@@ -453,6 +453,20 @@ You can also customize the indicator for a successful run (no errors/warnings fo
 
    Success indicator appended to `flycheck-mode-line-prefix`. Set to ":0" by default.
 
+By default the counts describe the current buffer.  If you'd rather see the
+whole project's state at a glance - including what a language server reported
+about files you don't have open - point the counter at the project:
+
+.. defcustom:: flycheck-mode-line-scope
+
+   The scope of the error counts in the mode line: ``buffer`` (the default)
+   for the current buffer's errors, or ``project`` for the project-wide
+   diagnostics, the same set the :ref:`error list <flycheck-error-list>`
+   shows in its project scope.  With ``project`` the indicator's color
+   follows the project counts too, so a clean buffer in a broken project
+   shows red.  The other status indicators always describe the current
+   buffer's check.
+
 .. seealso::
 
    :infonode:`(elisp)Mode Line Data`
