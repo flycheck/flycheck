@@ -14,6 +14,7 @@
 
 ### Bugs fixed
 
+- [#2347](https://github.com/flycheck/flycheck/pull/2347): A single-position `flymake-diagnostics` call in a `flycheck-eglot-mode` buffer no longer returns diagnostics from past the position ([#2345](https://github.com/flycheck/flycheck/issues/2345)).
 - [#2339](https://github.com/flycheck/flycheck/pull/2339): `perl-perlimports` quick fixes now notice when the buffer changed while the tool ran, instead of applying their edits to shifted positions.
 - [#2338](https://github.com/flycheck/flycheck/pull/2338): `emacs-lisp-checkdoc` no longer complains about missing file comments in buffers that have no backing file, such as org indirect edit buffers.
 
