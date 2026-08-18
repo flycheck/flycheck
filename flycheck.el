@@ -12550,16 +12550,18 @@ ORIG is the advised function; BEG, END and ARGS are its arguments."
       (apply orig beg end args)
     ;; Mirror `flymake-diagnostics': a BEG-only call means the diagnostics
     ;; AT that position, spanning it the way `overlays-at' reads a span,
-    ;; right-open.  A range call returns the diagnostics that OVERLAP
-    ;; [BEG, END] (nil means unbounded), not just those contained in it, so
-    ;; callers like `eglot-code-actions' still see a wide diagnostic at point.
+    ;; right-open.  A range call returns the diagnostics that overlap
+    ;; BEG..END (nil means unbounded) with `overlays-in's strict edges: a
+    ;; diagnostic merely touching a boundary is not served, and a narrow
+    ;; query inside a wider diagnostic still finds it, so callers like
+    ;; `eglot-code-actions' see what Flymake itself would report.
     (seq-filter (lambda (d)
                   (let ((db (flymake-diagnostic-beg d))
                         (de (flymake-diagnostic-end d)))
                     (if (and beg (null end))
                         (and (<= db beg) (< beg de))
-                      (and (or (null end) (<= db end))
-                           (or (null beg) (<= beg de))))))
+                      (and (or (null end) (< db end))
+                           (or (null beg) (< beg de))))))
                 flycheck-eglot--diagnostics)))
 
 (defun flycheck-eglot--enable ()
