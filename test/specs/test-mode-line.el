@@ -26,6 +26,8 @@
 ;;; Code:
 
 (require 'flycheck-buttercup)
+(require 'flymake)
+(require 'project)
 
 (describe "Mode Line"
   (it "shows the number of errors, warnings, and infos"
@@ -94,6 +96,77 @@
             :to-be 'flycheck-mode-line-list-errors)
     (expect (lookup-key flycheck-mode-line-counts-map [header-line mouse-1])
             :to-be 'flycheck-mode-line-list-errors))
+
+  (describe "project scope"
+
+    (before-each
+      (spy-on 'project-current :and-return-value nil)
+      (clrhash flycheck--project-error-store)
+      (clrhash flycheck--project-counts-cache))
+
+    (it "counts the project's diagnostics instead of the buffer's"
+      (flycheck-buttercup-with-temp-buffer
+        (setq default-directory
+              (file-name-as-directory (expand-file-name "/proj")))
+        (flycheck--project-record-errors
+         (list (flycheck-error-new-at 3 1 'error "elsewhere"
+                                      :filename "/proj/other.go"
+                                      :checker 'x)))
+        (let ((flycheck-mode-line-scope 'project)
+              (flycheck-current-errors nil))
+          (expect (flycheck-mode-line-status-text 'finished)
+                  :to-equal " FlyC:1|0|0"))))
+
+    (it "colors the indicator by the project counts"
+      (flycheck-buttercup-with-temp-buffer
+        (setq default-directory
+              (file-name-as-directory (expand-file-name "/proj")))
+        (flycheck--project-record-errors
+         (list (flycheck-error-new-at 3 1 'error "elsewhere"
+                                      :filename "/proj/other.go"
+                                      :checker 'x)))
+        (let* ((flycheck-mode-line-scope 'project)
+               (flycheck-current-errors nil)
+               (text (flycheck-mode-line-status-text 'finished)))
+          (expect (get-text-property 0 'face text) :to-equal 'error))))
+
+    (it "refreshes the cached counts when the store changes"
+      (flycheck-buttercup-with-temp-buffer
+        (setq default-directory
+              (file-name-as-directory (expand-file-name "/proj")))
+        (flycheck--project-record-errors
+         (list (flycheck-error-new-at 3 1 'error "one"
+                                      :filename "/proj/a" :checker 'x)))
+        (let ((flycheck-mode-line-scope 'project)
+              (flycheck-current-errors nil))
+          (expect (flycheck-mode-line-status-text 'finished)
+                  :to-equal " FlyC:1|0|0")
+          (flycheck--project-record-errors
+           (list (flycheck-error-new-at 4 1 'warning "two"
+                                        :filename "/proj/b" :checker 'x)))
+          (expect (flycheck-mode-line-status-text 'finished)
+                  :to-equal " FlyC:1|1|0"))))
+
+    (it "keeps the buffer's counts under the default scope"
+      (flycheck-buttercup-with-temp-buffer
+        (setq default-directory
+              (file-name-as-directory (expand-file-name "/proj")))
+        (flycheck--project-record-errors
+         (list (flycheck-error-new-at 3 1 'error "elsewhere"
+                                      :filename "/proj/other.go"
+                                      :checker 'x)))
+        (let ((flycheck-current-errors nil))
+          (expect (flycheck-mode-line-status-text 'finished)
+                  :to-equal " FlyC:0"))))
+
+    (it "hears about diagnostics eglot parks for unvisited files"
+      ;; Those never pass through Flycheck, so a variable watcher on
+      ;; flymake's parking spot keeps the cached counts honest.
+      (let ((before flycheck--project-diagnostics-generation))
+        (let ((flymake-list-only-diagnostics nil))
+          (ignore flymake-list-only-diagnostics))
+        (expect flycheck--project-diagnostics-generation
+                :to-be-greater-than before))))
 
   (it "explains suppressed errors in the tooltip of the whole indicator"
     (flycheck-buttercup-with-temp-buffer
