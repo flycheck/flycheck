@@ -331,6 +331,28 @@ half-assembled answer and passes for the wrong reason."
           ;; a narrow query inside a wider diagnostic must still find it
           (expect (flycheck-eglot--flymake-diagnostics #'ignore 3 4)
                   :to-equal (list wide)))))
+    (it "serves only the diagnostics AT a single position"
+      ;; Flymake promises that BEG alone means the diagnostics at BEG; the
+      ;; filter used to keep everything ending at or after it, handing
+      ;; "diagnostic at point" callers errors from lines below (#2345)
+      (flycheck-buttercup-with-temp-buffer
+        (insert "# comment
+TEST=1
+")
+        (let* ((flycheck-eglot-mode t)
+               (diag (test-eglot--diag (current-buffer) 11 17 :warning "unused"))
+               (flycheck-eglot--diagnostics (list diag)))
+          ;; before the span, as anywhere on line 1
+          (expect (flycheck-eglot--flymake-diagnostics #'ignore 1) :to-be nil)
+          (expect (flycheck-eglot--flymake-diagnostics #'ignore 10) :to-be nil)
+          ;; inside the span, both edges
+          (expect (flycheck-eglot--flymake-diagnostics #'ignore 11)
+                  :to-equal (list diag))
+          (expect (flycheck-eglot--flymake-diagnostics #'ignore 16)
+                  :to-equal (list diag))
+          ;; the right-open end and beyond, as `overlays-at' reads a span
+          (expect (flycheck-eglot--flymake-diagnostics #'ignore 17) :to-be nil)
+          (expect (flycheck-eglot--flymake-diagnostics #'ignore 18) :to-be nil))))
     (it "delegates to the original when the mode is off"
       (let ((flycheck-eglot-mode nil))
         (expect (flycheck-eglot--flymake-diagnostics
