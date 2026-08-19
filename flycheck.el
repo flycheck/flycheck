@@ -12217,6 +12217,9 @@ For a full language server, prefer Eglot and `flycheck-eglot-mode'."
 (declare-function flymake-diagnostic-type "flymake" (diag))
 (declare-function flymake-diagnostic-text "flymake" (diag))
 (declare-function flymake-diagnostic-data "flymake" (diag))
+(declare-function flymake-diagnostic-message "flymake" (diag))
+(declare-function flymake-diagnostic-origin "flymake" (diag))
+(declare-function flymake-diagnostic-code "flymake" (diag))
 (declare-function eglot-code-actions "eglot" (beg &optional end action-kind interactive))
 (declare-function eglot-server-capable "eglot" (&rest feats))
 (declare-function eglot-uri-to-path "eglot" (uri))
@@ -12338,6 +12341,26 @@ is never selected unless the mode opted in."
   (and (bound-and-true-p flycheck-eglot-mode)
        (flycheck-eglot--available-p)))
 
+(defun flycheck-eglot--diag-message (diag)
+  "Return the message text of the Flymake diagnostic DIAG.
+
+Emacs 32's Flymake splits a diagnostic's text into origin, code and
+message, and its `flymake-diagnostic-text' composes them back with
+decoration (and stray separators around absent parts).  Compose the raw
+fields here instead, in the shape Eglot used to bake into the text -
+ORIGIN [CODE]: MESSAGE - so the same diagnostic reads identically on
+either side of the split.  A diagnostic without an origin drops old
+Eglot's stray leading separators rather than reproducing them."
+  (if (fboundp 'flymake-diagnostic-message)
+      (let ((origin (flymake-diagnostic-origin diag))
+            (code (flymake-diagnostic-code diag))
+            (message (or (flymake-diagnostic-message diag) "")))
+        (cond ((and origin code) (format "%s [%s]: %s" origin code message))
+              (origin (format "%s: %s" origin message))
+              (code (format "[%s]: %s" code message))
+              (t (format "%s" message))))
+    (format "%s" (flymake-diagnostic-text diag))))
+
 (defun flycheck-eglot--type-level (type)
   "Map an Eglot Flymake diagnostic TYPE to a Flycheck error level."
   (pcase type
@@ -12361,7 +12384,7 @@ as a fallback."
        (flycheck-eglot--type-level (flymake-diagnostic-type diag)))
      (if lsp
          (plist-get lsp :message)
-       (format "%s" (flymake-diagnostic-text diag)))
+       (flycheck-eglot--diag-message diag))
      :end-pos (flymake-diagnostic-end diag)
      :id (and lsp (flycheck-lsp--diagnostic-id lsp))
      :relations (and lsp (flycheck-lsp--related-locations lsp))
@@ -12410,7 +12433,7 @@ position.  Returns nil when the position cannot be read."
     (flycheck-error-new-at
      (car beg) (cdr beg)
      (flycheck-eglot--type-level (flymake-diagnostic-type diag))
-     (format "%s" (flymake-diagnostic-text diag))
+     (flycheck-eglot--diag-message diag)
      :checker 'eglot-check
      :filename file
      :buffer nil)))
