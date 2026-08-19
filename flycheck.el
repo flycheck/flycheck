@@ -17597,11 +17597,18 @@ Requires Sphinx 1.2 or newer.  See URL `https://sphinx-doc.org'."
                                         ; directory
             source-original)            ; Sphinx needs the original document
   :error-patterns
-  ((warning line-start (file-name) ":" line ": WARNING: " (message) line-end)
+  ;; Sphinx 8 appends the warning's type, e.g. [ref.envvar], which is an
+  ;; error identifier rather than message text; older Sphinx has no tag.
+  ((warning line-start (file-name) ":" line ": WARNING: "
+            (message (minimal-match (one-or-more not-newline)))
+            (optional " [" (id (one-or-more (not (any "]")))) "]")
+            line-end)
    (error line-start
           (file-name) ":" line
           ": " (or "ERROR" "SEVERE") ": "
-          (message) line-end))
+          (message (minimal-match (one-or-more not-newline)))
+          (optional " [" (id (one-or-more (not (any "]")))) "]")
+          line-end))
   :modes rst-mode
   :predicate (lambda () (and (flycheck-buffer-saved-p)
                              (flycheck-locate-sphinx-source-directory)))
