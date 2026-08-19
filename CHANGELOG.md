@@ -14,6 +14,7 @@
 
 ### Bugs fixed
 
+- [#2349](https://github.com/flycheck/flycheck/pull/2349): The `rst-sphinx` checker reads the warning-type tags Sphinx 8 appends (e.g. `[ref.envvar]`) as error identifiers instead of leaving them in the message.
 - [#2348](https://github.com/flycheck/flycheck/pull/2348): Range queries against the diagnostics of a `flycheck-eglot-mode` buffer now keep `overlays-in`'s strict edges, so a diagnostic merely touching a boundary is no longer served.
 - [#2347](https://github.com/flycheck/flycheck/pull/2347): A single-position `flymake-diagnostics` call in a `flycheck-eglot-mode` buffer no longer returns diagnostics from past the position ([#2345](https://github.com/flycheck/flycheck/issues/2345)).
 - [#2339](https://github.com/flycheck/flycheck/pull/2339): `perl-perlimports` quick fixes now notice when the buffer changed while the tool ran, instead of applying their edits to shifted positions.
