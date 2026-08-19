@@ -69,6 +69,20 @@ half-assembled answer and passes for the wrong reason."
           (expect (flycheck-error-message err) :to-equal "raw")
           (expect (flycheck-error-id err) :to-be nil))))
 
+    (it "composes the split fields the way older Eglot baked into the text"
+      ;; Emacs 32's Flymake carries origin, code and message separately;
+      ;; the composed message must read identically to released Emacsen
+      (assume (fboundp 'flymake-diagnostic-message)
+              "Requires the split diagnostic fields of Emacs 32's Flymake")
+      (flycheck-buttercup-with-temp-buffer
+        (insert "line one here\n")
+        (let* ((diag (flymake-make-diagnostic
+                      (current-buffer) 1 5 :error
+                      (list "compiler" "UndeclaredName" "undefined: a")))
+               (err (flycheck-eglot--convert-diagnostic diag)))
+          (expect (flycheck-error-message err)
+                  :to-equal "compiler [UndeclaredName]: undefined: a"))))
+
     (it "maps the diagnostic's relatedInformation to related locations"
       (flycheck-buttercup-with-temp-buffer
         (insert "line one here\n")
