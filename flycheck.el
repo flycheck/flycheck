@@ -17646,10 +17646,16 @@ This is either a parent directory containing a Gemfile, or nil."
    (locate-dominating-file buffer-file-name "Gemfile")))
 
 (defun flycheck-ruby--filter-rubocop-errors (errors)
-  "Filter RuboCop ERRORS attributed to dummy stdin filename."
+  "Filter RuboCop ERRORS attributed to the dummy stdin filename.
+
+The JSON formatter relativizes the --stdin argument, so a buffer with
+no backing file is reported as the verbatim \"stdin\"; the absolute
+variant covers anything that expanded it first."
   (flycheck-remove-error-file-names
-   (flycheck--file-truename (expand-file-name "stdin"))
-   errors))
+   "stdin"
+   (flycheck-remove-error-file-names
+    (flycheck--file-truename (expand-file-name "stdin"))
+    errors)))
 
 (define-obsolete-variable-alias 'flycheck-rubocoprc
   'flycheck-rubocop-config "39")
@@ -17710,6 +17716,51 @@ departments are documented at docs.rubocop.org, so cops from extensions
     (cons 'url (format "https://docs.rubocop.org/rubocop/cops_%s.html#%s"
                        dept anchor))))
 
+(defun flycheck-parse-rubocop (output checker buffer)
+  "Parse RuboCop JSON errors from OUTPUT.
+
+CHECKER and BUFFER denote the CHECKER that returned OUTPUT and the
+BUFFER that was checked, respectively.  Shared by the whole RuboCop
+family (`ruby-rubocop', `ruby-standard', `ruby-chef-cookstyle'), whose
+engines all emit the same format.  The id is the bare cop name, without
+the \"[Correctable] \" marker the emacs format prepends, so the
+explainer's department match works on correctable offenses too.
+
+See URL `https://docs.rubocop.org/rubocop/formatters.html' for more
+information about the format."
+  (let ((errors nil))
+    (seq-do
+     (lambda (file)
+       (let ((path (alist-get 'path file)))
+         (seq-do
+          (lambda (offense)
+            (let-alist offense
+              (push
+               (flycheck-error-new-at
+                .location.start_line .location.start_column
+                (pcase .severity
+                  ;; The old emacs-format patterns dropped refactor and
+                  ;; info offenses entirely; they are info here
+                  ((or "info" "refactor" "convention") 'info)
+                  ("warning" 'warning)
+                  ;; "error" and "fatal"
+                  (_ 'error))
+                .message
+                :id .cop_name
+                :end-line .location.last_line
+                ;; RuboCop's end column is inclusive; Flycheck's is
+                ;; right-open
+                :end-column (and .location.last_column
+                                 (1+ .location.last_column))
+                :checker checker
+                :buffer buffer
+                :filename path)
+               errors)))
+          (alist-get 'offenses file))))
+     (alist-get 'files (seq-find (lambda (object) (alist-get 'files object))
+                                 (flycheck-parse-json output))))
+    (nreverse errors)))
+
 (defconst flycheck-ruby-rubocop-error-patterns
   '((info line-start (file-name) ":" line ":" column ": C: "
           (optional (id (one-or-more (not (any ":")))) ": ") (message) line-end)
@@ -17719,7 +17770,9 @@ departments are documented at docs.rubocop.org, so cops from extensions
     (error line-start (file-name) ":" line ":" column ": " (or "E" "F") ": "
            (optional (id (one-or-more (not (any ":")))) ": ") (message)
            line-end))
-  "Error patterns shared by RuboCop-based checkers.")
+  "Error patterns for RuboCop's emacs output format, no longer used.")
+(make-obsolete-variable 'flycheck-ruby-rubocop-error-patterns
+                        "the RuboCop checkers read JSON output now." "40")
 
 (flycheck-def-executable-var ruby-rubocop "rubocop")
 (flycheck-define-command-checker 'ruby-rubocop
@@ -17730,9 +17783,8 @@ You need at least RuboCop 0.34 for this syntax checker.
 See URL `https://rubocop.org/'."
   ;; ruby-standard is defined based on this checker
   :command '("rubocop"
-             "--display-cop-names"
              "--force-exclusion"
-             "--format" "emacs"
+             "--format" "json"
              (config-file "--config" flycheck-rubocop-config)
              (option-flag "--lint" flycheck-rubocop-lint-only)
              (option-flag "--server" flycheck-rubocop-server)
@@ -17748,7 +17800,7 @@ See URL `https://rubocop.org/'."
              "--stdin" (eval (flycheck-buffer-file-local-name "stdin")))
   :standard-input t
   :working-directory #'flycheck-ruby--find-project-root
-  :error-patterns flycheck-ruby-rubocop-error-patterns
+  :error-parser #'flycheck-parse-rubocop
   :error-filter #'flycheck-ruby--filter-rubocop-errors
   :error-explainer #'flycheck-ruby-rubocop-error-explainer
   :handle-suspicious #'flycheck--rubocop-handle-suspicious
@@ -17764,9 +17816,8 @@ checker is essentially the same.
 
 See URL `https://github.com/chef/cookstyle'."
   :command '("cookstyle"
-             "--display-cop-names"
              "--force-exclusion"
-             "--format" "emacs"
+             "--format" "json"
              (config-file "--config" flycheck-rubocop-config)
              (option-flag "--lint" flycheck-rubocop-lint-only)
              ;; RuboCop takes the original file name as argument when reading
@@ -17776,7 +17827,7 @@ See URL `https://github.com/chef/cookstyle'."
              "--stdin" (eval (flycheck-buffer-file-local-name "stdin")))
   :standard-input t
   :working-directory #'flycheck-ruby--find-project-root
-  :error-patterns flycheck-ruby-rubocop-error-patterns
+  :error-parser #'flycheck-parse-rubocop
   :error-filter #'flycheck-ruby--filter-rubocop-errors
   :handle-suspicious #'flycheck--rubocop-handle-suspicious
   :modes '(enh-ruby-mode ruby-mode ruby-ts-mode)
@@ -17806,16 +17857,15 @@ See URL `https://github.com/chef/cookstyle'."
 See URL `https://github.com/testdouble/standard' for more information."
   ;; This checker is derived from ruby-rubocop; see above
   :command '("standardrb"
-             "--display-cop-names"
              "--force-exclusion"
-             "--format" "emacs"
+             "--format" "json"
              "--cache" "false"
              (config-file "--config" flycheck-ruby-standard-config)
              (option-flag "--lint" flycheck-rubocop-lint-only)
              "--stdin" source-original)
   :standard-input t
   :working-directory #'flycheck-ruby--find-project-root
-  :error-patterns flycheck-ruby-rubocop-error-patterns
+  :error-parser #'flycheck-parse-rubocop
   :error-filter #'flycheck-ruby--filter-rubocop-errors
   :error-explainer #'flycheck-ruby-rubocop-error-explainer
   :handle-suspicious #'flycheck--rubocop-handle-suspicious
