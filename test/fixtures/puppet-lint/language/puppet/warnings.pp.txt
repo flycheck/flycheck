@@ -1,3 +1,39 @@
-test/resources/language/puppet/warnings.pp:2:error: foo::bar not in autoload module layout (autoloader_layout)
-test/resources/language/puppet/warnings.pp:3:warning: case statement without a default case (case_without_default)
-test/resources/language/puppet/warnings.pp:3:warning: legacy fact 'operatingsystem' (legacy_facts)
+[
+  [
+    {
+      "message": "foo::bar not in autoload module layout",
+      "line": 2,
+      "column": 7,
+      "kind": "error",
+      "check": "autoloader_layout",
+      "fullpath": "test/resources/language/puppet/warnings.pp",
+      "path": "test/resources/language/puppet/warnings.pp",
+      "filename": "warnings.pp",
+      "KIND": "ERROR"
+    },
+    {
+      "message": "case statement without a default case",
+      "line": 3,
+      "column": 3,
+      "kind": "warning",
+      "check": "case_without_default",
+      "fullpath": "test/resources/language/puppet/warnings.pp",
+      "path": "test/resources/language/puppet/warnings.pp",
+      "filename": "warnings.pp",
+      "KIND": "WARNING"
+    },
+    {
+      "message": "legacy fact 'operatingsystem'",
+      "line": 3,
+      "column": 8,
+      "token": "#<PuppetLint::Lexer::Token:0x0000ffff94b6c3a0>",
+      "fact_name": "operatingsystem",
+      "kind": "warning",
+      "check": "legacy_facts",
+      "fullpath": "test/resources/language/puppet/warnings.pp",
+      "path": "test/resources/language/puppet/warnings.pp",
+      "filename": "warnings.pp",
+      "KIND": "WARNING"
+    }
+  ]
+]
