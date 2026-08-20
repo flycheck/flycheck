@@ -1306,7 +1306,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       .. note::
 
-         This syntax checker requires mypy 0.730 or newer.
+         This syntax checker requires mypy 1.11 or newer; precise end positions need mypy 1.20.
 
       .. syntax-checker-config-file:: flycheck-python-mypy-config
 
