@@ -14662,18 +14662,38 @@ Uses GCC's Fortran compiler gfortran.  See URL
 (flycheck-def-args-var flycheck-yaml-actionlint-args yaml-actionlint
   :package-version '(flycheck . "39"))
 
+(defun flycheck-parse-actionlint (output checker buffer)
+  "Parse actionlint JSON errors from OUTPUT.
+
+CHECKER and BUFFER denote the CHECKER that returned OUTPUT and the
+BUFFER that was checked, respectively.  The kind of the check becomes
+the error's id, as the oneline format's [kind] suffix used to; the end
+column is inclusive and becomes Flycheck's right-open one.  Requires
+actionlint 1.6 or newer; end positions need 1.6.20.
+
+See URL `https://github.com/rhysd/actionlint/' for more information."
+  (mapcar
+   (lambda (err)
+     (let-alist err
+       (flycheck-error-new-at
+        .line .column 'error .message
+        :id .kind
+        :end-line (and .end_column .line)
+        :end-column (and .end_column (1+ .end_column))
+        :checker checker
+        :buffer buffer
+        :filename .filepath)))
+   (car (flycheck-parse-json output))))
+
 (flycheck-define-checker yaml-actionlint
   "A YAML syntax checker using actionlint.
 
 See URL https://github.com/rhysd/actionlint/."
-  :command ("actionlint" "-oneline"
+  :command ("actionlint" "-format" "{{json .}}"
             (config-file "-config-file" flycheck-yaml-actionlint-config)
             (eval flycheck-yaml-actionlint-args)
             source)
-  :error-patterns
-  ((error line-start (file-name) ":" line ":" column ": "
-          (message (minimal-match (one-or-more not-newline)))
-          " [" (id (one-or-more (not (any "]")))) "]" line-end))
+  :error-parser flycheck-parse-actionlint
   :modes (yaml-mode yaml-ts-mode)
   :predicate (lambda ()
                (and buffer-file-name
@@ -16472,6 +16492,39 @@ and their names."
 (flycheck-def-args-var flycheck-puppet-lint-args puppet-lint
   :package-version '(flycheck . "39"))
 
+(defun flycheck-parse-puppet-lint (output checker buffer)
+  "Parse puppet-lint JSON problems from OUTPUT.
+
+CHECKER and BUFFER denote the CHECKER that returned OUTPUT and the
+BUFFER that was checked, respectively.  The JSON is one outer array
+holding an array of problems per checked file, and it carries a column
+for every problem, which the old patterns never captured.
+
+See URL `https://puppet-lint.com/' for more information."
+  (let ((errors nil))
+    (seq-do
+     (lambda (file-problems)
+       (seq-do
+        (lambda (problem)
+          (let-alist problem
+            (push (flycheck-error-new-at
+                   .line .column
+                   (pcase .kind
+                     ("error" 'error)
+                     (_ 'warning))
+                   .message
+                   :id .check
+                   :checker checker
+                   :buffer buffer
+                   :filename .path)
+                  errors)))
+        file-problems))
+     ;; Stderr noise ahead of the report could parse as JSON too; take
+     ;; the value shaped like the report, a list of lists
+     (seq-find (lambda (value) (and (consp value) (listp (car value))))
+               (flycheck-parse-json output)))
+    (nreverse errors)))
+
 (flycheck-define-checker puppet-lint
   "A Puppet DSL style checker using puppet-lint.
 
@@ -16483,19 +16536,12 @@ See URL `https://puppet-lint.com/'."
   ;; temporary file will cause an error.
   :command ("puppet-lint"
             (config-file "--config" flycheck-puppet-lint-config)
-            "--log-format"
-            "%{path}:%{line}:%{kind}: %{message} (%{check})"
+            "--json"
             (option-list "" flycheck-puppet-lint-disabled-checks concat
                          flycheck-puppet-lint-disabled-arg-name)
             (eval flycheck-puppet-lint-args)
             source-original)
-  :error-patterns
-  ((warning line-start (file-name) ":" line ":warning: "
-            (message (minimal-match (one-or-more not-newline)))
-            " (" (id (one-or-more (not (any ")")))) ")" line-end)
-   (error line-start (file-name) ":" line ":error: "
-          (message (minimal-match (one-or-more not-newline)))
-          " (" (id (one-or-more (not (any ")")))) ")" line-end))
+  :error-parser flycheck-parse-puppet-lint
   :modes (puppet-mode puppet-ts-mode)
   ;; Since we check the original file, we can only use this syntax checker if
   ;; the buffer is actually linked to a file, and if it is not modified.

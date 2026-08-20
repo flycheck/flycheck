@@ -1,1 +1,1 @@
-test-action.yml:6:23: property "foo" is not defined in object type {} [expression]
+[{"message":"property \"foo\" is not defined in object type {}","filepath":"test-action.yml","line":6,"column":23,"kind":"expression","snippet":"      - run: echo ${{ inputs.foo }}\n                      ^~~~~~~~~~","end_column":32}]

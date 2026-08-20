@@ -8,6 +8,7 @@
 
 ### Changes
 
+- [#2353](https://github.com/flycheck/flycheck/pull/2353): `puppet-lint` and `actionlint` read their tools' JSON output, giving puppet-lint problems the columns the old patterns never captured and actionlint errors precise end positions.
 - [#2352](https://github.com/flycheck/flycheck/pull/2352): `python-mypy` reads mypy's JSON output (requiring mypy 1.11 or newer): errors carry precise end positions (with mypy 1.20+), stub-install hints stay attached to their error, and messages lose the stray leading space the old patterns captured.
 - [#2351](https://github.com/flycheck/flycheck/pull/2351): The RuboCop family (`rubocop`, `standardrb`, `cookstyle`) reads the tools' JSON output: ids are bare cop names without the `[Correctable] ` marker (which un-breaks explanations for correctable offenses), errors carry precise end positions, and refactor/info severities are no longer dropped.
 

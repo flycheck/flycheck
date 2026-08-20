@@ -26,10 +26,12 @@
   (flycheck-buttercup-def-checker-test puppet-lint puppet nil
     (flycheck-buttercup-should-syntax-check
      "language/puppet/warnings.pp" 'puppet-mode
-     '(2 nil error "foo::bar not in autoload module layout"
+     '(2 7 error "foo::bar not in autoload module layout"
          :id "autoloader_layout" :checker puppet-lint)
-     '(3 nil warning "case statement without a default case"
-         :id "case_without_default" :checker puppet-lint)))
+     '(3 3 warning "case statement without a default case"
+         :id "case_without_default" :checker puppet-lint)
+     '(3 8 warning "legacy fact 'operatingsystem'"
+         :id "legacy_facts" :checker puppet-lint)))
 
   (describe "the puppet-lint checker command"
     (it "appends flycheck-puppet-lint-args before the source file"
@@ -48,8 +50,9 @@
     (flycheck-buttercup-def-parse-test puppet-parser "language/puppet/parser-error.pp"
       '(3 9 error "Syntax error at '>'"))
     (flycheck-buttercup-def-parse-test puppet-lint "language/puppet/warnings.pp"
-      '(2 nil error "foo::bar not in autoload module layout" :id "autoloader_layout")
-      '(3 nil warning "case statement without a default case" :id "case_without_default")
-      '(3 nil warning "legacy fact 'operatingsystem'" :id "legacy_facts"))))
+      ;; The JSON carries columns, which the old patterns never captured
+      '(2 7 error "foo::bar not in autoload module layout" :id "autoloader_layout")
+      '(3 3 warning "case statement without a default case" :id "case_without_default")
+      '(3 8 warning "legacy fact 'operatingsystem'" :id "legacy_facts"))))
 
 ;;; test-puppet.el ends here
