@@ -5403,6 +5403,11 @@ name of an error is nil fill in the result of function
 
 Return ERRORS, modified in-place."
   (seq-do (lambda (err)
+            (dolist (relation (flycheck-error-relations err))
+              (when-let* ((filename (flycheck-related-location-filename
+                                     relation)))
+                (setf (flycheck-related-location-filename relation)
+                      (expand-file-name filename directory))))
             (setf (flycheck-error-filename err)
                   (if-let* ((filename (flycheck-error-filename err)))
                       (flycheck--expand-file-name filename directory)
@@ -10921,6 +10926,24 @@ Each change's replacements carry a `deletedRegion' to replace with
                .replacements))))
         .artifactChanges)))))
 
+(defun flycheck-parse-sarif--relations (related)
+  "Map a SARIF result's RELATED locations to `flycheck-related-location's.
+
+Tools attach the secondary places of a diagnostic here - GCC's notes,
+for instance - rather than reporting them as results of their own."
+  (seq-map
+   (lambda (location)
+     (let-alist location
+       (flycheck-related-location-new
+        :filename (flycheck-parse-sarif--uri
+                   .physicalLocation.artifactLocation.uri)
+        :line .physicalLocation.region.startLine
+        :column .physicalLocation.region.startColumn
+        :end-line .physicalLocation.region.endLine
+        :end-column .physicalLocation.region.endColumn
+        :message .message.text)))
+   related))
+
 (defun flycheck-parse-sarif (output checker buffer)
   "Parse SARIF errors from OUTPUT.
 
@@ -10959,7 +10982,9 @@ information about SARIF."
                                    (let-alist rule
                                      .defaultConfiguration.level))))
                        (message .message.text)
-                       (fixes .fixes))
+                       (fixes .fixes)
+                       (relations (flycheck-parse-sarif--relations
+                                   .relatedLocations)))
                   (if .locations
                       (seq-map
                        (lambda (location)
@@ -10976,15 +11001,21 @@ information about SARIF."
                                   ;; endColumn equals startColumn on the same
                                   ;; line (endLine defaults to startLine per
                                   ;; the SARIF spec).  Some tools emit these
-                                  ;; for line-level findings, so treat them as
-                                  ;; the whole line -- drop the column and end
+                                  ;; for line-level findings - GCC also drops
+                                  ;; the start column entirely for them, while
+                                  ;; still emitting an end - so treat both as
+                                  ;; the whole line: drop the column and end
                                   ;; and let the highlighting mode take over,
                                   ;; rather than highlight an empty range.
                                   (zero-width
-                                   (and end-col
+                                   ;; GCC also emits startColumn 0 for a
+                                   ;; caret-less diagnostic, its whole-line
+                                   ;; convention
+                                   (or (memql start-col '(nil 0))
+                                       (and end-col
                                         (equal end-col start-col)
                                         (or (null end-line)
-                                            (equal end-line start-line)))))
+                                            (equal end-line start-line))))))
                              (flycheck-error-new-at
                               start-line (unless zero-width start-col)
                               level message
@@ -10994,18 +11025,22 @@ information about SARIF."
                               :filename
                               (flycheck-parse-sarif--uri
                                .physicalLocation.artifactLocation.uri)
-                              :end-line (unless zero-width end-line)
+                              :end-line (unless zero-width
+                                          (and end-col
+                                               (or end-line start-line)))
                               :end-column (unless zero-width end-col)
                               ;; Only the fix changes for this location's file.
                               :fix (flycheck-parse-sarif--fix
                                     fixes
                                     .physicalLocation.artifactLocation.uri
-                                    buffer)))))
+                                    buffer)
+                              :relations relations))))
                        .locations)
                     ;; A result without a location applies to the whole run
                     (list (flycheck-error-new-at
                            nil nil level message
-                           :id id :checker checker :buffer buffer))))))
+                           :id id :checker checker :buffer buffer
+                           :relations relations))))))
             .results))))
      .runs)))
 
@@ -13304,12 +13339,95 @@ warnings."
   :safe #'flycheck-string-list-p
   :package-version '(flycheck . "0.20"))
 
+(defvar flycheck--gcc-sarif-support (make-hash-table :test 'equal)
+  "Whether a GCC binary supports SARIF output, keyed by absolute path.")
+
+(defun flycheck--gcc-sarif-flag ()
+  "Return GCC's SARIF output flag when this buffer's GCC supports it.
+
+Probed once per binary: the flag must be accepted on a null-compile of
+empty standard input - macOS installs Clang as gcc, which rejects it
+and correctly falls back to the text patterns - and the major version
+must be at least 15.  GCC 13 introduced the format, but its and GCC
+14's SARIF can fold a diagnostic into an unrelated result's related
+locations and lose it, which text output does not.  The probe runs
+through the checker's process machinery, so a remote buffer probes the
+remote host's gcc, and the answer is keyed to the host as well as the
+binary.  It is a quick synchronous null-compile, cached for the
+session: a compiler swapped in place at the same path keeps its old
+answer until Emacs restarts."
+  (when-let* ((gcc (flycheck-find-checker-executable 'c/c++-gcc)))
+    (let* ((key (cons (file-remote-p default-directory) gcc))
+           (cached (gethash key flycheck--gcc-sarif-support 'unknown)))
+      (when (eq cached 'unknown)
+        (setq cached
+              (and (eq 0 (ignore-errors
+                           (flycheck-call-checker-process
+                            'c/c++-gcc nil nil nil
+                            "-fdiagnostics-format=sarif-stderr"
+                            "-fsyntax-only" "-x" "c" "-")))
+                   (let ((version (ignore-errors
+                                    (flycheck-call-checker-process-for-output
+                                     'c/c++-gcc nil nil "-dumpversion"))))
+                     (and version
+                          (string-match "\\`[0-9]+" version)
+                          (>= (string-to-number (match-string 0 version))
+                              15)))
+                   t))
+        (puthash key cached flycheck--gcc-sarif-support))
+      (when cached '("-fdiagnostics-format=sarif-stderr")))))
+
+(defconst flycheck--gcc-kind-levels
+  '(("error" . error) ("fatal error" . error)
+    ("sorry, unimplemented" . error) ("internal compiler error" . error)
+    ("warning" . warning) ("anachronism" . warning)
+    ("note" . info))
+  "Levels of the GCC SARIF rule ids that merely restate the kind.
+
+GCC 13 and 14 omit the `level' of some results (a fatal error, a
+sorry), which SARIF defaults to warning; the kind in the rule id is
+authoritative, so it supplies the level and is then dropped as an id.")
+
+(defun flycheck--parse-gcc (output checker buffer)
+  "Parse GCC OUTPUT as SARIF, or with the checker's patterns for old GCC.
+
+CHECKER and BUFFER are as in `flycheck-parse-output'.  The SARIF path
+labels standard input as <stdin>, as the text patterns match it, and
+repeats the level as the rule id of an unflagged diagnostic; both are
+normalized away.  A note attached to an error arrives as its related
+location; a freestanding note is still a diagnostic of its own."
+  ;; Driver-level warnings print as text ahead of the SARIF document, so
+  ;; look for its schema line rather than expecting JSON first;
+  ;; `flycheck-parse-json' skips the leading noise by itself
+  (if (string-match-p "^{\"\\$schema\"" output)
+      (let ((errors (flycheck-parse-sarif output checker buffer)))
+        (dolist (err errors)
+          (when (equal (flycheck-error-filename err) "<stdin>")
+            (setf (flycheck-error-filename err) nil))
+          (when-let* ((level (cdr (assoc (flycheck-error-id err)
+                                         flycheck--gcc-kind-levels))))
+            (setf (flycheck-error-level err) level)
+            (setf (flycheck-error-id err) nil))
+          (dolist (relation (flycheck-error-relations err))
+            ;; The checked buffer's own file, not nil: a visit from the
+            ;; error list resolves relations against the ERROR's file,
+            ;; which for a cross-file error is not the checked buffer
+            (when (equal (flycheck-related-location-filename relation)
+                         "<stdin>")
+              (setf (flycheck-related-location-filename relation)
+                    (buffer-file-name buffer)))))
+        errors)
+    (flycheck-parse-with-patterns output checker buffer)))
+
 (flycheck-define-checker c/c++-gcc
   "A C/C++ syntax checker using GCC.
 
-Requires GCC 4.4 or newer.  See URL `https://gcc.gnu.org/'."
+Requires GCC 4.4 or newer; rich diagnostics via SARIF need GCC 15,
+whose SARIF is the first that loses nothing next to the text output.
+See URL `https://gcc.gnu.org/'."
   :command ("gcc"
             "-fshow-column"
+            (eval (flycheck--gcc-sarif-flag))
             "-iquote" (eval (flycheck-c/c++-quoted-include-directory))
             (option "-std=" flycheck-gcc-language-standard concat)
             (option-flag "-pedantic" flycheck-gcc-pedantic)
@@ -13333,6 +13451,7 @@ Requires GCC 4.4 or newer.  See URL `https://gcc.gnu.org/'."
             ;; Read from standard input
             "-")
   :standard-input t
+  :error-parser flycheck--parse-gcc
   :error-patterns
   ((info line-start (or "<stdin>" (file-name))
          ":" line (optional ":" column)

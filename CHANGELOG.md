@@ -8,6 +8,7 @@
 
 ### Changes
 
+- [#2354](https://github.com/flycheck/flycheck/pull/2354): `c/c++-gcc` reads GCC's SARIF output when the compiler supports it well (probed per binary, GCC 15 or newer - the SARIF of 13 and 14 can lose diagnostics - with the text patterns still covering older GCC and the Clang that answers to gcc on macOS): errors carry precise spans, warnings keep their flag ids, and GCC's notes become the error's related locations; the shared SARIF parser now maps related locations for every SARIF checker.
 - [#2353](https://github.com/flycheck/flycheck/pull/2353): `puppet-lint` and `actionlint` read their tools' JSON output, giving puppet-lint problems the columns the old patterns never captured and actionlint errors precise end positions.
 - [#2352](https://github.com/flycheck/flycheck/pull/2352): `python-mypy` reads mypy's JSON output (requiring mypy 1.11 or newer): errors carry precise end positions (with mypy 1.20+), stub-install hints stay attached to their error, and messages lose the stray leading space the old patterns captured.
 - [#2351](https://github.com/flycheck/flycheck/pull/2351): The RuboCop family (`rubocop`, `standardrb`, `cookstyle`) reads the tools' JSON output: ids are bare cop names without the `[Correctable] ` marker (which un-breaks explanations for correctable offenses), errors carry precise end positions, and refactor/info severities are no longer dropped.

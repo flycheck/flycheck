@@ -51,6 +51,60 @@
                   :line 7 :column nil :level 'warning
                   :message "style" :id "style/x")))))
 
+    (it "maps relatedLocations onto the error's relations"
+      ;; GCC attaches its notes here; a message-less relation marks an
+      ;; include site
+      (let* ((sarif (concat
+                     "{\"runs\":[{\"tool\":{\"driver\":{\"name\":\"d\"}},"
+                     "\"results\":[{\"level\":\"error\","
+                     "\"message\":{\"text\":\"boom\"},"
+                     "\"locations\":[{\"physicalLocation\":{"
+                     "\"artifactLocation\":{\"uri\":\"a.c\"},"
+                     "\"region\":{\"startLine\":2,\"startColumn\":3,\"endColumn\":5}}}],"
+                     "\"relatedLocations\":[{\"physicalLocation\":{"
+                     "\"artifactLocation\":{\"uri\":\"b.h\"},"
+                     "\"region\":{\"startLine\":7,\"startColumn\":1,\"endLine\":7,\"endColumn\":4}},"
+                     "\"message\":{\"text\":\"declared here\"}},"
+                     "{\"physicalLocation\":{"
+                     "\"artifactLocation\":{\"uri\":\"a.c\"},"
+                     "\"region\":{\"startLine\":1}}}]}]}]}"))
+             (err (car (flycheck-parse-sarif sarif 'checker 'buffer)))
+             (relations (flycheck-error-relations err)))
+        ;; endLine omitted with an endColumn present defaults to the
+        ;; start line
+        (expect (flycheck-error-end-line err) :to-equal 2)
+        (expect (flycheck-error-end-column err) :to-equal 5)
+        (expect (length relations) :to-equal 2)
+        (expect (flycheck-related-location-filename (nth 0 relations))
+                :to-equal "b.h")
+        (expect (flycheck-related-location-line (nth 0 relations))
+                :to-equal 7)
+        (expect (flycheck-related-location-end-column (nth 0 relations))
+                :to-equal 4)
+        (expect (flycheck-related-location-message (nth 0 relations))
+                :to-equal "declared here")
+        (expect (flycheck-related-location-line (nth 1 relations))
+                :to-equal 1)
+        (expect (flycheck-related-location-message (nth 1 relations))
+                :to-be nil)))
+
+    (it "treats a region with no start column, or column zero, as line-level"
+      ;; GCC emits caret-less diagnostics that way - startColumn 0 or
+      ;; none at all, depending on the build - with an end that is
+      ;; meaningless without a start
+      (let* ((sarif (concat
+                     "{\"runs\":[{\"tool\":{\"driver\":{\"name\":\"d\"}},"
+                     "\"results\":[{\"level\":\"warning\","
+                     "\"message\":{\"text\":\"w\"},"
+                     "\"locations\":[{\"physicalLocation\":{"
+                     "\"artifactLocation\":{\"uri\":\"a.c\"},"
+                     "\"region\":{\"startLine\":8,\"startColumn\":0,\"endLine\":8,\"endColumn\":1}}}]}]}]}"))
+             (err (car (flycheck-parse-sarif sarif 'checker 'buffer))))
+        (expect (flycheck-error-line err) :to-equal 8)
+        (expect (flycheck-error-column err) :to-be nil)
+        (expect (flycheck-error-end-line err) :to-be nil)
+        (expect (flycheck-error-end-column err) :to-be nil)))
+
     (it "maps SARIF levels and handles missing levels"
       (let ((sarif "{\"runs\":[{\"tool\":{\"driver\":{\"name\":\"d\"}},\
 \"results\":[\

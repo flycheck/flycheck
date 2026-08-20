@@ -26,6 +26,12 @@
 (require 'flycheck-buttercup)
 (require 'test-helpers)
 
+(defun flycheck-buttercup-gcc-sarif-p ()
+  "Whether the gcc here emits SARIF (GNU GCC 15 or newer)."
+  (and (flycheck-buttercup-gcc-is-gnu-p)
+       (flycheck--gcc-sarif-flag)
+       t))
+
 (describe "Language C/C++"
   (describe "The Cppcheck error parser"
     (let ((cppcheck-xml-without-errors "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
@@ -191,13 +197,25 @@ against a integer value that is neither 1 nor 0.\">
             "the C/C++ checkers are not run on Windows")
     (assume (flycheck-buttercup-gcc-is-gnu-p)
             "the gcc here is Clang, which words these differently")
-      (let ((flycheck-disabled-checkers '(c/c++-clang)))
-        (flycheck-buttercup-should-syntax-check
-         "language/c_c++/error.cpp" 'c++-mode
-         '(2 20 error "'struct A' has no member named 'bar'"
-             :checker c/c++-gcc)
-         '(8 nil warning "ignoring '#pragma nope '"
-             :id "-Wunknown-pragmas" :checker c/c++-gcc))))
+      (let ((flycheck-disabled-checkers '(c/c++-clang))
+            ;; Pin the locale: GCC picks its quote characters from it,
+            ;; in SARIF just as in text
+            (process-environment (cons "LC_ALL=C" process-environment)))
+        (if (flycheck-buttercup-gcc-sarif-p)
+            ;; SARIF spans the whole member expression and always uses
+            ;; curly quotes, locale notwithstanding
+            (flycheck-buttercup-should-syntax-check
+             "language/c_c++/error.cpp" 'c++-mode
+             '(2 18 error "'struct A' has no member named 'bar'"
+                 :end-line 2 :end-column 23 :checker c/c++-gcc)
+             '(8 nil warning "ignoring '#pragma nope '"
+                 :id "-Wunknown-pragmas" :checker c/c++-gcc))
+          (flycheck-buttercup-should-syntax-check
+           "language/c_c++/error.cpp" 'c++-mode
+           '(2 20 error "'struct A' has no member named 'bar'"
+               :checker c/c++-gcc)
+           '(8 nil warning "ignoring '#pragma nope '"
+               :id "-Wunknown-pragmas" :checker c/c++-gcc)))))
 
     (flycheck-buttercup-def-checker-test c/c++-gcc (c c++) fatal-error
     ;; The compilers are slow enough to start on the Windows runners
@@ -210,11 +228,19 @@ against a integer value that is neither 1 nor 0.\">
             "the C/C++ checkers are not run on Windows")
     (assume (flycheck-buttercup-gcc-is-gnu-p)
             "the gcc here is Clang, which words these differently")
-      (let ((flycheck-disabled-checkers '(c/c++-clang)))
-        (flycheck-buttercup-should-syntax-check
-         "language/c_c++/includes.c" 'c-mode
-         '(2 10 error "library.h: No such file or directory"
-             :checker c/c++-gcc))))
+      (let ((flycheck-disabled-checkers '(c/c++-clang))
+            ;; Pin the locale: GCC picks its quote characters from it,
+            ;; in SARIF just as in text
+            (process-environment (cons "LC_ALL=C" process-environment)))
+        (if (flycheck-buttercup-gcc-sarif-p)
+            (flycheck-buttercup-should-syntax-check
+             "language/c_c++/includes.c" 'c-mode
+             '(2 10 error "library.h: No such file or directory"
+                 :end-line 2 :end-column 21 :checker c/c++-gcc))
+          (flycheck-buttercup-should-syntax-check
+           "language/c_c++/includes.c" 'c-mode
+           '(2 10 error "library.h: No such file or directory"
+               :checker c/c++-gcc)))))
 
     (flycheck-buttercup-def-checker-test c/c++-gcc (c c++) warning
     ;; The compilers are slow enough to start on the Windows runners
@@ -227,14 +253,26 @@ against a integer value that is neither 1 nor 0.\">
             "the C/C++ checkers are not run on Windows")
     (assume (flycheck-buttercup-gcc-is-gnu-p)
             "the gcc here is Clang, which words these differently")
-      (let ((flycheck-disabled-checkers '(c/c++-clang c/c++-cppcheck)))
-        (flycheck-buttercup-should-syntax-check
-         "language/c_c++/warning.c" 'c-mode
-         '(5 10 warning "unused variable 'unused'"
-             :id "-Wunused-variable" :checker c/c++-gcc)
-         '(7 15 warning "comparison of integer expressions of different signedness: 'int' and 'unsigned int'"
-             :id "-Wsign-compare" :checker c/c++-gcc)
-         '(8 7 warning "#warning" :id "-Wcpp" :checker c/c++-gcc))))
+      (let ((flycheck-disabled-checkers '(c/c++-clang c/c++-cppcheck))
+            (process-environment (cons "LC_ALL=C" process-environment)))
+        (if (flycheck-buttercup-gcc-sarif-p)
+            (flycheck-buttercup-should-syntax-check
+             "language/c_c++/warning.c" 'c-mode
+             '(5 10 warning "unused variable 'unused'"
+                 :id "-Wunused-variable" :end-line 5 :end-column 16
+                 :checker c/c++-gcc)
+             '(7 15 warning "comparison of integer expressions of different signedness: 'int' and 'unsigned int'"
+                 :id "-Wsign-compare" :end-line 7 :end-column 16
+                 :checker c/c++-gcc)
+             '(8 7 warning "#warning" :id "-Wcpp" :end-line 8 :end-column 14
+                 :checker c/c++-gcc))
+          (flycheck-buttercup-should-syntax-check
+           "language/c_c++/warning.c" 'c-mode
+           '(5 10 warning "unused variable 'unused'"
+               :id "-Wunused-variable" :checker c/c++-gcc)
+           '(7 15 warning "comparison of integer expressions of different signedness: 'int' and 'unsigned int'"
+               :id "-Wsign-compare" :checker c/c++-gcc)
+           '(8 7 warning "#warning" :id "-Wcpp" :checker c/c++-gcc)))))
 
     (flycheck-buttercup-def-checker-test c/c++-gcc (c c++) included-file-warning
     ;; The compilers are slow enough to start on the Windows runners
@@ -249,18 +287,50 @@ against a integer value that is neither 1 nor 0.\">
             "the gcc here is Clang, which words these differently")
       (let ((flycheck-gcc-include-path '("./include"))
             (flycheck-disabled-checkers '(c/c++-clang))
-            (flycheck-relevant-error-other-file-minimum-level 'warning))
-        (flycheck-buttercup-should-syntax-check
-         "language/c_c++/in-included-file.cpp" 'c++-mode
-         `(5 10 warning "unused variable 'unused'"
-             :filename ,(flycheck-buttercup-resource-filename "language/c_c++/warning.c")
-             :id "-Wunused-variable" :checker c/c++-gcc)
-         `(7 15 warning "comparison of integer expressions of different signedness: 'int' and 'unsigned int'"
-             :filename ,(flycheck-buttercup-resource-filename "language/c_c++/warning.c")
-             :id "-Wsign-compare" :checker c/c++-gcc)
-         `(8 7 warning "#warning"
-             :filename ,(flycheck-buttercup-resource-filename "language/c_c++/warning.c")
-             :id "-Wcpp" :checker c/c++-gcc))))
+            (flycheck-relevant-error-other-file-minimum-level 'warning)
+            (process-environment (cons "LC_ALL=C" process-environment)))
+        (if (flycheck-buttercup-gcc-sarif-p)
+            ;; SARIF turns the In-file-included-from chain into a
+            ;; message-less related location at the include site, and the
+            ;; C++ frontend spans the signedness comparison differently
+            ;; than compiling warning.c as C does
+            (flycheck-buttercup-should-syntax-check
+             "language/c_c++/in-included-file.cpp" 'c++-mode
+             `(5 10 warning "unused variable 'unused'"
+                 :filename ,(flycheck-buttercup-resource-filename "language/c_c++/warning.c")
+                 :id "-Wunused-variable" :end-line 5 :end-column 16
+                 :relations ,(list (flycheck-related-location-new
+                                    :line 3
+                                    :filename (flycheck-buttercup-resource-filename
+                                               "language/c_c++/in-included-file.cpp")))
+                 :checker c/c++-gcc)
+             `(7 13 warning "comparison of integer expressions of different signedness: 'int' and 'unsigned int'"
+                 :filename ,(flycheck-buttercup-resource-filename "language/c_c++/warning.c")
+                 :id "-Wsign-compare" :end-line 7 :end-column 18
+                 :relations ,(list (flycheck-related-location-new
+                                    :line 3
+                                    :filename (flycheck-buttercup-resource-filename
+                                               "language/c_c++/in-included-file.cpp")))
+                 :checker c/c++-gcc)
+             `(8 7 warning "#warning"
+                 :filename ,(flycheck-buttercup-resource-filename "language/c_c++/warning.c")
+                 :id "-Wcpp" :end-line 8 :end-column 14
+                 :relations ,(list (flycheck-related-location-new
+                                    :line 3
+                                    :filename (flycheck-buttercup-resource-filename
+                                               "language/c_c++/in-included-file.cpp")))
+                 :checker c/c++-gcc))
+          (flycheck-buttercup-should-syntax-check
+           "language/c_c++/in-included-file.cpp" 'c++-mode
+           `(5 10 warning "unused variable 'unused'"
+               :filename ,(flycheck-buttercup-resource-filename "language/c_c++/warning.c")
+               :id "-Wunused-variable" :checker c/c++-gcc)
+           `(7 15 warning "comparison of integer expressions of different signedness: 'int' and 'unsigned int'"
+               :filename ,(flycheck-buttercup-resource-filename "language/c_c++/warning.c")
+               :id "-Wsign-compare" :checker c/c++-gcc)
+           `(8 7 warning "#warning"
+               :filename ,(flycheck-buttercup-resource-filename "language/c_c++/warning.c")
+               :id "-Wcpp" :checker c/c++-gcc)))))
 
     (flycheck-buttercup-def-checker-test c/c++-cppcheck (c c++) nil
     ;; The compilers are slow enough to start on the Windows runners
@@ -327,12 +397,39 @@ against a integer value that is neither 1 nor 0.\">
                 :to-equal 4))))
 
   (describe "reading the compiler's output"
-    ;; Recorded from Clang, which is what answers to the name gcc on
-    ;; macOS.  GNU GCC words these differently, which is exactly the sort
-    ;; of divergence a live check cannot pin down on one machine.
+    ;; Recorded from GNU GCC 15 in the checker image, which emits SARIF;
+    ;; the raw-text spec below pins the pattern fallback for older GCC
     (flycheck-buttercup-def-parse-test c/c++-gcc "language/c_c++/error.cpp"
       '(8 nil warning "ignoring ‘#pragma nope ’" :id "-Wunknown-pragmas")
-      '(2 20 error "‘struct A’ has no member named ‘bar’"))
+      '(2 18 error "‘struct A’ has no member named ‘bar’"
+          :end-line 2 :end-column 23))
+    (flycheck-buttercup-def-parse-test c/c++-gcc "language/c_c++/warning.c"
+      '(7 15 warning "comparison of integer expressions of different signedness: ‘int’ and ‘unsigned int’"
+          :id "-Wsign-compare" :end-line 7 :end-column 16)
+      '(8 7 warning "#warning" :id "-Wcpp" :end-line 8 :end-column 14)
+      '(5 10 warning "unused variable ‘unused’"
+          :id "-Wunused-variable" :end-line 5 :end-column 16))
+    (flycheck-buttercup-def-parse-test c/c++-gcc "language/c_c++/includes.c"
+      '(2 10 error "library.h: No such file or directory"
+          :end-line 2 :end-column 21))
+
+    (it "falls back to the text patterns for a gcc without SARIF"
+      (flycheck-buttercup-with-temp-buffer
+        (expect
+         (flycheck-buttercup-parse
+          'c/c++-gcc
+          "<stdin>:5:10: warning: unused variable 'unused' [-Wunused-variable]
+<stdin>:4:2: error: expected ';' before 'return'
+")
+         :to-be-equal-flycheck-errors
+         (list (flycheck-error-new-at
+                5 10 'warning "unused variable 'unused'"
+                :id "-Wunused-variable" :checker 'c/c++-gcc
+                :buffer (current-buffer) :filename nil)
+               (flycheck-error-new-at
+                4 2 'error "expected ';' before 'return'"
+                :checker 'c/c++-gcc
+                :buffer (current-buffer) :filename nil)))))
 
     ;; Plain `it' forms: the pragma-once filter reads the buffer's file
     ;; name, so these must parse inside the header's own buffer
@@ -341,7 +438,8 @@ against a integer value that is neither 1 nor 0.\">
         (flycheck-buttercup-should-parse
          'c/c++-gcc "language/c_c++/header.h"
          '(4 12 warning "comparison of integer expressions of different \
-signedness: ‘int’ and ‘unsigned int’" :id "-Wsign-compare"))))
+signedness: ‘int’ and ‘unsigned int’" :id "-Wsign-compare"
+            :end-line 4 :end-column 13))))
 
     (it "reads clang's output over header.h without the pragma warning"
       (flycheck-buttercup-with-resource-buffer "language/c_c++/header.h"
