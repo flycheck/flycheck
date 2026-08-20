@@ -359,8 +359,45 @@ ModuleNotFoundError: No module named 'pycodestyle'")
       '(1 1 info "Invalid module name: 'syntax-error'" :id "N999")
       '(3 7 error "Expected an identifier, but found a keyword `import` that cannot be used here")
       '(3 14 error "Simple statements must be separated by newlines or semicolons"))
+    (it "keeps mypy's folded hint attached to its error"
+      ;; A note at an error's exact location arrives as the error's hint
+      (flycheck-buttercup-with-temp-buffer
+        (expect
+         (flycheck-buttercup-parse
+          'python-mypy
+          (concat "{\"file\": \"m.py\", \"line\": 1, \"column\": 7,"
+                  " \"end_line\": null, \"end_column\": null,"
+                  " \"message\": \"Library stubs not installed\","
+                  " \"hint\": \"Hint: pip install types-requests\","
+                  " \"code\": \"import-untyped\","
+                  " \"severity\": \"error\"}\n"))
+         :to-be-equal-flycheck-errors
+         (list (flycheck-error-new-at
+                1 8 'error "Library stubs not installed\nHint: pip install types-requests"
+                :id "import-untyped" :checker 'python-mypy
+                :buffer (current-buffer) :filename "m.py")))))
+
+    (it "drops mypy's unknown-position sentinels rather than pinning them"
+      ;; -1 means unknown; a context note with it must not land on line 1
+      (flycheck-buttercup-with-temp-buffer
+        (expect
+         (flycheck-buttercup-parse
+          'python-mypy
+          (concat "{\"file\": \"m.py\", \"line\": -1, \"column\": -1,"
+                  " \"end_line\": -1, \"end_column\": -1,"
+                  " \"message\": \"At top level:\", \"hint\": null,"
+                  " \"code\": null, \"severity\": \"note\"}\n"))
+         :to-equal
+         (list (flycheck-error-new-at
+                nil nil 'info "At top level:"
+                :checker 'python-mypy
+                :buffer (current-buffer) :filename "m.py")))))
+
     (flycheck-buttercup-def-parse-test python-mypy "language/python/invalid_type.py"
-      '(2 12 error " Incompatible return value type (got \"str\", expected \"int\")" :id "return-value"))
+      ;; The old patterns captured the space after "error:" into the
+      ;; message; the JSON messages are clean
+      '(2 12 error "Incompatible return value type (got \"str\", expected \"int\")"
+          :id "return-value" :end-line 2 :end-column 13))
     (flycheck-buttercup-def-parse-test python-pyright "language/python/invalid_type.py"
       '(2 12 error "Type \"str\" is not assignable to return type \"int\"\n  \"str\" is not assignable to \"int\"" :id "reportReturnType" :end-line 2 :end-column 13))))
 

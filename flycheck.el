@@ -17023,34 +17023,57 @@ See URL `https://github.com/microsoft/pyright'."
 (flycheck-def-args-var flycheck-python-mypy-args python-mypy
   :package-version '(flycheck . "39"))
 
+(defun flycheck-parse-mypy (output checker buffer)
+  "Parse mypy JSON diagnostics from OUTPUT.
+
+CHECKER and BUFFER denote the CHECKER that returned OUTPUT and the
+BUFFER that was checked, respectively.  Mypy prints one JSON object per
+line; its columns are zero-based with a right-open end, converted here
+to Flycheck's one-based ones.
+
+See URL `https://mypy.readthedocs.io/en/stable/command_line.html' for
+more information."
+  (mapcar
+   (lambda (diag)
+     (let-alist diag
+       (flycheck-error-new-at
+        ;; -1 is mypy's unknown-position sentinel; an error without a
+        ;; line is discarded as irrelevant, like the old patterns never
+        ;; matching one
+        (and (natnump .line) (> .line 0) .line)
+        (and (natnump .column) (1+ .column))
+        (pcase .severity
+          ("note" 'info)
+          ("warning" 'warning)
+          (_ 'error))
+        ;; A note sharing an error's exact location arrives folded into
+        ;; its hint rather than as a diagnostic of its own
+        (if (stringp .hint)
+            (format "%s\n%s" .message .hint)
+          .message)
+        :id .code
+        :end-line (and (natnump .end_line) (> .end_line 0) .end_line)
+        ;; End positions arrived in mypy 1.20's JSON; older versions
+        ;; simply omit them
+        :end-column (and (natnump .end_column) (1+ .end_column))
+        :checker checker
+        :buffer buffer
+        :filename .file)))
+   (flycheck-parse-json output)))
+
 (flycheck-define-checker python-mypy
-  "Mypy syntax and type checker.  Requires mypy>=0.730.
+  "Mypy syntax and type checker.  Requires mypy 1.11 or newer;
+end positions need mypy 1.20.
 
 See URL `https://mypy-lang.org/'."
   :command ("mypy"
-            "--show-column-numbers"
-            "--show-error-codes"
-            "--no-pretty"
+            "--output" "json"
             (config-file "--config-file" flycheck-python-mypy-config)
             (option "--cache-dir" flycheck-python-mypy-cache-dir)
             (option "--python-executable" flycheck-python-mypy-python-executable)
             (eval flycheck-python-mypy-args)
             source-original)
-  :error-patterns
-  ((error line-start (file-name) ":" line (optional ":" column)
-          ": error:" (message) line-end)
-   (warning line-start (file-name) ":" line (optional ":" column)
-            ": warning:" (message) line-end)
-   (info line-start (file-name) ":" line (optional ":" column)
-         ": note:" (message) line-end))
-  :error-filter
-  (lambda (errors)
-    (dolist (err errors)
-      (let ((msg (flycheck-error-message err)))
-        (when (and msg (string-match "\\(.*?\\)  \\[\\([^]]+\\)\\]\\'" msg))
-          (setf (flycheck-error-message err) (match-string 1 msg))
-          (setf (flycheck-error-id err) (match-string 2 msg)))))
-    errors)
+  :error-parser flycheck-parse-mypy
   :working-directory flycheck-python-find-project-root
   :error-explainer
   (flycheck-error-explainer-from-url

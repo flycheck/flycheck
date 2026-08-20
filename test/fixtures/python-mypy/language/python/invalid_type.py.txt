@@ -1,2 +1,1 @@
-python/invalid_type.py:2:12: error: Incompatible return value type (got "str", expected "int")  [return-value]
-Found 1 error in 1 file (checked 1 source file)
+{"file": "python/invalid_type.py", "line": 2, "column": 11, "end_line": 2, "end_column": 12, "message": "Incompatible return value type (got \"str\", expected \"int\")", "hint": null, "code": "return-value", "severity": "error"}
