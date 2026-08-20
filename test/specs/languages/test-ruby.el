@@ -111,11 +111,13 @@
        "language/ruby/syntax-error.rb" 'ruby-mode
        `(5 7 error ,(flycheck-buttercup-rubocop-syntax-message
                      "unexpected constant, expecting end-of-input")
-           :id "Lint/Syntax"
+           :id "Lint/Syntax" :end-line 5 :end-column 11
            :checker ruby-rubocop)
        `(5 25 error ,(flycheck-buttercup-rubocop-syntax-message
                       "unterminated string meets end of file")
             :id "Lint/Syntax"
+            :end-line ,(if (version<= "3.4" (or (flycheck-buttercup-ruby-version) "0")) 5 6)
+            :end-column ,(if (version<= "3.4" (or (flycheck-buttercup-ruby-version) "0")) 25 2)
             :checker ruby-rubocop)))
 
     (flycheck-buttercup-def-checker-test ruby-standard ruby syntax-error
@@ -124,11 +126,13 @@
          "language/ruby/syntax-error.rb" 'ruby-mode
          `(5 7 error ,(flycheck-buttercup-rubocop-syntax-message
                      "unexpected constant, expecting end-of-input")
-             :id "Lint/Syntax"
+             :id "Lint/Syntax" :end-line 5 :end-column 11
              :checker ruby-standard)
          `(5 25 error ,(flycheck-buttercup-rubocop-syntax-message
                       "unterminated string meets end of file")
               :id "Lint/Syntax"
+              :end-line ,(if (version<= "3.4" (or (flycheck-buttercup-ruby-version) "0")) 5 6)
+              :end-column ,(if (version<= "3.4" (or (flycheck-buttercup-ruby-version) "0")) 25 2)
               :checker ruby-standard))))
 
     (flycheck-buttercup-def-checker-test ruby ruby syntax-error
@@ -142,31 +146,56 @@
                           "syntax error, unexpected constant, expecting end-of-input")
              :checker ruby))))
 
+    (flycheck-buttercup-def-checker-test ruby-rubocop ruby without-file-name
+      ;; The JSON formatter relativizes the --stdin dummy name back to
+      ;; the verbatim "stdin"; the filter must still drop it, or a
+      ;; buffer with no backing file loses all its offenses
+      (flycheck-buttercup-with-resource-buffer "language/ruby/warnings.rb"
+        (set-visited-file-name nil 'no-query)
+        (ruby-mode)
+        (let ((flycheck-disabled-checkers '(ruby-reek)))
+          (flycheck-buttercup-buffer-sync)
+          (expect flycheck-current-errors :to-be-truthy)
+          (expect (seq-every-p (lambda (err)
+                                 (null (flycheck-error-filename err)))
+                               flycheck-current-errors)
+                  :to-be-truthy))))
+
     (flycheck-buttercup-def-checker-test (ruby-rubocop ruby-reek) ruby warnings
       (flycheck-buttercup-should-syntax-check
        "language/ruby/warnings.rb" 'ruby-mode
        '(1 1 info "Missing frozen string literal comment."
-           :id "[Correctable] Style/FrozenStringLiteralComment" :checker ruby-rubocop)
+           :id "Style/FrozenStringLiteralComment" :end-line 1 :end-column 2
+           :checker ruby-rubocop)
        '(3 nil warning "Person assumes too much for instance variable '@name'"
            :id "InstanceVariableAssumption" :checker ruby-reek)
-       '(3 1 info "Missing top-level class documentation comment."
-           :id "Style/Documentation" :checker ruby-rubocop)
+       '(3 1 info "Missing top-level documentation comment for `class Person`."
+           :id "Style/Documentation" :end-line 3 :end-column 13
+           :checker ruby-rubocop)
        '(5 5 warning "Useless assignment to variable - `arr`."
-           :id "Lint/UselessAssignment" :checker ruby-rubocop)
+           :id "Lint/UselessAssignment" :end-line 5 :end-column 8
+           :checker ruby-rubocop)
        '(5 11 info "Use `%i` or `%I` for an array of symbols."
-           :id "[Correctable] Style/SymbolArray" :checker ruby-rubocop)
+           :id "Style/SymbolArray" :end-line 5 :end-column 36
+           :checker ruby-rubocop)
        '(6 10 info "Prefer single-quoted strings when you don't need string interpolation or special symbols."
-           :id "[Correctable] Style/StringLiterals" :checker ruby-rubocop)
+           :id "Style/StringLiterals" :end-line 6 :end-column 16
+           :checker ruby-rubocop)
        '(10 5 info "Use a guard clause (`return unless true`) instead of wrapping the code inside a conditional expression."
-            :id "Style/GuardClause":checker ruby-rubocop)
+            :id "Style/GuardClause" :end-line 10 :end-column 7
+            :checker ruby-rubocop)
        '(10 5 info "Favor modifier `if` usage when having a single-line body. Another good alternative is the usage of control flow `&&`/`||`."
-            :id "[Correctable] Style/IfUnlessModifier" :checker ruby-rubocop)
+            :id "Style/IfUnlessModifier" :end-line 10 :end-column 7
+            :checker ruby-rubocop)
        '(10 8 warning "Literal `true` appeared as a condition."
-            :id "Lint/LiteralAsCondition" :checker ruby-rubocop)
+            :id "Lint/LiteralAsCondition" :end-line 10 :end-column 12
+            :checker ruby-rubocop)
        '(10 13 info "Do not use `then` for multi-line `if`."
-            :id "[Correctable] Style/MultilineIfThen" :checker ruby-rubocop)
+            :id "Style/MultilineIfThen" :end-line 10 :end-column 17
+            :checker ruby-rubocop)
        '(11 7 info "Redundant `return` detected."
-            :id "[Correctable] Style/RedundantReturn" :checker ruby-rubocop)))
+            :id "Style/RedundantReturn" :end-line 11 :end-column 13
+            :checker ruby-rubocop)))
 
     (flycheck-buttercup-def-checker-test ruby-reek ruby warnings
       (let ((flycheck-disabled-checkers '(ruby-rubocop)))
@@ -207,7 +236,30 @@
 
   (describe "reading rubocop's output"
     (flycheck-buttercup-def-parse-test ruby-rubocop "language/ruby/syntax-error.rb"
-      '(5 7 error "unexpected token tCONSTANT (Using Ruby 2.7 parser; configure using `TargetRubyVersion` parameter, under `AllCops`)" :id "Lint/Syntax")))
+      '(5 7 error "unexpected token tCONSTANT
+(Using Ruby 2.7 parser; configure using `TargetRubyVersion` parameter, under `AllCops`)"
+          :id "Lint/Syntax" :end-line 5 :end-column 11))
+    (flycheck-buttercup-def-parse-test ruby-rubocop "language/ruby/warnings.rb"
+      '(1 1 info "Missing frozen string literal comment."
+          :id "Style/FrozenStringLiteralComment" :end-line 1 :end-column 2)
+      '(3 1 info "Missing top-level documentation comment for `class Person`."
+          :id "Style/Documentation" :end-line 3 :end-column 13)
+      '(5 5 warning "Useless assignment to variable - `arr`."
+          :id "Lint/UselessAssignment" :end-line 5 :end-column 8)
+      '(5 11 info "Use `%i` or `%I` for an array of symbols."
+          :id "Style/SymbolArray" :end-line 5 :end-column 36)
+      '(6 10 info "Prefer single-quoted strings when you don't need string interpolation or special symbols."
+          :id "Style/StringLiterals" :end-line 6 :end-column 16)
+      '(10 5 info "Use a guard clause (`return unless true`) instead of wrapping the code inside a conditional expression."
+           :id "Style/GuardClause" :end-line 10 :end-column 7)
+      '(10 5 info "Favor modifier `if` usage when having a single-line body. Another good alternative is the usage of control flow `&&`/`||`."
+           :id "Style/IfUnlessModifier" :end-line 10 :end-column 7)
+      '(10 8 warning "Literal `true` appeared as a condition."
+           :id "Lint/LiteralAsCondition" :end-line 10 :end-column 12)
+      '(10 13 info "Do not use `then` for multi-line `if`."
+           :id "Style/MultilineIfThen" :end-line 10 :end-column 17)
+      '(11 7 info "Redundant `return` detected."
+           :id "Style/RedundantReturn" :end-line 11 :end-column 13)))
 
   (describe "reading the tool's output"
     ;; Read from output recorded earlier, so this runs whether or
@@ -219,7 +271,11 @@
     (flycheck-buttercup-def-parse-test ruby-reek "language/ruby/warnings.rb"
       '(3 nil warning "Person assumes too much for instance variable '@name'" :id "InstanceVariableAssumption"))
     (flycheck-buttercup-def-parse-test ruby-standard "language/ruby/syntax-error.rb"
-      '(5 7 error "unexpected constant, expecting end-of-input (Using Ruby 3.3 parser; configure using `TargetRubyVersion` parameter, under `AllCops`)" :id "Lint/Syntax")
-      '(5 25 error "unterminated string meets end of file (Using Ruby 3.3 parser; configure using `TargetRubyVersion` parameter, under `AllCops`)" :id "Lint/Syntax"))))
+      '(5 7 error "unexpected constant, expecting end-of-input
+(Using Ruby 3.3 parser; configure using `TargetRubyVersion` parameter, under `AllCops`)"
+          :id "Lint/Syntax" :end-line 5 :end-column 11)
+      '(5 25 error "unterminated string meets end of file
+(Using Ruby 3.3 parser; configure using `TargetRubyVersion` parameter, under `AllCops`)"
+          :id "Lint/Syntax" :end-line 6 :end-column 2))))
 
 ;;; test-ruby.el ends here

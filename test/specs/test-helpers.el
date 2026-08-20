@@ -199,7 +199,7 @@ The note names the Ruby that RuboCop parsed with, which follows
 `TargetRubyVersion' and so differs from machine to machine.  It is
 built here rather than written out, so the spec asserts the part
 RuboCop is actually reporting."
-  (format "%s (Using Ruby %s parser; configure using \
+  (format "%s\n(Using Ruby %s parser; configure using \
 `TargetRubyVersion` parameter, under `AllCops`)"
           message
           (let ((version (or (flycheck-buttercup-ruby-version) "")))

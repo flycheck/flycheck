@@ -6,6 +6,10 @@
 
 ## master (unreleased)
 
+### Changes
+
+- [#2351](https://github.com/flycheck/flycheck/pull/2351): The RuboCop family (`rubocop`, `standardrb`, `cookstyle`) reads the tools' JSON output: ids are bare cop names without the `[Correctable] ` marker (which un-breaks explanations for correctable offenses), errors carry precise end positions, and refactor/info severities are no longer dropped.
+
 ### New Features
 
 - [#2346](https://github.com/flycheck/flycheck/pull/2346): New `flycheck-mode-line-scope` option to make the mode-line counter show the project-wide diagnostics instead of the current buffer's ([#2340](https://github.com/flycheck/flycheck/issues/2340)).
