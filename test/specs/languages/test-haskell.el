@@ -107,7 +107,8 @@
 Found:
   spam eggs = map lines eggs
 Perhaps:
-  spam = map lines" :checker haskell-hlint)
+  spam = map lines" :id "Eta reduce" :end-line 4 :end-column 27
+     :checker haskell-hlint)
          '(4 1 warning "Top-level binding with no type signature:
   spam :: [String] -> [[String]]"
              :id "-Wmissing-signatures"
@@ -116,7 +117,8 @@ Perhaps:
 Found:
   (putStrLn \"hello world\")
 Perhaps:
-  putStrLn \"hello world\"" :checker haskell-hlint))))
+  putStrLn \"hello world\"" :id "Redundant bracket" :end-line 7 :end-column 32
+     :checker haskell-hlint))))
 
     (flycheck-buttercup-def-checker-test
         haskell-stack-ghc haskell nonstandard-stack-yaml-file
@@ -166,7 +168,8 @@ Perhaps:
 Found:
   spam eggs = map lines eggs
 Perhaps:
-  spam = map lines" :checker haskell-hlint)
+  spam = map lines" :id "Eta reduce" :end-line 4 :end-column 27
+     :checker haskell-hlint)
          '(4 1 warning "Top-level binding with no type signature:
   spam :: [String] -> [[String]]"
              :id "-Wmissing-signatures"
@@ -175,7 +178,8 @@ Perhaps:
 Found:
   (putStrLn \"hello world\")
 Perhaps:
-  putStrLn \"hello world\"" :checker haskell-hlint)))))
+  putStrLn \"hello world\"" :id "Redundant bracket" :end-line 7 :end-column 32
+     :checker haskell-hlint)))))
 
   (describe "reading the tool's output"
     ;; Read from output recorded earlier, so this runs whether or
@@ -183,5 +187,49 @@ Perhaps:
 
     (flycheck-buttercup-def-parse-test haskell-ghc "language/haskell/SyntaxError.hs"
       '(3 1 error "parse error on input ‘module’" :id "GHC-58481"))))
+
+  (describe "reading hlint's output"
+
+    (it "attaches the replacement as a machine-applicable fix"
+      ;; The comparable-error matcher strips fixes, so assert directly
+      (with-temp-buffer
+        (let* ((errors (flycheck-buttercup-parse
+                        'haskell-hlint
+                        (flycheck-buttercup-fixture
+                         'haskell-hlint "language/haskell/Warnings.hs")))
+               (fix (flycheck-error-fix (car errors)))
+               (edit (car (flycheck-fix-edits fix))))
+          (expect (flycheck-fix-description fix) :to-equal "Eta reduce")
+          (expect (flycheck-fix-edit-line edit) :to-equal 4)
+          (expect (flycheck-fix-edit-column edit) :to-equal 1)
+          (expect (flycheck-fix-edit-end-line edit) :to-equal 4)
+          (expect (flycheck-fix-edit-end-column edit) :to-equal 27)
+          (expect (flycheck-fix-edit-replacement edit)
+                  :to-equal "spam = map lines"))))
+
+    (flycheck-buttercup-def-parse-test haskell-hlint "language/haskell/Warnings.hs"
+      ;; An idea with a replacement carries a machine-applicable fix
+      `(4 1 warning "Eta reduce
+Found:
+  spam eggs = map lines eggs
+Perhaps:
+  spam = map lines"
+          :id "Eta reduce" :end-line 4 :end-column 27
+          :fix ,(flycheck-fix-new
+                 :description "Eta reduce"
+                 :edits (list (flycheck-fix-edit-new
+                               :line 4 :column 1 :end-line 4 :end-column 27
+                               :replacement "spam = map lines"))))
+      `(7 8 info "Redundant bracket
+Found:
+  (putStrLn \"hello world\")
+Perhaps:
+  putStrLn \"hello world\""
+          :id "Redundant bracket" :end-line 7 :end-column 32
+          :fix ,(flycheck-fix-new
+                 :description "Redundant bracket"
+                 :edits (list (flycheck-fix-edit-new
+                               :line 7 :column 8 :end-line 7 :end-column 32
+                               :replacement "putStrLn \"hello world\""))))))
 
 ;;; test-haskell.el ends here

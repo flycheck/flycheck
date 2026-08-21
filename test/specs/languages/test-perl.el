@@ -53,6 +53,20 @@
                                :line 3 :column 1 :end-line 3 :end-column 26
                                :replacement "use POSIX qw( ceil );")))))
 
+    (it "attaches the diff's replacement as the perlimports fix"
+      ;; The comparable-error matcher strips fixes, so assert directly
+      (with-temp-buffer
+        (let* ((errors (flycheck-buttercup-parse
+                        'perl-perlimports
+                        (flycheck-buttercup-fixture
+                         'perl-perlimports "language/perl/UnusedImport.pl")))
+               (fix (flycheck-error-fix (car errors)))
+               (edit (car (flycheck-fix-edits fix))))
+          (expect (flycheck-fix-description fix)
+                  :to-equal "POSIX import arguments need tidying")
+          (expect (flycheck-fix-edit-replacement edit)
+                  :to-equal "use POSIX qw( ceil );"))))
+
     (it "stamps perlimports fixes with the tick from the check's start"
       ;; The tick must come from when the check started, not from parse
       ;; time, so a fix goes stale when the buffer changes while the tool
