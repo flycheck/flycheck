@@ -15420,40 +15420,73 @@ string is a default hint package (e.g. (\"Generalise\"
   :safe #'flycheck-string-list-p
   :package-version '(flycheck . "0.24"))
 
+(defun flycheck-parse-hlint (output checker buffer)
+  "Parse hlint JSON ideas from OUTPUT.
+
+CHECKER and BUFFER denote the CHECKER that returned OUTPUT and the
+BUFFER that was checked, respectively.  The hint name becomes the
+error's id, the columns are one-based with a right-open end, and an
+idea that carries a replacement becomes a machine-applicable fix,
+applied verbatim over the idea's span.  The message keeps the same
+Found/Perhaps block the text output prints."
+  (mapcar
+   (lambda (idea)
+     (let-alist idea
+       (flycheck-error-new-at
+        .startLine .startColumn
+        (pcase .severity
+          ("Suggestion" 'info)
+          ("Warning" 'warning)
+          (_ 'error))
+        (concat .hint
+                (when .from
+                  (format "\nFound:\n%s"
+                          (replace-regexp-in-string "^" "  " .from)))
+                (cond
+                 ;; An empty replacement means removal, worded as the
+                 ;; text output words it
+                 ((equal .to "") "\nPerhaps you should remove it.")
+                 (.to (format "\nPerhaps:\n%s"
+                              (replace-regexp-in-string "^" "  " .to))))
+                (mapconcat (lambda (note) (format "\nNote: %s" note))
+                           .note ""))
+        ;; A parse error's hint is its whole message; no id there
+        :id (unless (string-prefix-p "Parse error" .hint) .hint)
+        :end-line .endLine
+        :end-column .endColumn
+        :fix (and .to
+                  (flycheck--make-fix
+                   buffer .hint
+                   (list (flycheck-fix-edit-new
+                          :line .startLine :column .startColumn
+                          :end-line .endLine :end-column .endColumn
+                          ;; hlint indents the replacement relative to
+                          ;; column one; continuation lines must keep
+                          ;; the span's own indentation or the layout
+                          ;; breaks
+                          :replacement
+                          (replace-regexp-in-string
+                           "\n"
+                           (concat "\n" (make-string (1- .startColumn) ?\s))
+                           .to)))))
+        :checker checker
+        :buffer buffer
+        :filename .file)))
+   (car (flycheck-parse-json output))))
+
 (flycheck-define-checker haskell-hlint
   "A Haskell style checker using hlint.
 
 See URL `https://github.com/ndmitchell/hlint'."
   :command ("hlint"
-            "--no-exit-code"
+            "--no-exit-code" "--json"
             (option-list "-X" flycheck-hlint-language-extensions concat)
             (option-list "-i=" flycheck-hlint-ignore-rules concat)
             (option-list "-h" flycheck-hlint-hint-packages concat)
             (config-file "-h" flycheck-hlint-config)
             (eval flycheck-hlint-args)
             source-inplace)
-  :error-patterns
-  ((info line-start
-         (file-name) ":"
-         (or (seq line ":" column (optional "-" end-column))
-             (seq "(" line "," column ")-(" end-line "," end-column ")"))
-         ": Suggestion: "
-         (message (one-or-more (and (one-or-more (not (any ?\n))) ?\n)))
-         line-end)
-   (warning line-start
-            (file-name) ":"
-            (or (seq line ":" column (optional "-" end-column))
-                (seq "(" line "," column ")-(" end-line "," end-column ")"))
-            ": Warning: "
-            (message (one-or-more (and (one-or-more (not (any ?\n))) ?\n)))
-            line-end)
-   (error line-start
-          (file-name) ":"
-          (or (seq line ":" column (optional "-" end-column))
-              (seq "(" line "," column ")-(" end-line "," end-column ")"))
-          ": Error: "
-          (message (one-or-more (and (one-or-more (not (any ?\n))) ?\n)))
-          line-end))
+  :error-parser flycheck-parse-hlint
   :modes (haskell-mode haskell-literate-mode haskell-ts-mode))
 
 (define-obsolete-variable-alias 'flycheck-tidyrc

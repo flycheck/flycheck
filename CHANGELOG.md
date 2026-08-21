@@ -8,6 +8,7 @@
 
 ### Changes
 
+- [#2356](https://github.com/flycheck/flycheck/pull/2356): `haskell-hlint` reads hlint's JSON ideas: hint names become error ids, spans get right-open end columns, and an idea with a replacement carries a machine-applicable fix, applied with `C-c ! f`.
 - [#2355](https://github.com/flycheck/flycheck/pull/2355): `go-vet` reads `go vet -json`: analyzer findings carry the analyzer's name as their id and byte-precise positions with end columns, and a compile error that stops the analyzers is reported at its real position as an error rather than a warning.
 - [#2354](https://github.com/flycheck/flycheck/pull/2354): `c/c++-gcc` reads GCC's SARIF output when the compiler supports it well (probed per binary, GCC 15 or newer - the SARIF of 13 and 14 can lose diagnostics - with the text patterns still covering older GCC and the Clang that answers to gcc on macOS): errors carry precise spans, warnings keep their flag ids, and GCC's notes become the error's related locations; the shared SARIF parser now maps related locations for every SARIF checker.
 - [#2353](https://github.com/flycheck/flycheck/pull/2353): `puppet-lint` and `actionlint` read their tools' JSON output, giving puppet-lint problems the columns the old patterns never captured and actionlint errors precise end positions.
