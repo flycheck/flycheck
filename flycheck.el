@@ -10884,7 +10884,12 @@ lines, and returns the parsed JSON lines in a list."
       (goto-char (point-min))
       (while (not (eobp))
         (when (memq (char-after) '(?\{ ?\[))
-          (push (funcall flycheck--json-parser) objects))
+          (condition-case nil
+              (push (funcall flycheck--json-parser) objects)
+            ;; A plain-text line that merely starts with a brace or
+            ;; bracket - a compiler's [1 of 2] progress line, say -
+            ;; is not an object; skip just that line
+            (json-parse-error nil)))
         (forward-line)))
     (nreverse objects)))
 
@@ -15329,11 +15334,70 @@ See URL `https://github.com/commercialhaskell/stack'."
                 :message (or stack "Not found")
                 :face (if stack 'success '(bold error)))))))
 
+(defvar flycheck--ghc-json-support (make-hash-table :test 'equal)
+  "Whether a GHC binary supports JSON diagnostics, keyed by path.")
+
+(defun flycheck--ghc-json-flag ()
+  "Return GHC's JSON diagnostics flag when this buffer's GHC has it.
+
+Probed once per binary by evaluating a constant with the flag - GHC
+before 9.10 rejects it as unrecognised - through the checker's process
+machinery, so a remote buffer probes the remote host's compiler.  The
+answer is cached for the session: a compiler swapped in behind the
+same path, as ghcup set does, keeps its old answer until Emacs
+restarts."
+  (when-let* ((ghc (flycheck-find-checker-executable 'haskell-ghc)))
+    (let* ((key (cons (file-remote-p default-directory) ghc))
+           (cached (gethash key flycheck--ghc-json-support 'unknown)))
+      (when (eq cached 'unknown)
+        (setq cached
+              (eq 0 (ignore-errors
+                      (flycheck-call-checker-process
+                       'haskell-ghc nil nil nil
+                       "-fdiagnostics-as-json" "-e" "0"))))
+        (puthash key cached flycheck--ghc-json-support))
+      (when cached '("-fdiagnostics-as-json")))))
+
+(defun flycheck-parse-ghc (output checker buffer)
+  "Parse GHC diagnostics from OUTPUT, JSON lines or plain text.
+
+CHECKER and BUFFER denote the CHECKER that returned OUTPUT and the
+BUFFER that was checked, respectively.  GHC 9.10's JSON diagnostics come
+one object per line between the plain-text progress lines; the numeric
+code becomes a GHC-NNNNN id, which the Haskell error index explains.  A
+diagnostic without a span - a driver error, say - lands on line one.
+Output of an older GHC without JSON falls through to the checker's
+patterns, which also ignore the progress lines."
+  (nconc
+   (mapcar
+    (lambda (diag)
+      (let-alist diag
+        (flycheck-error-new-at
+         (or .span.start.line 1) .span.start.column
+         (pcase .severity
+           ("Warning" 'warning)
+           (_ 'error))
+         (concat (string-join .message "\n")
+                 (mapconcat (lambda (hint)
+                              (format "\nSuggested fix: %s" hint))
+                            .hints ""))
+         :id (and .code (format "GHC-%d" .code))
+         :end-line .span.end.line
+         :end-column .span.end.column
+         :checker checker
+         :buffer buffer
+         :filename .span.file)))
+    (seq-filter (lambda (value) (alist-get 'ghcVersion value))
+                (flycheck-parse-json output)))
+   (flycheck-parse-with-patterns output checker buffer)))
+
 (flycheck-define-checker haskell-ghc
   "A Haskell syntax and type checker using ghc.
 
+Rich diagnostics with ids from the Haskell error index need GHC 9.10.
 See URL `https://www.haskell.org/ghc/'."
   :command ("ghc" "-Wall" "-no-link"
+            (eval (flycheck--ghc-json-flag))
             "-outputdir" (eval (file-local-name
                                 (flycheck-haskell-ghc-cache-directory)))
             (option-flag "-no-user-package-db"
@@ -15374,9 +15438,13 @@ See URL `https://www.haskell.org/ghc/'."
                                   (one-or-more " ")
                                   (one-or-more (not (any ?\n ?|)))))))
           line-end))
+  :error-parser flycheck-parse-ghc
   :error-filter
   (lambda (errors)
     (flycheck-sanitize-errors (flycheck-dedent-error-messages errors)))
+  :error-explainer
+  (flycheck-error-explainer-from-url
+   "https://errors.haskell.org/messages/%s/")
   :modes (haskell-mode haskell-literate-mode haskell-ts-mode)
   :next-checkers ((warning . haskell-hlint))
   :working-directory flycheck-haskell--ghc-find-default-directory)

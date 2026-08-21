@@ -26,6 +26,13 @@
 (require 'flycheck-buttercup)
 
 (describe "Error parsers"
+  (describe "flycheck-parse-json"
+    (it "skips a text line that merely starts with a bracket"
+      ;; GHC prints [1 of 2] progress lines; Bundler prints [DEPRECATED]
+      (expect (flycheck-parse-json
+               "[1 of 1] Compiling M ( M.hs, nothing )\n{\"a\": 1}\n")
+              :to-equal '(((a . 1))))))
+
   (describe "The SARIF parser"
     (it "parses results with locations and rule metadata"
       (let ((sarif "{\"version\":\"2.1.0\",\"runs\":[{\"tool\":{\"driver\":\
