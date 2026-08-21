@@ -186,7 +186,82 @@ Perhaps:
     ;; not the tool is installed here
 
     (flycheck-buttercup-def-parse-test haskell-ghc "language/haskell/SyntaxError.hs"
-      '(3 1 error "parse error on input ‘module’" :id "GHC-58481"))))
+      ;; Recorded from a local GHC 9.14, which emits JSON diagnostics
+      '(3 1 error "parse error on input ‘module’"
+          :id "GHC-58481" :end-line 3 :end-column 7))))
+
+  (describe "reading ghc's output"
+    ;; GHC is not in the checker image; the JSON lines are captured
+    ;; from ghc 9.10.3, and the recording below comes from a local GHC
+
+    (it "reads JSON diagnostics with ids from the error index"
+      (flycheck-buttercup-with-temp-buffer
+        (expect
+         (flycheck-buttercup-parse
+          'haskell-ghc
+          (concat
+           "[1 of 1] Compiling Haskell.Warnings ( Warnings.hs, nothing )\n"
+           "{\"version\":\"1.0\",\"ghcVersion\":\"ghc-9.10.3\","
+           "\"span\":{\"file\":\"Warnings.hs\","
+           "\"start\":{\"line\":4,\"column\":1},"
+           "\"end\":{\"line\":4,\"column\":5}},"
+           "\"severity\":\"Warning\",\"code\":38417,"
+           "\"message\":[\"Top-level binding with no type signature:\\n  spam :: [String] -> [[String]]\"],"
+           "\"hints\":[]}\n"))
+         :to-be-equal-flycheck-errors
+         (list (flycheck-error-new-at
+                4 1 'warning
+                "Top-level binding with no type signature:\n  spam :: [String] -> [[String]]"
+                :id "GHC-38417" :end-line 4 :end-column 5
+                :checker 'haskell-ghc :buffer (current-buffer)
+                :filename "Warnings.hs")))))
+
+    (it "keeps a hint as a suggested fix line and a parse error's id"
+      (flycheck-buttercup-with-temp-buffer
+        (expect
+         (flycheck-buttercup-parse
+          'haskell-ghc
+          (concat
+           "{\"version\":\"1.0\",\"ghcVersion\":\"ghc-9.10.3\","
+           "\"span\":{\"file\":\"SyntaxError.hs\","
+           "\"start\":{\"line\":3,\"column\":1},"
+           "\"end\":{\"line\":3,\"column\":7}},"
+           "\"severity\":\"Error\",\"code\":58481,"
+           "\"message\":[\"parse error on input \`module'\"],"
+           "\"hints\":[\"Perhaps you intended to use TemplateHaskell\"]}\n"))
+         :to-be-equal-flycheck-errors
+         (list (flycheck-error-new-at
+                3 1 'error
+                "parse error on input \`module'\nSuggested fix: Perhaps you intended to use TemplateHaskell"
+                :id "GHC-58481" :end-line 3 :end-column 7
+                :checker 'haskell-ghc :buffer (current-buffer)
+                :filename "SyntaxError.hs")))))
+
+    (it "pins a diagnostic without a span to the first line"
+      (flycheck-buttercup-with-temp-buffer
+        (let ((errors (flycheck-buttercup-parse
+                       'haskell-ghc
+                       (concat
+                        "{\"version\":\"1.0\",\"ghcVersion\":\"ghc-9.10.3\","
+                        "\"span\":null,\"severity\":\"Error\",\"code\":39999,"
+                        "\"message\":[\"driver trouble\"],\"hints\":[]}\n"))))
+          (expect (flycheck-error-line (car errors)) :to-equal 1)
+          (expect (flycheck-error-message (car errors))
+                  :to-equal "driver trouble"))))
+
+    (it "still reads an old GHC's plain text through the patterns"
+      (flycheck-buttercup-with-temp-buffer
+        (expect
+         (flycheck-buttercup-parse
+          'haskell-ghc
+          "Warnings.hs:4:1: warning: [-Wmissing-signatures]\n    Top-level binding with no type signature:\n      spam :: [String] -> [[String]]\n")
+         :to-be-equal-flycheck-errors
+         (list (flycheck-error-new-at
+                4 1 'warning
+                "Top-level binding with no type signature:\n  spam :: [String] -> [[String]]"
+                :id "-Wmissing-signatures"
+                :checker 'haskell-ghc :buffer (current-buffer)
+                :filename "Warnings.hs"))))))
 
   (describe "reading hlint's output"
 

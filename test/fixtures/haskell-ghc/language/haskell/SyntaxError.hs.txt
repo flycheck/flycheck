@@ -1,7 +1,2 @@
 [1 of 1] Compiling Main             ( SyntaxError.hs, Main.o )
-SyntaxError.hs:3:1: error: [GHC-58481]
-    parse error on input ‘module’
-  |
-3 | module Haskell.SyntaxError where
-  | ^^^^^^
-
+{"version":"1.1","ghcVersion":"ghc-9.14.1","span":{"file":"SyntaxError.hs","start":{"line":3,"column":1},"end":{"line":3,"column":7}},"severity":"Error","code":58481,"message":["parse error on input \u2018module\u2019"],"hints":[]}
