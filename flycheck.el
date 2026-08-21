@@ -14844,18 +14844,73 @@ See URL `https://go.dev/cmd/gofmt/'."
 (flycheck-def-args-var flycheck-go-vet-args go-vet
   :package-version '(flycheck . "39"))
 
+(defun flycheck--go-vet-parse-position (position)
+  "Parse POSITION, a go/token file:line:column string, into a list.
+
+Returns (FILENAME LINE COLUMN), or nil when POSITION has no such
+shape."
+  (when (stringp position)
+    (cond
+     ((string-match "\\`\\(.+\\):\\([0-9]+\\):\\([0-9]+\\)\\'" position)
+      (list (match-string 1 position)
+            (string-to-number (match-string 2 position))
+            (string-to-number (match-string 3 position))))
+     ;; go/token omits a zero column, printing just file:line
+     ((string-match "\\`\\(.+\\):\\([0-9]+\\)\\'" position)
+      (list (match-string 1 position)
+            (string-to-number (match-string 2 position))
+            nil)))))
+
+(defun flycheck-parse-go-vet (output checker buffer)
+  "Parse `go vet -json' findings from OUTPUT.
+
+CHECKER and BUFFER denote the CHECKER that returned OUTPUT and the
+BUFFER that was checked, respectively.  The findings arrive as one JSON
+document keyed by package and then by analyzer, whose name becomes the
+error's id; positions count bytes, with go/token's right-open end
+mapping straight onto Flycheck's.  A compile error that stops the
+analyzers prints as a text line beside the document and is read by the
+checker's pattern."
+  (let ((errors nil))
+    (dolist (package (apply #'append (flycheck-parse-json output)))
+      (pcase-dolist (`(,analyzer . ,findings) (cdr package))
+        (seq-do
+         (lambda (finding)
+           (let-alist finding
+             (pcase-let ((`(,file ,line ,column)
+                          (flycheck--go-vet-parse-position .posn))
+                         (`(,_ ,end-line ,end-column)
+                          (flycheck--go-vet-parse-position .end)))
+               (when line
+                 (push (flycheck-error-new-at
+                        line column 'warning .message
+                        :id (symbol-name analyzer)
+                        :end-line end-line
+                        :end-column end-column
+                        :checker checker
+                        :buffer buffer
+                        :filename file)
+                       errors)))))
+         findings)))
+    (nconc (nreverse errors)
+           (flycheck-parse-with-patterns output checker buffer))))
+
 (flycheck-define-checker go-vet
   "A Go syntax checker using the `go vet' command.
 
 See URL `https://go.dev/cmd/go/' and URL
 `https://pkg.go.dev/cmd/vet/'."
-  :command ("go" "vet"
+  :command ("go" "vet" "-json"
             (option "-tags=" flycheck-go-build-tags concat
                     flycheck-option-comma-separated-list)
             (eval flycheck-go-vet-args)
             (source ".go"))
+  :error-parser flycheck-parse-go-vet
   :error-patterns
-  ((warning line-start (file-name) ":" line ": " (message) line-end))
+  ;; A compile error that stops the analyzers prints as text beside the
+  ;; JSON document; the parser reads it with this pattern
+  ((error line-start "vet: " (file-name) ":" line ":" column ": "
+          (message) line-end))
   :modes (go-mode go-ts-mode)
   :next-checkers (go-build
                   go-test

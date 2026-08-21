@@ -92,11 +92,14 @@
           `(("GOPATH" . ,(flycheck-buttercup-resource-filename "language/go")))
         (flycheck-buttercup-should-syntax-check
          "language/go/src/warnings.go" 'go-mode
-         '(4 2 error "imported and not used: \"fmt\"" :checker go-build)
+         ;; Wordings follow modern Go; go-vet reads the compile error
+         ;; that stops its analyzers since it moved to -json output
+         '(4 2 error "\"fmt\" imported and not used" :checker go-build)
          '(8 2 error "undefined: fmt" :checker go-build)
+         '(8 2 error "undefined: fmt" :checker go-vet)
          '(12 2 error "undefined: fmt" :checker go-build)
          '(17 2 error "undefined: fmt" :checker go-build)
-         '(19 13 error "cannot use 1 (type untyped int) as type string in argument to Warnf"
+         '(19 13 error "cannot use 1 (untyped int constant) as string value in argument to Warnf"
               :checker go-build))))
 
     (flycheck-buttercup-def-checker-test go-build go handles-packages
@@ -160,6 +163,12 @@
       '(5 9 error "expected '(', found ta")
       '(6 1 error "expected ')', found '}'"))
     (flycheck-buttercup-def-parse-test go-vet "language/go/src/warnings.go"
-      '(2 nil warning "undefined: fmt"))))
+      ;; A compile error that stops the analyzers, via the vet: pattern
+      '(8 2 error "undefined: fmt"))
+    (flycheck-buttercup-def-parse-test go-vet "language/go/printf/printf.go"
+      ;; An analyzer finding from the JSON document; the analyzer names
+      ;; the id, and go/token's right-open end maps straight through
+      '(6 14 warning "fmt.Printf format %d has arg \"s\" of wrong type string"
+          :id "printf" :end-line 6 :end-column 16))))
 
 ;;; test-go.el ends here
