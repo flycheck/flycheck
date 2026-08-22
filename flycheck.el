@@ -1010,6 +1010,21 @@ See `flycheck-navigation-minimum-level' and
                 (const :tag "Errors" error)
                 (symbol :tag "Custom error level")))
 
+(defcustom flycheck-navigation-scope 'buffer
+  "The scope of error navigation.
+
+With `buffer' (the default), `flycheck-next-error' and
+`flycheck-previous-error' move within the current buffer, as they
+always have.  With `project', navigation that runs out of errors in the
+buffer continues by a single step into the project's other diagnostics
+- the same set the error list shows in its project scope - opening the
+next file at its first error, or the previous file at its last."
+  :group 'flycheck
+  :type '(choice (const :tag "Current buffer" buffer)
+                 (const :tag "Whole project" project))
+  :safe (lambda (value) (memq value '(buffer project)))
+  :package-version '(flycheck . "40"))
+
 (defcustom flycheck-navigation-minimum-level nil
   "The minimum level of errors to navigate.
 
@@ -5170,13 +5185,19 @@ Use Emacs' project (see `project-current') when a project is
 found, so diagnostics from any file in the project aggregate
 together; otherwise fall back to `default-directory', which
 matches how a checker's working directory groups a multi-file
-check.  The result is an expanded directory name."
-  (file-name-as-directory
-   (expand-file-name
-    (or (and (require 'project nil 'noerror)
-             (when-let* ((project (project-current nil)))
-               (project-root project)))
-        default-directory))))
+check.  The result is the directory's true name, so buffers
+visiting the project under different spellings - a symlinked
+path, a Windows short name - agree on the key."
+  (let ((dir (file-name-as-directory
+              (expand-file-name
+               (or (and (require 'project nil 'noerror)
+                        (when-let* ((project (project-current nil)))
+                          (project-root project)))
+                   default-directory)))))
+    (if (file-remote-p dir)
+        dir
+      (file-name-as-directory
+       (or (ignore-errors (file-truename dir)) dir)))))
 
 (defun flycheck--project-key-prefixes (project-key)
   "Return the directory prefixes that place a file under PROJECT-KEY.
@@ -6548,13 +6569,24 @@ RESET is non-nil."
                                  (flycheck--error-start-positions)))))
      (t pos))))
 
+(defvar flycheck--project-navigation-cursor nil
+  "Where project navigation last continued to, or nil.
+
+A list (ORIGIN POINT FILE LINE COLUMN): the buffer and point the
+continuation stepped from, and where it landed.  `next-error' keeps
+its session in the origin buffer, whose point the continuation never
+moves, so a repeated step from the very same spot advances from the
+landing point rather than recomputing the same target.")
+
 (defun flycheck-next-error-function (n reset)
   "Visit the N-th error from the current point.
 
 N is the number of errors to advance by, where a negative N
 advances backwards.  With non-nil RESET, advance from the
 beginning of the buffer, otherwise advance from the current
-position.
+position.  When `flycheck-navigation-scope' is `project' and the
+buffer has no further error, continue by a single step into the
+project's other diagnostics.
 
 Intended for use with `next-error-function'."
   (if-let* ((pos (flycheck-next-error-pos n reset))
@@ -6569,7 +6601,111 @@ Intended for use with `next-error-function'."
                                (flycheck-overlays-at pos))
                      (get-char-property pos 'flycheck-error))))
       (flycheck-jump-to-error err)
-    (user-error "No more Flycheck errors")))
+    (let ((continue
+           ;; Continue into the project only when the buffer is truly
+           ;; exhausted: with a larger N and errors still left here,
+           ;; refuse rather than silently skip them, as buffer scope does
+           (and (eq flycheck-navigation-scope 'project)
+                (not (zerop (or n 1)))
+                (buffer-file-name)
+                (not (flycheck-next-error-pos
+                      (if (> (or n 1) 0) 1 -1) reset)))))
+      (if-let* ((err (and continue
+                          (flycheck--next-project-error (or n 1)))))
+          (let ((origin (current-buffer))
+                (opoint (point)))
+            (flycheck-jump-to-error err)
+            ;; The next-error session stays with the origin buffer,
+            ;; whose point never moves; remember where this step landed
+            ;; so a repeated step from the same spot advances instead
+            ;; of jumping to the same error forever
+            (setq flycheck--project-navigation-cursor
+                  (list origin opoint
+                        (flycheck-error-filename err)
+                        (flycheck-error-line err)
+                        (or (flycheck-error-column err) 1))))
+        (user-error "No more Flycheck errors%s"
+                    (if continue " in the project" ""))))))
+
+
+(defun flycheck--next-project-error (n)
+  "Return the project error navigation continues to, or nil.
+
+The project's diagnostics - the same set the error list shows in its
+project scope - ordered by file and position; with positive N the
+nearest one after point, which may still be in the current file when
+its check has not caught up with what the store knows, otherwise the
+next file's first; with negative N the nearest one before.  Files
+order by their true names, so different spellings of the same place -
+symlinked paths, Windows short names - sort together.  Filtered to
+the navigable levels; an error whose file is gone is passed over; a
+buffer without a file stays within itself."
+  (unless (zerop n)
+    (when-let* ((file (buffer-file-name))
+                (key (flycheck--buffer-project-key)))
+      (let* ((forward (> n 0))
+             (line (line-number-at-pos))
+             (column (1+ (- (point) (line-beginning-position))))
+             (truenames (make-hash-table :test 'equal))
+             (file-key
+              ;; Sort files by their true names, memoized per file:
+              ;; the buffer, the store and the cursor may each spell
+              ;; the same place differently - symlinked paths, Windows
+              ;; short names - and mixed spellings break the
+              ;; lexicographic order below
+              (lambda (name)
+                (or (gethash name truenames)
+                    (puthash name
+                             (if (file-remote-p name)
+                                 name
+                               (or (ignore-errors (file-truename name))
+                                   name))
+                             truenames))))
+             (reference
+              ;; A repeated step from the same origin spot continues
+              ;; from where the last one landed
+              (pcase flycheck--project-navigation-cursor
+                ((and `(,origin ,opoint ,cfile ,cline ,ccolumn)
+                      (guard (and (eq origin (current-buffer))
+                                  (= opoint (point)))))
+                 (list (funcall file-key cfile) cline ccolumn))
+                (_ (list (funcall file-key file) line column))))
+             (keyed
+              ;; (FILE LINE COLUMN) sort keys
+              (delq nil
+                    (mapcar
+                     (lambda (err)
+                       (when-let* ((other (flycheck-error-filename err))
+                                   (eline (flycheck-error-line err)))
+                         (when (flycheck-error-level-interesting-p err)
+                           (list (list (funcall file-key other)
+                                       eline
+                                       (or (flycheck-error-column err) 1))
+                                 err))))
+                     (flycheck--project-errors key))))
+             (after-p (lambda (a b)
+                        ;; Lexicographic (FILE LINE COLUMN) order
+                        (pcase-let ((`(,fa ,la ,ca) a) (`(,fb ,lb ,cb) b))
+                          (or (string-lessp fa fb)
+                              (and (string= fa fb)
+                                   (or (< la lb)
+                                       (and (= la lb) (< ca cb))))))))
+             (sorted (seq-sort (lambda (a b) (funcall after-p (car a) (car b)))
+                               keyed))
+             (candidates
+              (if forward
+                  (seq-filter (lambda (entry)
+                                (funcall after-p reference (car entry)))
+                              sorted)
+                (nreverse
+                 (seq-filter (lambda (entry)
+                               (funcall after-p (car entry) reference))
+                             sorted)))))
+        (seq-some (lambda (entry)
+                    (let ((err (cadr entry)))
+                      (and (file-exists-p (flycheck-error-filename err))
+                           err)))
+                  candidates)))))
 
 (defun flycheck-next-error (&optional n reset)
   "Visit the N-th error from the current point.
