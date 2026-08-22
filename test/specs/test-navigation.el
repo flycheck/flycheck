@@ -509,4 +509,208 @@
       (let ((err (should-error (flycheck-next-error) :type 'user-error)))
         (expect (cadr err) :to-equal "No more Flycheck errors")))))
 
+(describe "Project navigation scope"
+
+  (before-each
+    (spy-on 'project-current :and-return-value nil)
+    (clrhash flycheck--project-error-store))
+
+  (defun flycheck-test--nav-record (dir &rest specs)
+    "Record errors per SPECS, each (FILE LINE LEVEL), under DIR's project."
+    (flycheck--project-record-errors
+     (mapcar (lambda (spec)
+               (flycheck-error-new-at
+                (nth 1 spec) 1 (nth 2 spec) "e"
+                :filename (expand-file-name (nth 0 spec) dir)
+                :checker 'x))
+             specs)))
+
+  (defmacro flycheck-test--with-nav-project (files &rest body)
+    "Run BODY with DIR bound to a temp project containing FILES on disk."
+    (declare (indent 1))
+    `(let ((dir (make-temp-file "flycheck-nav" t))
+           ;; No live checks: these specs feed the store directly, and
+           ;; a checker process would hold the directory against the
+           ;; teardown below on Windows
+           (flycheck-check-syntax-automatically nil))
+       (unwind-protect
+           (progn
+             (dolist (file ,files)
+               (write-region "one\ntwo\nthree\nfour\n" nil
+                             (expand-file-name file dir)))
+             ,@body)
+         (dolist (buffer (buffer-list))
+           (when-let* ((name (buffer-file-name buffer)))
+             (when (string-prefix-p (file-name-as-directory dir)
+                                    (expand-file-name name))
+               (with-current-buffer buffer
+                 (set-buffer-modified-p nil)
+                 (kill-buffer)))))
+         ;; Windows keeps just-deleted files in a pending state while
+         ;; anything still holds a handle, which fails the removal of
+         ;; their directory; give it a moment before believing that
+         (let ((attempts 10))
+           (while (and (> attempts 0)
+                       (not (ignore-errors (delete-directory dir t) t)))
+             (setq attempts (1- attempts))
+             (sleep-for 0.1))
+           (when (file-directory-p dir)
+             (delete-directory dir t))))))
+
+  (it "hands the session over so repeated next-error advances"
+    ;; The real command re-runs in next-error-last-buffer; without the
+    ;; hand-off it would jump to the same first error forever
+    (flycheck-test--with-nav-project '("a.rb" "b.rb")
+      ;; The target buffer is open with flycheck-mode, as the global
+      ;; mode would have it, so the hand-off finds a next-error buffer
+      (with-current-buffer (find-file-noselect (expand-file-name "b.rb" dir))
+        (flycheck-mode 1))
+      (with-current-buffer (find-file-noselect (expand-file-name "a.rb" dir))
+        (flycheck-mode 1)
+        (flycheck-test--nav-record dir '("b.rb" 1 error) '("b.rb" 3 error))
+        (switch-to-buffer (current-buffer))
+        (goto-char (point-max))
+        (let ((flycheck-navigation-scope 'project))
+          (next-error)
+          ;; Emacs may visit the target under another spelling of the
+          ;; same place - its true name - so compare files, not strings
+          (expect (flycheck-same-files-p
+                   (buffer-file-name (window-buffer))
+                   (expand-file-name "b.rb" dir))
+                  :to-be-truthy)
+          (with-current-buffer (window-buffer)
+            (expect (line-number-at-pos (point)) :to-equal 1)
+            ;; The next step runs where the user landed, as it would
+            ;; interactively
+            (next-error))
+          (with-current-buffer (window-buffer)
+            (expect (line-number-at-pos (point)) :to-equal 3))))))
+
+  (it "continues within the current file from what the store knows"
+    ;; A freshly opened file's own later errors come before the next file
+    (flycheck-test--with-nav-project '("a.rb" "b.rb")
+      (with-current-buffer (find-file-noselect (expand-file-name "a.rb" dir))
+        (flycheck-mode 1)
+        (flycheck-test--nav-record dir '("a.rb" 3 error) '("b.rb" 1 error))
+        (goto-char (point-min))
+        (let* ((flycheck-navigation-scope 'project)
+               (err (flycheck--next-project-error 1)))
+          (expect (flycheck-error-filename err)
+                  :to-equal (expand-file-name "a.rb" dir))
+          (expect (flycheck-error-line err) :to-equal 3)))))
+
+  (it "continues backwards into the previous file's last error"
+    (flycheck-test--with-nav-project '("a.rb" "c.rb")
+      (with-current-buffer (find-file-noselect (expand-file-name "c.rb" dir))
+        (flycheck-mode 1)
+        (flycheck-test--nav-record dir
+                                   '("a.rb" 1 error) '("a.rb" 4 error))
+        (goto-char (point-min))
+        (let* ((flycheck-navigation-scope 'project)
+               (err (flycheck--next-project-error -1)))
+          (expect (flycheck-error-filename err)
+                  :to-equal (expand-file-name "a.rb" dir))
+          (expect (flycheck-error-line err) :to-equal 4)))))
+
+  (it "does not mistake the current file's other spelling for a neighbor"
+    (flycheck-test--with-nav-project '("a.rb")
+      (let* ((real (expand-file-name "a.rb" dir))
+             (link-dir (concat dir "-link")))
+        (make-symbolic-link dir link-dir)
+        (unwind-protect
+            (with-current-buffer
+                (find-file-noselect (expand-file-name "a.rb" link-dir))
+              (flycheck-mode 1)
+              ;; The store holds the truename spelling
+              (flycheck--project-record-errors
+               (list (flycheck-error-new-at 2 1 'error "e"
+                                            :filename real :checker 'x)))
+              (goto-char (point-max))
+              (let ((flycheck-navigation-scope 'project))
+                ;; Same file, so nothing to continue to
+                (expect (flycheck--next-project-error 1) :to-be nil)))
+          (delete-file link-dir)))))
+
+  (it "orders files by their true names across spellings"
+    ;; A buffer opened under a spelling that sorts after the store's -
+    ;; as Windows short 8.3 names do - must still find the next file
+    (flycheck-test--with-nav-project '("a.rb" "b.rb")
+      (let ((link (concat dir "0"))
+            (buffer nil))
+        (make-symbolic-link dir link)
+        (unwind-protect
+            (with-current-buffer
+                (setq buffer
+                      (find-file-noselect (expand-file-name "a.rb" link)))
+              (flycheck-mode 1)
+              (flycheck-test--nav-record dir '("b.rb" 1 error))
+              (goto-char (point-max))
+              (let* ((flycheck-navigation-scope 'project)
+                     (err (flycheck--next-project-error 1)))
+                (expect (flycheck-error-filename err)
+                        :to-equal (expand-file-name "b.rb" dir))))
+          (when buffer
+            (with-current-buffer buffer
+              (set-buffer-modified-p nil)
+              (kill-buffer)))
+          (delete-file link)))))
+
+  (it "passes over an error whose file is gone"
+    (flycheck-test--with-nav-project '("a.rb" "c.rb")
+      (with-current-buffer (find-file-noselect (expand-file-name "a.rb" dir))
+        (flycheck-mode 1)
+        (flycheck-test--nav-record dir
+                                   '("b.rb" 1 error) '("c.rb" 2 error))
+        (let* ((flycheck-navigation-scope 'project)
+               (err (flycheck--next-project-error 1)))
+          (expect (flycheck-error-filename err)
+                  :to-equal (expand-file-name "c.rb" dir))))))
+
+  (it "refuses a zero step"
+    (flycheck-test--with-nav-project '("a.rb")
+      (with-current-buffer (find-file-noselect (expand-file-name "a.rb" dir))
+        (flycheck-mode 1)
+        (flycheck-test--nav-record dir '("b.rb" 1 error))
+        (let ((flycheck-navigation-scope 'project))
+          (should-error (flycheck-next-error-function 0 nil)
+                        :type 'user-error)))))
+
+  (it "stays put under the default buffer scope"
+    (flycheck-test--with-nav-project '("a.rb")
+      (with-current-buffer (find-file-noselect (expand-file-name "a.rb" dir))
+        (flycheck-mode 1)
+        (flycheck-test--nav-record dir '("b.rb" 1 error))
+        (let ((err (should-error (flycheck-next-error-function 1 nil)
+                                 :type 'user-error)))
+          (expect (cadr err) :to-equal "No more Flycheck errors")))))
+
+  (it "says so when the whole project is exhausted"
+    (flycheck-test--with-nav-project '("a.rb")
+      (with-current-buffer (find-file-noselect (expand-file-name "a.rb" dir))
+        (flycheck-mode 1)
+        (let* ((flycheck-navigation-scope 'project)
+               (err (should-error (flycheck-next-error-function 1 nil)
+                                  :type 'user-error)))
+          (expect (cadr err)
+                  :to-equal "No more Flycheck errors in the project")))))
+
+  (it "respects the minimum navigation level across files"
+    (flycheck-test--with-nav-project '("a.rb")
+      (with-current-buffer (find-file-noselect (expand-file-name "a.rb" dir))
+        (flycheck-mode 1)
+        (flycheck-test--nav-record dir '("b.rb" 1 info))
+        (let ((flycheck-navigation-scope 'project)
+              (flycheck-navigation-minimum-level 'warning))
+          (should-error (flycheck-next-error-function 1 nil)
+                        :type 'user-error)))))
+
+  (it "keeps a buffer without a file within itself"
+    (with-temp-buffer
+      (setq default-directory temporary-file-directory)
+      (let* ((flycheck-navigation-scope 'project)
+             (err (should-error (flycheck-next-error-function 1 nil)
+                                :type 'user-error)))
+        ;; No project search happened, so no project claim either
+        (expect (cadr err) :to-equal "No more Flycheck errors")))))
+
 ;;; test-navigation.el ends here
