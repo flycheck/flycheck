@@ -31,9 +31,12 @@
 
 (defun flycheck-test--project-key (dir)
   "Return the project key Flycheck computes for DIR.
-Expanding here matches `flycheck--project-directory' on every
-platform (Windows `expand-file-name' prepends the current drive)."
-  (file-name-as-directory (expand-file-name dir)))
+Expanding and resolving the true name here matches
+`flycheck--project-directory' on every platform (Windows
+`expand-file-name' prepends the current drive, macOS mounts /tmp
+on /private/tmp)."
+  (let ((dir (file-name-as-directory (expand-file-name dir))))
+    (file-name-as-directory (or (ignore-errors (file-truename dir)) dir))))
 
 (defun flycheck-test--project-buffer (name dir)
   "Return a fresh buffer named NAME whose project key is DIR's."

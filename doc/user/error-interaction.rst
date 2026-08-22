@@ -75,6 +75,19 @@ compilation buffers and `flycheck-standard-error-navigation`:
    error from the beginning of the buffer.  With negative prefix argument move
    to the last error instead.
 
+Navigation stays within the current buffer by default, but it can follow the
+project's diagnostics across files:
+
+.. defcustom:: flycheck-navigation-scope
+
+   The scope of error navigation: ``buffer`` (the default) keeps
+   `flycheck-next-error` and `flycheck-previous-error` within the current
+   buffer; ``project`` continues by a single step into the project's other
+   diagnostics when the buffer runs out, opening the next file at its first
+   error.
+
+.. image:: /images/flycheck-project-navigation.gif
+
 By default error navigation jumps to all errors but you can choose to skip over
 errors with low levels:
 
