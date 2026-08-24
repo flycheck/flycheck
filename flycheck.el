@@ -1325,6 +1325,7 @@ Eglot renders the same LSP tag."
     (define-key map "c"         #'flycheck-buffer)
     (define-key map "C"         #'flycheck-clear)
     (define-key map (kbd "C-c") #'flycheck-compile)
+    (define-key map "P"         #'flycheck-check-project)
     (define-key map "n"         #'flycheck-next-error)
     (define-key map "p"         #'flycheck-previous-error)
     (define-key map "l"         #'flycheck-list-errors)
@@ -1537,6 +1538,7 @@ Only has effect when variable `global-flycheck-mode' is non-nil."
                   (seq-find #'flycheck-checker-supports-major-mode-p
                             flycheck-checkers))]
      ["Check current buffer" flycheck-buffer flycheck-mode]
+     ["Check whole project" flycheck-check-project t]
      ["Clear errors in buffer" flycheck-clear t]
      ["Run checker as compile command" flycheck-compile flycheck-mode]
      "---"
@@ -5337,7 +5339,8 @@ Each function is called with the project key (see
 contributed to the project, and returns a list of `flycheck-error'
 objects for files of that project that no buffer's check reported --
 e.g. the diagnostics an LSP server pushed about files that are not
-visited.  The LSP bridges register here.  The results pass the same
+visited, or what a project checker's run found.  The LSP bridges and
+the project-checker runs register here.  The results pass the same
 filter as recorded errors (see `flycheck--project-storable-errors') and
 deduplicate against the buffers' contributions; each error should carry
 a file name, or identical diagnostics from different contributors
@@ -5414,6 +5417,229 @@ the file changed without running a check."
             (nconc (nreverse result)
                    (flycheck--project-extra-errors project-key buffers owner))))
     result))
+
+(defvar flycheck--project-checkers nil
+  "Alist of the defined project checkers, in definition order.
+Each entry maps the checker symbol to its property plist; see
+`flycheck-define-project-checker'.")
+
+(defun flycheck-define-project-checker (symbol docstring &rest properties)
+  "Define SYMBOL as a project checker with DOCSTRING and PROPERTIES.
+
+A project checker runs a tool once over a whole project, on demand
+via `flycheck-check-project', and its diagnostics join the
+project-wide error store behind the error list's project scope and
+the mode line's project counts.  It is not a syntax checker: it
+never runs automatically and takes no part in buffer checks.
+
+The following PROPERTIES constitute a project checker:
+
+`:command (EXECUTABLE ARG ...)'
+     The command to run in the project's root directory, as a list
+     of strings.
+
+`:parser FUNCTION'
+     A function called with the command's output as a string, the
+     checker symbol and the project directory, returning the
+     diagnostics as a list of `flycheck-error' objects whose file
+     names are absolute.  An error the function signals becomes the
+     run's failure message, so a parser that recognizes the tool
+     saying \"this project needs setting up\" can say so.
+
+`:enabled FUNCTION'
+     A function called with the project directory, returning
+     non-nil when the checker applies to that project - say, when
+     files the tool reads are there.
+
+Defining a checker with the SYMBOL of an existing one replaces it."
+  (declare (indent 1) (doc-string 2))
+  (dolist (prop '(:command :parser :enabled))
+    (unless (plist-get properties prop)
+      (error "Project checker %s misses %s" symbol prop)))
+  (if-let* ((cell (assq symbol flycheck--project-checkers)))
+      (setcdr cell (plist-put (copy-sequence properties)
+                              :docstring docstring))
+    (setq flycheck--project-checkers
+          (append flycheck--project-checkers
+                  (list (cons symbol
+                              (plist-put (copy-sequence properties)
+                                         :docstring docstring))))))
+  symbol)
+
+(defvar flycheck--project-runs (make-hash-table :test 'equal)
+  "State of the project-checker runs, keyed by (PROJECT-KEY . CHECKER).
+Each value is a plist of `:process', the run still under way if any,
+and `:errors', what the last completed run reported.  The errors
+reflect the project as of that run; they stay until the next
+`flycheck-check-project' there replaces or clears them.")
+
+(defun flycheck--project-run-extra-errors (project-key _buffers)
+  "Return what project-checker runs reported for PROJECT-KEY."
+  (let (result)
+    (maphash (lambda (key state)
+               (when (equal (car key) project-key)
+                 (setq result (append (plist-get state :errors) result))))
+             flycheck--project-runs)
+    result))
+
+(add-hook 'flycheck--project-extra-errors-functions
+          #'flycheck--project-run-extra-errors)
+
+(defun flycheck--project-runs-forget (project-key)
+  "Drop the run results and kill the running checks of PROJECT-KEY."
+  (let (stale)
+    (maphash (lambda (key state)
+               (when (equal (car key) project-key)
+                 (when-let* ((proc (plist-get state :process)))
+                   (when (process-live-p proc)
+                     (delete-process proc)))
+                 (push key stale)))
+             flycheck--project-runs)
+    (dolist (key stale)
+      (remhash key flycheck--project-runs))))
+
+(defun flycheck--project-run-finish (proc)
+  "Collect what the finished project-checker process PROC produced."
+  (let ((status (process-status proc))
+        (stdout (process-buffer proc))
+        (stderr (process-get proc 'flycheck-stderr)))
+    (when (memq status '(exit signal))
+      (let* ((root (process-get proc 'flycheck-project-root))
+             (checker (process-get proc 'flycheck-project-checker))
+             (key (cons root checker))
+             (state (gethash key flycheck--project-runs)))
+        ;; A killed process was replaced or cleared; only the current
+        ;; one's normal exit reports
+        (when (and (eq status 'exit)
+                   (eq proc (plist-get state :process)))
+          (let* ((output (if (buffer-live-p stdout)
+                             (with-current-buffer stdout (buffer-string))
+                           ""))
+                 (failure nil)
+                 (errors (condition-case err
+                             (funcall (process-get proc 'flycheck-parser)
+                                      output checker root)
+                           (error (setq failure (error-message-string err))
+                                  nil))))
+            (puthash key (list :process nil :errors errors)
+                     flycheck--project-runs)
+            (flycheck--project-diagnostics-changed)
+            (flycheck-error-list-refresh)
+            (cond
+             (failure (message "%s: %s" checker failure))
+             (errors (message "%s reported %d project diagnostic%s"
+                              checker (length errors)
+                              (if (= (length errors) 1) "" "s")))
+             ((zerop (process-exit-status proc))
+              (message "%s found nothing to report" checker))
+             (t (message "%s failed%s" checker
+                         (let ((hint (and (buffer-live-p stderr)
+                                          (car (split-string
+                                                (with-current-buffer stderr
+                                                  (buffer-string))
+                                                "\n" t)))))
+                           (if hint (concat ": " hint) ""))))))))
+      (when-let* ((pipe (and (buffer-live-p stderr)
+                             (get-buffer-process stderr))))
+        (delete-process pipe))
+      (when (buffer-live-p stdout) (kill-buffer stdout))
+      (when (buffer-live-p stderr) (kill-buffer stderr)))))
+
+(defun flycheck--project-run (root checker props)
+  "Start the project checker CHECKER with PROPS over the project at ROOT."
+  (let* ((key (cons root checker))
+         (state (gethash key flycheck--project-runs)))
+    ;; A fresher run replaces one still under way
+    (when-let* ((proc (plist-get state :process)))
+      (when (process-live-p proc)
+        (delete-process proc)))
+    (let* ((default-directory root)
+           (stdout (generate-new-buffer
+                    (format " *flycheck-project-%s*" checker)))
+           (stderr (generate-new-buffer
+                    (format " *flycheck-project-%s-stderr*" checker)))
+           (proc (condition-case err
+                     (make-process
+                      :name (format "flycheck-project-%s" checker)
+                      :buffer stdout
+                      :stderr stderr
+                      :command (plist-get props :command)
+                      :noquery t
+                      :sentinel (lambda (proc _event)
+                                  (flycheck--project-run-finish proc)))
+                   ;; A tool gone missing between the executable check
+                   ;; and here must not silence the other checkers
+                   (error
+                    (kill-buffer stdout)
+                    (kill-buffer stderr)
+                    (message "%s could not start: %s" checker
+                             (error-message-string err))
+                    nil))))
+      (when proc
+        ;; The hidden pipe process feeding the stderr buffer would
+        ;; write a "finished" line of its own into it, polluting the
+        ;; failure hint the buffer is kept for
+        (when-let* ((pipe (get-buffer-process stderr)))
+          (set-process-sentinel pipe #'ignore))
+        (process-put proc 'flycheck-project-root root)
+        (process-put proc 'flycheck-project-checker checker)
+        (process-put proc 'flycheck-parser (plist-get props :parser))
+        (process-put proc 'flycheck-stderr stderr)
+        (puthash key (list :process proc
+                           :errors (plist-get
+                                    (gethash key flycheck--project-runs)
+                                    :errors))
+                 flycheck--project-runs)))))
+
+(defun flycheck-check-project (&optional clear)
+  "Check the whole project with every applicable project checker.
+
+A project checker runs its tool once over the project - see
+`flycheck-define-project-checker' - for the problems no single
+buffer's check can see, and its diagnostics show alongside the
+recorded buffer checks in the error list's project scope (see
+`flycheck-error-list-scope') and the mode line's project counts.
+
+The results reflect the project as of the run and stay until the
+next run here; with prefix argument CLEAR, drop them instead of
+checking again."
+  (interactive "P")
+  (let ((root (or (flycheck--buffer-project-key)
+                  (user-error "Cannot tell which project this buffer is in"))))
+    (when (file-remote-p root)
+      (user-error "Project checks do not support remote projects yet"))
+    (if clear
+        (progn
+          (flycheck--project-runs-forget root)
+          (flycheck--project-diagnostics-changed)
+          (flycheck-error-list-refresh)
+          (message "Project check results dropped"))
+      (let* ((applicable
+              (seq-filter (lambda (entry)
+                            (funcall (plist-get (cdr entry) :enabled) root))
+                          flycheck--project-checkers))
+             (runnable
+              (seq-filter (lambda (entry)
+                            (executable-find
+                             (car (plist-get (cdr entry) :command))))
+                          applicable)))
+        (cond
+         ((null applicable)
+          (user-error "No project checker applies to %s"
+                      (abbreviate-file-name root)))
+         ((null runnable)
+          (user-error "No %s executable to check this project with"
+                      (mapconcat
+                       (lambda (entry)
+                         (car (plist-get (cdr entry) :command)))
+                       applicable " or ")))
+         (t
+          (dolist (entry runnable)
+            (flycheck--project-run root (car entry) (cdr entry)))
+          (message "Checking project %s with %s..."
+                   (abbreviate-file-name root)
+                   (mapconcat (lambda (entry) (symbol-name (car entry)))
+                              runnable ", "))))))))
 
 (defun flycheck-fill-and-expand-error-file-names (errors directory)
   "Fill and expand file names in ERRORS relative to DIRECTORY.
@@ -19587,6 +19813,57 @@ See URL `https://github.com/terraform-linters/tflint'."
   (flycheck-error-explainer-from-url
    "https://github.com/terraform-linters/tflint-ruleset-terraform/blob/main/docs/rules/%s.md"
    (lambda (id) (and (string-prefix-p "terraform_" id) id))))
+
+(defun flycheck-parse-terraform-validate (output _checker directory)
+  "Parse `terraform validate -json' OUTPUT for the project at DIRECTORY.
+
+Terraform's one-based columns and right-open end columns are used as
+they are.  A diagnostic about the configuration as a whole carries no
+source location to jump to, so when only those turn up - an
+uninitialized project, mostly - the first one becomes the run's
+failure message instead.
+
+See URL `https://developer.hashicorp.com/terraform/cli/commands/validate'."
+  (let-alist (car (flycheck-parse-json output))
+    (let ((ranged (seq-filter (lambda (diag)
+                                (let-alist diag
+                                  (and .range .range.filename)))
+                              .diagnostics)))
+      (when (and .diagnostics (null ranged))
+        (let-alist (car .diagnostics)
+          (error "%s" .summary)))
+      (mapcar
+       (lambda (diag)
+         (let-alist diag
+           (flycheck-error-new-at
+            .range.start.line .range.start.column
+            (pcase .severity
+              ("warning" 'warning)
+              (_ 'error))
+            (if (and .detail (not (string-empty-p .detail)))
+                (concat .summary ": " .detail)
+              .summary)
+            :end-line .range.end.line
+            :end-column .range.end.column
+            :checker 'terraform-validate
+            :filename (expand-file-name .range.filename directory)
+            :buffer nil)))
+       ranged))))
+
+(flycheck-define-project-checker 'terraform-validate
+  "A Terraform project checker using `terraform validate'.
+
+Validates the root module in the project directory as a whole,
+catching the cross-file problems a single buffer's check cannot
+see, like references to undeclared variables.  A configuration
+using providers or modules needs `terraform init' run in the
+project first.
+
+See URL `https://developer.hashicorp.com/terraform/cli/commands/validate'."
+  :command '("terraform" "validate" "-json")
+  :parser #'flycheck-parse-terraform-validate
+  :enabled (lambda (directory)
+             (directory-files directory nil "\\.tf\\'" t 1)))
 
 (flycheck-def-option-var flycheck-chktex-extra-flags nil tex-chktex
   "A list of extra arguments to give to chktex.

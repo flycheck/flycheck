@@ -115,14 +115,26 @@ the tool was run."
   (when-let* ((config (flycheck-record-fixture-quirk checker :config)))
     `((flycheck-stylelint-config . ,(flycheck-record-fixture--resource config)))))
 
+(defun flycheck-record-fixture--run-project (_checker props directory)
+  "Run the project checker with PROPS in its resource DIRECTORY."
+  (let ((command (plist-get props :command))
+        (default-directory (file-name-as-directory directory)))
+    (with-temp-buffer
+      (let ((status (apply #'call-process (car command) nil t nil
+                           (cdr command))))
+        (list command status (buffer-string))))))
+
 (defun flycheck-record-fixture--run (checker file)
   "Run CHECKER's command over FILE and return (COMMAND EXIT-STATUS OUTPUT).
 
 The command is the one Flycheck would run, so a fixture recorded
 here matches what the checker actually invokes.  A checker that
 reads standard input gets the file's contents there, like it would
-during a real check."
-  (with-current-buffer (find-file-noselect file)
+during a real check.  A project checker runs in FILE, its resource
+directory, instead of over it."
+  (if-let* ((props (flycheck-fixture--project-checker checker)))
+      (flycheck-record-fixture--run-project checker props file)
+    (with-current-buffer (find-file-noselect file)
     (let* ((settings (flycheck-record-fixture-settings checker))
            (_ (dolist (setting settings)
                 (set (make-local-variable (car setting)) (cdr setting))))
@@ -149,7 +161,7 @@ during a real check."
         ;; Substituting the arguments can leave a copy of the file beside
         ;; the original, which a real check would have cleaned up and
         ;; which the next tool to look at that directory would see
-        (flycheck-safe-delete-temporaries)))))
+        (flycheck-safe-delete-temporaries))))))
 
 (defconst flycheck-record-fixture--volatile
   '(;; The copy Flycheck checks, and the caches some checkers ask for,
@@ -217,17 +229,29 @@ Return the file the fixture was written to."
 
 (defun flycheck-record-fixture-tool-available-p (checker)
   "Whether CHECKER's tool can actually run here."
-  (when-let* ((program (flycheck-find-checker-executable checker)))
+  (if-let* ((props (flycheck-fixture--project-checker checker)))
+      (executable-find (car (plist-get props :command)))
+    (when-let* ((program (flycheck-find-checker-executable checker)))
     (if-let* ((module (flycheck-record-fixture-quirk checker :module)))
         (eq 0 (call-process program nil nil nil "-c" (format "import %s" module)))
-      t)))
+      t))))
+
+(defun flycheck-fixture--project-checker (checker)
+  "The property plist of the project checker CHECKER, or nil.
+Project checkers (see `flycheck-define-project-checker') record and
+verify through the same machinery as command checkers, with their
+command run in the resource directory and their output read by
+their parser."
+  (alist-get checker (bound-and-true-p flycheck--project-checkers)))
 
 (defun flycheck-fixture--checker-of (directory)
   "The checker whose recordings live in DIRECTORY, or nil."
   (let ((name (intern (replace-regexp-in-string
                        "_" "/" (file-name-nondirectory
                                 (directory-file-name directory))))))
-    (and (flycheck-valid-checker-p name) name)))
+    (and (or (flycheck-valid-checker-p name)
+             (flycheck-fixture--project-checker name))
+         name)))
 
 (defun flycheck-fixture--reads (checker output)
   "How many errors CHECKER reads out of OUTPUT.
@@ -237,9 +261,13 @@ output no better than one that finds nothing in it.  Cargo printing
 that it has no library target rather than the JSON the checker
 expects gets here."
   (condition-case nil
-      (length (flycheck-filter-errors
-               (flycheck-parse-output output checker (current-buffer))
-               checker))
+      (length
+       (if-let* ((props (flycheck-fixture--project-checker checker)))
+           (funcall (plist-get props :parser) output checker
+                    default-directory)
+         (flycheck-filter-errors
+          (flycheck-parse-output output checker (current-buffer))
+          checker)))
     (error 0)))
 
 (defvar flycheck-verify-fixtures--checked 0

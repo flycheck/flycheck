@@ -18,6 +18,7 @@
 
 ### New Features
 
+- [#2360](https://github.com/flycheck/flycheck/pull/2360): New command `flycheck-check-project` (`C-c ! P`) runs project checkers - tools that check a whole project at once for the cross-file problems buffer checks cannot see - starting with `terraform-validate`; their diagnostics join the error list's project scope and the mode line's project counts.
 - [#2358](https://github.com/flycheck/flycheck/pull/2358): New `flycheck-navigation-scope` option: with `project`, `flycheck-next-error` continues into the project's other diagnostics when the buffer runs out of errors, opening the next file at its first error.
 - [#2346](https://github.com/flycheck/flycheck/pull/2346): New `flycheck-mode-line-scope` option to make the mode-line counter show the project-wide diagnostics instead of the current buffer's ([#2340](https://github.com/flycheck/flycheck/issues/2340)).
 - [#2344](https://github.com/flycheck/flycheck/pull/2344): New `flycheck-fix-edit-new-at-pos` constructor building a fix edit from buffer positions, as `flycheck-error-new-at-pos` does for errors ([#2343](https://github.com/flycheck/flycheck/issues/2343)).
