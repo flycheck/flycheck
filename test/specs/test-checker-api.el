@@ -302,6 +302,94 @@
           (expect (flycheck-may-use-checker 'emacs-lisp) :to-be-truthy)
           (expect was-called :to-be-truthy)))))
 
+  (describe "flycheck-get-next-checker-for-buffer"
+
+    (before-each
+      (dolist (pair '((test-chain-a . ((warning . test-chain-b)))
+                      (test-chain-b . (test-chain-c))
+                      (test-chain-c . nil)))
+        (flycheck-define-generic-checker (car pair)
+          "A fake chain link."
+          :start (lambda (_checker callback) (funcall callback 'finished nil))
+          :modes '(text-mode)
+          :next-checkers (cdr pair))
+        (cl-pushnew (car pair) flycheck-checkers)))
+
+    (after-each
+      (dolist (checker '(test-chain-a test-chain-b test-chain-c test-chain-d))
+        (setq flycheck-checkers (delq checker flycheck-checkers))
+        ;; Undefine the fake outright, or the customization spec finds
+        ;; a defined checker that is not registered
+        (put checker 'flycheck-generic-checker-version nil)))
+
+    (it "picks the first usable next checker"
+      (with-temp-buffer
+        (text-mode)
+        (expect (flycheck-get-next-checker-for-buffer 'test-chain-a)
+                :to-be 'test-chain-b)))
+
+    (it "continues through a disabled link to the rest of the chain"
+      (with-temp-buffer
+        (text-mode)
+        (let ((flycheck-disabled-checkers '(test-chain-b)))
+          (expect (flycheck-get-next-checker-for-buffer 'test-chain-a)
+                  :to-be 'test-chain-c))))
+
+    (it "does not continue when the whole tail is disabled"
+      (with-temp-buffer
+        (text-mode)
+        (let ((flycheck-disabled-checkers '(test-chain-b test-chain-c)))
+          (expect (flycheck-get-next-checker-for-buffer 'test-chain-a)
+                  :to-be nil))))
+
+    (it "keeps the disabled link's place in the order"
+      ;; The skipped checker's own next checkers substitute for it,
+      ;; ahead of whatever followed it
+      (flycheck-define-generic-checker 'test-chain-a
+        "A fake chain head with two next checkers."
+        :start (lambda (_checker callback) (funcall callback 'finished nil))
+        :modes '(text-mode)
+        :next-checkers '(test-chain-b test-chain-c))
+      (flycheck-define-generic-checker 'test-chain-d
+        "A fake chain tail."
+        :start (lambda (_checker callback) (funcall callback 'finished nil))
+        :modes '(text-mode))
+      (cl-pushnew 'test-chain-d flycheck-checkers)
+      (flycheck-define-generic-checker 'test-chain-b
+        "A fake middle link pointing at the tail."
+        :start (lambda (_checker callback) (funcall callback 'finished nil))
+        :modes '(text-mode)
+        :next-checkers '(test-chain-d))
+      (with-temp-buffer
+        (text-mode)
+        (let ((flycheck-disabled-checkers '(test-chain-b)))
+          (expect (flycheck-get-next-checker-for-buffer 'test-chain-a)
+                  :to-be 'test-chain-d))))
+
+    (it "still respects the level condition of the disabled link"
+      ;; test-chain-a continues to b only below error severity; a
+      ;; disabled b must not become MORE reachable than an enabled one
+      (with-temp-buffer
+        (text-mode)
+        (let ((flycheck-current-errors
+               (list (flycheck-error-new-at 1 1 'error "boom"
+                                            :checker 'test-chain-a)))
+              (flycheck-disabled-checkers '(test-chain-b)))
+          (expect (flycheck-get-next-checker-for-buffer 'test-chain-a)
+                  :to-be nil))))
+
+    (it "survives a cycle of unusable links"
+      (flycheck-define-generic-checker 'test-chain-b
+        "A fake middle link looping back."
+        :start (lambda (_checker callback) (funcall callback 'finished nil))
+        :modes '(text-mode)
+        :next-checkers '(test-chain-a))
+      (with-temp-buffer
+        (text-mode)
+        (let ((flycheck-disabled-checkers '(test-chain-a test-chain-b)))
+          (expect (flycheck-get-next-checker-for-buffer 'test-chain-a)
+                  :to-be nil)))))
+
   (describe "flycheck-may-enable-checker"
     (it "emacs-lisp"
       (flycheck-buttercup-with-resource-buffer "language/emacs-lisp/warnings.el"

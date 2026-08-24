@@ -2659,16 +2659,21 @@ nil otherwise."
          (flycheck-may-enable-checker checker)
          (or (null predicate) (funcall predicate)))))
 
+(defun flycheck--next-checker-level-passes-p (next-checker)
+  "Whether NEXT-CHECKER's error-level condition holds right now.
+
+NEXT-CHECKER is a cons (LEVEL . CHECKER) or a plain checker
+symbol, which continues unconditionally."
+  (let ((level (if (consp next-checker) (car next-checker) t)))
+    (or (eq level t)
+        (flycheck-has-max-current-errors-p level))))
+
 (defun flycheck-may-use-next-checker (next-checker)
   "Determine whether NEXT-CHECKER may be used."
-  (when (symbolp next-checker)
-    (push t next-checker))
-  (let ((level (car next-checker))
-        (next-checker (cdr next-checker)))
-    (and (or (eq level t)
-             (flycheck-has-max-current-errors-p level))
-         (flycheck-registered-checker-p next-checker)
-         (flycheck-may-use-checker next-checker))))
+  (let ((checker (flycheck--get-next-checker-symbol next-checker)))
+    (and (flycheck--next-checker-level-passes-p next-checker)
+         (flycheck-registered-checker-p checker)
+         (flycheck-may-use-checker checker))))
 
 
 ;;; Help for generic syntax checkers
@@ -3523,11 +3528,30 @@ nil otherwise."
     (seq-find #'flycheck-may-use-checker flycheck-checkers)))
 
 (defun flycheck-get-next-checker-for-buffer (checker)
-  "Get the checker to run after CHECKER for the current buffer."
-  (let ((next (seq-find #'flycheck-may-use-next-checker
-                        (flycheck-checker-get checker 'next-checkers))))
-    (when next
-      (if (symbolp next) next (cdr next)))))
+  "Get the checker to run after CHECKER for the current buffer.
+
+A next checker that cannot run here - disabled with
+`flycheck-disable-checker', not installed - does not cut the chain
+short: the checkers following it are considered in its place, so
+disabling one link keeps the rest of the chain reachable.  The
+unusable checker's error-level condition still gates the descent,
+since a chain that would not continue through it usable does not
+continue through it unusable either."
+  (let ((visited (list checker))
+        (queue (flycheck-checker-get checker 'next-checkers))
+        (found nil))
+    (while (and queue (not found))
+      (let* ((entry (pop queue))
+             (next (flycheck--get-next-checker-symbol entry)))
+        (when (and (not (memq next visited))
+                   (flycheck--next-checker-level-passes-p entry))
+          (push next visited)
+          (if (and (flycheck-registered-checker-p next)
+                   (flycheck-may-use-checker next))
+              (setq found next)
+            (setq queue (append (flycheck-checker-get next 'next-checkers)
+                                queue))))))
+    found))
 
 (defun flycheck-select-checker (checker)
   "Select CHECKER for the current buffer.
@@ -11833,8 +11857,10 @@ lint server both contribute, and then to the first command checker that
 supports the mode, so a command checker contributes too.
 
 Chaining to a bridge is safe whether or not that bridge is on in a given
-buffer: its predicate refuses the buffer, and Flycheck moves on to the
-next entry.  That matters because `next-checkers' is a property of the
+buffer: its predicate refuses the buffer, and Flycheck continues through
+it to the checkers behind it (see
+`flycheck-get-next-checker-for-buffer'), where a mode-matching entry is
+found.  That matters because `next-checkers' is a property of the
 checker, shared by every buffer, while the modes are buffer-local.
 
 Shared by the `flycheck-lsp' and `eglot-check' bridges."

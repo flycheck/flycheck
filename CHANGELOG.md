@@ -26,6 +26,7 @@
 
 ### Bugs fixed
 
+- [#2361](https://github.com/flycheck/flycheck/pull/2361): A checker chain continues through a disabled or unavailable link to the checkers behind it, so disabling one checker no longer silences the rest of its chain ([#2359](https://github.com/flycheck/flycheck/issues/2359)).
 - [#2350](https://github.com/flycheck/flycheck/pull/2350): The Eglot bridge composes diagnostic messages from Emacs 32's split Flymake fields itself, so they read identically across Emacs versions instead of picking up stray separators.
 - [#2349](https://github.com/flycheck/flycheck/pull/2349): The `rst-sphinx` checker reads the warning-type tags Sphinx 8 appends (e.g. `[ref.envvar]`) as error identifiers instead of leaving them in the message.
 - [#2348](https://github.com/flycheck/flycheck/pull/2348): Range queries against the diagnostics of a `flycheck-eglot-mode` buffer now keep `overlays-in`'s strict edges, so a diagnostic merely touching a boundary is no longer served.
