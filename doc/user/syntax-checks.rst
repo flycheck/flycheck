@@ -180,6 +180,33 @@ You can also start a syntax check explicitly with `C-c ! c`:
 
    Check syntax in the current buffer.
 
+.. _flycheck-project-checks:
+
+Check whole projects
+====================
+
+Some problems live between files, where no single buffer's check can see
+them: a Terraform output referencing a variable no file declares, say.  A
+*project checker* runs its tool once over the whole project, on demand:
+
+.. define-key:: C-c ! P
+                M-x flycheck-check-project
+
+   Run every applicable project checker over the current project.  The
+   diagnostics show alongside the recorded buffer checks in the
+   :ref:`error list's <flycheck-error-list>` project scope and in the
+   mode line's project counts (see `flycheck-mode-line-scope`).
+
+   The results reflect the project as of the run and stay until the next
+   run there; with a prefix argument the results are dropped instead.
+
+Project checkers never run automatically and take no part in buffer
+checks.  The first one is ``terraform-validate``, which validates the
+root module of a Terraform project with ``terraform validate``; a
+configuration using providers or modules needs ``terraform init`` run in
+the project first.  New ones can be defined with
+``flycheck-define-project-checker``.
+
 
 LSP diagnostics via Eglot
 =========================

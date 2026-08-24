@@ -124,7 +124,8 @@ and recursion respectively."
                   (checker (intern (replace-regexp-in-string "_" "/" sub))))
               (when (and (file-directory-p dir)
                          (directory-files-recursively dir "\\.txt\\'")
-                         (not (flycheck-valid-checker-p checker)))
+                         (not (flycheck-valid-checker-p checker))
+                         (not (assq checker flycheck--project-checkers)))
                 (push sub orphans))))
           (expect (nreverse orphans) :to-equal nil)))))
 
