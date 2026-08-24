@@ -411,8 +411,9 @@ up looking at is every checker's findings in one list, not just the last one's.
 A chain stops as soon as a checker has no next checker left to run.  At each
 step Flycheck takes the first entry of ``:next-checkers`` that fits: its error
 level has to match (see below) and the checker has to be usable in this buffer.
-An entry that doesn't fit is skipped rather than ending the chain, so a chain
-can name a checker that is only sometimes available and still reach the ones
+An entry that doesn't fit is skipped rather than ending the chain, and the
+checkers behind an unusable one are considered in its place: a chain can name
+a checker that is disabled here or not installed and still reach the ones
 behind it.
 
 Some checker chains are already set up by default in Flycheck: e.g.,
