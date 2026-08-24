@@ -5541,8 +5541,12 @@ reflect the project as of that run; they stay until the next
                            ""))
                  (failure nil)
                  (errors (condition-case err
-                             (funcall (process-get proc 'flycheck-parser)
-                                      output checker root)
+                             ;; In a temp buffer, so a parser building
+                             ;; an error without a file name cannot pick
+                             ;; up whichever buffer is current now
+                             (with-temp-buffer
+                               (funcall (process-get proc 'flycheck-parser)
+                                        output checker root))
                            (error (setq failure (error-message-string err))
                                   nil))))
             (puthash key (list :process nil :errors errors)
@@ -5664,6 +5668,31 @@ checking again."
                    (abbreviate-file-name root)
                    (mapconcat (lambda (entry) (symbol-name (car entry)))
                               runnable ", "))))))))
+
+(defun flycheck--project-expand-error-files (errors directory)
+  "Resolve the file names of ERRORS against DIRECTORY.
+
+Tools run over a project report paths relative to where they ran;
+the project store wants them absolute, and spelled by their true
+names so identical findings collapse against the buffer checks'.
+An error without a file name is dropped: the project view keys
+everything by file.  Returns the errors kept."
+  (let ((truenames (make-hash-table :test 'equal)))
+    (cl-flet ((resolve (file)
+                (or (gethash file truenames)
+                    (puthash file
+                             (let ((absolute (expand-file-name file directory)))
+                               (or (ignore-errors (file-truename absolute))
+                                   absolute))
+                             truenames))))
+      (dolist (err errors)
+        (when-let* ((file (flycheck-error-filename err)))
+          (setf (flycheck-error-filename err) (resolve file)))
+        (dolist (relation (flycheck-error-relations err))
+          (when-let* ((file (flycheck-related-location-filename relation)))
+            (setf (flycheck-related-location-filename relation)
+                  (resolve file)))))))
+  (seq-filter #'flycheck-error-filename errors))
 
 (defun flycheck-fill-and-expand-error-file-names (errors directory)
   "Fill and expand file names in ERRORS relative to DIRECTORY.
@@ -17793,6 +17822,52 @@ See URL `https://mypy-lang.org/'."
   ;; https://github.com/python/mypy/issues/4746.
   :predicate flycheck-buffer-saved-p)
 
+(defun flycheck--file-contains-p (file regexp)
+  "Whether FILE is a readable file with a line matching REGEXP."
+  (when (and (file-regular-p file) (file-readable-p file))
+    (with-temp-buffer
+      (insert-file-contents file)
+      (goto-char (point-min))
+      (re-search-forward regexp nil t))))
+
+(defun flycheck--mypy-project-configured-p (directory)
+  "Whether DIRECTORY is configured for a project-wide mypy run.
+
+Running mypy over an arbitrary tree drowns it in noise, so the
+project has to say it wants mypy: a mypy.ini or .mypy.ini, a
+`[tool.mypy]' section in pyproject.toml, or a `[mypy]' section in
+setup.cfg."
+  (or (file-exists-p (expand-file-name "mypy.ini" directory))
+      (file-exists-p (expand-file-name ".mypy.ini" directory))
+      (flycheck--file-contains-p
+       (expand-file-name "pyproject.toml" directory)
+       "^[ \t]*\\[tool\\.mypy[].]")
+      (flycheck--file-contains-p
+       (expand-file-name "setup.cfg" directory) "^\\[mypy\\]")))
+
+(defun flycheck-parse-mypy-project (output _checker directory)
+  "Parse project-wide mypy OUTPUT for the project at DIRECTORY.
+
+The diagnostics carry the `python-mypy' checker, whose buffer
+checks read the same mypy output: identical findings collapse in
+the project-wide view, and mypy's error explanations apply."
+  (flycheck--project-expand-error-files
+   (flycheck-parse-mypy output 'python-mypy nil)
+   directory))
+
+(flycheck-define-project-checker 'mypy-project
+  "A Python project checker running mypy over the whole project.
+
+Type-checks everything under the project root at once - mypy's
+`exclude' setting still applies - so diagnostics of files no
+buffer visits turn up too, including the cross-module errors a
+single buffer's check has no view of.
+
+See URL `https://mypy-lang.org/'."
+  :command '("mypy" "--output" "json" ".")
+  :parser #'flycheck-parse-mypy-project
+  :enabled #'flycheck--mypy-project-configured-p)
+
 (flycheck-def-option-var flycheck-lintr-caching t r-lintr
   "Whether to enable caching in lintr.
 
@@ -18835,6 +18910,31 @@ When non-nil, `cargo clippy' is passed `--all-features'."
                  (one-or-more alnum) "`.")))
          msg))))
    errors))
+
+(defun flycheck-parse-cargo-check-project (output _checker directory)
+  "Parse project-wide `cargo check' OUTPUT for the project at DIRECTORY.
+
+The diagnostics carry the `rust-cargo' checker, whose buffer checks
+read the same cargo output: identical findings collapse in the
+project-wide view, and rust-cargo's error explanations apply.  The
+same filter as the buffer checks' drops rustc's non-diagnostics."
+  (flycheck--project-expand-error-files
+   (flycheck-rust-error-filter
+    (flycheck-parse-cargo-rustc output 'rust-cargo nil))
+   directory))
+
+(flycheck-define-project-checker 'cargo-check
+  "A Rust project checker using `cargo check'.
+
+Checks every crate of the workspace at once, so diagnostics of
+files no buffer visits turn up too.
+
+See URL `https://doc.rust-lang.org/cargo/commands/cargo-check.html'."
+  :command '("cargo" "check" "--workspace" "--quiet"
+             "--message-format=json")
+  :parser #'flycheck-parse-cargo-check-project
+  :enabled (lambda (directory)
+             (file-exists-p (expand-file-name "Cargo.toml" directory))))
 
 (defun flycheck-rust-manifest-directory ()
   "Return the nearest directory holding the Cargo manifest.

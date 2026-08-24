@@ -18,6 +18,7 @@
 
 ### New Features
 
+- [#2362](https://github.com/flycheck/flycheck/pull/2362): New project checkers `cargo-check` and `mypy-project` check a whole Rust workspace or mypy-configured Python project at once via `flycheck-check-project`, reporting through `rust-cargo` and `python-mypy` so identical findings collapse against buffer checks.
 - [#2360](https://github.com/flycheck/flycheck/pull/2360): New command `flycheck-check-project` (`C-c ! P`) runs project checkers - tools that check a whole project at once for the cross-file problems buffer checks cannot see - starting with `terraform-validate`; their diagnostics join the error list's project scope and the mode line's project counts.
 - [#2358](https://github.com/flycheck/flycheck/pull/2358): New `flycheck-navigation-scope` option: with `project`, `flycheck-next-error` continues into the project's other diagnostics when the buffer runs out of errors, opening the next file at its first error.
 - [#2346](https://github.com/flycheck/flycheck/pull/2346): New `flycheck-mode-line-scope` option to make the mode-line counter show the project-wide diagnostics instead of the current buffer's ([#2340](https://github.com/flycheck/flycheck/issues/2340)).

@@ -89,6 +89,8 @@ checker's directory is the resource, without the `.txt'."
     (python-flake8  :module "flake8")
     (python-pylint  :module "pylint")
     (rust-clippy    :uncomparable "cargo reports whether the crate was \
+already built, so its output depends on the state of the target directory")
+    (cargo-check    :uncomparable "cargo reports whether the crate was \
 already built, so its output depends on the state of the target directory"))
   "What is unusual about a checker, when recording or checking a recording.
 
