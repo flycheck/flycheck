@@ -211,6 +211,84 @@
                 " \"summary\": \"Missing required provider\","
                 " \"detail\": \"Run terraform init.\"}]}")
         'terraform-validate "/prj/")
-       :to-throw 'error))))
+       :to-throw 'error)))
+
+  (describe "cargo-check"
+
+    (it "applies to a directory with a Cargo.toml"
+      (let ((enabled (plist-get (alist-get 'cargo-check
+                                           flycheck--project-checkers)
+                                :enabled)))
+        (flycheck-test--with-temp-project dir
+          (expect (funcall enabled dir) :to-be nil)
+          (write-region "" nil (expand-file-name "Cargo.toml" dir))
+          (expect (funcall enabled dir) :to-be-truthy))))
+
+    (it "reads the recorded cargo output"
+      (let* ((fixture (expand-file-name
+                       "../fixtures/cargo-check/language/rust/cargo-check.txt"
+                       flycheck-test-resources-directory))
+             (output (with-temp-buffer
+                       (insert-file-contents fixture)
+                       (buffer-string)))
+             (errors (flycheck-parse-cargo-check-project
+                      output 'cargo-check (expand-file-name "/prj/"))))
+        (expect (seq-every-p (lambda (err)
+                               (eq (flycheck-error-checker err) 'rust-cargo))
+                             errors)
+                :to-be-truthy)
+        (let ((mismatch (seq-find (lambda (err)
+                                    (eq (flycheck-error-level err) 'error))
+                                  errors))
+              (unused (seq-find (lambda (err)
+                                  (eq (flycheck-error-level err) 'warning))
+                                errors)))
+          (expect (flycheck-error-filename mismatch)
+                  :to-equal (expand-file-name "/prj/src/lib.rs"))
+          (expect (flycheck-error-line mismatch) :to-equal 4)
+          (expect (flycheck-error-column mismatch) :to-equal 18)
+          (expect (flycheck-error-filename unused)
+                  :to-equal (expand-file-name "/prj/src/util.rs"))
+          (expect (flycheck-error-line unused) :to-equal 2)))))
+
+  (describe "mypy-project"
+
+    (it "applies only to a project configured for mypy"
+      (let ((enabled (plist-get (alist-get 'mypy-project
+                                           flycheck--project-checkers)
+                                :enabled)))
+        (flycheck-test--with-temp-project dir
+          (expect (funcall enabled dir) :to-be nil)
+          (write-region "print(1)\n" nil (expand-file-name "a.py" dir))
+          ;; Python files alone are not an invitation
+          (expect (funcall enabled dir) :to-be nil)
+          (write-region "[project]\nname = \"x\"\n" nil
+                        (expand-file-name "pyproject.toml" dir))
+          (expect (funcall enabled dir) :to-be nil)
+          (write-region "[project]\nname = \"x\"\n\n[tool.mypy]\n" nil
+                        (expand-file-name "pyproject.toml" dir))
+          (expect (funcall enabled dir) :to-be-truthy)
+          (delete-file (expand-file-name "pyproject.toml" dir))
+          (write-region "[mypy]\n" nil (expand-file-name "mypy.ini" dir))
+          (expect (funcall enabled dir) :to-be-truthy))))
+
+    (it "reads the recorded mypy output"
+      (let* ((fixture (expand-file-name
+                       "../fixtures/mypy-project/language/python/mypy-project.txt"
+                       flycheck-test-resources-directory))
+             (output (with-temp-buffer
+                       (insert-file-contents fixture)
+                       (buffer-string)))
+             (errors (flycheck-parse-mypy-project
+                      output 'mypy-project (expand-file-name "/prj/"))))
+        (expect (length errors) :to-equal 2)
+        (expect (seq-every-p (lambda (err)
+                               (eq (flycheck-error-checker err) 'python-mypy))
+                             errors)
+                :to-be-truthy)
+        (expect (flycheck-error-filename (car errors))
+                :to-equal (expand-file-name "/prj/b.py"))
+        (expect (flycheck-error-line (car errors)) :to-equal 3)
+        (expect (flycheck-error-id (car errors)) :to-equal "assignment")))))
 
 ;;; test-project-runs.el ends here

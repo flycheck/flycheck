@@ -1,0 +1,2 @@
+{"file": "b.py", "line": 3, "column": 13, "end_line": 3, "end_column": 22, "message": "Incompatible types in assignment (expression has type \"str\", variable has type \"int\")", "hint": null, "code": "assignment", "severity": "error"}
+{"file": "b.py", "line": 3, "column": 19, "end_line": 3, "end_column": 21, "message": "Argument 1 to \"greet\" has incompatible type \"int\"; expected \"str\"", "hint": null, "code": "arg-type", "severity": "error"}

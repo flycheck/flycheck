@@ -201,11 +201,24 @@ them: a Terraform output referencing a variable no file declares, say.  A
    run there; with a prefix argument the results are dropped instead.
 
 Project checkers never run automatically and take no part in buffer
-checks.  The first one is ``terraform-validate``, which validates the
-root module of a Terraform project with ``terraform validate``; a
-configuration using providers or modules needs ``terraform init`` run in
-the project first.  New ones can be defined with
-``flycheck-define-project-checker``.
+checks.  Flycheck ships with these; new ones can be defined with
+``flycheck-define-project-checker``:
+
+``cargo-check``
+   Checks every crate of a Rust workspace (a ``Cargo.toml`` at the
+   project root) with ``cargo check``.
+
+``mypy-project``
+   Type-checks everything under the project root with mypy (its
+   ``exclude`` setting still applies), catching cross-module errors.
+   The project has to ask for mypy: a ``mypy.ini`` or ``.mypy.ini``, a
+   ``[tool.mypy]`` section in ``pyproject.toml``, or a ``[mypy]``
+   section in ``setup.cfg``.
+
+``terraform-validate``
+   Validates the root module of a Terraform project with ``terraform
+   validate``.  A configuration using providers or modules needs
+   ``terraform init`` run in the project first.
 
 
 LSP diagnostics via Eglot
