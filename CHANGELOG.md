@@ -18,6 +18,7 @@
 
 ### New Features
 
+- [#2364](https://github.com/flycheck/flycheck/pull/2364): The native `flycheck-lsp` client speaks the pull model of LSP 3.17: a server offering a `diagnosticProvider` is asked for each document's diagnostics, and `flycheck-check-project` asks servers covering their workspace for the diagnostics of every file in it, visited or not.
 - [#2362](https://github.com/flycheck/flycheck/pull/2362): New project checkers `cargo-check` and `mypy-project` check a whole Rust workspace or mypy-configured Python project at once via `flycheck-check-project`, reporting through `rust-cargo` and `python-mypy` so identical findings collapse against buffer checks.
 - [#2360](https://github.com/flycheck/flycheck/pull/2360): New command `flycheck-check-project` (`C-c ! P`) runs project checkers - tools that check a whole project at once for the cross-file problems buffer checks cannot see - starting with `terraform-validate`; their diagnostics join the error list's project scope and the mode line's project counts.
 - [#2358](https://github.com/flycheck/flycheck/pull/2358): New `flycheck-navigation-scope` option: with `project`, `flycheck-next-error` continues into the project's other diagnostics when the buffer runs out of errors, opening the next file at its first error.

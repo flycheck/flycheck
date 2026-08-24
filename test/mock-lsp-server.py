@@ -112,7 +112,45 @@ def capabilities():
             "interFileDependencies": False,
             "workspaceDiagnostics": False,
         }
+    elif scenario == "workspace":
+        caps["diagnosticProvider"] = {
+            "interFileDependencies": True,
+            "workspaceDiagnostics": True,
+        }
     return caps
+
+
+# The "workspace" scenario is a pure pull-model server: it never
+# publishes, answers a document pull with one warning, and reports on
+# its workspace with that document plus a sibling file nobody opened.
+# A pull naming the result id of the last report gets "unchanged".
+opened = []
+
+
+def document_report(uri, previous):
+    if previous == "doc-1":
+        return {"kind": "unchanged", "resultId": "doc-1"}
+    return {"kind": "full", "resultId": "doc-1", "items": [WARNING]}
+
+
+def workspace_report(previous_ids):
+    known = {entry["uri"]: entry["value"] for entry in previous_ids}
+    items = []
+    for uri in opened:
+        report = document_report(uri, known.get(uri))
+        report["uri"] = uri
+        report["version"] = None
+        items.append(report)
+        other = uri.rsplit("/", 1)[0] + "/other.mk"
+        if known.get(other) == "other-1":
+            items.append({"uri": other, "version": None,
+                          "kind": "unchanged", "resultId": "other-1"})
+        else:
+            items.append({"uri": other, "version": None, "kind": "full",
+                          "resultId": "other-1", "items": [ERROR]})
+    if items and all(item["kind"] == "unchanged" for item in items):
+        count("workspace/diagnostic/unchanged")
+    return {"items": items}
 
 
 def publish(uri, diags):
@@ -123,7 +161,9 @@ def publish(uri, diags):
 
 
 def on_did_open(uri):
-    if scenario == "push":
+    if scenario == "workspace":
+        opened.append(uri)
+    elif scenario == "push":
         for _ in range(5):
             publish(uri, [WARNING])
     elif scenario == "change":
@@ -145,8 +185,16 @@ while True:
     elif method == "textDocument/didOpen":
         on_did_open(msg["params"]["textDocument"]["uri"])
     elif method == "textDocument/diagnostic":
-        respond(msg, {"kind": "full", "items": [WARNING]})
-        publish(msg["params"]["textDocument"]["uri"], [WARNING])
+        if scenario == "workspace":
+            respond(msg, document_report(
+                msg["params"]["textDocument"]["uri"],
+                msg["params"].get("previousResultId")))
+        else:
+            respond(msg, {"kind": "full", "items": [WARNING]})
+            publish(msg["params"]["textDocument"]["uri"], [WARNING])
+    elif method == "workspace/diagnostic":
+        respond(msg, workspace_report(
+            msg["params"].get("previousResultIds", [])))
     elif method == "shutdown":
         respond(msg, None)
     elif method == "exit":

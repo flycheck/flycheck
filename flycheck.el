@@ -5239,9 +5239,29 @@ would otherwise never match what the server says about it."
         (list project-key truename)
       (list project-key))))
 
+(defvar flycheck--truenames (make-hash-table :test 'equal)
+  "True names of the paths compared against project keys, memoized.
+Global, unlike the buffer's `flycheck--file-truename': these are the
+paths servers and stores name, not the buffer's own.
+A path's true name does not change over a session short of retargeting
+a symbolic link, and the same paths come up on every aggregation.")
+
 (defun flycheck--path-under-prefixes-p (path prefixes)
-  "Whether the absolute PATH extends one of the directory PREFIXES."
-  (seq-some (lambda (prefix) (string-prefix-p prefix path)) prefixes))
+  "Whether the absolute PATH extends one of the directory PREFIXES.
+
+The prefixes are true names (see `flycheck--project-directory'), while
+PATH may come from a server or a buffer in another spelling of the
+same place - a symlinked directory, macOS's /tmp; its true name is
+tried when the spelling as given does not match."
+  (or (seq-some (lambda (prefix) (string-prefix-p prefix path)) prefixes)
+      (let ((truename (or (gethash path flycheck--truenames)
+                          (puthash path
+                                   (or (ignore-errors (file-truename path))
+                                       path)
+                                   flycheck--truenames))))
+        (and (not (equal truename path))
+             (seq-some (lambda (prefix) (string-prefix-p prefix truename))
+                       prefixes)))))
 
 (defun flycheck--project-storable-errors (errors)
   "Return the subset of ERRORS worth recording project-wide.
@@ -5490,6 +5510,21 @@ Defining a checker with the SYMBOL of an existing one replaces it."
                                          :docstring docstring))))))
   symbol)
 
+(defvar flycheck--project-check-functions nil
+  "Functions checking a project on demand besides the project checkers.
+
+Each is called by `flycheck-check-project' with the project key (see
+`flycheck--project-directory'), starts whatever it can for that
+project - an LSP server pulling its workspace's diagnostics, say - and
+returns the names of what it started, as strings, or nil.  What they
+find reaches the project view through
+`flycheck--project-extra-errors-functions'.")
+
+(defvar flycheck--project-clear-functions nil
+  "Functions dropping what `flycheck--project-check-functions' found.
+Each is called with the project key when `flycheck-check-project' is
+asked to drop a project's results.")
+
 (defvar flycheck--project-runs (make-hash-table :test 'equal)
   "State of the project-checker runs, keyed by (PROJECT-KEY . CHECKER).
 Each value is a plist of `:process', the run still under way if any,
@@ -5639,6 +5674,8 @@ checking again."
     (if clear
         (progn
           (flycheck--project-runs-forget root)
+          (dolist (fn flycheck--project-clear-functions)
+            (funcall fn root))
           (flycheck--project-diagnostics-changed)
           (flycheck-error-list-refresh)
           (message "Project check results dropped"))
@@ -5650,24 +5687,36 @@ checking again."
               (seq-filter (lambda (entry)
                             (executable-find
                              (car (plist-get (cdr entry) :command))))
-                          applicable)))
+                          applicable))
+             ;; Other sources start their work as they are asked
+             (others (apply #'append
+                            (mapcar (lambda (fn) (funcall fn root))
+                                    flycheck--project-check-functions)))
+             (names (append (mapcar (lambda (entry) (symbol-name (car entry)))
+                                    runnable)
+                            others)))
         (cond
-         ((null applicable)
-          (user-error "No project checker applies to %s"
-                      (abbreviate-file-name root)))
-         ((null runnable)
+         (names
+          (dolist (entry runnable)
+            (flycheck--project-run root (car entry) (cdr entry)))
+          ;; A checker whose tool is missing is worth a word even when
+          ;; something else runs
+          (dolist (entry applicable)
+            (unless (memq entry runnable)
+              (message "No %s executable; %s does not run"
+                       (car (plist-get (cdr entry) :command)) (car entry))))
+          (message "Checking project %s with %s..."
+                   (abbreviate-file-name root)
+                   (mapconcat #'identity names ", ")))
+         (applicable
           (user-error "No %s executable to check this project with"
                       (mapconcat
                        (lambda (entry)
                          (car (plist-get (cdr entry) :command)))
                        applicable " or ")))
          (t
-          (dolist (entry runnable)
-            (flycheck--project-run root (car entry) (cdr entry)))
-          (message "Checking project %s with %s..."
-                   (abbreviate-file-name root)
-                   (mapconcat (lambda (entry) (symbol-name (car entry)))
-                              runnable ", "))))))))
+          (user-error "No project checker applies to %s"
+                      (abbreviate-file-name root))))))))
 
 (defun flycheck--project-expand-error-files (errors directory)
   "Resolve the file names of ERRORS against DIRECTORY.
@@ -11959,8 +12008,8 @@ Shared by the `flycheck-lsp' and `eglot-check' bridges."
 
 Each entry is (MAJOR-MODE PROGRAM ARG...): a buffer in MAJOR-MODE that
 enables `flycheck-lsp-mode' has PROGRAM started with the ARGs as an LSP
-server, is fed the buffer's text, and reports the diagnostics the server
-pushes back through the `flycheck-lsp' checker.
+server, is fed the buffer's text, and reports the server's diagnostics
+through the `flycheck-lsp' checker.
 
 The default entries are linters that ship a native LSP server and lint out
 of the box, with no project configuration: RuboCop (Ruby), Ruff (Python),
@@ -12043,9 +12092,21 @@ feature off."
 (cl-defstruct (flycheck-lsp--doc (:constructor flycheck-lsp--doc-create)
                                  (:copier nil))
   "The state of one document open on a server.
-VERSION is nil until the document has been opened."
-  buffer version tick
-  (diags nil))                          ; latest raw LSP diagnostics
+VERSION is nil until the document has been opened.  RESULT-ID is what
+the last pulled report of it carried, for the next pull to refer to."
+  buffer version tick result-id
+  ;; The version last pulled from the server; a check pulls again only
+  ;; when the document moved past it
+  pulled-version
+  ;; The latest raw LSP diagnostics, by channel: a server may push some
+  ;; and answer pulls with others (rust-analyzer pushes what cargo
+  ;; check says and hands out its own on request), and each channel
+  ;; replaces only its own
+  (diags nil) (pulled nil))
+
+(defun flycheck-lsp--doc-diagnostics (doc)
+  "Return every raw LSP diagnostic held for DOC, pushed and pulled."
+  (append (flycheck-lsp--doc-diags doc) (flycheck-lsp--doc-pulled doc)))
 
 (cl-defstruct (flycheck-lsp--server (:constructor flycheck-lsp--server-create)
                                     (:copier nil))
@@ -12056,6 +12117,9 @@ The `documents' table maps a document's canonical path (see
 server's advertised capability plist from its `initialize' reply, filled
 in once `initialized' turns non-nil (the handshake runs asynchronously)."
   connection root command stderr capabilities initialized
+  ;; Whether the workspace has been pulled here: a refresh request from
+  ;; the server is worth honoring only then
+  workspace-pulled
   (documents (make-hash-table :test 'equal)))
 
 (defvar flycheck-lsp--servers (make-hash-table :test 'equal)
@@ -12128,32 +12192,152 @@ expanded path -- rather than the raw URI -- makes both sides agree."
   (let ((conn (flycheck-lsp--server-connection server)))
     (and conn (jsonrpc-running-p conn))))
 
+(defun flycheck-lsp--accept-diagnostics (server uri diagnostics
+                                                &optional version result-id
+                                                pushed)
+  "Cache DIAGNOSTICS about the document at URI on SERVER.
+
+DIAGNOSTICS is a sequence of raw LSP diagnostics, from a push or a
+pull.  With VERSION, a report about a document a buffer has since
+synced at another version is stale and ignored.  RESULT-ID, from a
+pull, is kept for the next pull to refer to; a report with one
+replaces the pulled diagnostics, a push the pushed ones, and the
+document shows both (see `flycheck-lsp--doc-diagnostics').  If a
+live buffer owns
+the document, re-trigger its check so the fresh diagnostics are
+published (guarded against recursion); a report repeating what the
+cache holds changes nothing about the buffer, and servers republish
+freely while they index.  PUSHED says the report was a push, for the
+counts `flycheck-verify-setup' shows."
+  (let ((doc (flycheck-lsp--document server (flycheck-lsp--doc-key uri))))
+    (unless (and version
+                 (flycheck-lsp--doc-version doc)
+                 (not (equal version (flycheck-lsp--doc-version doc))))
+      (when result-id
+        (setf (flycheck-lsp--doc-result-id doc) result-id))
+      (let* ((new (append diagnostics nil))
+             (changed (not (equal new (if pushed
+                                          (flycheck-lsp--doc-diags doc)
+                                        (flycheck-lsp--doc-pulled doc))))))
+        (when changed
+          (if pushed
+              (setf (flycheck-lsp--doc-diags doc) new)
+            (setf (flycheck-lsp--doc-pulled doc) new))
+          (flycheck--project-diagnostics-changed))
+        (when-let* ((buffer (flycheck-lsp--doc-buffer doc))
+                    ((buffer-live-p buffer)))
+          (with-current-buffer buffer
+            (let ((recheck (and changed
+                                flycheck-mode
+                                (not flycheck-lsp--suppress-recheck))))
+              (when pushed
+                (flycheck-lsp--count-push recheck))
+              (when recheck
+                (let ((flycheck-lsp--suppress-recheck t))
+                  (flycheck-buffer-automatically))))))))))
+
 (defun flycheck-lsp--handle-notification (server method params)
   "Handle an LSP notification METHOD with PARAMS from SERVER.
 
-Only `textDocument/publishDiagnostics' is used: cache the diagnostics on
-their document and, if a live buffer owns it, re-trigger its check so the
-fresh diagnostics are published (guarded against recursion)."
+Only `textDocument/publishDiagnostics' is used; see
+`flycheck-lsp--accept-diagnostics'."
   (when (eq method 'textDocument/publishDiagnostics)
-    (let* ((doc (flycheck-lsp--document
-                 server (flycheck-lsp--doc-key (plist-get params :uri))))
-           (new (append (plist-get params :diagnostics) nil))
-           ;; A push repeating what we already hold changes nothing about
-           ;; the buffer, and servers republish freely while they index
-           (changed (not (equal new (flycheck-lsp--doc-diags doc)))))
-      (when changed
-        (setf (flycheck-lsp--doc-diags doc) new)
-        (flycheck--project-diagnostics-changed))
-      (when-let* ((buffer (flycheck-lsp--doc-buffer doc))
-                  ((buffer-live-p buffer)))
-        (with-current-buffer buffer
-          (let ((recheck (and changed
-                              flycheck-mode
-                              (not flycheck-lsp--suppress-recheck))))
-            (flycheck-lsp--count-push recheck)
-            (when recheck
-              (let ((flycheck-lsp--suppress-recheck t))
-                (flycheck-buffer-automatically)))))))))
+    (flycheck-lsp--accept-diagnostics
+     server (plist-get params :uri) (plist-get params :diagnostics)
+     (plist-get params :version) nil 'pushed)))
+
+(defconst flycheck-lsp--pull-timeout 60
+  "Seconds to wait for a server's answer to a pull.
+A server still loading its workspace can take a while over the first
+document, and longer over the whole workspace.")
+
+(defun flycheck-lsp--pull-document (server doc uri)
+  "Ask SERVER for the diagnostics of the document DOC at URI.
+
+The reply lands in the cache like a push would (see
+`flycheck-lsp--accept-diagnostics'), re-triggering the buffer's check
+only when it changes something, so a pull cannot chase its own tail.
+A reply of `unchanged', keyed on the result id of the last one, is
+just that.  A reply about a document closed in the meantime is
+dropped rather than resurrecting it; a failed or timed-out pull
+leaves the document to be asked about again by the next check."
+  (let ((version (flycheck-lsp--doc-version doc))
+        (documents (flycheck-lsp--server-documents server)))
+    (setf (flycheck-lsp--doc-pulled-version doc) version)
+    (jsonrpc-async-request
+     (flycheck-lsp--server-connection server)
+     'textDocument/diagnostic
+     (append (list :textDocument (list :uri uri))
+             (when-let* ((id (flycheck-lsp--doc-result-id doc)))
+               (list :previousResultId id)))
+     :timeout flycheck-lsp--pull-timeout
+     :success-fn (lambda (result)
+                   (when (and (equal (plist-get result :kind) "full")
+                              (eq doc (gethash (flycheck-lsp--doc-key uri)
+                                               documents)))
+                     (flycheck-lsp--accept-diagnostics
+                      server uri (plist-get result :items) version
+                      (plist-get result :resultId))))
+     :error-fn (lambda (_err)
+                 (setf (flycheck-lsp--doc-pulled-version doc) nil))
+     :timeout-fn (lambda ()
+                   (setf (flycheck-lsp--doc-pulled-version doc) nil)))))
+
+(defun flycheck-lsp--pull-workspace (server)
+  "Ask SERVER for the diagnostics of its whole workspace.
+
+Each document's report lands in the cache like a push about it would:
+the buffers visiting them re-check, and the rest show in the project
+view (see `flycheck-lsp--project-extra-errors').  A document the
+server reports unchanged since the last pull, by result id, is left as
+it is."
+  (setf (flycheck-lsp--server-workspace-pulled server) t)
+  (let ((previous nil))
+    (maphash (lambda (path doc)
+               (when-let* ((id (flycheck-lsp--doc-result-id doc)))
+                 (push (list :uri (flycheck-lsp--path-to-uri path) :value id)
+                       previous)))
+             (flycheck-lsp--server-documents server))
+    (jsonrpc-async-request
+     (flycheck-lsp--server-connection server)
+     'workspace/diagnostic
+     (list :previousResultIds (vconcat previous))
+     :timeout flycheck-lsp--pull-timeout
+     :success-fn (lambda (result)
+                   (seq-doseq (item (plist-get result :items))
+                     (when (equal (plist-get item :kind) "full")
+                       (flycheck-lsp--accept-diagnostics
+                        server (plist-get item :uri) (plist-get item :items)
+                        (plist-get item :version)
+                        (plist-get item :resultId)))))
+     :error-fn (lambda (err)
+                 (message "Flycheck LSP: %s could not report on its workspace: %s"
+                          (car (flycheck-lsp--server-command server))
+                          (or (plist-get err :message) err)))
+     :timeout-fn (lambda ()
+                   (message "Flycheck LSP: %s took too long to report on its workspace"
+                            (car (flycheck-lsp--server-command server)))))))
+
+(defun flycheck-lsp--handle-request (server method _params)
+  "Answer the LSP request METHOD from SERVER.
+
+A `workspace/diagnostic/refresh' says the diagnostics pulled so far
+are outdated - a server that answered empty while it was still
+loading its workspace sends one when it is done - so every document
+a live buffer has open is pulled again, and the workspace too once a
+pull of it has happened here.  Everything else gets a null reply."
+  (when (and (eq method 'workspace/diagnostic/refresh)
+             (flycheck-lsp--server-live-p server))
+    (maphash (lambda (path doc)
+               (when-let* ((buffer (flycheck-lsp--doc-buffer doc))
+                           ((buffer-live-p buffer))
+                           ((flycheck-lsp--doc-version doc)))
+                 (flycheck-lsp--pull-document
+                  server doc (flycheck-lsp--path-to-uri path))))
+             (flycheck-lsp--server-documents server))
+    (when (flycheck-lsp--server-workspace-pulled server)
+      (flycheck-lsp--pull-workspace server)))
+  nil)
 
 (defun flycheck-lsp--list-only-error (path lsp)
   "Convert the raw LSP diagnostic plist LSP about the unvisited PATH.
@@ -12206,7 +12390,7 @@ dependency, a generated file elsewhere)."
                             (not (flycheck--path-under-prefixes-p
                                   path prefixes))
                             (get-file-buffer path))
-                  (dolist (lsp (flycheck-lsp--doc-diags doc))
+                  (dolist (lsp (flycheck-lsp--doc-diagnostics doc))
                     (push (flycheck-lsp--list-only-error path lsp) result)))))
             (flycheck-lsp--server-documents server))))
        flycheck-lsp--servers)
@@ -12214,6 +12398,64 @@ dependency, a generated file elsewhere)."
 
 (add-hook 'flycheck--project-extra-errors-functions
           #'flycheck-lsp--project-extra-errors)
+
+(defun flycheck-lsp--check-project (root)
+  "Pull workspace diagnostics from the servers under ROOT that offer them.
+
+For `flycheck--project-check-functions': every live server rooted in
+the project whose diagnosticProvider covers the workspace is asked,
+and the names of those asked are returned."
+  (let ((prefixes (flycheck--project-key-prefixes root))
+        (names nil))
+    (maphash
+     (lambda (_key server)
+       (when (and (flycheck-lsp--server-live-p server)
+                  (flycheck-lsp--server-initialized server)
+                  (flycheck-lsp--capable server :diagnosticProvider
+                                         :workspaceDiagnostics)
+                  (flycheck--path-under-prefixes-p
+                   (file-name-as-directory
+                    (expand-file-name (flycheck-lsp--server-root server)))
+                   prefixes)
+                  ;; Nothing shows what a server with no buffer left on
+                  ;; it would find (see `flycheck-lsp--project-extra-errors')
+                  (seq-some (lambda (doc)
+                              (buffer-live-p (flycheck-lsp--doc-buffer doc)))
+                            (hash-table-values
+                             (flycheck-lsp--server-documents server))))
+         (flycheck-lsp--pull-workspace server)
+         (push (format "%s (workspace diagnostics)"
+                       (car (flycheck-lsp--server-command server)))
+               names)))
+     flycheck-lsp--servers)
+    (nreverse names)))
+
+(add-hook 'flycheck--project-check-functions #'flycheck-lsp--check-project)
+
+(defun flycheck-lsp--clear-project (root)
+  "Drop what workspace pulls cached about unvisited files under ROOT.
+
+For `flycheck--project-clear-functions': the documents no live buffer
+holds are forgotten, result ids included, so the next pull starts
+afresh.  The servers stay."
+  (let ((prefixes (flycheck--project-key-prefixes root)))
+    (maphash
+     (lambda (_key server)
+       (when (flycheck--path-under-prefixes-p
+              (file-name-as-directory
+               (expand-file-name (flycheck-lsp--server-root server)))
+              prefixes)
+         (let ((documents (flycheck-lsp--server-documents server))
+               (unvisited nil))
+           (maphash (lambda (path doc)
+                      (unless (buffer-live-p (flycheck-lsp--doc-buffer doc))
+                        (push path unvisited)))
+                    documents)
+           (dolist (path unvisited)
+             (remhash path documents)))))
+     flycheck-lsp--servers)))
+
+(add-hook 'flycheck--project-clear-functions #'flycheck-lsp--clear-project)
 
 (defun flycheck-lsp--document (server key)
   "Return the `flycheck-lsp--doc' for KEY on SERVER, creating it if needed."
@@ -12228,12 +12470,18 @@ dependency, a generated file elsewhere)."
         :capabilities
         (list :textDocument
               (list :publishDiagnostics '(:relatedInformation t)
+                    ;; Pull-model diagnostics: a server advertising a
+                    ;; diagnosticProvider is asked per document (see
+                    ;; `flycheck-lsp--pull-document') and, on demand, for
+                    ;; its workspace (see `flycheck-lsp--pull-workspace')
+                    :diagnostic '(:relatedDocumentSupport :json-false)
                     ;; Advertise that we can apply a quickfix's edit, so a
                     ;; server that gates code actions on client support offers
                     ;; them (see `flycheck-lsp--code-action-fix').
                     :codeAction
                     '(:codeActionLiteralSupport
-                      (:codeActionKind (:valueSet ["quickfix"])))))))
+                      (:codeActionKind (:valueSet ["quickfix"]))))
+              :workspace '(:diagnostics (:refreshSupport t)))))
 
 (defun flycheck-lsp--server-key (server)
   "Return SERVER's key in `flycheck-lsp--servers'."
@@ -12292,7 +12540,9 @@ the server down.  Return nil if the process could not be spawned at all."
                      :notification-dispatcher
                      (lambda (_conn method params)
                        (flycheck-lsp--handle-notification server method params))
-                     :request-dispatcher (lambda (&rest _) nil))))
+                     :request-dispatcher
+                     (lambda (_conn method params)
+                       (flycheck-lsp--handle-request server method params)))))
           (setf (flycheck-lsp--server-connection server) conn)
           (jsonrpc-async-request
            conn 'initialize (flycheck-lsp--initialize-params root)
@@ -12524,10 +12774,17 @@ handshake's completion re-triggers the check (see
                 (funcall callback 'finished nil)
               (flycheck-lsp--sync-document
                server doc uri (flycheck-lsp--language-id major-mode))
+              ;; A server on the pull model is asked about each version
+              ;; of the document once; a re-check of the same text - a
+              ;; push's, a pull reply's own - does not ask again
+              (when (and (flycheck-lsp--capable server :diagnosticProvider)
+                         (not (equal (flycheck-lsp--doc-version doc)
+                                     (flycheck-lsp--doc-pulled-version doc))))
+                (flycheck-lsp--pull-document server doc uri))
               (funcall callback 'finished
                        (mapcar (lambda (d)
                                  (flycheck-lsp--diagnostic->error d buffer server uri))
-                               (flycheck-lsp--doc-diags doc)))))))
+                               (flycheck-lsp--doc-diagnostics doc)))))))
     (error (funcall callback 'errored (error-message-string err)))))
 
 (defun flycheck-lsp--enabled-p ()
