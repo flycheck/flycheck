@@ -220,6 +220,11 @@ checks.  Flycheck ships with these; new ones can be defined with
    validate``.  A configuration using providers or modules needs
    ``terraform init`` run in the project first.
 
+A language server joins the run too: when :mode:`flycheck-lsp` has a server
+for the project that offers workspace diagnostics, :kbd:`C-c ! P` asks it
+about every file of the workspace, visited or not, and its answers show in
+the project scope like the checkers' findings.
+
 
 LSP diagnostics via Eglot
 =========================
@@ -307,9 +312,10 @@ whose language server you don't have.
 .. minor-mode:: flycheck-lsp-mode
 
    Start the LSP server configured for the buffer's major mode, send it the
-   buffer's text, and report the diagnostics it pushes back through the ``flycheck-lsp``
-   checker.  Does nothing in a buffer whose major mode has no configured,
-   installed server.
+   buffer's text, and report its diagnostics through the ``flycheck-lsp``
+   checker - the ones it pushes, or, for a server on LSP's pull model, the
+   ones a check asks it for.  Does nothing in a buffer whose major mode has
+   no configured, installed server.
 
 .. minor-mode:: global-flycheck-lsp-mode
 

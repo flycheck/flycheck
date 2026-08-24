@@ -649,6 +649,135 @@
                 (expect (flycheck-fix-description fix) :to-equal "lazy")
                 (expect (length (flycheck-fix-edits fix)) :to-equal 1)))))))
 
+    (describe "pull-model diagnostics"
+
+      (it "advertises the diagnostic capabilities"
+        (let ((caps (plist-get (flycheck-lsp--initialize-params "/proj/")
+                               :capabilities)))
+          (expect (plist-get (plist-get caps :textDocument) :diagnostic)
+                  :to-be-truthy)
+          (expect (plist-get (plist-get (plist-get caps :workspace) :diagnostics)
+                             :refreshSupport)
+                  :to-be t)))
+
+      (it "ignores a report about a version the buffer has moved past"
+        (flycheck-buttercup-with-temp-buffer
+          (setq-local flycheck-mode t)
+          (spy-on 'flycheck-buffer-automatically)
+          (let* ((server (flycheck-lsp--server-create))
+                 (uri "file:///x/a.rb")
+                 (doc (flycheck-lsp--document server (flycheck-lsp--doc-key uri))))
+            (setf (flycheck-lsp--doc-buffer doc) (current-buffer)
+                  (flycheck-lsp--doc-version doc) 3)
+            (flycheck-lsp--accept-diagnostics
+             server uri (vector '(:severity 1 :message "old")) 2 "r1")
+            (expect (flycheck-lsp--doc-diags doc) :to-be nil)
+            (expect (flycheck-lsp--doc-result-id doc) :to-be nil)
+            (expect 'flycheck-buffer-automatically :not :to-have-been-called)
+            (flycheck-lsp--accept-diagnostics
+             server uri (vector '(:severity 1 :message "new")) 3 "r2")
+            (expect (length (flycheck-lsp--doc-diagnostics doc)) :to-equal 1)
+            (expect (flycheck-lsp--doc-result-id doc) :to-equal "r2")
+            (expect 'flycheck-buffer-automatically :to-have-been-called))))
+
+      (it "re-pulls the open documents on a refresh request, and the workspace after a pull"
+        (flycheck-buttercup-with-temp-buffer
+          (let* ((server (flycheck-lsp--server-create))
+                 (uri "file:///x/a.rb")
+                 (doc (flycheck-lsp--document server (flycheck-lsp--doc-key uri))))
+            (setf (flycheck-lsp--doc-buffer doc) (current-buffer)
+                  (flycheck-lsp--doc-version doc) 1)
+            (spy-on 'flycheck-lsp--pull-document)
+            (spy-on 'flycheck-lsp--pull-workspace)
+            (spy-on 'flycheck-lsp--server-live-p :and-return-value t)
+            (expect (flycheck-lsp--handle-request
+                     server 'workspace/diagnostic/refresh nil)
+                    :to-be nil)
+            (expect 'flycheck-lsp--pull-document :to-have-been-called)
+            (expect 'flycheck-lsp--pull-workspace :not :to-have-been-called)
+            (setf (flycheck-lsp--server-workspace-pulled server) t)
+            (flycheck-lsp--handle-request server 'workspace/diagnostic/refresh nil)
+            (expect 'flycheck-lsp--pull-workspace :to-have-been-called-with server))))
+
+      (it "keeps pushed and pulled diagnostics apart, showing both"
+        (let* ((server (flycheck-lsp--server-create))
+               (uri "file:///x/a.rb")
+               (doc (flycheck-lsp--document server (flycheck-lsp--doc-key uri))))
+          (flycheck-lsp--accept-diagnostics
+           server uri (vector '(:severity 1 :message "pushed")) nil nil 'pushed)
+          (flycheck-lsp--accept-diagnostics
+           server uri (vector '(:severity 1 :message "pulled")) nil "r1")
+          (expect (mapcar (lambda (d) (plist-get d :message))
+                          (flycheck-lsp--doc-diagnostics doc))
+                  :to-equal '("pushed" "pulled"))
+          ;; An empty pull answer clears only what was pulled
+          (flycheck-lsp--accept-diagnostics server uri [] nil "r2")
+          (expect (mapcar (lambda (d) (plist-get d :message))
+                          (flycheck-lsp--doc-diagnostics doc))
+                  :to-equal '("pushed"))))
+
+      (it "refers to the last result id when pulling a document again"
+        (let* ((server (flycheck-lsp--server-create))
+               (uri "file:///x/a.rb")
+               (doc (flycheck-lsp--document server (flycheck-lsp--doc-key uri))))
+          (setf (flycheck-lsp--doc-version doc) 2)
+          (spy-on 'jsonrpc-async-request)
+          (flycheck-lsp--pull-document server doc uri)
+          (expect (plist-get (nth 2 (spy-calls-args-for 'jsonrpc-async-request 0))
+                             :previousResultId)
+                  :to-be nil)
+          (expect (flycheck-lsp--doc-pulled-version doc) :to-equal 2)
+          (setf (flycheck-lsp--doc-result-id doc) "r7")
+          (flycheck-lsp--pull-document server doc uri)
+          (expect (plist-get (nth 2 (spy-calls-args-for 'jsonrpc-async-request 1))
+                             :previousResultId)
+                  :to-equal "r7")))
+
+      (it "forgets the unvisited documents under the project on clearing"
+        (flycheck-buttercup-with-temp-buffer
+          (let* ((flycheck-lsp--servers (make-hash-table :test 'equal))
+                 (project (file-name-as-directory (expand-file-name "/proj")))
+                 (server (flycheck-lsp--server-create :root project
+                                                      :command '("srv")))
+                 (visited (flycheck-lsp--document server "/proj/a.rb"))
+                 (unvisited (flycheck-lsp--document server "/proj/b.rb")))
+            (setf (flycheck-lsp--doc-buffer visited) (current-buffer)
+                  (flycheck-lsp--doc-diags unvisited) '((:message "m")))
+            (puthash (cons project '("srv")) server flycheck-lsp--servers)
+            (flycheck-lsp--clear-project project)
+            (expect (gethash "/proj/a.rb" (flycheck-lsp--server-documents server))
+                    :to-be visited)
+            (expect (gethash "/proj/b.rb" (flycheck-lsp--server-documents server))
+                    :to-be nil))))
+
+      (it "pulls the workspace of the capable servers under the project"
+        (flycheck-buttercup-with-temp-buffer
+         (let ((flycheck-lsp--servers (make-hash-table :test 'equal))
+               (project (file-name-as-directory (expand-file-name "/proj"))))
+          (spy-on 'flycheck-lsp--server-live-p :and-return-value t)
+          (spy-on 'flycheck-lsp--pull-workspace)
+          (cl-flet ((add (root command caps)
+                      (let ((server (flycheck-lsp--server-create
+                                     :root root :command command
+                                     :capabilities caps :initialized t)))
+                        ;; A buffer on the server, or nothing would show
+                        ;; what it finds
+                        (setf (flycheck-lsp--doc-buffer
+                               (flycheck-lsp--document server "/proj/a.rb"))
+                              (current-buffer))
+                        (puthash (cons root command) server
+                                 flycheck-lsp--servers))))
+            (add project '("ws")
+                 '(:diagnosticProvider (:workspaceDiagnostics t)))
+            (add project '("doc-only")
+                 '(:diagnosticProvider (:workspaceDiagnostics :json-false)))
+            (add (file-name-as-directory (expand-file-name "/elsewhere")) '("far")
+                 '(:diagnosticProvider (:workspaceDiagnostics t)))
+            (expect (flycheck-lsp--check-project project)
+                    :to-equal '("ws (workspace diagnostics)"))
+            (expect (spy-calls-count 'flycheck-lsp--pull-workspace)
+                    :to-equal 1))))))
+
     (describe "the flycheck-lsp generic checker"
       (it "is a registered generic checker"
         (expect (flycheck-valid-checker-p 'flycheck-lsp) :to-be-truthy)

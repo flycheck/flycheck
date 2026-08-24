@@ -160,6 +160,34 @@
           (expect (plist-get (gethash key flycheck--project-runs) :errors)
                   :to-be nil))))
 
+    (it "runs the project check functions and names what they started"
+      (flycheck-test--define-run-checker :enabled #'ignore)
+      (flycheck-test--with-temp-project dir
+        (let* ((asked nil)
+              (flycheck--project-check-functions
+               (list (lambda (root) (setq asked root) '("srv (workspace)")))))
+          (spy-on 'message)
+          (flycheck-check-project)
+          (expect asked :to-equal dir)
+          (expect (spy-calls-args-for 'message 0)
+                  :to-equal (list "Checking project %s with %s..."
+                                  (abbreviate-file-name dir)
+                                  "srv (workspace)")))))
+
+    (it "drops what the project check functions found on clearing"
+      (flycheck-test--with-temp-project dir
+        (let* ((cleared nil)
+              (flycheck--project-clear-functions
+               (list (lambda (root) (setq cleared root)))))
+          (flycheck-check-project 'clear)
+          (expect cleared :to-equal dir))))
+
+    (it "still says so when nothing applies and the functions have nothing"
+      (flycheck-test--define-run-checker :enabled #'ignore)
+      (flycheck-test--with-temp-project _dir
+        (let ((flycheck--project-check-functions (list #'ignore)))
+          (should-error (flycheck-check-project) :type 'user-error))))
+
     (it "says so when no checker applies"
       (flycheck-test--define-run-checker :enabled #'ignore)
       (flycheck-test--with-temp-project _dir

@@ -147,6 +147,55 @@ down before the temp directory goes away."
           (expect (mapcar #'flycheck-error-level flycheck-current-errors)
                   :to-have-same-items-as '(warning error))))))
 
+  (it "pulls a pull-model server's diagnostics, and its workspace on demand"
+    (assume (test-lsp-integration/possible-p) "No python3, or Windows")
+    (test-lsp-integration/preserving-checker 'flycheck-lsp
+      (test-lsp-integration/with-file-buffer
+        (let ((flycheck-lsp-servers
+               `((makefile-gmake-mode . ("python3" ,test-lsp-integration/server
+                                         "workspace"))))
+              (flycheck-checkers '(flycheck-lsp)))
+          (flycheck-lsp-mode 1)
+          (flycheck-buffer)
+          ;; The server never pushes: the buffer's diagnostics come from
+          ;; the document pull its check sends
+          (expect (test-lsp-integration/wait-until
+                   (lambda () (= 1 (length flycheck-current-errors))) 10)
+                  :to-be-truthy)
+          (expect (flycheck-error-message (car flycheck-current-errors))
+                  :to-equal "mock warning")
+          (let ((key (flycheck--buffer-project-key)))
+            ;; Checking the project asks the server about its whole
+            ;; workspace, which surfaces the sibling nobody opened
+            (flycheck-check-project)
+            (expect (test-lsp-integration/wait-until
+                     (lambda ()
+                       (seq-some (lambda (err)
+                                   (and (equal (flycheck-error-message err)
+                                               "mock error")
+                                        (equal (file-name-nondirectory
+                                                (flycheck-error-filename err))
+                                               "other.mk")))
+                                 (flycheck--project-errors key)))
+                     10)
+                    :to-be-truthy)
+            ;; The next pull hands the result ids back, and the server
+            ;; has nothing new to say
+            (flycheck-check-project)
+            (expect (test-lsp-integration/wait-until
+                     (lambda ()
+                       (equal (cdr (assoc "workspace/diagnostic/unchanged"
+                                          (test-lsp-integration/stats)))
+                              1))
+                     10)
+                    :to-be-truthy))
+          ;; And pulling did not turn into a feedback loop
+          (test-lsp-integration/pump 1)
+          (expect (or (cdr (assoc "textDocument/diagnostic"
+                                  (test-lsp-integration/stats)))
+                      0)
+                  :to-be-less-than 10)))))
+
   (it "checks once for an indexing server's republish storm"
     (assume (test-lsp-integration/possible-p) "No python3, or Windows")
     (test-lsp-integration/preserving-checker 'flycheck-lsp
