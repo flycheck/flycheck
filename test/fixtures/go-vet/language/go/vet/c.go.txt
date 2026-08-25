@@ -1,0 +1,11 @@
+{
+	"vet": {
+		"printf": [
+			{
+				"posn": "test/resources/language/go/vet/c.go:6:14",
+				"end": "test/resources/language/go/vet/c.go:6:16",
+				"message": "fmt.Printf format %d has arg \"s\" of wrong type string"
+			}
+		]
+	}
+}

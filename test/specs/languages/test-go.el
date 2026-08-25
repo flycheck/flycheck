@@ -53,6 +53,23 @@
                   :filename "/home/gastove/golang/src/github.com/Gastove/test/pkg/lib/lib.go")
                  )))))
 
+  (describe "the go-vet suspicious-output handler"
+    (it "steps aside outside a module"
+      (let ((verdict (flycheck--go-vet-handle-suspicious
+                      'go-vet 1
+                      "go: go.mod file not found in current directory or any parent directory; see 'go help modules'\n")))
+        (expect (car verdict) :to-be 'disable)
+        (expect (cdr verdict) :to-match "go.mod file not found")))
+
+    (it "steps aside in a directory mixing packages"
+      (let ((verdict (flycheck--go-vet-handle-suspicious
+                      'go-vet 1 "found packages a (a.go) and b (b.go) in /src\n")))
+        (expect (car verdict) :to-be 'disable)))
+
+    (it "stays suspicious over anything else"
+      (expect (flycheck--go-vet-handle-suspicious 'go-vet 1 "something odd\n")
+              :to-be 'suspicious)))
+
   (describe "the go-vet checker command"
     (it "threads flycheck-go-build-tags into go vet"
       (let ((flycheck-go-build-tags '("integration" "linux")))
@@ -106,6 +123,13 @@
       (flycheck-buttercup-with-env
           `(("GOPATH" . ,(flycheck-buttercup-resource-filename "language/go")))
         (flycheck-buttercup-should-syntax-check "language/go/src/b1/main.go" 'go-mode)))
+
+    (flycheck-buttercup-def-checker-test go-vet go cross-file
+      ;; A file referring to a type its sibling declares vets clean, as
+      ;; the package does; vetted alone it would be full of undefined
+      ;; references (issue #2365)
+      (let ((flycheck-checkers '(go-vet)))
+        (flycheck-buttercup-should-syntax-check "language/go/vet/b.go" 'go-mode)))
 
     (flycheck-buttercup-def-checker-test go-build go missing-package
       (let ((go-root (or (getenv "GOROOT") "/usr/local/go"))
@@ -162,12 +186,19 @@
     (flycheck-buttercup-def-parse-test go-gofmt "language/go/src/syntax/syntax-error.go"
       '(5 9 error "expected '(', found ta")
       '(6 1 error "expected ')', found '}'"))
-    (flycheck-buttercup-def-parse-test go-vet "language/go/src/warnings.go"
+    (flycheck-buttercup-def-parse-test go-vet "language/go/vet-error/main.go"
       ;; A compile error that stops the analyzers, via the vet: pattern
-      '(8 2 error "undefined: fmt"))
-    (flycheck-buttercup-def-parse-test go-vet "language/go/printf/printf.go"
+      '(4 2 error "undefined: fmt"))
+    (flycheck-buttercup-def-parse-test go-vet "language/go/vet/c.go"
       ;; An analyzer finding from the JSON document; the analyzer names
       ;; the id, and go/token's right-open end maps straight through
+      '(6 14 warning "fmt.Printf format %d has arg \"s\" of wrong type string"
+          :id "printf" :end-line 6 :end-column 16))
+    (flycheck-buttercup-def-parse-test go-vet "language/go/vet/b.go"
+      ;; The whole package is vetted: reading b.go's output, which refers
+      ;; to a type a.go declares, yields the sibling c.go's finding and
+      ;; none of the undefined references vet reports about a file vetted
+      ;; alone (the buffer view then keeps only its own file's warnings)
       '(6 14 warning "fmt.Printf format %d has arg \"s\" of wrong type string"
           :id "printf" :end-line 6 :end-column 16))))
 

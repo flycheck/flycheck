@@ -1,7 +1,7 @@
-package main
+package vet
 
 import "fmt"
 
-func main() {
+func Bad() {
 	fmt.Printf("%d", "s")
 }

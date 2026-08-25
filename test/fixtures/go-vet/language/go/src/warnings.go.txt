@@ -1,2 +1,0 @@
-# command-line-arguments
-vet: warnings.go:8:2: undefined: fmt

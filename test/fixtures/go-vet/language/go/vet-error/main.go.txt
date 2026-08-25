@@ -1,0 +1,2 @@
+# veterror
+vet: ./main.go:4:2: undefined: fmt
