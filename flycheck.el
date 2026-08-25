@@ -9021,33 +9021,49 @@ clamped to the line so a checker column past the end still lands on it."
   "Create a tracked overlay rendering BLOCK on its own lines below ANCHOR.
 
 BACKGROUND, when given, is a face put under the whole block so the tinted
-line and its messages read as one region.  The block hangs off the *next*
-line, outside the range the line tint covers, so it has to carry the tint
-itself rather than inherit it.
+line and its messages read as one region; the block carries the tint
+itself, newlines included, so it reaches the window edge.
 
-BLOCK is the annotation text without surrounding newlines.  It is hung off
-the beginning of the following line as a `before-string' ending in a
-newline, so its extra screen rows belong to that line's buffer position
-rather than to ANCHOR's line.  That keeps visual-line motion working:
-`next-line' (with the variable `line-move-visual') and
-`evil-next-visual-line' move point onto the next line of code, instead of
-stalling on the annotation or, under Evil, getting stuck before it.  On
-the last line of the buffer, where there is no following line, the block
-is hung off ANCHOR with a leading newline and a `cursor'-anchored space
-instead.  Return the overlay."
-  (let ((string (if (< anchor (point-max))
-                    (concat block "\n")
-                  (concat (propertize " " 'cursor t) "\n" block))))
+BLOCK is the annotation text without surrounding newlines.  The overlay
+spans ANCHOR's newline and replaces it, through a `display' string, with
+a newline, the block and a newline again.  That placement satisfies two
+parts of Emacs at once.  Line numbers (`display-line-numbers-mode') go
+by the buffer position a screen row starts at: the block's rows start
+at the newline, inside the annotated line, so they get no number and
+the line after keeps its own.  A block hung off the next line's start
+instead took that line's number (issue #2367).  Visual-line motion
+(`next-line' with the variable `line-move-visual', and
+`evil-next-visual-line') steps down over a display string as a unit,
+so point lands on the next line of code rather than stalling on the
+annotation, as it would with an `after-string' at the end of the line.
+Stepping up onto a line that has a block - only ever the case with
+`flycheck-annotate-other-lines-style' set to `below', since the
+focused line's block is rebuilt as point leaves it - lands at the end
+of that line rather than at the goal column, the one place the
+display string falls short of a plain buffer line.
+A `cursor'-anchored space leads the string so the cursor sits after the
+code when point is at ANCHOR.  On the last line of the buffer, where
+there is no newline to replace, the string hangs off ANCHOR as a
+`before-string' instead.  Return the overlay."
+  (let* ((last (>= anchor (point-max)))
+         (string (concat (propertize " " 'cursor t) "\n" block
+                         (if last "" "\n"))))
     ;; Appended, so the messages keep their own colours and only take the
     ;; background from the tint.  It has to cover the newlines too, or the
     ;; tint would stop at the text instead of reaching the window edge.
     (when background
       (add-face-text-property 0 (length string) background 'append string))
-    (let ((ov (if (< anchor (point-max))
-                  (make-overlay (1+ anchor) (1+ anchor) nil t nil)
-                (make-overlay anchor anchor nil t nil))))
+    ;; A display string takes its base face from the newline it replaces,
+    ;; overlays included, so the block would light up under `hl-line' or
+    ;; an active region; `default' underneath everything keeps it plain
+    (add-face-text-property 0 (length string) 'default 'append string)
+    (let ((ov (make-overlay anchor (if last anchor (1+ anchor)) nil t nil)))
       (overlay-put ov 'priority 100)
-      (overlay-put ov 'before-string string)
+      (cond
+       (last (overlay-put ov 'before-string string))
+       (t (overlay-put ov 'display string)
+          ;; Gone with the newline it stood in for, when lines are joined
+          (overlay-put ov 'evaporate t)))
       (flycheck-annotate--track ov))))
 
 (defun flycheck-annotate-below-style (errors anchor _focused)

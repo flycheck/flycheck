@@ -28,6 +28,7 @@
 
 ### Bugs fixed
 
+- [#2368](https://github.com/flycheck/flycheck/pull/2368): A `below`-style annotation no longer takes the following line's number under `display-line-numbers-mode`: the block now stands in for the annotated line's newline, which keeps the numbers right and visual-line motion stepping down over it; moving up onto a line annotated this way, which takes `flycheck-annotate-other-lines-style` set to `below`, now lands at its end rather than at the goal column ([#2367](https://github.com/flycheck/flycheck/issues/2367)).
 - [#2366](https://github.com/flycheck/flycheck/pull/2366): The `go-vet` checker vets the buffer's whole package as saved on disk instead of the single file, which `go vet` treats as a package of its own and fills with spurious undefined references to sibling files; outside a module it steps aside, saying why ([#2365](https://github.com/flycheck/flycheck/issues/2365)).
 - [#2361](https://github.com/flycheck/flycheck/pull/2361): A checker chain continues through a disabled or unavailable link to the checkers behind it, so disabling one checker no longer silences the rest of its chain ([#2359](https://github.com/flycheck/flycheck/issues/2359)).
 - [#2350](https://github.com/flycheck/flycheck/pull/2350): The Eglot bridge composes diagnostic messages from Emacs 32's split Flymake fields itself, so they read identically across Emacs versions instead of picking up stray separators.

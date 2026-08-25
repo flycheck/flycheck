@@ -44,7 +44,7 @@ Line 2 gets an error and a warning; line 4 gets a warning."
   "Return OV's annotation string, minus the leading cursor-anchor space.
 Return nil for overlays that carry no annotation, such as tint overlays,
 so it doubles as a predicate for the message overlays."
-  (when-let* ((s (overlay-get ov 'before-string)))
+  (when-let* ((s (or (overlay-get ov 'display) (overlay-get ov 'before-string))))
     (if (get-text-property 0 'cursor s) (substring s 1) s)))
 
 (defun test-annotate/sideline (code msg-width win-width &optional gutter)
@@ -68,14 +68,11 @@ space stripped."
 
 (defun test-annotate/anchors ()
   "Return an alist mapping each message overlay's code line to its text.
-A `below'-style block is hung off the start of the line after the code it
-annotates (so it doesn't disturb visual-line motion); such a block ends in
-a newline, so key it back under the code line."
+Every style anchors its overlay on the annotated line: a `below'-style
+block replaces that line's newline, so it begins with one."
   (mapcar (lambda (ov)
-            (let* ((text (test-annotate/text ov))
-                   (below (string-suffix-p "\n" text)))
-              (cons (- (line-number-at-pos (overlay-start ov)) (if below 1 0))
-                    (substring-no-properties text))))
+            (cons (line-number-at-pos (overlay-start ov))
+                  (substring-no-properties (test-annotate/text ov))))
           (seq-filter #'test-annotate/text flycheck-annotate--overlays)))
 
 (defun test-annotate/tints ()
@@ -185,9 +182,9 @@ a newline, so key it back under the code line."
         (if (listp face) face (list face))))
 
     (it "carries the line tint through the whole block"
-      ;; The block hangs off the next line, outside the range the tint
-      ;; overlay covers, so it has to carry the tint itself or the code
-      ;; line and its messages look like separate regions.  See #2276.
+      ;; The block carries the tint itself rather than inheriting the line
+      ;; tint's: the last line's `before-string' inherits nothing, and every
+      ;; other block is kept plain underneath on purpose.  See #2276.
       (flycheck-buttercup-with-temp-buffer
         (insert "abcdef\nghijkl\n")
         (let* ((eol (save-excursion (goto-char (point-min)) (line-end-position)))
@@ -218,7 +215,10 @@ a newline, so key it back under the code line."
                (text (test-annotate/text ov)))
           (dotimes (i (length text))
             (expect (test-annotate/faces-at ov i)
-                    :not :to-contain 'flycheck-annotate-error-background)))))
+                    :not :to-contain 'flycheck-annotate-error-background)
+            ;; and it stays plain under hl-line or the region: the display
+            ;; string would otherwise inherit the newline's overlay faces
+            (expect (test-annotate/faces-at ov i) :to-contain 'default)))))
 
     (it "stacks each message on its own line under the code"
       (flycheck-buttercup-with-temp-buffer
@@ -231,14 +231,14 @@ a newline, so key it back under the code line."
                (flycheck-annotate--overlays nil)
                (ov (flycheck-annotate-below-style errs eol t))
                (s (substring-no-properties (test-annotate/text ov))))
-          ;; the block hangs off the next line, so it ends (not begins) with a
-          ;; newline, keeping visual-line motion off the annotated line
+          ;; the block stands in for the line's newline, so it begins with
+          ;; one and ends with one
+          (expect (string-prefix-p "\n" s) :to-be t)
           (expect (string-suffix-p "\n" s) :to-be t)
-          (expect (string-prefix-p "\n" s) :to-be nil)
           (expect s :to-match "one")
           (expect s :to-match "two")
-          ;; one line per error, then the trailing newline
-          (expect (length (split-string s "\n")) :to-equal 3))))
+          ;; the leading newline, one line per error, the trailing newline
+          (expect (length (split-string s "\n")) :to-equal 4))))
 
     (it "aligns the connector to the error's display column past a tab"
       (flycheck-buttercup-with-temp-buffer
@@ -252,7 +252,8 @@ a newline, so key it back under the code line."
                (ov (flycheck-annotate-below-style errs eol t))
                (s (test-annotate/text ov)))
           ;; the leading pad aligns to display column 8, not 1
-          (expect (get-text-property 0 'display s)
+          ;; index 0 is the newline the block stands in for; the pad follows
+          (expect (get-text-property 1 'display s)
                   :to-equal '(space :align-to 8)))))
 
     (it "adds no pad for an error in the first column"
@@ -265,7 +266,7 @@ a newline, so key it back under the code line."
                (ov (flycheck-annotate-below-style errs eol t))
                (s (test-annotate/text ov)))
           ;; char 0 is the connector itself, no stretch space
-          (expect (get-text-property 0 'display s) :to-be nil))))
+          (expect (get-text-property 1 'display s) :to-be nil))))
 
     (it "trails an error's related locations on their own lines"
       (flycheck-buttercup-with-temp-buffer
@@ -281,25 +282,38 @@ a newline, so key it back under the code line."
                (s (substring-no-properties (test-annotate/text ov))))
           (expect s :to-match "redefined")
           (expect s :to-match "↳ first here (5:2)")
-          ;; the message line, the related-location line, then the trailing newline
-          (expect (length (split-string s "\n")) :to-equal 3))))
+          ;; the leading newline, the message line, the related-location
+          ;; line, then the trailing newline
+          (expect (length (split-string s "\n")) :to-equal 4))))
 
-    (it "hangs the block off the start of the next line"
-      ;; Regression guard: anchoring the multi-line block on the following
-      ;; line's buffer position (rather than the annotated line's newline)
-      ;; keeps `next-line' and `evil-next-visual-line' from stalling on -- or,
-      ;; under Evil, getting stuck before -- the annotation.
+    (it "replaces the annotated line's newline with the block"
+      ;; Regression guard for two things at once.  Under
+      ;; `display-line-numbers-mode' a block hung off the next line's start
+      ;; took that line's number and left the line itself unnumbered
+      ;; (issue #2367); a plain `after-string' at the end of the line
+      ;; numbers right but stalls `next-line' and `evil-next-visual-line'
+      ;; on the annotation.  A `display' string standing in for the
+      ;; newline keeps the block's rows within the annotated line, which
+      ;; the numbering skips and visual-line motion steps over as a unit.
       (flycheck-buttercup-with-temp-buffer
         (insert "abcdef\nghijkl\n")
         (let* ((eol (save-excursion (goto-char (point-min)) (line-end-position)))
                (errs (list (flycheck-error-new-at 1 1 'error "boom"
                                                   :checker 'emacs-lisp)))
                (flycheck-annotate--overlays nil)
-               (ov (flycheck-annotate-below-style errs eol t)))
-          (expect (line-number-at-pos (overlay-start ov)) :to-equal 2)
-          (expect (overlay-start ov)
-                  :to-equal (save-excursion (goto-char (point-min))
-                                            (line-beginning-position 2))))))
+               (ov (flycheck-annotate-below-style errs eol t))
+               (raw (overlay-get ov 'display)))
+          (expect (overlay-start ov) :to-equal eol)
+          (expect (overlay-end ov) :to-equal (1+ eol))
+          (expect (overlay-get ov 'before-string) :to-be nil)
+          ;; the cursor stays after the code, then the newline it stands in
+          ;; for, the block, and a newline to end it
+          (expect (get-text-property 0 'cursor raw) :to-be t)
+          (expect (string-prefix-p " \n" (substring-no-properties raw)) :to-be t)
+          (expect (string-suffix-p "\n" (substring-no-properties raw)) :to-be t)
+          ;; and it goes with the newline when the lines are joined
+          (save-excursion (goto-char eol) (delete-char 1))
+          (expect (overlay-buffer ov) :to-be nil))))
 
     (it "falls back to a leading newline on the buffer's last line"
       (flycheck-buttercup-with-temp-buffer
@@ -603,9 +617,9 @@ a newline, so key it back under the code line."
       ;; plain space carrying a `cursor' property.  That keeps C-e and typing
       ;; parked at the end of the code instead of the end of the annotation.  A
       ;; plain space is essential: the `cursor' property lands at the far end of
-      ;; the `sideline' `:align-to' stretch.  The multi-line `below' style keeps
-      ;; the cursor on the code line by hanging its block off the next line
-      ;; instead (see its own specs), so it is excluded here.
+      ;; the `sideline' `:align-to' stretch.  The multi-line `below' style
+      ;; anchors the cursor the same way, but in a `display' string (see its
+      ;; own specs), so it is excluded here.
       (flycheck-buttercup-with-temp-buffer
         (save-window-excursion
           (set-window-buffer (selected-window) (current-buffer))
