@@ -15574,16 +15574,35 @@ checker's pattern."
     (nconc (nreverse errors)
            (flycheck-parse-with-patterns output checker buffer))))
 
+(defun flycheck--go-vet-handle-suspicious (_checker _exit-status output)
+  "Disable `go-vet' when OUTPUT says there was no package to vet.
+
+Vetting the buffer's package needs a module around it, and one package
+in its directory; outside a module, or in a directory mixing packages,
+`go vet' explains itself instead of reporting, which is the buffer's
+setup rather than a parsing gap.  Anything else stays `suspicious'."
+  (if (string-match-p (rx bol "go: " (or "go.mod file not found"
+                                         "cannot find main module")
+                          (* nonl)
+                          (or eol ";"))
+                      (or output ""))
+      (cons 'disable (flycheck--fatal-exit-reason output))
+    (if (string-match-p (rx bol "found packages " (+ nonl) " and ") (or output ""))
+        (cons 'disable (flycheck--fatal-exit-reason output))
+      'suspicious)))
+
 (flycheck-define-checker go-vet
   "A Go syntax checker using the `go vet' command.
+
+Vets the buffer's whole package as saved on disk, since vet needs
+the package to resolve references between its files.
 
 See URL `https://go.dev/cmd/go/' and URL
 `https://pkg.go.dev/cmd/vet/'."
   :command ("go" "vet" "-json"
             (option "-tags=" flycheck-go-build-tags concat
                     flycheck-option-comma-separated-list)
-            (eval flycheck-go-vet-args)
-            (source ".go"))
+            (eval flycheck-go-vet-args))
   :error-parser flycheck-parse-go-vet
   :error-patterns
   ;; A compile error that stops the analyzers prints as text beside the
@@ -15591,6 +15610,11 @@ See URL `https://go.dev/cmd/go/' and URL
   ((error line-start "vet: " (file-name) ":" line ":" column ": "
           (message) line-end))
   :modes (go-mode go-ts-mode)
+  ;; The whole package is vetted, from the files on disk: vet given a
+  ;; single file treats it as a package of its own and reports every
+  ;; reference into a sibling file as undefined
+  :predicate flycheck-buffer-saved-p
+  :handle-suspicious flycheck--go-vet-handle-suspicious
   :next-checkers (go-build
                   go-test
                   ;; Fall back if `go build' or `go test' can be used

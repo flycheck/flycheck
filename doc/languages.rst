@@ -507,7 +507,8 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
    .. syntax-checker:: go-vet
 
-      Check Go for suspicious code with vet_.
+      Check Go for suspicious code with vet_.  The buffer's whole package is
+      vetted, from the files on disk, so the buffer has to be saved.
 
       .. defcustom:: flycheck-go-build-tags
 
