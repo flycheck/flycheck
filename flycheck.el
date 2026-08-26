@@ -11782,21 +11782,36 @@ Built from the diagnostic's `code', carrying its `codeDescription' href
           (href (plist-get (plist-get lsp :codeDescription) :href)))
       (if href (propertize id 'explainer-url href) id))))
 
-(defun flycheck-lsp--uri-to-path (uri)
-  "Convert a `file:' URI to a local file path.
+(defun flycheck-lsp--uri-to-path (uri &optional remote)
+  "Convert a `file:' URI to a file name.
 
 Percent-decoding and authority stripping are shared with the SARIF parser
 via `flycheck--file-uri-to-path'; this additionally trims the leading
 slash of a Windows drive URI (file:///c:/...).  A non-`file:' URI is
-returned unchanged."
+returned unchanged.
+
+A server serving files on a remote host names them as that host sees
+them.  REMOTE, a prefix as `file-remote-p' returns, is put back in front
+of the result, so that it names the file for Emacs rather than for the
+server.  Pass it wherever the answer is used as a file name or compared
+against one; leave it out where the URI is known to be local, such as a
+key into a server's own documents."
   (if (string-prefix-p "file://" uri)
       (let ((path (flycheck--file-uri-to-path uri)))
-        (if (string-match-p "\\`/[a-zA-Z]:" path) (substring path 1) path))
+        (concat remote
+                ;; A drive letter is a local Windows spelling; a remote
+                ;; host's path keeps its leading slash.
+                (if (and (not remote) (string-match-p "\\`/[a-zA-Z]:" path))
+                    (substring path 1)
+                  path)))
     uri))
 
 (defun flycheck-lsp--path-to-uri (path)
-  "Return a `file:' URI for the local PATH."
-  (let ((enc (url-hexify-string (expand-file-name path)
+  "Return a `file:' URI naming PATH as the server's host sees it.
+
+A remote PATH is reduced with `file-local-name': the server runs on that
+host and knows nothing of Emacs\='s remote file names."
+  (let ((enc (url-hexify-string (file-local-name (expand-file-name path))
                                 (cons ?/ url-unreserved-chars))))
     (concat "file://" (if (string-prefix-p "/" enc) enc (concat "/" enc)))))
 
@@ -11813,7 +11828,8 @@ directly to Flycheck's right-open end column."
          (start (plist-get range :start))
          (end (plist-get range :end)))
     (flycheck-related-location-new
-     :filename (and uri (flycheck-lsp--uri-to-path uri))
+     :filename (and uri (flycheck-lsp--uri-to-path
+                         uri (file-remote-p default-directory)))
      :line (and start (1+ (plist-get start :line)))
      :column (and start (1+ (plist-get start :character)))
      :end-line (and end (1+ (plist-get end :line)))
@@ -11876,7 +11892,8 @@ fix is applied right after."
            (dchanges
             (mapcar (lambda (tde)
                       (cons (flycheck-lsp--uri-to-path
-                             (plist-get (plist-get tde :textDocument) :uri))
+                             (plist-get (plist-get tde :textDocument) :uri)
+                             (file-remote-p default-directory))
                             (plist-get tde :edits)))
                     dchanges))
            ;; `changes' (legacy): a JSON object of uri -> edits, which jsonrpc
@@ -11887,7 +11904,8 @@ fix is applied right after."
                      collect (cons (flycheck-lsp--uri-to-path
                                     (if (keywordp uri)
                                         (substring (symbol-name uri) 1)
-                                      uri))
+                                      uri)
+                                    (file-remote-p default-directory))
                                    edits))))))
     (when (and this
                (= (length targets) 1)
@@ -12546,11 +12564,18 @@ the server down.  Return nil if the process could not be spawned at all."
          (stderr (get-buffer-create (format " *%s stderr*" name)))
          (server (flycheck-lsp--server-create :root root :command command
                                               :stderr stderr))
-         (proc (make-process
-                :name name :command command :connection-type 'pipe
-                :coding 'utf-8-emacs-unix :noquery t :stderr stderr)))
+         (proc nil))
     (condition-case err
-        (let ((conn (make-instance
+        (let ((conn (progn
+                      ;; Spawned inside the handler below: a program that
+                      ;; is missing signals here, and the stderr buffer
+                      ;; would otherwise be left behind.
+                      (setq proc (make-process
+                                  :name name :command command
+                                  :connection-type 'pipe
+                                  :coding 'utf-8-emacs-unix :noquery t
+                                  :stderr stderr))
+                      (make-instance
                      'jsonrpc-process-connection
                      :name name :process proc
                      :notification-dispatcher
@@ -12558,7 +12583,7 @@ the server down.  Return nil if the process could not be spawned at all."
                        (flycheck-lsp--handle-notification server method params))
                      :request-dispatcher
                      (lambda (_conn method params)
-                       (flycheck-lsp--handle-request server method params)))))
+                       (flycheck-lsp--handle-request server method params))))))
           (setf (flycheck-lsp--server-connection server) conn)
           (jsonrpc-async-request
            conn 'initialize (flycheck-lsp--initialize-params root)
@@ -12806,12 +12831,19 @@ handshake's completion re-triggers the check (see
 (defun flycheck-lsp--enabled-p ()
   "Return non-nil when the `flycheck-lsp' checker may run in the current buffer.
 
-That is, `flycheck-lsp-mode' is on, the buffer visits a file, and its
-major mode has a server in `flycheck-lsp-servers' whose program is
+That is, `flycheck-lsp-mode' is on, the buffer visits a local file, and
+its major mode has a server in `flycheck-lsp-servers' whose program is
 installed.  Used as the checker's predicate so `flycheck-lsp' is never selected
-unless the mode opted in and the server is actually available."
+unless the mode opted in and the server is actually available.
+
+A file on a remote host is declined.  The server would be looked for on
+that host but started on this one, so a buffer checked that way is
+served by whatever local program happens to share the name, reading file
+names that mean nothing to it.  Command checkers do run over TRAMP, and
+the buffer falls through to them."
   (and (bound-and-true-p flycheck-lsp-mode)
        buffer-file-name
+       (not (file-remote-p default-directory))
        (flycheck-lsp--available-command major-mode)
        t))
 

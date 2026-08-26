@@ -62,7 +62,17 @@
       (expect (flycheck-lsp--uri-to-path "file:///c:/x/y.rb")
               :to-equal "c:/x/y.rb"))
     (it "returns a non-file URI unchanged"
-      (expect (flycheck-lsp--uri-to-path "untitled:1") :to-equal "untitled:1")))
+      (expect (flycheck-lsp--uri-to-path "untitled:1") :to-equal "untitled:1"))
+    ;; A server on a remote host names files as that host sees them, so
+    ;; the answer has to be put back on that host to name a file Emacs
+    ;; can open or compare against the buffer's name.
+    (it "puts the remote host back when given one"
+      (expect (flycheck-lsp--uri-to-path "file:///home/u/a.rb" "/ssh:host:")
+              :to-equal "/ssh:host:/home/u/a.rb"))
+    (it "leaves a Windows drive alone on a remote host"
+      ;; A drive letter is a local spelling; a remote path keeps its slash.
+      (expect (flycheck-lsp--uri-to-path "file:///c:/x/y.rb" "/ssh:host:")
+              :to-equal "/ssh:host:/c:/x/y.rb")))
 
   (describe "flycheck-lsp--path-to-uri"
     ;; The round-trip normalizes through `expand-file-name' (which on Windows
@@ -75,7 +85,16 @@
     (it "round-trips a non-ASCII path with uri-to-path"
       (expect (flycheck-lsp--uri-to-path
                (flycheck-lsp--path-to-uri "/tmp/café.rb"))
-              :to-equal (expand-file-name "/tmp/café.rb"))))
+              :to-equal (expand-file-name "/tmp/café.rb")))
+    ;; The server knows nothing of Emacs's remote file names.
+    (it "names a remote path as the server's host sees it"
+      (expect (flycheck-lsp--path-to-uri "/ssh:host:/home/u/a.rb")
+              :to-equal "file:///home/u/a.rb"))
+    (it "round-trips a remote path through its host"
+      (expect (flycheck-lsp--uri-to-path
+               (flycheck-lsp--path-to-uri "/ssh:host:/home/u/a.rb")
+               "/ssh:host:")
+              :to-equal "/ssh:host:/home/u/a.rb")))
 
   (describe "flycheck-lsp--tags"
     (it "maps the LSP tag codes onto Flycheck's symbols"
@@ -247,6 +266,23 @@
                       "Fix it")))
             (expect (flycheck-fix-description fix) :to-equal "Fix it")
             (expect (length (flycheck-fix-edits fix)) :to-equal 1)))))
+
+    (it "builds a fix in a buffer on a remote host"
+      ;; The server reports the file it edits by its own path; unless that
+      ;; is put back on the buffer's host it never matches the buffer's
+      ;; name, and every quickfix is silently declined.
+      (flycheck-buttercup-with-temp-buffer
+        (setq buffer-file-name "/ssh:flycheck-nonexistent-host:/proj/a.el"
+              default-directory "/ssh:flycheck-nonexistent-host:/proj/")
+        (let ((fix (flycheck-lsp--workspace-edit-fix
+                    '(:documentChanges
+                      [(:textDocument (:uri "file:///proj/a.el")
+                        :edits [(:range (:start (:line 0 :character 0)
+                                         :end (:line 0 :character 3))
+                                 :newText "X")])])
+                    "Fix it")))
+          (expect (flycheck-fix-p fix) :to-be-truthy)
+          (expect (length (flycheck-fix-edits fix)) :to-equal 1))))
 
     (it "builds a fix from a legacy `changes' WorkspaceEdit"
       ;; jsonrpc decodes the changes object's URI keys to keywords
@@ -782,6 +818,25 @@
       (it "is a registered generic checker"
         (expect (flycheck-valid-checker-p 'flycheck-lsp) :to-be-truthy)
         (expect (flycheck-checker-get 'flycheck-lsp 'start) :to-be #'flycheck-lsp--start))
+
+      (it "declines a remote buffer"
+        ;; The server is looked for on the remote host but would be
+        ;; started on this one, so the buffer must fall through to the
+        ;; command checkers, which do run over TRAMP.
+        (flycheck-buttercup-with-temp-buffer
+          (setq buffer-file-name "/ssh:flycheck-nonexistent-host:/home/u/a.rb"
+                default-directory "/ssh:flycheck-nonexistent-host:/home/u/")
+          (let ((flycheck-lsp-mode t))
+            (expect (flycheck-lsp--enabled-p) :to-be nil))))
+
+      (it "cleans up after a server program that is not installed"
+        ;; The spawn has to fail inside the handler that tears the stderr
+        ;; buffer down, and the caller has to see nil rather than a signal.
+        (let ((before (length (buffer-list))))
+          (expect (flycheck-lsp--start-server
+                   default-directory '("flycheck-no-such-program-xyz"))
+                  :to-be nil)
+          (expect (length (buffer-list)) :to-equal before)))
 
       (it "does not define an `lsp' checker, so it never clobbers lsp-mode's"
         ;; lsp-mode has owned the `lsp' checker name for years; a colliding
