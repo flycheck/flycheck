@@ -8,6 +8,7 @@
 
 ### Changes
 
+- [#2373](https://github.com/flycheck/flycheck/pull/2373): `go-staticcheck` errors carry the end position staticcheck reports, so a finding highlights the expression it is about rather than a single point; a finding that spans nothing, such as an unused declaration, stays a point.
 - [#2357](https://github.com/flycheck/flycheck/pull/2357): `haskell-ghc` reads GHC 9.10's JSON diagnostics when the compiler has them (probed per binary): errors carry precise spans and GHC-NNNNN ids that `C-c ! e` explains via the Haskell error index, and JSON-reading checkers in general no longer choke on text lines that merely start with a bracket, like GHC's compilation progress.
 - [#2356](https://github.com/flycheck/flycheck/pull/2356): `haskell-hlint` reads hlint's JSON ideas: hint names become error ids, spans get right-open end columns, and an idea with a replacement carries a machine-applicable fix, applied with `C-c ! f`.
 - [#2355](https://github.com/flycheck/flycheck/pull/2355): `go-vet` reads `go vet -json`: analyzer findings carry the analyzer's name as their id and byte-precise positions with end columns, and a compile error that stops the analyzers is reported at its real position as an error rather than a warning.
