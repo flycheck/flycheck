@@ -52,6 +52,38 @@
                         absolute-fn
                         absolute-fn
                         (flycheck-buttercup-resource-filename
-                         "global-mode-dummy.el"))))))))
+                         "global-mode-dummy.el"))))))
+
+    (describe "on a remote host"
+
+      ;; A checker running on the remote host reports host-local names.
+      ;; Expanding those against the remote working directory has to keep
+      ;; the host, or Flycheck opens the same path on the local machine.
+      (it "keeps the host when expanding an error's file name"
+        (let ((errors (list (flycheck-error-new :filename "/home/u/a.c"))))
+          (expect (flycheck-error-filename
+                   (car (flycheck-fill-and-expand-error-file-names
+                         errors "/ssh:host:/home/u/")))
+                  :to-equal "/ssh:host:/home/u/a.c")))
+
+      (it "keeps the host when expanding a related location"
+        (let* ((relation (flycheck-related-location-new
+                          :filename "/home/u/other.c" :line 3))
+               (errors (list (flycheck-error-new :filename "/home/u/a.c"
+                                                 :relations (list relation)))))
+          (flycheck-fill-and-expand-error-file-names errors "/ssh:host:/home/u/")
+          (expect (flycheck-related-location-filename relation)
+                  :to-equal "/ssh:host:/home/u/other.c")))
+
+      ;; The project-checker twin of the above: cargo reports absolute
+      ;; paths for anything outside the workspace, such as a registry
+      ;; dependency, and those must not resolve on the local machine.
+      (it "keeps the host when expanding a project checker's error"
+        (let ((errors (list (flycheck-error-new
+                             :filename "/home/u/.cargo/registry/src/x.rs"))))
+          (expect (flycheck-error-filename
+                   (car (flycheck--project-expand-error-files
+                         errors "/ssh:host:/home/u/proj/")))
+                  :to-equal "/ssh:host:/home/u/.cargo/registry/src/x.rs"))))))
 
 ;;; test-status-reporting.el ends here
