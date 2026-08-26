@@ -322,6 +322,14 @@ whose language server you don't have.
    Enable ``flycheck-lsp-mode`` in every buffer whose major mode has an
    installed server in `flycheck-lsp-servers`.
 
+.. note::
+
+   A file on a remote host is left to the command checkers, which do run over
+   TRAMP.  The native client would look for the server on the remote host but
+   start it on this one, so it is declined rather than run against the wrong
+   machine.  ``flycheck-eglot-mode`` is the way to get LSP diagnostics for a
+   remote file: Eglot runs the server on the right host.
+
 Which LSP integration should I use?
 -----------------------------------
 
@@ -530,7 +538,9 @@ errors.  If you want those features too, run the server through Eglot and use
 ``flycheck-eglot-mode``; if you only want diagnostics, a dedicated linter is
 lighter than a language server.
 
-Two caveats if you do point it at a full server: some report diagnostics only
-through LSP *pull* requests rather than pushing them, which the ``flycheck-lsp`` checker
-does not yet support (it will report nothing), and some need extra
-``initializationOptions`` or workspace configuration to lint the way you expect.
+One caveat if you do point it at a full server: some need extra
+``initializationOptions`` or workspace configuration to lint the way you
+expect.  Servers that report diagnostics only through LSP *pull* requests,
+rather than pushing them, do work - a check asks such a server for the
+buffer's diagnostics, and `flycheck-check-project` asks it for the whole
+workspace's.
