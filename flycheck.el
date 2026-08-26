@@ -95,7 +95,7 @@
 ;; Tell the byte compiler about autoloaded functions from packages
 (declare-function org-lint "org-lint" (&optional arg))
 ;; Emacs 30 and newer; guarded with `fboundp' where it is called
-(declare-function trusted-content-p "subr" ())
+(declare-function trusted-content-p "files" ())
 (declare-function xref-push-marker-stack "xref" (&optional m))
 
 
