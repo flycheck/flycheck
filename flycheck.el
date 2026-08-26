@@ -11165,7 +11165,12 @@ information about staticcheck."
           :id .code
           :checker checker
           :buffer buffer
-          :filename .location.file)
+          :filename .location.file
+          ;; A finding that spans nothing, such as an unused
+          ;; declaration, still carries an `end' object, with an empty
+          ;; file and zeroed position.  Report it as a point.
+          :end-line (and .end.line (/= .end.line 0) .end.line)
+          :end-column (and .end.column (/= .end.column 0) .end.column))
          errors)))
     (nreverse errors)))
 
