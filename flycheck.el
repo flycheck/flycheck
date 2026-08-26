@@ -12227,8 +12227,15 @@ the root does not change over a buffer's life."
                 (expand-file-name default-directory)))))
 
 (defun flycheck-lsp--buffer-uri ()
-  "Return the `file:' URI of the current buffer's file, or nil."
-  (and buffer-file-name (flycheck-lsp--path-to-uri buffer-file-name)))
+  "Return the `file:' URI of the current buffer's file, or nil.
+
+A file on a remote host has none: reducing its name for the server
+would spell it exactly like the local file of that name, and the two
+buffers would then share a document.  The checker declines those
+buffers anyway, see `flycheck-lsp--enabled-p'."
+  (and buffer-file-name
+       (not (file-remote-p buffer-file-name))
+       (flycheck-lsp--path-to-uri buffer-file-name)))
 
 (defun flycheck-lsp--doc-key (uri)
   "Return the canonical key (an absolute path) for the document URI.
@@ -12236,7 +12243,11 @@ the root does not change over a buffer's life."
 The client and the server may spell the same file's URI differently (a
 re-encoded percent escape, an authority component, a Windows drive
 case).  Keying open documents and their diagnostics on the decoded,
-expanded path -- rather than the raw URI -- makes both sides agree."
+expanded path, rather than the raw URI, makes both sides agree.
+
+URI is always a server's, and a server only ever serves files local to
+the host it runs on, so the key is a plain local path with no remote
+prefix to put back."
   (expand-file-name (flycheck-lsp--uri-to-path uri)))
 
 (defun flycheck-lsp--server-live-p (server)
@@ -12579,32 +12590,33 @@ the server down.  Return nil if the process could not be spawned at all."
   (add-hook 'kill-emacs-hook #'flycheck-lsp--shutdown-all)
   (let* ((default-directory root)
          (name (format "flycheck-lsp:%s" (car command)))
-         (stderr (get-buffer-create (format " *%s stderr*" name)))
+         ;; Named per server, not per program: two roots running the same
+         ;; program would otherwise share a buffer, and tearing one down
+         ;; would take the other's stderr pipe with it.
+         (stderr (get-buffer-create (format " *%s %s stderr*" name root)))
          (server (flycheck-lsp--server-create :root root :command command
                                               :stderr stderr))
          (proc nil))
     (condition-case err
-        (let ((conn (progn
-                      ;; Spawned inside the handler below: a program that
-                      ;; is missing signals here, and the stderr buffer
-                      ;; would otherwise be left behind.
-                      (setq proc (make-process
-                                  :name name :command command
-                                  :connection-type 'pipe
-                                  :coding 'utf-8-emacs-unix :noquery t
-                                  :stderr stderr))
-                      (make-instance
-                     'jsonrpc-process-connection
-                     :name name :process proc
-                     :notification-dispatcher
-                     (lambda (_conn method params)
-                       (flycheck-lsp--handle-notification server method params))
-                     :request-dispatcher
-                     (lambda (_conn method params)
-                       (flycheck-lsp--handle-request server method params))))))
-          (setf (flycheck-lsp--server-connection server) conn)
+        (progn
+          ;; Spawned inside the handler below: a missing program signals
+          ;; here, and the stderr buffer would be left behind.
+          (setq proc (make-process
+                      :name name :command command :connection-type 'pipe
+                      :coding 'utf-8-emacs-unix :noquery t :stderr stderr))
+          (setf (flycheck-lsp--server-connection server)
+                (make-instance
+                 'jsonrpc-process-connection
+                 :name name :process proc
+                 :notification-dispatcher
+                 (lambda (_conn method params)
+                   (flycheck-lsp--handle-notification server method params))
+                 :request-dispatcher
+                 (lambda (_conn method params)
+                   (flycheck-lsp--handle-request server method params))))
           (jsonrpc-async-request
-           conn 'initialize (flycheck-lsp--initialize-params root)
+           (flycheck-lsp--server-connection server)
+           'initialize (flycheck-lsp--initialize-params root)
            :timeout flycheck-lsp-initialize-timeout
            :success-fn (lambda (result)
                          (flycheck-lsp--on-initialized server result))
@@ -12614,7 +12626,11 @@ the server down.  Return nil if the process could not be spawned at all."
            :timeout-fn (lambda () (flycheck-lsp--init-failed server "timeout")))
           server)
       (error
-       (ignore-errors (delete-process proc))
+       ;; `delete-process' reads nil as the current buffer's process, so
+       ;; a spawn that never happened must not reach it.
+       (when-let* ((conn (flycheck-lsp--server-connection server)))
+         (ignore-errors (jsonrpc-shutdown conn 'cleanup-buffers)))
+       (when proc (ignore-errors (delete-process proc)))
        (ignore-errors (kill-buffer stderr))
        (message "Flycheck LSP: %s failed to start: %s"
                 (car command) (error-message-string err))

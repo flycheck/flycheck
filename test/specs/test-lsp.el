@@ -822,12 +822,33 @@
       (it "declines a remote buffer"
         ;; The server is looked for on the remote host but would be
         ;; started on this one, so the buffer must fall through to the
-        ;; command checkers, which do run over TRAMP.
+        ;; command checkers, which do run over TRAMP.  The local
+        ;; assertion is the control: without it a mode with no
+        ;; configured server would pass this either way.
         (flycheck-buttercup-with-temp-buffer
-          (setq buffer-file-name "/ssh:flycheck-nonexistent-host:/home/u/a.rb"
-                default-directory "/ssh:flycheck-nonexistent-host:/home/u/")
-          (let ((flycheck-lsp-mode t))
+          (delay-mode-hooks (ruby-mode))
+          (let ((flycheck-lsp-mode t)
+                (flycheck-executable-find #'identity))
+            (setq buffer-file-name "/proj/a.rb" default-directory "/proj/")
+            (expect (flycheck-lsp--enabled-p) :to-be-truthy)
+            (setq buffer-file-name "/ssh:host:/proj/a.rb"
+                  default-directory "/ssh:host:/proj/")
             (expect (flycheck-lsp--enabled-p) :to-be nil))))
+
+      (it "gives a remote buffer no document URI"
+        ;; Reducing a remote name for the server spells it exactly like
+        ;; the local file of that name, so the two buffers would share a
+        ;; document and killing one would close the other's.
+        (flycheck-buttercup-with-temp-buffer
+          (setq buffer-file-name "/sudo::/etc/hosts")
+          (expect (flycheck-lsp--buffer-uri) :to-be nil))
+        (flycheck-buttercup-with-temp-buffer
+          (setq buffer-file-name "/etc/hosts")
+          ;; Windows expands this against the current drive, so match the
+          ;; tail rather than the whole URI.
+          (let ((uri (flycheck-lsp--buffer-uri)))
+            (expect uri :to-be-truthy)
+            (expect (string-suffix-p "/etc/hosts" uri) :to-be-truthy))))
 
       (it "cleans up after a server program that is not installed"
         ;; The spawn has to fail inside the handler that tears the stderr
@@ -837,6 +858,22 @@
                    default-directory '("flycheck-no-such-program-xyz"))
                   :to-be nil)
           (expect (length (buffer-list)) :to-equal before)))
+
+      (it "leaves the current buffer's own process alone when that fails"
+        ;; The spawn never happened, so `proc' is nil, and
+        ;; `delete-process' reads nil as the current buffer's process.
+        (let* ((buffer (generate-new-buffer "flycheck-lsp-victim"))
+               (victim (start-process "flycheck-lsp-victim" buffer
+                                      "sleep" "30")))
+          (set-process-query-on-exit-flag victim nil)
+          (unwind-protect
+              (with-current-buffer buffer
+                (expect (flycheck-lsp--start-server
+                         default-directory '("flycheck-no-such-program-xyz"))
+                        :to-be nil)
+                (expect (process-live-p victim) :to-be-truthy))
+            (ignore-errors (delete-process victim))
+            (kill-buffer buffer))))
 
       (it "does not define an `lsp' checker, so it never clobbers lsp-mode's"
         ;; lsp-mode has owned the `lsp' checker name for years; a colliding
