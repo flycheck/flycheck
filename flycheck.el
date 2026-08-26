@@ -1712,8 +1712,8 @@ to a number and return it.  Otherwise return nil."
   "Expand FILENAME against DIRECTORY, honoring a remote DIRECTORY.
 
 Like `expand-file-name', but when DIRECTORY is remote and
-FILENAME is a host-local path -- as a checker running on the
-remote host over TRAMP reports -- the result names the file on
+FILENAME is a host-local path, as a checker running on the
+remote host over TRAMP reports, the result names the file on
 that host, so it compares against the remote temporary files and
 opens the right file when jumped to."
   (if-let* ((remote (and (not (file-remote-p filename))
@@ -13930,7 +13930,8 @@ See URL `https://clang.llvm.org/'."
                                         ; location
             "-fno-diagnostics-show-option" ; Do not show the corresponding
                                         ; warning group
-            "-iquote" (eval (flycheck-c/c++-quoted-include-directory))
+            "-iquote" (eval (file-local-name
+                             (flycheck-c/c++-quoted-include-directory)))
             (option "-std=" flycheck-clang-language-standard concat)
             (option-flag "-pedantic" flycheck-clang-pedantic)
             (option-flag "-pedantic-errors" flycheck-clang-pedantic-errors)
@@ -14168,7 +14169,8 @@ See URL `https://gcc.gnu.org/'."
   :command ("gcc"
             "-fshow-column"
             (eval (flycheck--gcc-sarif-flag))
-            "-iquote" (eval (flycheck-c/c++-quoted-include-directory))
+            "-iquote" (eval (file-local-name
+                             (flycheck-c/c++-quoted-include-directory)))
             (option "-std=" flycheck-gcc-language-standard concat)
             (option-flag "-pedantic" flycheck-gcc-pedantic)
             (option-flag "-pedantic-errors" flycheck-gcc-pedantic-errors)
@@ -14668,7 +14670,7 @@ Requires DMD 2.066 or newer.  See URL `https://dlang.org/'."
             "-o-"                       ; Don't generate an object file
             "-vcolumns"                 ; Add columns in output
             "-wi" ; Compilation will continue even if there are warnings
-            (eval (concat "-I" (flycheck-d-base-directory)))
+            (eval (concat "-I" (file-local-name (flycheck-d-base-directory))))
             (option-list "-I" flycheck-dmd-include-path concat)
             (eval flycheck-dmd-args)
             (source ".d"))
@@ -14788,9 +14790,10 @@ See `https://credo-ci.org/'."
    `(progn
       (require 'bytecomp)
       (setq byte-compile-root-dir
-            ,(if buffer-file-name
-                 (file-name-directory buffer-file-name)
-               default-directory)))))
+            ,(file-local-name
+              (if buffer-file-name
+                  (file-name-directory buffer-file-name)
+                default-directory))))))
 
 (defconst flycheck-emacs-lisp-check-form
   (flycheck-prepare-emacs-lisp-form
@@ -14975,7 +14978,11 @@ See Info Node `(elisp)Byte Compilation'."
              (let ((path (pcase flycheck-emacs-lisp-load-path
                            (`inherit load-path)
                            (p (mapcar #'expand-file-name p)))))
-               (flycheck-prepend-with-option "--directory" path)))
+               ;; The remote Emacs cannot resolve a TRAMP name.
+               (flycheck-prepend-with-option
+                "--directory"
+                (mapcar (lambda (d) (file-local-name (or d default-directory)))
+                        path))))
             (option "--eval" flycheck-emacs-lisp-package-user-dir nil
                     flycheck-option-emacs-lisp-package-user-dir)
             (option "--eval" flycheck-emacs-lisp-initialize-packages nil
@@ -15496,7 +15503,8 @@ Uses GCC's Fortran compiler gfortran.  See URL
             ;; Do not show the corresponding warning group
             "-fno-diagnostics-show-option"
             ;; Fortran has similar include processing as C/C++
-            "-iquote" (eval (flycheck-c/c++-quoted-include-directory))
+            "-iquote" (eval (file-local-name
+                             (flycheck-c/c++-quoted-include-directory)))
             (option "-std=" flycheck-gfortran-language-standard concat)
             (option "-f" flycheck-gfortran-layout concat
                     flycheck-option-gfortran-layout)
@@ -16048,8 +16056,9 @@ See URL `https://github.com/commercialhaskell/stack'."
             (option-list "-i" flycheck-ghc-search-path concat)
             (eval (concat
                    "-i"
-                   (flycheck-module-root-directory
-                    (flycheck-find-in-buffer flycheck-haskell-module-re))))
+                   (file-local-name
+                    (flycheck-module-root-directory
+                     (flycheck-find-in-buffer flycheck-haskell-module-re)))))
             (eval flycheck-ghc-args)
             "-x" (eval
                   (pcase major-mode
@@ -16167,8 +16176,9 @@ See URL `https://www.haskell.org/ghc/'."
             ;; properly resolve local imports
             (eval (concat
                    "-i"
-                   (flycheck-module-root-directory
-                    (flycheck-find-in-buffer flycheck-haskell-module-re))))
+                   (file-local-name
+                    (flycheck-module-root-directory
+                     (flycheck-find-in-buffer flycheck-haskell-module-re)))))
             (option-list "-X" flycheck-ghc-language-extensions concat)
             (eval flycheck-ghc-args)
             "-x" (eval
@@ -18764,7 +18774,8 @@ Requires Sphinx 1.2 or newer.  See URL `https://sphinx-doc.org'."
   :command ("sphinx-build" "-b" "pseudoxml"
             "-q" "-N"                   ; Reduced output and no colors
             (option-flag "-n" flycheck-sphinx-warn-on-missing-references)
-            (eval (flycheck-locate-sphinx-source-directory))
+            (eval (when-let* ((dir (flycheck-locate-sphinx-source-directory)))
+                    (file-local-name dir)))
             temporary-directory         ; Redirect the output to a temporary
                                         ; directory
             source-original)            ; Sphinx needs the original document

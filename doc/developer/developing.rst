@@ -337,6 +337,41 @@ external program and parsing its output, checking for a plugin, etc.).
    serve as useful examples you can draw from, and all core functions are
    documented.
 
+Paths on the command line
+-------------------------
+
+Flycheck checks remote files too.  When the buffer's file lives on another
+machine, reached over TRAMP, the checker runs *there*, so every path in
+``:command`` has to be a plain path on that host: ``/home/me/src`` rather than
+``/ssh:build-box:/home/me/src``, which the remote tool cannot resolve.
+
+The built-in substitutions handle this for you.  ``source``,
+``source-inplace``, ``source-original``, ``temporary-directory``,
+``temporary-file-name`` and ``config-file`` all reduce their result before it
+reaches the command line, so a checker built from those needs nothing extra.
+
+What needs care is a path you compute yourself, in an ``eval`` form or an
+option filter.  Pass it through ``file-local-name``, and use
+``flycheck-buffer-file-local-name`` in place of ``buffer-file-name``:
+
+.. code-block:: elisp
+
+   ;; Wrong: hands the remote tool a TRAMP file name.
+   (eval (concat "-I" (my-include-directory)))
+
+   ;; Right.
+   (eval (concat "-I" (file-local-name (my-include-directory))))
+
+This applies to a path buried inside a larger argument as well, such as a
+directory interpolated into a ``--eval`` expression.  A ``:working-directory``
+function is the exception: it is not part of the command line, and must return
+the full remote name so Flycheck runs the process on the right host.
+
+A spec substitutes the arguments of every checker in ``flycheck-checkers``
+against a remote buffer and fails if any of them still carries a remote
+prefix, so a slip here shows up as a test failure rather than a puzzling bug
+report.
+
 Suggesting fixes
 ----------------
 
