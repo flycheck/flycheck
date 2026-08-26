@@ -1718,7 +1718,16 @@ that host, so it compares against the remote temporary files and
 opens the right file when jumped to."
   (if-let* ((remote (and (not (file-remote-p filename))
                          (file-remote-p directory))))
-      (concat remote (expand-file-name filename (file-local-name directory)))
+      (let ((expanded (expand-file-name filename (file-local-name directory))))
+        (concat remote
+                ;; On Windows `expand-file-name' stamps the current drive
+                ;; onto an absolute path.  This path belongs to the remote
+                ;; host, which has no such drive, so drop a letter that was
+                ;; not in FILENAME to begin with.
+                (if (and (not (string-match-p "\\`[a-zA-Z]:" filename))
+                         (string-match "\\`[a-zA-Z]:\\(.*\\)" expanded))
+                    (match-string 1 expanded)
+                  expanded)))
     (expand-file-name filename directory)))
 
 (defun flycheck-buffer-file-local-name (&optional fallback)
@@ -5730,8 +5739,12 @@ everything by file.  Returns the errors kept."
     (cl-flet ((resolve (file)
                 (or (gethash file truenames)
                     (puthash file
-                             (let ((absolute (expand-file-name file directory)))
-                               (or (ignore-errors (file-truename absolute))
+                             (let ((absolute (flycheck--expand-file-name file directory)))
+                               ;; A remote true name costs a round trip per
+                               ;; path, and the remote spelling is already
+                               ;; exact, as the project keys assume.
+                               (or (and (not (file-remote-p absolute))
+                                        (ignore-errors (file-truename absolute)))
                                    absolute))
                              truenames))))
       (dolist (err errors)
@@ -5756,7 +5769,7 @@ Return ERRORS, modified in-place."
               (when-let* ((filename (flycheck-related-location-filename
                                      relation)))
                 (setf (flycheck-related-location-filename relation)
-                      (expand-file-name filename directory))))
+                      (flycheck--expand-file-name filename directory))))
             (setf (flycheck-error-filename err)
                   (if-let* ((filename (flycheck-error-filename err)))
                       (flycheck--expand-file-name filename directory)
