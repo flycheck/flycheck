@@ -223,9 +223,13 @@
       '(7 17 warning "unnecessary conversion"))
     (flycheck-buttercup-def-parse-test go-staticcheck "language/go/staticcheck/main.go"
       ;; One JSON document per finding, with the check's code as the id
-      '(8 6 error "unnecessary assignment to the blank identifier" :id "S1005")
+      ;; and the span staticcheck reports alongside the location
+      '(8 6 error "unnecessary assignment to the blank identifier" :id "S1005"
+          :end-line 8 :end-column 7)
       '(12 39 error "calling strings.Replace with n == 0 will return no results, did you mean -1?"
-           :id "SA1018")
+           :id "SA1018" :end-line 12 :end-column 40)
+      ;; An unused declaration spans nothing, and its `end' is zeroed
+      ;; rather than absent, so it stays a point
       '(16 6 error "func unused is unused" :id "U1000"))))
 
 ;;; test-go.el ends here
