@@ -1,0 +1,1 @@
+test/resources/language/go/unconvert/main.go:7:17: unnecessary conversion

@@ -1,0 +1,2 @@
+test/resources/language/go/errcheck/main.go:7:9:	f.Close()
+test/resources/language/go/errcheck/main.go:9:9:	os.Stat("enoent")
