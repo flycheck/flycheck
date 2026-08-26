@@ -1,0 +1,6 @@
+# build
+./main.go:10:17: cannot use 1 (untyped int constant) as string value in variable declaration
+./main.go:11:22: not enough arguments in call to pair
+	have (number)
+	want (int, int)
+./main.go:12:2: undefined: undefined

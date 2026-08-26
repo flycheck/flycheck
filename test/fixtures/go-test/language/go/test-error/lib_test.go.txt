@@ -1,0 +1,2 @@
+# testerror [testerror.test]
+./lib_test.go:6:2: undefined: fmt

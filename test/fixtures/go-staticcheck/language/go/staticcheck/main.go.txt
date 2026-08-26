@@ -1,0 +1,3 @@
+{"code":"S1005","severity":"error","location":{"file":"test/resources/language/go/staticcheck/main.go","line":8,"column":6},"end":{"file":"test/resources/language/go/staticcheck/main.go","line":8,"column":7},"message":"unnecessary assignment to the blank identifier"}
+{"code":"SA1018","severity":"error","location":{"file":"test/resources/language/go/staticcheck/main.go","line":12,"column":39},"end":{"file":"test/resources/language/go/staticcheck/main.go","line":12,"column":40},"message":"calling strings.Replace with n == 0 will return no results, did you mean -1?"}
+{"code":"U1000","severity":"error","location":{"file":"test/resources/language/go/staticcheck/main.go","line":16,"column":6},"end":{"file":"","line":0,"column":0},"message":"func unused is unused"}
