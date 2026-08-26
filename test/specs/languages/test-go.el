@@ -200,6 +200,32 @@
       ;; none of the undefined references vet reports about a file vetted
       ;; alone (the buffer view then keeps only its own file's warnings)
       '(6 14 warning "fmt.Printf format %d has arg \"s\" of wrong type string"
-          :id "printf" :end-line 6 :end-column 16))))
+          :id "printf" :end-line 6 :end-column 16))
+    (flycheck-buttercup-def-parse-test go-build "language/go/build/main.go"
+      ;; The compiler names the package on a line of its own, which no
+      ;; pattern claims, and folds the detail of a call-site mismatch
+      ;; onto tab-indented continuation lines that belong to the message
+      '(10 17 error "cannot use 1 (untyped int constant) as string value in variable declaration")
+      '(11 22 error "not enough arguments in call to pair
+	have (number)
+	want (int, int)")
+      '(12 2 error "undefined: undefined"))
+    (flycheck-buttercup-def-parse-test go-test "language/go/test-error/lib_test.go"
+      ;; `go test -c' compiles the test binary, so the package header
+      ;; names the test package rather than the package under test
+      '(6 2 error "undefined: fmt"))
+    (flycheck-buttercup-def-parse-test go-errcheck "language/go/errcheck/main.go"
+      ;; errcheck prints the offending expression, which the error filter
+      ;; turns into a sentence
+      '(7 9 warning "Ignored `error` returned from `f.Close()`")
+      '(9 9 warning "Ignored `error` returned from `os.Stat(\"enoent\")`"))
+    (flycheck-buttercup-def-parse-test go-unconvert "language/go/unconvert/main.go"
+      '(7 17 warning "unnecessary conversion"))
+    (flycheck-buttercup-def-parse-test go-staticcheck "language/go/staticcheck/main.go"
+      ;; One JSON document per finding, with the check's code as the id
+      '(8 6 error "unnecessary assignment to the blank identifier" :id "S1005")
+      '(12 39 error "calling strings.Replace with n == 0 will return no results, did you mean -1?"
+           :id "SA1018")
+      '(16 6 error "func unused is unused" :id "U1000"))))
 
 ;;; test-go.el ends here
