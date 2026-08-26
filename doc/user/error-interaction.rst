@@ -175,8 +175,9 @@ clear the last Flycheck error message from the minibuffer:
 
 .. seealso::
 
-   :flyc:`flycheck-pos-tip`
-      A Flycheck extension to display errors in a GUI popup.
+   :mode:`flycheck-annotate`
+      Show the error messages next to the code they refer to, instead of in
+      the echo area.
 
 Additionally Flycheck shows errors in a GUI tooltip whenever you hover an error
 location with the mouse pointer.  By default the tooltip contains the messages
