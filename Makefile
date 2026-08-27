@@ -104,7 +104,7 @@ compile:
 
 .PHONY: specs
 specs: compile
-	$(EASK) exec buttercup -L . -L test -L test/specs test/specs
+	$(EASK) exec buttercup -p '$(PATTERN)' -L . -L test -L test/specs test/specs
 
 # Times the hot paths; nothing asserts, the numbers are for comparing a
 # branch against master on the same machine.
