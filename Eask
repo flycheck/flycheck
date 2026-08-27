@@ -33,9 +33,10 @@
 
  ;; Various modes for use in the unit tests
  (depends-on "adoc-mode")
- ;; bazel-mode requires Emacs 29; its checker specs skip without the
- ;; buildifier binary anyway, so just drop it on older versions
- (when (>= emacs-major-version 29)
+ ;; bazel-mode moved its floor to Emacs 30.1, and `eask upgrade' fails
+ ;; the whole install when it cannot satisfy that.  Its checker specs
+ ;; skip without the buildifier binary anyway, so drop it on older ones.
+ (when (>= emacs-major-version 30)
    (depends-on "bazel"))
  (depends-on "coffee-mode")
  (depends-on "cperl-mode")
