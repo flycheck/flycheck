@@ -2,11 +2,12 @@
 ;;; Code:
 (require 'flycheck-buttercup)
 (require 'test-helpers)
+(require 'markdown-ts-mode nil t)
 
 (describe "Language Markdown"
   (flycheck-buttercup-def-checker-test markdown-markdownlint-cli markdown nil
     (flycheck-buttercup-should-syntax-check
-     "language/markdown.md" 'markdown-mode
+     "language/markdown.md" '(markdown-mode markdown-ts-mode)
      '(1 nil error "First line in a file should be a top-level heading [Context: \"## Second Header First\"]"
          :id "MD041/first-line-heading/first-line-h1" :checker markdown-markdownlint-cli)
      '(3 nil error "Multiple consecutive blank lines [Expected: 1; Actual: 2]"
@@ -18,7 +19,7 @@
     (let ((flycheck-disabled-checkers '(markdown-markdownlint-cli))
           (flycheck-markdown-markdownlint-cli2-config nil))
       (flycheck-buttercup-should-syntax-check
-       "language/markdown.md" 'markdown-mode
+       "language/markdown.md" '(markdown-mode markdown-ts-mode)
        '(1 nil error "First line in a file should be a top-level heading [Context: \"## Second Header First\"]"
            :id "MD041/first-line-heading/first-line-h1" :checker markdown-markdownlint-cli2)
        '(3 nil error "Multiple consecutive blank lines [Expected: 1; Actual: 2]"
@@ -29,7 +30,7 @@
   (flycheck-buttercup-def-checker-test markdown-mdl markdown nil
     (let ((flycheck-disabled-checkers '(markdown-markdownlint-cli markdown-markdownlint-cli2 markdown-pymarkdown)))
       (flycheck-buttercup-should-syntax-check
-       "language/markdown.md" 'markdown-mode
+       "language/markdown.md" '(markdown-mode markdown-ts-mode)
        '(1 nil error "First header should be a top level header"
            :id "MD002" :checker markdown-mdl)
        '(3 nil error "Multiple consecutive blank lines"
@@ -40,7 +41,7 @@
   (flycheck-buttercup-def-checker-test markdown-pymarkdown markdown nil
     (let ((flycheck-disabled-checkers '(markdown-markdownlint-cli markdown-markdownlint-cli2 markdown-mdl)))
       (flycheck-buttercup-should-syntax-check
-       "language/markdown.md" 'markdown-mode
+       "language/markdown.md" '(markdown-mode markdown-ts-mode)
        '(1 nil error "Headings should be surrounded by blank lines. [Expected: 1; Actual: 2; Below] (blanks-around-headings,blanks-around-headers)"
            :id "MD022" :checker markdown-pymarkdown)
        '(1 nil error "First line in file should be a top level heading (first-line-heading,first-line-h1)"

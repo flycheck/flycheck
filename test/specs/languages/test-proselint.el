@@ -2,6 +2,7 @@
 ;;; Code:
 (require 'flycheck-buttercup)
 (require 'test-helpers)
+(require 'markdown-ts-mode nil t)
 
 (describe "Language Proselint"
 
@@ -34,7 +35,7 @@
     (let ((flycheck-disabled-checkers '(markdown-markdownlint-cli markdown-markdownlint-cli2 markdown-mdl markdown-pymarkdown)))
       (flycheck-buttercup-with-env '(("LC_ALL" . nil))
         (flycheck-buttercup-should-syntax-check
-         "language/text/text.txt" '(text-mode markdown-mode)
+         "language/text/text.txt" '(text-mode markdown-mode markdown-ts-mode)
          '(1 7 warning "Substitute 'damn' every time you're inclined to write 'very'; your editor will delete it and the writing will be just as it should be."
              :id "weasel_words.very"
              :checker proselint
