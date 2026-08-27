@@ -76,7 +76,11 @@ endif
 .PHONY: init
 init:
 	$(EASK) install-deps --dev
-	$(EASK) upgrade
+# Opportunistic: install-deps has already satisfied everything Eask asks
+# for, and an upgrade that cannot be satisfied must not fail the build.
+# A dependency raising its Emacs floor otherwise breaks every job on an
+# older Emacs, without a commit landing here.
+	-$(EASK) upgrade
 
 .PHONY: clean
 clean:
