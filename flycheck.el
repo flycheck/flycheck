@@ -12055,6 +12055,7 @@ Shared by the `flycheck-lsp' and `eglot-check' bridges."
     (css-mode "biome" "lsp-proxy")
     (css-ts-mode "biome" "lsp-proxy")
     (markdown-mode "harper-ls" "--stdio")
+    (markdown-ts-mode "harper-ls" "--stdio")
     (gfm-mode "harper-ls" "--stdio"))
   "Alist mapping a major mode to a diagnostics LSP server command.
 
@@ -17406,7 +17407,13 @@ See URL `https://proselint.com/'."
             (eval (flycheck--proselint-args)))
   :standard-input t
   :error-parser flycheck-proselint-parse-errors
-  :modes (text-mode markdown-mode gfm-mode message-mode org-mode rst-mode))
+  :modes (text-mode
+          markdown-mode
+          markdown-ts-mode
+          gfm-mode
+          message-mode
+          org-mode
+          rst-mode))
 
 (flycheck-def-option-var flycheck-protoc-import-path nil protobuf-protoc
   "A list of directories to resolve import directives.
@@ -18544,7 +18551,7 @@ See URL `https://github.com/igorshubovych/markdownlint-cli'."
             source)
   :error-parser flycheck-parse-markdownlint
   :error-filter flycheck-markdownlint-error-filter
-  :modes (markdown-mode gfm-mode)
+  :modes (markdown-mode markdown-ts-mode gfm-mode)
   :error-explainer flycheck-markdownlint-error-explainer
   :next-checkers ((warning . proselint)))
 
@@ -18580,7 +18587,7 @@ See URL `https://github.com/DavidAnson/markdownlint-cli2'."
           (? ":" column) " " (id (one-or-more (not (any space))))
           " " (message) line-end))
   :error-filter flycheck-markdownlint-error-filter
-  :modes (markdown-mode gfm-mode)
+  :modes (markdown-mode markdown-ts-mode gfm-mode)
   :error-explainer flycheck-markdownlint-error-explainer
   :next-checkers ((warning . proselint)))
 
@@ -18634,7 +18641,7 @@ See URL `https://github.com/markdownlint/markdownlint'."
   (lambda (errors)
     (flycheck-sanitize-errors
      (flycheck-remove-error-file-names "(stdin)" errors)))
-  :modes (markdown-mode gfm-mode)
+  :modes (markdown-mode markdown-ts-mode gfm-mode)
   :next-checkers ((warning . proselint)))
 
 (flycheck-def-config-file-var flycheck-markdown-pymarkdown-config
@@ -18658,7 +18665,7 @@ See URL `https://pypi.org/project/pymarkdownlnt/'."
   (lambda (errors)
     (flycheck-sanitize-errors
      (flycheck-remove-error-file-names "(string)" errors)))
-  :modes (markdown-mode gfm-mode)
+  :modes (markdown-mode markdown-ts-mode gfm-mode)
   :next-checkers ((warning . proselint))
   :error-explainer
   (flycheck-error-explainer-from-url
@@ -20416,6 +20423,7 @@ See URL `https://www.gnu.org/software/texinfo/'."
 ;; prints a backtrace.
 (flycheck-def-option-var flycheck-textlint-plugin-alist
     '((markdown-mode . "@textlint/markdown")
+      (markdown-ts-mode . "@textlint/markdown")
       (gfm-mode . "@textlint/markdown")
       (t . "@textlint/text"))
     textlint
@@ -20462,9 +20470,18 @@ See URL `https://textlint.github.io/'."
   ;; only text and markdown formats are installed by default. Ask the
   ;; user to add mode->plugin mappings manually in
   ;; `flycheck-textlint-plugin-alist'.
-  :modes
-  (text-mode markdown-mode gfm-mode message-mode adoc-mode asciidoc-mode
-             mhtml-mode latex-mode LaTeX-mode org-mode rst-mode)
+  :modes (text-mode
+          markdown-mode
+          markdown-ts-mode
+          gfm-mode
+          message-mode
+          adoc-mode
+          asciidoc-mode
+          mhtml-mode
+          latex-mode
+          LaTeX-mode
+          org-mode
+          rst-mode)
   :enabled
   (lambda () (flycheck--textlint-get-plugin))
   :verify
