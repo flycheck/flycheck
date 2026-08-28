@@ -24,7 +24,7 @@ OPTIPNG = optipng
 
 # Program options
 EMACSOPTS =
-PATTERN = .*
+PATTERN = \\\`
 # Internal variables
 EMACSBATCH = $(EMACS) -Q --batch -L . -L test/specs $(EMACSOPTS)
 RUNEMACS =
