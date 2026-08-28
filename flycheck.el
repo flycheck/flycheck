@@ -256,7 +256,8 @@
     yaml-yamllint
     ;; Only ever selected when `flycheck-eglot-mode' is on (see its predicate).
     eglot-check
-    ;; Only ever selected when `flycheck-lsp-mode' is on (see its predicate).
+    ;; Selected when `flycheck-lsp-mode' is on, or when
+    ;; `flycheck-lsp-prefer-server' stands it in for a command checker.
     flycheck-lsp)
   "Syntax checkers available for automatic selection.
 
@@ -3534,7 +3535,10 @@ nil otherwise."
   (if flycheck-checker
       (when (flycheck-may-use-checker flycheck-checker)
         flycheck-checker)
-    (seq-find #'flycheck-may-use-checker flycheck-checkers)))
+    (when-let* ((checker (seq-find #'flycheck-may-use-checker
+                                   flycheck-checkers)))
+      ;; Only here, so a checker the user selected is never stood in for.
+      (or (flycheck-lsp--substitute checker) checker))))
 
 (defun flycheck-get-next-checker-for-buffer (checker)
   "Get the checker to run after CHECKER for the current buffer.
@@ -12135,6 +12139,59 @@ stored in `flycheck-lsp's chain, not per buffer."
   :group 'flycheck
   :package-version '(flycheck . "38"))
 
+(defcustom flycheck-lsp-checker-servers
+  '((ruby-rubocop "rubocop" "--lsp")
+    (python-ruff "ruff" "server"))
+  "Alist mapping a command checker to the server that supersedes it.
+
+Each entry is (CHECKER PROGRAM ARG...): the resident server that lints
+what CHECKER lints.  Consulted only when `flycheck-lsp-prefer-server'
+asks for the substitution, and only where it agrees with what
+`flycheck-lsp-servers' configures for the buffer's major mode: a mode
+pointed at another linter's server is left alone, so the substitution
+never quietly swaps one linter for a different one."
+  :type '(alist :key-type (symbol :tag "Checker")
+                :value-type (repeat :tag "Server command" string))
+  :group 'flycheck
+  :package-version '(flycheck . "40"))
+
+(defcustom flycheck-lsp-prefer-server nil
+  "Whether to prefer a linter's resident server over its command checker.
+
+With nil, the default, nothing changes: automatic selection picks the
+first usable checker from `flycheck-checkers', and a language server is
+used only where `flycheck-lsp-mode' is on.
+
+With t, automatic selection uses `flycheck-lsp' in place of a command
+checker that `flycheck-lsp-checker-servers' names a resident equivalent
+for, when `flycheck-lsp-servers' points the buffer's major mode at that
+same program and it is installed.  A command checker spawns its linter
+afresh on every check; the server stays resident and lints
+incrementally, which is markedly faster for a linter slow to start.
+
+With a list of checker symbols only those are substituted, so the
+preference can be turned on for one language, or for one project
+through a directory-local value.
+
+A checker chosen with \\[flycheck-select-checker], or set as a
+file-local `flycheck-checker', is never substituted, and neither is a
+buffer on a remote host, which the native client declines.
+
+The server reads its own configuration file rather than Flycheck's
+options, so `flycheck-rubocop-except' and its like configure the
+command checker and not the server, and the diagnostics may differ.
+\\[flycheck-verify-setup] reports which server superseded which
+checker."
+  :type '(choice (const :tag "Never prefer a server" nil)
+                 (const :tag "Whenever a resident equivalent is available" t)
+                 (repeat :tag "Only for these checkers"
+                         (symbol :tag "Checker")))
+  :safe (lambda (value) (or (booleanp value) (flycheck-symbol-list-p value)))
+  :group 'flycheck
+  :package-version '(flycheck . "40"))
+
+
+
 (defcustom flycheck-lsp-initialize-timeout 5
   "Seconds to wait for a language server to answer `initialize'.
 
@@ -12229,6 +12286,67 @@ and the `flycheck-lsp' checker's predicate calls this on every check."
                          command))))
       (setq-local flycheck-lsp--command-cache (cons mode result))
       result)))
+
+(defun flycheck-lsp--same-program-p (program command)
+  "Return non-nil when COMMAND runs PROGRAM.
+
+Compares base names, and looks at every word of COMMAND, so a server
+named by an absolute path or run through a wrapper, as `bundle exec
+rubocop --lsp' does, still counts as the program it runs."
+  (let ((want (file-name-nondirectory program)))
+    (seq-some (lambda (word) (equal (file-name-nondirectory word) want))
+              command)))
+
+(defun flycheck-lsp--superseding-server (checker)
+  "Return the server command that supersedes CHECKER here, or nil.
+
+Only when `flycheck-lsp-prefer-server' asks for CHECKER, and only when
+the server `flycheck-lsp-servers' configures for this buffer's major
+mode is the same program `flycheck-lsp-checker-servers' names for
+CHECKER.  A mode pointed at a different linter's server is left alone,
+so this never stands one linter in for another."
+  (and (pcase flycheck-lsp-prefer-server
+         ('nil nil)
+         ('t t)
+         ((pred listp) (memq checker flycheck-lsp-prefer-server))
+         ;; Anything else is a mistake; refuse rather than read it as t
+         ;; and turn the preference on for the whole catalog.
+         (_ nil))
+       (when-let* ((want (alist-get checker flycheck-lsp-checker-servers))
+                   (have (flycheck-lsp--available-command major-mode))
+                   ((flycheck-lsp--same-program-p (car want) have)))
+         have)))
+
+(defun flycheck-lsp--preferred-p ()
+  "Return non-nil when the preference would use a server in this buffer.
+
+Derived rather than remembered, so turning `flycheck-lsp-prefer-server'
+off takes effect at once and no buffer is left flagged."
+  (seq-some #'flycheck-lsp--superseding-server
+            (mapcar #'car flycheck-lsp-checker-servers)))
+
+(defun flycheck-lsp--substitute (checker)
+  "Return `flycheck-lsp' when it supersedes CHECKER here, else nil.
+
+Called on the checker automatic selection picked, never on one the user
+selected, so a deliberate choice is left alone."
+  (and (not (eq checker 'flycheck-lsp))
+       ;; Removing it from the registry is how a checker is dropped from
+       ;; automatic selection; that has to hold here too.
+       (memq 'flycheck-lsp flycheck-checkers)
+       (flycheck-lsp--superseding-server checker)
+       (progn
+         ;; Only the minor mode registers the mode otherwise.  Guarded:
+         ;; `flycheck-add-mode' is a bare push, and this runs on every
+         ;; check.
+         (unless (flycheck-checker-supports-major-mode-p 'flycheck-lsp
+                                                         major-mode)
+           (flycheck-add-mode 'flycheck-lsp major-mode))
+         ;; Ask the same question as any other candidate, so a disabled
+         ;; `flycheck-lsp' stays disabled and the buffer-file-name and
+         ;; remote guards live in one place.
+         (flycheck-may-use-checker 'flycheck-lsp))
+       'flycheck-lsp))
 
 (defun flycheck-lsp--language-id (mode)
   "Return a best-effort LSP languageId string for major MODE."
@@ -12856,6 +12974,13 @@ While the server is still finishing its asynchronous `initialize'
 handshake, report nothing and leave the document registered: the
 handshake's completion re-triggers the check (see
 `flycheck-lsp--on-initialized')."
+  ;; `flycheck-lsp-mode' is not the only way a buffer gets a document
+  ;; now: `flycheck-lsp-prefer-server' brings one here without the mode.
+  ;; Both of these are the mode's doing otherwise, and a buffer that skips
+  ;; them leaks its document and writes the recheck guard globally.
+  (add-hook 'kill-buffer-hook #'flycheck-lsp--close-buffer nil 'local)
+  (unless (local-variable-p 'flycheck-lsp--suppress-recheck)
+    (setq-local flycheck-lsp--suppress-recheck flycheck-lsp--suppress-recheck))
   (condition-case err
       (let* ((command (flycheck-lsp--command major-mode))
              (uri (flycheck-lsp--buffer-uri))
@@ -12888,30 +13013,53 @@ handshake's completion re-triggers the check (see
 (defun flycheck-lsp--enabled-p ()
   "Return non-nil when the `flycheck-lsp' checker may run in the current buffer.
 
-That is, `flycheck-lsp-mode' is on, the buffer visits a local file, and
-its major mode has a server in `flycheck-lsp-servers' whose program is
-installed.  Used as the checker's predicate so `flycheck-lsp' is never selected
-unless the mode opted in and the server is actually available.
+That is, `flycheck-lsp-mode' is on or `flycheck-lsp-prefer-server' stands
+this checker in for a command checker, the buffer visits a local file,
+and its major mode has a server in `flycheck-lsp-servers' whose program
+is installed.  Used as the checker's predicate, so `flycheck-lsp' is
+never selected unless something opted in and the server is available.
 
 A file on a remote host is declined.  The server would be looked for on
 that host but started on this one, so a buffer checked that way is
 served by whatever local program happens to share the name, reading file
 names that mean nothing to it.  Command checkers do run over TRAMP, and
 the buffer falls through to them."
-  (and (bound-and-true-p flycheck-lsp-mode)
+  (and (or (bound-and-true-p flycheck-lsp-mode)
+           (flycheck-lsp--preferred-p))
        buffer-file-name
        (not (file-remote-p default-directory))
        (flycheck-lsp--available-command major-mode)
        t))
+
+(defun flycheck-lsp--verify (_checker)
+  "Report how `flycheck-lsp' came to be used in this buffer."
+  (let ((command (flycheck-lsp--available-command major-mode)))
+    (cons (flycheck-verification-result-new
+           :label "server"
+           :message (if command
+                        (mapconcat #'identity command " ")
+                      "none configured for this mode")
+           :face (if command 'success '(bold warning)))
+          (when-let* ((superseded (seq-find #'flycheck-lsp--superseding-server
+                                            flycheck-checkers)))
+            ;; Say why the command checker stopped running, or the
+            ;; substitution looks like the linter broke.
+            (list (flycheck-verification-result-new
+                   :label "supersedes"
+                   :message (format "%s, see `flycheck-lsp-prefer-server'"
+                                    superseded)
+                   :face 'success))))))
 
 (flycheck-define-generic-checker 'flycheck-lsp
   "Report the diagnostics of a Language Server Protocol server.
 
 Talks to the server configured for the buffer's major mode in
 `flycheck-lsp-servers' directly, over the built-in `jsonrpc' library, with
-no Eglot involved.  Enabled by `flycheck-lsp-mode'."
+no Eglot involved.  Enabled by `flycheck-lsp-mode', or used in place of
+a command checker by `flycheck-lsp-prefer-server'."
   :start #'flycheck-lsp--start
   :predicate #'flycheck-lsp--enabled-p
+  :verify #'flycheck-lsp--verify
   :modes '(prog-mode text-mode))
 
 (defun flycheck--lsp-server-gone ()
