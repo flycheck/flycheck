@@ -819,6 +819,197 @@
         (expect (flycheck-valid-checker-p 'flycheck-lsp) :to-be-truthy)
         (expect (flycheck-checker-get 'flycheck-lsp 'start) :to-be #'flycheck-lsp--start))
 
+      (describe "preferring a resident server"
+
+        ;; A command checker spawns its linter afresh on every check; the
+        ;; linter's own server stays resident.  The substitution happens
+        ;; only where automatic selection chose the superseded checker.
+
+        ;; Registering the mode mutates a property shared by every
+        ;; buffer, so put it back rather than leaving it for later specs.
+        (before-each
+          (setq flycheck-test--lsp-modes
+                (flycheck-checker-get 'flycheck-lsp 'modes)))
+        (after-each
+          (setf (flycheck-checker-get 'flycheck-lsp 'modes)
+                flycheck-test--lsp-modes))
+
+        (defvar flycheck-test--lsp-modes nil)
+
+        (defun flycheck-test--preferred-checker (&rest bindings)
+          "Return the checker chosen in a Ruby buffer under BINDINGS."
+          (let ((dir (file-name-as-directory
+                      (make-temp-file "flycheck-prefer" t))))
+            (unwind-protect
+                (with-temp-buffer
+                  (delay-mode-hooks (ruby-mode))
+                  (setq buffer-file-name (expand-file-name "a.rb" dir)
+                        default-directory dir)
+                  (let ((flycheck-executable-find
+                         (if (plist-member bindings :find)
+                             (plist-get bindings :find)
+                           #'identity))
+                        (flycheck-checkers
+                         (or (plist-get bindings :checkers)
+                             '(ruby-rubocop flycheck-lsp)))
+                        (flycheck-disabled-checkers
+                         (plist-get bindings :disabled))
+                        (flycheck-lsp-servers
+                         (or (plist-get bindings :servers)
+                             flycheck-lsp-servers))
+                        (flycheck-lsp-checker-servers
+                         (or (plist-get bindings :checker-servers)
+                             flycheck-lsp-checker-servers)))
+                    (if (plist-member bindings :prefer)
+                        (let ((flycheck-lsp-prefer-server
+                               (plist-get bindings :prefer))
+                              (flycheck-checker (plist-get bindings :selected)))
+                          (flycheck-get-checker-for-buffer))
+                      ;; No binding at all, so the default is under test.
+                      (flycheck-get-checker-for-buffer))))
+              (delete-directory dir t))))
+
+        (it "leaves the command checker alone out of the box"
+          ;; Deliberately does not bind the option: the default is what
+          ;; ships, and flipping it must fail this.
+          (expect (default-value 'flycheck-lsp-prefer-server) :to-be nil)
+          (expect (flycheck-test--preferred-checker) :to-be 'ruby-rubocop))
+
+        (it "uses the server when asked to, and it is usable"
+          (let ((dir (file-name-as-directory
+                      (make-temp-file "flycheck-prefer" t))))
+            (unwind-protect
+                (with-temp-buffer
+                  (delay-mode-hooks (ruby-mode))
+                  (setq buffer-file-name (expand-file-name "a.rb" dir)
+                        default-directory dir)
+                  (let ((flycheck-executable-find #'identity)
+                        (flycheck-checkers '(ruby-rubocop flycheck-lsp))
+                        (flycheck-lsp-prefer-server t))
+                    (expect (flycheck-get-checker-for-buffer)
+                            :to-be 'flycheck-lsp)
+                    ;; Returning the symbol is not enough: selection has
+                    ;; always yielded a checker that may actually run.
+                    (expect (flycheck-may-use-checker 'flycheck-lsp)
+                            :to-be-truthy)
+                    ;; Which is the predicate's second reason, not the mode.
+                    (expect (bound-and-true-p flycheck-lsp-mode) :to-be nil)
+                    (expect (flycheck-lsp--preferred-p) :to-be-truthy)))
+              (delete-directory dir t))))
+
+        (it "honours a list of checkers"
+          (expect (flycheck-test--preferred-checker :prefer '(ruby-rubocop))
+                  :to-be 'flycheck-lsp)
+          (expect (flycheck-test--preferred-checker :prefer '(python-ruff))
+                  :to-be 'ruby-rubocop))
+
+        (it "does not stand one linter in for another"
+          ;; The manual tells people to point a mode at standardrb's
+          ;; server.  Substituting RuboCop's checker with it would report
+          ;; a different linter's diagnostics under RuboCop's name.
+          (expect (flycheck-test--preferred-checker
+                   :prefer t :servers '((ruby-mode "standardrb" "--lsp")))
+                  :to-be 'ruby-rubocop))
+
+        (it "sees through a wrapper and an absolute path"
+          ;; `bundle exec rubocop --lsp' is how Ruby projects run it.
+          (expect (flycheck-test--preferred-checker
+                   :prefer t
+                   :servers '((ruby-mode "bundle" "exec" "rubocop" "--lsp")))
+                  :to-be 'flycheck-lsp)
+          (expect (flycheck-test--preferred-checker
+                   :prefer t
+                   :servers '((ruby-mode "/opt/rubocop" "--lsp")))
+                  :to-be 'flycheck-lsp))
+
+        (it "never overrides a checker the user selected"
+          (expect (flycheck-test--preferred-checker
+                   :prefer t :selected 'ruby-rubocop)
+                  :to-be 'ruby-rubocop))
+
+        (it "leaves a remote buffer to the command checkers"
+          ;; The native client declines those, so standing in for a
+          ;; checker that does run there would lose the check.  Asks the
+          ;; substitution directly: running the whole of selection would
+          ;; have the command checker reach for the host.
+          (with-temp-buffer
+            (delay-mode-hooks (ruby-mode))
+            (setq buffer-file-name "/ssh:host:/proj/a.rb"
+                  default-directory "/ssh:host:/proj/")
+            (let ((flycheck-executable-find #'identity)
+                  (flycheck-checkers '(ruby-rubocop flycheck-lsp))
+                  (flycheck-lsp-prefer-server t))
+              ;; The preference is active here, and the predicate still
+              ;; says no because the buffer is remote.
+              (expect (flycheck-lsp--preferred-p) :to-be-truthy)
+              (expect (flycheck-lsp--enabled-p) :to-be nil))))
+
+        (it "respects disabling and unregistering the checker"
+          (expect (flycheck-test--preferred-checker
+                   :prefer t :disabled '(flycheck-lsp))
+                  :to-be 'ruby-rubocop)
+          (expect (flycheck-test--preferred-checker
+                   :prefer t :checkers '(ruby-rubocop))
+                  :to-be 'ruby-rubocop))
+
+        (it "refuses a malformed value instead of reading it as t"
+          ;; `ruby-rubocop' rather than `(ruby-rubocop)' is the likely
+          ;; typo, and must not turn the preference on for everything.
+          (expect (flycheck-test--preferred-checker :prefer 'ruby-rubocop)
+                  :to-be 'ruby-rubocop))
+
+        (it "declines when the server program is not installed"
+          ;; Only the server is missing: the command checker's own
+          ;; executable is still found, so it stays selectable.
+          (expect (flycheck-test--preferred-checker
+                   :prefer t
+                   :servers '((ruby-mode "absent-server" "--lsp"))
+                   :checker-servers '((ruby-rubocop "absent-server" "--lsp"))
+                   :find (lambda (x) (unless (equal x "absent-server") x)))
+                  :to-be 'ruby-rubocop))
+
+        (it "registers the mode once, however often it is asked"
+          ;; `flycheck-add-mode' is a bare push and this runs on every
+          ;; check, so an unguarded call grows a global list without end.
+          (let ((dir (file-name-as-directory
+                      (make-temp-file "flycheck-prefer" t))))
+            (unwind-protect
+                (with-temp-buffer
+                  (delay-mode-hooks (ruby-mode))
+                  (setq buffer-file-name (expand-file-name "a.rb" dir)
+                        default-directory dir)
+                  (let ((flycheck-executable-find #'identity)
+                        (flycheck-checkers '(ruby-rubocop flycheck-lsp))
+                        (flycheck-lsp-prefer-server t))
+                    (dotimes (_ 5) (flycheck-get-checker-for-buffer))
+                    (expect (seq-count (lambda (m) (eq m 'ruby-mode))
+                                       (flycheck-checker-get 'flycheck-lsp
+                                                             'modes))
+                            :to-equal 1)))
+              (delete-directory dir t))))
+
+        (it "stops substituting as soon as the option goes off"
+          ;; Nothing is remembered per buffer, so a buffer that used a
+          ;; server is not left flagged.
+          (let ((dir (file-name-as-directory
+                      (make-temp-file "flycheck-prefer" t))))
+            (unwind-protect
+                (with-temp-buffer
+                  (delay-mode-hooks (ruby-mode))
+                  (setq buffer-file-name (expand-file-name "a.rb" dir)
+                        default-directory dir)
+                  (let ((flycheck-executable-find #'identity)
+                        (flycheck-checkers '(ruby-rubocop flycheck-lsp)))
+                    (let ((flycheck-lsp-prefer-server t))
+                      (expect (flycheck-get-checker-for-buffer)
+                              :to-be 'flycheck-lsp))
+                    (let ((flycheck-lsp-prefer-server nil))
+                      (expect (flycheck-get-checker-for-buffer)
+                              :to-be 'ruby-rubocop)
+                      (expect (flycheck-may-use-checker 'flycheck-lsp)
+                              :to-be nil))))
+              (delete-directory dir t)))))
+
       (it "declines a remote buffer"
         ;; The server is looked for on the remote host but would be
         ;; started on this one, so the buffer must fall through to the

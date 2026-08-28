@@ -330,6 +330,43 @@ whose language server you don't have.
    machine.  ``flycheck-eglot-mode`` is the way to get LSP diagnostics for a
    remote file: Eglot runs the server on the right host.
 
+Preferring a server over a command checker
+------------------------------------------
+
+A command checker spawns its linter afresh on every check.  Where the linter
+ships its own server, Flycheck can use that instead, so the linter stays
+resident and lints incrementally:
+
+.. code-block:: elisp
+
+   (setq flycheck-lsp-prefer-server t)
+
+.. defcustom:: flycheck-lsp-prefer-server
+
+   Whether automatic checker selection uses a linter's resident server in
+   place of its command checker.  ``nil`` by default, so nothing changes.
+   With ``t`` it applies wherever a resident equivalent is configured and
+   installed; with a list of checker symbols it applies only to those, which
+   also makes it usable as a directory-local for one project.
+
+   A checker chosen with `flycheck-select-checker`, or set as a file-local
+   ``flycheck-checker``, is never substituted, and neither is a buffer on a
+   remote host.  Type :kbd:`C-c ! v` to see which server superseded which
+   checker.
+
+.. defcustom:: flycheck-lsp-checker-servers
+
+   Which resident server stands in for which command checker.  The
+   substitution happens only where this agrees with what
+   ``flycheck-lsp-servers`` configures for the buffer's major mode, so
+   pointing a mode at a different linter's server turns the substitution off
+   for that checker rather than quietly reporting another linter's
+   diagnostics under the first one's name.
+
+The server reads its own configuration file rather than Flycheck's options,
+so the ``flycheck-rubocop-*`` variables and their like configure the command
+checker and not the server, and the diagnostics can differ.
+
 Which LSP integration should I use?
 -----------------------------------
 
