@@ -12135,7 +12135,12 @@ To run this server behind Eglot's rather than instead of it, turn
 Eglot leads and `flycheck-lsp' follows.
 
 Note that this takes effect globally when a buffer enables the mode: it is
-stored in `flycheck-lsp's chain, not per buffer."
+stored in `flycheck-lsp's chain, not per buffer.
+
+It has no effect on a buffer served through `flycheck-lsp-prefer-server'
+rather than this mode.  Such a buffer runs the server alone: the checker
+the server stood in for is not run after it, and neither is that
+checker's chain."
   :type 'boolean
   :safe #'booleanp
   :group 'flycheck
