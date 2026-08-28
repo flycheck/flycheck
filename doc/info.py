@@ -217,8 +217,12 @@ def resolve_info_references(app, _env, refnode, contnode):
             reference += contnode
             return reference
     else:
-        # Without an xref DB we're unable to resolve any info references
-        return None
+        # Without an xref DB no info reference can be resolved.  Hand back
+        # the plain text so the reference reads as its title and Sphinx
+        # counts it handled: returning nothing makes Sphinx report every
+        # one of them as a missing target, which fails a -W build for
+        # want of a database that lives on someone else's server.
+        return contnode
 
 
 def setup(app):
