@@ -169,6 +169,34 @@
                              :id "UndeclaredName" :checker 'flycheck-lsp
                              :filename path :buffer nil))))))
 
+        (it "surfaces them for a buffer the preference serves too"
+          ;; `flycheck-lsp-prefer-server' puts a document on a server
+          ;; without the mode, so the project view should show that
+          ;; server's findings just the same.
+          (let ((flycheck-lsp--servers (make-hash-table :test 'equal))
+                (path (expand-file-name "box/box.go" project)))
+            (spy-on 'flycheck-lsp--server-live-p :and-return-value t)
+            (spy-on 'flycheck-lsp--preferred-p :and-return-value t)
+            (server-with-doc project path (list diag))
+            (flycheck-buttercup-with-temp-buffer
+              ;; The mode is off; only the preference is serving.
+              (expect (bound-and-true-p flycheck-lsp-mode) :to-be nil)
+              (expect (flycheck-lsp--project-extra-errors project nil)
+                      :to-be-equal-flycheck-errors
+                      (list (flycheck-error-new-at
+                             28 2 'error "undefined: a"
+                             :id "UndeclaredName" :checker 'flycheck-lsp
+                             :filename path :buffer nil))))))
+
+        (it "shows nothing when neither the mode nor the preference serves"
+          (let ((flycheck-lsp--servers (make-hash-table :test 'equal))
+                (path (expand-file-name "box/box.go" project)))
+            (spy-on 'flycheck-lsp--server-live-p :and-return-value t)
+            (server-with-doc project path (list diag))
+            (flycheck-buttercup-with-temp-buffer
+              (expect (flycheck-lsp--project-extra-errors project nil)
+                      :to-be nil))))
+
         (it "skips a document a live buffer owns"
           (let ((flycheck-lsp--servers (make-hash-table :test 'equal))
                 (owner (generate-new-buffer " owner")))

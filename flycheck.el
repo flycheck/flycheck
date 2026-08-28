@@ -5356,11 +5356,12 @@ retried on every redisplay."
   "Return `flycheck-count-errors' over PROJECT-KEY's diagnostics.
 
 Cached against `flycheck--project-diagnostics-generation', so the mode
-line does not aggregate on every redisplay.  The cache key includes the
-buffer-local bridge modes, which gate what the aggregation includes."
+line does not aggregate on every redisplay.  The cache key includes what
+gates the aggregation: the Eglot bridge, and whether the native client
+serves this buffer (see `flycheck-lsp--serving-p')."
   (let* ((key (list project-key
                     (and (bound-and-true-p flycheck-eglot-mode) t)
-                    (and (bound-and-true-p flycheck-lsp-mode) t)))
+                    (flycheck-lsp--serving-p)))
          (cached (gethash key flycheck--project-counts-cache)))
     (if (and cached (= (car cached) flycheck--project-diagnostics-generation))
         (cdr cached)
@@ -12562,6 +12563,17 @@ with astral characters and no end position is attempted at all."
      :filename path
      :buffer nil)))
 
+(defun flycheck-lsp--serving-p ()
+  "Return non-nil when the native client serves the current buffer.
+
+Either because `flycheck-lsp-mode' is on, or because
+`flycheck-lsp-prefer-server' stood the checker in for a command
+checker: both put a document on a server, so both should show that
+server's findings for the project's other files."
+  (and (or (bound-and-true-p flycheck-lsp-mode)
+           (flycheck-lsp--preferred-p))
+       t))
+
 (defun flycheck-lsp--project-extra-errors (project-key buffers)
   "Return cached diagnostics for unvisited documents under PROJECT-KEY.
 
@@ -12575,9 +12587,9 @@ off, whose problems that buffer reports its own way; so is a server
 that died, whose cache is stale; and so is a document outside the
 project, which a server rooted inside it may still be told about (a
 dependency, a generated file elsewhere)."
-  (when (or (bound-and-true-p flycheck-lsp-mode)
+  (when (or (flycheck-lsp--serving-p)
             (seq-some (lambda (buffer)
-                        (buffer-local-value 'flycheck-lsp-mode buffer))
+                        (with-current-buffer buffer (flycheck-lsp--serving-p)))
                       buffers))
     (let ((prefixes (flycheck--project-key-prefixes project-key))
           (result nil))
