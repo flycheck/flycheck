@@ -199,6 +199,58 @@
       (flycheck-test--with-temp-project _dir
         (should-error (flycheck-check-project) :type 'user-error))))
 
+  (describe "a project on a remote host"
+
+    ;; The checker has to run where the project is.  Without a file
+    ;; handler the process ignores a remote `default-directory' and runs
+    ;; on this machine instead, against files it cannot see.
+    (before-all
+      (flycheck-test-tramp-setup-method))
+
+    (after-each
+      (ignore-errors (tramp-cleanup-all-connections)))
+
+    (it "runs the checker on the project's host"
+      ;; The mock method addresses a Unix path; a Windows temp directory
+      ;; cannot be named through it.
+      (assume (not (eq system-type 'windows-nt))
+              "the mock method cannot address Windows paths")
+      (assume (flycheck-test-tramp-connectable-p) "no mock TRAMP connection")
+      (flycheck-test--define-run-checker
+       ;; Report where the process actually ran, so a check that silently
+       ;; ran here instead fails rather than passing.
+       :command (flycheck-test--emacs-command
+                 '(princ (format "gamma.rb:3:%s" default-directory))))
+      (let ((flycheck-test--project-tmp (make-temp-file "flycheck-prj" t)))
+        (unwind-protect
+            (with-temp-buffer
+              (setq default-directory
+                    (concat flycheck-test-tramp-remote-prefix
+                            (file-name-as-directory
+                             flycheck-test--project-tmp)))
+              (let ((dir (flycheck--project-directory)))
+                (expect (file-remote-p dir) :to-be-truthy)
+                (flycheck-check-project)
+                (flycheck-test--wait-for-run (cons dir 'test-run))
+                (let ((errors (flycheck--project-errors dir)))
+                  (expect (length errors) :to-equal 1)
+                  ;; The path the checker reported is expanded back onto
+                  ;; the project's host, not opened locally.
+                  (expect (flycheck-error-filename (car errors))
+                          :to-equal (concat dir "gamma.rb"))
+                  ;; And it really ran there: without a file handler
+                  ;; the process starts in this machine's home directory
+                  ;; instead of the project.
+                  (expect (file-equal-p (flycheck-error-message (car errors))
+                                        flycheck-test--project-tmp)
+                          :to-be-truthy))))
+          (maphash (lambda (_key state)
+                     (when-let* ((proc (plist-get state :process)))
+                       (when (process-live-p proc) (delete-process proc))))
+                   flycheck--project-runs)
+          (ignore-errors
+            (delete-directory flycheck-test--project-tmp t))))))
+
   (describe "terraform-validate"
 
     (it "applies to a directory with Terraform files"
@@ -240,6 +292,21 @@
                 " \"detail\": \"Run terraform init.\"}]}")
         'terraform-validate "/prj/")
        :to-throw 'error)))
+
+    (it "keeps the host on an absolute path from a remote project"
+      ;; terraform reports paths as its own host sees them; expanding an
+      ;; absolute one with plain `expand-file-name' would drop the prefix
+      ;; and name the same path on this machine.
+      (let ((errors (flycheck-parse-terraform-validate
+                     (concat "{\"valid\":false,\"diagnostics\":"
+                             "[{\"severity\":\"error\",\"summary\":\"Bad\","
+                             "\"detail\":\"\",\"range\":{\"filename\":"
+                             "\"/srv/app/main.tf\",\"start\":"
+                             "{\"line\":1,\"column\":1},"
+                             "\"end\":{\"line\":1,\"column\":2}}}]}")
+                     'terraform-validate "/ssh:host:/srv/app/")))
+        (expect (flycheck-error-filename (car errors))
+                :to-equal "/ssh:host:/srv/app/main.tf")))
 
   (describe "cargo-check"
 

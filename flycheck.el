@@ -5488,8 +5488,9 @@ never runs automatically and takes no part in buffer checks.
 The following PROPERTIES constitute a project checker:
 
 `:command (EXECUTABLE ARG ...)'
-     The command to run in the project's root directory, as a list
-     of strings.
+     The command to run in the project's root directory, on the host
+     that directory is on, as a list of strings.  It must name no file
+     on this machine, and the tool has to be installed there.
 
 `:parser FUNCTION'
      A function called with the command's output as a string, the
@@ -5636,6 +5637,11 @@ reflect the project as of that run; they stay until the next
                       :buffer stdout
                       :stderr stderr
                       :command (plist-get props :command)
+                      ;; Run where the project is: without this the
+                      ;; process ignores a remote `default-directory' and
+                      ;; runs on this machine instead, against files it
+                      ;; cannot see.
+                      :file-handler t
                       :noquery t
                       :sentinel (lambda (proc _event)
                                   (flycheck--project-run-finish proc)))
@@ -5678,8 +5684,6 @@ checking again."
   (interactive "P")
   (let ((root (or (flycheck--buffer-project-key)
                   (user-error "Cannot tell which project this buffer is in"))))
-    (when (file-remote-p root)
-      (user-error "Project checks do not support remote projects yet"))
     (if clear
         (progn
           (flycheck--project-runs-forget root)
@@ -5688,15 +5692,34 @@ checking again."
           (flycheck--project-diagnostics-changed)
           (flycheck-error-list-refresh)
           (message "Project check results dropped"))
-      (let* ((applicable
-              (seq-filter (lambda (entry)
-                            (funcall (plist-get (cdr entry) :enabled) root))
-                          flycheck--project-checkers))
-             (runnable
-              (seq-filter (lambda (entry)
-                            (executable-find
-                             (car (plist-get (cdr entry) :command))))
-                          applicable))
+      (let* ((probed
+              ;; Both filters ask the project's host: `:enabled' stats
+              ;; files there and the executable search reads its
+              ;; `exec-path', which both need the directory bound rather
+              ;; than a flag.  A host that cannot be reached signals from
+              ;; deep inside TRAMP, so say which project is unreachable
+              ;; instead of surfacing that.
+              (condition-case err
+                  (let ((default-directory root))
+                    (let ((applicable
+                           (seq-filter (lambda (entry)
+                                         (funcall (plist-get (cdr entry)
+                                                             :enabled)
+                                                  root))
+                                       flycheck--project-checkers)))
+                      (cons applicable
+                            (seq-filter
+                             (lambda (entry)
+                               (executable-find
+                                (car (plist-get (cdr entry) :command))
+                                (file-remote-p root)))
+                             applicable))))
+                (file-error
+                 (user-error "Cannot reach %s: %s"
+                             (abbreviate-file-name root)
+                             (error-message-string err)))))
+             (applicable (car probed))
+             (runnable (cdr probed))
              ;; Other sources start their work as they are asked
              (others (apply #'append
                             (mapcar (lambda (fn) (funcall fn root))
@@ -20346,7 +20369,7 @@ See URL `https://developer.hashicorp.com/terraform/cli/commands/validate'."
             :end-line .range.end.line
             :end-column .range.end.column
             :checker 'terraform-validate
-            :filename (expand-file-name .range.filename directory)
+            :filename (flycheck--expand-file-name .range.filename directory)
             :buffer nil)))
        ranged))))
 
