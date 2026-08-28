@@ -371,6 +371,30 @@ The server reads its own configuration file rather than Flycheck's options,
 so the ``flycheck-rubocop-*`` variables and their like configure the command
 checker and not the server, and the diagnostics can differ.
 
+Seeing and stopping the servers
+-------------------------------
+
+Flycheck keeps a server for the rest of the session, one per project root and
+command, so a project you visited hours ago may still have one running:
+
+.. define-key:: M-x flycheck-lsp-list-servers
+
+   List the running servers: the project each serves, its command, whether it
+   is still live, how many documents it holds and how many of those a live
+   buffer still owns.
+
+.. define-key:: M-x flycheck-lsp-restart-server
+
+   Shut down the server serving this buffer and forget it, so the next check
+   starts a fresh one.  Without this a server that has wedged can only be
+   cleared by restarting Emacs, since a server outlives its buffers and
+   survives ``flycheck-lsp-mode`` being turned off.
+
+.. define-key:: M-x flycheck-lsp-shutdown-servers
+
+   Shut down this project's servers, or every running one with a prefix
+   argument.
+
 Which LSP integration should I use?
 -----------------------------------
 

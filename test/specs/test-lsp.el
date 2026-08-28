@@ -1010,6 +1010,134 @@
                               :to-be nil))))
               (delete-directory dir t)))))
 
+      (describe "listing and stopping servers"
+
+        ;; A server outlives the buffers it serves and even the mode
+        ;; being turned off, so without these a wedged one can only be
+        ;; cleared by restarting Emacs.
+
+        (defun flycheck-test--fake-server (root command &rest buffers)
+          "Register a server for ROOT running COMMAND holding BUFFERS.
+A nil in BUFFERS stands for a document no buffer visits, as a
+workspace pull leaves behind."
+          (let ((server (flycheck-lsp--server-create
+                         :root root :command command))
+                (n 0))
+            (dolist (buffer buffers)
+              (puthash (format "/doc%d" (setq n (1+ n)))
+                       (flycheck-lsp--doc-create :buffer buffer)
+                       (flycheck-lsp--server-documents server)))
+            (puthash (cons root command) server flycheck-lsp--servers)
+            server))
+
+        (after-each (clrhash flycheck-lsp--servers))
+
+        (it "counts only the documents a live buffer still owns"
+          ;; A workspace pull registers a document per reported file, so
+          ;; the table size is not the number of buffers.
+          (let* ((buffer (generate-new-buffer "held"))
+                 (server (flycheck-test--fake-server
+                          "/proj/" '("rubocop" "--lsp") buffer nil)))
+            (expect (hash-table-count (flycheck-lsp--server-documents server))
+                    :to-equal 2)
+            (expect (flycheck-lsp--server-buffer-count server) :to-equal 1)
+            (kill-buffer buffer)
+            (expect (flycheck-lsp--server-buffer-count server) :to-equal 0)))
+
+        (it "lists what is running, documents apart from buffers"
+          (let ((buffer (generate-new-buffer "held")))
+            (unwind-protect
+                (progn
+                  (flycheck-test--fake-server "/proj/" '("rubocop" "--lsp")
+                                              buffer nil)
+                  (let ((entry (car (flycheck-lsp--server-list-entries))))
+                    (expect (append (cadr entry) nil)
+                            :to-equal (list (abbreviate-file-name "/proj/")
+                                            "rubocop --lsp" "dead" "2" "1"))))
+              (kill-buffer buffer))))
+
+        (it "finds the server that serves the buffer, not merely one
+holding its document"
+          ;; Roots nest, so a document can sit in several servers.  Only
+          ;; the one keyed on this buffer's root actually checks it.
+          (flycheck-test--fake-server "/p/" '("ruby-lsp"))
+          (flycheck-test--fake-server "/p/sub/" '("ruby-lsp"))
+          (flycheck-buttercup-with-temp-buffer
+            (setq buffer-file-name "/p/sub/a.rb"
+                  default-directory "/p/sub/")
+            (cl-letf (((symbol-function 'flycheck-lsp--root) (lambda () "/p/sub/"))
+                      ((symbol-function 'flycheck-lsp--command)
+                       (lambda (_mode) '("ruby-lsp"))))
+              (expect (flycheck-lsp--server-for-buffer)
+                      :to-equal '("/p/sub/" "ruby-lsp")))))
+
+        (it "shuts the buffer's server down and asks for a fresh check"
+          (let ((stopped nil))
+            (spy-on 'flycheck-lsp--shutdown-server
+                    :and-call-fake (lambda (s) (push s stopped)))
+            (spy-on 'flycheck-buffer-deferred)
+            (flycheck-test--fake-server "/p/" '("ruby-lsp"))
+            (flycheck-buttercup-with-temp-buffer
+              (setq buffer-file-name "/p/a.rb" default-directory "/p/")
+              (cl-letf (((symbol-function 'flycheck-lsp--root) (lambda () "/p/"))
+                        ((symbol-function 'flycheck-lsp--command)
+                         (lambda (_mode) '("ruby-lsp"))))
+                (let ((flycheck-mode t))
+                  (flycheck-lsp-restart-server))))
+            (expect (length stopped) :to-equal 1)
+            (expect (hash-table-count flycheck-lsp--servers) :to-equal 0)
+            (expect 'flycheck-buffer-deferred :to-have-been-called)))
+
+        (it "drops a server from the registry before stopping it"
+          ;; Stopping pumps process output, and a check triggered by that
+          ;; can register a fresh server under the same key.  Removing
+          ;; afterwards would delete that one and leak its process.
+          (let ((registered-during-shutdown nil))
+            (spy-on 'flycheck-lsp--shutdown-server
+                    :and-call-fake
+                    (lambda (_server)
+                      (setq registered-during-shutdown
+                            (hash-table-count flycheck-lsp--servers))))
+            (flycheck-test--fake-server "/p/" '("ruby-lsp"))
+            (flycheck-lsp-shutdown-servers 'all)
+            (expect registered-during-shutdown :to-equal 0)))
+
+        (it "shuts down this project's servers, or all of them"
+          (spy-on 'flycheck-lsp--shutdown-server)
+          (flycheck-test--fake-server "/a/" '("rubocop" "--lsp"))
+          (flycheck-test--fake-server "/a/nested/" '("ruff" "server"))
+          (flycheck-test--fake-server "/b/" '("ruff" "server"))
+          (flycheck-buttercup-with-temp-buffer
+            (setq default-directory "/a/")
+            (cl-letf (((symbol-function 'flycheck-lsp--root) (lambda () "/a/")))
+              (flycheck-lsp-shutdown-servers)))
+          ;; The nested root belongs to this project too.
+          (expect 'flycheck-lsp--shutdown-server :to-have-been-called-times 2)
+          (expect (hash-table-count flycheck-lsp--servers) :to-equal 1)
+          (flycheck-lsp-shutdown-servers 'all)
+          (expect (hash-table-count flycheck-lsp--servers) :to-equal 0))
+
+        (it "refuses to restart when no server serves the buffer"
+          ;; A server exists, but not for this buffer.
+          (flycheck-test--fake-server "/other/" '("ruby-lsp"))
+          (flycheck-buttercup-with-temp-buffer
+            (setq buffer-file-name "/p/a.rb" default-directory "/p/")
+            (cl-letf (((symbol-function 'flycheck-lsp--root) (lambda () "/p/"))
+                      ((symbol-function 'flycheck-lsp--command)
+                       (lambda (_mode) '("ruby-lsp"))))
+              (expect (flycheck-lsp-restart-server) :to-throw 'user-error))))
+
+        (it "prints a list buffer with a row per server"
+          (flycheck-test--fake-server "/p/" '("ruby-lsp"))
+          (unwind-protect
+              (progn
+                (flycheck-lsp-list-servers)
+                (with-current-buffer "*Flycheck LSP servers*"
+                  (expect (derived-mode-p 'flycheck-lsp-server-list-mode)
+                          :to-be-truthy)
+                  (expect (buffer-string) :to-match "ruby-lsp")))
+            (kill-buffer "*Flycheck LSP servers*"))))
+
       (it "declines a remote buffer"
         ;; The server is looked for on the remote host but would be
         ;; started on this one, so the buffer must fall through to the

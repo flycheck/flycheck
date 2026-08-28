@@ -13096,13 +13096,138 @@ files does not pay to restart it."
                                    (list :textDocument (list :uri uri)))))))
      flycheck-lsp--servers)))
 
+(defun flycheck-lsp--forget-server (key server)
+  "Drop SERVER, registered under KEY, and shut it down.
+
+Dropped first: shutting down pumps process output, and a diagnostics
+push arriving then can re-trigger a check that registers a fresh server
+under the same key.  Removing afterwards would delete that one instead,
+leaving its process running and unreachable."
+  (remhash key flycheck-lsp--servers)
+  (flycheck-lsp--shutdown-server server))
+
+(defun flycheck-lsp--server-buffer-count (server)
+  "Return how many of SERVER's documents a live buffer still owns.
+
+Not the size of the table: a workspace pull registers a document for
+every file it reports on, including files no buffer visits."
+  (let ((count 0))
+    (maphash (lambda (_key doc)
+               (when (buffer-live-p (flycheck-lsp--doc-buffer doc))
+                 (setq count (1+ count))))
+             (flycheck-lsp--server-documents server))
+    count))
+
+(defun flycheck-lsp--server-for-buffer ()
+  "Return the registry key of the server serving the current buffer.
+
+The key `flycheck-lsp--start' would build, so this names the server that
+actually checks this buffer.  Project roots nest, and a workspace pull
+registers a document for every file it reports on, so several servers
+can hold the same document and the one holding it is not necessarily the
+one serving it."
+  (when-let* ((command (flycheck-lsp--command major-mode))
+              (key (cons (flycheck-lsp--root) command))
+              ((gethash key flycheck-lsp--servers)))
+    key))
+
+(defun flycheck-lsp-restart-server ()
+  "Shut down the language server serving this buffer and forget it.
+
+The next check starts a fresh one.  Without this a server that has wedged
+can only be cleared by restarting Emacs, since a server outlives the
+buffers it serves and even `flycheck-lsp-mode' being turned off."
+  (interactive)
+  (let* ((key (or (flycheck-lsp--server-for-buffer)
+                  (user-error "No language server is serving this buffer")))
+         (server (gethash key flycheck-lsp--servers)))
+    (flycheck-lsp--forget-server key server)
+    (if flycheck-mode
+        (progn (message "Shut %s down; the next check starts it again"
+                        (car (flycheck-lsp--server-command server)))
+               (flycheck-buffer-deferred))
+      (message "Shut %s down" (car (flycheck-lsp--server-command server))))))
+
+(defun flycheck-lsp-shutdown-servers (&optional all)
+  "Shut down the language servers of this buffer's project.
+
+With prefix argument ALL, shut down every running server instead."
+  (interactive "P")
+  (let ((root (and (not all)
+                   ;; A remote buffer has no server, and asking for its
+                   ;; project would reach for the host.
+                   (not (file-remote-p default-directory))
+                   (file-name-as-directory
+                    (expand-file-name (flycheck-lsp--root)))))
+        (count 0))
+    ;; Over a snapshot: shutting a server down pumps process output, and
+    ;; a check triggered by that can register a server mid-iteration.
+    (dolist (key (hash-table-keys flycheck-lsp--servers))
+      (when-let* ((server (gethash key flycheck-lsp--servers)))
+        (when (or all
+                  (and root
+                       (string-prefix-p
+                        root (file-name-as-directory
+                              (expand-file-name
+                               (flycheck-lsp--server-root server))))))
+          (flycheck-lsp--forget-server key server)
+          (setq count (1+ count)))))
+    (message "Shut down %d language server%s" count
+             (if (= count 1) "" "s"))))
+
+(defun flycheck-lsp--server-list-entries ()
+  "Return `tabulated-list-entries' for the running servers."
+  (let (entries)
+    (maphash
+     (lambda (key server)
+       (push (list key
+                   (vector (abbreviate-file-name
+                            (flycheck-lsp--server-root server))
+                           (string-join (flycheck-lsp--server-command server)
+                                        " ")
+                           (if (flycheck-lsp--server-live-p server)
+                               "live" "dead")
+                           (number-to-string
+                            (hash-table-count
+                             (flycheck-lsp--server-documents server)))
+                           (number-to-string
+                            (flycheck-lsp--server-buffer-count server))))
+             entries))
+     flycheck-lsp--servers)
+    (nreverse entries)))
+
+(define-derived-mode flycheck-lsp-server-list-mode tabulated-list-mode
+  "Flycheck LSP servers"
+  "Major mode listing the language servers Flycheck is running."
+  (setq tabulated-list-format [("Project" 30 t)
+                               ("Command" 28 t)
+                               ("State" 6 t)
+                               ("Docs" 5 t)
+                               ("Buffers" 7 t)]
+        tabulated-list-sort-key '("Project" . nil)
+        tabulated-list-entries #'flycheck-lsp--server-list-entries)
+  (tabulated-list-init-header))
+
+(defun flycheck-lsp-list-servers ()
+  "List the language servers Flycheck is running.
+
+A server is kept for the rest of the session, so this is the way to see
+what is running, how many documents each holds, and how many of those a
+live buffer still owns."
+  (interactive)
+  (with-current-buffer (get-buffer-create "*Flycheck LSP servers*")
+    ;; Entering the mode again would discard the sort column and point.
+    (unless (derived-mode-p 'flycheck-lsp-server-list-mode)
+      (flycheck-lsp-server-list-mode))
+    (tabulated-list-print)
+    (pop-to-buffer (current-buffer))))
+
 (defun flycheck-lsp--shutdown-all ()
   "Shut down every running LSP server.
 Added to `kill-emacs-hook' the first time a server starts."
-  (maphash (lambda (key server)
-             (flycheck-lsp--shutdown-server server)
-             (remhash key flycheck-lsp--servers))
-           flycheck-lsp--servers))
+  (dolist (key (hash-table-keys flycheck-lsp--servers))
+    (when-let* ((server (gethash key flycheck-lsp--servers)))
+      (flycheck-lsp--forget-server key server))))
 
 (defun flycheck-lsp--enable ()
   "Set up the current buffer to report its LSP server's diagnostics.
