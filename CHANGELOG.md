@@ -8,6 +8,7 @@
 
 ### Changes
 
+- [#2378](https://github.com/flycheck/flycheck/pull/2378): `flycheck-check-project` works on a project that lives on a remote host, running the checker over TRAMP on the host the project is on instead of refusing.
 - [#2373](https://github.com/flycheck/flycheck/pull/2373): `go-staticcheck` errors carry the end position staticcheck reports, so a finding highlights the expression it is about rather than a single point; a finding that spans nothing, such as an unused declaration, stays a point.
 - [#2357](https://github.com/flycheck/flycheck/pull/2357): `haskell-ghc` reads GHC 9.10's JSON diagnostics when the compiler has them (probed per binary): errors carry precise spans and GHC-NNNNN ids that `C-c ! e` explains via the Haskell error index, and JSON-reading checkers in general no longer choke on text lines that merely start with a bracket, like GHC's compilation progress.
 - [#2356](https://github.com/flycheck/flycheck/pull/2356): `haskell-hlint` reads hlint's JSON ideas: hint names become error ids, spans get right-open end columns, and an idea with a replacement carries a machine-applicable fix, applied with `C-c ! f`.
