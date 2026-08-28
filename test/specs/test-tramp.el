@@ -31,26 +31,6 @@
 (require 'tramp)
 (require 'python)
 
-(defconst flycheck-test-tramp-remote-prefix "/mock:localhost:"
-  "TRAMP prefix of the local mock connection used by these specs.")
-
-(defun flycheck-test-tramp-setup-method ()
-  "Register TRAMP's mock method, running a local shell as the remote."
-  (add-to-list 'tramp-methods
-               '("mock"
-                 (tramp-login-program "sh")
-                 (tramp-login-args (("-i")))
-                 (tramp-remote-shell "/bin/sh")
-                 (tramp-remote-shell-args ("-c"))
-                 (tramp-connection-timeout 10)))
-  (add-to-list 'tramp-default-host-alist '("\\`mock\\'" nil "localhost")))
-
-(defun flycheck-test-tramp-connectable-p ()
-  "Return non-nil if a mock TRAMP connection can be established."
-  (ignore-errors
-    (let ((default-directory flycheck-test-tramp-remote-prefix))
-      (file-exists-p (concat flycheck-test-tramp-remote-prefix "/")))))
-
 (describe "Remote syntax checking over TRAMP"
   (before-all
     (flycheck-test-tramp-setup-method))
