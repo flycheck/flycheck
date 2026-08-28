@@ -371,6 +371,11 @@ The server reads its own configuration file rather than Flycheck's options,
 so the ``flycheck-rubocop-*`` variables and their like configure the command
 checker and not the server, and the diagnostics can differ.
 
+A buffer served this way runs the server alone.  The checker it stood in for
+does not run after it, nor does that checker's chain, so a Ruby buffer linted
+by RuboCop's server does not go on to `ruby-reek`.  ``flycheck-lsp-exclusive``
+governs chaining for ``flycheck-lsp-mode`` and does not apply here.
+
 Seeing and stopping the servers
 -------------------------------
 
