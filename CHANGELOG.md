@@ -8,6 +8,7 @@
 
 ### Changes
 
+- [#2376](https://github.com/flycheck/flycheck/pull/2376): Markdown checkers run in Emacs 31’s experimental new `markdown-ts-mode`.
 - [#2378](https://github.com/flycheck/flycheck/pull/2378): `flycheck-check-project` works on a project that lives on a remote host, running the checker over TRAMP on the host the project is on instead of refusing.
 - [#2373](https://github.com/flycheck/flycheck/pull/2373): `go-staticcheck` errors carry the end position staticcheck reports, so a finding highlights the expression it is about rather than a single point; a finding that spans nothing, such as an unused declaration, stays a point.
 - [#2357](https://github.com/flycheck/flycheck/pull/2357): `haskell-ghc` reads GHC 9.10's JSON diagnostics when the compiler has them (probed per binary): errors carry precise spans and GHC-NNNNN ids that `C-c ! e` explains via the Haskell error index, and JSON-reading checkers in general no longer choke on text lines that merely start with a bracket, like GHC's compilation progress.
@@ -17,7 +18,6 @@
 - [#2353](https://github.com/flycheck/flycheck/pull/2353): `puppet-lint` and `actionlint` read their tools' JSON output, giving puppet-lint problems the columns the old patterns never captured and actionlint errors precise end positions.
 - [#2352](https://github.com/flycheck/flycheck/pull/2352): `python-mypy` reads mypy's JSON output (requiring mypy 1.11 or newer): errors carry precise end positions (with mypy 1.20+), stub-install hints stay attached to their error, and messages lose the stray leading space the old patterns captured.
 - [#2351](https://github.com/flycheck/flycheck/pull/2351): The RuboCop family (`rubocop`, `standardrb`, `cookstyle`) reads the tools' JSON output: ids are bare cop names without the `[Correctable] ` marker (which un-breaks explanations for correctable offenses), errors carry precise end positions, and refactor/info severities are no longer dropped.
-- [#2376](https://github.com/flycheck/flycheck/pull/2376): Markdown checkers run in Emacs 31’s experimental new `markdown-ts-mode`.
 
 ### New Features
 
