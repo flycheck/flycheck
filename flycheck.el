@@ -12377,15 +12377,16 @@ the root does not change over a buffer's life."
 (defun flycheck-lsp--buffer-uri ()
   "Return the `file:' URI of the current buffer's file, or nil.
 
-A file on a remote host has none: reducing its name for the server
-would spell it exactly like the local file of that name, and the two
-buffers would then share a document.  The checker declines those
-buffers anyway, see `flycheck-lsp--enabled-p'."
-  (and buffer-file-name
-       (not (file-remote-p buffer-file-name))
-       (flycheck-lsp--path-to-uri buffer-file-name)))
+The URI names the file as the server\='s host sees it; the host itself is
+carried by the document key, see `flycheck-lsp--doc-key'."
+  (and buffer-file-name (flycheck-lsp--path-to-uri buffer-file-name)))
 
-(defun flycheck-lsp--doc-key (uri)
+(defun flycheck-lsp--server-remote (server)
+  "Return SERVER\='s remote prefix, or nil when it runs on this machine."
+  (when-let* ((root (flycheck-lsp--server-root server)))
+    (file-remote-p root)))
+
+(defun flycheck-lsp--doc-key (uri &optional remote)
   "Return the canonical key (an absolute path) for the document URI.
 
 The client and the server may spell the same file's URI differently (a
@@ -12393,10 +12394,11 @@ re-encoded percent escape, an authority component, a Windows drive
 case).  Keying open documents and their diagnostics on the decoded,
 expanded path, rather than the raw URI, makes both sides agree.
 
-URI is always a server's, and a server only ever serves files local to
-the host it runs on, so the key is a plain local path with no remote
-prefix to put back."
-  (expand-file-name (flycheck-lsp--uri-to-path uri)))
+URI is always a server's, naming the file as its own host sees it.
+REMOTE, a prefix as `file-remote-p' returns, is that host, so the key
+names the file as Emacs does: two servers on different hosts holding the
+same path get different keys, and the key opens the right file."
+  (expand-file-name (flycheck-lsp--uri-to-path uri remote)))
 
 (defun flycheck-lsp--server-live-p (server)
   "Return non-nil when SERVER's connection is still running."
@@ -12420,7 +12422,9 @@ published (guarded against recursion); a report repeating what the
 cache holds changes nothing about the buffer, and servers republish
 freely while they index.  PUSHED says the report was a push, for the
 counts `flycheck-verify-setup' shows."
-  (let ((doc (flycheck-lsp--document server (flycheck-lsp--doc-key uri))))
+  (let ((doc (flycheck-lsp--document
+              server (flycheck-lsp--doc-key
+                      uri (flycheck-lsp--server-remote server)))))
     (unless (and version
                  (flycheck-lsp--doc-version doc)
                  (not (equal version (flycheck-lsp--doc-version doc))))
@@ -12484,8 +12488,11 @@ leaves the document to be asked about again by the next check."
      :timeout flycheck-lsp--pull-timeout
      :success-fn (lambda (result)
                    (when (and (equal (plist-get result :kind) "full")
-                              (eq doc (gethash (flycheck-lsp--doc-key uri)
-                                               documents)))
+                              (eq doc (gethash
+                                       (flycheck-lsp--doc-key
+                                        uri (flycheck-lsp--server-remote
+                                             server))
+                                       documents)))
                      (flycheck-lsp--accept-diagnostics
                       server uri (plist-get result :items) version
                       (plist-get result :resultId))))
@@ -12687,7 +12694,10 @@ afresh.  The servers stay."
 
 (defun flycheck-lsp--initialize-params (root)
   "Return the LSP `initialize' params for a server rooted at ROOT."
-  (list :processId (emacs-pid)
+  (list :processId (unless (file-remote-p root) (emacs-pid))
+        ;; A server on another host cannot see our process, and some
+        ;; older ones want the path rather than the URI.
+        :rootPath (file-local-name (expand-file-name root))
         :rootUri (flycheck-lsp--path-to-uri root)
         :capabilities
         (list :textDocument
@@ -12737,6 +12747,52 @@ Remove it from the registry so a later check starts a fresh one."
   (flycheck-lsp--shutdown-server server)
   (remhash (flycheck-lsp--server-key server) flycheck-lsp--servers))
 
+(defvar tramp-use-ssh-controlmaster-options)
+(declare-function tramp-shell-quote-argument "tramp" (s))
+(defvar tramp-ssh-controlmaster-options)
+
+(defun flycheck-lsp--remote-command (command)
+  "Return COMMAND wrapped for a server started on a remote host.
+
+The shell TRAMP runs the command under translates a carriage return into
+a newline, which destroys the CRLF framing LSP headers use.  Turning the
+line discipline raw leaves the byte stream alone.  Eglot wraps remote
+servers the same way.
+
+Arguments are quoted the way a POSIX shell reads them rather than the
+way this machine\='s shell does, since that is what runs them."
+  (list "sh" "-c"
+        (concat "stty raw > /dev/null 2>&1; exec "
+                (mapconcat #'tramp-shell-quote-argument command " "))))
+
+(defun flycheck-lsp--spawn (name command stderr)
+  "Start COMMAND as process NAME with STDERR, on this host or the remote one.
+
+A remote `default-directory' needs `:file-handler', or the process runs
+here instead, against files it cannot see.  It also needs the wrapper
+`flycheck-lsp--remote-command' builds, which is what preserves the byte
+stream the LSP framing depends on."
+  (if (file-remote-p default-directory)
+      (progn
+        ;; Loaded before the bindings below: on Emacs 30 one of them is
+        ;; an obsolete alias, and `defvaralias' refuses to alias a symbol
+        ;; that is let-bound, so loading it inside would signal.
+        (require 'tramp-sh nil t)
+        (let (;; A connection carrying this much data is not what
+              ;; ControlMaster is for.  Eglot suppresses it for the same
+              ;; reason (Emacs bug#61350).  The string matters only on
+              ;; Emacs 28 and 29, where `suppress' reads as plain
+              ;; truthy.
+              (tramp-use-ssh-controlmaster-options 'suppress)
+              (tramp-ssh-controlmaster-options
+               "-o ControlMaster=no -o ControlPath=none"))
+          (make-process :name name
+                        :command (flycheck-lsp--remote-command command)
+                        :connection-type 'pipe :coding 'utf-8-emacs-unix
+                        :noquery t :stderr stderr :file-handler t)))
+    (make-process :name name :command command :connection-type 'pipe
+                  :coding 'utf-8-emacs-unix :noquery t :stderr stderr)))
+
 (defun flycheck-lsp--start-server (root command)
   "Start an LSP server running COMMAND under ROOT and initialize it.
 
@@ -12760,9 +12816,7 @@ the server down.  Return nil if the process could not be spawned at all."
         (progn
           ;; Spawned inside the handler below: a missing program signals
           ;; here, and the stderr buffer would be left behind.
-          (setq proc (make-process
-                      :name name :command command :connection-type 'pipe
-                      :coding 'utf-8-emacs-unix :noquery t :stderr stderr))
+          (setq proc (flycheck-lsp--spawn name command stderr))
           (setf (flycheck-lsp--server-connection server)
                 (make-instance
                  'jsonrpc-process-connection
@@ -12902,7 +12956,9 @@ as unavailable."
     ;; command (or a `flycheck-fix-all-errors' batch).
     (ignore-errors
       (flycheck-lsp--sync-document
-       server (flycheck-lsp--document server (flycheck-lsp--doc-key uri))
+       server (flycheck-lsp--document
+               server (flycheck-lsp--doc-key
+                       uri (flycheck-lsp--server-remote server)))
        uri (flycheck-lsp--language-id major-mode))
       (when-let* ((actions (append
                             (flycheck-lsp--request
@@ -13009,7 +13065,8 @@ handshake's completion re-triggers the check (see
             (funcall callback 'finished nil)
           (let* ((buffer (current-buffer))
                  (doc (flycheck-lsp--document
-                       server (flycheck-lsp--doc-key uri))))
+                       server (flycheck-lsp--doc-key
+                               uri (flycheck-lsp--server-remote server)))))
             (setf (flycheck-lsp--doc-buffer doc) buffer)
             (if (not (flycheck-lsp--server-initialized server))
                 (funcall callback 'finished nil)
@@ -13032,20 +13089,18 @@ handshake's completion re-triggers the check (see
   "Return non-nil when the `flycheck-lsp' checker may run in the current buffer.
 
 That is, `flycheck-lsp-mode' is on or `flycheck-lsp-prefer-server' stands
-this checker in for a command checker, the buffer visits a local file,
-and its major mode has a server in `flycheck-lsp-servers' whose program
+this checker in for a command checker, the buffer visits a file, and
+its major mode has a server in `flycheck-lsp-servers' whose program
 is installed.  Used as the checker's predicate, so `flycheck-lsp' is
 never selected unless something opted in and the server is available.
 
-A file on a remote host is declined.  The server would be looked for on
-that host but started on this one, so a buffer checked that way is
-served by whatever local program happens to share the name, reading file
-names that mean nothing to it.  Command checkers do run over TRAMP, and
-the buffer falls through to them."
+A file on a remote host is served by a server started there, over TRAMP;
+`flycheck-lsp--spawn' runs it on that host and the document keys name
+files as Emacs does, so the server needs to be installed there rather
+than here."
   (and (or (bound-and-true-p flycheck-lsp-mode)
            (flycheck-lsp--preferred-p))
        buffer-file-name
-       (not (file-remote-p default-directory))
        (flycheck-lsp--available-command major-mode)
        t))
 
@@ -13102,17 +13157,24 @@ The server itself is left running -- like Eglot, it is kept for the rest
 of the session and torn down only when Emacs exits (see
 `flycheck-lsp--shutdown-all') -- so reopening or checking another of its
 files does not pay to restart it."
-  (when-let* ((uri (flycheck-lsp--buffer-uri))
-              (key (flycheck-lsp--doc-key uri)))
-    (maphash
+  (when-let* ((uri (flycheck-lsp--buffer-uri)))
+    ;; A local buffer's host is nil, which is a value, not an absence.
+    (let* ((remote (file-remote-p buffer-file-name))
+           (key (flycheck-lsp--doc-key uri remote)))
+      (maphash
      (lambda (_server-key server)
-       (when (gethash key (flycheck-lsp--server-documents server))
-         (remhash key (flycheck-lsp--server-documents server))
-         (when (flycheck-lsp--server-live-p server)
-           (ignore-errors
-             (flycheck-lsp--notify server 'textDocument/didClose
-                                   (list :textDocument (list :uri uri)))))))
-     flycheck-lsp--servers)))
+       ;; The key carries this buffer's host, so a server elsewhere
+       ;; holding the same path for another buffer does not match and
+       ;; keeps its document.
+       (progn
+         (when (gethash key (flycheck-lsp--server-documents server))
+           (remhash key (flycheck-lsp--server-documents server))
+           (when (flycheck-lsp--server-live-p server)
+             (ignore-errors
+               (flycheck-lsp--notify server 'textDocument/didClose
+                                       (list :textDocument
+                                             (list :uri uri))))))))
+       flycheck-lsp--servers))))
 
 (defun flycheck-lsp--forget-server (key server)
   "Drop SERVER, registered under KEY, and shut it down.
@@ -13172,9 +13234,6 @@ buffers it serves and even `flycheck-lsp-mode' being turned off."
 With prefix argument ALL, shut down every running server instead."
   (interactive "P")
   (let ((root (and (not all)
-                   ;; A remote buffer has no server, and asking for its
-                   ;; project would reach for the host.
-                   (not (file-remote-p default-directory))
                    (file-name-as-directory
                     (expand-file-name (flycheck-lsp--root)))))
         (count 0))

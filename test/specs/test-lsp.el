@@ -955,11 +955,11 @@
                    :prefer t :selected 'ruby-rubocop)
                   :to-be 'ruby-rubocop))
 
-        (it "leaves a remote buffer to the command checkers"
-          ;; The native client declines those, so standing in for a
-          ;; checker that does run there would lose the check.  Asks the
-          ;; substitution directly: running the whole of selection would
-          ;; have the command checker reach for the host.
+        (it "serves a remote buffer too"
+          ;; The server runs on that host, so the preference applies
+          ;; there as well.  Asks the substitution directly: running the
+          ;; whole of selection would have the command checker reach for
+          ;; the host.
           (with-temp-buffer
             (delay-mode-hooks (ruby-mode))
             (setq buffer-file-name "/ssh:host:/proj/a.rb"
@@ -967,10 +967,10 @@
             (let ((flycheck-executable-find #'identity)
                   (flycheck-checkers '(ruby-rubocop flycheck-lsp))
                   (flycheck-lsp-prefer-server t))
-              ;; The preference is active here, and the predicate still
-              ;; says no because the buffer is remote.
+              ;; The preference is active here, and a remote buffer is
+              ;; served like any other now.
               (expect (flycheck-lsp--preferred-p) :to-be-truthy)
-              (expect (flycheck-lsp--enabled-p) :to-be nil))))
+              (expect (flycheck-lsp--enabled-p) :to-be-truthy))))
 
         (it "respects disabling and unregistering the checker"
           (expect (flycheck-test--preferred-checker
@@ -1166,11 +1166,111 @@ holding its document"
                   (expect (buffer-string) :to-match "ruby-lsp")))
             (kill-buffer "*Flycheck LSP servers*"))))
 
-      (it "declines a remote buffer"
-        ;; The server is looked for on the remote host but would be
-        ;; started on this one, so the buffer must fall through to the
-        ;; command checkers, which do run over TRAMP.  The local
-        ;; assertion is the control: without it a mode with no
+      (it "starts a remote server on the buffer's own host"
+        ;; Without a file handler `make-process' ignores a remote
+        ;; `default-directory' and starts here, against files the server
+        ;; cannot see.
+        (let (spawned)
+          (spy-on 'make-process :and-call-fake
+                  (lambda (&rest args) (setq spawned args) nil))
+          (let ((default-directory "/ssh:host:/srv/app/"))
+            (ignore-errors (flycheck-lsp--spawn "srv" '("rubocop" "--lsp")
+                                                (current-buffer))))
+          (expect (plist-get spawned :file-handler) :to-be t)
+          (expect (plist-get spawned :command)
+                  :to-equal (flycheck-lsp--remote-command
+                             '("rubocop" "--lsp")))))
+
+      (it "starts a local server plainly"
+        (let (spawned)
+          (spy-on 'make-process :and-call-fake
+                  (lambda (&rest args) (setq spawned args) nil))
+          (let ((default-directory "/srv/app/"))
+            (ignore-errors (flycheck-lsp--spawn "srv" '("rubocop" "--lsp")
+                                                (current-buffer))))
+          (expect (plist-get spawned :file-handler) :to-be nil)
+          (expect (plist-get spawned :command) :to-equal '("rubocop" "--lsp"))))
+
+      (it "keys a document by the host its server runs on"
+        ;; Every doc-key call site passes the server's host; if that
+        ;; stopped happening, two hosts would share one key.
+        (let* ((server (flycheck-lsp--server-create
+                        :root "/ssh:host:/srv/app/" :command '("srv")))
+               (doc (flycheck-lsp--document
+                     server (flycheck-lsp--doc-key
+                             "file:///srv/app/a.rb"
+                             (flycheck-lsp--server-remote server)))))
+          (expect (flycheck-lsp--server-remote server) :to-equal "/ssh:host:")
+          (expect (hash-table-keys (flycheck-lsp--server-documents server))
+                  :to-equal '("/ssh:host:/srv/app/a.rb"))
+          (expect doc :to-be-truthy)))
+
+      (it "closes a document only on its own host's server"
+        ;; Two hosts can hold the same path.  Closing a buffer on one
+        ;; must not tell the other to drop a file it is still serving.
+        (let ((flycheck-lsp--servers (make-hash-table :test 'equal))
+              (local (flycheck-lsp--server-create
+                      :root "/srv/app/" :command '("srv")))
+              (remote (flycheck-lsp--server-create
+                       :root "/ssh:host:/srv/app/" :command '("srv"))))
+          (flycheck-lsp--document local (flycheck-lsp--doc-key
+                                         "file:///srv/app/a.rb"))
+          (flycheck-lsp--document remote (flycheck-lsp--doc-key
+                                          "file:///srv/app/a.rb" "/ssh:host:"))
+          (puthash '("/srv/app/" "srv") local flycheck-lsp--servers)
+          (puthash '("/ssh:host:/srv/app/" "srv") remote flycheck-lsp--servers)
+          ;; Closing the local buffer leaves the remote server alone.
+          (flycheck-buttercup-with-temp-buffer
+            (setq buffer-file-name "/srv/app/a.rb")
+            (flycheck-lsp--close-buffer))
+          (expect (hash-table-count (flycheck-lsp--server-documents local))
+                  :to-equal 0)
+          (expect (hash-table-count (flycheck-lsp--server-documents remote))
+                  :to-equal 1)
+          ;; And the other way round: put the local one back, then close
+          ;; the remote buffer and check only the remote server loses it.
+          (flycheck-lsp--document local (flycheck-lsp--doc-key
+                                         "file:///srv/app/a.rb"))
+          (flycheck-buttercup-with-temp-buffer
+            (setq buffer-file-name "/ssh:host:/srv/app/a.rb")
+            (flycheck-lsp--close-buffer))
+          (expect (hash-table-count (flycheck-lsp--server-documents remote))
+                  :to-equal 0)
+          (expect (hash-table-count (flycheck-lsp--server-documents local))
+                  :to-equal 1)))
+
+      (it "wraps a remote server so the framing survives"
+        ;; TRAMP's shared shell turns a carriage return into a newline,
+        ;; and the direct methods spawn through a pty, either of which
+        ;; destroys the CRLF framing LSP headers use.
+        (expect (flycheck-lsp--remote-command '("rubocop" "--lsp"))
+                :to-equal '("sh" "-c" "stty raw > /dev/null 2>&1; exec rubocop --lsp"))
+        ;; Arguments are quoted, so a path with a space survives.
+        (expect (nth 2 (flycheck-lsp--remote-command '("srv" "a b")))
+                :to-match (regexp-quote "a\\ b")))
+
+      (it "tells a remote server nothing about our process"
+        ;; A pid on this machine means nothing on the server's host, and
+        ;; an older server may want the path rather than the URI.
+        (let ((params (flycheck-lsp--initialize-params "/ssh:host:/srv/app/")))
+          ;; The field is required by LSP, so it must be present and
+          ;; null rather than simply absent.
+          (expect (plist-member params :processId) :to-be-truthy)
+          (expect (plist-get params :processId) :to-be nil)
+          (expect (plist-get params :rootPath) :to-equal "/srv/app/")
+          (expect (plist-get params :rootUri) :to-equal "file:///srv/app/"))
+        (let ((params (flycheck-lsp--initialize-params "/srv/app/")))
+          (expect (plist-get params :processId) :to-equal (emacs-pid))))
+
+      (it "keeps a remote document apart from a local file of that path"
+        ;; Both name "/etc/hosts" to their own server; the key is what
+        ;; distinguishes them, so closing one must not close the other.
+        (expect (flycheck-lsp--doc-key "file:///etc/hosts" "/ssh:host:")
+                :not :to-equal (flycheck-lsp--doc-key "file:///etc/hosts")))
+
+      (it "serves a remote buffer"
+        ;; The server runs on the buffer's own host, so a remote buffer
+        ;; is checked like a local one.  The local assertion is the control: without it a mode with no
         ;; configured server would pass this either way.
         (flycheck-buttercup-with-temp-buffer
           (delay-mode-hooks (ruby-mode))
@@ -1178,17 +1278,22 @@ holding its document"
                 (flycheck-executable-find #'identity))
             (setq buffer-file-name "/proj/a.rb" default-directory "/proj/")
             (expect (flycheck-lsp--enabled-p) :to-be-truthy)
+            ;; A remote buffer is served too now: the server runs on
+            ;; that host.
             (setq buffer-file-name "/ssh:host:/proj/a.rb"
                   default-directory "/ssh:host:/proj/")
-            (expect (flycheck-lsp--enabled-p) :to-be nil))))
+            (expect (flycheck-lsp--enabled-p) :to-be-truthy))))
 
-      (it "gives a remote buffer no document URI"
-        ;; Reducing a remote name for the server spells it exactly like
-        ;; the local file of that name, so the two buffers would share a
-        ;; document and killing one would close the other's.
+      (it "names a remote file as the server's host sees it"
+        ;; The URI carries no host; the document key does, so a remote
+        ;; buffer and a local file of the same path stay distinct.
         (flycheck-buttercup-with-temp-buffer
-          (setq buffer-file-name "/sudo::/etc/hosts")
-          (expect (flycheck-lsp--buffer-uri) :to-be nil))
+          (setq buffer-file-name "/ssh:host:/etc/hosts")
+          (expect (flycheck-lsp--buffer-uri) :to-equal "file:///etc/hosts")
+          (expect (flycheck-lsp--doc-key (flycheck-lsp--buffer-uri) "/ssh:host:")
+                  :to-equal "/ssh:host:/etc/hosts")
+          (expect (flycheck-lsp--doc-key (flycheck-lsp--buffer-uri))
+                  :to-equal "/etc/hosts"))
         (flycheck-buttercup-with-temp-buffer
           (setq buffer-file-name "/etc/hosts")
           ;; Windows expands this against the current drive, so match the

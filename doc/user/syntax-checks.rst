@@ -328,11 +328,12 @@ whose language server you don't have.
 
 .. note::
 
-   A file on a remote host is left to the command checkers, which do run over
-   TRAMP.  The native client would look for the server on the remote host but
-   start it on this one, so it is declined rather than run against the wrong
-   machine.  ``flycheck-eglot-mode`` is the way to get LSP diagnostics for a
-   remote file: Eglot runs the server on the right host.
+   A file on a remote host is checked like a local one: the server runs on
+   that host over TRAMP, so it needs to be installed there rather than here,
+   and the diagnostics it reports open the right files.  Flycheck runs it
+   with the remote line discipline in raw mode, because the shell TRAMP runs
+   it under would otherwise translate the carriage returns that LSP framing
+   depends on.
 
 Preferring a server over a command checker
 ------------------------------------------
