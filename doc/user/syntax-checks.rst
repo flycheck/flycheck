@@ -200,6 +200,8 @@ them: a Terraform output referencing a variable no file declares, say.  A
    The results reflect the project as of the run and stay until the next
    run there; with a prefix argument the results are dropped instead.
 
+.. image:: /images/flycheck-project-check.gif
+
 A project on a remote host is checked like a local one: the tool runs on
 that host over TRAMP, so it needs to be installed there, and the paths it
 reports are opened there rather than at the same paths on this machine.
