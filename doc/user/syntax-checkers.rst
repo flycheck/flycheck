@@ -341,10 +341,11 @@ Customize keybindings
 All Flycheck commands are bound under the ``C-c !`` prefix by default.  The
 full list of default keybindings is:
 
-=================   =================================
+=================   =====================================
 ``C-c ! c``         Check the current buffer
 ``C-c ! C``         Clear all errors
 ``C-c ! C-c``       Run a checker as a shell command
+``C-c ! P``         Check the whole project
 ``C-c ! n``         Jump to the next error
 ``C-c ! p``         Jump to the previous error
 ``C-c ! l``         List all errors
@@ -353,12 +354,15 @@ full list of default keybindings is:
 ``C-c ! ?``         Describe a checker
 ``C-c ! h``         Display error at point
 ``C-c ! e``         Explain error at point
+``C-c ! j``         Visit a related location of the error
+``C-c ! f``         Apply the fix of the error at point
+``C-c ! F``         Apply every fix in the buffer
 ``C-c ! H``         Display local help
 ``C-c ! i``         Open the Flycheck manual
 ``C-c ! V``         Show Flycheck version
 ``C-c ! v``         Verify the setup
 ``C-c ! x``         Disable a checker
-=================   =================================
+=================   =====================================
 
 Change the prefix key
 ---------------------
