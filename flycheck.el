@@ -3658,13 +3658,23 @@ A fix a checker suggests carries this tick (see `flycheck--make-fix')
 so `flycheck-apply-fix' can tell whether the buffer has changed since
 the checker read it, and thus whether the fix's positions are stale.")
 
+(defvar-local flycheck--syntax-check-start-time nil
+  "When the current check started, as a Lisp timestamp.
+
+The tick above covers the fixes for this buffer.  A check can also
+suggest a fix for another file it read from disk, which no tick of this
+buffer describes; that fix is good only as long as the file has not been
+written since this time (see `flycheck--check-fix-file-state').")
+
 (defun flycheck-start-current-syntax-check (checker)
   "Start a syntax check in the current buffer with CHECKER.
 
 Set `flycheck-current-syntax-check' accordingly."
   ;; Remember the buffer's modification state, so a fix this check produces
-  ;; can be refused later if the buffer has changed in the meantime.
-  (setq flycheck--syntax-check-modified-tick (buffer-chars-modified-tick))
+  ;; can be refused later if the buffer has changed in the meantime, and the
+  ;; time, which is what a fix for another file answers to instead.
+  (setq flycheck--syntax-check-modified-tick (buffer-chars-modified-tick)
+        flycheck--syntax-check-start-time (current-time))
   ;; Allocate the current syntax check *before* starting it.  This allows for
   ;; synchronous checks, which call the status callback immediately in their
   ;; start function.
@@ -4953,6 +4963,26 @@ nothing, when an edit's coordinates make no sense or the edits overlap."
           (goto-char beg)
           (insert (or replacement "")))))))
 
+(defun flycheck--apply-fix-in (fix buffer &optional guard)
+  "Apply FIX's edits in BUFFER as a single undoable change.
+
+GUARD, when given, is called with FIX in BUFFER before anything is
+applied and signals when the fix must not be applied.  What makes a fix
+stale depends on where it came from: a fix for the buffer that was
+checked compares modification ticks (see `flycheck--check-fix-tick'),
+while a fix for a file the checker read from disk has no tick to compare
+and its caller checks the file instead (see
+`flycheck--check-fix-file-state')."
+  (unless (buffer-live-p buffer)
+    (user-error "Cannot apply a fix: its buffer is gone"))
+  (with-current-buffer buffer
+    (when buffer-read-only
+      (user-error "Cannot apply a fix in a read-only buffer"))
+    (when guard (funcall guard fix))
+    (save-restriction
+      (widen)
+      (flycheck--apply-edits (flycheck-fix-edits fix)))))
+
 (defun flycheck-apply-fix (fix &optional buffer)
   "Apply FIX in BUFFER, defaulting to the current buffer.
 
@@ -4965,16 +4995,8 @@ or read-only, when the buffer has changed since the check that
 produced the fix (its line and column numbers would be stale), or
 when the fix's own edits overlap -- so a fix can never silently
 corrupt the buffer."
-  (let ((buffer (or buffer (current-buffer))))
-    (unless (buffer-live-p buffer)
-      (user-error "Cannot apply a fix: its buffer is gone"))
-    (with-current-buffer buffer
-      (when buffer-read-only
-        (user-error "Cannot apply a fix in a read-only buffer"))
-      (flycheck--check-fix-tick fix)
-      (save-restriction
-        (widen)
-        (flycheck--apply-edits (flycheck-fix-edits fix))))))
+  (flycheck--apply-fix-in fix (or buffer (current-buffer))
+                          #'flycheck--check-fix-tick))
 
 (defun flycheck--fix-span (fix)
   "Return the buffer region (BEG . END) that FIX's edits span.
@@ -4984,6 +5006,46 @@ FIX's edits, resolved in the current buffer."
   (let ((regions (mapcar #'flycheck--fix-edit-region (flycheck-fix-edits fix))))
     (cons (apply #'min (mapcar #'car regions))
           (apply #'max (mapcar #'cdr regions)))))
+
+(defun flycheck--apply-fixes-in (fixes buffer &optional guard)
+  "Apply as many of FIXES together in BUFFER as do not conflict.
+
+GUARD, when given, is called with FIXES in BUFFER before anything is
+applied and signals when they must not be applied; see
+`flycheck--apply-fix-in'.  Return the number of fixes applied."
+  (unless (buffer-live-p buffer)
+    (user-error "Cannot apply fixes: their buffer is gone"))
+  (with-current-buffer buffer
+    (when buffer-read-only
+      (user-error "Cannot apply fixes in a read-only buffer"))
+    (when guard (funcall guard fixes))
+    ;; Ignore fixes with no edits: they contribute nothing and would trip
+    ;; up `flycheck--fix-span'.  In practice every live fix has edits.
+    (setq fixes (seq-filter #'flycheck-fix-edits fixes))
+    (save-restriction
+      (widen)
+      ;; Greedily select a non-overlapping subset, bottom-up: process the
+      ;; fixes lowest in the buffer first and keep a fix only if its whole
+      ;; span sits at or above every fix already selected below it.
+      (let ((spanned (mapcar (lambda (fix)
+                               (cons (flycheck--fix-span fix) fix))
+                             fixes))
+            (boundary most-positive-fixnum)
+            (selected nil))
+        ;; Sort by span start, latest in the buffer first, and keep a fix
+        ;; when its whole span ends at or before every fix already kept
+        ;; below it.  Sorting by start (not end) maximizes the number of
+        ;; fixes applied: it is the classic interval-scheduling greedy, so
+        ;; one wide-span fix can't crowd out several small ones.
+        (setq spanned (sort spanned (lambda (a b) (> (caar a) (caar b)))))
+        (pcase-dolist (`((,beg . ,end) . ,fix) spanned)
+          (when (<= end boundary)
+            (push fix selected)
+            (setq boundary (min boundary beg))))
+        (when selected
+          (flycheck--apply-edits
+           (apply #'append (mapcar #'flycheck-fix-edits selected))))
+        (length selected)))))
 
 (defun flycheck-apply-fixes (fixes &optional buffer)
   "Apply as many of FIXES together in BUFFER as do not conflict.
@@ -4998,40 +5060,9 @@ applied.
 Signal a `user-error', touching nothing, when BUFFER is not live or
 read-only, or when any fix is stale -- the buffer changed since it was
 computed."
-  (let ((buffer (or buffer (current-buffer))))
-    (unless (buffer-live-p buffer)
-      (user-error "Cannot apply fixes: their buffer is gone"))
-    (with-current-buffer buffer
-      (when buffer-read-only
-        (user-error "Cannot apply fixes in a read-only buffer"))
-      (mapc #'flycheck--check-fix-tick fixes)
-      ;; Ignore fixes with no edits: they contribute nothing and would trip
-      ;; up `flycheck--fix-span'.  In practice every live fix has edits.
-      (setq fixes (seq-filter #'flycheck-fix-edits fixes))
-      (save-restriction
-        (widen)
-        ;; Greedily select a non-overlapping subset, bottom-up: process the
-        ;; fixes lowest in the buffer first and keep a fix only if its whole
-        ;; span sits at or above every fix already selected below it.
-        (let ((spanned (mapcar (lambda (fix)
-                                 (cons (flycheck--fix-span fix) fix))
-                               fixes))
-              (boundary most-positive-fixnum)
-              (selected nil))
-          ;; Sort by span start, latest in the buffer first, and keep a fix
-          ;; when its whole span ends at or before every fix already kept
-          ;; below it.  Sorting by start (not end) maximizes the number of
-          ;; fixes applied: it is the classic interval-scheduling greedy, so
-          ;; one wide-span fix can't crowd out several small ones.
-          (setq spanned (sort spanned (lambda (a b) (> (caar a) (caar b)))))
-          (pcase-dolist (`((,beg . ,end) . ,fix) spanned)
-            (when (<= end boundary)
-              (push fix selected)
-              (setq boundary (min boundary beg))))
-          (when selected
-            (flycheck--apply-edits
-             (apply #'append (mapcar #'flycheck-fix-edits selected))))
-          (length selected))))))
+  (flycheck--apply-fixes-in fixes (or buffer (current-buffer))
+                            (lambda (fixes)
+                              (mapc #'flycheck--check-fix-tick fixes))))
 
 (defun flycheck--error-fix-buffer (err)
   "Return the live buffer in which ERR's fix may be applied, or nil.
@@ -5048,6 +5079,105 @@ edited -- cannot be fixed in place."
                   (and buffer-file-name
                        (flycheck-same-files-p filename buffer-file-name))))
         buffer))))
+
+(defun flycheck--error-fix-target (err &optional visit)
+  "Return the live buffer in which ERR's fix is to be applied, or nil.
+
+For an error about the file its own buffer visits that is the buffer
+itself (see `flycheck--error-fix-buffer').  For a cross-file error, one
+a whole-project checker reported about a file no buffer was checked for,
+it is a buffer visiting that file; with VISIT non-nil the file is opened
+when nothing visits it yet, and otherwise such an error resolves to nil."
+  (or (flycheck--error-fix-buffer err)
+      (when-let* ((filename (flycheck-error-filename err))
+                  ((file-regular-p filename)))
+        (or (find-buffer-visiting filename)
+            (and visit (find-file-noselect filename))))))
+
+(defun flycheck--fix-bound (err)
+  "Return what says which state of its file ERR's fix describes.
+
+That is the symbol `now' for a lazy fix provider (see
+`flycheck-error-fix'), which computes the fix against the file as it is
+when asked; the time of the check that produced a fix Flycheck already
+holds; or nil when nothing says, in which case the fix is not applied to
+another file at all."
+  (cond
+   ((functionp (flycheck-error-fix err)) 'now)
+   ;; A buffer check can report a fix for another file it read (rustc names
+   ;; a suggestion in a second crate file this way).  The buffer's tick
+   ;; says nothing about that file, but the time its check started does.
+   ((when-let* ((buffer (flycheck-error-buffer err))
+                ((buffer-live-p buffer)))
+      (buffer-local-value 'flycheck--syntax-check-start-time buffer)))
+   (t (flycheck--project-error-time err))))
+
+(defun flycheck--fix-file-current-p (file checked)
+  "Whether FILE can still hold what a fix bounded by CHECKED describes.
+
+CHECKED is a bound as `flycheck--fix-bound' returns one."
+  (pcase checked
+    ('nil nil)
+    ('now t)
+    (time
+     ;; A file on another host is stamped by that host's clock, which ours
+     ;; has no business comparing against: a machine running a few seconds
+     ;; ahead would refuse every fix.
+     (or (file-remote-p file)
+         (when-let* ((written (file-attribute-modification-time
+                               (file-attributes file))))
+           (not (time-less-p time written)))))))
+
+(defun flycheck--check-fix-file-state (buffer checked)
+  "Signal a `user-error' when BUFFER no longer holds what CHECKED describes.
+
+A fix for a file other than the checked one carries no modification tick
+to compare against (see `flycheck-apply-fix'): its line and column
+numbers describe the file as its checker read it from disk.  So the file
+must still be what was read, which it is not once the buffer has unsaved
+changes, the file changed under it, or it was written after the check
+that produced the fix.  CHECKED is that check, as `flycheck--fix-bound'
+reports it; a fix nothing bounds is refused rather than applied at
+positions that may describe an older file."
+  (let ((name (file-name-nondirectory (or (buffer-file-name buffer)
+                                          (buffer-name buffer)))))
+    (when (buffer-modified-p buffer)
+      (user-error "%s has unsaved changes; save it and check again" name))
+    (unless (verify-visited-file-modtime buffer)
+      (user-error "%s changed on disk; revert it and check again" name))
+    (unless checked
+      (user-error "Nothing says which state of %s this fix is for; \
+check again" name))
+    (unless (flycheck--fix-file-current-p (buffer-file-name buffer) checked)
+      (user-error "%s was written since the check; check again" name))))
+
+(defun flycheck--apply-error-fix (err &optional visit)
+  "Apply ERR's fix in the buffer whose text it edits.
+
+That is ERR's own buffer, or, for an error about another file, a buffer
+visiting that file, opened when VISIT is non-nil and nothing visits it
+yet.  Return a cons of the applied fix and the buffer it was applied in,
+or nil when the checker turns out to have no fix after all (see
+`flycheck-error-resolve-fix').  Signal a `user-error', touching nothing,
+when the fix cannot be applied safely."
+  (let* ((in-place (flycheck--error-fix-buffer err))
+         (bound (unless in-place (flycheck--fix-bound err)))
+         (buffer (or in-place (flycheck--error-fix-target err visit))))
+    (unless buffer
+      (user-error "Cannot apply this fix: %s"
+                  (let ((filename (flycheck-error-filename err)))
+                    (cond
+                     ((null filename) "the buffer of this error is gone")
+                     ((not (file-regular-p filename))
+                      (format "there is no file at %s any more" filename))
+                     (t (format "no buffer visits %s" filename))))))
+    (when-let* ((fix (with-current-buffer buffer
+                       (flycheck-error-resolve-fix err))))
+      (if in-place
+          (flycheck-apply-fix fix buffer)
+        (flycheck--check-fix-file-state buffer bound)
+        (flycheck--apply-fix-in fix buffer))
+      (cons fix buffer))))
 
 (defun flycheck-error-format-snippet (err &optional max-length)
   "Extract the text that ERR refers to from the buffer.
@@ -5543,9 +5673,11 @@ asked to drop a project's results.")
 (defvar flycheck--project-runs (make-hash-table :test 'equal)
   "State of the project-checker runs, keyed by (PROJECT-KEY . CHECKER).
 Each value is a plist of `:process', the run still under way if any,
-and `:errors', what the last completed run reported.  The errors
-reflect the project as of that run; they stay until the next
-`flycheck-check-project' there replaces or clears them.")
+`:errors', what the last completed run reported, and `:time', when that
+run started.  The errors reflect the project as of that run; they stay
+until the next `flycheck-check-project' there replaces or clears them.
+The time is what tells a fix for one of those errors whether the file it
+edits has been written since (see `flycheck--check-fix-file-state').")
 
 (defun flycheck--project-run-extra-errors (project-key _buffers)
   "Return what project-checker runs reported for PROJECT-KEY."
@@ -5558,6 +5690,19 @@ reflect the project as of that run; they stay until the next
 
 (add-hook 'flycheck--project-extra-errors-functions
           #'flycheck--project-run-extra-errors)
+
+(defun flycheck--project-error-time (err)
+  "Return when the project-checker run that reported ERR started, or nil.
+
+Errors from a buffer check are not in these results; what bounds their
+fixes is the check of the buffer that reported them, see
+`flycheck--fix-bound'."
+  (catch 'time
+    (maphash (lambda (_key state)
+               (when (memq err (plist-get state :errors))
+                 (throw 'time (plist-get state :time))))
+             flycheck--project-runs)
+    nil))
 
 (defun flycheck--project-runs-forget (project-key)
   "Drop the run results and kill the running checks of PROJECT-KEY."
@@ -5599,7 +5744,8 @@ reflect the project as of that run; they stay until the next
                                         output checker root))
                            (error (setq failure (error-message-string err))
                                   nil))))
-            (puthash key (list :process nil :errors errors)
+            (puthash key (list :process nil :errors errors
+                               :time (plist-get state :time))
                      flycheck--project-runs)
             (flycheck--project-diagnostics-changed)
             (flycheck-error-list-refresh)
@@ -5671,7 +5817,8 @@ reflect the project as of that run; they stay until the next
         (puthash key (list :process proc
                            :errors (plist-get
                                     (gethash key flycheck--project-runs)
-                                    :errors))
+                                    :errors)
+                           :time (current-time))
                  flycheck--project-runs)))))
 
 (defun flycheck-check-project (&optional clear)
@@ -7562,15 +7709,19 @@ already names it in a grouped list."
          (msg-and-checker
           (concat
            ;; Flag errors that carry an applicable machine fix (apply with
-           ;; `x'/`flycheck-error-list-apply-fix'), for discoverability.  Only
-           ;; badge errors whose fix can actually be applied here, not
-           ;; cross-file ones the apply command would refuse.  A fix that has
-           ;; to be fetched before we know it exists, as an LSP code action
+           ;; `x'/`flycheck-error-list-apply-fix'), for discoverability.  An
+           ;; error about another file is badged too, as long as that file is
+           ;; still there: its fix is applied in the file it names, which the
+           ;; command opens.  A fix that has to
+           ;; be fetched before we know it exists, as an LSP code action
            ;; does, is badged with a question mark rather than left bare: the
            ;; indicators cannot promise it, but there is room to mention it
            ;; here, and otherwise nothing would suggest trying.
            (when (and (flycheck-error-fix error)
-                      (flycheck--error-fix-buffer error))
+                      (or (flycheck--error-fix-buffer error)
+                          (when-let* ((filename (flycheck-error-filename
+                                                 error)))
+                            (file-regular-p filename))))
              (let ((known (flycheck-error-known-fix-p error)))
                (propertize (if known "[fix] " "[fix?] ")
                            'face 'flycheck-error-list-checker-name
@@ -8123,26 +8274,26 @@ related location; see `flycheck-visit-related-location'."
 (defun flycheck-error-list-apply-fix (&optional pos)
   "Apply the suggested fix of the error at POS in the error list.
 
-POS defaults to `point'.  Signal a `user-error' when the error
-has no fix."
+POS defaults to `point'.  The fix is applied in the buffer its line and
+column numbers belong to: the buffer that was checked, or, for an error
+a project checker reported about another file, that file, which is
+opened and left unsaved so the change can be reviewed and undone.
+
+Signal a `user-error' when the error has no fix, or when the file it
+belongs to has changed since the check that produced it."
   (interactive)
-  (let* ((error (tabulated-list-get-id pos))
-         (fixable (and (flycheck-error-p error) (flycheck-error-fix error)))
-         (buffer (and fixable (flycheck--error-fix-buffer error))))
-    (unless fixable
+  (let ((error (tabulated-list-get-id pos)))
+    (unless (and (flycheck-error-p error) (flycheck-error-fix error))
       (user-error "The error at point has no fix"))
-    (unless buffer
-      (user-error "This fix cannot be applied here (the error is in another \
-file, or its buffer is gone)"))
-    ;; Resolve a lazy fix provider in the error's own buffer.
-    (if-let* ((fix (with-current-buffer buffer
-                     (flycheck-error-resolve-fix error))))
-        (progn
-          (flycheck-apply-fix fix buffer)
+    (if-let* ((result (flycheck--apply-error-fix error 'visit)))
+        (pcase-let ((`(,fix . ,buffer) result))
           (flycheck-error-list-refresh)
-          (message "Applied fix%s"
+          (message "Applied fix%s%s"
                    (if-let* ((description (flycheck-fix-description fix)))
-                       (concat ": " description) "")))
+                       (concat ": " description) "")
+                   (if (eq buffer flycheck-error-list-source-buffer)
+                       ""
+                     (format " in %s" (buffer-name buffer)))))
       (user-error "The fix for this error is not available"))))
 
 (defun flycheck-error-list-fix-all ()
