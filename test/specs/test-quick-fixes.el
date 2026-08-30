@@ -698,6 +698,113 @@ bounds the fix of a file the checker read from disk."
              (err (flycheck-test--fix-error file (lambda (_err) nil))))
         (expect (flycheck--apply-error-fix err 'visit) :to-be nil))))
 
+  (describe "flycheck--fix-files-to-open"
+
+    (it "lists the files fixing would have to open, once each"
+      (let* ((a (flycheck-test--fix-file "a.el" "helo\n"))
+             (b (flycheck-test--fix-file "b.el" "helo\n")))
+        (find-file-noselect b)
+        (expect (flycheck--fix-files-to-open
+                 (list (flycheck-test--fix-error a)
+                       (flycheck-test--fix-error a)
+                       (flycheck-test--fix-error b)))
+                :to-equal (list a))))
+
+    (it "ignores errors that carry no fix"
+      (let ((a (flycheck-test--fix-file "a.el" "helo\n")))
+        (expect (flycheck--fix-files-to-open
+                 (list (flycheck-error-new-at 1 1 'error "x" :filename a
+                                              :buffer nil)))
+                :to-be nil))))
+
+  (describe "flycheck--fix-errors-across-files"
+
+    (it "fixes several files at once and counts them"
+      (let* ((a (flycheck-test--fix-file "a.el" "helo\n"))
+             (b (flycheck-test--fix-file "b.el" "helo\n")))
+        (expect (flycheck--fix-errors-across-files
+                 (list (flycheck-test--fix-error a)
+                       (flycheck-test--fix-error b)))
+                :to-equal '(2 2 0))
+        (dolist (file (list a b))
+          (with-current-buffer (find-buffer-visiting file)
+            (expect (buffer-string) :to-equal "hello\n")))))
+
+    (it "skips a file that changed and fixes the rest"
+      (let* ((a (flycheck-test--fix-file "a.el" "helo\n"))
+             (b (flycheck-test--fix-file "b.el" "helo\n")))
+        (with-current-buffer (find-file-noselect a)
+          (goto-char (point-max))
+          (insert "extra\n"))
+        (expect (flycheck--fix-errors-across-files
+                 (list (flycheck-test--fix-error a)
+                       (flycheck-test--fix-error b)))
+                :to-equal '(1 1 1))
+        (with-current-buffer (find-buffer-visiting a)
+          (expect (buffer-string) :to-equal "helo\nextra\n"))
+        (with-current-buffer (find-buffer-visiting b)
+          (expect (buffer-string) :to-equal "hello\n"))))
+
+    (it "opens nothing when the project's results are stale"
+      (let* ((a (flycheck-test--fix-file "a.el" "helo\n"))
+             (err (flycheck-test--fix-error a)))
+        (flycheck-test--record-run err (time-add (current-time) -60))
+        (expect (flycheck--fix-errors-across-files (list err))
+                :to-equal '(0 0 1))
+        (expect (find-buffer-visiting a) :to-be nil)))
+
+    (it "skips a file whole when one of its fixes is unbounded"
+      ;; The first error opens the file; the second one, which nothing
+      ;; bounds, then keeps the whole file out rather than riding along.
+      (let* ((a (flycheck-test--fix-file "a.el" "helo\n"))
+             (bounded (flycheck-test--fix-error a))
+             (unbounded (flycheck-error-new-at
+                         1 1 'error "typo" :filename a :buffer nil
+                         :fix (flycheck-test--edit 1 1 1 5 "hello"))))
+        (expect (flycheck--fix-errors-across-files (list bounded unbounded))
+                :to-equal '(0 0 2))
+        (with-current-buffer (find-buffer-visiting a)
+          (expect (buffer-string) :to-equal "helo\n"))))
+
+    (it "counts an error whose file is gone as skipped"
+      (expect (flycheck--fix-errors-across-files
+               (list (flycheck-test--fix-error
+                      (expand-file-name "gone.el" flycheck-test--fix-dir))))
+              :to-equal '(0 0 1)))
+
+    (it "leaves errors without a fix alone"
+      (let ((a (flycheck-test--fix-file "a.el" "helo\n")))
+        (expect (flycheck--fix-errors-across-files
+                 (list (flycheck-error-new-at 1 1 'error "x" :filename a
+                                              :buffer nil)))
+                :to-equal '(0 0 0))
+        (expect (find-buffer-visiting a) :to-be nil)))
+
+    (it "counts a fix that conflicts with another in the same file"
+      (let ((a (flycheck-test--fix-file "a.el" "helo\n")))
+        (expect (flycheck--fix-errors-across-files
+                 (list (flycheck-test--fix-error a)
+                       (flycheck-test--fix-error
+                        a (flycheck-test--edit 1 1 1 5 "hey"))))
+                :to-equal '(1 1 1))))
+
+    (it "still answers to the buffer's tick for its own errors"
+      ;; An error the buffer's own check reported carries the tick of that
+      ;; check; editing the buffer since must keep its fix out.
+      (let* ((a (flycheck-test--fix-file "a.el" "helo\n"))
+             (buffer (find-file-noselect a))
+             (err (with-current-buffer buffer
+                    (flycheck-error-new-at
+                     1 1 'error "typo"
+                     :fix (flycheck-fix-new
+                           :edits (flycheck-fix-edits
+                                   (flycheck-test--edit 1 1 1 5 "hello"))
+                           :tick (1- (buffer-chars-modified-tick buffer)))))))
+        (expect (flycheck--fix-errors-across-files (list err))
+                :to-equal '(0 0 1))
+        (with-current-buffer buffer
+          (expect (buffer-string) :to-equal "helo\n")))))
+
   (describe "flycheck--project-error-time"
 
     (it "returns the time of the run that reported the error"

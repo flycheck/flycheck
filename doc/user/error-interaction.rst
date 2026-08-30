@@ -350,13 +350,14 @@ In the :ref:`error list <flycheck-error-list>` press :kbd:`x`
 current row, or :kbd:`X` (``flycheck-error-list-fix-all``) to apply every
 fix in the list's source buffer.
 
-:kbd:`x` works across files in the list's project scope (:kbd:`P`, see
+Both work across files in the list's project scope (:kbd:`P`, see
 :doc:`error-list`).  A project checker such as ``cargo-check`` reports fixable
 errors for files no buffer visits; applying one opens that file, makes the
 change and leaves the buffer unsaved, so you can look it over and undo it.
-A file that has been written since the check is left alone rather than edited
-at positions that no longer describe it, and so is one whose buffer has
-unsaved changes.
+:kbd:`X` then fixes every file the list shows, one undoable change each, and
+asks first when that means opening files.  A file that has been written since
+the check is left alone rather than edited at positions that no longer
+describe it, and so is one whose buffer has unsaved changes.
 
 A fix is applied as a single undoable change, so :kbd:`C-/` reverts it.  The
 checkers that currently provide fixes are ``javascript-eslint``,

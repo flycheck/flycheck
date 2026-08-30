@@ -361,7 +361,42 @@ is when asked, so no earlier check has to vouch for it."
           (cl-letf (((symbol-function 'flycheck-error-list-refresh) #'ignore))
             (flycheck-error-list-apply-fix)))
         (with-current-buffer (find-buffer-visiting file)
-          (expect (buffer-string) :to-equal "hello\n")))))
+          (expect (buffer-string) :to-equal "hello\n"))))
+
+    (it "fixes every file the project scope shows"
+      (let ((a (test-errorlist/file "a.el"))
+            (b (test-errorlist/file "b.el")))
+        (with-temp-buffer
+          (setq-local flycheck-error-list-scope 'project)
+          (cl-letf (((symbol-function 'flycheck-error-list-current-errors)
+                     (lambda () (list (test-errorlist/error a)
+                                      (test-errorlist/error b))))
+                    ((symbol-function 'y-or-n-p) (lambda (_prompt) t))
+                    ((symbol-function 'flycheck-error-list-refresh) #'ignore))
+            (flycheck-error-list-fix-all)))
+        (dolist (file (list a b))
+          (with-current-buffer (find-buffer-visiting file)
+            (expect (buffer-string) :to-equal "hello\n")))))
+
+    (it "opens nothing when the prompt is declined"
+      (let ((a (test-errorlist/file "a.el")))
+        (with-temp-buffer
+          (setq-local flycheck-error-list-scope 'project)
+          (cl-letf (((symbol-function 'flycheck-error-list-current-errors)
+                     (lambda () (list (test-errorlist/error a))))
+                    ((symbol-function 'y-or-n-p) (lambda (_prompt) nil))
+                    ((symbol-function 'flycheck-error-list-refresh) #'ignore))
+            (expect (flycheck-error-list-fix-all) :to-throw 'user-error)))
+        (expect (find-buffer-visiting a) :to-be nil)))
+
+    (it "signals when the project has nothing to fix"
+      (with-temp-buffer
+        (setq-local flycheck-error-list-scope 'project)
+        (cl-letf (((symbol-function 'flycheck-error-list-current-errors)
+                   (lambda () (list (flycheck-error-new-at
+                                     1 1 'error "x" :checker 'emacs-lisp))))
+                  ((symbol-function 'flycheck-error-list-refresh) #'ignore))
+          (expect (flycheck-error-list-fix-all) :to-throw 'user-error)))))
 
   (describe "Grouping by file"
     (let ((errors (list (flycheck-error-new-at 3 1 'error "in b"
