@@ -21,6 +21,7 @@
 
 ### New Features
 
+- [#2386](https://github.com/flycheck/flycheck/pull/2386): Fixes apply to errors in other files of the project: `x` in the error list opens the file an error belongs to and applies the fix there, and `X` in the project scope fixes every file the list shows.
 - [#2385](https://github.com/flycheck/flycheck/pull/2385): The native `flycheck-lsp` client checks a file on a remote host, starting the language server on that host over TRAMP instead of declining the buffer.
 - [#2381](https://github.com/flycheck/flycheck/pull/2381): New commands `flycheck-lsp-list-servers`, `flycheck-lsp-restart-server` and `flycheck-lsp-shutdown-servers` show the language servers Flycheck is running and stop them, which previously took restarting Emacs.
 - [#2380](https://github.com/flycheck/flycheck/pull/2380): New `flycheck-lsp-prefer-server` option: automatic checker selection can use a linter's own resident LSP server in place of the command checker that spawns it afresh on every check, for the linters `flycheck-lsp-checker-servers` names.
