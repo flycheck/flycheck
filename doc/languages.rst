@@ -1328,6 +1328,16 @@ to view the docstring of the syntax checker.  Likewise, you may use
          A list of additional arguments passed to ``mypy``, for options such as
          ``--strict`` or ``--ignore-missing-imports``.
 
+   .. project-checker:: mypy-project
+
+      Type check the whole project at once with mypy, on demand with
+      :kbd:`C-c ! P` (see :ref:`flycheck-project-checks`), which catches the
+      cross-module errors a single buffer's check has no view of.  Applies to
+      a project that asks for mypy: a ``mypy.ini`` or ``.mypy.ini``, a
+      ``[tool.mypy]`` section in ``pyproject.toml``, or a ``[mypy]`` section
+      in ``setup.cfg``.  Its diagnostics carry the `python-mypy` checker, so
+      what the buffer checks already found collapses against them.
+
    .. syntax-checker:: python-pylint
 
       Check syntax and lint with `Pylint <https://pylint.org/>`_.
@@ -1622,6 +1632,15 @@ to view the docstring of the syntax checker.  Likewise, you may use
          Whether to lint with all Cargo features enabled in Clippy, by passing
          ``--all-features`` to ``cargo clippy``.  Off by default.
 
+   .. project-checker:: cargo-check
+
+      Check every crate of the workspace at once with ``cargo check``, on
+      demand with :kbd:`C-c ! P` (see :ref:`flycheck-project-checks`), so the
+      diagnostics of files no buffer visits turn up too.  Applies to a project
+      with a ``Cargo.toml`` at its root.  Its diagnostics carry the
+      `rust-cargo` checker, so what the buffer checks already found collapses
+      against them.
+
 .. supported-language:: SaltStack
 
    .. syntax-checker:: salt-lint
@@ -1884,6 +1903,14 @@ to view the docstring of the syntax checker.  Likewise, you may use
       .. defcustom:: flycheck-tflint-args
 
          A list of additional arguments passed to ``tflint``.
+
+   .. project-checker:: terraform-validate
+
+      Validate the root module as a whole with ``terraform validate``, on
+      demand with :kbd:`C-c ! P` (see :ref:`flycheck-project-checks`), which
+      catches what no single file's check can see, such as a reference to an
+      undeclared variable.  A configuration using providers or modules needs
+      ``terraform init`` run in the project first.
 
 .. supported-language:: Text
 

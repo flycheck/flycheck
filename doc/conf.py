@@ -296,6 +296,8 @@ class IssueReferences(Transform):
 def setup(app):
     app.add_object_type('syntax-checker', 'checker',
                         'pair: %s; Syntax checker')
+    app.add_object_type('project-checker', 'project-checker',
+                        'pair: %s; Project checker')
     app.add_directive('supported-language', SupportedLanguage)
     app.add_directive('syntax-checker-config-file',
                       SyntaxCheckerConfigurationFile)
