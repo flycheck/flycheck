@@ -500,6 +500,221 @@
                          (current-buffer)))))
           (expect (flycheck-error-fix err) :to-be nil))))))
 
+(defvar flycheck-test--fix-dir nil
+  "The directory of files the cross-file fix specs edit.")
+
+(defun flycheck-test--fix-file (name content)
+  "Write CONTENT to NAME in `flycheck-test--fix-dir' and return the file."
+  (let ((file (expand-file-name name flycheck-test--fix-dir)))
+    (with-temp-file file (insert content))
+    file))
+
+(defun flycheck-test--record-run (err time)
+  "Pretend a project run reported ERR, having started at TIME."
+  (let* ((key (cons flycheck-test--fix-dir 'test-run))
+         (state (gethash key flycheck--project-runs)))
+    (puthash key (list :process nil
+                       :errors (cons err (plist-get state :errors))
+                       :time time)
+             flycheck--project-runs)))
+
+(defun flycheck-test--fix-error (file &optional fix)
+  "Return an error about FILE with FIX, as a project checker reports one.
+
+The error is recorded against a run that started just now, which is what
+bounds the fix of a file the checker read from disk."
+  (let ((err (flycheck-error-new-at
+              1 1 'error "typo" :filename file :buffer nil
+              :fix (or fix (flycheck-test--edit 1 1 1 5 "hello")))))
+    (flycheck-test--record-run err (current-time))
+    err))
+
+(describe "Cross-file fixes"
+
+  (before-each
+    (setq flycheck-test--fix-dir
+          (file-name-as-directory
+           (file-truename (make-temp-file "flycheck-fix" t)))))
+
+  (after-each
+    (dolist (buffer (buffer-list))
+      (when-let* ((file (buffer-file-name buffer)))
+        (when (string-prefix-p flycheck-test--fix-dir file)
+          (with-current-buffer buffer (set-buffer-modified-p nil))
+          (kill-buffer buffer))))
+    (clrhash flycheck--project-runs)
+    (ignore-errors (delete-directory flycheck-test--fix-dir t)))
+
+  (describe "flycheck--error-fix-target"
+
+    (it "resolves an error about its own buffer's file to that buffer"
+      (flycheck-buttercup-with-temp-buffer
+        (setq buffer-file-name (flycheck-test--fix-file "a.el" "helo\n"))
+        (let ((err (flycheck-error-new-at 1 1 'error "x")))
+          (expect (flycheck--error-fix-target err) :to-be (current-buffer)))))
+
+    (it "resolves a cross-file error to the buffer already visiting its file"
+      (let* ((file (flycheck-test--fix-file "b.el" "helo\n"))
+             (buffer (find-file-noselect file))
+             (err (flycheck-test--fix-error file)))
+        (expect (flycheck--error-fix-target err) :to-be buffer)))
+
+    (it "opens the file only when asked to"
+      (let* ((file (flycheck-test--fix-file "b.el" "helo\n"))
+             (err (flycheck-test--fix-error file)))
+        (expect (flycheck--error-fix-target err) :to-be nil)
+        (expect (buffer-file-name (flycheck--error-fix-target err 'visit))
+                :to-equal file)))
+
+    (it "resolves nothing for a file that is not there"
+      (let ((err (flycheck-test--fix-error
+                  (expand-file-name "gone.el" flycheck-test--fix-dir))))
+        (expect (flycheck--error-fix-target err 'visit) :to-be nil))))
+
+  (describe "flycheck--apply-error-fix"
+
+    (it "applies a fix in the file the error names, opening it"
+      (let* ((file (flycheck-test--fix-file "b.el" "helo world\n"))
+             (err (flycheck-test--fix-error file)))
+        (expect (flycheck--apply-error-fix err 'visit) :to-be-truthy)
+        (with-current-buffer (find-buffer-visiting file)
+          (expect (buffer-string) :to-equal "hello world\n")
+          ;; Left for review and undo rather than written out.
+          (expect (buffer-modified-p) :to-be t))))
+
+    (it "refuses to open a file it was not allowed to visit"
+      (let* ((file (flycheck-test--fix-file "b.el" "helo world\n"))
+             (err (flycheck-test--fix-error file)))
+        (expect (flycheck--apply-error-fix err) :to-throw 'user-error)
+        (expect (find-buffer-visiting file) :to-be nil)))
+
+    (it "refuses a fix for a buffer with unsaved changes"
+      ;; What the checker read is no longer what the buffer holds, so the
+      ;; fix's line and column numbers may point anywhere.
+      (let* ((file (flycheck-test--fix-file "b.el" "helo world\n"))
+             (buffer (find-file-noselect file))
+             (err (flycheck-test--fix-error file)))
+        (with-current-buffer buffer (goto-char (point-min)) (insert "\n"))
+        (expect (flycheck--apply-error-fix err 'visit) :to-throw 'user-error)
+        (with-current-buffer buffer
+          (expect (buffer-string) :to-equal "\nhelo world\n"))))
+
+    (it "refuses a fix whose file changed under its buffer"
+      ;; Standing in for the file being rewritten behind the buffer's back,
+      ;; which a file system with a coarse clock would not always show.
+      (let* ((file (flycheck-test--fix-file "b.el" "helo world\n"))
+             (buffer (find-file-noselect file))
+             (err (flycheck-test--fix-error file)))
+        (with-current-buffer buffer (set-visited-file-modtime '(0 0)))
+        (expect (flycheck--apply-error-fix err 'visit) :to-throw 'user-error)
+        (with-current-buffer buffer
+          (expect (buffer-string) :to-equal "helo world\n"))))
+
+    (it "refuses a fix whose file was written after the check ran"
+      (let* ((file (flycheck-test--fix-file "b.el" "helo world\n"))
+             (err (flycheck-test--fix-error file)))
+        (flycheck-test--record-run err (time-add (current-time) -60))
+        (expect (flycheck--apply-error-fix err 'visit) :to-throw 'user-error)))
+
+    (it "refuses a fix nothing says the state of"
+      ;; Neither a run nor a live buffer stands behind this one, so there is
+      ;; no telling whether its positions still describe the file.
+      (let* ((file (flycheck-test--fix-file "b.el" "helo world\n"))
+             (err (flycheck-error-new-at
+                   1 1 'error "typo" :filename file :buffer nil
+                   :fix (flycheck-test--edit 1 1 1 5 "hello"))))
+        (expect (condition-case signalled
+                    (flycheck--apply-error-fix err 'visit)
+                  (user-error (error-message-string signalled)))
+                :to-match "Nothing says which state")))
+
+    (it "refuses a buffer check's fix for a file written since that check"
+      ;; rustc names a suggestion in another crate file this way: the fix
+      ;; carries the checked buffer's tick, which says nothing about the
+      ;; file it edits, so the check's time is what bounds it.
+      (let* ((file (flycheck-test--fix-file "b.el" "helo world\n"))
+             (checked (generate-new-buffer " checked"))
+             (err (with-current-buffer checked
+                    (setq flycheck--syntax-check-start-time
+                          (time-add (current-time) -60))
+                    (flycheck-error-new-at
+                     1 1 'error "typo" :filename file
+                     :fix (flycheck-test--edit 1 1 1 5 "hello")))))
+        (unwind-protect
+            (expect (flycheck--apply-error-fix err 'visit) :to-throw
+                    'user-error)
+          (kill-buffer checked))))
+
+    (it "applies a buffer check's fix for a file untouched since that check"
+      (let* ((file (flycheck-test--fix-file "b.el" "helo world\n"))
+             (checked (generate-new-buffer " checked"))
+             (err (with-current-buffer checked
+                    (setq flycheck--syntax-check-start-time
+                          (time-add (current-time) 60))
+                    (flycheck-error-new-at
+                     1 1 'error "typo" :filename file
+                     :fix (flycheck-test--edit 1 1 1 5 "hello")))))
+        (unwind-protect
+            (progn
+              (expect (flycheck--apply-error-fix err 'visit) :to-be-truthy)
+              (with-current-buffer (find-buffer-visiting file)
+                (expect (buffer-string) :to-equal "hello world\n")))
+          (kill-buffer checked))))
+
+    (it "applies a fix a provider computed against the file just now"
+      ;; A lazy provider answers for the file as it is when asked, so no
+      ;; earlier check has to vouch for it.
+      (let* ((file (flycheck-test--fix-file "b.el" "helo world\n"))
+             (err (flycheck-error-new-at
+                   1 1 'error "typo" :filename file :buffer nil
+                   :fix (lambda (_err) (flycheck-test--edit 1 1 1 5 "hello")))))
+        (expect (flycheck--apply-error-fix err 'visit) :to-be-truthy)
+        (with-current-buffer (find-buffer-visiting file)
+          (expect (buffer-string) :to-equal "hello world\n"))))
+
+    (it "applies a fix whose file has not been written since the check"
+      (let* ((file (flycheck-test--fix-file "b.el" "helo world\n"))
+             (err (flycheck-test--fix-error file)))
+        (flycheck-test--record-run err (time-add (current-time) 60))
+        (expect (flycheck--apply-error-fix err 'visit) :to-be-truthy)
+        (with-current-buffer (find-buffer-visiting file)
+          (expect (buffer-string) :to-equal "hello world\n"))))
+
+    (it "does not weigh a file on another host against the local clock"
+      ;; Its timestamp comes from that host's clock; a machine running a
+      ;; little ahead would otherwise refuse every fix.
+      (let* ((file (flycheck-test--fix-file "b.el" "helo world\n"))
+             (err (flycheck-test--fix-error file)))
+        (find-file-noselect file)
+        (flycheck-test--record-run err (time-add (current-time) -60))
+        (cl-letf (((symbol-function 'file-remote-p)
+                   (lambda (name &rest _) (and (equal name file) "/ssh:h:"))))
+          (expect (flycheck--apply-error-fix err 'visit) :to-be-truthy))
+        (with-current-buffer (find-buffer-visiting file)
+          (expect (buffer-string) :to-equal "hello world\n"))))
+
+    (it "returns nothing when a lazy provider comes up empty"
+      (let* ((file (flycheck-test--fix-file "b.el" "helo world\n"))
+             (err (flycheck-test--fix-error file (lambda (_err) nil))))
+        (expect (flycheck--apply-error-fix err 'visit) :to-be nil))))
+
+  (describe "flycheck--project-error-time"
+
+    (it "returns the time of the run that reported the error"
+      (let ((err (flycheck-error-new-at 1 1 'error "x" :filename "/p/a.el"
+                                        :buffer nil))
+            (time (current-time)))
+        (puthash (cons "/p/" 'test-run)
+                 (list :process nil :errors (list err) :time time)
+                 flycheck--project-runs)
+        (expect (flycheck--project-error-time err) :to-equal time)))
+
+    (it "returns nothing for an error no run reported"
+      (expect (flycheck--project-error-time
+               (flycheck-error-new-at 1 1 'error "x" :filename "/p/a.el"
+                                      :buffer nil))
+              :to-be nil))))
+
 (provide 'test-quick-fixes)
 
 ;;; test-quick-fixes.el ends here

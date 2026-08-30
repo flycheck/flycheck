@@ -235,7 +235,45 @@
 
     (it "marks nothing when the error carries no fix at all"
       (let ((err (flycheck-error-new-at 1 1 'error "x" :checker 'emacs-lisp)))
-        (expect (test-fixbadge/render err) :not :to-match "\\[fix"))))
+        (expect (test-fixbadge/render err) :not :to-match "\\[fix")))
+
+    (it "marks an error about another file, whose fix opens that file"
+      ;; Not rendered through `test-fixbadge/render': the point is what the
+      ;; badge does when the error resolves to no buffer of its own.
+      (let ((file (make-temp-file "flycheck-badge" nil ".el" "x\n")))
+        (unwind-protect
+            (let ((err (flycheck-error-new-at
+                        1 1 'error "x" :checker 'emacs-lisp :buffer nil
+                        :filename file
+                        :fix (flycheck-fix-new :description "d" :edits nil
+                                               :tick 0))))
+              (expect (mapconcat
+                       (lambda (cell) (if (stringp cell) cell (car cell)))
+                       (cadr (flycheck-error-list-make-entry err)) " ")
+                      :to-match "\\[fix\\] "))
+          (delete-file file))))
+
+    (it "marks nothing for an error whose file is gone"
+      ;; The apply command would only refuse it, so promising a fix here
+      ;; would send the user after one that cannot be applied.
+      (let ((err (flycheck-error-new-at
+                  1 1 'error "x" :checker 'emacs-lisp :buffer nil
+                  :filename "/p/gone.el"
+                  :fix (flycheck-fix-new :description "d" :edits nil
+                                         :tick 0))))
+        (expect (mapconcat (lambda (cell) (if (stringp cell) cell (car cell)))
+                           (cadr (flycheck-error-list-make-entry err)) " ")
+                :not :to-match "\\[fix")))
+
+    (it "marks nothing for a fix with neither a buffer nor a file"
+      (let ((err (flycheck-error-new-at
+                  1 1 'error "x" :checker 'emacs-lisp :buffer nil
+                  :filename nil
+                  :fix (flycheck-fix-new :description "d" :edits nil
+                                         :tick 0))))
+        (expect (mapconcat (lambda (cell) (if (stringp cell) cell (car cell)))
+                           (cadr (flycheck-error-list-make-entry err)) " ")
+                :not :to-match "\\[fix"))))
 
   (describe "Applying fixes"
     (it "applies the fix of the error at point"
@@ -278,6 +316,52 @@
       (with-temp-buffer
         (setq-local flycheck-error-list-source-buffer nil)
         (expect (flycheck-error-list-fix-all) :to-throw 'user-error))))
+
+  (describe "Applying fixes across the project"
+    (defvar test-errorlist/dir nil)
+
+    (defun test-errorlist/file (name)
+      "Write a fixable file NAME in the spec's directory and return it."
+      (let ((file (expand-file-name name test-errorlist/dir)))
+        (with-temp-file file (insert "helo\n"))
+        file))
+
+    (defun test-errorlist/error (file)
+      "Return an error about FILE carrying a fix, as a server offers one.
+
+The fix comes from a provider, which computes it against the file as it
+is when asked, so no earlier check has to vouch for it."
+      (flycheck-error-new-at
+       1 1 'error "typo" :checker 'emacs-lisp :filename file :buffer nil
+       :fix (lambda (_err)
+              (flycheck-fix-new
+               :edits (list (flycheck-fix-edit-new
+                             :line 1 :column 1 :end-line 1 :end-column 5
+                             :replacement "hello"))))))
+
+    (before-each
+      (setq test-errorlist/dir
+            (file-name-as-directory
+             (file-truename (make-temp-file "flycheck-el" t)))))
+
+    (after-each
+      (dolist (buffer (buffer-list))
+        (when-let* ((file (buffer-file-name buffer)))
+          (when (string-prefix-p test-errorlist/dir file)
+            (with-current-buffer buffer (set-buffer-modified-p nil))
+            (kill-buffer buffer))))
+      (ignore-errors (delete-directory test-errorlist/dir t)))
+
+    (it "applies the fix of an error about another file, opening it"
+      (let ((file (test-errorlist/file "b.el")))
+        (with-temp-buffer
+          (insert (propertize "row" 'tabulated-list-id
+                              (test-errorlist/error file)))
+          (goto-char (point-min))
+          (cl-letf (((symbol-function 'flycheck-error-list-refresh) #'ignore))
+            (flycheck-error-list-apply-fix)))
+        (with-current-buffer (find-buffer-visiting file)
+          (expect (buffer-string) :to-equal "hello\n")))))
 
   (describe "Grouping by file"
     (let ((errors (list (flycheck-error-new-at 3 1 'error "in b"
