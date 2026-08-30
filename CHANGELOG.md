@@ -35,6 +35,7 @@
 
 ### Bugs fixed
 
+- [#2388](https://github.com/flycheck/flycheck/pull/2388): A rustc or Clippy suggestion that only deletes code, like "remove this `mut`", keeps its own message instead of having the empty replacement appended to it.
 - [#2383](https://github.com/flycheck/flycheck/pull/2383): A buffer using `flycheck-lsp-prefer-server` contributes its server’s findings to the error list’s project scope and the mode-line project counts, as one using `flycheck-lsp-mode` already did.
 - [#2371](https://github.com/flycheck/flycheck/pull/2371): LSP quick fixes work in a buffer on a remote host, where the server names the file as its own host sees it and Flycheck compared that against the buffer's remote name, silently declining every fix; the native `flycheck-lsp` client now declines a remote buffer outright, since it looked the server up on the remote host but started it on this one, and leaves those buffers to the command checkers.
 - [#2370](https://github.com/flycheck/flycheck/pull/2370): Remote checking keeps the two machines straight: a related location a checker reports on the remote host now opens there rather than at the same path on the local machine, and the `c/c++-clang`, `c/c++-gcc`, `fortran-gfortran`, `d-dmd`, `haskell-ghc`, `haskell-stack-ghc`, `rst-sphinx` and `emacs-lisp` checkers pass plain remote paths on their command lines instead of TRAMP file names the remote tool cannot resolve.
