@@ -11641,8 +11641,12 @@ https://github.com/rust-lang/rust/blob/master/src/librustc_errors/json.rs#L154"
             ;; Messages from `cargo clippy' may suggest replacement code.  In
             ;; these cases, the `message' field itself is an unhelpful `try' or
             ;; `change this to'.  We add the `suggested_replacement' field in
-            ;; these cases.
-            (if .suggested_replacement
+            ;; these cases.  A suggestion that deletes has an empty
+            ;; replacement, and its message already says what goes ("remove
+            ;; this `mut'"), so appending an empty pair of backquotes to it
+            ;; only makes it look broken.
+            (if (and .suggested_replacement
+                     (not (string-empty-p .suggested_replacement)))
                 (format "%s: `%s`" message .suggested_replacement)
               message)
             :id error-code

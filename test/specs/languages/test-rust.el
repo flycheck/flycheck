@@ -373,6 +373,26 @@
       '(2 5 warning "unneeded `return` statement" :id "clippy::needless_return" :end-line 2 :end-column 16)
       '(2 5 info "for further information visit https://rust-lang.github.io/rust-clippy/rust-1.91.0/index.html#needless_return" :id "clippy::needless_return" :end-line 2 :end-column 16)
       '(2 5 info "`#[warn(clippy::needless_return)]` on by default" :id "clippy::needless_return" :end-line 2 :end-column 16)
-      '(2 5 info "remove `return`: `true`" :id "clippy::needless_return" :end-line 2 :end-column 16))))
+      '(2 5 info "remove `return`: `true`" :id "clippy::needless_return" :end-line 2 :end-column 16)))
+
+  (describe "reading a suggestion"
+
+    (it "leaves the message of a suggestion that deletes alone"
+      ;; Such a suggestion has an empty replacement, and its own message
+      ;; already says what goes, so appending the replacement would render
+      ;; as "remove this `mut`: ``".
+      (let* ((diag "{\"message\":\"variable does not need to be mutable\",\
+\"code\":{\"code\":\"unused_mut\"},\"level\":\"warning\",\
+\"spans\":[{\"file_name\":\"a.rs\",\"is_primary\":true,\
+\"line_start\":2,\"line_end\":2,\"column_start\":9,\"column_end\":16}],\
+\"children\":[{\"message\":\"remove this `mut`\",\"spans\":[\
+{\"file_name\":\"a.rs\",\"line_start\":2,\"line_end\":2,\
+\"column_start\":9,\"column_end\":13,\"suggested_replacement\":\"\",\
+\"suggestion_applicability\":\"MachineApplicable\"}]}]}")
+             (messages (mapcar #'flycheck-error-message
+                               (flycheck-parse-rustc-diagnostic
+                                (car (flycheck-parse-json diag)) 'rust-cargo
+                                (current-buffer)))))
+        (expect messages :to-contain "remove this `mut`")))))
 
 ;;; test-rust.el ends here
