@@ -355,9 +355,9 @@ resident and lints incrementally:
    also makes it usable as a directory-local for one project.
 
    A checker chosen with `flycheck-select-checker`, or set as a file-local
-   ``flycheck-checker``, is never substituted, and neither is a buffer on a
-   remote host.  Type :kbd:`C-c ! v` to see which server superseded which
-   checker.
+   ``flycheck-checker``, is never substituted.  A buffer on a remote host is,
+   with the server started on that host.  Type :kbd:`C-c ! v` to see which
+   server superseded which checker.
 
 .. defcustom:: flycheck-lsp-checker-servers
 
