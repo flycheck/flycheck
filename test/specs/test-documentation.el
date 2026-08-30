@@ -53,6 +53,9 @@
       (? "                       " (group (1+ nonl)) "\n")
       (? "                       " (group (1+ nonl))) eol))
 
+(defconst flycheck/project-checker-re
+  (rx bol "   .. project-checker:: " (group (1+ nonl)) eol))
+
 (defconst flycheck/defcustom-re
   (rx bol "      .. defcustom:: " (group (1+ nonl)) "\n"
       (? "                     " (group (1+ nonl)) eol)))
@@ -92,6 +95,17 @@
           (it "doesn't document syntax checker options that don't exist"
             (expect (seq-difference documented-options all-options)
                     :to-equal nil))))
+
+      (describe "Project checkers"
+        (let ((documented (flycheck/collect-matches
+                           flycheck/project-checker-re languages))
+              (defined (mapcar #'car flycheck--project-checkers)))
+
+          (it "documents all project checkers"
+            (expect (seq-difference defined documented) :to-equal nil))
+
+          (it "doesn't document project checkers that don't exist"
+            (expect (seq-difference documented defined) :to-equal nil))))
 
       (describe "Configuration files"
         (let ((documented-file-vars (flycheck/collect-matches
