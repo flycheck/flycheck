@@ -5179,6 +5179,109 @@ when the fix cannot be applied safely."
         (flycheck--apply-fix-in fix buffer))
       (cons fix buffer))))
 
+(defun flycheck--fix-file-to-open (err)
+  "Return the file that fixing ERR would have to open, or nil.
+
+That is the file of an error whose fix is still good for it and that no
+live buffer visits.  A file whose state already rules the fix out is not
+one to open: a project's results go stale together, and opening every
+file of one only to refuse them all leaves nothing but buffers behind."
+  (when-let* (((flycheck-error-fix err))
+              ((null (flycheck--error-fix-target err)))
+              (filename (flycheck-error-filename err))
+              ((file-regular-p filename))
+              ((flycheck--fix-file-current-p filename
+                                             (flycheck--fix-bound err))))
+    filename))
+
+(defun flycheck--fix-target-to-open (err)
+  "Return the buffer to apply ERR's fix in, opening its file if worthwhile.
+
+Like `flycheck--error-fix-target' asked to visit, except that it opens
+only the files `flycheck--fix-file-to-open' names."
+  (or (flycheck--error-fix-target err)
+      (when-let* ((filename (flycheck--fix-file-to-open err)))
+        (find-file-noselect filename))))
+
+(defun flycheck--fix-files-to-open (errors)
+  "Return the files fixing ERRORS would have to open, deduplicated.
+
+They come in the order the errors do; see `flycheck--fix-file-to-open'."
+  (seq-uniq (delq nil (mapcar #'flycheck--fix-file-to-open errors))
+            #'flycheck-same-files-p))
+
+(defun flycheck--fix-errors-across-files (errors)
+  "Apply the fixes of ERRORS in the files those errors belong to.
+
+The errors are grouped by the buffer their fix edits (see
+`flycheck--error-fix-target'), which for a cross-file error means
+opening the file it names.  Each file is fixed as a single undoable
+change and left unsaved, so the change can be reviewed and undone.  A
+file whose fixes cannot be applied safely, because it changed since the
+check or its buffer is read-only, is skipped whole rather than aborting
+the rest.
+
+Return a list (APPLIED FILES SKIPPED): how many fixes were applied, in
+how many buffers, and how many were left unapplied."
+  (let ((groups nil) (applied 0) (files 0) (skipped 0))
+    (dolist (err errors)
+      (when (flycheck-error-fix err)
+        ;; Opening a file can fail on its own (unreadable, a file name
+        ;; another handler chokes on); that is this one error's problem,
+        ;; not the whole run's.
+        (if-let* ((target (ignore-errors (flycheck--fix-target-to-open err))))
+            (let ((group (assq target groups)))
+              (unless group
+                (setq group (list target))
+                (push group groups))
+              (setcdr group (cons err (cdr group))))
+          (setq skipped (1+ skipped)))))
+    (pcase-dolist (`(,buffer . ,group) (nreverse groups))
+      (let* ((errs (nreverse group))
+             (count (length errs)))
+        (condition-case nil
+            ;; Ask each lazy provider once, in the buffer the fix belongs
+            ;; to, and keep the error beside the fix it produced: which
+            ;; guard a fix answers to depends on where its error came from.
+            (let* ((pairs (delq nil
+                                (mapcar
+                                 (lambda (err)
+                                   (when-let*
+                                       ((fix (with-current-buffer buffer
+                                               (flycheck-error-resolve-fix
+                                                err))))
+                                     (cons err fix)))
+                                 errs)))
+                   (cross (seq-remove
+                           (lambda (pair)
+                             (eq (flycheck--error-fix-buffer (car pair))
+                                 buffer))
+                           pairs)))
+              (when cross
+                ;; The strictest bound among them decides: nothing bounds
+                ;; the group as soon as one of its fixes is unbounded, and
+                ;; the oldest check otherwise, since a write after that one
+                ;; leaves every fix from it stale.
+                (let* ((bounds (mapcar (lambda (pair)
+                                         (flycheck--fix-bound (car pair)))
+                                       cross))
+                       (times (seq-remove #'symbolp bounds)))
+                  (flycheck--check-fix-file-state
+                   buffer (cond ((memq nil bounds) nil)
+                                (times (car (sort times #'time-less-p)))
+                                (t 'now)))))
+              (with-current-buffer buffer
+                (dolist (pair pairs)
+                  (unless (memq pair cross)
+                    (flycheck--check-fix-tick (cdr pair)))))
+              (let ((n (flycheck--apply-fixes-in
+                        (mapcar #'cdr pairs) buffer)))
+                (setq applied (+ applied n)
+                      skipped (+ skipped (- count n)))
+                (when (> n 0) (setq files (1+ files)))))
+          (user-error (setq skipped (+ skipped count))))))
+    (list applied files skipped)))
+
 (defun flycheck-error-format-snippet (err &optional max-length)
   "Extract the text that ERR refers to from the buffer.
 
@@ -8297,15 +8400,47 @@ belongs to has changed since the check that produced it."
       (user-error "The fix for this error is not available"))))
 
 (defun flycheck-error-list-fix-all ()
-  "Apply every fixable error's fix in the error list's source buffer."
+  "Apply every fix the error list shows.
+
+In the buffer scope that is every fix of the source buffer.  In the
+project scope (see `flycheck-error-list-scope') it is every fix in the
+project, including those for files no buffer visits: such a file is
+opened, fixed as a single undoable change and left unsaved, so the
+change can be reviewed and undone.  A file that changed since the check
+is skipped rather than fixed at stale positions.  Errors a filter hides
+are left alone."
   (interactive)
-  (if-let* ((buffer flycheck-error-list-source-buffer)
-            ((buffer-live-p buffer)))
-      (progn
-        (with-current-buffer buffer
-          (call-interactively #'flycheck-fix-all-errors))
-        (flycheck-error-list-refresh))
-    (user-error "The error list has no live source buffer")))
+  (if (eq flycheck-error-list-scope 'project)
+      (let* ((errors (flycheck-error-list-apply-filter
+                      (flycheck-error-list-current-errors)))
+             (opening (flycheck--fix-files-to-open errors)))
+        (when (and opening
+                   (not (y-or-n-p
+                         (format "Fixing this opens %d file%s; proceed? "
+                                 (length opening)
+                                 (if (= (length opening) 1) "" "s")))))
+          (user-error "Not fixing"))
+        (pcase-let ((`(,applied ,files ,skipped)
+                     (flycheck--fix-errors-across-files errors)))
+          (flycheck-error-list-refresh)
+          (cond
+           ((> applied 0)
+            (message "Applied %d fix%s in %d file%s%s"
+                     applied (if (= applied 1) "" "es")
+                     files (if (= files 1) "" "s")
+                     (if (> skipped 0)
+                         (format " (%d skipped)" skipped)
+                       "")))
+           ((> skipped 0)
+            (user-error "No fix could be applied (%d skipped)" skipped))
+           (t (user-error "No applicable fixes in this project")))))
+    (if-let* ((buffer flycheck-error-list-source-buffer)
+              ((buffer-live-p buffer)))
+        (progn
+          (with-current-buffer buffer
+            (call-interactively #'flycheck-fix-all-errors))
+          (flycheck-error-list-refresh))
+      (user-error "The error list has no live source buffer"))))
 
 (defun flycheck-error-list-next-error-pos (pos &optional n)
   "Starting from POS get the N'th next error in the error list.
