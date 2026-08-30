@@ -34,7 +34,7 @@ Within the error list the following key bindings are available:
 :kbd:`e`     Explain the error
 :kbd:`j`     Visit a related location of the error, if it has one
 :kbd:`x`     Apply the error's fix, if it has one
-:kbd:`X`     Apply every fix in the source buffer
+:kbd:`X`     Apply every fix in the source buffer, or in the project
 :kbd:`f`     Filter the error list by level
 :kbd:`F`     Remove the filter
 :kbd:`S`     Sort the error list by the column at point
@@ -81,14 +81,17 @@ scope shows those too.
 
 .. note::
 
-   Flycheck does not run checkers on files you haven't opened; project scope
-   surfaces the diagnostics it already has, from open buffers, from the
-   cross-file output of the checks you run, and from what a language server
-   volunteered about files that are not visited.  It does not turn Flycheck
-   into a background whole-project linter.  A cross-file error therefore
-   reflects the last check that reported it: it stays until the buffer that
-   produced it is checked again, since Flycheck cannot tell that another file
-   changed without re-running a check.
+   Nothing here runs in the background.  Buffer checks only ever see the
+   files you have opened, and project scope shows the diagnostics Flycheck
+   already has: from those buffers, from the cross-file output of the checks
+   you run, and from what a language server volunteered about files that are
+   not visited.  For the rest there is :kbd:`C-c ! P`, which runs a project
+   checker over the whole project, or asks a workspace-wide language server
+   about it, when you ask for it (see :ref:`flycheck-project-checks`).
+
+   A cross-file error reflects the last check that reported it: it stays
+   until the buffer that produced it is checked again, since Flycheck cannot
+   tell that another file changed without re-running a check.
 
 The project of a buffer is Emacs' project (see ``project-current``) when one is
 found, and the checker's working directory otherwise.  The current scope is
