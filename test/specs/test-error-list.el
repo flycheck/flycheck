@@ -1135,6 +1135,88 @@ is when asked, so no earlier check has to vouch for it."
               (expect (cadr (aref tabulated-list-format 0))
                       :to-equal (length "s.el")))))))
 
+    (describe "Naming a file in a group header"
+
+      (it "names a file under the source buffer's directory relative to it"
+        (let ((source (generate-new-buffer " naming-source")))
+          (unwind-protect
+              (progn
+                (with-current-buffer source (setq default-directory "/p/"))
+                (flycheck/with-error-list-buffer
+                  (setq flycheck-error-list-source-buffer source)
+                  (expect (flycheck-error-list--abbreviate-filename "/p/a/b.el")
+                          :to-equal "a/b.el")))
+            (kill-buffer source))))
+
+      (it "resolves a project the buffer and the checker spell differently"
+        ;; A symlinked project directory, or macOS mounting /tmp on
+        ;; /private/tmp: the buffer holds one spelling and the checker
+        ;; reports the other, and the row showed a whole absolute path.
+        (let* ((real (file-name-as-directory
+                      (file-truename (make-temp-file "flycheck-real" t))))
+               (link (concat (directory-file-name real) "-link"))
+               (source (generate-new-buffer " naming-source")))
+          (unwind-protect
+              (progn
+                (make-symbolic-link (directory-file-name real) link t)
+                (with-current-buffer source
+                  (setq default-directory (file-name-as-directory link)))
+                (flycheck/with-error-list-buffer
+                  (setq flycheck-error-list-source-buffer source)
+                  (clrhash flycheck--truenames)
+                  (expect (flycheck-error-list--abbreviate-filename
+                           (expand-file-name "src/b.el" real))
+                          :to-equal "src/b.el")))
+            (kill-buffer source)
+            (ignore-errors (delete-file link))
+            (ignore-errors (delete-directory real t)))))
+
+      (it "does not resolve the names of files on another host"
+        ;; A remote true name costs a round trip per path, and this runs on
+        ;; every refresh of the list.
+        (let ((source (generate-new-buffer " naming-source")))
+          (unwind-protect
+              (progn
+                (with-current-buffer source
+                  (setq default-directory "/ssh:host:/p/"))
+                (flycheck/with-error-list-buffer
+                  (setq flycheck-error-list-source-buffer source)
+                  (spy-on 'flycheck--memoized-truename :and-call-through)
+                  (expect (flycheck-error-list--abbreviate-filename
+                           "/ssh:host:/q/b.el")
+                          :to-equal "/ssh:host:/q/b.el")
+                  (expect 'flycheck--memoized-truename
+                          :not :to-have-been-called)))
+            (kill-buffer source))))
+
+      (it "does not resolve a name that is not absolute"
+        ;; `file-truename' would resolve it against whichever buffer is
+        ;; current, and cache the answer under the bare name.
+        (let ((source (generate-new-buffer " naming-source")))
+          (unwind-protect
+              (progn
+                (with-current-buffer source (setq default-directory "/p/"))
+                (flycheck/with-error-list-buffer
+                  (setq flycheck-error-list-source-buffer source)
+                  (spy-on 'flycheck--memoized-truename :and-call-through)
+                  (expect (flycheck-error-list--abbreviate-filename "s.el")
+                          :to-equal "s.el")
+                  (expect 'flycheck--memoized-truename
+                          :not :to-have-been-called)))
+            (kill-buffer source))))
+
+      (it "falls back to the whole name for a file outside the project"
+        (let ((source (generate-new-buffer " naming-source")))
+          (unwind-protect
+              (progn
+                (with-current-buffer source (setq default-directory "/p/"))
+                (flycheck/with-error-list-buffer
+                  (setq flycheck-error-list-source-buffer source)
+                  (expect (flycheck-error-list--abbreviate-filename
+                           "/elsewhere/b.el")
+                          :to-equal "/elsewhere/b.el")))
+            (kill-buffer source)))))
+
     (describe "Display"
       (it "displays the error list according to the display action"
         (let (received-action)

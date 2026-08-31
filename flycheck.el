@@ -5486,11 +5486,21 @@ would otherwise never match what the server says about it."
       (list project-key))))
 
 (defvar flycheck--truenames (make-hash-table :test 'equal)
-  "True names of the paths compared against project keys, memoized.
+  "True names of local paths Flycheck compares against each other, memoized.
 Global, unlike the buffer's `flycheck--file-truename': these are the
-paths servers and stores name, not the buffer's own.
+paths stores, servers and the error list compare, whoever named them.
 A path's true name does not change over a session short of retargeting
 a symbolic link, and the same paths come up on every aggregation.")
+
+(defun flycheck--memoized-truename (path)
+  "Return the true name of PATH, or PATH itself when it has none.
+
+Memoized in `flycheck--truenames': the same paths come up on every
+aggregation, and each lookup is a `file-truename' walk."
+  (or (gethash path flycheck--truenames)
+      (puthash path
+               (or (ignore-errors (file-truename path)) path)
+               flycheck--truenames)))
 
 (defun flycheck--path-under-prefixes-p (path prefixes)
   "Whether the absolute PATH extends one of the directory PREFIXES.
@@ -5500,11 +5510,7 @@ PATH may come from a server or a buffer in another spelling of the
 same place - a symlinked directory, macOS's /tmp; its true name is
 tried when the spelling as given does not match."
   (or (seq-some (lambda (prefix) (string-prefix-p prefix path)) prefixes)
-      (let ((truename (or (gethash path flycheck--truenames)
-                          (puthash path
-                                   (or (ignore-errors (file-truename path))
-                                       path)
-                                   flycheck--truenames))))
+      (let ((truename (flycheck--memoized-truename path)))
         (and (not (equal truename path))
              (seq-some (lambda (prefix) (string-prefix-p prefix truename))
                        prefixes)))))
@@ -7907,9 +7913,23 @@ read the project-wide diagnostics of that buffer's project."
             (dir (and (buffer-live-p flycheck-error-list-source-buffer)
                       (buffer-local-value 'default-directory
                                           flycheck-error-list-source-buffer))))
-      (if (string-prefix-p dir filename)
-          (file-relative-name filename dir)
-        (abbreviate-file-name filename))
+      (cond
+       ((string-prefix-p dir filename) (file-relative-name filename dir))
+       ;; The buffer's directory and the name a checker reports can be
+       ;; different spellings of the same place - a symlinked project, macOS
+       ;; mounting /tmp on /private/tmp - and without resolving them every
+       ;; row of such a project shows a whole absolute path.  Only for local
+       ;; absolute names: a remote true name costs a round trip per path and
+       ;; this runs on every refresh, and a relative one would be resolved
+       ;; against whichever buffer happens to be current.
+       ((and (file-name-absolute-p filename)
+             (not (file-remote-p filename))
+             (not (file-remote-p dir))
+             (let ((true-dir (flycheck--memoized-truename dir))
+                   (true-file (flycheck--memoized-truename filename)))
+               (and (string-prefix-p true-dir true-file)
+                    (file-relative-name true-file true-dir)))))
+       (t (abbreviate-file-name filename)))
     (or filename "<no file>")))
 
 (defun flycheck-error-list--group-key-function (dimension)
