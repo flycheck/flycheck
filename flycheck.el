@@ -6068,9 +6068,12 @@ Return ERRORS, modified in-place."
          flycheck-relevant-error-other-file-show
          (or (null buffer-file-name)
              (not (flycheck-same-files-p buffer-file-name file-name)))
-         (<= (flycheck-error-level-severity
-              flycheck-relevant-error-other-file-minimum-level)
-             (flycheck-error-level-severity (flycheck-error-level err))))))
+         ;; nil means every level, which is not the same as the severity
+         ;; of nil: that is 0, and `info' sits below it.
+         (or (null flycheck-relevant-error-other-file-minimum-level)
+             (<= (flycheck-error-level-severity
+                  flycheck-relevant-error-other-file-minimum-level)
+                 (flycheck-error-level-severity (flycheck-error-level err)))))))
 
 (defun flycheck-relevant-error-p (err)
   "Determine whether ERR is relevant for the current buffer.

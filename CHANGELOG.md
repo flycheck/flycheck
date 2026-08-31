@@ -35,6 +35,7 @@
 
 ### Bugs fixed
 
+- [#2391](https://github.com/flycheck/flycheck/pull/2391): Setting `flycheck-relevant-error-other-file-minimum-level` to nil shows errors of every level from other files, as it says it does, rather than dropping the `info` ones.
 - [#2390](https://github.com/flycheck/flycheck/pull/2390): The error list's group headers are no longer cut off: they share the File column with the file names, which is now made wide enough for them.
 - [#2390](https://github.com/flycheck/flycheck/pull/2390): A file in a project the buffer and the checker spell differently, as they do for a symlinked directory or macOS's `/tmp`, is named relative to the project in the error list rather than by its whole path.
 - [#2388](https://github.com/flycheck/flycheck/pull/2388): A rustc or Clippy suggestion that only deletes code, like "remove this `mut`", keeps its own message instead of having the empty replacement appended to it.

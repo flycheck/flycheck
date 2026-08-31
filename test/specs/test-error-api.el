@@ -381,6 +381,34 @@
       (let ((err (flycheck-error-new-at 5 7 'error))
             (rel (flycheck-related-location-new :line 1 :message "here")))
         (setf (flycheck-error-relations err) (list rel))
-        (expect (flycheck-error-relations err) :to-equal (list rel))))))
+        (expect (flycheck-error-relations err) :to-equal (list rel)))))
+
+  (describe "Errors about another file"
+
+    (defun test-error-api/relevant-p (level minimum)
+      "Whether an error of LEVEL about another file shows under MINIMUM."
+      (flycheck-buttercup-with-temp-buffer
+        (setq buffer-file-name "/p/this.el")
+        (let ((flycheck-relevant-error-other-file-minimum-level minimum))
+          (and (flycheck-relevant-error-p
+                (flycheck-error-new-at 1 1 level "m" :filename "/p/other.el"
+                                       :buffer (current-buffer)))
+               t))))
+
+    (it "keeps one at the minimum level"
+      (expect (test-error-api/relevant-p 'error 'error) :to-be t))
+
+    (it "drops one below the minimum level"
+      (expect (test-error-api/relevant-p 'warning 'error) :to-be nil))
+
+    (it "keeps every level when there is no minimum"
+      ;; nil means every level, and `info' sits below the severity nil
+      ;; itself has, so the comparison has to be skipped rather than made.
+      (expect (test-error-api/relevant-p 'info nil) :to-be t)
+      (expect (test-error-api/relevant-p 'warning nil) :to-be t))
+
+    (it "drops them all when they are turned off"
+      (let ((flycheck-relevant-error-other-file-show nil))
+        (expect (test-error-api/relevant-p 'error nil) :to-be nil)))))
 
 ;;; test-error-api.el ends here
