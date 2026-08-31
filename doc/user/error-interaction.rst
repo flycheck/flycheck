@@ -242,6 +242,8 @@ checkers produce explanations, the majority do not.  Those that do are:
 
    Display an explanation for the first explainable error at point.
 
+.. image:: /images/flycheck-explain-error.gif
+
 
 Diagnostic tags
 ===============

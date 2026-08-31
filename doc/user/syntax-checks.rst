@@ -20,6 +20,8 @@ possible.
 
    .. note::
 
+      .. image:: /images/flycheck-remote-check.gif
+
       Remote files (via TRAMP) are checked like local ones: command checkers
       run on the remote host, so the tools need to be installed there rather
       than locally.  Because each check spawns a process over the network,
@@ -327,6 +329,8 @@ whose language server you don't have.
 
    Enable ``flycheck-lsp-mode`` in every buffer whose major mode has an
    installed server in `flycheck-lsp-servers`.
+
+.. image:: /images/flycheck-lsp-mode.gif
 
 .. note::
 

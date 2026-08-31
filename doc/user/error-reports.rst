@@ -467,6 +467,8 @@ about files you don't have open - point the counter at the project:
    shows red.  The other status indicators always describe the current
    buffer's check.
 
+.. image:: /images/flycheck-mode-line-scope.png
+
 .. seealso::
 
    :infonode:`(elisp)Mode Line Data`
