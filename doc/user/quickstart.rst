@@ -89,17 +89,12 @@ More features
 =============
 
 All Flycheck commands are available in the Emacs Menu at :menuselection:`Tools
----> Syntax checking`:
+---> Syntax checking`, and the same menu pops up when you click the mode line
+lighter:
 
 .. figure:: /images/flycheck-menu.png
 
    The menu of Flycheck, showing all available Flycheck commands
-
-The same menu also pops up when you click on the mode line lighter:
-
-.. figure:: /images/flycheck-mode-line-menu.png
-
-   The mode line menu of Flycheck
 
 What else Flycheck can do
 =========================
