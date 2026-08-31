@@ -7440,6 +7440,9 @@ displayed; see `flycheck-error-list--update-format'.")
     (flycheck--error-list-compute-msg-offset flycheck-error-list-format)
   "Amount of space to use in `flycheck-flush-multiline-message'.")
 
+(defconst flycheck-error-list--file-column-max 40
+  "How wide the File column of the error list may get, in columns.")
+
 (defun flycheck-error-list--column-widths (errors)
   "Compute the File and ID column widths for ERRORS.
 
@@ -7451,7 +7454,8 @@ Return a cons cell (FILE-WIDTH . ID-WIDTH)."
                               (length (file-name-nondirectory file)))))
       (when-let* ((id (flycheck-error-id err)))
         (setq id-width (max id-width (length (format "%s" id))))))
-    (cons (min file-width 40) (min id-width 24))))
+    (cons (min file-width flycheck-error-list--file-column-max)
+          (min id-width 24))))
 
 (defun flycheck-error-list--set-column-width (format name width)
   "Set the width of the column NAME in FORMAT to WIDTH.
@@ -7467,10 +7471,15 @@ ignored."
 
 (defun flycheck-error-list--update-format ()
   "Fit the File and ID column widths to the displayed errors."
-  (pcase-let ((`(,file-width . ,id-width)
-               (flycheck-error-list--column-widths
-                (flycheck-error-list-apply-filter
-                 (flycheck-error-list-current-errors)))))
+  (let* ((errors (flycheck-error-list-apply-filter
+                  (flycheck-error-list-current-errors)))
+         (widths (flycheck-error-list--column-widths errors))
+         (file-width
+          (min flycheck-error-list--file-column-max
+               (max (car widths)
+                       (flycheck-error-list--group-header-width
+                        errors (flycheck-error-list--grouping-dimensions)))))
+         (id-width (cdr widths)))
     (let ((format (copy-sequence flycheck-error-list-format)))
       (flycheck-error-list--set-column-width format "File" file-width)
       (flycheck-error-list--set-column-width format "ID" id-width)
@@ -7977,6 +7986,45 @@ headers above a still-present error keep their collapse too."
                    (remhash path flycheck-error-list--collapsed)))
                flycheck-error-list--collapsed))))
 
+(defun flycheck-error-list--group-header-label (dimension key count collapsed
+                                                         depth)
+  "Return the text of the header of a group at DEPTH.
+
+DIMENSION and KEY name the group, COUNT is how many errors it holds and
+COLLAPSED whether it is collapsed."
+  (format "%s%s %s (%d)"
+          (make-string (* 2 depth) ?\s)
+          (if collapsed "▸" "▾")
+          (flycheck-error-list--group-name dimension key)
+          count))
+
+(defun flycheck-error-list--group-header-width (errors dimensions)
+  "Return the width the headers of ERRORS grouped by DIMENSIONS need.
+
+The headers share the first column with the file names, and are usually
+longer than the names under them, so without this the group a reader is
+looking for is the part that gets elided.  The counts are taken over the
+whole list, which is exact for the outermost dimension and an upper
+bound for the ones nested under it, where a group holds only part of
+what its key names."
+  (let ((width 0) (depth 0))
+    (dolist (dimension dimensions)
+      (let ((counts (make-hash-table :test 'equal))
+            (key-fn (flycheck-error-list--group-key-function dimension)))
+        (dolist (err errors)
+          (let ((key (funcall key-fn err)))
+            (puthash key (1+ (gethash key counts 0)) counts)))
+        (maphash
+         (lambda (key count)
+           (setq width
+                 (max width
+                      (string-width
+                       (flycheck-error-list--group-header-label
+                        dimension key count nil depth)))))
+         counts))
+      (setq depth (1+ depth)))
+    width))
+
 (defun flycheck-error-list--group-header (path dimension key count collapsed depth)
   "Return a header entry for the group at PATH.
 
@@ -7987,11 +8035,8 @@ list headed by `flycheck-group', not a `flycheck-error', so
 navigation and the fix/explain commands skip it."
   (list (list 'flycheck-group path)
         (vector (flycheck-error-list-make-cell
-                 (format "%s%s %s (%d)"
-                         (make-string (* 2 depth) ?\s)
-                         (if collapsed "▸" "▾")
-                         (flycheck-error-list--group-name dimension key)
-                         count)
+                 (flycheck-error-list--group-header-label
+                  dimension key count collapsed depth)
                  'flycheck-error-list-group-header nil
                  'flycheck-error-list-group)
                 "" "" "" "" "")))

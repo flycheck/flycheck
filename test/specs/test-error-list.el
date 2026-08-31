@@ -1069,7 +1069,71 @@ is when asked, so no earlier check has to vouch for it."
 
       (it "rejects an invalid message filter regexp"
         (expect (flycheck-error-list-set-message-filter "[")
-                :to-throw 'user-error)))
+                :to-throw 'user-error))
+
+      (it "fits the File column to the group headers it has to show"
+        ;; The headers live in that column, and are longer than the file
+        ;; names under them, so fitting the names alone elides the very
+        ;; thing the reader is looking for.
+        (flycheck-buttercup-with-temp-buffer
+          (setq flycheck-current-errors
+                (list (flycheck-error-new-at 1 1 'error "a" :checker 'foo
+                                             :filename "s.el")))
+          (let ((source (current-buffer)))
+            (flycheck/with-error-list-buffer
+              (setq flycheck-error-list-source-buffer source
+                    flycheck-error-list-group-by 'file)
+              (flycheck-error-list--update-format)
+              (expect (cadr (aref tabulated-list-format 0))
+                      :to-be-greater-than (length "s.el"))
+              (expect (cadr (aref tabulated-list-format 0))
+                      :to-equal (length "▾ s.el (1)"))))))
+
+      (it "fits the File column to a checker header too"
+        (flycheck-buttercup-with-temp-buffer
+          (setq flycheck-current-errors
+                (list (flycheck-error-new-at 1 1 'error "a"
+                                             :checker 'javascript-eslint
+                                             :filename "s.el")))
+          (let ((source (current-buffer)))
+            (flycheck/with-error-list-buffer
+              (setq flycheck-error-list-source-buffer source
+                    flycheck-error-list-group-by 'checker)
+              (flycheck-error-list--update-format)
+              (expect (cadr (aref tabulated-list-format 0))
+                      :to-equal (length "▾ javascript-eslint (1)"))))))
+
+      (it "sizes a header by what its own group holds"
+        ;; Not by the length of the whole list: nine errors in one file and
+        ;; one in another make a two-digit total and a one-digit group.
+        (flycheck-buttercup-with-temp-buffer
+          (setq flycheck-current-errors
+                (append (make-list 9 (flycheck-error-new-at
+                                      1 1 'error "a" :checker 'foo
+                                      :filename "a.el"))
+                        (list (flycheck-error-new-at 1 1 'error "b"
+                                                     :checker 'foo
+                                                     :filename "b.el"))))
+          (let ((source (current-buffer)))
+            (flycheck/with-error-list-buffer
+              (setq flycheck-error-list-source-buffer source
+                    flycheck-error-list-group-by 'file)
+              (flycheck-error-list--update-format)
+              (expect (cadr (aref tabulated-list-format 0))
+                      :to-equal (length "▾ a.el (9)"))))))
+
+      (it "leaves the column alone when nothing is grouped"
+        (flycheck-buttercup-with-temp-buffer
+          (setq flycheck-current-errors
+                (list (flycheck-error-new-at 1 1 'error "a" :checker 'foo
+                                             :filename "s.el")))
+          (let ((source (current-buffer)))
+            (flycheck/with-error-list-buffer
+              (setq flycheck-error-list-source-buffer source
+                    flycheck-error-list-group-by nil)
+              (flycheck-error-list--update-format)
+              (expect (cadr (aref tabulated-list-format 0))
+                      :to-equal (length "s.el")))))))
 
     (describe "Display"
       (it "displays the error list according to the display action"
