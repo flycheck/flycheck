@@ -35,6 +35,8 @@
 
 ### Bugs fixed
 
+- [#2390](https://github.com/flycheck/flycheck/pull/2390): The error list's group headers are no longer cut off: they share the File column with the file names, which is now made wide enough for them.
+- [#2390](https://github.com/flycheck/flycheck/pull/2390): A file in a project the buffer and the checker spell differently, as they do for a symlinked directory or macOS's `/tmp`, is named relative to the project in the error list rather than by its whole path.
 - [#2388](https://github.com/flycheck/flycheck/pull/2388): A rustc or Clippy suggestion that only deletes code, like "remove this `mut`", keeps its own message instead of having the empty replacement appended to it.
 - [#2383](https://github.com/flycheck/flycheck/pull/2383): A buffer using `flycheck-lsp-prefer-server` contributes its server’s findings to the error list’s project scope and the mode-line project counts, as one using `flycheck-lsp-mode` already did.
 - [#2371](https://github.com/flycheck/flycheck/pull/2371): LSP quick fixes work in a buffer on a remote host, where the server names the file as its own host sees it and Flycheck compared that against the buffer's remote name, silently declining every fix; the native `flycheck-lsp` client now declines a remote buffer outright, since it looked the server up on the remote host but started it on this one, and leaves those buffers to the command checkers.
