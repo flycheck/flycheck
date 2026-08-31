@@ -359,6 +359,8 @@ asks first when that means opening files.  A file that has been written since
 the check is left alone rather than edited at positions that no longer
 describe it, and so is one whose buffer has unsaved changes.
 
+.. image:: /images/flycheck-project-fixes.gif
+
 A fix is applied as a single undoable change, so :kbd:`C-/` reverts it.  The
 checkers that currently provide fixes are ``javascript-eslint``,
 ``python-ruff``, ``sh-shellcheck``, the ``rust`` checkers (from ``cargo
