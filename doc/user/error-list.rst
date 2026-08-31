@@ -130,6 +130,8 @@ with :kbd:`F`:
 
 The active filters are shown in the error list's mode line.
 
+.. image:: /images/flycheck-error-list-filter.gif
+
 Sort the list
 =============
 
