@@ -391,6 +391,8 @@ command, so a project you visited hours ago may still have one running:
    is still live, how many documents it holds and how many of those a live
    buffer still owns.
 
+.. image:: /images/flycheck-lsp-servers.png
+
 .. define-key:: M-x flycheck-lsp-restart-server
 
    Shut down the server serving this buffer and forget it, so the next check
