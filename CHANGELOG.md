@@ -35,6 +35,7 @@
 
 ### Bugs fixed
 
+- [#2394](https://github.com/flycheck/flycheck/pull/2394): A checker that reads the buffer from standard input now works on a remote host, where the check used to run for ever without ever reporting: Flycheck writes the buffer to a file there and has the remote shell redirect it, since standard input cannot be closed over a TRAMP connection.
 - [#2391](https://github.com/flycheck/flycheck/pull/2391): Setting `flycheck-relevant-error-other-file-minimum-level` to nil shows errors of every level from other files, as it says it does, rather than dropping the `info` ones.
 - [#2390](https://github.com/flycheck/flycheck/pull/2390): The error list's group headers are no longer cut off: they share the File column with the file names, which is now made wide enough for them.
 - [#2390](https://github.com/flycheck/flycheck/pull/2390): A file in a project the buffer and the checker spell differently, as they do for a symlinked directory or macOS's `/tmp`, is named relative to the project in the error list rather than by its whole path.
