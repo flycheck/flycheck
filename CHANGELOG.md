@@ -35,6 +35,7 @@
 
 ### Bugs fixed
 
+- [#2395](https://github.com/flycheck/flycheck/pull/2395): A check that is stopped, or superseded by the next one, no longer leaves its checker running on the remote host: Flycheck interrupts the command there, which is what actually stops it, rather than only dropping its own end of the process.
 - [#2394](https://github.com/flycheck/flycheck/pull/2394): A checker that reads the buffer from standard input now works on a remote host, where the check used to run for ever without ever reporting: Flycheck writes the buffer to a file there and has the remote shell redirect it, since standard input cannot be closed over a TRAMP connection.
 - [#2391](https://github.com/flycheck/flycheck/pull/2391): Setting `flycheck-relevant-error-other-file-minimum-level` to nil shows errors of every level from other files, as it says it does, rather than dropping the `info` ones.
 - [#2390](https://github.com/flycheck/flycheck/pull/2390): The error list's group headers are no longer cut off: they share the File column with the file names, which is now made wide enough for them.
