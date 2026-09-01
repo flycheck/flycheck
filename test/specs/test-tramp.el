@@ -275,6 +275,98 @@ the checker is given."
             (expect 'flycheck-process-send-buffer :to-have-been-called))
         (ignore-errors (delete-file local))))))
 
+(describe "Interrupting a check on a remote host"
+
+  ;; `delete-process' drops Emacs's end of a remote process and leaves the
+  ;; command running on the other host.  The mock method runs it locally,
+  ;; so the spec can watch for it and say whether it really stopped.
+
+  (before-all
+    (flycheck-test-tramp-setup-method))
+
+  (after-each
+    (setf (symbol-plist 'test-slow) nil)
+    (ignore-errors (tramp-cleanup-all-connections)))
+
+  (defun flycheck-test-checker-process ()
+    "Return the process of the check running in this buffer, if any.
+Flycheck notes the buffer on the process, which is what tells this
+buffer\='s check from one an earlier spec left behind."
+    (let ((buffer (current-buffer)))
+      (seq-find (lambda (process)
+                  (eq buffer (process-get process 'flycheck-buffer)))
+                (process-list))))
+
+  ;; The mock method runs the "remote" command as a local child of Emacs,
+  ;; in Emacs's own process group, so deleting the process stops it there
+  ;; whether or not it was interrupted first.  Only a real other host shows
+  ;; the difference, which is why this pins the mechanism rather than
+  ;; watching for the process: measured over ssh and over docker, a stopped
+  ;; check left its command running until the interrupt was added.
+
+  (it "interrupts the command on the other host, rather than only dropping it"
+    (assume (flycheck-test-tramp-connectable-p) "no mock TRAMP connection")
+    (let* ((local (make-temp-file "flycheck-interrupt-" nil ".txt" "hello\n"))
+           (remote (concat flycheck-test-tramp-remote-prefix local))
+           (buffer nil))
+      (flycheck-define-command-checker 'test-slow
+        "Reads standard input and then waits, long enough to be caught at it."
+        :command '("sh" "-c" "cat > /dev/null; sleep 60")
+        :standard-input t
+        :error-parser (lambda (_output _checker _buffer) nil)
+        :modes '(text-mode))
+      (unwind-protect
+          (progn
+            (setq buffer (find-file-noselect remote))
+            (with-current-buffer buffer
+              (text-mode)
+              (let ((flycheck-checkers '(test-slow))
+                    (flycheck-check-syntax-automatically nil))
+                (flycheck-mode)
+                (flycheck-buffer)
+                ;; Guard the guard: there is nothing to interrupt unless a
+                ;; check is running, and nothing remote to signal unless
+                ;; Tramp noted the pid it started over there.
+                (let ((process (flycheck-test-checker-process)))
+                  (expect process :to-be-truthy)
+                  (expect (process-get process 'remote-pid) :to-be-truthy))
+                (spy-on 'interrupt-process :and-call-through)
+                (flycheck-stop)
+                (expect 'interrupt-process :to-have-been-called))))
+        (when (buffer-live-p buffer) (kill-buffer buffer))
+        (ignore-errors (delete-file local)))))
+
+  (it "leaves a local check to be deleted as before"
+    (let* ((local (make-temp-file "flycheck-interrupt-" nil ".txt" "hello\n"))
+           (buffer nil))
+      (flycheck-define-command-checker 'test-slow
+        "Reads standard input and then waits."
+        :command '("sh" "-c" "cat > /dev/null; sleep 60")
+        :standard-input t
+        :error-parser (lambda (_output _checker _buffer) nil)
+        :modes '(text-mode))
+      (unwind-protect
+          (progn
+            (setq buffer (find-file-noselect local))
+            (with-current-buffer buffer
+              (text-mode)
+              (let ((flycheck-checkers '(test-slow))
+                    (flycheck-check-syntax-automatically nil))
+                (flycheck-mode)
+                (spy-on 'interrupt-process :and-call-through)
+                (flycheck-buffer)
+                ;; Guard the guard: an absence proves nothing if no check
+                ;; ever ran.
+                (let ((process (flycheck-test-checker-process)))
+                  (expect process :to-be-truthy)
+                  (flycheck-stop)
+                  ;; Locally the process is Emacs's own, and deleting it is
+                  ;; what has always stopped the checker.
+                  (expect 'interrupt-process :not :to-have-been-called)
+                  (expect (process-live-p process) :to-be nil)))))
+        (when (buffer-live-p buffer) (kill-buffer buffer))
+        (ignore-errors (delete-file local))))))
+
 (describe "flycheck--redirect-command"
 
   (it "runs the command through a shell that redirects the file"

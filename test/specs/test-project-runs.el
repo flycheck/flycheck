@@ -114,6 +114,70 @@
           (expect (flycheck-error-line (car errors)) :to-equal 3)
           (expect (flycheck-error-message (car errors)) :to-equal "boom"))))
 
+    (it "stops naming a run before it stops it"
+      ;; Stopping a process can run its sentinel there and then, and a
+      ;; sentinel that still finds its own process in the table takes the
+      ;; abandoned run for the current one and publishes whatever it had
+      ;; printed by the time it was killed.
+      (flycheck-test--define-run-checker
+       :command (flycheck-test--emacs-command
+                 '(progn (princ "gamma.rb:3:boom\n")
+                         (sleep-for 30))))
+      (flycheck-test--with-temp-project dir
+        (let ((key (cons dir 'test-run))
+              (named-when-stopped 'not-called))
+          (flycheck-check-project)
+          ;; Wait for the run to be under way, so there is something to
+          ;; abandon in the first place.
+          (let ((deadline (+ 10 (float-time))))
+            (while (and (not (process-live-p
+                              (plist-get (gethash key flycheck--project-runs)
+                                         :process)))
+                        (< (float-time) deadline))
+              (accept-process-output nil 0.05)))
+          (expect (process-live-p
+                   (plist-get (gethash key flycheck--project-runs) :process))
+                  :to-be-truthy)
+          (spy-on 'flycheck--delete-process :and-call-fake
+                  (lambda (process)
+                    (setq named-when-stopped
+                          (eq process
+                              (plist-get (gethash key flycheck--project-runs)
+                                         :process)))
+                    (delete-process process)))
+          (flycheck--project-runs-forget dir)
+          (expect named-when-stopped :to-be nil))))
+
+    (it "stops naming a run the next one replaces"
+      ;; The same hazard on the other path: a fresher run over the same
+      ;; project stops the one still under way.
+      (flycheck-test--define-run-checker
+       :command (flycheck-test--emacs-command
+                 '(progn (princ "gamma.rb:3:boom\n")
+                         (sleep-for 30))))
+      (flycheck-test--with-temp-project dir
+        (let ((key (cons dir 'test-run))
+              (named-when-stopped 'not-called))
+          (flycheck-check-project)
+          (let ((deadline (+ 10 (float-time))))
+            (while (and (not (process-live-p
+                              (plist-get (gethash key flycheck--project-runs)
+                                         :process)))
+                        (< (float-time) deadline))
+              (accept-process-output nil 0.05)))
+          (expect (process-live-p
+                   (plist-get (gethash key flycheck--project-runs) :process))
+                  :to-be-truthy)
+          (spy-on 'flycheck--delete-process :and-call-fake
+                  (lambda (process)
+                    (setq named-when-stopped
+                          (eq process
+                              (plist-get (gethash key flycheck--project-runs)
+                                         :process)))
+                    (delete-process process)))
+          (flycheck-check-project)
+          (expect named-when-stopped :to-be nil))))
+
     (it "replaces the previous run's results"
       (flycheck-test--define-run-checker)
       (flycheck-test--with-temp-project dir
