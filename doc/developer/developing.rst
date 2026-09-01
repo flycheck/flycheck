@@ -372,6 +372,16 @@ against a remote buffer and fails if any of them still carries a remote
 prefix, so a slip here shows up as a test failure rather than a puzzling bug
 report.
 
+``:standard-input`` needs nothing extra either, though what happens under it
+differs on a remote host.  Flycheck cannot feed the buffer to the process
+there: the process TRAMP hands back is the shell connection it multiplexes
+every remote command through, and an end of file cannot be expressed on it,
+so a checker reading to the end of its input would wait for one for ever.
+Flycheck writes the buffer to a file on that host instead and has the remote
+shell redirect it, which the checker cannot tell apart from a pipe.  It costs
+one write per check, which is why a checker that can take a file argument is
+still the cheaper thing to write.
+
 Suggesting fixes
 ----------------
 
