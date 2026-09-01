@@ -157,6 +157,146 @@ would reach for the host, so it stays offline on any machine.")
       (expect substituted :to-be-greater-than 100)
       (expect offenders :to-equal nil))))
 
+(describe "Standard input on a remote host"
+
+  ;; Tramp hands back the shell connection it multiplexes every remote
+  ;; command through, and an end of file cannot be expressed on it: a
+  ;; checker reading to the end of its input waits for one for ever.  The
+  ;; buffer goes to a file on that host instead, and the remote shell
+  ;; redirects it.  The mock method drives all of that against localhost.
+
+  (before-all
+    (flycheck-test-tramp-setup-method))
+
+  (before-each
+    ;; Counting bytes answers both questions at once: whether the input
+    ;; arrived at all, and whether it arrived unchanged.
+    (flycheck-define-command-checker 'test-stdin
+      "Reports the size of what it was given on standard input."
+      :command '("wc" "-c")
+      :standard-input t
+      :error-parser
+      (lambda (output _checker _buffer)
+        (list (flycheck-error-new-at 1 1 'info (string-trim output))))
+      :modes '(text-mode)))
+
+  (after-each
+    (setf (symbol-plist 'test-stdin) nil)
+    (ignore-errors (tramp-cleanup-all-connections)))
+
+  (defun flycheck-test-stdin-size (file &optional narrow)
+    "Check FILE with the stdin checker and return the size it saw.
+With NARROW, narrow the buffer first: a narrowing must not change what
+the checker is given."
+    (let ((buffer (find-file-noselect file)))
+      (unwind-protect
+          (with-current-buffer buffer
+            (text-mode)
+            (when narrow
+              (narrow-to-region (point-min) (min (point-max) (+ (point-min) 2))))
+            (let ((flycheck-checkers '(test-stdin))
+                  (flycheck-check-syntax-automatically nil)
+                  (done nil)
+                  (deadline (+ 30 (float-time))))
+              (add-hook 'flycheck-after-syntax-check-hook
+                        (lambda () (setq done t)) nil t)
+              (flycheck-mode)
+              (flycheck-buffer)
+              (while (and (not done) (< (float-time) deadline))
+                (accept-process-output nil 0.2))
+              ;; Without the redirect this is where it stops: the check
+              ;; never finishes, so there is nothing to compare.
+              (expect done :to-be-truthy)
+              (when-let* ((err (car flycheck-current-errors)))
+                (string-to-number (flycheck-error-message err)))))
+        (kill-buffer buffer))))
+
+  (it "gives a remote checker the whole buffer, byte for byte"
+    (assume (flycheck-test-tramp-connectable-p) "no mock TRAMP connection")
+    ;; A carriage return and a literal C-d are what a pty would rewrite
+    ;; and swallow on the way, so they are what the count has to prove.
+    (let* ((content (concat "a\r\nb" (string ?\C-d) "c\n"))
+           (local (make-temp-file "flycheck-stdin-" nil ".txt" content))
+           (remote (concat flycheck-test-tramp-remote-prefix local)))
+      (unwind-protect
+          (expect (flycheck-test-stdin-size remote)
+                  :to-equal (string-bytes content))
+        (ignore-errors (delete-file local)))))
+
+  (it "gives it the whole buffer even when the buffer is narrowed"
+    (assume (flycheck-test-tramp-connectable-p) "no mock TRAMP connection")
+    (let* ((content "one\ntwo\nthree\n")
+           (local (make-temp-file "flycheck-stdin-" nil ".txt" content))
+           (remote (concat flycheck-test-tramp-remote-prefix local)))
+      (unwind-protect
+          (expect (flycheck-test-stdin-size remote 'narrow)
+                  :to-equal (string-bytes content))
+        (ignore-errors (delete-file local)))))
+
+  (it "encodes the buffer the way the local path would"
+    (assume (flycheck-test-tramp-connectable-p) "no mock TRAMP connection")
+    ;; A file whose lines end CRLF decodes to a buffer that has none.
+    ;; Writing it back out with the buffer's own coding system would put
+    ;; them back, handing the checker two bytes the local path never sends.
+    (let* ((local (make-temp-file "flycheck-stdin-" nil ".txt"))
+           (remote (concat flycheck-test-tramp-remote-prefix local)))
+      (let ((coding-system-for-write 'binary))
+        (write-region "one\r\ntwo\r\n" nil local nil 'quiet))
+      (unwind-protect
+          (progn
+            ;; Guard the guard: the carriage returns have to be on disk for
+            ;; this to be testing anything.
+            (expect (file-attribute-size (file-attributes local)) :to-equal 10)
+            (expect (flycheck-test-stdin-size remote) :to-equal 8))
+        (ignore-errors (delete-file local)))))
+
+  (it "does not also send the buffer on standard input"
+    (assume (flycheck-test-tramp-connectable-p) "no mock TRAMP connection")
+    (let* ((local (make-temp-file "flycheck-stdin-" nil ".txt" "one\n"))
+           (remote (concat flycheck-test-tramp-remote-prefix local)))
+      (unwind-protect
+          (progn
+            (spy-on 'flycheck-process-send-buffer)
+            (flycheck-test-stdin-size remote)
+            ;; It went into the file, so writing it into the connection as
+            ;; well would leave the buffer's text sitting in the remote
+            ;; shell's input.
+            (expect 'flycheck-process-send-buffer :not :to-have-been-called))
+        (ignore-errors (delete-file local)))))
+
+  (it "leaves the local path sending on standard input"
+    (let* ((content "one\ntwo\n")
+           (local (make-temp-file "flycheck-stdin-" nil ".txt" content)))
+      (unwind-protect
+          (progn
+            (spy-on 'flycheck-process-send-buffer :and-call-through)
+            (expect (flycheck-test-stdin-size local)
+                    :to-equal (string-bytes content))
+            (expect 'flycheck-process-send-buffer :to-have-been-called))
+        (ignore-errors (delete-file local))))))
+
+(describe "flycheck--redirect-command"
+
+  (it "runs the command through a shell that redirects the file"
+    (expect (flycheck--redirect-command '("ruff" "check" "-") "/tmp/in")
+            :to-equal '("sh" "-c" "exec ruff check - < /tmp/in")))
+
+  (it "quotes what a shell would otherwise take apart"
+    ;; Asserted by running it: the arguments have to reach the command as
+    ;; they were given, and the file has to be found under a name with a
+    ;; space in it.
+    (let* ((file (make-temp-file "flycheck-quote " nil ".txt" "from the file\n"))
+           (command (flycheck--redirect-command
+                     (list "sh" "-c" "printf '%s\n' \"$1\" \"$2\"; cat" "--"
+                           "two words" "$(echo substituted)")
+                     file)))
+      (unwind-protect
+          (expect (with-temp-buffer
+                    (apply #'call-process (car command) nil t nil (cdr command))
+                    (buffer-string))
+                  :to-equal "two words\n$(echo substituted)\nfrom the file\n")
+        (ignore-errors (delete-file file))))))
+
 (provide 'test-tramp)
 
 ;;; test-tramp.el ends here

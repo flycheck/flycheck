@@ -10646,6 +10646,40 @@ symbols in the command."
   (seq-mapcat (lambda (arg) (flycheck-substitute-argument arg checker))
               (flycheck-checker-arguments checker)))
 
+(defun flycheck--process-input-coding-system (program)
+  "Return the coding system a process running PROGRAM would encode input with.
+
+`process-send-region' encodes the buffer with this on the way to a local
+checker, so the file written for a remote one has to use it too.  The
+buffer's own coding system is the wrong thing to write with: it would put
+the carriage returns of a DOS file back, or a byte order mark, neither of
+which the local path ever sends."
+  (let ((entry (and program
+                    (assoc-default program process-coding-system-alist
+                                   #'string-match))))
+    (or (if (consp entry) (cdr entry) entry)
+        (cdr default-process-coding-system)
+        'utf-8-unix)))
+
+(defun flycheck--redirect-command (command file)
+  "Return COMMAND with its standard input redirected from FILE.
+
+FILE is a name on the host the command runs on.  This is how a buffer
+reaches a checker running over TRAMP: the process Tramp hands back is
+the shell connection it multiplexes every remote command through, and
+an end of file cannot be expressed on it.  With a pipe connection type
+the end of file never arrives and a checker that reads to the end waits
+for it for ever; with a pty it does arrive, but the line discipline
+rewrites the buffer on the way, translating carriage returns and
+swallowing the end-of-file character where it appears in the text.  A
+redirect has neither problem."
+  (list "sh" "-c"
+        ;; `exec' so the checker replaces the shell rather than running
+        ;; under it: killing the process then reaches the checker itself,
+        ;; the way `flycheck-lsp--remote-command' does it.
+        (concat "exec " (mapconcat #'tramp-shell-quote-argument command " ")
+                " < " (tramp-shell-quote-argument file))))
+
 (defun flycheck-process-send-buffer (process)
   "Send all contents of current buffer to PROCESS.
 
@@ -10680,7 +10714,30 @@ PROCESS, and terminates standard input with EOF."
                ;; local name on the remote host.
                (program (file-local-name executable))
                (args (flycheck-checker-substituted-arguments checker))
-               (command (flycheck--wrap-command program args))
+               ;; A checker that reads standard input cannot be fed over
+               ;; TRAMP; see `flycheck--redirect-command'.  Put the buffer
+               ;; in a file on that host and let the remote shell redirect
+               ;; it.  The file joins `flycheck-temporaries', so it is
+               ;; deleted with the rest when the check finishes.
+               (stdin-file (when (and (flycheck-checker-get
+                                       checker 'standard-input)
+                                      (file-remote-p default-directory))
+                             ;; `flycheck-save-buffer-to-file' writes the
+                             ;; whole buffer, narrowing or not, which is
+                             ;; what `flycheck-process-send-buffer' sends;
+                             ;; the coding system is what it would have
+                             ;; been encoded with on the way.
+                             (let ((coding-system-for-write
+                                    (flycheck--process-input-coding-system
+                                     program)))
+                               (flycheck-save-buffer-to-temp
+                                (lambda (_)
+                                  (flycheck-temp-file-system nil))))))
+               (command (let ((command (flycheck--wrap-command program args)))
+                          (if stdin-file
+                              (flycheck--redirect-command
+                               command (file-local-name stdin-file))
+                            command)))
                (sentinel-events nil)
                ;; Use pipes to receive output from the syntax checker.  They are
                ;; more efficient and more robust than PTYs, which Emacs uses by
@@ -10733,8 +10790,10 @@ PROCESS, and terminates standard input with EOF."
           ;; process itself, to get rid of the global state ASAP.
           (process-put process 'flycheck-temporaries flycheck-temporaries)
           (setq flycheck-temporaries nil)
-          ;; Send the buffer to the process on standard input, if enabled.
-          (when (flycheck-checker-get checker 'standard-input)
+          ;; Send the buffer to the process on standard input, if enabled
+          ;; and not already redirected from a file on the remote host.
+          (when (and (flycheck-checker-get checker 'standard-input)
+                     (not stdin-file))
             (condition-case err
                 (flycheck-process-send-buffer process)
               ;; Some checkers exit before reading all input, causing errors
