@@ -5819,8 +5819,10 @@ fixes is the check of the buffer that reported them, see
     (maphash (lambda (key state)
                (when (equal (car key) project-key)
                  (when-let* ((proc (plist-get state :process)))
-                   (when (process-live-p proc)
-                     (delete-process proc)))
+                   ;; Out of the table first; see `flycheck--project-run'.
+                   (puthash key (plist-put (copy-sequence state) :process nil)
+                            flycheck--project-runs)
+                   (flycheck--delete-process proc))
                  (push key stale)))
              flycheck--project-runs)
     (dolist (key stale)
@@ -5882,10 +5884,15 @@ fixes is the check of the buffer that reported them, see
   "Start the project checker CHECKER with PROPS over the project at ROOT."
   (let* ((key (cons root checker))
          (state (gethash key flycheck--project-runs)))
-    ;; A fresher run replaces one still under way
+    ;; A fresher run replaces one still under way.  Take it out of the
+    ;; table before stopping it: stopping can run its sentinel there and
+    ;; then, and a sentinel that still finds its own process in the table
+    ;; treats the abandoned run as the current one and publishes what it
+    ;; had printed so far.
     (when-let* ((proc (plist-get state :process)))
-      (when (process-live-p proc)
-        (delete-process proc)))
+      (puthash key (plist-put (copy-sequence state) :process nil)
+               flycheck--project-runs)
+      (flycheck--delete-process proc))
     (let* ((default-directory root)
            (stdout (generate-new-buffer
                     (format " *flycheck-project-%s*" checker)))
@@ -10816,14 +10823,36 @@ PROCESS, and terminates standard input with EOF."
        (when process
          ;; No need to explicitly delete the temporary files of the process,
          ;; because deleting runs the sentinel, which will delete them anyway.
-         (delete-process process))
+         (flycheck--delete-process process))
        (signal (car err) (cdr err))))))
+
+(defun flycheck--delete-process (process)
+  "Delete PROCESS, stopping the command behind it wherever it runs.
+
+`delete-process' only drops Emacs\='s end of a remote process: the
+command keeps running on the other host, and a check superseded by the
+next one leaves it there.  Tramp records the pid of that command and
+signals it when the process is interrupted, so interrupt first and let
+the deletion clean up after it."
+  (when (process-live-p process)
+    (unwind-protect
+        ;; Only Tramp's own processes carry a remote pid, and such a
+        ;; process is the connection, so a live one means the connection is
+        ;; open.  It can still be hung -- a suspended laptop, a dropped
+        ;; network -- and this runs from `kill-buffer', so bound the wait
+        ;; rather than let a teardown hang on it.
+        (when (process-get process 'remote-pid)
+          (with-timeout (1 nil)
+            (ignore-errors (interrupt-process process))))
+      ;; Whatever happened above, including a `C-g' out of Tramp, Emacs's
+      ;; end of the process still has to go.
+      (delete-process process))))
 
 (defun flycheck-interrupt-command-checker (_checker process)
   "Interrupt a PROCESS."
   ;; Deleting the process always triggers the sentinel, which does the cleanup
   (when process
-    (delete-process process)))
+    (flycheck--delete-process process)))
 
 (defun flycheck-command-checker-print-doc (checker)
   "Print additional documentation for a command CHECKER."
