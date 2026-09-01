@@ -30,3 +30,7 @@ _build/
 /test/resources/**/_build/
 /test/resources/**/Cargo.lock
 rebar3.crashdump
+
+# In-place copies a checker leaves behind when a spec, or a demo, runs
+# against the fixtures
+flycheck_*
