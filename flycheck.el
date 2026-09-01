@@ -10829,7 +10829,7 @@ PROCESS, and terminates standard input with EOF."
 (defun flycheck--delete-process (process)
   "Delete PROCESS, stopping the command behind it wherever it runs.
 
-`delete-process' only drops Emacs\='s end of a remote process: the
+`delete-process' only drops Emacs\\='s end of a remote process: the
 command keeps running on the other host, and a check superseded by the
 next one leaves it there.  Tramp records the pid of that command and
 signals it when the process is interrupted, so interrupt first and let
@@ -12302,7 +12302,7 @@ key into a server's own documents."
   "Return a `file:' URI naming PATH as the server's host sees it.
 
 A remote PATH is reduced with `file-local-name': the server runs on that
-host and knows nothing of Emacs\='s remote file names."
+host and knows nothing of Emacs\\='s remote file names."
   (let ((enc (url-hexify-string (file-local-name (expand-file-name path))
                                 (cons ?/ url-unreserved-chars))))
     (concat "file://" (if (string-prefix-p "/" enc) enc (concat "/" enc)))))
@@ -12823,12 +12823,12 @@ the root does not change over a buffer's life."
 (defun flycheck-lsp--buffer-uri ()
   "Return the `file:' URI of the current buffer's file, or nil.
 
-The URI names the file as the server\='s host sees it; the host itself is
+The URI names the file as the server\\='s host sees it; the host itself is
 carried by the document key, see `flycheck-lsp--doc-key'."
   (and buffer-file-name (flycheck-lsp--path-to-uri buffer-file-name)))
 
 (defun flycheck-lsp--server-remote (server)
-  "Return SERVER\='s remote prefix, or nil when it runs on this machine."
+  "Return SERVER\\='s remote prefix, or nil when it runs on this machine."
   (when-let* ((root (flycheck-lsp--server-root server)))
     (file-remote-p root)))
 
@@ -13206,7 +13206,7 @@ line discipline raw leaves the byte stream alone.  Eglot wraps remote
 servers the same way.
 
 Arguments are quoted the way a POSIX shell reads them rather than the
-way this machine\='s shell does, since that is what runs them."
+way this machine\\='s shell does, since that is what runs them."
   (list "sh" "-c"
         (concat "stty raw > /dev/null 2>&1; exec "
                 (mapconcat #'tramp-shell-quote-argument command " "))))
