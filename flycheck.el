@@ -12701,7 +12701,7 @@ The `documents' table maps a document's canonical path (see
 `flycheck-lsp--doc-key') to a `flycheck-lsp--doc'.  `capabilities' is the
 server's advertised capability plist from its `initialize' reply, filled
 in once `initialized' turns non-nil (the handshake runs asynchronously)."
-  connection root command stderr capabilities initialized
+  connection process root command stderr capabilities initialized
   ;; Whether the workspace has been pulled here: a refresh request from
   ;; the server is worth honoring only then
   workspace-pulled
@@ -13190,9 +13190,12 @@ A no-op if the connection died in the meantime."
 Remove it from the registry so a later check starts a fresh one."
   (message "Flycheck LSP: %s failed to initialize (%s)"
            (car (flycheck-lsp--server-command server)) reason)
-  (flycheck-lsp--shutdown-server server)
-  (remhash (flycheck-lsp--server-key server) flycheck-lsp--servers))
+  ;; Through `flycheck-lsp--forget-server' for its ordering: shutting down
+  ;; pumps process output, and a push arriving then can register a fresh
+  ;; server under this key for a trailing `remhash' to drop instead.
+  (flycheck-lsp--forget-server (flycheck-lsp--server-key server) server))
 
+(defvar tramp-dont-suspend-timers)
 (defvar tramp-use-ssh-controlmaster-options)
 (declare-function tramp-shell-quote-argument "tramp" (s))
 (defvar tramp-ssh-controlmaster-options)
@@ -13263,6 +13266,7 @@ the server down.  Return nil if the process could not be spawned at all."
           ;; Spawned inside the handler below: a missing program signals
           ;; here, and the stderr buffer would be left behind.
           (setq proc (flycheck-lsp--spawn name command stderr))
+          (setf (flycheck-lsp--server-process server) proc)
           (setf (flycheck-lsp--server-connection server)
                 (make-instance
                  'jsonrpc-process-connection
@@ -13287,6 +13291,10 @@ the server down.  Return nil if the process could not be spawned at all."
       (error
        ;; `delete-process' reads nil as the current buffer's process, so
        ;; a spawn that never happened must not reach it.
+       ;; Stopped before `jsonrpc-shutdown', which otherwise spends its
+       ;; grace dropping a process that being dropped does not stop - the
+       ;; order `flycheck-lsp--shutdown-server' uses.
+       (flycheck-lsp--force-quit server)
        (when-let* ((conn (flycheck-lsp--server-connection server)))
          (ignore-errors (jsonrpc-shutdown conn 'cleanup-buffers)))
        (when proc (ignore-errors (delete-process proc)))
@@ -13300,6 +13308,11 @@ the server down.  Return nil if the process could not be spawned at all."
   (let* ((key (cons root command))
          (server (gethash key flycheck-lsp--servers)))
     (unless (and server (flycheck-lsp--server-live-p server))
+      ;; A server is only replaced once its connection has gone, which is
+      ;; the case where the server itself is likeliest to still be up on
+      ;; the other host.  Overwriting the registry entry would drop the
+      ;; last reference to it, with nothing left to stop it by.
+      (when server (flycheck-lsp--forget-server key server))
       (setq server (flycheck-lsp--start-server root command))
       (if server
           (puthash key server flycheck-lsp--servers)
@@ -13585,16 +13598,128 @@ a command checker by `flycheck-lsp-prefer-server'."
   "Note that a server's cached diagnostics no longer count."
   (flycheck--project-diagnostics-changed))
 
+(defvar flycheck-lsp--exiting nil
+  "Non-nil while servers are being torn down because Emacs is quitting.
+Bound by `flycheck-lsp--shutdown-all\='.  What hangs then cannot be
+interrupted, so a stopped server is worth more than a working
+connection.")
+
+(defvar flycheck-lsp--exit-grace 0.3
+  "Seconds a server gets to act on `exit' before it is signalled.
+A server told to exit may still be flushing state to disk, and every
+server left running at the end of a session spends this once.")
+
+(defun flycheck-lsp--await-exit (server)
+  "Give SERVER\\='s language server its grace to act on `exit'.
+Return once it has gone or the grace is spent."
+  (when-let* ((proc (flycheck-lsp--server-process server)))
+    (let ((deadline (+ (float-time) flycheck-lsp--exit-grace)))
+      (while (and (process-live-p proc) (< (float-time) deadline))
+        (accept-process-output proc 0.05)))))
+
+(defun flycheck-lsp--host-connected-p (directory)
+  "Return non-nil when DIRECTORY is on a host already connected to.
+
+Two things at once, both of which have to hold before a pid is worth
+signalling.  The pid counts on the server\\='s host and nowhere else, so a
+local DIRECTORY must never reach a kill: it would land on whatever holds
+that number HERE.  And the connection has to be one that already exists,
+because opening a fresh one can block for over a minute on a host that
+has gone away, which this cannot afford on `kill-emacs-hook'.  A host
+out of reach has taken its server with it either way."
+  (file-remote-p directory nil 'connected))
+
+(defun flycheck-lsp--force-quit (server)
+  "Stop SERVER\\='s language server on whatever host it runs on.
+
+Reached once the protocol\\='s own `shutdown' and `exit' have gone
+unanswered, and for a connection that died with the server still up.
+For a server on another host, stopping it is not something
+`delete-process' can do: that drops this end of the connection and
+leaves the server itself running.  Because a later check just starts a
+fresh one, a server that cannot complete a handshake would pile up a
+copy per attempt.
+
+A status of `exit' means the command itself ended, so there is nothing
+left to stop.  Any other status leaves it out there: still running, or
+`signal', which describes this end being dropped and says nothing about
+the other one.  The one case that reads too well is a transport failing
+with the server alive, which also ends up `exit'; that misses an orphan
+rather than signalling the wrong thing.
+
+Tramp starts the command as its own process group leader, so signalling
+the group takes with it any workers the server forked, with the bare
+process as the fallback for a kill(1) that will not take a group.  A
+local server needs none of this, being a real child that
+`delete-process' reaps, and neither does one Tramp recorded no
+`remote-pid' for, as its direct-async path does not."
+  (when-let* ((proc (flycheck-lsp--server-process server))
+              ((not (process-get proc 'flycheck-lsp-quit)))
+              ((not (eq (process-status proc) 'exit)))
+              (pid (process-get proc 'remote-pid))
+              (root (flycheck-lsp--server-root server))
+              ((flycheck-lsp--host-connected-p root))
+              ;; The connection's own directory, not the project's: a
+              ;; root that has since gone from the host fails the `cd'
+              ;; Tramp puts in front of the command, and the kill never
+              ;; runs while looking like it did.
+              (default-directory (concat (file-remote-p root) "/")))
+    ;; Tramp suspends timers around a connection transaction, so the
+    ;; timeout below is inert unless it is told not to.  Telling it costs
+    ;; the connection: a transaction cut off part way leaves the next
+    ;; command reading the last one's output, and file operations failing
+    ;; outright.  Worth it only where the connection has no future anyway
+    ;; and blocking cannot be escaped - Emacs on its way out, with no C-g
+    ;; left to press.
+    (when (let ((tramp-dont-suspend-timers flycheck-lsp--exiting))
+            (with-timeout (1 nil)
+              (ignore-errors
+                (process-file "sh" nil nil nil "-c"
+                              (format "kill -9 -%d 2>/dev/null || kill -9 %d 2>/dev/null"
+                                      pid pid))
+                t)))
+      ;; Marked only once the kill has gone out: one abandoned mid-flight
+      ;; is worth another pass, where a delivered one would be aimed at a
+      ;; pid the host may have given to something else by then.
+      (process-put proc 'flycheck-lsp-quit t))))
+
 (defun flycheck-lsp--shutdown-server (server)
-  "Politely shut SERVER's language server down and free its buffers."
-  (let ((conn (flycheck-lsp--server-connection server)))
-    (when (and conn (jsonrpc-running-p conn))
-      (ignore-errors (jsonrpc-request conn 'shutdown nil :timeout 1))
-      (ignore-errors (jsonrpc-notify conn 'exit nil))
-      (ignore-errors (jsonrpc-shutdown conn t))
-      (flycheck--lsp-server-gone)))
-  (when-let* ((stderr (flycheck-lsp--server-stderr server)))
-    (when (buffer-live-p stderr) (kill-buffer stderr))))
+  "Politely shut SERVER's language server down and free its buffers.
+
+The kill and the buffer are cleanup forms.  Waiting for a server pumps
+its output, which runs this again for whichever other server that output
+finishes off, and an exit thrown through the wait would otherwise leave
+this one running with its buffer behind it.  They signal nothing of
+their own: an error raised on the way out would stand in for whatever
+exit was already leaving.
+
+`jsonrpc-shutdown' stays outside them, and last.  It waits for a
+sentinel with no deadline of its own, pumping output as it goes, so
+running it before the servers nested inside that pumping have been
+stopped leaves its wait with nothing left to finish it."
+  (let* ((conn (flycheck-lsp--server-connection server))
+         (running (and conn (jsonrpc-running-p conn))))
+    (unwind-protect
+        (unwind-protect
+            (when running
+              (ignore-errors (jsonrpc-request conn 'shutdown nil :timeout 1))
+              (ignore-errors (jsonrpc-notify conn 'exit nil))
+              (flycheck-lsp--await-exit server))
+          ;; A connection gone is not a server stopped, so this happens
+          ;; whether or not the branch above ran.
+          (with-demoted-errors "Flycheck LSP: %S"
+            (flycheck-lsp--force-quit server)))
+      (with-demoted-errors "Flycheck LSP: %S"
+        (when-let* ((stderr (flycheck-lsp--server-stderr server)))
+          (when (buffer-live-p stderr) (kill-buffer stderr)))))
+    (when running
+      ;; Bounded even so: by now the server is stopped and what is left is
+      ;; buffer housekeeping, which is not worth a wait with no end of its
+      ;; own.  Unlike the kill, this is an ordinary
+      ;; `accept-process-output' wait, so a timer does reach it.
+      (with-timeout (2 nil)
+        (ignore-errors (jsonrpc-shutdown conn t)))
+      (flycheck--lsp-server-gone))))
 
 (defun flycheck-lsp--close-buffer ()
   "Close the current buffer's document on any server holding it.
@@ -13629,7 +13754,12 @@ Dropped first: shutting down pumps process output, and a diagnostics
 push arriving then can re-trigger a check that registers a fresh server
 under the same key.  Removing afterwards would delete that one instead,
 leaving its process running and unreachable."
-  (remhash key flycheck-lsp--servers)
+  ;; Identity-checked, for the same reason the order is what it is: a
+  ;; push arriving mid-teardown can register a fresh server under this
+  ;; key, and dropping that one would leak it exactly as a trailing
+  ;; `remhash\=' would.
+  (when (eq (gethash key flycheck-lsp--servers) server)
+    (remhash key flycheck-lsp--servers))
   (flycheck-lsp--shutdown-server server))
 
 (defun flycheck-lsp--server-buffer-count (server)
@@ -13747,10 +13877,19 @@ live buffer still owns."
 
 (defun flycheck-lsp--shutdown-all ()
   "Shut down every running LSP server.
-Added to `kill-emacs-hook' the first time a server starts."
-  (dolist (key (hash-table-keys flycheck-lsp--servers))
-    (when-let* ((server (gethash key flycheck-lsp--servers)))
-      (flycheck-lsp--forget-server key server))))
+Added to `kill-emacs-hook' the first time a server starts.
+
+Until the table is empty rather than once over its keys: tearing a
+server down pumps output, and a diagnostics push arriving then can start
+another.  One registered behind the sweep would be a server left running
+on another host with Emacs gone."
+  (let ((flycheck-lsp--exiting t)
+        (keys nil))
+    (while (setq keys (hash-table-keys flycheck-lsp--servers))
+      (let ((key (car keys)))
+        (if-let* ((server (gethash key flycheck-lsp--servers)))
+            (flycheck-lsp--forget-server key server)
+          (remhash key flycheck-lsp--servers))))))
 
 (defun flycheck-lsp--enable ()
   "Set up the current buffer to report its LSP server's diagnostics.
