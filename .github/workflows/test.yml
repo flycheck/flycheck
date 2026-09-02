@@ -17,6 +17,10 @@ concurrency:
 jobs:
   test:
     runs-on: ${{ matrix.os }}
+    # A job runs in 6 to 15 minutes.  Without this it inherits
+    # GitHub's 6 hour default, which a wedged runner once spent in
+    # full before anyone could tell it from a slow one.
+    timeout-minutes: 30
     continue-on-error: ${{ matrix.experimental }}
     strategy:
       fail-fast: false
