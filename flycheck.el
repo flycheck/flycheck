@@ -18186,8 +18186,9 @@ See URL `https://proselint.com/' for more information about proselint."
                      :id .check
                      :buffer buffer
                      :checker checker
-                     ;; See https://github.com/amperser/proselint/issues/1048
-                     :end-pos .end)))
+                     :end-pos (+ .end (flycheck--proselint-off-by-one-correction
+                                       buffer
+                                       .end)))))
                 (let-alist (car response)
                   .data.errors))
       ;; Proselint versions >= 0.16.0
@@ -18204,6 +18205,22 @@ See URL `https://proselint.com/' for more information about proselint."
               (let-alist (car response)
                 .result.<stdin>.diagnostics)))))
 
+;; Proselint 0.14 will often tell us that an error extends one character
+;; further than it actually does.  This is fairly trivial until we try
+;; to apply a replacement, at which point it causes us trouble.
+;; https://github.com/amperser/proselint/issues/1048
+(defun flycheck--proselint-off-by-one-correction (buffer end-pos)
+  "Return an offset if END-POS of BUFFER doesn't look like the end of an error."
+  (with-current-buffer buffer
+    (let ((penultimate-char (char-before (- end-pos 1)))
+          (ultimate-char (char-before end-pos)))
+      (if (and penultimate-char
+               ultimate-char
+               (not (char-equal (char-syntax penultimate-char)
+                                (char-syntax ultimate-char))))
+          -1
+        0))))
+
 ;; A hash table (not the scalar of earlier versions -- hence the new name,
 ;; so an in-session reload does not leave a stale non-table value that
 ;; `gethash' would choke on).
@@ -18217,15 +18234,26 @@ absent from the table has not been probed yet.")
 
 (defvar flycheck-proselint-executable)
 
+(defun flycheck--proselint-version ()
+  "Return the version number of Proselint, as a string."
+  (with-temp-buffer
+    ;; Probe on the host the check will run on (remote over TRAMP).
+    (process-file (or flycheck-proselint-executable "proselint")
+                  nil t nil "--version")
+    (goto-char (point-min))
+    (search-forward-regexp
+     (rx line-start
+         (zero-or-one "Proselint ")
+         (group digit (zero-or-more (any digit ".")) digit)
+         line-end)))
+  (match-string 1))
+
 (defun flycheck--proselint-args ()
   "Return command arguments for proselint, detecting the version once per host."
   (let ((host (file-remote-p default-directory)))
     (when (eq (gethash host flycheck--proselint-old-args-by-host 'unknown) 'unknown)
       (puthash host
-               ;; Probe on the host the check will run on (remote over TRAMP).
-               (zerop (process-file
-                       (or flycheck-proselint-executable "proselint")
-                       nil nil nil "--version"))
+               (version< (flycheck--proselint-version) "0.16")
                flycheck--proselint-old-args-by-host))
     (if (gethash host flycheck--proselint-old-args-by-host)
         ;; Proselint versions <= 0.14.0:

@@ -11,25 +11,24 @@
       (clrhash flycheck--proselint-old-args-by-host))
 
     (it "probes a host once and caches the detected version"
-      ;; Exit 0 -> old proselint, which takes the "--json -" arguments.
-      (spy-on 'process-file :and-return-value 0)
+      (spy-on 'flycheck--proselint-version :and-return-value "0.14.0")
       (let ((default-directory "/tmp/"))
         (expect (flycheck--proselint-args) :to-equal '("--json" "-"))
         (expect (flycheck--proselint-args) :to-equal '("--json" "-")))
-      (expect 'process-file :to-have-been-called-times 1))
+      (expect 'flycheck--proselint-version :to-have-been-called-times 1))
 
     (it "detects the version independently on each host"
       ;; `file-remote-p' parses the prefix without connecting, so the probe
       ;; can be faked per host without a live remote.
-      (spy-on 'process-file :and-call-fake
+      (spy-on 'flycheck--proselint-version :and-call-fake
               (lambda (&rest _)
-                (if (file-remote-p default-directory) 1 0)))
+                (if (file-remote-p default-directory) "0.16.0" "0.14.0")))
       (let ((default-directory "/tmp/"))
         (expect (flycheck--proselint-args) :to-equal '("--json" "-")))
       (let ((default-directory "/ssh:host:/tmp/"))
         (expect (flycheck--proselint-args)
                 :to-equal '("check" "--output-format=json")))
-      (expect 'process-file :to-have-been-called-times 2)))
+      (expect 'flycheck--proselint-version :to-have-been-called-times 2)))
 
   (flycheck-buttercup-def-checker-test proselint (text markdown) nil
     (let ((flycheck-disabled-checkers '(markdown-markdownlint-cli markdown-markdownlint-cli2 markdown-mdl markdown-pymarkdown)))
@@ -40,17 +39,17 @@
              :id "weasel_words.very"
              :checker proselint
              :end-line 1
-             :end-column 12)
+             :end-column 11)
          '(2 4 warning "Redundancy. Use 'associate' instead of 'associate together'."
              :id "redundancy.garner"
              :checker proselint
-             :end-line 3
-             :end-column 1)
+             :end-line 2
+             :end-column 22)
          '(3 5 warning "Gender bias. Use 'lawyer' instead of 'lady lawyer'."
              :id "sexism.misc"
              :checker proselint
              :end-line 3
-             :end-column 17)))))
+             :end-column 16)))))
 
   (describe "reading the tool's output"
     ;; Read from output recorded earlier, so this runs whether or
