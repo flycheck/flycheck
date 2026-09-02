@@ -27,6 +27,38 @@
 (require 'cl-lib)
 (require 'flycheck-buttercup)
 
+;; A stand-in for a server process that exits when its input closes, the
+;; way a real one acts on `exit'.  `remote-pid' is what tells a server on
+;; another host from a child of this Emacs.  Defined at top level rather
+;; than in the `describe' that uses them: a nested `defmacro' is not a
+;; top-level form, so byte-compiling the specs would leave it unexpanded.
+(defun flycheck-test-lsp-process (&optional remote-pid)
+  "Start a stand-in server process, optionally carrying REMOTE-PID."
+  (let ((proc (start-process "flycheck-test-lsp" nil
+                             "sh" "-c" "read _; exit 0")))
+    (set-process-query-on-exit-flag proc nil)
+    (when remote-pid (process-put proc 'remote-pid remote-pid))
+    proc))
+
+(defun flycheck-test-lsp-await (proc status)
+  "Wait for PROC to reach STATUS, so a spec never races its stand-in."
+  (let ((deadline (+ (float-time) 5)))
+    (while (and (not (eq (process-status proc) status))
+                (< (float-time) deadline))
+      (accept-process-output proc 0.02))
+    (process-status proc)))
+
+;; Enough of a connection for the shutdown path: it asks whether the
+;; connection runs, sends `shutdown' and `exit', then cleans up.
+(defmacro flycheck-test-with-stub-jsonrpc (running &rest body)
+  (declare (indent 1))
+  `(cl-letf (((symbol-function 'jsonrpc-running-p) (lambda (_) ,running))
+             ((symbol-function 'jsonrpc-request) (lambda (&rest _) nil))
+             ((symbol-function 'jsonrpc-notify) (lambda (&rest _) nil))
+             ((symbol-function 'jsonrpc-shutdown) (lambda (&rest _) nil))
+             ((symbol-function 'flycheck--lsp-server-gone) #'ignore))
+     ,@body))
+
 (describe "LSP diagnostics"
 
   (describe "flycheck-lsp--severity-level"
@@ -577,6 +609,344 @@
           (cl-letf (((symbol-function 'flycheck-lsp--shutdown-server) #'ignore))
             (flycheck-lsp--init-failed server "timeout"))
           (expect (gethash key flycheck-lsp--servers) :to-be nil))))
+
+    (describe "flycheck-lsp--force-quit"
+      (it "kills the process group on the host the server runs on"
+        (let* ((proc (flycheck-test-lsp-process 4242))
+               (server (flycheck-lsp--server-create
+                        :root "/mock:localhost:/p/" :process proc))
+               (called nil))
+          (unwind-protect
+              (progn
+                (spy-on 'flycheck-lsp--host-connected-p :and-return-value t)
+                (cl-letf (((symbol-function 'process-file)
+                           (lambda (program &rest args)
+                             (setq called (list default-directory program args))
+                             0)))
+                  (flycheck-lsp--force-quit server))
+                (expect called :not :to-be nil)
+                ;; On the server's own host, and at the connection's own
+                ;; directory: a project root that has gone from the host
+                ;; would fail Tramp's `cd' and swallow the kill.
+                (expect (nth 0 called) :to-equal "/mock:localhost:/")
+                (expect (nth 1 called) :to-equal "sh")
+                ;; The group first, so a server that forked workers goes with
+                ;; it, and the bare process as the fallback.
+                (expect (car (last (nth 2 called)))
+                        :to-equal
+                        (concat "kill -9 -4242 2>/dev/null"
+                                " || kill -9 4242 2>/dev/null")))
+            (delete-process proc))))
+
+      (it "stops a server whose connection died under it"
+        ;; The status a dropped connection leaves is `signal', which says
+        ;; nothing about the other host: that is the orphan case, not a
+        ;; reason to skip the kill.
+        (let* ((proc (flycheck-test-lsp-process 4242))
+               (server (flycheck-lsp--server-create
+                        :root "/mock:localhost:/p/" :process proc)))
+          (delete-process proc)
+          (expect (process-status proc) :to-be 'signal)
+          (spy-on 'flycheck-lsp--host-connected-p :and-return-value t)
+          (spy-on 'process-file)
+          (flycheck-lsp--force-quit server)
+          (expect 'process-file :to-have-been-called)))
+
+      (it "leaves a server that exited on its own alone"
+        (let* ((proc (flycheck-test-lsp-process 4242))
+               (server (flycheck-lsp--server-create
+                        :root "/mock:localhost:/p/" :process proc)))
+          (process-send-eof proc)
+          (expect (flycheck-test-lsp-await proc 'exit) :to-be 'exit)
+          ;; Reachable, so only the status can hold the kill back.
+          (spy-on 'flycheck-lsp--host-connected-p :and-return-value t)
+          (spy-on 'process-file)
+          (flycheck-lsp--force-quit server)
+          (expect 'process-file :not :to-have-been-called)))
+
+      (it "does not open a connection just to signal a server"
+        ;; Opening one can block for over a minute on a host that has gone
+        ;; away, and this runs while Emacs is trying to exit.
+        (let* ((proc (flycheck-test-lsp-process 4242))
+               (server (flycheck-lsp--server-create
+                        :root "/mock:localhost:/p/" :process proc)))
+          (unwind-protect
+              (progn
+                (spy-on 'flycheck-lsp--host-connected-p)  ; not connected
+                (spy-on 'process-file)
+                (flycheck-lsp--force-quit server)
+                (expect 'process-file :not :to-have-been-called))
+            (delete-process proc))))
+
+      (it "leaves a server Tramp gave no pid alone"
+        ;; Its direct-async path records none, and without one there is
+        ;; nothing to aim a kill at.
+        (let* ((proc (flycheck-test-lsp-process))  ; no remote-pid
+               (server (flycheck-lsp--server-create
+                        :root "/mock:localhost:/p/" :process proc)))
+          (unwind-protect
+              (progn
+                (spy-on 'flycheck-lsp--host-connected-p :and-return-value t)
+                (spy-on 'process-file)
+                (flycheck-lsp--force-quit server)
+                (expect 'process-file :not :to-have-been-called))
+            (delete-process proc))))
+
+      (it "never signals a pid against this machine"
+        ;; A pid counts on one host.  This state should not arise, and if
+        ;; it ever did the kill would land on a local process group.
+        (let* ((proc (flycheck-test-lsp-process 4242))
+               (server (flycheck-lsp--server-create
+                        :root "/p/" :process proc)))  ; local root, remote pid
+          (unwind-protect
+              (progn
+                (expect (flycheck-lsp--host-connected-p "/p/") :to-be nil)
+                (spy-on 'process-file)
+                (flycheck-lsp--force-quit server)
+                (expect 'process-file :not :to-have-been-called))
+            (delete-process proc))))
+
+      (it "makes its timeout real only while Emacs is quitting"
+        ;; Tramp suspends timers around a transaction, so the timeout is
+        ;; inert unless told otherwise - and telling it costs the
+        ;; connection, which is only acceptable on the way out.
+        (let* ((proc (flycheck-test-lsp-process 4242))
+               (server (flycheck-lsp--server-create
+                        :root "/mock:localhost:/p/" :process proc))
+               (seen nil))
+          (unwind-protect
+              (progn
+                (spy-on 'flycheck-lsp--host-connected-p :and-return-value t)
+                (cl-letf (((symbol-function 'process-file)
+                           (lambda (&rest _)
+                             (push (bound-and-true-p tramp-dont-suspend-timers)
+                                   seen)
+                             0)))
+                  (let ((flycheck-lsp--exiting nil))
+                    (flycheck-lsp--force-quit server))
+                  ;; A second pass, as a later teardown would be.
+                  (process-put proc 'flycheck-lsp-quit nil)
+                  (let ((flycheck-lsp--exiting t))
+                    (flycheck-lsp--force-quit server)))
+                (expect (nreverse seen) :to-equal '(nil t)))
+            (delete-process proc))))
+
+      (it "tries again when the kill never went out"
+        ;; The flag says a kill was delivered, not that one was attempted:
+        ;; a host that drops out mid-call has to be worth another pass.
+        (let* ((proc (flycheck-test-lsp-process 4242))
+               (server (flycheck-lsp--server-create
+                        :root "/mock:localhost:/p/" :process proc)))
+          (unwind-protect
+              (progn
+                (spy-on 'flycheck-lsp--host-connected-p :and-return-value t)
+                (spy-on 'process-file :and-throw-error 'error)
+                (flycheck-lsp--force-quit server)
+                (expect (process-get proc 'flycheck-lsp-quit) :to-be nil)
+                (flycheck-lsp--force-quit server)
+                (expect (spy-calls-count 'process-file) :to-equal 2))
+            (delete-process proc))))
+
+      (it "kills a server once and not again"
+        ;; A pid is only ours until the host reuses it, so a second pass
+        ;; must not fire a kill at whatever holds it by then.
+        (let* ((proc (flycheck-test-lsp-process 4242))
+               (server (flycheck-lsp--server-create
+                        :root "/mock:localhost:/p/" :process proc)))
+          (unwind-protect
+              (progn
+                (spy-on 'flycheck-lsp--host-connected-p :and-return-value t)
+                (spy-on 'process-file)
+                (flycheck-lsp--force-quit server)
+                (expect (spy-calls-count 'process-file) :to-equal 1)
+                (flycheck-lsp--force-quit server)
+                (expect (spy-calls-count 'process-file) :to-equal 1))
+            (delete-process proc)))))
+
+    (describe "flycheck-lsp--shutdown-server"
+      (it "signals a server that will not act on `exit'"
+        (let* ((proc (flycheck-test-lsp-process 4242))
+               (server (flycheck-lsp--server-create
+                        :root "/mock:localhost:/p/" :connection 'conn
+                        :process proc)))
+          (unwind-protect
+              (progn
+                (spy-on 'flycheck-lsp--host-connected-p :and-return-value t)
+                (spy-on 'process-file)
+                (flycheck-test-with-stub-jsonrpc t
+                  (flycheck-lsp--shutdown-server server))
+                (expect 'process-file :to-have-been-called))
+            (delete-process proc))))
+
+      (it "stops the server before jsonrpc gives up and deletes it"
+        ;; Left to jsonrpc, the teardown warns and stalls for its grace
+        ;; before dropping a process it cannot stop anyway.
+        (let* ((proc (flycheck-test-lsp-process 4242))
+               (server (flycheck-lsp--server-create
+                        :root "/mock:localhost:/p/" :connection 'conn
+                        :process proc))
+               (events nil))
+          (unwind-protect
+              (progn
+                (spy-on 'flycheck-lsp--host-connected-p :and-return-value t)
+                (cl-letf (((symbol-function 'process-file)
+                           (lambda (&rest _) (push 'kill events) 0)))
+                  (flycheck-test-with-stub-jsonrpc t
+                    (cl-letf (((symbol-function 'jsonrpc-shutdown)
+                               (lambda (&rest _) (push 'jsonrpc-shutdown events))))
+                      (flycheck-lsp--shutdown-server server))))
+                (expect (nreverse events)
+                        :to-equal '(kill jsonrpc-shutdown)))
+            (delete-process proc))))
+
+      (it "lets a server that acts on `exit' go on its own"
+        ;; The grace is the whole point: a server that exits when told must
+        ;; not be signalled on its way out.
+        (let* ((proc (flycheck-test-lsp-process 4242))
+               (server (flycheck-lsp--server-create
+                        :root "/mock:localhost:/p/" :connection 'conn
+                        :process proc))
+               ;; Long enough that the stand-in's exit cannot lose a race
+               ;; the spec is not about.
+               (flycheck-lsp--exit-grace 5))
+          (unwind-protect
+              (progn
+                ;; Reachable, so only the grace can hold the kill back.
+                (spy-on 'flycheck-lsp--host-connected-p :and-return-value t)
+                (spy-on 'process-file)
+                (flycheck-test-with-stub-jsonrpc t
+                  (cl-letf (((symbol-function 'jsonrpc-notify)
+                             ;; Acting on `exit' is the server going away,
+                             ;; which it does in its own time rather than
+                             ;; inside our call.
+                             (lambda (&rest _)
+                               (run-at-time
+                                0.01 nil
+                                (lambda ()
+                                  (when (process-live-p proc)
+                                    (process-send-eof proc)))))))
+                    (flycheck-lsp--shutdown-server server)))
+                (expect (flycheck-test-lsp-await proc 'exit) :to-be 'exit)
+                (expect 'process-file :not :to-have-been-called))
+            (when (process-live-p proc) (delete-process proc)))))
+
+      (it "stops the server even when the grace exits non-locally"
+        ;; Waiting for a server pumps its output, which runs this again
+        ;; for whichever other server that output finishes off.  An exit
+        ;; thrown through here must not leave this one running, nor its
+        ;; buffer behind for the rest of the session.
+        (let* ((proc (flycheck-test-lsp-process 4242))
+               (stderr (generate-new-buffer " *flycheck-test-lsp stderr*"))
+               (server (flycheck-lsp--server-create
+                        :root "/mock:localhost:/p/" :connection 'conn
+                        :process proc :stderr stderr)))
+          (unwind-protect
+              (progn
+                (spy-on 'flycheck-lsp--host-connected-p :and-return-value t)
+                (spy-on 'process-file)
+                (catch 'flycheck-test-escape
+                  (flycheck-test-with-stub-jsonrpc t
+                    (cl-letf (((symbol-function 'flycheck-lsp--await-exit)
+                               (lambda (&rest _)
+                                 (throw 'flycheck-test-escape nil))))
+                      (flycheck-lsp--shutdown-server server))))
+                (expect 'process-file :to-have-been-called)
+                (expect (buffer-live-p stderr) :to-be nil))
+            (delete-process proc)
+            (when (buffer-live-p stderr) (kill-buffer stderr)))))
+
+      (it "does not wait on jsonrpc for ever"
+        ;; `jsonrpc-shutdown' waits for a sentinel with no deadline of its
+        ;; own, and it runs while Emacs is quitting.  Bounded, it costs a
+        ;; couple of seconds; unbounded it once hung the whole teardown.
+        (let* ((proc (flycheck-test-lsp-process 4242))
+               (server (flycheck-lsp--server-create
+                        :root "/mock:localhost:/p/" :connection 'conn
+                        :process proc))
+               (elapsed nil))
+          (unwind-protect
+              (progn
+                (spy-on 'flycheck-lsp--host-connected-p :and-return-value t)
+                (spy-on 'process-file)
+                (flycheck-test-with-stub-jsonrpc t
+                  (cl-letf (((symbol-function 'jsonrpc-shutdown)
+                             ;; A sentinel that never arrives, capped well
+                             ;; past the timeout so a regression here fails
+                             ;; rather than hangs the run.
+                             (lambda (&rest _)
+                               (let ((end (+ (float-time) 6)))
+                                 (while (< (float-time) end)
+                                   (accept-process-output nil 0.05))))))
+                    (let ((t0 (float-time)))
+                      (flycheck-lsp--shutdown-server server)
+                      (setq elapsed (- (float-time) t0)))))
+                (expect elapsed :to-be-less-than 4))
+            (delete-process proc))))
+
+      (it "stops a server whose connection has already gone"
+        ;; Nothing holds such a server: the polite branch cannot run, and
+        ;; dropping our end of a remote process does not stop it.
+        (let* ((proc (flycheck-test-lsp-process 4242))
+               (server (flycheck-lsp--server-create
+                        :root "/mock:localhost:/p/" :connection 'conn
+                        :process proc)))
+          (unwind-protect
+              (progn
+                (spy-on 'flycheck-lsp--host-connected-p :and-return-value t)
+                (spy-on 'process-file)
+                (flycheck-test-with-stub-jsonrpc nil
+                  (flycheck-lsp--shutdown-server server))
+                (expect 'process-file :to-have-been-called))
+            (delete-process proc)))))
+
+    (describe "the server registry"
+      (it "stops the server it replaces"
+        ;; A server is only replaced once its connection has gone, which
+        ;; is exactly when the server itself is likeliest to still be up.
+        (let* ((key (cons "/mock:localhost:/p/" '("some-server")))
+               (dead (flycheck-lsp--server-create
+                      :root "/mock:localhost:/p/" :command '("some-server")))
+               (flycheck-lsp--servers (make-hash-table :test 'equal))
+               (forgotten nil))
+          (puthash key dead flycheck-lsp--servers)
+          (cl-letf (((symbol-function 'flycheck-lsp--server-live-p) #'ignore)
+                    ((symbol-function 'flycheck-lsp--start-server)
+                     (lambda (&rest _) nil))
+                    ((symbol-function 'flycheck-lsp--forget-server)
+                     (lambda (_key server) (setq forgotten server))))
+            (flycheck-lsp--ensure-server "/mock:localhost:/p/" '("some-server")))
+          (expect forgotten :to-be dead)))
+
+      (it "does not drop a server that replaced the one being forgotten"
+        ;; Shutting down pumps output, and a push arriving then can
+        ;; register a fresh server under the same key.  Forgetting the old
+        ;; one must not take the new one with it.
+        (let* ((key (cons "/p/" '("some-server")))
+               (old (flycheck-lsp--server-create :root "/p/"))
+               (new (flycheck-lsp--server-create :root "/p/"))
+               (flycheck-lsp--servers (make-hash-table :test 'equal)))
+          (puthash key new flycheck-lsp--servers)
+          (cl-letf (((symbol-function 'flycheck-lsp--shutdown-server) #'ignore))
+            (flycheck-lsp--forget-server key old))
+          (expect (gethash key flycheck-lsp--servers) :to-be new)))
+
+      (it "keeps sweeping while teardown registers more servers"
+        ;; `flycheck-lsp--shutdown-all' runs from `kill-emacs-hook'; one
+        ;; registered behind the sweep would outlive Emacs.
+        (let* ((flycheck-lsp--servers (make-hash-table :test 'equal))
+               (a (flycheck-lsp--server-create :root "/a/"))
+               (b (flycheck-lsp--server-create :root "/b/"))
+               (torn nil))
+          (puthash 'a a flycheck-lsp--servers)
+          (cl-letf (((symbol-function 'flycheck-lsp--shutdown-server)
+                     (lambda (server)
+                       (push server torn)
+                       ;; A push arriving mid-teardown starts another.
+                       (when (eq server a)
+                         (puthash 'b b flycheck-lsp--servers)))))
+            (flycheck-lsp--shutdown-all))
+          (expect (nreverse torn) :to-equal (list a b))
+          (expect (hash-table-count flycheck-lsp--servers) :to-equal 0))))
 
     (describe "flycheck-lsp--capable"
       (it "walks the capability plist"
@@ -1310,6 +1680,29 @@ holding its document"
                    default-directory '("flycheck-no-such-program-xyz"))
                   :to-be nil)
           (expect (length (buffer-list)) :to-equal before)))
+
+      (it "stops a server it spawned but could not go on to talk to"
+        ;; Unlike a spawn that never happened, this one leaves a server
+        ;; running on the other host with nothing holding it.
+        (let ((spawned nil))
+          (unwind-protect
+              (progn
+                (spy-on 'flycheck-lsp--force-quit)
+                (cl-letf (((symbol-function 'flycheck-lsp--spawn)
+                           (lambda (&rest _)
+                             (setq spawned (flycheck-test-lsp-process 4242))))
+                          ((symbol-function 'jsonrpc-async-request)
+                           (lambda (&rest _) (error "handshake never got out"))))
+                  ;; A local root: the spawn and the handshake are both
+                  ;; stubbed, so nothing here wants a host, and asking
+                  ;; Tramp for one it has no method for would fail this
+                  ;; for a reason that is not the one under test.
+                  (expect (flycheck-lsp--start-server
+                           temporary-file-directory '("some-server"))
+                          :to-be nil))
+                (expect spawned :not :to-be nil)
+                (expect 'flycheck-lsp--force-quit :to-have-been-called))
+            (when spawned (ignore-errors (delete-process spawned))))))
 
       (it "leaves the current buffer's own process alone when that fails"
         ;; The spawn never happened, so `proc' is nil, and
