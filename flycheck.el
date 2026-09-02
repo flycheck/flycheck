@@ -15765,22 +15765,30 @@ This variable has no effect, if
 
 (defun flycheck--emacs-lisp-enabled-p ()
   "Check whether to enable Emacs Lisp checker in the current buffer."
-  (not
-   (or
-    ;; Do not check buffers used for autoloads generation during package
-    ;; installation.  These buffers are too short-lived for being checked, and
-    ;; doing so causes spurious errors.  See
-    ;; https://github.com/flycheck/flycheck/issues/45 and
-    ;; https://github.com/bbatsov/prelude/issues/248.  We must also not check
-    ;; compilation buffers, but as these are ephemeral, Flycheck won't check
-    ;; them anyway.
-    (flycheck-autoloads-file-p)
-    ;; Package-manager manifests and dir-locals files contain data, not
-    ;; code, and don't need to follow Checkdoc conventions either.
-    (and (buffer-file-name)
+  (not (flycheck--emacs-lisp-disabled-reason)))
+
+(defun flycheck--emacs-lisp-disabled-reason ()
+  "Return why an emacs-lisp buffer might be unsuitable for checking."
+  (cond
+   ;; Do not check buffers used for autoloads generation during package
+   ;; installation.  These buffers are too short-lived for being checked, and
+   ;; doing so causes spurious errors.  See
+   ;; https://github.com/flycheck/flycheck/issues/45 and
+   ;; https://github.com/bbatsov/prelude/issues/248.  We must also not check
+   ;; compilation buffers, but as these are ephemeral, Flycheck won't check
+   ;; them anyway.
+   ((flycheck-autoloads-file-p)
+    "autoloads")
+   ;; Package-manager manifests and dir-locals files contain data, not
+   ;; code, and don't need to follow Checkdoc conventions either.
+   ((and (buffer-file-name)
          (member (file-name-nondirectory (buffer-file-name))
-                 '("Cask" "Carton" "Eask" "Eask-local"
-                   ".dir-locals.el" ".dir-locals-2.el"))))))
+                 '("Cask" "Carton" "Eask" "Eask-local")))
+    "package manifest")
+   ((and (buffer-file-name)
+         (member (file-name-nondirectory (buffer-file-name))
+                 '(".dir-locals.el" ".dir-locals-2.el")))
+    "`dir-locals-file'")))
 
 (defun flycheck--emacs-lisp-byte-compile-enabled-p ()
   "Check whether to enable the Emacs Lisp byte compiler checker.
@@ -15872,6 +15880,21 @@ See Info Node `(elisp)Byte Compilation'."
       (flycheck-sanitize-errors errors))))
   :modes (emacs-lisp-mode lisp-interaction-mode)
   :enabled flycheck--emacs-lisp-byte-compile-enabled-p
+  :verify
+  (lambda (_)
+    (append
+     (list
+      (flycheck-verification-result-new
+       :label "checkable content"
+       :message (let ((reason (flycheck--emacs-lisp-disabled-reason)))
+                  (if reason (concat "no, " reason ) "yes"))
+       :face (if (flycheck--emacs-lisp-enabled-p) 'success '(bold warning))))
+     (when (fboundp 'trusted-content-p)
+       (list
+        (flycheck-verification-result-new
+         :label "trusted content"
+         :message (if (trusted-content-p) "yes" "no")
+         :face (if (trusted-content-p) 'success '(bold warning)))))))
   :predicate
   (lambda ()
     ;; Do not check buffers that should not be byte-compiled.  The checker

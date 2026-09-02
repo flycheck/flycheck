@@ -21,6 +21,7 @@
 
 ### New Features
 
+- [#2363](https://github.com/flycheck/flycheck/pull/2363): When the `emacs-lisp` checker doesn’t activate, mention why in `flycheck-verify-setup`.
 - [#2386](https://github.com/flycheck/flycheck/pull/2386): Fixes apply to errors in other files of the project: `x` in the error list opens the file an error belongs to and applies the fix there, and `X` in the project scope fixes every file the list shows.
 - [#2385](https://github.com/flycheck/flycheck/pull/2385): The native `flycheck-lsp` client checks a file on a remote host, starting the language server on that host over TRAMP instead of declining the buffer.
 - [#2381](https://github.com/flycheck/flycheck/pull/2381): New commands `flycheck-lsp-list-servers`, `flycheck-lsp-restart-server` and `flycheck-lsp-shutdown-servers` show the language servers Flycheck is running and stop them, which previously took restarting Emacs.

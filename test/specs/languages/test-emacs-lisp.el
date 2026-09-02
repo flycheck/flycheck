@@ -66,9 +66,28 @@
         (let ((trusted-content nil))
           (expect (flycheck-may-use-checker 'emacs-lisp)
                   :not :to-be-truthy)
+          (let ((verification-result
+                 (car
+                  (seq-filter
+                   (lambda (r)
+                     (string-equal (flycheck-verification-result-label r)
+                                   "trusted content"))
+                   (flycheck-verify-generic-checker 'emacs-lisp)))))
+            (expect (flycheck-verification-result-message verification-result)
+                    :to-equal "no")
+            (expect (flycheck-verification-result-face verification-result)
+                    :to-equal '(bold warning)))
+
           ;; Checkdoc doesn't expand macros, so it stays enabled
           (expect (flycheck-may-use-checker 'emacs-lisp-checkdoc)
-                  :to-be-truthy))))
+                  :to-be-truthy)
+          (expect
+           (seq-filter
+            (lambda (r)
+              (string-equal (flycheck-verification-result-label r)
+                            "trusted content"))
+            (flycheck-verify-generic-checker 'emacs-lisp-checkdoc))
+           :to-be nil))))
 
     (it "enables byte compilation for trusted files"
       (assume (fboundp 'trusted-content-p) "Requires Emacs 30+")
@@ -159,7 +178,30 @@
       ;; Regression test ensuring that Emacs Lisp won't check autoload buffers.
       (flycheck-buttercup-with-file-buffer (locate-library "shut-up-autoloads")
         (expect (flycheck-may-use-checker 'emacs-lisp) :not :to-be-truthy)
-        (expect (flycheck-may-use-checker 'emacs-lisp-checkdoc) :not :to-be-truthy)))
+        (let ((verification-result
+               (car
+                (seq-filter
+                 (lambda (r)
+                   (string-equal (flycheck-verification-result-label r)
+                                 "checkable content"))
+                 (flycheck-verify-generic-checker 'emacs-lisp)))))
+          (expect (flycheck-verification-result-message verification-result)
+                  :to-equal "no, autoloads")
+          (expect (flycheck-verification-result-face verification-result)
+                  :to-equal '(bold warning)))
+
+        (expect (flycheck-may-use-checker 'emacs-lisp-checkdoc) :not :to-be-truthy)
+        (let ((verification-result
+               (car
+                (seq-filter
+                 (lambda (r)
+                   (string-equal (flycheck-verification-result-label r)
+                                 "checkable content"))
+                 (flycheck-verify-generic-checker 'emacs-lisp)))))
+          (expect (flycheck-verification-result-message verification-result)
+                  :to-equal "no, autoloads")
+          (expect (flycheck-verification-result-face verification-result)
+                  :to-equal '(bold warning)))))
 
     (flycheck-buttercup-def-checker-test (emacs-lisp emacs-lisp-checkdoc) emacs-lisp
                                          checkdoc-does-not-check-manifests
