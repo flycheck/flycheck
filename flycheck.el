@@ -185,6 +185,7 @@
     markdown-mdl
     markdown-pymarkdown
     nix
+    nix-nixf
     ocaml-dune
     ocaml
     opam
@@ -19667,6 +19668,54 @@ See URL `https://nixos.org/nix/manual/#sec-nix-instantiate'."
   (lambda (errors)
     (flycheck-sanitize-errors
      (flycheck-remove-error-file-names "(string)" errors)))
+  :next-checkers ((warning . nix-nixf))
+  :modes (nix-mode nix-ts-mode))
+
+(defun flycheck-parse-nixf--fix (fixes buffer)
+  "Build a `flycheck-fix' for BUFFER from a nixf FIXES, or nil."
+  (when fixes
+    (flycheck--make-fix
+     buffer (mapconcat (lambda (f) (alist-get 'message f)) fixes " & ")
+     (seq-mapcat
+      (lambda (fix)
+        (seq-map
+         (lambda (edit)
+           (let-alist edit
+             (flycheck-fix-edit-new
+              :line (1+ .range.lCur.line) :column (1+ .range.lCur.column)
+              :end-line (1+ .range.rCur.line) :end-column (1+ .range.rCur.column)
+              :replacement .newText)))
+         (alist-get 'edits fix)))
+      fixes))))
+
+(defun flycheck-parse-nixf (output checker buffer)
+  "Parse nixf warnings from JSON OUTPUT.
+
+CHECKER and BUFFER denote the CHECKER that returned OUTPUT and
+the BUFFER that was checked respectively."
+  (mapcar (lambda (err)
+            (let-alist err
+              (flycheck-error-new-at
+               (1+ .range.lCur.line)
+               (1+ .range.lCur.column)
+               (flycheck-lsp--severity-level .severity)
+               (replace-regexp-in-string "{}" (lambda (_) (pop .args)) .message)
+               :id .sname
+               :checker checker
+               :buffer buffer
+               :filename (buffer-file-name buffer)
+               :end-line (1+ .range.rCur.line)
+               :end-column (1+ .range.rCur.column)
+               :fix (flycheck-parse-nixf--fix .fixes buffer))))
+          (car (flycheck-parse-json output))))
+
+(flycheck-define-checker nix-nixf
+  "Nix checker using nixf.
+
+See URL `https://github.com/nix-community/nixd/blob/main/libnixf/README.md#nixf-tidy'."
+  :command ("nixf-tidy" "--variable-lookup")
+  :standard-input t
+  :error-parser flycheck-parse-nixf
   :modes (nix-mode nix-ts-mode))
 
 (defun flycheck-parse-statix (output checker buffer)

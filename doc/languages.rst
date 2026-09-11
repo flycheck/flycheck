@@ -938,6 +938,12 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       .. _nix-instantiate: https://nixos.org/nix/manual/#sec-nix-instantiate
 
+   .. syntax-checker:: nix-nixf
+
+      Check Nix with nixf_.
+
+      .. _nixf: https://github.com/nix-community/nixd/blob/main/libnixf/README.md#nixf-tidy
+
    .. syntax-checker:: statix
 
       Check Nix with statix_.
