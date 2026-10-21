@@ -90,33 +90,58 @@
       ;; jump, but `eldoc-display-in-buffer' reads the same flag as a
       ;; request to display the *eldoc* window.  See #2201.
       (flycheck-buttercup-with-temp-buffer
-        (let ((asked 'unset))
-          (cl-letf (((symbol-function 'eldoc-print-current-symbol-info) #'ignore))
-            (flycheck-display-errors-via-eldoc nil))
-          ;; Eldoc may only get round to displaying long after the request,
-          ;; so the suppression has to outlive it rather than ride on a
-          ;; dynamic binding
-          (flycheck--eldoc-suppress-doc-window
-           (lambda (_docs interactive) (setq asked interactive)) nil t)
-          (expect asked :to-be nil))))
+        (flycheck-mode 1)
+        ;; An eager strategy displays once per source as it answers, and
+        ;; the source answering late does so after the request returned.
+        ;; Each display is as interactive as the request was (#2387).
+        (setq-local eldoc-documentation-strategy
+                    #'eldoc-documentation-compose-eagerly)
+        (setq-local eldoc-documentation-functions
+                    (list (lambda (callback) (funcall callback "now") t)
+                          (lambda (callback)
+                            (run-at-time 0.01 nil callback "later")
+                            t)))
+        (let ((displays 0))
+          (setq-local eldoc-display-functions
+                      (list #'eldoc-display-in-buffer
+                            (lambda (&rest _) (cl-incf displays))))
+          (spy-on 'eldoc-doc-buffer)
+          ;; Wait for every display a request starts: a late one left
+          ;; behind would land in some later spec
+          (cl-flet ((await (n)
+                      (let ((deadline (+ (float-time) 5)))
+                        (while (and (< displays n) (< (float-time) deadline))
+                          (accept-process-output nil 0.02)))))
+            (flycheck-display-errors-via-eldoc nil)
+            (await 2)
+            (expect displays :to-equal 2)
+            (expect 'eldoc-doc-buffer :not :to-have-been-called)
+            ;; An explicit `M-x eldoc' still opens the window
+            (call-interactively #'eldoc)
+            (await 4)
+            (expect 'eldoc-doc-buffer :to-have-been-called-times 2)))))
 
     (it "only suppresses the window for the refresh it asked for"
       (flycheck-buttercup-with-temp-buffer
-        (let ((asked 'unset))
+        (let ((asked 'unset)
+              (flycheck--eldoc-own-request nil))
           ;; nothing pending: an explicit `M-x eldoc' must still display
           (flycheck--eldoc-suppress-doc-window
            (lambda (_docs interactive) (setq asked interactive)) nil t)
           (expect asked :to-be t))))
 
-    (it "suppresses the window once, not for every later display"
+    (it "keeps the window shut across Eldoc's own idle requests"
+      ;; They document non-interactively, so they never open the window,
+      ;; and a late answer to Flycheck's request may still follow them
       (flycheck-buttercup-with-temp-buffer
-        (let ((asked nil))
-          (cl-letf (((symbol-function 'eldoc-print-current-symbol-info) #'ignore))
-            (flycheck-display-errors-via-eldoc nil))
-          (dotimes (_ 2)
-            (flycheck--eldoc-suppress-doc-window
-             (lambda (_docs interactive) (push interactive asked)) nil t))
-          (expect (nreverse asked) :to-equal '(nil t)))))
+        (let ((asked 'unset)
+              (flycheck--eldoc-own-request nil))
+          (let ((flycheck--eldoc-requesting t))
+            (flycheck--eldoc-note-request t))
+          (flycheck--eldoc-note-request nil)
+          (flycheck--eldoc-suppress-doc-window
+           (lambda (_docs interactive) (setq asked interactive)) nil t)
+          (expect asked :to-be nil))))
 
     (it "asks eldoc to document interactively"
       ;; Left to itself Eldoc keeps out of the echo area unless the
@@ -144,6 +169,11 @@
           (expect flycheck-display-error-at-point-timer :to-be-truthy)
           (flycheck-cancel-error-display-error-at-point-timer))
         (eldoc-mode -1)
+        ;; `M-x eldoc' documents with or without it, and a refresh from
+        ;; the timer could keep the window it asked for shut (#2387)
+        (let ((this-command 'eldoc))
+          (flycheck-display-error-at-point-soon)
+          (expect flycheck-display-error-at-point-timer :not :to-be-truthy))
         ;; Without eldoc-mode the timer must pick up the slack
         (flycheck-display-error-at-point-soon)
         (expect flycheck-display-error-at-point-timer :to-be-truthy)
