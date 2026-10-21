@@ -36,6 +36,7 @@
 
 ### Bugs fixed
 
+- [#2405](https://github.com/flycheck/flycheck/pull/2405): The Flycheck menu shows up in the context menu of `context-menu-mode` ([#2401](https://github.com/flycheck/flycheck/issues/2401)).
 - [#2406](https://github.com/flycheck/flycheck/pull/2406): Stop the `*eldoc*` window popping open with an eager `eldoc-documentation-strategy`, such as `eldoc-documentation-compose-eagerly`, which displays again each time a source answers ([#2387](https://github.com/flycheck/flycheck/issues/2387)).
 - [#2302](https://github.com/flycheck/flycheck/pull/2302): `proselint` errors no longer extend one character past the text they flag with proselint 0.14.
 - [#2302](https://github.com/flycheck/flycheck/pull/2302): `proselint` detects the tool's version from what `proselint --version` prints rather than whether it succeeds, so a development build of proselint, which accepts the option again, is no longer run with the arguments of 0.14.
