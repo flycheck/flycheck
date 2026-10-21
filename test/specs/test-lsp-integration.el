@@ -41,6 +41,8 @@
 ;; Bound by eglot, which the spec that uses them loads first
 (defvar eglot-server-programs)
 (defvar eglot-sync-connect)
+;; Emacs 30+ only
+(defvar trusted-content)
 
 (defconst test-lsp-integration/server
   (expand-file-name "mock-lsp-server.py" flycheck-test-directory)
@@ -232,6 +234,10 @@ down before the temp directory goes away."
                `((makefile-gmake-mode . ("python3" ,test-lsp-integration/server
                                          "pull"))))
               (eglot-sync-connect t)
+              ;; Newer Flymake refuses to run a backend in an untrusted
+              ;; buffer unless the backend opts out, which older Eglot
+              ;; doesn't, and the refusal escapes under Buttercup
+              (trusted-content :all)
               (flycheck-checkers '(eglot-check))
               (server nil))
           (unwind-protect
