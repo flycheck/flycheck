@@ -365,9 +365,11 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       Check syntax with the built-in byte compiler.
 
-      On Emacs 30+, this checker is only enabled for files marked as
-      trusted via ``trusted-content`` (see :infonode:`(emacs)Safe File
-      Variables`), to mitigate CVE-2024-53920.  Byte-compilation involves
+      On Emacs 30+, and on older Emacs with the ``compat`` library (which
+      many packages depend on), this checker is only enabled for files
+      marked as trusted via ``trusted-content`` (see
+      :infonode:`(emacs)Safe File Variables`), to mitigate
+      CVE-2024-53920.  Byte-compilation involves
       macro expansion which can execute arbitrary code, so untrusted files
       must not be byte-compiled.  To use this checker, add your project
       directories to ``trusted-content``.  The ``emacs-lisp-checkdoc``
