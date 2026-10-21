@@ -3389,13 +3389,24 @@ Slots:
 (defvar flycheck-mode-map
   (let ((map (make-sparse-keymap)))
     (define-key map flycheck-keymap-prefix flycheck-command-map)
-    ;; We place the menu under a custom menu key.  Since this menu key is not
-    ;; present in the menu of the global map, no top-level menu entry is added
-    ;; to the global menu bar.  However, it still appears on the mode line
-    ;; lighter.
+    ;; A bare keymap rather than a menu item, which keeps the menu off the
+    ;; menu bar (it lives under Tools), but not off the mode line lighter
     (define-key map [menu-bar flycheck] flycheck-mode-menu-map)
     map)
   "Keymap of command `flycheck-mode'.")
+
+(defun flycheck-context-menu (menu _click)
+  "Make the Flycheck menu show in the context MENU.
+
+Flycheck mode adds this to `context-menu-functions', after
+`context-menu-minor'.  That copies the menu from `flycheck-mode-map',
+where it is a bare keymap rather than a menu item, which no menu
+displays.  Replace the copy with one that shows, where it is."
+  (when (lookup-key menu [flycheck])
+    (define-key menu [flycheck]
+      `(menu-item ,(keymap-prompt flycheck-mode-menu-map)
+                  ,flycheck-mode-menu-map)))
+  menu)
 
 (defvar-local flycheck-old-next-error-function nil
   "Remember the old `next-error-function'.")
@@ -3502,6 +3513,8 @@ ARG is ‘toggle’; disable the mode otherwise."
 
     (pcase-dolist (`(,hook . ,fn) (reverse flycheck-hooks-alist))
       (add-hook hook fn nil 'local))
+    ;; After `context-menu-minor', whose entry for Flycheck it replaces
+    (add-hook 'context-menu-functions #'flycheck-context-menu 90 'local)
 
     (setq flycheck-old-next-error-function
           (if flycheck-standard-error-navigation
@@ -3524,6 +3537,7 @@ ARG is ‘toggle’; disable the mode otherwise."
 
     (pcase-dolist (`(,hook . ,fn) flycheck-hooks-alist)
       (remove-hook hook fn 'local))
+    (remove-hook 'context-menu-functions #'flycheck-context-menu 'local)
 
     (flycheck-teardown))))
 

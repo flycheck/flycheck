@@ -64,7 +64,40 @@
         (let ((hack-local-variables-hook))
           (revert-buffer 'ignore-auto 'no-confirm))
         (expect flycheck-current-errors :not :to-be-truthy)
-        (expect (flycheck-deferred-check-p) :not :to-be-truthy)))))
+        (expect (flycheck-deferred-check-p) :not :to-be-truthy))))
+
+  (describe "the context menu"
+    (it "offers the Flycheck menu while the mode is on"
+      (flycheck-buttercup-with-temp-buffer
+        (emacs-lisp-mode)
+        (flycheck-mode 1)
+        ;; The raw entry, as `lookup-key' would look through `menu-item'.
+        ;; A bare keymap, which `context-menu-minor' copies from the mode
+        ;; map, is never shown (#2401).
+        (let* ((menu (cdr (context-menu-map)))
+               (keys (mapcar #'car-safe menu))
+               (entry (cdr (assq 'flycheck menu))))
+          (expect (car-safe entry) :to-be 'menu-item)
+          (expect (nth 1 entry) :to-equal "Syntax Checking")
+          (expect (nth 2 entry) :to-be flycheck-mode-menu-map)
+          ;; In place of the copy, among the other minor modes' menus
+          (expect (seq-count (lambda (key) (eq key 'flycheck)) keys)
+                  :to-equal 1)
+          (expect (cadr (memq 'separator-minor keys)) :to-be 'flycheck))
+        (flycheck-mode -1)
+        (expect (assq 'flycheck (cdr (context-menu-map))) :to-be nil)))
+
+    (it "leaves the menu out where minor mode menus are"
+      (flycheck-buttercup-with-temp-buffer
+        (emacs-lisp-mode)
+        (flycheck-mode 1)
+        ;; The global value: Flycheck's function is in the local one
+        (cl-letf (((default-value 'context-menu-functions)
+                   (remq 'context-menu-minor
+                         (default-value 'context-menu-functions))))
+          (expect (memq 'flycheck-context-menu context-menu-functions)
+                  :to-be-truthy)
+          (expect (assq 'flycheck (cdr (context-menu-map))) :to-be nil))))))
 
 (describe "Syntax Checker Selection"
 
