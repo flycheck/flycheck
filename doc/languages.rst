@@ -374,6 +374,16 @@ to view the docstring of the syntax checker.  Likewise, you may use
       checker doesn't expand macros and remains enabled for untrusted
       files.
 
+      Emacs doesn't trust the ``*scratch*`` buffer it starts with, so this
+      checker leaves it alone.  To have it checked anyway:
+
+      .. code-block:: elisp
+
+         (add-hook 'lisp-interaction-mode-hook
+                   (lambda ()
+                     (when (equal (buffer-name) "*scratch*")
+                       (setq-local trusted-content :all))))
+
       .. defcustom:: flycheck-emacs-lisp-load-path
 
          The load path as list of strings.  Relative directories are expanded

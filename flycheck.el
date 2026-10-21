@@ -3805,9 +3805,14 @@ inert mode line with no idea why.")
 
 Distinguish a mode nothing supports, where there is nothing to be done,
 from one whose checkers are all unusable here, which usually means the
-tool is not installed and is worth looking into."
+tool is not installed and is worth looking into.
+
+Stay quiet where only `trusted-content' keeps `emacs-lisp' off: Emacs
+never trusts the *scratch* buffer it starts with, and saying so at
+every startup would only be noise."
   (unless (or (memq major-mode flycheck--modes-without-checker)
-              (flycheck-ephemeral-buffer-p))
+              (flycheck-ephemeral-buffer-p)
+              (flycheck--emacs-lisp-only-untrusted-p))
     (push major-mode flycheck--modes-without-checker)
     (let ((supported (seq-some (lambda (checker)
                                  (flycheck-checker-supports-major-mode-p
@@ -15991,6 +15996,20 @@ Return nil as well where there is no notion of trust, that is, without
         "see `trusted-content'"
       ;; Only a `trusted-content' of `:all' trusts a buffer without a file
       "buffer visits no file")))
+
+(defun flycheck--emacs-lisp-only-untrusted-p ()
+  "Whether the current buffer goes unchecked only for want of trust.
+
+Only in modes no checker but `emacs-lisp' supports, such as
+`lisp-interaction-mode': elsewhere `emacs-lisp-checkdoc' doesn't care
+about trust, so something else is keeping it off too."
+  (and (equal (seq-filter #'flycheck-checker-supports-major-mode-p
+                          flycheck-checkers)
+              '(emacs-lisp))
+       (not (flycheck-manually-disabled-checker-p 'emacs-lisp))
+       (flycheck-find-checker-executable 'emacs-lisp)
+       (flycheck--emacs-lisp-enabled-p)
+       (flycheck--emacs-lisp-untrusted-reason)))
 
 (defun flycheck--emacs-lisp-checkdoc-enabled-p ()
   "Check whether to enable Emacs Lisp Checkdoc in the current buffer."
