@@ -257,8 +257,43 @@
 
   (it "says something different when checkers exist but none can run"
     ;; That usually means the tool is missing, which is worth chasing
-    (let ((messages (test-nochecker/messages #'emacs-lisp-mode)))
+    (let ((messages (test-nochecker/messages #'js-mode)))
       (expect (car messages) :to-match "can run here")))
+
+  (it "speaks up in emacs-lisp-mode, where checkdoc ignores trust"
+    ;; So with nothing running, something besides trust is wrong
+    (expect (car (test-nochecker/messages #'emacs-lisp-mode))
+            :to-match "can run here"))
+
+  (it "stays quiet where only trust keeps emacs-lisp off"
+    (assume (fboundp 'trusted-content-p) "Requires Emacs 30+")
+    (expect (test-nochecker/messages #'lisp-interaction-mode) :to-be nil))
+
+  (it "speaks up in a trusted buffer, even after staying quiet"
+    (assume (fboundp 'trusted-content-p) "Requires Emacs 30+")
+    (test-nochecker/messages #'lisp-interaction-mode)
+    (expect (car (test-nochecker/messages
+                  (lambda ()
+                    (lisp-interaction-mode)
+                    (setq-local trusted-content :all))))
+            :to-match "can run here"))
+
+  (it "speaks up when emacs-lisp is disabled by hand"
+    (assume (fboundp 'trusted-content-p) "Requires Emacs 30+")
+    (expect (car (test-nochecker/messages
+                  (lambda ()
+                    (lisp-interaction-mode)
+                    (setq-local flycheck-disabled-checkers '(emacs-lisp)))))
+            :to-match "can run here"))
+
+  (it "speaks up when emacs is missing"
+    (assume (fboundp 'trusted-content-p) "Requires Emacs 30+")
+    (expect (car (test-nochecker/messages
+                  (lambda ()
+                    (lisp-interaction-mode)
+                    (setq-local flycheck-emacs-lisp-executable
+                                "flycheck-no-such-emacs"))))
+            :to-match "can run here"))
 
   (it "says it once, however many times the buffer is checked"
     (expect (length (test-nochecker/messages #'fundamental-mode)) :to-equal 1))

@@ -36,6 +36,7 @@
 
 ### Bugs fixed
 
+- [#2407](https://github.com/flycheck/flycheck/pull/2407): Flycheck no longer says at every startup on Emacs 30+ that no syntax checker can run in `*scratch*`, which Emacs doesn't trust; the `emacs-lisp` docs show how to trust it ([#2402](https://github.com/flycheck/flycheck/issues/2402)).
 - [#2405](https://github.com/flycheck/flycheck/pull/2405): The Flycheck menu shows up in the context menu of `context-menu-mode` ([#2401](https://github.com/flycheck/flycheck/issues/2401)).
 - [#2406](https://github.com/flycheck/flycheck/pull/2406): Stop the `*eldoc*` window popping open with an eager `eldoc-documentation-strategy`, such as `eldoc-documentation-compose-eagerly`, which displays again each time a source answers ([#2387](https://github.com/flycheck/flycheck/issues/2387)).
 - [#2302](https://github.com/flycheck/flycheck/pull/2302): `proselint` errors no longer extend one character past the text they flag with proselint 0.14.
