@@ -15904,22 +15904,30 @@ This variable has no effect, if
 
 (defun flycheck--emacs-lisp-enabled-p ()
   "Check whether to enable Emacs Lisp checker in the current buffer."
-  (not
-   (or
-    ;; Do not check buffers used for autoloads generation during package
-    ;; installation.  These buffers are too short-lived for being checked, and
-    ;; doing so causes spurious errors.  See
-    ;; https://github.com/flycheck/flycheck/issues/45 and
-    ;; https://github.com/bbatsov/prelude/issues/248.  We must also not check
-    ;; compilation buffers, but as these are ephemeral, Flycheck won't check
-    ;; them anyway.
-    (flycheck-autoloads-file-p)
-    ;; Package-manager manifests and dir-locals files contain data, not
-    ;; code, and don't need to follow Checkdoc conventions either.
-    (and (buffer-file-name)
+  (not (flycheck--emacs-lisp-disabled-reason)))
+
+(defun flycheck--emacs-lisp-disabled-reason ()
+  "Return why neither Emacs Lisp checker runs in the current buffer, or nil."
+  (cond
+   ;; Do not check buffers used for autoloads generation during package
+   ;; installation.  These buffers are too short-lived for being checked, and
+   ;; doing so causes spurious errors.  See
+   ;; https://github.com/flycheck/flycheck/issues/45 and
+   ;; https://github.com/bbatsov/prelude/issues/248.  We must also not check
+   ;; compilation buffers, but as these are ephemeral, Flycheck won't check
+   ;; them anyway.
+   ((flycheck-autoloads-file-p)
+    "autoloads file")
+   ;; Package-manager manifests and dir-locals files contain data, not
+   ;; code, and don't need to follow Checkdoc conventions either.
+   ((and (buffer-file-name)
          (member (file-name-nondirectory (buffer-file-name))
-                 '("Cask" "Carton" "Eask" "Eask-local"
-                   ".dir-locals.el" ".dir-locals-2.el"))))))
+                 '("Cask" "Carton" "Eask" "Eask-local")))
+    "package manifest")
+   ((and (buffer-file-name)
+         (member (file-name-nondirectory (buffer-file-name))
+                 '(".dir-locals.el" ".dir-locals-2.el")))
+    "dir-locals file")))
 
 (defun flycheck--emacs-lisp-byte-compile-enabled-p ()
   "Check whether to enable the Emacs Lisp byte compiler checker.
@@ -15932,16 +15940,41 @@ mark files or directories as trusted.
 Checkdoc doesn't expand macros, so `emacs-lisp-checkdoc' stays
 enabled for untrusted files, like in Emacs core."
   (and (flycheck--emacs-lisp-enabled-p)
-       (or (not (fboundp 'trusted-content-p))
-           (trusted-content-p))))
+       (not (flycheck--emacs-lisp-untrusted-reason))))
+
+(defun flycheck--emacs-lisp-untrusted-reason ()
+  "Return why the current buffer isn't trusted to byte-compile, or nil.
+
+Return nil as well where there is no notion of trust, that is, without
+`trusted-content-p'."
+  (when (and (fboundp 'trusted-content-p) (not (trusted-content-p)))
+    (if buffer-file-truename
+        "see `trusted-content'"
+      ;; Only a `trusted-content' of `:all' trusts a buffer without a file
+      "buffer visits no file")))
 
 (defun flycheck--emacs-lisp-checkdoc-enabled-p ()
   "Check whether to enable Emacs Lisp Checkdoc in the current buffer."
-  (and (flycheck--emacs-lisp-enabled-p)
-       ;; These files are valid Lisp, but don't contain "standard" comments.
-       (not (and (buffer-file-name)
-                 (member (file-name-nondirectory (buffer-file-name))
-                         '("Eldev" "Eldev-local"))))))
+  (not (flycheck--emacs-lisp-checkdoc-disabled-reason)))
+
+(defun flycheck--emacs-lisp-checkdoc-disabled-reason ()
+  "Return why Checkdoc skips the current buffer, or nil."
+  (or (flycheck--emacs-lisp-disabled-reason)
+      ;; These files are valid Lisp, but don't contain "standard" comments.
+      (and (buffer-file-name)
+           (member (file-name-nondirectory (buffer-file-name))
+                   '("Eldev" "Eldev-local"))
+           "Eldev file")))
+
+(defun flycheck--emacs-lisp-verification (label reason)
+  "Return a verification result LABEL for an Emacs Lisp checker.
+
+REASON is why the checker skips the current buffer, or nil if it
+doesn't."
+  (flycheck-verification-result-new
+   :label label
+   :message (if reason (format "no, %s" reason) "yes")
+   :face (if reason '(bold warning) 'success)))
 
 (flycheck-define-checker emacs-lisp
   "An Emacs Lisp syntax checker using the Emacs Lisp Byte compiler.
@@ -16011,6 +16044,15 @@ See Info Node `(elisp)Byte Compilation'."
       (flycheck-sanitize-errors errors))))
   :modes (emacs-lisp-mode lisp-interaction-mode)
   :enabled flycheck--emacs-lisp-byte-compile-enabled-p
+  :verify
+  (lambda (_)
+    (cons
+     (flycheck--emacs-lisp-verification
+      "checkable content" (flycheck--emacs-lisp-disabled-reason))
+     ;; Without `trusted-content-p' trust isn't a factor
+     (when (fboundp 'trusted-content-p)
+       (list (flycheck--emacs-lisp-verification
+              "trusted content" (flycheck--emacs-lisp-untrusted-reason))))))
   :predicate
   (lambda ()
     ;; Do not check buffers that should not be byte-compiled.  The checker
@@ -16095,7 +16137,11 @@ The checker runs `checkdoc-current-buffer'."
   :error-patterns
   ((info line-start (or "#<buffer  *temp*>" (file-name)) ":" line ": " (message) line-end))
   :modes (emacs-lisp-mode)
-  :enabled flycheck--emacs-lisp-checkdoc-enabled-p)
+  :enabled flycheck--emacs-lisp-checkdoc-enabled-p
+  :verify
+  (lambda (_)
+    (list (flycheck--emacs-lisp-verification
+           "checkable content" (flycheck--emacs-lisp-checkdoc-disabled-reason)))))
 
 (dolist (checker '(emacs-lisp emacs-lisp-checkdoc))
   (setf (car (flycheck-checker-get checker 'command))

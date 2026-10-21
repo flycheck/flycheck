@@ -38,6 +38,14 @@
   "Check if VAR is a customization pair describing a variable."
   (eq (cadr var) 'custom-variable))
 
+(defun flycheck/verify-row (checker label)
+  "Return the message and face of CHECKER's verification row LABEL, or nil."
+  (let ((row (seq-find (lambda (r)
+                         (equal (flycheck-verification-result-label r) label))
+                       (flycheck-verify-generic-checker checker))))
+    (and row (list (flycheck-verification-result-message row)
+                   (flycheck-verification-result-face row)))))
+
 (describe "Language Emacs Lisp"
 
   (describe "Checkdoc"
@@ -66,15 +74,40 @@
         (let ((trusted-content nil))
           (expect (flycheck-may-use-checker 'emacs-lisp)
                   :not :to-be-truthy)
+          (expect (flycheck/verify-row 'emacs-lisp "trusted content")
+                  :to-equal '("no, see `trusted-content'" (bold warning)))
           ;; Checkdoc doesn't expand macros, so it stays enabled
           (expect (flycheck-may-use-checker 'emacs-lisp-checkdoc)
-                  :to-be-truthy))))
+                  :to-be-truthy)
+          (expect (flycheck/verify-row 'emacs-lisp-checkdoc "trusted content")
+                  :to-be nil))))
 
     (it "enables byte compilation for trusted files"
       (assume (fboundp 'trusted-content-p) "Requires Emacs 30+")
       (flycheck-buttercup-with-resource-buffer "language/emacs-lisp/warnings.el"
         (emacs-lisp-mode)
-        (expect (flycheck-may-use-checker 'emacs-lisp) :to-be-truthy))))
+        (expect (flycheck-may-use-checker 'emacs-lisp) :to-be-truthy)
+        (expect (flycheck/verify-row 'emacs-lisp "trusted content")
+                :to-equal '("yes" success))))
+
+    (it "says a buffer without a file can't be trusted"
+      (assume (fboundp 'trusted-content-p) "Requires Emacs 30+")
+      ;; Like the *scratch* buffer Emacs starts with
+      (flycheck-buttercup-with-temp-buffer
+        (lisp-interaction-mode)
+        (let ((trusted-content nil))
+          (expect (flycheck-may-use-checker 'emacs-lisp) :not :to-be-truthy)
+          (expect (flycheck/verify-row 'emacs-lisp "trusted content")
+                  :to-equal '("no, buffer visits no file" (bold warning))))))
+
+    (it "does not verify trust without trusted-content-p"
+      (assume (not (fboundp 'trusted-content-p)) "Trust is a factor here")
+      (flycheck-buttercup-with-resource-buffer "language/emacs-lisp/warnings.el"
+        (emacs-lisp-mode)
+        (expect (flycheck/verify-row 'emacs-lisp "checkable content")
+                :to-equal '("yes" success))
+        (expect (flycheck/verify-row 'emacs-lisp "trusted content")
+                :to-be nil))))
 
   (describe "Checker tests"
     (flycheck-buttercup-def-checker-test (emacs-lisp emacs-lisp-checkdoc) emacs-lisp nil
@@ -159,21 +192,50 @@
       ;; Regression test ensuring that Emacs Lisp won't check autoload buffers.
       (flycheck-buttercup-with-file-buffer (locate-library "shut-up-autoloads")
         (expect (flycheck-may-use-checker 'emacs-lisp) :not :to-be-truthy)
-        (expect (flycheck-may-use-checker 'emacs-lisp-checkdoc) :not :to-be-truthy)))
+        (expect (flycheck/verify-row 'emacs-lisp "checkable content")
+                :to-equal '("no, autoloads file" (bold warning)))
+        (expect (flycheck-may-use-checker 'emacs-lisp-checkdoc) :not :to-be-truthy)
+        (expect (flycheck/verify-row 'emacs-lisp-checkdoc "checkable content")
+                :to-equal '("no, autoloads file" (bold warning)))))
 
     (flycheck-buttercup-def-checker-test (emacs-lisp emacs-lisp-checkdoc) emacs-lisp
                                          checkdoc-does-not-check-manifests
       ;; Flycheck's own manifest, which is real Lisp but is data
       (flycheck-buttercup-with-file-buffer
           (expand-file-name "Eask" flycheck-test-source-directory)
-        (expect (flycheck-may-use-checker 'emacs-lisp-checkdoc) :not :to-be-truthy)))
+        ;; It would otherwise open in `eask-mode', or `fundamental-mode'
+        ;; without that, which no Emacs Lisp checker supports anyway
+        (emacs-lisp-mode)
+        (expect (flycheck-may-use-checker 'emacs-lisp-checkdoc) :not :to-be-truthy)
+        (expect (flycheck/verify-row 'emacs-lisp-checkdoc "checkable content")
+                :to-equal '("no, package manifest" (bold warning)))))
 
     (it "does not checkdoc an Eldev file"
       ;; The name was matched against the whole path, so it never matched
       (flycheck-buttercup-with-temp-buffer
         (setq buffer-file-name (expand-file-name "Eldev" default-directory))
         (emacs-lisp-mode)
-        (expect (flycheck--emacs-lisp-checkdoc-enabled-p) :not :to-be-truthy)))
+        (expect (flycheck--emacs-lisp-checkdoc-enabled-p) :not :to-be-truthy)
+        (expect (flycheck/verify-row 'emacs-lisp-checkdoc "checkable content")
+                :to-equal '("no, Eldev file" (bold warning)))))
+
+    (it "does not check a dir-locals file"
+      (flycheck-buttercup-with-temp-buffer
+        (setq buffer-file-name (expand-file-name ".dir-locals.el" default-directory))
+        (emacs-lisp-mode)
+        (expect (flycheck--emacs-lisp-enabled-p) :not :to-be-truthy)
+        (expect (flycheck/verify-row 'emacs-lisp "checkable content")
+                :to-equal '("no, dir-locals file" (bold warning)))
+        (expect (flycheck/verify-row 'emacs-lisp-checkdoc "checkable content")
+                :to-equal '("no, dir-locals file" (bold warning)))))
+
+    (it "verifies an ordinary file as checkable"
+      (flycheck-buttercup-with-resource-buffer "language/emacs-lisp/warnings.el"
+        (emacs-lisp-mode)
+        (expect (flycheck/verify-row 'emacs-lisp "checkable content")
+                :to-equal '("yes" success))
+        (expect (flycheck/verify-row 'emacs-lisp-checkdoc "checkable content")
+                :to-equal '("yes" success))))
 
     (flycheck-buttercup-def-checker-test (emacs-lisp emacs-lisp-checkdoc) emacs-lisp
                                          does-not-check-with-no-byte-compile
