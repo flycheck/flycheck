@@ -18356,15 +18356,28 @@ absent from the table has not been probed yet.")
 
 (defvar flycheck-proselint-executable)
 
+(defun flycheck--proselint-version ()
+  "Return the version number of Proselint, as a string.
+Return nil if Proselint or its version number could not be found."
+  (with-temp-buffer
+    (ignore-errors
+      ;; Probe on the host the check will run on (remote over TRAMP).
+      (process-file (or flycheck-proselint-executable "proselint")
+                    nil t nil "--version")
+      (goto-char (point-min))
+      (search-forward-regexp
+       (rx line-start
+           (zero-or-one "Proselint ")
+           (group digit (zero-or-more (any digit ".")) digit)
+           line-end))
+      (match-string 1))))
+
 (defun flycheck--proselint-args ()
   "Return command arguments for proselint, detecting the version once per host."
   (let ((host (file-remote-p default-directory)))
     (when (eq (gethash host flycheck--proselint-old-args-by-host 'unknown) 'unknown)
       (puthash host
-               ;; Probe on the host the check will run on (remote over TRAMP).
-               (zerop (process-file
-                       (or flycheck-proselint-executable "proselint")
-                       nil nil nil "--version"))
+               (version< (or (flycheck--proselint-version) "1") "0.16")
                flycheck--proselint-old-args-by-host))
     (if (gethash host flycheck--proselint-old-args-by-host)
         ;; Proselint versions <= 0.14.0:
