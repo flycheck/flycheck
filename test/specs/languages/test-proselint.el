@@ -39,17 +39,17 @@
              :id "weasel_words.very"
              :checker proselint
              :end-line 1
-             :end-column 12)
+             :end-column 11)
          '(2 4 warning "Redundancy. Use 'associate' instead of 'associate together'."
              :id "redundancy.garner"
              :checker proselint
-             :end-line 3
-             :end-column 1)
+             :end-line 2
+             :end-column 22)
          '(3 5 warning "Gender bias. Use 'lawyer' instead of 'lady lawyer'."
              :id "sexism.misc"
              :checker proselint
              :end-line 3
-             :end-column 17)))))
+             :end-column 16)))))
 
   (describe "reading the tool's output"
     ;; Read from output recorded earlier, so this runs whether or

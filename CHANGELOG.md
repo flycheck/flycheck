@@ -35,6 +35,7 @@
 
 ### Bugs fixed
 
+- [#2302](https://github.com/flycheck/flycheck/pull/2302): `proselint` errors no longer extend one character past the text they flag with proselint 0.14.
 - [#2302](https://github.com/flycheck/flycheck/pull/2302): `proselint` detects the tool's version from what `proselint --version` prints rather than whether it succeeds, so a development build of proselint, which accepts the option again, is no longer run with the arguments of 0.14.
 - [#2396](https://github.com/flycheck/flycheck/pull/2396): A language server running on a remote host is stopped there when Flycheck gives up on it, so a server that never answers the `initialize` handshake no longer leaves a copy of itself behind on every attempt.
 - [#2395](https://github.com/flycheck/flycheck/pull/2395): A check that is stopped, or superseded by the next one, no longer leaves its checker running on the remote host: Flycheck interrupts the command there, which is what actually stops it, rather than only dropping its own end of the process.
