@@ -1610,6 +1610,9 @@ just return nil."
   (when (lookup-key global-map [menu-bar tools])
     (easy-menu-remove-item nil '("Tools") (cadr flycheck-mode-menu-map)))
   (remove-hook 'kill-emacs-hook #'flycheck-global-teardown)
+  (advice-remove 'eldoc-display-in-buffer #'flycheck--eldoc-suppress-doc-window)
+  (advice-remove 'eldoc-print-current-symbol-info
+                 #'flycheck--eldoc-note-request)
   ;; Or the next set of the watched variable calls an unbound function,
   ;; from inside Eglot's process filter of all places
   (remove-variable-watcher 'flymake-list-only-diagnostics
@@ -3480,12 +3483,14 @@ ARG is ‘toggle’; disable the mode otherwise."
     (flycheck-clear)
     (flycheck--sync-margin)
     (add-hook 'eldoc-documentation-functions #'flycheck-eldoc-function nil t)
-    ;; Guarded by a buffer-local flag that only Flycheck sets, so this is
-    ;; inert everywhere else.  It stays for the session: Eldoc displays for
-    ;; whichever buffer answered last, so removing it when one buffer turns
+    ;; Neither advice changes anything until Flycheck first asks Eldoc to
+    ;; document.  They stay for the session: Eldoc displays for whichever
+    ;; buffer answered last, so removing them when one buffer turns
     ;; Flycheck off would break the buffers that still have it on.
     (advice-add 'eldoc-display-in-buffer
                 :around #'flycheck--eldoc-suppress-doc-window)
+    (advice-add 'eldoc-print-current-symbol-info
+                :before #'flycheck--eldoc-note-request)
     ;; `global-eldoc-mode' may have skipped this buffer because no
     ;; documentation source was registered when it made its decision;
     ;; give it another chance now that Flycheck provides one.  Buffers
@@ -8700,8 +8705,8 @@ avoid slowing down editing when the error list is hidden."
   "Whether errors at point are displayed through Eldoc."
   (eq flycheck-display-errors-function #'flycheck-display-errors-via-eldoc))
 
-(defvar-local flycheck--eldoc-refresh-pending nil
-  "Non-nil while a Flycheck-initiated Eldoc refresh has yet to be displayed.
+(defvar flycheck--eldoc-own-request nil
+  "Non-nil while the last interactive Eldoc request was Flycheck's.
 
 Flycheck documents interactively so that the echo area is refreshed even
 after a command Eldoc does not recognise, but that request should not
@@ -8709,24 +8714,39 @@ reach `eldoc-display-in-buffer', which reads it as \\[eldoc-doc-buffer]
 and pops the documentation window open.  Jumping to an error should not
 rearrange the frame.
 
-This cannot be a `let' around the request.  Eldoc gathers documentation
-from every registered source and displays it once they have all
-answered, so a single asynchronous source, such as a language server, is
-enough to push the display past the end of any dynamic binding.  A flag
-that lives until the display happens survives that.")
+Eldoc gathers documentation from every registered source and displays
+it once they have all answered, so a single asynchronous source, such as
+a language server, is enough to push the display past the end of the
+request, and of the binding of `flycheck--eldoc-requesting' that marks
+it.  Nor can the first display end it: an eager
+`eldoc-documentation-strategy', such as
+`eldoc-documentation-compose-eagerly', displays again each time a source
+answers.  So the flag lasts until something else asks Eldoc to document
+interactively, like \\[eldoc], which may then open the window.
+
+It is global, like the window: before Emacs 31, Eldoc displays in
+whichever buffer is current when a source answers.")
+
+(defvar flycheck--eldoc-requesting nil
+  "Non-nil while Flycheck itself asks Eldoc to document.")
+
+(defun flycheck--eldoc-note-request (&optional interactive)
+  "Note whether an INTERACTIVE Eldoc request is Flycheck's own.
+
+Runs before `eldoc-print-current-symbol-info'.  Eldoc's idle timer
+documents non-interactively, which never opens the window, so only an
+interactive request changes anything."
+  (when interactive
+    (setq flycheck--eldoc-own-request flycheck--eldoc-requesting)))
 
 (defun flycheck--eldoc-suppress-doc-window (display docs interactive)
   "Keep a Flycheck-initiated refresh from popping the Eldoc window open.
 
 DISPLAY is `eldoc-display-in-buffer', called with DOCS and INTERACTIVE.
 The documentation buffer is still brought up to date; only the request to
-put it on screen is dropped, and only for the refresh Flycheck asked
-for."
-  (if flycheck--eldoc-refresh-pending
-      (progn
-        (setq flycheck--eldoc-refresh-pending nil)
-        (funcall display docs nil))
-    (funcall display docs interactive)))
+put it on screen is dropped, and only while Flycheck made the last
+interactive request."
+  (funcall display docs (and interactive (not flycheck--eldoc-own-request))))
 
 (defun flycheck-display-errors-via-eldoc (_errors)
   "Trigger Eldoc to document the errors at point.
@@ -8734,19 +8754,19 @@ for."
 Eldoc computes its documentation from all of its registered
 sources, including `flycheck-eldoc-function', so refreshing it
 shows the Flycheck errors at point alongside e.g. Eglot's
-documentation.  This works from any display entry point --
-interactive commands, error navigation, automatic display after a
-check -- whether or not variable `eldoc-mode' is enabled.
+documentation.  This works from any display entry point (interactive
+commands, error navigation, automatic display after a check), whether
+or not variable `eldoc-mode' is enabled.
 
 Eldoc is asked to document interactively, because reaching this
 function already means Flycheck decided to show the errors at
 point.  Left to its own devices Eldoc keeps out of the echo area
 unless the command that ran is one of `eldoc-message-commands',
 which error navigation is not, and the errors would go unseen.
-`flycheck--eldoc-refresh-pending' keeps that request from reaching the
+`flycheck--eldoc-own-request' keeps that request from reaching the
 documentation window."
-  (setq flycheck--eldoc-refresh-pending t)
-  (eldoc-print-current-symbol-info t))
+  (let ((flycheck--eldoc-requesting t))
+    (eldoc-print-current-symbol-info t)))
 
 (defun flycheck-eldoc-function (callback &rest _ignored)
   "Document the Flycheck errors at point by calling CALLBACK.
@@ -8811,15 +8831,20 @@ If there are no errors, clears the error messages at point."
   "Whether Eldoc itself will refresh the echo area for this command.
 
 Eldoc only writes to the echo area after a command registered in
-`eldoc-message-commands' -- ordinary motion and editing.  After any
-other command, such as a jump from `consult-flycheck', it computes its
-documentation but leaves the echo area alone, so Flycheck has to ask
-for the display itself."
+`eldoc-message-commands', ordinary motion and editing, or one that asks
+it to document, like \\[eldoc].  After any other command, such as a jump
+from `consult-flycheck', it computes its documentation but leaves the
+echo area alone, so Flycheck has to ask for the display itself."
   (and (flycheck--display-errors-via-eldoc-p)
-       (bound-and-true-p eldoc-mode)
-       (symbolp this-command)
-       this-command
-       (intern-soft (symbol-name this-command) eldoc-message-commands)
+       (or
+        ;; That request includes Flycheck's errors already, and a second
+        ;; one from Flycheck, while the first waits for a slow source,
+        ;; would keep its window shut
+        (memq this-command '(eldoc eldoc-print-current-symbol-info))
+        (and (bound-and-true-p eldoc-mode)
+             (symbolp this-command)
+             this-command
+             (intern-soft (symbol-name this-command) eldoc-message-commands)))
        t))
 
 (defun flycheck-display-error-at-point-soon ()
