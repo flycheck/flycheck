@@ -94,7 +94,7 @@
 
 ;; Tell the byte compiler about autoloaded functions from packages
 (declare-function org-lint "org-lint" (&optional arg))
-;; Emacs 30 and newer; guarded with `fboundp' where it is called
+;; Emacs 30 and newer, or compat; guarded with `fboundp' where it is called
 (declare-function trusted-content-p "files" ())
 (declare-function xref-push-marker-stack "xref" (&optional m))
 
@@ -15976,7 +15976,8 @@ This variable has no effect, if
 (defun flycheck--emacs-lisp-byte-compile-enabled-p ()
   "Check whether to enable the Emacs Lisp byte compiler checker.
 
-On Emacs 30+, the checker is only enabled for trusted files, to
+Wherever `trusted-content-p' exists (Emacs 30+, or older Emacs with
+the compat library), the checker is only enabled for trusted files, to
 mitigate CVE-2024-53920: byte-compilation involves macro expansion
 which can execute arbitrary code.  Customize `trusted-content' to
 mark files or directories as trusted.
@@ -16037,8 +16038,9 @@ doesn't."
 (flycheck-define-checker emacs-lisp
   "An Emacs Lisp syntax checker using the Emacs Lisp Byte compiler.
 
-On Emacs 30+, this checker is only enabled for files the user has
-marked as trusted via the `trusted-content' variable, to mitigate
+On Emacs 30+, and on older Emacs with the compat library, this checker
+is only enabled for files the user has marked as trusted via the
+`trusted-content' variable, to mitigate
 CVE-2024-53920 (byte-compilation involves macro expansion which can
 execute arbitrary code).
 
