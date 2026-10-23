@@ -18234,17 +18234,29 @@ for more information about perlimports."
                :end-line .location.end.line
                :end-column (+ 1 .location.end.column)
                :checker checker
-               :fix (flycheck--make-fix
-                     buffer
-                     (concat .module " " .reason)
-                     (list
-                      (flycheck-fix-edit-new
-                       :line .location.start.line
-                       :column .location.start.column
-                       :end-line .location.end.line
-                       :end-column (+ 1 .location.end.column)
-                       :replacement (flycheck-perl-perlimports-parse-diff
-                                     .diff))))
+               :fix
+               ;; The diffs provided by perlimports are intended to be
+               ;; user-facing rather than machine applicable
+               ;; (https://github.com/perl-ide/App-perlimports/issues/193#issuecomment-5625911920).
+               ;; Nevertheless, if the diff consists of a single hunk,
+               ;; it should be simple and safe to apply.
+               (unless
+                   (string-match-p
+                    (rx line-start "@@" (one-or-more not-newline) "@@" line-end
+                        (zero-or-more anything)
+                        line-start "@@" (one-or-more not-newline) "@@" line-end)
+                    .diff)
+                 (flycheck--make-fix
+                  buffer
+                  (concat .module " " .reason)
+                  (list
+                   (flycheck-fix-edit-new
+                    :line .location.start.line
+                    :column .location.start.column
+                    :end-line .location.end.line
+                    :end-column (+ 1 .location.end.column)
+                    :replacement (flycheck-perl-perlimports-parse-diff
+                                  .diff)))))
                :buffer buffer)))
           (flycheck-parse-json output)))
 
