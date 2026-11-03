@@ -654,8 +654,9 @@ error.  The following modes are known:
      highlight the whole line.
 
 `symbols'
-     Highlight a full symbol if there is any, otherwise behave like `columns'.
-     This is the default.
+     Highlight a full symbol if there is any, or a whole string when the
+     error is on its opening quote and the string ends on the same line,
+     otherwise behave like `columns'.  This is the default.
 
 `sexps'
      Highlight a full expression, if there is any, otherwise behave like
@@ -4835,6 +4836,30 @@ the THING at the column, and END the end of the THING."
     (goto-char pos)
     (bounds-of-thing-at-point thing)))
 
+(defun flycheck--string-region (beg)
+  "Get the region of the string opening at BEG, or nil.
+
+Only a string that closes on the same line counts: a highlight across a
+whole docstring would bury the code around it, and a string that never
+closes is usually what the error is about."
+  ;; Many modes only mark string delimiters as they propertize, so the
+  ;; answer mustn't depend on how far that has got
+  (syntax-propertize (1+ beg))
+  ;; String quote or string fence
+  (when (memq (syntax-class (syntax-after beg)) '(7 15))
+    (save-excursion
+      (goto-char beg)
+      (let ((eol (line-end-position))
+            (ppss (syntax-ppss (1+ beg))))
+        (when (and (nth 3 ppss) (eq (nth 8 ppss) beg))
+          ;; The scan below doesn't propertize as it goes
+          (syntax-propertize eol)
+          (let ((end (ignore-errors (scan-sexps beg 1))))
+            ;; Python reads the """ opening a docstring as an empty string
+            ;; and the quote that starts the real one
+            (and end (<= end eol) (> end (+ beg 2))
+                 (cons beg end))))))))
+
 (defun flycheck--approximate-region (err mode)
   "Compute the region of ERR based on MODE and ERR's line and column."
   ;; Ignoring fields speeds up calls to `line-end-position'.
@@ -4847,11 +4872,13 @@ the THING at the column, and END the end of the THING."
         (flycheck--line-region beg)
       (or (pcase mode
             (`symbols
-             ;; Ensure that we're on a word or symbol.  See
+             ;; Ensure that we're on a word or symbol, as on punctuation
+             ;; the symbol before it would come back.  See
              ;; https://github.com/flycheck/flycheck/issues/1519
              (and (<= (point-min) beg) (< beg (point-max))
-                  (memq (char-syntax (char-after beg)) '(?w ?_))
-                  (flycheck-bounds-of-thing-at-point 'symbol beg)))
+                  (if (memq (char-syntax (char-after beg)) '(?w ?_))
+                      (flycheck-bounds-of-thing-at-point 'symbol beg)
+                    (flycheck--string-region beg))))
             (`sexps
              (flycheck-bounds-of-thing-at-point 'sexp beg)))
           (flycheck--column-region beg)))))
