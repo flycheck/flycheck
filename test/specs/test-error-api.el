@@ -152,7 +152,52 @@
                  (flycheck-error-new-at
                   1 1 nil nil :end-line 10 :end-column 1)
                  nil)
-                :to-equal '(1 . 42)))))
+                :to-equal '(1 . 42))))
+
+    (defun test-error-api/symbols-highlight (line column)
+      "Return the text `symbols' mode highlights for an error at LINE, COLUMN."
+      (let ((region (flycheck-error-region-for-mode
+                     (flycheck-error-new-at line column) 'symbols)))
+        (buffer-substring-no-properties (car region) (cdr region))))
+
+    (it "highlights a string in symbols mode from its opening quote"
+      (flycheck-buttercup-with-temp-buffer
+        (insert "(foo \"bar baz\" x\"qux\" \"\" \"open\n  end\")\n(\"unclosed")
+        (emacs-lisp-mode)
+        (expect (test-error-api/symbols-highlight 1 6) :to-equal "\"bar baz\"")
+        ;; Behind a symbol, which `thing-at-point' would hand back instead
+        (expect (test-error-api/symbols-highlight 1 17) :to-equal "\"qux\"")
+        (expect (test-error-api/symbols-highlight 1 2) :to-equal "foo")
+        (expect (test-error-api/symbols-highlight 1 1) :to-equal "(")))
+
+    (it "highlights a string the mode only marks as it propertizes"
+      ;; In a fresh buffer, with nothing propertized yet
+      (flycheck-buttercup-with-temp-buffer
+        (insert "x = %q(foo bar)\n")
+        (ruby-mode)
+        (expect (test-error-api/symbols-highlight 1 5)
+                :to-equal "%q(foo bar)")))
+
+    (it "highlights only the quote of strings it can't take whole"
+      (flycheck-buttercup-with-temp-buffer
+        (insert "(foo \"bar baz\" x\"qux\" \"\" \"open\n  end\")\n(\"unclosed")
+        (emacs-lisp-mode)
+        ;; Closing
+        (expect (test-error-api/symbols-highlight 1 14) :to-equal "\"")
+        ;; Empty
+        (expect (test-error-api/symbols-highlight 1 23) :to-equal "\"")
+        ;; Spanning lines
+        (expect (test-error-api/symbols-highlight 1 26) :to-equal "\"")
+        ;; Never closed
+        (expect (test-error-api/symbols-highlight 3 2) :to-equal "\""))
+      (flycheck-buttercup-with-temp-buffer
+        (insert "s = \"don't 'quote'\"\ndef f():\n    \"\"\"Doc\n    more.\"\"\"\n")
+        (python-mode)
+        ;; Inside another string
+        (expect (test-error-api/symbols-highlight 1 9) :to-equal "'")
+        ;; A multi-line docstring, which python-mode reads as an empty
+        ;; string and then the real one
+        (expect (test-error-api/symbols-highlight 3 5) :to-equal "\""))))
 
   (describe "flycheck-error-pos"
     (it "computes the error position"

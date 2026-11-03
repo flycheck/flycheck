@@ -8,6 +8,7 @@
 
 ### Changes
 
+- [#2409](https://github.com/flycheck/flycheck/pull/2409): The default `symbols` highlighting mode highlights a whole string, instead of just its opening quote, for an error that sits on the quote and has no end position, as long as the string ends on the same line ([#2403](https://github.com/flycheck/flycheck/issues/2403)).
 - [#2376](https://github.com/flycheck/flycheck/pull/2376): Markdown checkers run in Emacs 31’s experimental new `markdown-ts-mode`.
 - [#2378](https://github.com/flycheck/flycheck/pull/2378): `flycheck-check-project` works on a project that lives on a remote host, running the checker over TRAMP on the host the project is on instead of refusing.
 - [#2373](https://github.com/flycheck/flycheck/pull/2373): `go-staticcheck` errors carry the end position staticcheck reports, so a finding highlights the expression it is about rather than a single point; a finding that spans nothing, such as an unused declaration, stays a point.

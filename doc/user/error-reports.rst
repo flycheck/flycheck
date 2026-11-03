@@ -75,8 +75,9 @@ using `flycheck-highlighting-mode`.
       Highlight the column of the error if any, otherwise like ``lines``.
 
    ``symbols``
-      Highlight the entire symbol around the error column if any, otherwise like
-      ``columns``.  This is the default.
+      Highlight the entire symbol around the error column if any, or the whole
+      string when the error column is on its opening quote and the string ends
+      on the same line, otherwise like ``columns``.  This is the default.
 
    ``sexps``
       Highlight the entire expression around the error column if any, otherwise
