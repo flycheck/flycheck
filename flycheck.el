@@ -18068,8 +18068,8 @@ for more information about the custom directories."
 
 OUTPUT is what it printed, for the message that says why.
 
-Eslint exits with status 2 on any fatal failure -- a missing or
-broken configuration, a crashing plugin -- rather than lint
+Eslint exits with status 2 on any fatal failure (a missing or
+broken configuration, a crashing plugin) rather than lint
 findings, so the checker cannot be used in this buffer.  This
 matches the semantics of the blocking `--print-config' probe that
 previous versions ran in `:enabled' (see URL
@@ -18079,9 +18079,7 @@ first line of OUTPUT is included in the disable notice.
 
 Any other exit status without parsable errors is suspicious: it
 suggests an output format Flycheck fails to parse."
-  (if (eq exit-status 2)
-      (cons 'disable (car (split-string output "\n" t)))
-    'suspicious))
+  (flycheck--handle-fatal-exit exit-status output '(2)))
 
 (defun flycheck--utf16-offset-to-position (offset)
   "Return the buffer position at UTF-16 code-unit OFFSET from `point-min'.
