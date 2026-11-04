@@ -3849,11 +3849,10 @@ Get a syntax checker for the current buffer with
 
 Interactively, a running syntax check is interrupted first, per
 `flycheck-interrupt-running-checks' (without its age limit, since
-you asked for fresh results explicitly).  When called from Lisp
-while a check is running, do nothing; automatic re-checks handle
-interruption in `flycheck-buffer-automatically' instead."
+you asked for fresh results explicitly).  A running check that is
+kept, as it always is when called from Lisp, runs to its end, and the
+new check is queued behind it, to start as an automatic check would."
   (interactive)
-  (flycheck-clean-deferred-check)
   (if flycheck-mode
       (progn
         (when (and (called-interactively-p 'any)
@@ -3865,7 +3864,9 @@ interruption in `flycheck-buffer-automatically' instead."
                    ;; in the check below
                    (ignore-errors (flycheck-get-checker-for-buffer)))
           (flycheck--interrupt-current-syntax-check))
-        (unless (flycheck-running-p)
+        (if (flycheck-running-p)
+            (flycheck-buffer-deferred)
+          (flycheck-clean-deferred-check)
           ;; Clear error list and mark all overlays for deletion.  We do not
           ;; delete all overlays immediately to avoid excessive re-displays
           ;; and flickering, if the same errors gets highlighted again after
