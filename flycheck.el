@@ -13099,24 +13099,30 @@ push that arrives for another buffer.")
   (alist-get mode flycheck-lsp-servers))
 
 (defvar-local flycheck-lsp--command-cache nil
-  "Cached (MODE . RESULT) of `flycheck-lsp--available-command' for this buffer.
-A server installed mid-session is not noticed until the cache is rebuilt
-\(on a major-mode change, which clears buffer-local variables).")
+  "Cached ((MODE . COMMAND) . RESULT) of `flycheck-lsp--available-command'.
+
+COMMAND is what `flycheck-lsp-servers' configured for MODE, so changing
+it takes effect.  A server installed mid-session is not noticed until
+the cache is rebuilt (on a major-mode change, which clears buffer-local
+variables).")
 
 (defun flycheck-lsp--available-command (mode)
   "Return the server command for MODE if its program is installed, else nil.
 
 Uses `flycheck-executable-find', so it honours the user's setting and TRAMP.
-The result is cached buffer-locally, keyed on MODE: `executable-find'
-scans the variable `exec-path' (and probes the remote host over TRAMP),
-and the `flycheck-lsp' checker's predicate calls this on every check."
-  (if (eq (car flycheck-lsp--command-cache) mode)
-      (cdr flycheck-lsp--command-cache)
-    (let ((result (when-let* ((command (flycheck-lsp--command mode)))
-                    (and (funcall flycheck-executable-find (car command))
-                         command))))
-      (setq-local flycheck-lsp--command-cache (cons mode result))
-      result)))
+The result is cached buffer-locally, keyed on MODE and its configured
+command: `executable-find' scans the variable `exec-path' (and probes
+the remote host over TRAMP), and the `flycheck-lsp' checker's predicate
+calls this on every check."
+  (let* ((command (flycheck-lsp--command mode))
+         (key (cons mode command)))
+    (if (equal (car flycheck-lsp--command-cache) key)
+        (cdr flycheck-lsp--command-cache)
+      (let ((result (and command
+                         (funcall flycheck-executable-find (car command))
+                         command)))
+        (setq-local flycheck-lsp--command-cache (cons key result))
+        result))))
 
 (defun flycheck-lsp--same-program-p (program command)
   "Return non-nil when COMMAND runs PROGRAM.
