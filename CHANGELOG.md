@@ -37,6 +37,7 @@
 
 ### Bugs fixed
 
+- [#2421](https://github.com/flycheck/flycheck/pull/2421): `cuda-nvcc` discards its object file on Windows too, where there is no `/dev/null`.
 - [#2421](https://github.com/flycheck/flycheck/pull/2421): `python-pyright` shows pyright's information diagnostics as info rather than warnings.
 - [#2421](https://github.com/flycheck/flycheck/pull/2421): `markdown-markdownlint-cli2` shows the findings of rules configured as warnings as warnings.
 - [#2420](https://github.com/flycheck/flycheck/pull/2420): The project scope and the mode line's project counts collapse a diagnostic reported about one file under two spellings of its name, such as through a symlinked directory.
