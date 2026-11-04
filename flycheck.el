@@ -13206,9 +13206,26 @@ selected, so a deliberate choice is left alone."
          (flycheck-may-use-checker 'flycheck-lsp))
        'flycheck-lsp))
 
+(defconst flycheck-lsp--language-ids
+  '(("js" . "javascript") ("js2" . "javascript") ("js-json" . "json")
+    ("js-jsx" . "javascriptreact") ("rjsx" . "javascriptreact")
+    ("tsx" . "typescriptreact") ("gfm" . "markdown") ("adoc" . "asciidoc")
+    ("c++" . "cpp") ("objc" . "objective-c") ("cperl" . "perl")
+    ("sh" . "shellscript") ("bash" . "shellscript") ("mhtml" . "html")
+    ("less-css" . "less") ("nxml" . "xml") ("conf-toml" . "toml")
+    ("makefile-gmake" . "makefile") ("tuareg" . "ocaml"))
+  "LSP languageIds for common major modes whose names don't give theirs.
+Keyed by the mode's name in lower case, without its -mode or -ts-mode
+suffix.  A server may drop a document whose languageId it doesn't
+know.")
+
 (defun flycheck-lsp--language-id (mode)
-  "Return a best-effort LSP languageId string for major MODE."
-  (replace-regexp-in-string "\\(?:-ts\\)?-mode\\'" "" (symbol-name mode)))
+  "Return the LSP languageId for major MODE.
+That is the mode's name in lower case, without its -mode or -ts-mode
+suffix, unless `flycheck-lsp--language-ids' has another."
+  (let ((name (downcase (replace-regexp-in-string
+                         "\\(?:-ts\\)?-mode\\'" "" (symbol-name mode)))))
+    (or (cdr (assoc name flycheck-lsp--language-ids)) name)))
 
 (defvar-local flycheck-lsp--cached-root nil
   "Cached workspace root for this buffer; see `flycheck-lsp--root'.")

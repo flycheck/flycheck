@@ -439,8 +439,15 @@
     (describe "flycheck-lsp--language-id"
       (it "strips the -mode and -ts-mode suffixes"
         (expect (flycheck-lsp--language-id 'ruby-mode) :to-equal "ruby")
-        (expect (flycheck-lsp--language-id 'ruby-ts-mode) :to-equal "ruby")
-        (expect (flycheck-lsp--language-id 'js-mode) :to-equal "js")))
+        (expect (flycheck-lsp--language-id 'ruby-ts-mode) :to-equal "ruby"))
+
+      (it "is the LSP identifier where the mode's name isn't one"
+        ;; harper-ls drops a document in a language it doesn't know
+        (expect (flycheck-lsp--language-id 'gfm-mode) :to-equal "markdown")
+        (expect (flycheck-lsp--language-id 'js-mode) :to-equal "javascript")
+        (expect (flycheck-lsp--language-id 'tsx-ts-mode)
+                :to-equal "typescriptreact")
+        (expect (flycheck-lsp--language-id 'LaTeX-mode) :to-equal "latex")))
 
     (describe "flycheck-lsp--command"
       (it "returns the configured command for a mode, nil otherwise"
