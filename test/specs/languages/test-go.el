@@ -10,6 +10,16 @@
 (require 'test-helpers)
 
 (describe "Language Go"
+
+  (describe "go-staticcheck"
+    (it "waits for the buffer to be saved, as it reads the package from disk"
+      (expect (flycheck-checker-get 'go-staticcheck 'predicate)
+              :to-be-truthy)
+      (flycheck-buttercup-with-temp-buffer
+        (insert "package main\n")
+        (expect (funcall (flycheck-checker-get 'go-staticcheck 'predicate))
+                :not :to-be-truthy))))
+
   (describe "The staticcheck error parser"
     (let ((json "
 {

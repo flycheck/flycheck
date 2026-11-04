@@ -17272,7 +17272,9 @@ limited features) if `flycheck-go-version' is set. See URL
   :error-parser flycheck-parse-go-staticcheck
   :error-explainer
   (flycheck-error-explainer-from-url "https://staticcheck.dev/docs/checks#%s")
-  :modes (go-mode go-ts-mode))
+  :modes (go-mode go-ts-mode)
+  ;; It reads the package from disk, as the other Go checkers do
+  :predicate flycheck-buffer-saved-p)
 
 (flycheck-define-checker groovy
   "A groovy syntax checker using groovy compiler API.

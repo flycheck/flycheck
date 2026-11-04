@@ -589,6 +589,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
    .. syntax-checker:: go-staticcheck
 
       Perform static analysis and code linting with staticcheck_, the successor to megacheck.
+      It reads the package from the files on disk, so the buffer has to be saved.
 
       .. defcustom:: flycheck-go-version
 
