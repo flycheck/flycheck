@@ -140,12 +140,23 @@
                       'type 'flycheck-error-list
                       'face (flycheck-error-level-error-list-face 'warning))))
 
-      (it "has the error ID in the 5th cell"
+      (it "has the error ID in the 5th cell, going to the error on RET"
+        ;; There's no explainer to run instead
         (expect (aref cells 4) :to-equal
                 (list "W1"
-                      'type 'flycheck-error-list-explain-error
+                      'type 'flycheck-error-list
                       'face 'flycheck-error-list-id
                       'help-echo "W1")))
+
+      (it "explains the error on RET on the ID when there's an explainer"
+        (let ((explained (flycheck-error-new-at 1 1 'warning "m"
+                                                :checker 'dockerfile-hadolint
+                                                :id "DL3006")))
+          (expect (plist-get (cdr (aref (cadr (flycheck-error-list-make-entry
+                                               explained))
+                                        4))
+                             'type)
+                  :to-be 'flycheck-error-list-explain-error)))
 
       (let ((checker-name (propertize "emacs-lisp-checkdoc"
                                       'face 'flycheck-error-list-checker-name)))
@@ -973,6 +984,20 @@ is when asked, so no earlier check has to vouch for it."
           (expect (flycheck-error-list-mode-line-filter-indicator)
                   :to-equal " [>= warning]")))
 
+      (it "escapes a percent sign in the message filter"
+        (let ((flycheck-error-list-minimum-level nil)
+              (flycheck-error-list--message-filter "100%"))
+          (expect (flycheck-error-list-mode-line-filter-indicator)
+                  :to-equal " [/100%%/]")))
+
+      (it "names a killed source buffer"
+        (let ((buffer (generate-new-buffer " gone")))
+          (kill-buffer buffer)
+          (with-temp-buffer
+            (setq-local flycheck-error-list-source-buffer buffer)
+            (expect (flycheck-error-list-propertized-source-name)
+                    :to-equal "<killed>"))))
+
       (it "shows the checker and message filters in the mode line"
         (let ((flycheck-error-list-minimum-level nil)
               (flycheck-error-list--checker-filter 'python-ruff)
@@ -1044,6 +1069,12 @@ is when asked, so no earlier check has to vouch for it."
                         :filename (make-string 100 ?x)
                         :id (make-string 100 ?y))))
                 :to-equal '(40 . 24)))
+
+      (it "measures wide characters by the columns they take"
+        (expect (flycheck-error-list--column-widths
+                 (list (flycheck-error-new-at
+                        1 1 'error "a" :filename "日本語.el" :id "エラー")))
+                :to-equal '(9 . 6)))
 
       (it "uses minimum widths without errors"
         (expect (flycheck-error-list--column-widths nil)
