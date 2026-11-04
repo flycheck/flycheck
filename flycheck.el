@@ -2675,6 +2675,7 @@ cached."
         (cl-pushnew checker flycheck--automatically-disabled-checkers))
       may-enable))))
 
+(defvar flycheck-mode)
 (defun flycheck-reset-enabled-checker (checker)
   "Reset the `:enabled' test of CHECKER.
 
@@ -2689,7 +2690,8 @@ state using this function."
   (when (memq checker flycheck--automatically-enabled-checkers)
     (setq flycheck--automatically-enabled-checkers
           (remq checker flycheck--automatically-enabled-checkers)))
-  (flycheck-buffer))
+  (when flycheck-mode
+    (flycheck-buffer)))
 
 (defun flycheck-may-use-checker (checker)
   "Whether a generic CHECKER may be used.
@@ -2911,7 +2913,9 @@ Return a list of `flycheck-verification-result' objects."
                      (interactive)
                      (with-current-buffer buffer
                        (flycheck--toggle-checker checker t)
-                       (flycheck-buffer)))
+                       ;; Verifying works with the mode off too
+                       (when flycheck-mode
+                         (flycheck-buffer))))
   'help-echo "mouse-1, RET: re-enable this checker in this buffer")
 
 (define-button-type 'flycheck-checker-reset-enabled
@@ -3120,7 +3124,14 @@ is applicable from Emacs Lisp code.  Use
                    "Flycheck cannot use this syntax checker for this buffer.\n"
                    'face 'error)))
         (insert "\n")
-        (flycheck--verify-print-footer buffer)))))
+        (flycheck--verify-print-footer buffer)
+        ;; Its buttons revert it once they've acted
+        (setq-local revert-buffer-function
+                    (lambda (_ignore-auto _noconfirm)
+                      (unless (buffer-live-p buffer)
+                        (user-error "The verified buffer is gone"))
+                      (with-current-buffer buffer
+                        (flycheck-verify-checker checker))))))))
 
 (defvar-local flycheck--last-failure nil
   "What the last failed syntax check reported, or nil.
