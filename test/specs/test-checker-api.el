@@ -479,6 +479,25 @@
           (expect flycheck--automatically-disabled-checkers :to-equal '(emacs-lisp))
           (expect counter :to-equal 1)))))
 
+  (describe "flycheck-verify-checker"
+    (it "re-enables a checker from its button with the mode off"
+      (flycheck-buttercup-with-temp-buffer
+        (emacs-lisp-mode)
+        (setq-local flycheck-disabled-checkers '(emacs-lisp))
+        (let ((source (current-buffer)))
+          (save-window-excursion
+            (flycheck-verify-checker 'emacs-lisp)
+            (with-current-buffer "*Flycheck checker*"
+              (goto-char (point-min))
+              (search-forward "enable")
+              (push-button (button-at (1- (point))))
+              ;; Refreshed by the button, still about the same checker
+              (expect (buffer-string) :to-match "emacs-lisp")
+              (expect (buffer-string) :not :to-match "manually disabled")
+              (kill-buffer)))
+          (expect (buffer-local-value 'flycheck-disabled-checkers source)
+                  :not :to-contain 'emacs-lisp)))))
+
   (describe "flycheck-unload-function"
     (it "takes the bridges' hooks out of Eglot and stops the servers"
       (spy-on 'flycheck-lsp--shutdown-all)
