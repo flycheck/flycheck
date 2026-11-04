@@ -19535,12 +19535,10 @@ python3.exe may be a Microsoft Store stub.  An executable the user
 already chose is kept."
   (unless (ignore-errors (zerop (call-process "python3" nil nil nil "--version")))
     (dolist (checker '(json-python-json python-flake8 python-pylint
-                       python-pycompile))
+                       python-pycompile salt-lint))
       (let ((var (flycheck-checker-executable-variable checker)))
         (unless (default-value var)
           (set-default var "python"))))))
-
-(flycheck--python-fallback)
 
 (defun flycheck-pyright--parse-error (output checker buffer)
   "Parse pyright errors/warnings from JSON OUTPUT.
@@ -20970,11 +20968,15 @@ See URL `https://github.com/rust-lang/rust-clippy'."
   "A salt linter which applies common best practices for SaltStack.
 
 See URL `https://salt-lint.readthedocs.io/en/latest/'."
-  :command ("python" "-m" "saltlint" "--json")
+  :command ("python3" "-m" "saltlint" "--json")
   :standard-input t
   :error-parser flycheck-salt-lint-parser
   :error-filter flycheck-sanitize-errors
-  :modes salt-mode)
+  :modes salt-mode
+  ;; The interpreter may well lack the module: salt-lint is often
+  ;; installed with pipx, into an interpreter of its own
+  :enabled (lambda () (flycheck-python-find-module 'salt-lint "saltlint"))
+  :verify (lambda (_) (flycheck-python-verify-module 'salt-lint "saltlint")))
 
 (defun flycheck-salt-lint-parser (output checker buffer)
   "Parse salt lint JSON errors from OUTPUT.
@@ -22184,6 +22186,9 @@ See URL `https://github.com/adrienverge/yamllint'."
   (flycheck-error-explainer-from-url
    "https://yamllint.readthedocs.io/en/stable/rules.html#module-yamllint.rules.%s"
    (lambda (id) (string-replace "-" "_" id))))
+
+;; Once every checker it covers is defined
+(flycheck--python-fallback)
 
 (provide 'flycheck)
 

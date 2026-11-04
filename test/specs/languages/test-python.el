@@ -12,11 +12,13 @@
       (let ((flycheck-python-flake8-executable "/opt/py/bin/python3.12")
             (flycheck-python-pylint-executable nil)
             (flycheck-json-python-json-executable nil)
-            (flycheck-python-pycompile-executable nil))
+            (flycheck-python-pycompile-executable nil)
+            (flycheck-salt-lint-executable nil))
         (flycheck--python-fallback)
         (expect flycheck-python-flake8-executable
                 :to-equal "/opt/py/bin/python3.12")
-        (expect flycheck-python-pylint-executable :to-equal "python"))))
+        (expect flycheck-python-pylint-executable :to-equal "python")
+        (expect flycheck-salt-lint-executable :to-equal "python"))))
 
   (flycheck-buttercup-def-checker-test python-flake8 python syntax-error
     (assume (flycheck-buttercup-python-module-available-p
