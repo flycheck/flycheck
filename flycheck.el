@@ -4889,8 +4889,8 @@ If the buffer of ERR is not live, FORMS are not evaluated."
 
 Return a cons cell `(BEG . END)'.  If the input range is empty,
 it is expanded to cover at least one character so that END is
-always greater than BEG.  If ERR doesn't specify an end-column
-return nil."
+greater than BEG, except in an empty buffer.  If ERR doesn't specify
+an end-column return nil."
   (if-let* ((line (flycheck-error-line err))
             (column (flycheck-error-column err))
             (end-line (or (flycheck-error-end-line err) line))
@@ -4901,7 +4901,8 @@ return nil."
              (end (flycheck-line-column-to-position end-line end-column)))
         (cond
          ((< beg end) (cons beg end))
-         ((= end (point-max)) (cons (1- end) end))
+         ;; An empty buffer has no character to take
+         ((= end (point-max)) (cons (max (point-min) (1- end)) end))
          (t (cons end (1+ end)))))))
 
 (defun flycheck--line-region (pos)
@@ -4931,11 +4932,12 @@ end of the line."
   "Get the column region of position POS.
 
 Return a cons cell `(BEG . END)' where BEG is the position at
-the column, and END is one past it."
+the column, and END is one past it, except in an empty buffer, where
+both are its only position."
   (save-excursion
     (goto-char pos)
-    ;; (eobp): Not enough lines in the buffer
-    (if (eobp) (cons (1- (point-max)) (point-max))
+    ;; (eobp): Not enough lines in the buffer, if any at all
+    (if (eobp) (cons (max (point-min) (1- (point-max))) (point-max))
       (cons pos (1+ pos)))))
 
 (defun flycheck-bounds-of-thing-at-point (thing pos)
@@ -5539,7 +5541,9 @@ beginning position)."
             (if (or (null end-column) (equal column (1- end-column)))
                 (format "%d:%d" line column)
               (format "%d:%d-%d" line column end-column))
-          (format "(%d:%d)-(%d:%d)" line column end-line end-column))
+          (if end-column
+              (format "(%d:%d)-(%d:%d)" line column end-line end-column)
+            (format "(%d:%d)-%d" line column end-line)))
       (if (or (null end-line) (equal line end-line))
           (format "%d" line)
         (format "%d-%d" line end-line)))))

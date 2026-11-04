@@ -51,6 +51,17 @@
         (insert "\nfoo\n")
         (expect (flycheck--line-region 1) :to-equal '(1 . 2)))))
 
+  (describe "Regions in an empty buffer"
+    (it "stay within the buffer"
+      (flycheck-buttercup-with-temp-buffer
+        (dolist (err (list (flycheck-error-new-at 1 1)
+                           (flycheck-error-new-at 1 1 nil nil
+                                                  :end-line 1 :end-column 1)))
+          (dolist (mode '(lines columns symbols sexps))
+            (pcase-let ((`(,beg . ,end) (flycheck-error-region-for-mode err mode)))
+              (expect beg :to-be-greater-than 0)
+              (expect end :to-be-greater-than 0)))))))
+
   (describe "flycheck-error-column-region"
     (it "computes the region for a column"
       (flycheck-buttercup-with-temp-buffer
@@ -308,7 +319,8 @@
         (expect (fmt 14 1   14  2)   :to-equal "14:1")
         (expect (fmt 14 1   14  1)   :to-equal "14:1-1")
         (expect (fmt 14 1   14  5)   :to-equal "14:1-5")
-        (expect (fmt 14 1   15  5)   :to-equal "(14:1)-(15:5)"))))
+        (expect (fmt 14 1   15  5)   :to-equal "(14:1)-(15:5)")
+        (expect (fmt 14 1   15  nil) :to-equal "(14:1)-15"))))
 
   (describe "flycheck-error-<"
     (it "compares by line without column"

@@ -37,6 +37,7 @@
 
 ### Bugs fixed
 
+- [#2418](https://github.com/flycheck/flycheck/pull/2418): An error in an empty buffer gets a region inside the buffer, which its tooltip needs, and `flycheck-error-format-position` handles an error spanning lines without an end column.
 - [#2418](https://github.com/flycheck/flycheck/pull/2418): A file-local nil for the minimum level options is safe, as documented, and Customize offers the nil that turns off `flycheck-display-errors-function`, `flycheck-clear-displayed-errors-function` and `flycheck-help-echo-function`.
 - [#2418](https://github.com/flycheck/flycheck/pull/2418): `flycheck-version` reports Flycheck's own version when Flycheck is loaded from source, instead of one read off the name of the file the current buffer visits.
 - [#2418](https://github.com/flycheck/flycheck/pull/2418): A checker that runs no process, such as `eglot-check`, works in a buffer whose directory is gone, and a command checker there says it cannot run in the missing directory instead of blaming a `:working-directory` it doesn't have.
