@@ -410,7 +410,7 @@ Regardless of the value, checks triggered on every keystroke (the
 `new-line' condition) coalesce behind a running check, and
 checkers without an `:interrupt' function are never interrupted.
 Interactive checks (\\[flycheck-buffer]) are exempt from the age
-limit -- you asked for fresh results explicitly -- but nil
+limit, since you asked for fresh results explicitly, but nil
 disables interruption even for them.
 
 This variable is buffer-local friendly: set it to nil via file or
@@ -1593,12 +1593,9 @@ which is the case when Flycheck was not installed as a package.")
 If called interactively or if SHOW-VERSION is non-nil, show the
 version in the echo area and the messages buffer.
 
-The returned string includes both, the version from package.el
-and the library version, if both are present and different.
-
-If the version number could not be determined, signal an error,
-if called interactively, or if SHOW-VERSION is non-nil, otherwise
-just return nil."
+The version comes from the package metadata when Flycheck was
+installed as a package, and from the constant `flycheck-version'
+otherwise."
   (interactive (list t))
   (let ((version (flycheck--pkg-version)))
     (when show-version
@@ -1951,7 +1948,7 @@ Safely delete all files and directories listed in
 ;; We use a custom tree-walking expander instead of `rx-define' or
 ;; `rx-let' because those don't support optional arguments with
 ;; defaults.  For example, `(file-name)' should use a default body
-;; while `(file-name SEXP ...)' uses a custom one — this conditional
+;; while `(file-name SEXP ...)' uses a custom one, and this conditional
 ;; logic cannot be expressed with `rx-define's parameter mechanism,
 ;; which only supports required args and `&rest'.
 (defun flycheck--rx-expand (form)
@@ -2469,8 +2466,8 @@ are mandatory.
 
      Each ITEM is a cons cell `(LEVEL . CHECKER)'.  CHECKER is a
      syntax checker to run after this syntax checker.  LEVEL is
-     an error level.  CHECKER will only be used if there are no
-     current errors of at least LEVEL.  LEVEL may also be t, in
+     an error level.  CHECKER will only be used if there is no
+     current error more severe than LEVEL.  LEVEL may also be t, in
      which case CHECKER is used regardless of the current errors.
 
      ITEM may also be a syntax checker symbol, which is
@@ -3463,18 +3460,19 @@ request features at URL `https://github.com/flycheck/flycheck'.
 Flycheck displays its status in the mode line.  In the default
 configuration, it looks like this:
 
-`FlyC'     This buffer has not been checked yet.
-`FlyC*'    Flycheck is running.  Expect results soon!
-`FlyC:0'   Last check resulted in no errors and no warnings.
-`FlyC:3|5' This buffer contains three errors and five warnings.
-           Use `\\[flycheck-list-errors]' to see the list.
-`FlyC-'    Flycheck doesn't have a checker for this buffer.
+`FlyC'       This buffer has not been checked yet.
+`FlyC*'      Flycheck is running.  Expect results soon!
+`FlyC:0'     Last check reported nothing at all.
+`FlyC:3|5|1' This buffer contains three errors, five warnings and
+             one info message.  Use `\\[flycheck-list-errors]' to see
+             the list.
+`FlyC-'      Flycheck doesn't have a checker for this buffer.
 
 You may also see the following icons:
-`FlyC!'    The checker crashed.
-`FlyC.'    The last syntax check was manually interrupted.
-`FlyC?'    The checker did something unexpected, like exiting with 1
-           but returning no errors.
+`FlyC!'      The checker crashed.
+`FlyC.'      The last syntax check was manually interrupted.
+`FlyC?'      The checker did something unexpected, like exiting with 1
+             but returning no errors.
 
 The following keybindings are available in `flycheck-mode':
 
@@ -4348,8 +4346,8 @@ if `flycheck-mode' is still active (it may have been killed by
 (defun flycheck-must-defer-check ()
   "Determine whether the syntax check has to be deferred.
 
-A check has to be deferred if the buffer is not visible, or if the buffer is
-currently being reverted.
+A check has to be deferred if the buffer is not visible, if the buffer is
+currently being reverted, or if a check is already running.
 
 Return t if the check is to be deferred, or nil otherwise."
   (or (flycheck--must-defer-regardless-of-running-p)
@@ -4888,7 +4886,8 @@ closes is usually what the error is about."
 
 ERR is a Flycheck error.  If its position is fully specified, use
 that to compute a region; otherwise, use MODE, as documented in
-`flycheck-highlighting-mode'.  If MODE is nil, signal an error."
+`flycheck-highlighting-mode'.  If MODE is nil, take the column ERR
+is on, as `columns' does."
   (flycheck-error-with-buffer err
     (save-restriction
       (widen)
@@ -6412,8 +6411,8 @@ The following PROPERTIES constitute an error level:
      A display specification indicating what to display in the
      margin when `flycheck-indication-mode' is `left-margin' or
      `right-margin'.  See Info node `(elisp)Displaying in the
-     Margins'.  If omitted, Flycheck generates an image spec from
-     the fringe bitmap.
+     Margins'.  If omitted, Flycheck shows
+     `flycheck-default-margin-str' in the fringe face.
 
 `:error-list-face FACE'
      A face symbol denoting the face to use for messages of this
@@ -7954,7 +7953,7 @@ read the project-wide diagnostics of that buffer's project."
                           flycheck-error-list-source-buffer))))
 
 (defun flycheck-error-list--abbreviate-filename (filename)
-  "Abbreviate FILENAME for a group header, relative to the source project."
+  "Abbreviate FILENAME for a group header, relative to the source's directory."
   (if-let* ((filename)
             (dir (and (buffer-live-p flycheck-error-list-source-buffer)
                       (buffer-local-value 'default-directory
@@ -9818,7 +9817,7 @@ annotated on the next command."
 
 All of them go in as one entry, a line each, so a single yank pastes
 everything reported at POS.  They used to go in one at a time, which put
-the rest behind \[yank-pop] and left a paste showing only one of them.
+the rest behind \\[yank-pop] and left a paste showing only one of them.
 
 FORMATTER is a function to turn an error into a string,
 defaulting to `flycheck-error-message'.
@@ -11070,7 +11069,7 @@ contained no errors Flycheck could read:\n\n%s"
                          errors))))))
 
 
-;;; Executables of command checkers.
+;;; Executables of command checkers
 (defmacro flycheck-def-executable-var (checker default-executable)
   "Define the executable variable for CHECKER.
 
@@ -11315,10 +11314,10 @@ SEPARATOR is ignored in this case."
 (defmacro flycheck-def-args-var (symbol checkers &rest custom-args)
   "Define SYMBOL as argument variable for CHECKERS.
 
-SYMBOL is declared as customizable, risky and buffer-local
-variable using `defcustom' to provide an option for arbitrary
-arguments for the given syntax CHECKERS (either a single checker
-or a list of checkers).  CUSTOM-ARGS is forwarded to `defcustom'.
+SYMBOL is declared as customizable and risky variable using
+`defcustom' to provide an option for arbitrary arguments for the
+given syntax CHECKERS (either a single checker or a list of
+checkers).  CUSTOM-ARGS is forwarded to `defcustom'.
 
 Use the `eval' form to splice this variable into the
 `:command'."
@@ -12676,8 +12675,8 @@ preference can be turned on for one language, or for one project
 through a directory-local value.
 
 A checker chosen with \\[flycheck-select-checker], or set as a
-file-local `flycheck-checker', is never substituted, and neither is a
-buffer on a remote host, which the native client declines.
+file-local `flycheck-checker', is never substituted.  A buffer on a
+remote host is substituted too, by a server started on that host.
 
 The server reads its own configuration file rather than Flycheck's
 options, so `flycheck-rubocop-except' and its like configure the
@@ -12845,8 +12844,8 @@ selected, so a deliberate choice is left alone."
                                                          major-mode)
            (flycheck-add-mode 'flycheck-lsp major-mode))
          ;; Ask the same question as any other candidate, so a disabled
-         ;; `flycheck-lsp' stays disabled and the buffer-file-name and
-         ;; remote guards live in one place.
+         ;; `flycheck-lsp' stays disabled and the buffer-file-name guard
+         ;; lives in one place.
          (flycheck-may-use-checker 'flycheck-lsp))
        'flycheck-lsp))
 
@@ -14596,7 +14595,7 @@ Relative paths are relative to the file being checked."
 
 The value of this variable is either a string denoting a language
 standard, or nil, to use the default standard. When non-nil, pass
-the language standard via the `-std' option."
+the language standard as a `-gnat' switch, e.g. `-gnat2012'."
   :type '(choice (const :tag "Default standard" nil)
                  (string :tag "Language standard"))
   :safe #'string-or-null-p
@@ -14607,8 +14606,8 @@ the language standard via the `-std' option."
   "A list of additional Ada warnings to enable in GNAT.
 
 The value of this variable is a list of strings, where each
-string is the name of a warning category to enable. By default,
-most optional warnings are recommended, as in `-gnata'.
+string is a warning switch to pass after `-gnat', e.g. \"wa\" for
+`-gnatwa', which the default uses to enable most optional warnings.
 
 Refer to Info Node `(gnat_ugn_unw)Warning Message Control' for
 more information about GNAT warnings."
@@ -16803,7 +16802,7 @@ details."
   :type '(choice (const :tag "Unspecified" nil)
                  (string :tag "Version"))
   :safe #'string-or-null-p
-  :package-version '(flycheck . "0.32"))
+  :package-version '(flycheck . "32"))
 
 (flycheck-def-args-var flycheck-go-build-args go-build
   :package-version '(flycheck . "39"))
@@ -17723,12 +17722,12 @@ The value of this variable is a list of strings, where each
 string is a directory to add to the include path via `-J'."
   :type '(repeat (directory :tag "Include directory"))
   :safe #'flycheck-string-list-p
-  :package-version '(flycheck . "35.0"))
+  :package-version '(flycheck . "35"))
 
 (define-obsolete-variable-alias 'flycheck-jsonnet-command-args
   'flycheck-jsonnet-args "39")
 (flycheck-def-args-var flycheck-jsonnet-args jsonnet
-  :package-version '(flycheck . "35.0"))
+  :package-version '(flycheck . "35"))
 
 (flycheck-def-option-var flycheck-jsonnet-ext-code-files nil jsonnet
   "External code files for the jsonnet binary.
@@ -18767,7 +18766,7 @@ because it adds the current directory to Python's path)."
 (defcustom flycheck-python-project-files
   '("pyproject.toml" "setup.cfg" "mypy.ini" "pyrightconfig.json")
   "Files used to find where to run Python checkers from.
-Currently used for pylint, flake8, and pyright.
+Every Python checker runs from the directory they mark.
 
 The presence of one of these files indicates the root of the
 current project; `.pylintrc' is not part of the list because it
@@ -19369,7 +19368,7 @@ lintr::lint() function."
 (flycheck-define-checker r-lintr
   "An R style and syntax checker using the lintr package.
 
-See URL `https://github.com/jimhester/lintr'."
+See URL `https://github.com/r-lib/lintr'."
   :command ("R" "--slave" "--no-restore" "--no-save" "-e"
             (eval (concat
                    "library(lintr);"
@@ -19809,7 +19808,7 @@ See URL `https://nixos.org/nix/manual/#sec-nix-instantiate'."
 CHECKER and BUFFER denote the CHECKER that returned OUTPUT and
 the BUFFER that was checked respectively.
 
-See URL `https://github.com/nerdypepper/statix' for more
+See URL `https://github.com/oppiliappan/statix' for more
 information about statix."
   (mapcar (lambda (err)
             (let-alist err
@@ -19840,7 +19839,7 @@ information about statix."
 (flycheck-define-checker statix
   "Nix checker using statix.
 
-See URL `https://github.com/nerdypepper/statix'."
+See URL `https://github.com/oppiliappan/statix'."
   :command ("statix" "check" "-o=json"
             (eval flycheck-statix-args)
             source)
@@ -20551,7 +20550,7 @@ This syntax checker needs Rust 1.18 or newer.  See URL
 (flycheck-define-checker rust-clippy
   "A Rust syntax checker using clippy.
 
-See URL `https://github.com/rust-lang-nursery/rust-clippy'."
+See URL `https://github.com/rust-lang/rust-clippy'."
   :command ("cargo" "clippy"
             (option "--features=" flycheck-rust-features concat
                     flycheck-option-comma-separated-list)
