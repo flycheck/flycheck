@@ -14671,25 +14671,33 @@ manage never asks."
   "Convert DIAG, parked by Eglot for the unvisited FILE, to an error.
 
 DIAG is a Flymake diagnostic whose locus is a file name rather than a
-buffer: its position is a (LINE . COLUMN) cons, both one-based, and it
-carries no LSP data, so there is no id, no related locations and no end
-position.  Returns nil when the position cannot be read."
-  ;; Flymake's own project listing reads the position off the raw slot,
-  ;; with the same fallback; the public `flymake-diagnostic-beg' wants an
-  ;; annotated diagnostic and these are never annotated.
-  (when-let* ((beg (or (and (fboundp 'flymake--diag-beg)
-                            (let ((beg (flymake--diag-beg diag)))
-                              (and (consp beg) beg)))
-                       (and (fboundp 'flymake--diag-orig-beg)
-                            (let ((beg (flymake--diag-orig-beg diag)))
-                              (and (consp beg) beg))))))
-    (flycheck-error-new-at
-     (car beg) (cdr beg)
-     (flycheck-eglot--type-level (flymake-diagnostic-type diag))
-     (flycheck-eglot--diag-message diag)
-     :checker 'eglot-check
-     :filename file
-     :buffer nil)))
+buffer, and whose position is a (LINE . COLUMN) cons, both one-based.
+Eglot attaches the LSP diagnostic to it since Emacs 31, read as
+`flycheck-lsp' reads one about an unvisited file, for the message and
+the id; without that, there is no id.  Neither gives an end position.
+Returns nil when the position cannot be read."
+  (if-let* ((lsp (and (fboundp 'flymake-diagnostic-data)
+                      (alist-get 'eglot-lsp-diag
+                                 (flymake-diagnostic-data diag)))))
+      (let ((err (flycheck-lsp--list-only-error file lsp)))
+        (setf (flycheck-error-checker err) 'eglot-check)
+        err)
+    ;; Flymake's own project listing reads the position off the raw slot,
+    ;; with the same fallback; the public `flymake-diagnostic-beg' wants an
+    ;; annotated diagnostic and these are never annotated.
+    (when-let* ((beg (or (and (fboundp 'flymake--diag-beg)
+                              (let ((beg (flymake--diag-beg diag)))
+                                (and (consp beg) beg)))
+                         (and (fboundp 'flymake--diag-orig-beg)
+                              (let ((beg (flymake--diag-orig-beg diag)))
+                                (and (consp beg) beg))))))
+      (flycheck-error-new-at
+       (car beg) (cdr beg)
+       (flycheck-eglot--type-level (flymake-diagnostic-type diag))
+       (flycheck-eglot--diag-message diag)
+       :checker 'eglot-check
+       :filename file
+       :buffer nil))))
 
 (defun flycheck-eglot--project-extra-errors (project-key buffers)
   "Return Eglot's diagnostics for unvisited files under PROJECT-KEY.

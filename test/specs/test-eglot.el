@@ -107,14 +107,37 @@ half-assembled answer and passes for the wrong reason."
   (describe "project diagnostics for unvisited files"
 
     ;; Eglot parks a push about a file no buffer visits in Flymake's
-    ;; `flymake-list-only-diagnostics', as (LINE . COLUMN) file diagnostics
-    ;; with no LSP payload; the bridge folds them into the project view.
+    ;; `flymake-list-only-diagnostics', as (LINE . COLUMN) file diagnostics,
+    ;; with the LSP diagnostic attached since Emacs 31; the bridge folds
+    ;; them into the project view.
 
     (cl-flet ((parked (file line col type text)
                 (cons file (list (flymake-make-diagnostic
                                   file (cons line col) nil type text)))))
 
       (let ((project (file-name-as-directory (expand-file-name "/proj"))))
+
+        (it "reads the LSP diagnostic Eglot attaches to a parked one"
+          (let* ((file (expand-file-name "box/box.go" project))
+                 (lsp '(:range (:start (:line 27 :character 1)
+                                :end (:line 27 :character 2))
+                        :severity 2 :code "UndeclaredName" :source "compiler"
+                        :message "undefined: a"))
+                 (flymake-list-only-diagnostics
+                  (list (cons file
+                              (list (flymake-make-diagnostic
+                                     file (cons 28 2) nil 'eglot-error
+                                     "compiler [UndeclaredName]: undefined: a"
+                                     `((eglot-lsp-diag . ,lsp))))))))
+            (flycheck-buttercup-with-temp-buffer
+              (setq-local flycheck-eglot-mode t)
+              (expect (flycheck-eglot--project-extra-errors project nil)
+                      :to-be-equal-flycheck-errors
+                      (list (flycheck-error-new-at
+                             28 2 'warning "undefined: a"
+                             :id "UndeclaredName"
+                             :checker 'eglot-check
+                             :filename file :buffer nil))))))
 
         (it "converts a parked diagnostic to an error of the unvisited file"
           (let* ((file (expand-file-name "box/box.go" project))
