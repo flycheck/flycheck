@@ -37,6 +37,7 @@
 
 ### Bugs fixed
 
+- [#2419](https://github.com/flycheck/flycheck/pull/2419): `html-tidy` checks buffers in Emacs 31's `mhtml-ts-mode`.
 - [#2419](https://github.com/flycheck/flycheck/pull/2419): `python-pycompile` reports a `TabError` for inconsistent tabs and spaces.
 - [#2419](https://github.com/flycheck/flycheck/pull/2419): `haskell-ghc` and `haskell-stack-ghc` link GHC's errors to the error index: they take GHC 9.6's error code alone as the id, without the warning flag after it, pad the codes JSON diagnostics give to five digits, and explain only error codes.
 - [#2419](https://github.com/flycheck/flycheck/pull/2419): `json-jq` no longer reports errors read out of the checked document itself, as jq no longer prints it back.
