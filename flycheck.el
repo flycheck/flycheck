@@ -11913,10 +11913,9 @@ information about staticcheck."
 Every span in FILE with a `suggested_replacement' whose
 `suggestion_applicability' is \"MachineApplicable\" becomes one
 edit, so a multi-part suggestion (e.g. inserting a `(' and a `)')
-is applied in full.  Spans in another file -- a suggestion that
-reaches into a macro or a different source file -- are dropped, so
-the fix never edits this buffer at foreign line and column
-numbers."
+is applied in full.  Spans in another file, of a suggestion that
+reaches into a macro or a different source file, are dropped, so the
+fix never edits BUFFER at another file's line and column numbers."
   (let ((edits
          (delq nil
                (seq-map
@@ -12021,10 +12020,17 @@ https://github.com/rust-lang/rust/blob/master/src/librustc_errors/json.rs#L154"
          errors)))
 
     ;; Then we turn children messages into flycheck errors pointing to the
-    ;; location of the primary span.
+    ;; location of their first span, or else of the primary span.
     (dolist (child children)
       (let* ((message (let-alist child .message))
              (child-spans (let-alist child .spans))
+             ;; A note can point into another file than the primary span,
+             ;; at a definition or a bound in the standard library, say.
+             ;; It stays at the primary span, where the error it explains
+             ;; is, and points at that place as a related location.
+             (elsewhere (let-alist (car child-spans)
+                          (and .file_name primary-filename
+                               (not (equal .file_name primary-filename)))))
              ;; A child's suggestion may span several places (e.g. inserting
              ;; a `(' and a matching `)'); collect all of them into one fix.
              ;; A child's fix applies to the diagnostic's primary file; drop
@@ -12037,8 +12043,8 @@ https://github.com/rust-lang/rust/blob/master/src/librustc_errors/json.rs#L154"
             ;; Use the line/column from the first span if there is one, or
             ;; fallback to the line/column information from the primary span of
             ;; the diagnostic.
-            (or .line_start primary-line)
-            (or .column_start primary-column)
+            (if elsewhere primary-line (or .line_start primary-line))
+            (if elsewhere primary-column (or .column_start primary-column))
             'info
             ;; Messages from `cargo clippy' may suggest replacement code.  In
             ;; these cases, the `message' field itself is an unhelpful `try' or
@@ -12056,8 +12062,18 @@ https://github.com/rust-lang/rust/blob/master/src/librustc_errors/json.rs#L154"
             :buffer buffer
             :filename primary-filename
             :group group
-            :end-line (or .line_end primary-end-line)
-            :end-column (or .column_end primary-end-column)
+            :end-line (if elsewhere
+                          primary-end-line
+                        (or .line_end primary-end-line))
+            :end-column (if elsewhere
+                            primary-end-column
+                          (or .column_end primary-end-column))
+            :relations (when elsewhere
+                         (list (flycheck-related-location-new
+                                :filename .file_name
+                                :line .line_start :column .column_start
+                                :end-line .line_end :end-column .column_end
+                                :message message)))
             :fix fix)
            errors))))
 
