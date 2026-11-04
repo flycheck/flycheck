@@ -9847,11 +9847,13 @@ line at point when the buffer isn't displayed."
       ;; with its update flag, which would force a redisplay simulation on
       ;; this hot path.  A slight over-scan past the last visible line is
       ;; harmless; we only use the region to collect errors to annotate.
+      ;; Screen lines, not buffer lines: folded text hides any number of
+      ;; them in one
       (let ((start (window-start win)))
         (cons start
               (save-excursion
                 (goto-char start)
-                (forward-line (window-body-height win))
+                (vertical-motion (window-body-height win) win)
                 (point))))
     (cons (line-beginning-position) (line-end-position))))
 
@@ -9860,11 +9862,14 @@ line at point when the buffer isn't displayed."
 
 Return an alist mapping the end-of-line position of each line to the
 list of errors on it, in buffer order.  Skips errors that belong to
-another file."
+another file, and errors in invisible text, as in a fold."
   (let ((groups nil))
     (dolist (ov (flycheck-overlays-in beg end))
       (when-let* ((err (overlay-get ov 'flycheck-error)))
-        (unless (flycheck-relevant-error-other-file-p err)
+        (unless (or (flycheck-relevant-error-other-file-p err)
+                    ;; Folded away, never drawn, and a fold may hold
+                    ;; any number of them
+                    (invisible-p (overlay-start ov)))
           (let* ((anchor (save-excursion
                            (goto-char (overlay-start ov))
                            (line-end-position)))

@@ -935,6 +935,51 @@ block replaces that line's newline, so it begins with one."
           (flycheck-annotate--post-command)
           (expect 'flycheck-annotate--refresh :to-have-been-called))))
 
+  (describe "the annotated region"
+    (it "reaches past folded text to the bottom of the window"
+      ;; A fold hides any number of lines in one screen line
+      (flycheck-buttercup-with-temp-buffer
+        (save-window-excursion
+          (set-window-buffer (selected-window) (current-buffer))
+          (dotimes (i 200) (insert (format "line %d\n" (1+ i))))
+          (goto-char (point-min))
+          (forward-line 1)
+          (let ((fold (make-overlay (point) (progn (forward-line 150) (point)))))
+            (overlay-put fold 'invisible t))
+          (goto-char (point-min))
+          (set-window-start (selected-window) (point-min))
+          (expect (line-number-at-pos (cdr (flycheck-annotate--region)))
+                  :to-be-greater-than 152)))))
+
+  (describe "folded text"
+    (it "leaves the errors folded away unannotated"
+      (flycheck-buttercup-with-temp-buffer
+        (save-window-excursion
+          (set-window-buffer (selected-window) (current-buffer))
+          (dotimes (i 20) (insert (format "line %d\n" (1+ i))))
+          (setq-local flycheck-mode t)
+          (dolist (line '(1 5 10))
+            (flycheck-add-overlay
+             (flycheck-error-new-at line 1 'warning (format "w%d" line)
+                                    :buffer (current-buffer)
+                                    :checker 'emacs-lisp)))
+          ;; Lines 2 to 16 folded under line 1, from its newline on, as
+          ;; outline folds them
+          (goto-char (point-min))
+          (overlay-put (make-overlay (line-end-position)
+                                     (progn (forward-line 15)
+                                            (line-end-position)))
+                       'invisible t)
+          (goto-char (point-min))
+          (set-window-start (selected-window) (point-min))
+          (let ((flycheck-annotate-mode t)
+                (flycheck-annotate-current-line-style 'eol)
+                (flycheck-annotate-other-lines-style 'eol))
+            (flycheck-annotate--refresh)
+            (expect (length (seq-filter #'test-annotate/text
+                                        flycheck-annotate--overlays))
+                    :to-equal 1))))))
+
   (describe "the background tint"
     (it "adds no tint when disabled"
       (flycheck-buttercup-with-temp-buffer
