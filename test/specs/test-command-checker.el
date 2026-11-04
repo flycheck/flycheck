@@ -109,6 +109,25 @@ afterwards."
     (it "unknown argument cell"
       (expect (flycheck-command-argument-p '(foo bar)) :not :to-be-truthy)))
 
+  (describe "flycheck-fix-error-filename"
+    (it "gives the related locations in the checked copy the buffer's file"
+      (flycheck-buttercup-with-temp-buffer
+        (setq buffer-file-name "/project/a.el")
+        (let* ((copy "/tmp/flycheck-copy/a.el")
+               (elsewhere (flycheck-related-location-new
+                           :filename "/project/b.el" :line 1))
+               (here (flycheck-related-location-new :filename copy :line 2))
+               (err (flycheck-error-new-at 1 1 'error "x"
+                                           :filename copy
+                                           :relations (list here elsewhere))))
+          (flycheck-fix-error-filename err (list copy) "/tmp/")
+          (expect (flycheck-error-filename err) :to-equal "/project/a.el")
+          (expect (flycheck-related-location-filename here)
+                  :to-equal "/project/a.el")
+          (expect (flycheck-related-location-filename elsewhere)
+                  :to-equal "/project/b.el")
+          (set-buffer-modified-p nil)))))
+
   (describe "flycheck-start-command-checker"
 
     (it "wraps command"

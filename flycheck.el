@@ -11664,18 +11664,26 @@ Resolves error file names relative to CWD directory.
 
 Make the file name of ERR absolute.  If the absolute file name of
 ERR is in BUFFER-FILES, replace it with the value of variable
-`buffer-file-name'."
+`buffer-file-name'.  Do the same for the related locations of ERR."
   (flycheck-error-with-buffer err
-    (when-let* ((filename (flycheck-error-filename err)))
-      (when (seq-some (apply-partially #'flycheck-same-files-p
-                                       (flycheck--expand-file-name filename cwd))
-                      buffer-files)
-        (setf (flycheck-error-filename err) buffer-file-name)
-        (when (and buffer-file-name (flycheck-error-message err))
-          (setf (flycheck-error-message err)
-                (replace-regexp-in-string
-                 (regexp-quote filename) buffer-file-name
-                 (flycheck-error-message err) 'fixed-case 'literal))))))
+    (let ((checked-p (lambda (filename)
+                       (seq-some (apply-partially
+                                  #'flycheck-same-files-p
+                                  (flycheck--expand-file-name filename cwd))
+                                 buffer-files))))
+      (when-let* ((filename (flycheck-error-filename err)))
+        (when (funcall checked-p filename)
+          (setf (flycheck-error-filename err) buffer-file-name)
+          (when (and buffer-file-name (flycheck-error-message err))
+            (setf (flycheck-error-message err)
+                  (replace-regexp-in-string
+                   (regexp-quote filename) buffer-file-name
+                   (flycheck-error-message err) 'fixed-case 'literal)))))
+      (dolist (relation (flycheck-error-relations err))
+        (when-let* ((filename (flycheck-related-location-filename relation)))
+          (when (funcall checked-p filename)
+            (setf (flycheck-related-location-filename relation)
+                  buffer-file-name))))))
   err)
 
 
