@@ -37,6 +37,7 @@
 
 ### Bugs fixed
 
+- [#2414](https://github.com/flycheck/flycheck/pull/2414): A related location without a file of its own, visited from the error list or from a button in an error message, opens in the buffer of its error instead of whichever buffer the button was in.
 - [#2414](https://github.com/flycheck/flycheck/pull/2414): `X` in the error list leaves the errors its filters hide alone, as documented.
 - [#2414](https://github.com/flycheck/flycheck/pull/2414): Sorting the error list by level keeps each level's errors in order, and a grouped list can't be sorted by a column any more, which scattered its rows away from their groups.
 - [#2414](https://github.com/flycheck/flycheck/pull/2414): The error list no longer breaks redisplay once its source buffer is killed or when its message filter has a `%`, sizes its columns by display width so wide characters don't throw them off, and goes to the error on `RET` over an ID nothing explains.

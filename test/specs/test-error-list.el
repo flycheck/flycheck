@@ -212,6 +212,23 @@
             (flycheck-error-list-visit-related-location)))
         (expect visited :to-be loc)))
 
+    (it "visits a location without a file in the buffer of its error"
+      (let* ((source (generate-new-buffer " source"))
+             (loc (flycheck-related-location-new :line 2 :column 3 :message "a"))
+             (err (flycheck-error-new-at 1 1 'error "x" :checker 'emacs-lisp
+                                         :buffer source :relations (list loc))))
+        (unwind-protect
+            (progn
+              (with-current-buffer source (insert "one\ntwo\n"))
+              (with-temp-buffer
+                (insert (propertize "row" 'tabulated-list-id err))
+                (goto-char (point-min))
+                (save-window-excursion
+                  (flycheck-error-list-visit-related-location)
+                  (expect (current-buffer) :to-be source)
+                  (expect (flycheck-line-column-at-point) :to-equal '(2 . 3)))))
+          (kill-buffer source))))
+
     (it "signals a user-error when the error at point has no related locations"
       (with-temp-buffer
         (insert (propertize "row" 'tabulated-list-id
