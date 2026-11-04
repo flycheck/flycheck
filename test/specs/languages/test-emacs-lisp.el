@@ -61,7 +61,41 @@
                                     flycheck/excluded-checkdoc-vars))))
         (expect (seq-sort #'string-lessp flycheck-emacs-lisp-checkdoc-variables)
                 :to-equal
-                (seq-sort #'string-lessp checkdoc-relevant-vars)))))
+                (seq-sort #'string-lessp checkdoc-relevant-vars))))
+
+    (describe "a value saved through Customize before checkdoc loads"
+      ;; Customize keeps it as the saved value until the variable is
+      ;; defined, and evaluates it only then
+      (cl-flet ((checkdoc-sees (saved)
+                  (put 'flycheck-test--checkdoc-option 'saved-value
+                       (list saved))
+                  (unwind-protect
+                      (let* ((flycheck-emacs-lisp-checkdoc-variables
+                              '(flycheck-test--checkdoc-option))
+                             (form
+                              `(progn
+                                 ,(flycheck-emacs-lisp-checkdoc-variables-form)
+                                 (defvar flycheck-test--checkdoc-base "saved")
+                                 (defcustom flycheck-test--checkdoc-option
+                                   "default"
+                                   "An option." :type 'string :group 'emacs)
+                                 (princ flycheck-test--checkdoc-option))))
+                        (with-temp-buffer
+                          (call-process flycheck-this-emacs-executable
+                                        nil '(t nil) nil
+                                        "-Q" "--batch" "--eval"
+                                        (flycheck-sexp-to-string form))
+                          (buffer-string)))
+                    (put 'flycheck-test--checkdoc-option 'saved-value nil))))
+        (it "is passed on for checkdoc to evaluate as it loads"
+          ;; By then what it refers to is defined too
+          (expect (checkdoc-sees '(upcase flycheck-test--checkdoc-base))
+                  :to-equal "SAVED"))
+
+        (it "gives way to the default when it can't be evaluated there"
+          ;; A value referring to what only this session defines
+          (expect (checkdoc-sees 'flycheck-test--defined-in-session-only)
+                  :to-equal "default")))))
 
   (describe "Trusted content (CVE-2024-53920)"
 

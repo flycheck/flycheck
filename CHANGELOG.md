@@ -37,6 +37,7 @@
 
 ### Bugs fixed
 
+- [#2421](https://github.com/flycheck/flycheck/pull/2421): `emacs-lisp-checkdoc` uses the checkdoc settings saved through Customize even before checkdoc is loaded in the session.
 - [#2421](https://github.com/flycheck/flycheck/pull/2421): `pug` checks a buffer without a file instead of signaling, and keeps the errors in that buffer.
 - [#2421](https://github.com/flycheck/flycheck/pull/2421): Setting `flycheck-python-mypy-cache-dir` to `null-device` writes no mypy cache instead of failing every check.
 - [#2421](https://github.com/flycheck/flycheck/pull/2421): The `null-device` command argument names the null device of the host the checker runs on, so checking files on a POSIX host over TRAMP from Windows passes `/dev/null` rather than `NUL`.
