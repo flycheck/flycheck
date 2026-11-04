@@ -588,7 +588,26 @@
             (flycheck-lsp--handle-notification
              server 'textDocument/publishDiagnostics
              (list :uri uri :diagnostics (vector '(:severity 1 :message "m"))))
-            (expect 'flycheck-buffer-automatically :not :to-have-been-called)))))
+            (expect 'flycheck-buffer-automatically :not :to-have-been-called))))
+      (it "leaves the guard clear after a check in a buffer that lost it"
+        ;; A major-mode change wipes the buffer-local binding, and the
+        ;; check makes a local one of whatever value it sees
+        (flycheck-buttercup-with-temp-buffer
+          (setq-local flycheck-mode t)
+          (spy-on 'flycheck-buffer-automatically :and-call-fake
+                  (lambda (&rest _)
+                    (unless (local-variable-p 'flycheck-lsp--suppress-recheck)
+                      (setq-local flycheck-lsp--suppress-recheck
+                                  flycheck-lsp--suppress-recheck))))
+          (let* ((server (flycheck-lsp--server-create))
+                 (uri "file:///x/a.rb")
+                 (doc (flycheck-lsp--document
+                       server (flycheck-lsp--doc-key uri))))
+            (setf (flycheck-lsp--doc-buffer doc) (current-buffer))
+            (flycheck-lsp--handle-notification
+             server 'textDocument/publishDiagnostics
+             (list :uri uri :diagnostics (vector '(:severity 1 :message "m"))))
+            (expect flycheck-lsp--suppress-recheck :to-be nil)))))
 
     (describe "flycheck-lsp--sync-document"
       (it "sends didOpen first, then didChange only when the text changed"
