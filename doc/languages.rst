@@ -1150,9 +1150,17 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       .. _PHPCS Changed: https://github.com/sirbrillig/phpcs-changed
 
+      phpcs-changed reads the file from git, so the buffer must be saved and
+      tracked by git.
+
       .. defcustom:: flycheck-phpcs-changed-git-base
 
-         The git base branch to compare against (e.g. "main", "master", "trunk").
+         The git object to compare against, or nil.  With nil, report the
+         problems the saved file adds to its staged or committed version.
+         With a branch or commit (e.g. "main"), report the problems the last
+         commit adds to it instead; that checks the committed file rather
+         than the saved one, so errors land on the right lines only while the
+         file has no uncommitted changes.
 
       .. defcustom:: flycheck-phpcs-standard
 

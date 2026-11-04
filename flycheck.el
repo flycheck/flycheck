@@ -18550,14 +18550,32 @@ See URL `https://pear.php.net/package/PHP_CodeSniffer/'."
   ;; buffer is empty, see https://github.com/flycheck/flycheck/issues/907
   :predicate flycheck-buffer-nonempty-p)
 
-(flycheck-def-option-var flycheck-phpcs-changed-git-base "main"
+(flycheck-def-option-var flycheck-phpcs-changed-git-base nil
                          php-phpcs-changed
-  "The git base branch for PHPCS-Changed.
+  "The git object PHPCS-Changed compares against, or nil.
 
-The value of this variable is a string specifying the git branch
-to compare against (e.g. \"main\", \"master\", \"trunk\")."
-  :type '(string :tag "Branch name")
-  :safe #'stringp)
+With nil, report the problems the file as saved adds to its staged or
+committed version.  With a branch, commit or other git object (e.g.
+\"main\"), report the problems the last commit adds to it instead.
+That checks the committed file, not the saved one, so errors land on
+the right lines only while the file has no uncommitted changes."
+  :type '(choice (const :tag "The staged or committed version" nil)
+                 (string :tag "Branch or commit"))
+  :safe #'string-or-null-p
+  :package-version '(flycheck . "40"))
+
+(defun flycheck-phpcs-changed-error-filter (errors)
+  "Expand the file names in ERRORS from PHPCS-Changed.
+
+PHPCS-Changed names files relative to the root of the repository, which
+it runs below, from the file's directory, for phpcs to find the ruleset
+nearest the file."
+  (when-let* ((root (and buffer-file-name
+                         (locate-dominating-file buffer-file-name ".git"))))
+    (dolist (err errors)
+      (when-let* ((file (flycheck-error-filename err)))
+        (setf (flycheck-error-filename err) (expand-file-name file root)))))
+  (flycheck-sanitize-errors errors))
 
 (flycheck-define-checker php-phpcs-changed
   "A PHP style checker using PHPCS-Changed.
@@ -18566,20 +18584,22 @@ Needs PHP Code Sniffer 2.6 or newer.
 See URL `https://github.com/sirbrillig/phpcs-changed'."
   :command ("phpcs-changed"
             "--git"
-            "--git-base" (eval flycheck-phpcs-changed-git-base)
-            "--git-unstaged"
+            ;; Only one mode applies, and `--git-base' wins
+            (option "--git-base" flycheck-phpcs-changed-git-base)
+            (eval (unless flycheck-phpcs-changed-git-base "--git-unstaged"))
+            "--report" "checkstyle"
             (option "--standard=" flycheck-phpcs-standard concat)
             (eval (flycheck-buffer-file-local-name)))
-  :standard-input t
   :error-parser flycheck-parse-checkstyle
-  :error-filter
-  (lambda (errors)
-    (flycheck-sanitize-errors
-     (flycheck-remove-error-file-names "STDIN" errors)))
+  :error-filter flycheck-phpcs-changed-error-filter
   :modes (php-mode php-ts-mode php+-mode)
-  ;; phpcs seems to choke on empty standard input, hence skip phpcs if the
-  ;; buffer is empty, see https://github.com/flycheck/flycheck/issues/907
-  :predicate flycheck-buffer-nonempty-p)
+  ;; It reads the file and its history from git, not from the buffer, and
+  ;; refuses a file git doesn't track; an empty file chokes phpcs, see
+  ;; https://github.com/flycheck/flycheck/issues/907
+  :predicate (lambda ()
+               (and (flycheck-buffer-saved-p)
+                    (flycheck-buffer-nonempty-p)
+                    (vc-git-registered (buffer-file-name)))))
 
 (flycheck-define-checker processing
   "Processing command line tool.

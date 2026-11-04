@@ -75,6 +75,23 @@
                                         :buffer 'buffer
                                         :filename "foo.php"))))))
 
+  (describe "phpcs-changed's checkstyle report"
+    (it "names the file relative to the repository"
+      ;; Recorded from phpcs-changed 3.1.0 run on src/a.php from src/
+      (let ((errors (flycheck-parse-checkstyle "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+<checkstyle version=\"phpcs-changed-3.1.0\">
+	<file name=\"src/a.php\">
+		<error line=\"6\" column=\"15\" severity=\"error\" message=\"Opening brace should be on a new line\" source=\"Squiz.Functions.MultiLineFunctionDeclaration.BraceOnSameLine\"/>
+	</file>
+</checkstyle>
+" 'php-phpcs-changed nil)))
+        (expect (length errors) :to-equal 1)
+        (expect (flycheck-error-filename (car errors)) :to-equal "src/a.php")
+        (expect (flycheck-error-line (car errors)) :to-equal 6)
+        (expect (flycheck-error-id (car errors))
+                :to-equal
+                "Squiz.Functions.MultiLineFunctionDeclaration.BraceOnSameLine"))))
+
   (describe "the PHP checker commands"
     (it "appends flycheck-phpcs-args before the stdin marker"
       (flycheck-buttercup-with-temp-buffer
@@ -85,6 +102,46 @@
             (expect args :to-contain "--severity=5")
             (expect args :to-contain "--sniffs=Generic.PHP.Syntax")
             (expect (car (last args)) :to-equal "-")))))
+
+    (it "has phpcs-changed check the saved file against git by default"
+      (flycheck-buttercup-with-temp-buffer
+        (insert "<?php\n")
+        (let* ((flycheck-phpcs-changed-git-base nil)
+               (flycheck-phpcs-standard nil)
+               (args (flycheck-checker-substituted-arguments
+                      'php-phpcs-changed)))
+          (expect args :to-contain "--git-unstaged")
+          (expect args :not :to-contain "--git-base")
+          (expect (cadr (member "--report" args)) :to-equal "checkstyle"))))
+
+    (it "has phpcs-changed compare the last commit to a base"
+      (flycheck-buttercup-with-temp-buffer
+        (insert "<?php\n")
+        (let* ((flycheck-phpcs-changed-git-base "main")
+               (args (flycheck-checker-substituted-arguments
+                      'php-phpcs-changed)))
+          (expect (cadr (member "--git-base" args)) :to-equal "main")
+          (expect args :not :to-contain "--git-unstaged"))))
+
+    (it "files phpcs-changed's errors under the root of the repository"
+      (let* ((root (file-name-as-directory
+                    (file-truename (make-temp-file "flycheck-phpcs" t))))
+             (file (expand-file-name "src/a.php" root)))
+        (unwind-protect
+            (progn
+              (make-directory (expand-file-name ".git" root))
+              (make-directory (expand-file-name "src" root))
+              (write-region "<?php\n" nil file)
+              (with-temp-buffer
+                (setq buffer-file-name file)
+                (let ((err (car (flycheck-phpcs-changed-error-filter
+                                 (list (flycheck-error-new-at
+                                        6 15 'error "m"
+                                        :filename "src/a.php"))))))
+                  (expect (file-equal-p (flycheck-error-filename err) file)
+                          :to-be-truthy))
+                (setq buffer-file-name nil)))
+          (delete-directory root t))))
 
     (it "appends flycheck-phpmd-args"
       (flycheck-buttercup-with-temp-buffer

@@ -37,6 +37,7 @@
 
 ### Bugs fixed
 
+- [#2415](https://github.com/flycheck/flycheck/pull/2415): `php-phpcs-changed` reports problems, which it never did before:
 - [#2414](https://github.com/flycheck/flycheck/pull/2414): A related location without a file of its own, visited from the error list or from a button in an error message, opens in the buffer of its error instead of whichever buffer the button was in.
 - [#2414](https://github.com/flycheck/flycheck/pull/2414): `X` in the error list leaves the errors its filters hide alone, as documented.
 - [#2414](https://github.com/flycheck/flycheck/pull/2414): Sorting the error list by level keeps each level's errors in order, and a grouped list can't be sorted by a column any more, which scattered its rows away from their groups.
