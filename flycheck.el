@@ -15576,36 +15576,19 @@ When non-nil, enable quiet mode, via `--quiet'."
   :safe #'booleanp
   :package-version '(flycheck . "26"))
 
-(defconst flycheck-stylelint-error-re
-  (flycheck-rx-to-string
-   '(: line-start (id (one-or-more word)) ": " (message) line-end))
-  "Fallback regex for parsing stylelint errors from non-JSON output.")
-
 (defun flycheck-parse-stylelint (output checker buffer)
   "Parse stylelint errors from OUTPUT.
 
 CHECKER and BUFFER denote the CHECKER that returned OUTPUT and
 the BUFFER that was checked respectively.
 
-The CHECKER usually returns the errors as JSON.
-
-If the CHECKER throws an Error it returns an Error message with a stacktrace."
+Stylelint reports its findings as JSON, CSS syntax errors included.
+Anything else is a failure of its own, such as a missing configuration,
+and reads as nothing, so the checker's exit status decides what it means
+(see `flycheck--stylelint-handle-suspicious')."
   (condition-case nil
       (flycheck-parse-stylelint-json output checker buffer)
-
-    ;; The output could not be parsed as JSON
-    (json-error
-
-     ;; Extract a flycheck error from the output (with a regular expression)
-     ;; For match-string 4/5 see flycheck-rx-message/flycheck-rx-id
-     (when (string-match flycheck-stylelint-error-re output)
-       (list (flycheck-error-new-at
-              1 nil 'error
-              (match-string 4 output)
-              :id (match-string 5 output)
-              :checker checker
-              :buffer buffer
-              :filename (buffer-file-name buffer)))))))
+    (json-error nil)))
 
 (defun flycheck-parse-stylelint-json (output checker buffer)
   "Parse stylelint JSON errors from OUTPUT.
@@ -15616,61 +15599,63 @@ the BUFFER that was checked respectively.
 See URL `https://stylelint.io/developer-guide/formatters/' for information
 about the JSON format of stylelint."
   ;; stylelint returns a vector of result objects
-  ;; Since we only passed one file, the first element is enough
-  (let* ((stylelint-output (elt (json-parse-string output
-                                                   :object-type 'plist
-                                                   :null-object nil
-                                                   :false-object nil)
-                                0))
-           (filename (buffer-file-name buffer))
+  ;; Since we only passed one file, the first element is enough; there is
+  ;; none for a file stylelint ignores
+  (let* ((results (json-parse-string output
+                                     :object-type 'plist
+                                     :null-object nil
+                                     :false-object nil))
+         (stylelint-output (and (> (length results) 0) (aref results 0)))
+         (filename (buffer-file-name buffer))
 
-           ;; Turn all deprecations into warnings
-           (deprecations
-            (mapcar (lambda (d)
-                      (flycheck-error-new-at
-                       1 nil 'warning
-                       (plist-get d :text)
-                       :id "Deprecation Warning"
-                       :checker checker
-                       :buffer buffer
-                       :filename filename))
-                    (plist-get stylelint-output :deprecations)))
+         ;; Turn all deprecations into warnings
+         (deprecations
+          (mapcar (lambda (d)
+                    (flycheck-error-new-at
+                     1 nil 'warning
+                     (plist-get d :text)
+                     :id "Deprecation Warning"
+                     :checker checker
+                     :buffer buffer
+                     :filename filename))
+                  (plist-get stylelint-output :deprecations)))
 
-           ;; Turn all invalid options into errors
-           (invalid-options
-            (mapcar (lambda (io)
-                      (flycheck-error-new-at
-                       1 nil 'error
-                       (plist-get io :text)
-                       :id "Invalid Option"
-                       :checker checker
-                       :buffer buffer
-                       :filename filename))
-                    (plist-get stylelint-output :invalidOptionWarnings)))
+         ;; Turn all invalid options into errors
+         (invalid-options
+          (mapcar (lambda (io)
+                    (flycheck-error-new-at
+                     1 nil 'error
+                     (plist-get io :text)
+                     :id "Invalid Option"
+                     :checker checker
+                     :buffer buffer
+                     :filename filename))
+                  (plist-get stylelint-output :invalidOptionWarnings)))
 
-           ;; Read all linting warnings
-           (warnings
-            (mapcar (lambda (w)
-                      (flycheck-error-new-at
-                       (plist-get w :line) (plist-get w :column)
-                       (pcase (plist-get w :severity)
-                         (`"error"   'error)
-                         (`"warning" 'warning)
-                         ;; Default to info for unknown .severity
-                         (_          'info))
-                       (plist-get w :text)
-                       :id (plist-get w :rule)
-                       :checker checker
-                       :buffer buffer
-                       :filename filename))
-                    (plist-get stylelint-output :warnings))))
+         ;; Read all linting warnings
+         (warnings
+          (mapcar (lambda (w)
+                    (flycheck-error-new-at
+                     (plist-get w :line) (plist-get w :column)
+                     (pcase (plist-get w :severity)
+                       (`"error"   'error)
+                       (`"warning" 'warning)
+                       ;; Default to info for unknown .severity
+                       (_          'info))
+                     (plist-get w :text)
+                     :id (plist-get w :rule)
+                     :checker checker
+                     :buffer buffer
+                     :filename filename))
+                  (plist-get stylelint-output :warnings))))
 
-      ;; Return the combined errors (deprecations, invalid options, warnings)
-      (append deprecations invalid-options warnings)))
+    ;; Return the combined errors (deprecations, invalid options, warnings)
+    (append deprecations invalid-options warnings)))
 
 (defun flycheck--stylelint-config-exists-p (checker)
   "Whether there is a valid stylelint CHECKER config for the current buffer."
-  (zerop (flycheck-call-checker-process
+  ;; nil when stylelint isn't installed
+  (eql 0 (flycheck-call-checker-process
           checker nil nil nil
           "--print-config" (flycheck-buffer-file-local-name "index.js"))))
 
@@ -15685,17 +15670,21 @@ about the JSON format of stylelint."
         (string-to-number (car (split-string (buffer-string) "\\.")))))))
 
 (defun flycheck--stylelint-verify (checker)
-  "Verify stylelint setup for CHECKER."
-  (let ((have-config (flycheck--stylelint-config-exists-p checker)))
-    (list
-     (flycheck-verification-result-new
-      :label "configuration available"
-      :message (if have-config "yes" "no config file found")
-      :face (if have-config 'success '(bold error)))
-     (flycheck-verification-result-new
-      :label "stylelint version"
-      :message (number-to-string (flycheck--stylelint-get-major-version checker))
-      :face 'success))))
+  "Verify stylelint setup for CHECKER.
+
+Nothing to say without stylelint, whose absence is reported already."
+  (when (flycheck-find-checker-executable checker)
+    (let ((have-config (flycheck--stylelint-config-exists-p checker)))
+      (list
+       (flycheck-verification-result-new
+        :label "configuration available"
+        :message (if have-config "yes" "no config file found")
+        :face (if have-config 'success '(bold error)))
+       (flycheck-verification-result-new
+        :label "stylelint version"
+        :message (number-to-string
+                  (flycheck--stylelint-get-major-version checker))
+        :face 'success)))))
 
 (flycheck-define-checker css-stylelint
   "A CSS syntax and style checker using stylelint.
@@ -18000,7 +17989,9 @@ See URL `https://stylelint.io/'."
             "--formatter" "json"
             (eval flycheck-stylelint-args)
             (option-flag "--quiet" flycheck-stylelint-quiet)
-            (config-file "--config" flycheck-stylelint-config))
+            (config-file "--config" flycheck-stylelint-config)
+            "--stdin-filename" (eval (flycheck-buffer-file-local-name
+                                      "style.less")))
   :standard-input t
   :verify (lambda (_) (flycheck--stylelint-verify 'less-stylelint))
   :error-parser flycheck-parse-stylelint
@@ -21144,7 +21135,9 @@ See URL `https://stylelint.io/'."
             "--formatter" "json"
             (eval flycheck-stylelint-args)
             (option-flag "--quiet" flycheck-stylelint-quiet)
-            (config-file "--config" flycheck-stylelint-config))
+            (config-file "--config" flycheck-stylelint-config)
+            "--stdin-filename" (eval (flycheck-buffer-file-local-name
+                                      "style.scss")))
   :standard-input t
   :verify (lambda (_) (flycheck--stylelint-verify 'scss-stylelint))
   :error-parser flycheck-parse-stylelint
@@ -21206,7 +21199,9 @@ See URL `https://stylelint.io/'."
             "--formatter" "json"
             (eval flycheck-stylelint-args)
             (option-flag "--quiet" flycheck-stylelint-quiet)
-            (config-file "--config" flycheck-stylelint-config))
+            (config-file "--config" flycheck-stylelint-config)
+            "--stdin-filename" (eval (flycheck-buffer-file-local-name
+                                      "style.sass")))
   :standard-input t
   :verify (lambda (_) (flycheck--stylelint-verify 'sass-stylelint))
   :error-parser flycheck-parse-stylelint
