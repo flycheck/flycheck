@@ -4,6 +4,12 @@
 (require 'test-helpers)
 
 (describe "Language HTML"
+
+  (describe "html-tidy"
+    (it "checks Emacs 31's mhtml-ts-mode too"
+      (expect (flycheck-checker-get 'html-tidy 'modes)
+              :to-contain 'mhtml-ts-mode)))
+
   (flycheck-buttercup-def-checker-test html-tidy html nil
     (flycheck-buttercup-should-syntax-check
      "language/html.html" '(html-mode)

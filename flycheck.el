@@ -17786,7 +17786,7 @@ See URL `https://github.com/htacg/tidy-html5'."
             "line " line
             " column " column
             " - Warning: " (message) line-end))
-  :modes (html-mode mhtml-mode nxhtml-mode html-ts-mode))
+  :modes (html-mode mhtml-mode nxhtml-mode html-ts-mode mhtml-ts-mode))
 
 (flycheck-def-args-var flycheck-eslint-args javascript-eslint
   :package-version '(flycheck . "32"))
