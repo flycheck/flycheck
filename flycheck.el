@@ -7656,7 +7656,10 @@ ignored."
           (cons name (cons width (cddr (aref format index)))))))
 
 (defun flycheck-error-list--update-format ()
-  "Fit the File and ID column widths to the displayed errors."
+  "Fit the File and ID column widths to the displayed errors.
+
+A grouped list also loses its column sorters, as sorting the rows by a
+column would scatter them away from their group headers."
   (let* ((errors (flycheck-error-list-apply-filter
                   (flycheck-error-list-current-errors)))
          (widths (flycheck-error-list--column-widths errors))
@@ -7669,6 +7672,12 @@ ignored."
     (let ((format (copy-sequence flycheck-error-list-format)))
       (flycheck-error-list--set-column-width format "File" file-width)
       (flycheck-error-list--set-column-width format "ID" id-width)
+      (when (flycheck-error-list--grouping-dimensions)
+        (dotimes (i (length format))
+          (pcase-let ((`(,name ,width ,_sort . ,props) (aref format i)))
+            (setf (aref format i) `(,name ,width nil ,@props))))
+        ;; A key left on a column that can't sort any more breaks printing
+        (setq tabulated-list-sort-key nil))
       (setq tabulated-list-format format))
     (setq flycheck--error-list-msg-offset
           (flycheck--error-list-compute-msg-offset tabulated-list-format))
@@ -7810,6 +7819,9 @@ DIMENSIONS is nil for a flat list, or a list of the symbols in
           ;; Grouped entries are laid out in order already, so turn off column
           ;; sorting; restore the location sort for the flat list.
           tabulated-list-sort-key (unless dimensions (cons "Line" nil)))
+    ;; Even when the list is hidden and the refresh does nothing, so a
+    ;; header click can't sort the groups apart before the next one
+    (flycheck-error-list--update-format)
     (flycheck-error-list-refresh)
     (message "Flycheck error list %s"
              (if dimensions
@@ -8303,15 +8315,20 @@ See `flycheck-error-<'."
 (defun flycheck-error-list-entry-level-< (entry1 entry2)
   "Determine whether ENTRY1 is before ENTRY2 by level.
 
-In a file-grouped list an entry can be a file header rather than an
-error; such entries have no level, so they sort as equal here and keep
-their place.
-
-See `flycheck-error-level-<'."
+The most severe errors come first, levels of one severity apart by
+name, and the errors of one level by location.  In a file-grouped list
+an entry can be a file header rather than an error; such entries have
+no level, so they sort as equal here and keep their place."
   (let ((err1 (car entry1))
         (err2 (car entry2)))
     (and (flycheck-error-p err1) (flycheck-error-p err2)
-         (not (flycheck-error-level-< err1 err2)))))
+         (let* ((level1 (flycheck-error-level err1))
+                (level2 (flycheck-error-level err2))
+                (severity1 (flycheck-error-level-severity level1))
+                (severity2 (flycheck-error-level-severity level2)))
+           (cond ((/= severity1 severity2) (> severity1 severity2))
+                 ((not (eq level1 level2)) (string< level1 level2))
+                 (t (flycheck-error-< err1 err2)))))))
 
 (defvar flycheck-error-list-mode-line-map
   (let ((map (make-sparse-keymap)))
