@@ -17491,7 +17491,10 @@ See URL `https://github.com/commercialhaskell/stack'."
   :error-patterns
   ((warning line-start (file-name) ":" line ":" column ":"
             (or " " "\n    ") (in "Ww") "arning:"
-            (optional " " "[" (id (one-or-more not-newline)) "]")
+            ;; GHC 9.6 and later put the error code before the flag:
+            ;; [GHC-40910] [-Wunused-top-binds]
+            (optional " " "[" (id (one-or-more (not (any "]" "\n")))) "]")
+            (zero-or-more " [" (one-or-more (not (any "]" "\n"))) "]")
             (optional "\n")
             (message
              (one-or-more " ") (one-or-more not-newline)
@@ -17500,7 +17503,8 @@ See URL `https://github.com/commercialhaskell/stack'."
                            (one-or-more (not (any ?\n ?|)))))
             line-end)
    (error line-start (file-name) ":" line ":" column ":" (optional " error:")
-          (optional " " "[" (id (one-or-more not-newline)) "]")
+          (optional " " "[" (id (one-or-more (not (any "]" "\n")))) "]")
+          (zero-or-more " [" (one-or-more (not (any "]" "\n"))) "]")
           (or (message (one-or-more not-newline))
               (and "\n"
                    (message
@@ -17512,6 +17516,10 @@ See URL `https://github.com/commercialhaskell/stack'."
   :error-filter
   (lambda (errors)
     (flycheck-sanitize-errors (flycheck-dedent-error-messages errors)))
+  :error-explainer
+  (flycheck-error-explainer-from-url
+   "https://errors.haskell.org/messages/%s/"
+   (lambda (id) (and (string-prefix-p "GHC-" id) id)))
   :modes (haskell-mode haskell-literate-mode haskell-ts-mode)
   :next-checkers ((warning . haskell-hlint))
   :working-directory (lambda (_)
@@ -17572,7 +17580,8 @@ patterns, which also ignore the progress lines."
                  (mapconcat (lambda (hint)
                               (format "\nSuggested fix: %s" hint))
                             .hints ""))
-         :id (and .code (format "GHC-%d" .code))
+         ;; The error index pads the codes to five digits: GHC-01239
+         :id (and .code (format "GHC-%05d" .code))
          :end-line .span.end.line
          :end-column .span.end.column
          :checker checker
@@ -17612,7 +17621,10 @@ See URL `https://www.haskell.org/ghc/'."
   :error-patterns
   ((warning line-start (file-name) ":" line ":" column ":"
             (or " " "\n    ") (in "Ww") "arning:"
-            (optional " " "[" (id (one-or-more not-newline)) "]")
+            ;; GHC 9.6 and later put the error code before the flag:
+            ;; [GHC-40910] [-Wunused-top-binds]
+            (optional " " "[" (id (one-or-more (not (any "]" "\n")))) "]")
+            (zero-or-more " [" (one-or-more (not (any "]" "\n"))) "]")
             (optional "\n")
             (message
              (one-or-more " ") (one-or-more not-newline)
@@ -17621,7 +17633,8 @@ See URL `https://www.haskell.org/ghc/'."
                            (one-or-more (not (any ?\n ?|)))))
             line-end)
    (error line-start (file-name) ":" line ":" column ":" (optional " error:")
-          (optional " " "[" (id (one-or-more not-newline)) "]")
+          (optional " " "[" (id (one-or-more (not (any "]" "\n")))) "]")
+          (zero-or-more " [" (one-or-more (not (any "]" "\n"))) "]")
           (or (message (one-or-more not-newline))
               (and "\n"
                    (message
@@ -17635,8 +17648,11 @@ See URL `https://www.haskell.org/ghc/'."
   (lambda (errors)
     (flycheck-sanitize-errors (flycheck-dedent-error-messages errors)))
   :error-explainer
+  ;; The index has the error codes, not the warning flags older GHCs give
+  ;; as ids
   (flycheck-error-explainer-from-url
-   "https://errors.haskell.org/messages/%s/")
+   "https://errors.haskell.org/messages/%s/"
+   (lambda (id) (and (string-prefix-p "GHC-" id) id)))
   :modes (haskell-mode haskell-literate-mode haskell-ts-mode)
   :next-checkers ((warning . haskell-hlint))
   :working-directory flycheck-haskell--ghc-find-default-directory)
