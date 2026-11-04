@@ -16623,11 +16623,11 @@ Use flycheck-erlang-rebar3-profile if set, otherwise use test or eqc profile if
 directory name is \"test\" or \"eqc\", or else \"default\"."
   (or
    flycheck-erlang-rebar3-profile
-   (seq-contains-p '("test" "eqc")
-                   (and buffer-file-name
-                        (file-name-base
-                         (directory-file-name
-                          (file-name-directory buffer-file-name)))))
+   (car (member (and buffer-file-name
+                     (file-name-nondirectory
+                      (directory-file-name
+                       (file-name-directory buffer-file-name))))
+                '("test" "eqc")))
    "default"))
 
 (defconst flycheck-rebar3--diagnostic-rx
