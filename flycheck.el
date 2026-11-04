@@ -5522,20 +5522,6 @@ path, a Windows short name - agree on the key."
       (file-name-as-directory
        (or (ignore-errors (file-truename dir)) dir)))))
 
-(defun flycheck--project-key-prefixes (project-key)
-  "Return the directory prefixes that place a file under PROJECT-KEY.
-
-That is PROJECT-KEY itself and, when it differs, its truename: a
-language server may resolve symlinks in the paths it reports (macOS
-mounts /tmp on /private/tmp), and a project opened through the symlink
-would otherwise never match what the server says about it."
-  (let ((truename (unless (file-remote-p project-key)
-                    (ignore-errors
-                      (file-name-as-directory (file-truename project-key))))))
-    (if (and truename (not (equal truename project-key)))
-        (list project-key truename)
-      (list project-key))))
-
 (defvar flycheck--truenames (make-hash-table :test 'equal)
   "True names of local paths Flycheck compares against each other, memoized.
 Global, unlike the buffer's `flycheck--file-truename': these are the
@@ -5553,18 +5539,17 @@ aggregation, and each lookup is a `file-truename' walk."
                (or (ignore-errors (file-truename path)) path)
                flycheck--truenames)))
 
-(defun flycheck--path-under-prefixes-p (path prefixes)
-  "Whether the absolute PATH extends one of the directory PREFIXES.
+(defun flycheck--path-under-p (path project-key)
+  "Whether the absolute PATH lies under the directory PROJECT-KEY.
 
-The prefixes are true names (see `flycheck--project-directory'), while
+PROJECT-KEY is a true name (see `flycheck--project-directory'), while
 PATH may come from a server or a buffer in another spelling of the
 same place - a symlinked directory, macOS's /tmp; its true name is
 tried when the spelling as given does not match."
-  (or (seq-some (lambda (prefix) (string-prefix-p prefix path)) prefixes)
+  (or (string-prefix-p project-key path)
       (let ((truename (flycheck--memoized-truename path)))
         (and (not (equal truename path))
-             (seq-some (lambda (prefix) (string-prefix-p prefix truename))
-                       prefixes)))))
+             (string-prefix-p project-key truename)))))
 
 (defun flycheck--project-storable-errors (errors)
   "Return the subset of ERRORS worth recording project-wide.
@@ -11983,7 +11968,7 @@ for instance - rather than reporting them as results of their own."
    (lambda (location)
      (let-alist location
        (flycheck-related-location-new
-        :filename (flycheck-parse-sarif--uri
+        :filename (flycheck--file-uri-to-path
                    .physicalLocation.artifactLocation.uri)
         :line .physicalLocation.region.startLine
         :column .physicalLocation.region.startColumn
@@ -12071,7 +12056,7 @@ information about SARIF."
                               :checker checker
                               :buffer buffer
                               :filename
-                              (flycheck-parse-sarif--uri
+                              (flycheck--file-uri-to-path
                                .physicalLocation.artifactLocation.uri)
                               :end-line (unless zero-width
                                           (and end-col
@@ -12102,13 +12087,6 @@ escapes, which must be decoded, as file URIs percent-encode UTF-8."
     (when (string-match "\\`file://[^/]*" uri)
       (setq uri (substring uri (match-end 0))))
     (decode-coding-string (url-unhex-string uri) 'utf-8)))
-
-(defun flycheck-parse-sarif--uri (uri)
-  "Turn a SARIF artifact-location URI into a file name.
-
-Strip a `file://' scheme and percent-decode URI; return relative URIs
-unchanged, for Flycheck to expand against the working directory."
-  (and uri (flycheck--file-uri-to-path uri)))
 
 (defun flycheck-parse-rustc (output checker buffer)
   "Parse rustc errors from OUTPUT and return a list of `flycheck-error'.
@@ -13120,21 +13098,19 @@ dependency, a generated file elsewhere)."
             (seq-some (lambda (buffer)
                         (with-current-buffer buffer (flycheck-lsp--serving-p)))
                       buffers))
-    (let ((prefixes (flycheck--project-key-prefixes project-key))
-          (result nil))
+    (let ((result nil))
       (maphash
        (lambda (_key server)
          (when (and (flycheck-lsp--server-live-p server)
-                    (flycheck--path-under-prefixes-p
+                    (flycheck--path-under-p
                      (file-name-as-directory
                       (expand-file-name (flycheck-lsp--server-root server)))
-                     prefixes))
+                     project-key))
            (maphash
             (lambda (path doc)
               (let ((buffer (flycheck-lsp--doc-buffer doc)))
                 (unless (or (and buffer (buffer-live-p buffer))
-                            (not (flycheck--path-under-prefixes-p
-                                  path prefixes))
+                            (not (flycheck--path-under-p path project-key))
                             (get-file-buffer path))
                   (dolist (lsp (flycheck-lsp--doc-diagnostics doc))
                     (push (flycheck-lsp--list-only-error path lsp) result)))))
@@ -13151,18 +13127,17 @@ dependency, a generated file elsewhere)."
 For `flycheck--project-check-functions': every live server rooted in
 the project whose diagnosticProvider covers the workspace is asked,
 and the names of those asked are returned."
-  (let ((prefixes (flycheck--project-key-prefixes root))
-        (names nil))
+  (let ((names nil))
     (maphash
      (lambda (_key server)
        (when (and (flycheck-lsp--server-live-p server)
                   (flycheck-lsp--server-initialized server)
                   (flycheck-lsp--capable server :diagnosticProvider
                                          :workspaceDiagnostics)
-                  (flycheck--path-under-prefixes-p
+                  (flycheck--path-under-p
                    (file-name-as-directory
                     (expand-file-name (flycheck-lsp--server-root server)))
-                   prefixes)
+                   root)
                   ;; Nothing shows what a server with no buffer left on
                   ;; it would find (see `flycheck-lsp--project-extra-errors')
                   (seq-some (lambda (doc)
@@ -13184,22 +13159,21 @@ and the names of those asked are returned."
 For `flycheck--project-clear-functions': the documents no live buffer
 holds are forgotten, result ids included, so the next pull starts
 afresh.  The servers stay."
-  (let ((prefixes (flycheck--project-key-prefixes root)))
-    (maphash
-     (lambda (_key server)
-       (when (flycheck--path-under-prefixes-p
-              (file-name-as-directory
-               (expand-file-name (flycheck-lsp--server-root server)))
-              prefixes)
-         (let ((documents (flycheck-lsp--server-documents server))
-               (unvisited nil))
-           (maphash (lambda (path doc)
-                      (unless (buffer-live-p (flycheck-lsp--doc-buffer doc))
-                        (push path unvisited)))
-                    documents)
-           (dolist (path unvisited)
-             (remhash path documents)))))
-     flycheck-lsp--servers)))
+  (maphash
+   (lambda (_key server)
+     (when (flycheck--path-under-p
+            (file-name-as-directory
+             (expand-file-name (flycheck-lsp--server-root server)))
+            root)
+       (let ((documents (flycheck-lsp--server-documents server))
+             (unvisited nil))
+         (maphash (lambda (path doc)
+                    (unless (buffer-live-p (flycheck-lsp--doc-buffer doc))
+                      (push path unvisited)))
+                  documents)
+         (dolist (path unvisited)
+           (remhash path documents)))))
+   flycheck-lsp--servers))
 
 (add-hook 'flycheck--project-clear-functions #'flycheck-lsp--clear-project)
 
@@ -14047,8 +14021,6 @@ For a full language server, prefer Eglot and `flycheck-eglot-mode'."
 (declare-function flymake-diagnostic-code "flymake" (diag))
 (declare-function eglot-code-actions "eglot" (beg &optional end action-kind interactive))
 (declare-function eglot-server-capable "eglot" (&rest feats))
-(declare-function eglot-uri-to-path "eglot" (uri))
-(declare-function eglot--uri-to-path "eglot" (uri))
 (declare-function eglot--request "eglot" (server method params &rest _))
 (declare-function eglot--current-server-or-lose "eglot" ())
 
@@ -14278,11 +14250,10 @@ file with a live buffer is skipped rather than shown twice."
                  (seq-some (lambda (buffer)
                              (buffer-local-value 'flycheck-eglot-mode buffer))
                            buffers)))
-    (let ((prefixes (flycheck--project-key-prefixes project-key))
-          (result nil))
+    (let ((result nil))
       (pcase-dolist (`(,file . ,diags) flymake-list-only-diagnostics)
         (when (and (stringp file)
-                   (flycheck--path-under-prefixes-p file prefixes)
+                   (flycheck--path-under-p file project-key)
                    (not (get-file-buffer file)))
           (dolist (diag diags)
             (when-let* ((err (flycheck-eglot--list-only-error file diag)))
@@ -21762,8 +21733,7 @@ See URL `https://github.com/nodeca/js-yaml'."
           (message) " (" line ":" column ")"
           line-end))
   :modes (yaml-mode yaml-ts-mode)
-  :next-checkers ((warning . yaml-yamllint)
-                  (warning . cwl)))
+  :next-checkers ((warning . yaml-yamllint)))
 
 (define-obsolete-variable-alias 'flycheck-yamllintrc
   'flycheck-yamllint-config "39")
@@ -21801,7 +21771,6 @@ See URL `https://github.com/adrienverge/yamllint'."
             "stdin:" line ":" column ": [warning] "
             (message) line-end))
   :modes (yaml-mode yaml-ts-mode)
-  :next-checkers ((warning . cwl))
   :error-explainer
   ;; The rule pages anchor on the module name, which spells the rule
   ;; with underscores where the reported id has hyphens
