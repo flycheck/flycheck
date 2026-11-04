@@ -18390,7 +18390,7 @@ See URL `https://ocaml.org/'."
   :error-patterns flycheck-ocaml-error-patterns
   :error-filter #'flycheck-ocaml--filter-errors
   :predicate (lambda () (not (flycheck-ocaml--dune-root)))
-  :modes '(tuareg-mode caml-mode neocaml-mode))
+  :modes '(tuareg-mode caml-mode neocaml-mode neocaml-interface-mode))
 
 (flycheck-def-option-var flycheck-ocaml-dune-profile nil ocaml-dune
   "The build profile for the Dune checker.
@@ -18443,7 +18443,7 @@ See URL `https://dune.build/'."
   :working-directory (lambda (_checker) (flycheck-ocaml--dune-root))
   :predicate (lambda ()
                (and (flycheck-ocaml--dune-root) (flycheck-buffer-saved-p)))
-  :modes '(tuareg-mode caml-mode neocaml-mode))
+  :modes '(tuareg-mode caml-mode neocaml-mode neocaml-interface-mode))
 
 (flycheck-def-option-var flycheck-perl-include-path nil perl
   "A list of include directories for Perl.

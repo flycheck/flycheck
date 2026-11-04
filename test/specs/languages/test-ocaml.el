@@ -56,6 +56,12 @@
      '(4 17 error "This constant has type string but an expression was expected of type\n         int"
          :end-line 4 :end-column 29 :checker ocaml-dune)))
 
+  (describe "the modes"
+    (it "include neocaml's mode for interface files"
+      (dolist (checker '(ocaml ocaml-dune))
+        (expect (flycheck-checker-get checker 'modes)
+                :to-contain 'neocaml-interface-mode))))
+
   (describe "reading Dune's output"
     ;; The location line, the echoed source and the wrapped message all
     ;; have to be read as one error
