@@ -3530,10 +3530,13 @@ ARG is ‘toggle’; disable the mode otherwise."
     ;; After `context-menu-minor', whose entry for Flycheck it replaces
     (add-hook 'context-menu-functions #'flycheck-context-menu 90 'local)
 
-    (setq flycheck-old-next-error-function
-          (if flycheck-standard-error-navigation
-              next-error-function
-            :unset))
+    ;; Enabling the mode again must not take our own function for the
+    ;; one to restore
+    (unless (eq next-error-function #'flycheck-next-error-function)
+      (setq flycheck-old-next-error-function
+            (if flycheck-standard-error-navigation
+                next-error-function
+              :unset)))
     (when flycheck-standard-error-navigation
       (setq next-error-function #'flycheck-next-error-function))
 

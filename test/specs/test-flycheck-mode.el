@@ -39,6 +39,14 @@
         (expect flycheck-mode :not :to-be-truthy)
         (expect next-error-function :to-be :old)))
 
+    (it "restores the old next-error-function after being enabled twice"
+      (flycheck-buttercup-with-temp-buffer
+        (setq next-error-function :old)
+        (flycheck-mode 1)
+        (flycheck-mode 1)
+        (flycheck-mode -1)
+        (expect next-error-function :to-be :old)))
+
     (it "does-not-enable-standard-error-navigation"
       (flycheck-buttercup-with-temp-buffer
         (let ((flycheck-standard-error-navigation nil))
