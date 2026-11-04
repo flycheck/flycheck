@@ -890,6 +890,10 @@ The following events are known:
      Check syntax immediately when variable `flycheck-mode' is
      non-nil.
 
+Flycheck checks a reverted buffer under any of `save', `mode-enabled',
+`new-line' and `idle-change', since a revert both brings back the
+file's contents and changes the buffer.
+
 Flycheck performs syntax checks only on events, which are
 contained in this list.  For instance, if the value of this
 variable is `(mode-enabled save)', Flycheck will only check if
@@ -3437,7 +3441,7 @@ displays.  Replace the copy with one that shows, where it is."
     ;; clean up temporary files and directories.
     (kill-buffer-hook       . flycheck-teardown)
     (change-major-mode-hook . flycheck-teardown)
-    (before-revert-hook     . flycheck-teardown)
+    (before-revert-hook     . flycheck--handle-before-revert)
     ;; Update the error list if necessary
     (post-command-hook . flycheck-error-list-update-source)
     (post-command-hook . flycheck-error-list-highlight-errors)
@@ -4320,7 +4324,9 @@ Start a syntax check if a new line has been inserted into the
 buffer."
   ;; Save and restore the match data, as recommended in (elisp)Change Hooks
   (save-match-data
-    (when flycheck-mode
+    ;; A revert's insertion is no edit: `flycheck-handle-revert' decides
+    ;; on a check once it's done
+    (when (and flycheck-mode (not (flycheck--reverting-p)))
       (if (string-match-p (rx "\n") (buffer-substring beg end))
           (flycheck-buffer-automatically 'new-line 'force-deferred)
         (when (memq 'idle-change (flycheck--automatic-check-events))
@@ -4373,13 +4379,30 @@ If a buffer switch actually happened, schedule a syntax check."
   "Handle a save of the buffer."
   (flycheck-buffer-automatically 'save))
 
+(defun flycheck--handle-before-revert ()
+  "Tear Flycheck down in a buffer about to be reverted.
+
+Keep the global hooks, even in the last Flycheck buffer: the mode
+stays on through a revert that preserves modes.  A revert that doesn't
+runs `change-major-mode-hook', which tears down the rest."
+  (flycheck-teardown 'ignore-global))
+
 (defun flycheck-handle-revert ()
   "Handle a buffer revert.
-Start a syntax check after the buffer has been reverted, but only
-if `flycheck-mode' is still active (it may have been killed by
-`revert-buffer' via `kill-all-local-variables')."
+
+Check the buffer as an automatic check would, under any of the events
+`flycheck-check-syntax-automatically' names that a revert amounts to:
+it brings back the file's contents, as a save or opening the file
+would, and changes the buffer.  Only if `flycheck-mode' is still
+active, as `revert-buffer' may have killed it via
+`kill-all-local-variables'."
   (when flycheck-mode
-    (flycheck-buffer)))
+    ;; The contents are back by now, which is all a revert defers checks
+    ;; for
+    (with-suppressed-warnings ((obsolete revert-buffer-in-progress-p))
+      (let ((revert-buffer-in-progress-p nil))
+        (flycheck-buffer-automatically
+         '(save mode-enabled new-line idle-change))))))
 
 
 ;;; Deferred syntax checking
@@ -4410,11 +4433,18 @@ running syntax check, which may be interrupted to make room; the
 conditions here cannot be resolved by interruption."
   (or (not (get-buffer-window))
       ;; We must defer checks while a buffer is being reverted, to avoid race
-      ;; conditions while the buffer contents are being restored.  Emacs 31
-      ;; renamed the variable and kept the old name as an alias, which is the
-      ;; one that works on every Emacs we support.
-      (with-suppressed-warnings ((obsolete revert-buffer-in-progress-p))
-        revert-buffer-in-progress-p)))
+      ;; conditions while the buffer contents are being restored.
+      (flycheck--reverting-p)))
+
+(defun flycheck--reverting-p ()
+  "Whether a buffer is being reverted.
+
+`revert-buffer' binds its variable globally, so that's any buffer,
+not necessarily the current one."
+  ;; Emacs 31 renamed the variable and kept the old name as an alias, which
+  ;; is the one that works on every Emacs we support
+  (with-suppressed-warnings ((obsolete revert-buffer-in-progress-p))
+    revert-buffer-in-progress-p))
 
 (defun flycheck-deferred-check-p ()
   "Determine whether the current buffer has a deferred check.

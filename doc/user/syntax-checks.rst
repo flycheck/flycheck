@@ -131,6 +131,10 @@ You can customise this behaviour with `flycheck-check-syntax-automatically`:
    ``mode-enabled``
       Check the buffer immediately after :mode:`flycheck` was enabled.
 
+   Flycheck checks a reverted buffer under any of ``save``,
+   ``mode-enabled``, ``new-line`` and ``idle-change``, since a revert both
+   brings back the file's contents and changes the buffer.
+
    For instance with the following setting :mode:`flycheck` will only check the
    buffer when it was saved:
 

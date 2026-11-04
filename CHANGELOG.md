@@ -37,6 +37,7 @@
 
 ### Bugs fixed
 
+- [#2412](https://github.com/flycheck/flycheck/pull/2412): A revert checks the buffer only as `flycheck-check-syntax-automatically` allows, waits for a window to show the buffer, so `global-auto-revert-mode` no longer checks every buffer at once after a `git checkout`, and starts one check instead of two.
 - [#2412](https://github.com/flycheck/flycheck/pull/2412): In a remote buffer, checks after a change or a buffer switch follow `flycheck-check-syntax-automatically-remote`, so listing `idle-change` there works even when the local option leaves it out.
 - [#2412](https://github.com/flycheck/flycheck/pull/2412): Turning `flycheck-mode` on in a buffer where it's already on no longer keeps `next-error` from getting back to compilation and grep results once the mode is off.
 - [#2412](https://github.com/flycheck/flycheck/pull/2412): `flycheck-buffer` called from Lisp while a check runs, as `flycheck-select-checker` and the error list's `g` do, queues a check behind it instead of dropping the request along with any check already queued.
