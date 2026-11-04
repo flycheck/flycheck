@@ -37,6 +37,7 @@
 
 ### Bugs fixed
 
+- [#2415](https://github.com/flycheck/flycheck/pull/2415): The stylelint checkers handle stylelint's failures:
 - [#2415](https://github.com/flycheck/flycheck/pull/2415): `terraform-tflint` files each issue under the file tflint names, rather than showing every file's issues on the current buffer, and shows tflint's info findings as info rather than errors.
 - [#2415](https://github.com/flycheck/flycheck/pull/2415): `erlang-rebar3` checks files in `test` and `eqc` directories again, under the profile the directory names.
 - [#2415](https://github.com/flycheck/flycheck/pull/2415): `rust-clippy` shows its findings in the crates of a Cargo workspace, whose paths it reports relative to the workspace root, as `rust-cargo` already did.

@@ -50,6 +50,30 @@
       (expect (flycheck--stylelint-handle-suspicious 'css-stylelint 2 "")
               :to-be 'suspicious))
 
+    (it "leaves a missing configuration to the exit status"
+      ;; As stylelint 17 prints it, exiting 78; read as an error, it hid
+      ;; the exit status from the handler above
+      (expect (flycheck-parse-stylelint "ConfigurationError: No configuration \
+provided for /tmp/style.css
+    at getConfigForFile (file:///usr/local/lib/node_modules/stylelint/lib/getConfigForFile.mjs:80:9)
+" 'css-stylelint nil)
+              :to-be nil))
+
+    (it "reads nothing for a file stylelint ignores"
+      (expect (flycheck-parse-stylelint "[]" 'css-stylelint nil) :to-be nil))
+
+    (it "verifies a buffer without stylelint installed"
+      (spy-on 'flycheck-call-checker-process :and-return-value nil)
+      (expect (flycheck--stylelint-config-exists-p 'css-stylelint)
+              :not :to-be-truthy))
+
+    (it "names the buffer's file to every stylelint checker"
+      ;; For its configuration's overrides and ignore file
+      (dolist (checker '(css-stylelint scss-stylelint
+                         sass-stylelint less-stylelint))
+        (expect (flycheck-checker-substituted-arguments checker)
+                :to-contain "--stdin-filename")))
+
     (it "covers every stylelint checker"
       (dolist (checker '(css-stylelint scss-stylelint
                          sass-stylelint less-stylelint))
