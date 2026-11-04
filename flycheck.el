@@ -19578,6 +19578,7 @@ the BUFFER that was checked respectively."
         (pcase .severity
           ("error" 'error)
           ("warning" 'warning)
+          ("information" 'info)
           (_ 'warning))
         .message
         :id .rule
@@ -19586,7 +19587,7 @@ the BUFFER that was checked respectively."
         :checker checker
         :buffer buffer
         :filename (buffer-file-name buffer))))
-   (cdr (nth 2 (car (flycheck-parse-json output))))))
+   (alist-get 'generalDiagnostics (car (flycheck-parse-json output)))))
 
 (flycheck-define-checker python-pyright
   "A Python static type checker using Pyright.
