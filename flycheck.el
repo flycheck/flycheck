@@ -8988,6 +8988,9 @@ whichever buffer is current when a source answers.")
 (defvar flycheck--eldoc-requesting nil
   "Non-nil while Flycheck itself asks Eldoc to document.")
 
+(defvar-local flycheck--eldoc-documented nil
+  "Non-nil when Flycheck last gave Eldoc errors to document here.")
+
 (defun flycheck--eldoc-note-request (&optional interactive)
   "Note whether an INTERACTIVE Eldoc request is Flycheck's own.
 
@@ -9036,20 +9039,22 @@ Intended for `eldoc-documentation-functions', where command
 and third-party display packages keep working unchanged."
   (when (and flycheck-mode (flycheck--display-errors-via-eldoc-p)
              (not (flycheck-annotate--suppresses-echo-p)))
-    (when-let* ((errors (flycheck-overlay-errors-at (point))))
-      (funcall callback
-               (mapconcat
-                (lambda (err)
-                  (let ((level (flycheck-error-level err)))
-                    (concat
-                     (propertize (symbol-name level)
-                                 'face (flycheck-error-level-error-list-face
-                                        level))
-                     ": "
-                     (flycheck-error-format-message-and-id err)
-                     (when-let* ((rel (flycheck-error-format-relations err)))
-                       (concat "\n" rel)))))
-                errors "\n")))))
+    (let ((errors (flycheck-overlay-errors-at (point))))
+      (setq flycheck--eldoc-documented (and errors t))
+      (when errors
+        (funcall callback
+                 (mapconcat
+                  (lambda (err)
+                    (let ((level (flycheck-error-level err)))
+                      (concat
+                       (propertize (symbol-name level)
+                                   'face (flycheck-error-level-error-list-face
+                                          level))
+                       ": "
+                       (flycheck-error-format-message-and-id err)
+                       (when-let* ((rel (flycheck-error-format-relations err)))
+                         (concat "\n" rel)))))
+                  errors "\n"))))))
 
 (defun flycheck-display-errors (errors)
   "Display ERRORS using `flycheck-display-errors-function'."
@@ -9083,7 +9088,14 @@ If there are no errors, clears the error messages at point."
       (let ((errors (flycheck-overlay-errors-at (point))))
         (if errors
             (flycheck-display-errors errors)
-          (flycheck-clear-displayed-errors))))))
+          (flycheck-clear-displayed-errors)
+          ;; What Eldoc shows is Eldoc's to clear: it documents again,
+          ;; without the errors now gone.  Only here, in the buffer on
+          ;; display, rather than wherever Flycheck clears its display
+          (when (and flycheck--eldoc-documented
+                     (flycheck--display-errors-via-eldoc-p))
+            (setq flycheck--eldoc-documented nil)
+            (flycheck-display-errors-via-eldoc nil)))))))
 
 (defun flycheck--eldoc-refreshes-echo-area-p ()
   "Whether Eldoc itself will refresh the echo area for this command.

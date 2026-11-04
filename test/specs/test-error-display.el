@@ -78,6 +78,38 @@
             (flycheck-display-error-at-point)
             (expect refreshed :to-equal 1)))))
 
+    (it "has Eldoc document again once the errors at point are gone"
+      ;; The echo area is Eldoc's to clear here, and left alone it keeps
+      ;; showing an error the next check found fixed
+      (flycheck-buttercup-with-temp-buffer
+        (insert "hello")
+        (flycheck-mode)
+        (flycheck-add-overlay (flycheck-error-new-at 1 1 'error "Boom"))
+        (goto-char 1)
+        (flycheck-eldoc-function #'ignore)
+        (flycheck-delete-all-overlays)
+        (let ((refreshed 0))
+          (cl-letf (((symbol-function 'eldoc-print-current-symbol-info)
+                     (lambda (&rest _) (cl-incf refreshed))))
+            (flycheck-display-error-at-point)
+            ;; Once: nothing of Flycheck's is left for Eldoc to clear
+            (flycheck-display-error-at-point)
+            (expect refreshed :to-equal 1)))))
+
+    (it "leaves Eldoc alone when Flycheck clears a buffer"
+      ;; As when the buffer is killed or reverted, perhaps unseen
+      (flycheck-buttercup-with-temp-buffer
+        (insert "hello")
+        (flycheck-mode)
+        (flycheck-add-overlay (flycheck-error-new-at 1 1 'error "Boom"))
+        (goto-char 1)
+        (flycheck-eldoc-function #'ignore)
+        (let ((refreshed 0))
+          (cl-letf (((symbol-function 'eldoc-print-current-symbol-info)
+                     (lambda (&rest _) (cl-incf refreshed))))
+            (flycheck-clear)
+            (expect refreshed :to-equal 0)))))
+
     (it "enables eldoc-mode when global-eldoc-mode allows it"
       (flycheck-buttercup-with-temp-buffer
         (let ((global-eldoc-mode t))
