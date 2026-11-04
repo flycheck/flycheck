@@ -231,14 +231,15 @@ Some syntax checkers can additionally read configuration from files.  Flycheck
 can find configuration files of syntax checkers and use them when invoking the
 syntax checker program:
 
-.. defcustom:: flycheck-local-config-file-functions
+.. defcustom:: flycheck-locate-config-file-functions
 
    Functions to call to find a configuration file for a syntax checker.  Each
-   function gets the name of a configuration file and shall return the absolute
-   path to a file if one exists.  The default value leads to the following
-   steps:
+   function gets the name of a configuration file and the syntax checker, and
+   shall return the absolute path to a file if one exists.  Flycheck's own
+   functions run after any you add, and take the following steps:
 
-   1. If the name is an absolute path, use it.
+   1. If the name has a directory part, expand it against the directory the
+      checker runs in and use it.
    2. If the name exists in any ancestor directory, use the nearest one.
    3. If the name exists in ``$HOME``, use it.
 

@@ -954,7 +954,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       Check Nix with statix_.
 
-      .. _statix: https://github.com/nerdypepper/statix
+      .. _statix: https://github.com/oppiliappan/statix
 
       .. defcustom:: flycheck-statix-args
 
@@ -1217,11 +1217,12 @@ to view the docstring of the syntax checker.  Likewise, you may use
    is available.  Additionally `python-pyright` and `python-mypy` provide
    optional type checking.
 
-   All Python checkers are invoked indirectly using ``python -c ...`` (rather
-   than a direct call to ``flake8`` or ``pylint``) to make it easier to switch
-   between Python 2 and 3.  For example, you can use ``(setq
-   flycheck-python-pylint-executable "python3")`` to run ``pylint`` using Python
-   3, or ``(defvaralias 'flycheck-python-flake8-executable
+   `python-flake8`, `python-pylint` and `python-pycompile` run through the
+   Python interpreter (rather than a direct call to ``flake8`` or ``pylint``),
+   so the interpreter decides which installation of the tool runs.  For
+   example, you can use ``(setq flycheck-python-pylint-executable
+   "~/venv/bin/python")`` to run the ``pylint`` installed in a virtualenv, or
+   ``(defvaralias 'flycheck-python-flake8-executable
    'python-shell-interpreter)`` to run ``flake8`` through the executable pointed
    to by ``python-shell-interpreter``.
 
@@ -1378,7 +1379,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
    .. syntax-checker:: r-lintr
 
-      Check syntax and lint with `lintr <https://github.com/jimhester/lintr>`_.
+      Check syntax and lint with `lintr <https://github.com/r-lib/lintr>`_.
 
       .. defcustom:: flycheck-lintr-caching
 
@@ -1410,7 +1411,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
    .. syntax-checker:: rpm-rpmlint
 
-      Lint with `rpmlint <https://sourceforge.net/projects/rpmlint/>`_.
+      Lint with `rpmlint <https://github.com/rpm-software-management/rpmlint>`_.
 
 .. supported-language:: reStructuredText
 
@@ -1529,7 +1530,7 @@ to view the docstring of the syntax checker.  Likewise, you may use
    `rust-clippy`.
 
    .. _Rust: https://www.rust-lang.org/
-   .. _clippy: https://github.com/rust-lang-nursery/rust-clippy
+   .. _clippy: https://github.com/rust-lang/rust-clippy
 
    .. syntax-checker:: rust-cargo
                        rust
@@ -1543,7 +1544,6 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
          `rust-cargo` requires Rust 1.17 or newer.
          `rust` requires Rust 1.18 or newer.
-         `rust-clippy` requires the nightly version of Rust.
 
       .. _Cargo: https://doc.crates.io/index.html
 

@@ -131,7 +131,6 @@ nitpick_ignore = [
     ('any', 'flycheck-define-checker'),
     ('any', 'flycheck-define-command-checker'),
     ('any', 'flycheck-define-generic-checker'),
-    ('any', 'flycheck-locate-config-file-functions'),
     ('any', 'flycheck-mode-line-prefix'),
     ('any', 'flycheck-posframe'),
     ('any', 'flycheck-rx-to-string'),
