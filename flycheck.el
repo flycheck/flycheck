@@ -12269,16 +12269,21 @@ information about SARIF."
             .results))))
      .runs)))
 
-(defun flycheck--file-uri-to-path (uri)
+(defun flycheck--file-uri-to-path (uri &optional remote)
   "Strip a `file://' scheme and authority from URI and percent-decode it.
 
 Both file:///abs/path and file://host/abs/path leave the leading slash of
-the path.  `url-unhex-string' returns the raw bytes of the percent
-escapes, which must be decoded, as file URIs percent-encode UTF-8."
+the path, except before a Windows drive letter: file:///c:/x names c:/x.
+With REMOTE non-nil, the path is on a remote host and keeps its slash.
+`url-unhex-string' returns the raw bytes of the percent escapes, which
+must be decoded, as file URIs percent-encode UTF-8."
   (when uri
     (when (string-match "\\`file://[^/]*" uri)
       (setq uri (substring uri (match-end 0))))
-    (decode-coding-string (url-unhex-string uri) 'utf-8)))
+    (let ((path (decode-coding-string (url-unhex-string uri) 'utf-8)))
+      (if (and (not remote) (string-match-p "\\`/[a-zA-Z]:" path))
+          (substring path 1)
+        path))))
 
 (defun flycheck-parse-rustc (output checker buffer)
   "Parse rustc errors from OUTPUT and return a list of `flycheck-error'.
@@ -12518,10 +12523,9 @@ Built from the diagnostic's `code', carrying its `codeDescription' href
 (defun flycheck-lsp--uri-to-path (uri &optional remote)
   "Convert a `file:' URI to a file name.
 
-Percent-decoding and authority stripping are shared with the SARIF parser
-via `flycheck--file-uri-to-path'; this additionally trims the leading
-slash of a Windows drive URI (file:///c:/...).  A non-`file:' URI is
-returned unchanged.
+Percent-decoding, authority stripping and the slash before a Windows
+drive letter are shared with the SARIF parser via
+`flycheck--file-uri-to-path'.  A non-`file:' URI is returned unchanged.
 
 A server serving files on a remote host names them as that host sees
 them.  REMOTE, a prefix as `file-remote-p' returns, is put back in front
@@ -12530,13 +12534,7 @@ server.  Pass it wherever the answer is used as a file name or compared
 against one; leave it out where the URI is known to be local, such as a
 key into a server's own documents."
   (if (string-prefix-p "file://" uri)
-      (let ((path (flycheck--file-uri-to-path uri)))
-        (concat remote
-                ;; A drive letter is a local Windows spelling; a remote
-                ;; host's path keeps its leading slash.
-                (if (and (not remote) (string-match-p "\\`/[a-zA-Z]:" path))
-                    (substring path 1)
-                  path)))
+      (concat remote (flycheck--file-uri-to-path uri remote))
     uri))
 
 (defun flycheck-lsp--path-to-uri (path)

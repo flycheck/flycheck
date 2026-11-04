@@ -44,6 +44,17 @@
                (concat "{\"a\": \"" (string #x3fffff) "\"}\n{\"b\": 2}\n"))
               :to-equal '(((b . 2))))))
 
+  (describe "flycheck--file-uri-to-path"
+    (it "drops the slash before a Windows drive letter"
+      (expect (flycheck--file-uri-to-path "file:///C:/proj/a%20b.c")
+              :to-equal "C:/proj/a b.c"))
+    (it "keeps it for a path on a remote host"
+      (expect (flycheck--file-uri-to-path "file:///C:/proj/a.c" "/ssh:h:")
+              :to-equal "/C:/proj/a.c"))
+    (it "keeps the slash of an ordinary absolute path"
+      (expect (flycheck--file-uri-to-path "file:///proj/a.c")
+              :to-equal "/proj/a.c")))
+
   (describe "The SARIF parser"
     (it "parses results with locations and rule metadata"
       (let ((sarif "{\"version\":\"2.1.0\",\"runs\":[{\"tool\":{\"driver\":\
