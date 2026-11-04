@@ -109,6 +109,25 @@ afterwards."
     (it "unknown argument cell"
       (expect (flycheck-command-argument-p '(foo bar)) :not :to-be-truthy)))
 
+  (describe "flycheck--process-input-coding-system"
+    (it "takes the coding system process-coding-system-alist computes"
+      ;; Given what a process start would give it
+      (defalias 'flycheck-test--mytool-coding
+        (lambda (args)
+          (and (equal args '(start-process "flycheck-x" nil "mytool" "-v"))
+               '(utf-8 . iso-latin-1-unix))))
+      (unwind-protect
+          (let ((process-coding-system-alist
+                 '(("\\`mytool\\'" . flycheck-test--mytool-coding))))
+            (expect (flycheck--process-input-coding-system
+                     "flycheck-x" '("mytool" "-v"))
+                    :to-be 'iso-latin-1-unix))
+        (fmakunbound 'flycheck-test--mytool-coding)))
+
+    (it "takes a bound coding-system-for-write first"
+      (let ((coding-system-for-write 'utf-16le))
+        (expect (flycheck--process-input-coding-system "flycheck-x" '("mytool"))
+                :to-be 'utf-16le))))
   (describe "flycheck-fix-error-filename"
     (it "gives the related locations in the checked copy the buffer's file"
       (flycheck-buttercup-with-temp-buffer

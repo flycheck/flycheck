@@ -10899,20 +10899,24 @@ symbols in the command."
   (seq-mapcat (lambda (arg) (flycheck-substitute-argument arg checker))
               (flycheck-checker-arguments checker)))
 
-(defun flycheck--process-input-coding-system (program)
-  "Return the coding system a process running PROGRAM would encode input with.
+(defun flycheck--process-input-coding-system (name command)
+  "Return the coding system a process would encode its input with.
+
+The process is called NAME and runs COMMAND, a list of the program and
+its arguments, as `start-process' would get them.
 
 `process-send-region' encodes the buffer with this on the way to a local
 checker, so the file written for a remote one has to use it too.  The
 buffer's own coding system is the wrong thing to write with: it would put
 the carriage returns of a DOS file back, or a byte order mark, neither of
-which the local path ever sends."
-  (let ((entry (and program
-                    (assoc-default program process-coding-system-alist
-                                   #'string-match))))
-    (or (if (consp entry) (cdr entry) entry)
-        (cdr default-process-coding-system)
-        'utf-8-unix)))
+which the local path ever sends.  So ask Emacs as it would for that
+process: a bound `coding-system-for-write' first, then
+`process-coding-system-alist', whose entries may be functions."
+  (or coding-system-for-write
+      (cdr-safe (apply #'find-operation-coding-system
+                       'start-process name nil command))
+      (cdr default-process-coding-system)
+      'utf-8-unix))
 
 (defun flycheck--redirect-command (command file)
   "Return COMMAND with its standard input redirected from FILE.
@@ -10967,6 +10971,8 @@ PROCESS, and terminates standard input with EOF."
                ;; local name on the remote host.
                (program (file-local-name executable))
                (args (flycheck-checker-substituted-arguments checker))
+               (name (format "flycheck-%s" checker))
+               (wrapped (flycheck--wrap-command program args))
                ;; A checker that reads standard input cannot be fed over
                ;; TRAMP; see `flycheck--redirect-command'.  Put the buffer
                ;; in a file on that host and let the remote shell redirect
@@ -10982,15 +10988,14 @@ PROCESS, and terminates standard input with EOF."
                              ;; been encoded with on the way.
                              (let ((coding-system-for-write
                                     (flycheck--process-input-coding-system
-                                     program)))
+                                     name wrapped)))
                                (flycheck-save-buffer-to-temp
                                 (lambda (_)
                                   (flycheck-temp-file-system nil))))))
-               (command (let ((command (flycheck--wrap-command program args)))
-                          (if stdin-file
-                              (flycheck--redirect-command
-                               command (file-local-name stdin-file))
-                            command)))
+               (command (if stdin-file
+                            (flycheck--redirect-command
+                             wrapped (file-local-name stdin-file))
+                          wrapped))
                (sentinel-events nil)
                ;; Use pipes to receive output from the syntax checker.  They are
                ;; more efficient and more robust than PTYs, which Emacs uses by
@@ -11022,9 +11027,7 @@ PROCESS, and terminates standard input with EOF."
           ;; We use `start-file-process' rather than `start-process' so
           ;; the checker runs on the remote host when `default-directory'
           ;; is remote; it behaves exactly like `start-process' otherwise.
-          (setq process (apply 'start-file-process
-                               (format "flycheck-%s" checker)
-                               nil command))
+          (setq process (apply 'start-file-process name nil command))
           ;; Process sentinels can be called while sending input to the process.
           ;; We want to record errors raised by process-send before calling
           ;; `flycheck-handle-signal', so initially just accumulate events.
