@@ -37,6 +37,7 @@
 
 ### Bugs fixed
 
+- [#2419](https://github.com/flycheck/flycheck/pull/2419): The `rpm-rpmlint` error explainer works with rpmlint 2 as well as rpmlint 1, passing the `--explain` both take.
 - [#2418](https://github.com/flycheck/flycheck/pull/2418): The `delimiters` highlighting style keeps the faces of tags such as `deprecated`.
 - [#2418](https://github.com/flycheck/flycheck/pull/2418): `flycheck-fold-include-levels` keeps the level of an included-file error with nothing after it, instead of leaving it with none.
 - [#2418](https://github.com/flycheck/flycheck/pull/2418): `flycheck-add-mode` adds a mode once however often it runs, and `flycheck-describe-checker` links to the definition of a checker defined with `flycheck-define-generic-checker`.
