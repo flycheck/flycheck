@@ -19527,13 +19527,20 @@ See URL `https://docs.python.org/3.4/library/py_compile.html'."
   :modes (python-mode python-ts-mode)
   :next-checkers ((warning . python-mypy)))
 
-;; On systems where "python3" is not a working interpreter (e.g., Windows
-;; where python3.exe is a Microsoft Store stub), fall back to "python".
-(unless (ignore-errors (zerop (call-process "python3" nil nil nil "--version")))
-  (dolist (checker '(json-python-json python-flake8 python-pylint
-                     python-pycompile))
-    (let ((var (flycheck-checker-executable-variable checker)))
-      (set-default var "python"))))
+(defun flycheck--python-fallback ()
+  "Run the checkers that need python3 with python where python3 doesn't work.
+
+On some systems \"python3\" is no working interpreter: on Windows,
+python3.exe may be a Microsoft Store stub.  An executable the user
+already chose is kept."
+  (unless (ignore-errors (zerop (call-process "python3" nil nil nil "--version")))
+    (dolist (checker '(json-python-json python-flake8 python-pylint
+                       python-pycompile))
+      (let ((var (flycheck-checker-executable-variable checker)))
+        (unless (default-value var)
+          (set-default var "python"))))))
+
+(flycheck--python-fallback)
 
 (defun flycheck-pyright--parse-error (output checker buffer)
   "Parse pyright errors/warnings from JSON OUTPUT.
