@@ -498,6 +498,34 @@
           (expect (buffer-local-value 'flycheck-disabled-checkers source)
                   :not :to-contain 'emacs-lisp)))))
 
+  (describe "flycheck-compute-working-directory"
+    (it "doesn't need the buffer's directory for a checker running no command"
+      (with-temp-buffer
+        (let ((default-directory "/no/such/directory/"))
+          (expect (flycheck-compute-working-directory 'eglot-check)
+                  :to-equal "/no/such/directory/"))))
+
+    (it "blames the buffer's directory when the checker's own has none"
+      (flycheck-define-generic-checker 'test-own-directory
+        "A fake checker whose working directory function finds nothing."
+        :start (lambda (_checker callback) (funcall callback 'finished nil))
+        :working-directory (lambda (_checker) nil)
+        :modes '(text-mode))
+      (unwind-protect
+          (with-temp-buffer
+            (let ((default-directory "/no/such/directory/"))
+              (expect (flycheck-compute-working-directory 'test-own-directory)
+                      :to-equal "/no/such/directory/")))
+        (put 'test-own-directory 'flycheck-generic-checker-version nil)))
+
+    (it "says a command checker can't run in a missing directory"
+      (with-temp-buffer
+        (let ((default-directory "/no/such/directory/"))
+          (expect (condition-case err
+                      (flycheck-compute-working-directory 'emacs-lisp)
+                    (error (error-message-string err)))
+                  :to-match "cannot run in /no/such/directory/")))))
+
   (describe "flycheck-unload-function"
     (it "takes the bridges' hooks out of Eglot and stops the servers"
       (spy-on 'flycheck-lsp--shutdown-all)
