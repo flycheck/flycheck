@@ -351,7 +351,8 @@ fix that may not exist, but the error list marks them ``[fix?]``.  Press
 In the :ref:`error list <flycheck-error-list>` press :kbd:`x`
 (``flycheck-error-list-apply-fix``) to apply the fix of the error on the
 current row, or :kbd:`X` (``flycheck-error-list-fix-all``) to apply every
-fix in the list's source buffer.
+fix the list shows in its source buffer, leaving alone the errors a filter
+hides.
 
 Both work across files in the list's project scope (:kbd:`P`, see
 :doc:`error-list`).  A project checker such as ``cargo-check`` reports fixable

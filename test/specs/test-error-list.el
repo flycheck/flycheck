@@ -311,16 +311,23 @@
         (goto-char (point-min))
         (expect (flycheck-error-list-apply-fix) :to-throw 'user-error)))
 
-    (it "fixes all errors in the source buffer"
-      (let ((src (generate-new-buffer " src")) called)
+    (it "fixes the errors the list shows in the source buffer"
+      (let* ((src (generate-new-buffer " src"))
+             (shown (flycheck-error-new-at 1 1 'error "shown" :buffer src))
+             (hidden (flycheck-error-new-at 2 1 'info "hidden" :buffer src))
+             fixed)
         (unwind-protect
             (with-temp-buffer
               (setq-local flycheck-error-list-source-buffer src)
-              (cl-letf (((symbol-function 'flycheck-fix-all-errors)
-                         (lambda () (interactive) (setq called t)))
+              (with-current-buffer src
+                (setq flycheck-current-errors (list shown hidden)))
+              (cl-letf (((symbol-function 'flycheck--fix-buffer-errors)
+                         (lambda (errors)
+                           (setq fixed (cons (current-buffer) errors))))
                         ((symbol-function 'flycheck-error-list-refresh) #'ignore))
-                (flycheck-error-list-fix-all))
-              (expect called :to-be t))
+                (let ((flycheck-error-list-minimum-level 'warning))
+                  (flycheck-error-list-fix-all)))
+              (expect fixed :to-equal (list src shown)))
           (kill-buffer src))))
 
     (it "signals a user-error when there is no live source buffer"
