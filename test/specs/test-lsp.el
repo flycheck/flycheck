@@ -553,7 +553,29 @@
               (goto-char (point-max)) (insert "!")
               (flycheck-lsp--sync-document server doc uri "ruby"))
             (expect (nreverse methods)
-                    :to-equal '(textDocument/didOpen textDocument/didChange))))))
+                    :to-equal '(textDocument/didOpen textDocument/didChange)))))
+
+      (it "sends the whole text of a narrowed buffer"
+        (flycheck-buttercup-with-temp-buffer
+          (insert "one\ntwo\n")
+          (narrow-to-region 5 (point-max))
+          (let ((server (flycheck-lsp--server-create :connection 'conn))
+                (doc (flycheck-lsp--doc-create))
+                (texts nil))
+            (cl-letf (((symbol-function 'jsonrpc-notify)
+                       (lambda (_conn _method params)
+                         (push (or (plist-get (plist-get params :textDocument)
+                                              :text)
+                                   (plist-get (aref (plist-get params
+                                                               :contentChanges)
+                                                    0)
+                                              :text))
+                               texts))))
+              (flycheck-lsp--sync-document server doc "file:///x/a.rb" "ruby")
+              (goto-char (point-max))
+              (insert "!")
+              (flycheck-lsp--sync-document server doc "file:///x/a.rb" "ruby"))
+            (expect (nreverse texts) :to-equal '("one\ntwo\n" "one\ntwo\n!"))))))
 
     (describe "flycheck-lsp--start"
       (it "reports nothing when the mode has no configured server"
