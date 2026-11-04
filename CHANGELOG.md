@@ -37,6 +37,7 @@
 
 ### Bugs fixed
 
+- [#2412](https://github.com/flycheck/flycheck/pull/2412): Turning `flycheck-mode` on in a buffer where it's already on no longer keeps `next-error` from getting back to compilation and grep results once the mode is off.
 - [#2412](https://github.com/flycheck/flycheck/pull/2412): `flycheck-buffer` called from Lisp while a check runs, as `flycheck-select-checker` and the error list's `g` do, queues a check behind it instead of dropping the request along with any check already queued.
 - [#2412](https://github.com/flycheck/flycheck/pull/2412): A check no longer stays running for good when the next checker of a chain signals as it starts; the check fails and says why.
 - [#2411](https://github.com/flycheck/flycheck/pull/2411): `flycheck-lsp` sends the language server the whole file of a narrowed buffer, not just the part the narrowing shows.
