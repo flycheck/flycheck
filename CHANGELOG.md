@@ -37,6 +37,7 @@
 
 ### Bugs fixed
 
+- [#2416](https://github.com/flycheck/flycheck/pull/2416): The text sent to a checker on a remote host is encoded as Emacs would encode it for a local process, honoring `coding-system-for-write` and functions in `process-coding-system-alist`.
 - [#2416](https://github.com/flycheck/flycheck/pull/2416): A related location in the copy of the buffer a checker read points at the buffer's file, instead of at the copy Flycheck deleted after the check.
 - [#2416](https://github.com/flycheck/flycheck/pull/2416): A rustc or Cargo note pointing into another file, at a definition or a bound in the standard library, say, shows at the error it explains with its place as a related location, instead of at that line number in the wrong file.
 - [#2416](https://github.com/flycheck/flycheck/pull/2416): A SARIF report naming a Windows file as `file:///C:/...` points at `C:/...`, as the native LSP client's file names already did.
