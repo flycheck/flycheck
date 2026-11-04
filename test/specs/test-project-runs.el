@@ -114,6 +114,22 @@
           (expect (flycheck-error-line (car errors)) :to-equal 3)
           (expect (flycheck-error-message (car errors)) :to-equal "boom"))))
 
+    (it "dates the kept errors by their own run while another is under way"
+      (flycheck-test--define-run-checker)
+      (flycheck-test--with-temp-project dir
+        (let ((key (cons dir 'test-run)))
+          (flycheck-check-project)
+          (flycheck-test--wait-for-run key)
+          (let ((first (plist-get (gethash key flycheck--project-runs) :time)))
+            (expect first :to-be-truthy)
+            (flycheck-test--define-run-checker
+             :command (flycheck-test--emacs-command '(sleep-for 30)))
+            (flycheck-check-project)
+            (expect (plist-get (gethash key flycheck--project-runs) :process)
+                    :to-be-truthy)
+            (expect (plist-get (gethash key flycheck--project-runs) :time)
+                    :to-equal first)))))
+
     (it "stops naming a run before it stops it"
       ;; Stopping a process can run its sentinel there and then, and a
       ;; sentinel that still finds its own process in the table takes the

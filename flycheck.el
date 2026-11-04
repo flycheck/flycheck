@@ -4831,8 +4831,10 @@ the list of `flycheck-fix-edit' objects to apply together.  TICK
 is the buffer's `buffer-chars-modified-tick' when the check that
 produced the fix started; `flycheck-apply-fix' refuses to apply
 the fix if the buffer has changed since, so stale line and column
-numbers can never silently corrupt it.  See `flycheck-apply-fix'."
-  description edits tick)
+numbers can never silently corrupt it.  See `flycheck-apply-fix'.
+TIME is when that check started, which is what a fix for another
+file than the checked one answers to (see `flycheck--fix-bound')."
+  description edits tick time)
 
 (defmacro flycheck-error-with-buffer (err &rest forms)
   "Switch to the buffer of ERR and evaluate FORMS.
@@ -5006,13 +5008,16 @@ current buffer, so call this in the buffer being fixed."
 
 Stamp the fix with BUFFER's modification tick at the start of the
 current check (see `flycheck--syntax-check-modified-tick'), so
-`flycheck-apply-fix' can tell whether the buffer has changed since."
+`flycheck-apply-fix' can tell whether the buffer has changed since, and
+with the time the check started, which bounds a fix for another file."
   (when edits
-    (flycheck-fix-new
-     :description description :edits edits
-     :tick (and (buffer-live-p buffer)
-                (buffer-local-value 'flycheck--syntax-check-modified-tick
-                                    buffer)))))
+    (let ((live (buffer-live-p buffer)))
+      (flycheck-fix-new
+       :description description :edits edits
+       :tick (and live (buffer-local-value
+                        'flycheck--syntax-check-modified-tick buffer))
+       :time (and live (buffer-local-value
+                        'flycheck--syntax-check-start-time buffer))))))
 
 (defun flycheck--check-fix-tick (fix)
   "Signal a `user-error' if the current buffer changed since FIX was computed."
@@ -5261,15 +5266,19 @@ That is the symbol `now' for a lazy fix provider (see
 when asked; the time of the check that produced a fix Flycheck already
 holds; or nil when nothing says, in which case the fix is not applied to
 another file at all."
-  (cond
-   ((functionp (flycheck-error-fix err)) 'now)
-   ;; A buffer check can report a fix for another file it read (rustc names
-   ;; a suggestion in a second crate file this way).  The buffer's tick
-   ;; says nothing about that file, but the time its check started does.
-   ((when-let* ((buffer (flycheck-error-buffer err))
-                ((buffer-live-p buffer)))
-      (buffer-local-value 'flycheck--syntax-check-start-time buffer)))
-   (t (flycheck--project-error-time err))))
+  (let ((fix (flycheck-error-fix err)))
+    (cond
+     ((functionp fix) 'now)
+     ;; A buffer check can report a fix for another file it read (rustc
+     ;; names a suggestion in a second crate file this way).  The buffer's
+     ;; tick says nothing about that file, but the time its check started
+     ;; does, which the fix carries: a later checker of the same chain
+     ;; starts later, and the buffer only knows its time.
+     ((and (flycheck-fix-p fix) (flycheck-fix-time fix)))
+     ((when-let* ((buffer (flycheck-error-buffer err))
+                  ((buffer-live-p buffer)))
+        (buffer-local-value 'flycheck--syntax-check-start-time buffer)))
+     (t (flycheck--project-error-time err)))))
 
 (defun flycheck--fix-file-current-p (file checked)
   "Whether FILE can still hold what a fix bounded by CHECKED describes.
@@ -6000,7 +6009,7 @@ fixes is the check of the buffer that reported them, see
                            (error (setq failure (error-message-string err))
                                   nil))))
             (puthash key (list :process nil :errors errors
-                               :time (plist-get state :time))
+                               :time (process-get proc 'flycheck-start-time))
                      flycheck--project-runs)
             (flycheck--project-diagnostics-changed)
             (flycheck-error-list-refresh)
@@ -6038,6 +6047,7 @@ fixes is the check of the buffer that reported them, see
                flycheck--project-runs)
       (flycheck--delete-process proc))
     (let* ((default-directory root)
+           (start-time (current-time))
            (stdout (generate-new-buffer
                     (format " *flycheck-project-%s*" checker)))
            (stderr (generate-new-buffer
@@ -6074,12 +6084,14 @@ fixes is the check of the buffer that reported them, see
         (process-put proc 'flycheck-project-checker checker)
         (process-put proc 'flycheck-parser (plist-get props :parser))
         (process-put proc 'flycheck-stderr stderr)
-        (puthash key (list :process proc
-                           :errors (plist-get
-                                    (gethash key flycheck--project-runs)
-                                    :errors)
-                           :time (current-time))
-                 flycheck--project-runs)))))
+        (process-put proc 'flycheck-start-time start-time)
+        ;; The errors of the last run stay until this one finishes, and
+        ;; so does the time that dates them
+        (let ((last (gethash key flycheck--project-runs)))
+          (puthash key (list :process proc
+                             :errors (plist-get last :errors)
+                             :time (plist-get last :time))
+                   flycheck--project-runs))))))
 
 (defun flycheck-check-project (&optional clear)
   "Check the whole project with every applicable project checker.

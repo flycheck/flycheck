@@ -721,6 +721,31 @@ bounds the fix of a file the checker read from disk."
                     'user-error)
           (kill-buffer checked))))
 
+    (it "bounds a fix by its own checker, not a later one of the chain"
+      (let* ((file (flycheck-test--fix-file "b.el" "helo world\n"))
+             (checked (generate-new-buffer " checked"))
+             (err (with-current-buffer checked
+                    (setq flycheck--syntax-check-start-time
+                          (time-add (current-time) -60))
+                    (flycheck-error-new-at
+                     1 1 'error "typo" :filename file
+                     :fix (flycheck--make-fix
+                           checked nil
+                           (list (flycheck-fix-edit-new
+                                  :line 1 :column 1 :end-line 1 :end-column 5
+                                  :replacement "hello")))))))
+        (unwind-protect
+            (progn
+              ;; The next checker of the chain starts after the write
+              (with-current-buffer checked
+                (setq flycheck--syntax-check-start-time
+                      (time-add (current-time) 60)))
+              (expect (condition-case signalled
+                          (flycheck--apply-error-fix err 'visit)
+                        (user-error (error-message-string signalled)))
+                      :to-match "written since the check"))
+          (kill-buffer checked))))
+
     (it "applies a buffer check's fix for a file untouched since that check"
       (let* ((file (flycheck-test--fix-file "b.el" "helo world\n"))
              (checked (generate-new-buffer " checked"))
