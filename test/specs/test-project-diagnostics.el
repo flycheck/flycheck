@@ -121,6 +121,27 @@ on /private/tmp)."
                                           :checker 'x)))))
         (expect (length (flycheck-test--project-errors "/proj/")) :to-equal 1))
 
+      (it "resolves each buffer's project once per directory"
+        (let ((buffer (flycheck-test--project-buffer " once" "/proj/")))
+          (with-current-buffer buffer
+            (flycheck--project-record-errors
+             (list (flycheck-error-new-at 1 1 'error "a" :filename "/proj/x"))))
+          (spy-on 'flycheck--project-directory :and-call-through)
+          (flycheck-test--project-errors "/proj/")
+          (flycheck-test--project-errors "/proj/")
+          (expect (spy-calls-count 'flycheck--project-directory)
+                  :to-be-less-than 2)))
+
+      (it "resolves a buffer's project again once its directory changes"
+        (let ((buffer (flycheck-test--project-buffer " moved" "/proj-a/")))
+          (with-current-buffer buffer
+            (expect (flycheck--buffer-project-key)
+                    :to-equal (flycheck-test--project-key "/proj-a/"))
+            ;; As `set-visited-file-name' does for a file renamed elsewhere
+            (setq default-directory (flycheck-test--project-key "/proj-b/"))
+            (expect (flycheck--buffer-project-key)
+                    :to-equal (flycheck-test--project-key "/proj-b/")))))
+
       (it "does not merge identical errors from different fileless buffers"
         ;; Two unsaved buffers reporting the same diagnostic are distinct.
         (dolist (name '(" u1" " u2"))

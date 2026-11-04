@@ -5780,18 +5780,23 @@ generation the counts were computed at and the alist
 `flycheck--project-diagnostics-generation' moves on.")
 
 (defvar-local flycheck--cached-project-key nil
-  "This buffer's `flycheck--project-directory', resolved once.
-Like `flycheck-lsp--cached-root': `project-current' is not free, and a
-buffer's project does not change over its life.")
+  "This buffer's `flycheck--project-directory', resolved once per directory.
+
+A cons of the `default-directory' it was resolved in and the key, as
+`project-current' is not free.  A buffer's project changes only with
+its directory, when its file is renamed into another one.")
 
 (defun flycheck--buffer-project-key ()
   "Return the current buffer's project key, cached buffer-locally.
 A failing project backend is remembered as `failed', so it is not
 retried on every redisplay."
-  (let ((key (or flycheck--cached-project-key
-                 (setq flycheck--cached-project-key
-                       (or (ignore-errors (flycheck--project-directory))
-                           'failed)))))
+  (let ((key (if (equal (car flycheck--cached-project-key) default-directory)
+                 (cdr flycheck--cached-project-key)
+               (cdr (setq flycheck--cached-project-key
+                          (cons default-directory
+                                (or (ignore-errors
+                                      (flycheck--project-directory))
+                                    'failed)))))))
     (unless (eq key 'failed) key)))
 
 (defun flycheck--project-counts (project-key)
@@ -5897,12 +5902,10 @@ the file changed without running a check."
          (if (not (buffer-live-p buffer))
              (push buffer dead)
            ;; Resolve the project lazily, only now, to keep `project-current'
-           ;; off the check hot path; a misbehaving project backend must not
-           ;; abort the whole aggregation, so guard against it.
+           ;; off the check hot path, and once per buffer and directory
            (when (equal project-key
-                        (ignore-errors
-                          (with-current-buffer buffer
-                            (flycheck--project-directory))))
+                        (with-current-buffer buffer
+                          (flycheck--buffer-project-key)))
              (push buffer buffers)
              (dolist (err errors)
                (let* ((identity (flycheck--project-error-identity err buffer))
