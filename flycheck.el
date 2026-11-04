@@ -18964,8 +18964,11 @@ See URL `https://developers.google.com/protocol-buffers/'."
   "A Pug syntax checker using the pug compiler.
 
 See URL `https://pugjs.org/'."
-  :command ("pug" "-p"
-            (eval (file-local-name (expand-file-name (buffer-file-name)))))
+  ;; -p resolves includes against the file; a buffer without one has none
+  :command ("pug"
+            (eval (when (buffer-file-name)
+                    (list "-p" (file-local-name
+                                (expand-file-name (buffer-file-name)))))))
   :standard-input t
   :error-patterns
   ;; errors with includes/extends (e.g. missing files)
@@ -18993,6 +18996,11 @@ See URL `https://pugjs.org/'."
           (zero-or-more not-newline) "\n"
           (message)
           line-end))
+  ;; Without -p, pug calls the file "Pug"
+  :error-filter
+  (lambda (errors)
+    (flycheck-sanitize-errors
+     (flycheck-remove-error-file-names "Pug" errors)))
   :modes pug-mode)
 
 (flycheck-define-checker puppet-parser
