@@ -142,6 +142,26 @@
   (describe "flycheck-temp-prefix"
 
     (it "has the default value"
-      (expect flycheck-temp-prefix :to-equal "flycheck"))))
+      (expect flycheck-temp-prefix :to-equal "flycheck")))
+
+  (describe "the minimum level options"
+    (it "take nil, for every level, as safe"
+      (dolist (option '(flycheck-navigation-minimum-level
+                        flycheck-error-list-minimum-level
+                        flycheck-relevant-error-other-file-minimum-level))
+        (expect (safe-local-variable-p option nil) :to-be-truthy)
+        (expect (safe-local-variable-p option 'warning) :to-be-truthy)
+        (expect (safe-local-variable-p option 'no-such-level)
+                :not :to-be-truthy))))
+
+  (describe "the display function options"
+    (it "offer the nil their docstrings document"
+      (require 'cus-edit)
+      (dolist (option '(flycheck-display-errors-function
+                        flycheck-clear-displayed-errors-function
+                        flycheck-help-echo-function))
+        (expect (widget-apply (widget-convert (custom-variable-type option))
+                              :match nil)
+                :to-be-truthy)))))
 
 ;;; test-customization.el ends here

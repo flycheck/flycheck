@@ -511,6 +511,7 @@ If set to nil, do not display errors at all."
                         flycheck-display-error-messages)
                  (const :tag "Display error messages only if no error list"
                         flycheck-display-error-messages-unless-error-list)
+                 (const :tag "Don't display errors" nil)
                  (function :tag "Error display function"))
   :package-version '(flycheck . "37")
   :risky t)
@@ -519,10 +520,12 @@ If set to nil, do not display errors at all."
   "Function to hide error message displayed by `flycheck-display-errors-function'.
 
 If set to a function, it will be called with no arguments to
-clear all displayed errors at point."
+clear all displayed errors at point.  If set to nil, displayed errors
+are not cleared."
   :group 'flycheck
   :type '(choice (const :tag "Clear displayed error messages"
                         flycheck-clear-displayed-error-messages)
+                 (const :tag "Don't clear them" nil)
                  (function :tag "Clear displayed errors function"))
   :package-version '(flycheck . "34.2")
   :risky t)
@@ -541,6 +544,7 @@ If set to nil, do not show error tooltips."
   :group 'flycheck
   :type '(choice (const :tag "Concatenate error messages to form a tooltip"
                         flycheck-help-echo-all-error-messages)
+                 (const :tag "No tooltips" nil)
                  (function :tag "Help echo function"))
   :package-version '(flycheck . "0.25")
   :risky t)
@@ -1031,6 +1035,10 @@ next file at its first error, or the previous file at its last."
   :safe (lambda (value) (memq value '(buffer project)))
   :package-version '(flycheck . "40"))
 
+(defun flycheck--minimum-level-p (value)
+  "Whether VALUE is a minimum level: an error level, or nil for all."
+  (or (null value) (and (symbolp value) (flycheck-error-level-p value))))
+
 (defcustom flycheck-navigation-minimum-level nil
   "The minimum level of errors to navigate.
 
@@ -1038,7 +1046,7 @@ If set to an error level, only navigate errors whose error level
 is at least as severe as this one.  If nil, navigate all errors."
   :group 'flycheck
   :type 'flycheck-minimum-level
-  :safe #'flycheck-error-level-p
+  :safe #'flycheck--minimum-level-p
   :package-version '(flycheck . "0.21"))
 
 (defcustom flycheck-error-list-minimum-level nil
@@ -1054,7 +1062,7 @@ You can temporarily change the level using
 using \\[flycheck-error-list-reset-filter]."
   :group 'flycheck
   :type 'flycheck-minimum-level
-  :safe #'flycheck-error-level-p
+  :safe #'flycheck--minimum-level-p
   :package-version '(flycheck . "0.24"))
 
 (defcustom flycheck-relevant-error-other-file-minimum-level 'error
@@ -1065,7 +1073,7 @@ whose error level is at least as severe as this one.  If nil,
 display all errors from other files."
   :group 'flycheck
   :type 'flycheck-minimum-level
-  :safe #'flycheck-error-level-p
+  :safe #'flycheck--minimum-level-p
   :package-version '(flycheck . "32"))
 
 (defcustom flycheck-relevant-error-other-file-show t
