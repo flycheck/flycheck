@@ -55,6 +55,12 @@
     (expect (flycheck/version-header) :to-equal flycheck-version)
     (expect (flycheck/eask-version) :to-equal flycheck-version))
 
+  (it "doesn't read the version off the file the current buffer visits"
+    (with-temp-buffer
+      (setq buffer-file-name "/tmp/foo-1.2.3/bar.el")
+      (expect (flycheck-version) :not :to-equal "1.2.3")
+      (setq buffer-file-name nil)))
+
   (it "declares a version Emacs can compare"
     (expect (ignore-errors (version-to-list flycheck-version))
             :not :to-be nil)))
