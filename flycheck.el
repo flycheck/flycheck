@@ -13558,7 +13558,14 @@ afresh.  The servers stay."
         :rootUri (flycheck-lsp--path-to-uri root)
         :capabilities
         (list :textDocument
-              (list :publishDiagnostics '(:relatedInformation t)
+              ;; What `flycheck-lsp--diagnostic->error' reads, which
+              ;; servers send only to a client that says it reads them
+              (list :publishDiagnostics
+                    '(:relatedInformation t
+                      ;; The codes `flycheck-lsp--diagnostic-tags' maps
+                      :tagSupport (:valueSet [1 2])
+                      :codeDescriptionSupport t
+                      :dataSupport t)
                     ;; Pull-model diagnostics: a server advertising a
                     ;; diagnosticProvider is asked per document (see
                     ;; `flycheck-lsp--pull-document') and, on demand, for

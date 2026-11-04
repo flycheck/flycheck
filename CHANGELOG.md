@@ -37,6 +37,7 @@
 
 ### Bugs fixed
 
+- [#2422](https://github.com/flycheck/flycheck/pull/2422): `flycheck-lsp` tells servers it reads diagnostic tags, code descriptions and data, so pyright, for one, reports unused and unreachable code to it.
 - [#2422](https://github.com/flycheck/flycheck/pull/2422): With `flycheck-lsp-prefer-server`, the checker the server stands in for no longer runs right after it as well, once a buffer in the same mode has turned `flycheck-lsp-mode` on.
 - [#2422](https://github.com/flycheck/flycheck/pull/2422): With `flycheck-lsp-exclusive` or `flycheck-eglot-exclusive` off, the command checkers keep running behind the LSP bridges in every major mode, not only in the one a bridge was turned on in last.
 - [#2422](https://github.com/flycheck/flycheck/pull/2422): Turning `flycheck-eglot-mode` off in a buffer Eglot still manages turns Flymake back on, instead of leaving the buffer without Eglot's diagnostics.
