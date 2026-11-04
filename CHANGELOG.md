@@ -37,6 +37,7 @@
 
 ### Bugs fixed
 
+- [#2423](https://github.com/flycheck/flycheck/pull/2423): With `flycheck-annotate-suppress-echo`, the echo area still shows an error at point that the line's annotation doesn't, such as one the `eol` or `sideline` style only counts beside a more severe one.
 - [#2423](https://github.com/flycheck/flycheck/pull/2423): With errors displayed through Eldoc, an error fixed at point no longer stays in the echo area after the check that found it gone.
 - [#2422](https://github.com/flycheck/flycheck/pull/2422): Where Eglot attaches the LSP diagnostic to one about an unvisited file, as Emacs 31's does, the project view shows it with the server's message and id, as it does for a visited file.
 - [#2422](https://github.com/flycheck/flycheck/pull/2422): `flycheck-lsp` names a document's language the way LSP does, such as `markdown` for `gfm-mode` and `javascript` for `js-mode`, so harper-ls checks GitHub Markdown buffers instead of dropping them.

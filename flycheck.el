@@ -9326,7 +9326,9 @@ anchored to one line, sorted most-severe first; ANCHOR, the buffer
 position at the end of that line to attach the overlay to; and FOCUSED,
 non-nil when the line is the one at point.  It must create its overlays
 with `flycheck-annotate--make-overlay', which tags and tracks them for
-teardown.
+teardown.  A style that shows only some of ERRORS puts those it shows
+on its overlay as `flycheck-annotate-shown', so the echo area still
+shows the rest; see `flycheck-annotate-suppress-echo'.
 
 Add to this alist to register additional styles."
   :group 'flycheck
@@ -9596,8 +9598,12 @@ message spanning lines is folded onto one; see
 
 Only the most severe error's message is shown, with a count of the rest.
 FOCUSED is ignored."
-  (flycheck-annotate--make-overlay
-   anchor (concat "  " (flycheck-annotate--compact-text errors))))
+  (let ((ov (flycheck-annotate--make-overlay
+             anchor (concat "  " (flycheck-annotate--compact-text errors)))))
+    ;; The rest are for the echo area to show; see
+    ;; `flycheck-annotate--suppresses-echo-p'
+    (overlay-put ov 'flycheck-annotate-shown (list (car errors)))
+    ov))
 
 (defun flycheck-annotate--reserved-columns (&optional window)
   "Columns at WINDOW's right edge that text must not be aligned into.
@@ -9694,9 +9700,9 @@ simply follows it instead.  FOCUSED is ignored."
          (width (+ (string-width text) (car geometry)))
          (spacer (propertize " " 'display `(space :align-to (- right ,width))))
          (ov (flycheck-annotate--make-overlay anchor (concat spacer text))))
-    ;; Marks the annotation as an incomplete rendering of its errors, so
-    ;; the echo message is not suppressed on its line; see
-    ;; `flycheck-annotate--suppresses-echo-p'.
+    ;; What the annotation leaves out, the echo message shows on its line;
+    ;; see `flycheck-annotate--suppresses-echo-p'.
+    (overlay-put ov 'flycheck-annotate-shown (list (car errors)))
     (unless (eq text full)
       (overlay-put ov 'flycheck-annotate-truncated t))
     ov))
@@ -9972,37 +9978,54 @@ to know where the window ended up."
       ;; runs inside redisplay, so guard against coming back round
       (flycheck-annotate--post-command))))
 
-(defun flycheck-annotate--truncated-at-point-p ()
-  "Return non-nil when the annotation on the current line was truncated."
-  (let ((bol (line-beginning-position))
-        (end (min (point-max) (1+ (line-end-position)))))
-    (seq-some (lambda (ov)
-                (and (overlay-get ov 'flycheck-annotate-truncated)
-                     ;; Evaporated overlays linger in the registry with
-                     ;; no start until the next rebuild clears them.
-                     (when-let* ((start (overlay-start ov)))
-                       (<= bol start end))))
-              flycheck-annotate--overlays)))
+(defun flycheck-annotate--covers-p (overlays)
+  "Return non-nil when the line's annotation shows OVERLAYS' errors in full.
+
+OVERLAYS are the Flycheck overlays at point.  Each of their errors must
+be one the annotation of the line at point shows: of this file, of a
+level the current-line tier shows, and anchored on this line.  And that
+annotation must be there, not truncated, and show each of them, where a
+compact style shows only the most severe of a line's errors."
+  (let* ((bol (line-beginning-position))
+         (eol (line-end-position))
+         (levels (flycheck-annotate--effective-levels
+                  flycheck-annotate-current-line-levels))
+         (annotation
+          (seq-find (lambda (ov)
+                      ;; Evaporated overlays linger in the registry with
+                      ;; no start until the next rebuild clears them.
+                      (when-let* ((start (overlay-start ov)))
+                        (and (<= bol start eol)
+                             (or (overlay-get ov 'before-string)
+                                 (overlay-get ov 'display)))))
+                    flycheck-annotate--overlays))
+         (shown (and annotation
+                     (overlay-get annotation 'flycheck-annotate-shown))))
+    (and annotation
+         (not (overlay-get annotation 'flycheck-annotate-truncated))
+         (seq-every-p
+          (lambda (ov)
+            (let ((err (overlay-get ov 'flycheck-error)))
+              (and (not (flycheck-relevant-error-other-file-p err))
+                   (flycheck-annotate--filter-levels (list err) levels)
+                   (<= bol (overlay-start ov) eol)
+                   (or (null shown) (memq err shown)))))
+          overlays))))
 
 (defun flycheck-annotate--suppresses-echo-p ()
   "Return non-nil when inline display covers the at-point echo message.
 
-Only suppresses when the errors at point would actually be rendered
-inline and in full, so an error that the inline display drops (because
-its level is disabled for the current-line tier, or it belongs to
-another file) or truncates (a `sideline' message too wide for the room
-beside the code) is still shown through the echo area rather than
-nowhere."
+Only suppresses when every error at point is rendered inline and in
+full on the line at point, so an error the inline display drops (its
+level disabled for the current-line tier, from another file, anchored
+on another line, or only counted by a compact style) or truncates (a
+`sideline' message too wide for the room beside the code) is still
+shown through the echo area rather than nowhere."
   (and (bound-and-true-p flycheck-annotate-mode)
        flycheck-annotate-suppress-echo
        flycheck-annotate-current-line-style
-       (not (flycheck-annotate--truncated-at-point-p))
-       (seq-some (lambda (err)
-                   (not (flycheck-relevant-error-other-file-p err)))
-                 (flycheck-annotate--filter-levels
-                  (flycheck-overlay-errors-at (point))
-                  (flycheck-annotate--effective-levels
-                   flycheck-annotate-current-line-levels)))))
+       (when-let* ((overlays (flycheck-overlays-at (point))))
+         (flycheck-annotate--covers-p overlays))))
 
 ;;;###autoload
 (define-minor-mode flycheck-annotate-mode
@@ -10029,7 +10052,9 @@ annotated on the next command."
   :group 'flycheck
   (cond
    (flycheck-annotate-mode
-    (add-hook 'post-command-hook #'flycheck-annotate--post-command nil t)
+    ;; Ahead of `flycheck-display-error-at-point-soon', which asks whether
+    ;; the line's annotation covers the errors at point
+    (add-hook 'post-command-hook #'flycheck-annotate--post-command -50 t)
     (add-hook 'window-scroll-functions #'flycheck-annotate--after-scroll nil t)
     (add-hook 'flycheck-after-syntax-check-hook
               #'flycheck-annotate--refresh nil t)

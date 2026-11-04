@@ -488,6 +488,7 @@ block replaces that line's newline, so it begins with one."
               (flycheck-annotate-suppress-echo t)
               (flycheck-annotate-current-line-style 'below)
               (flycheck-annotate-levels t))
+          (flycheck-annotate--refresh)
           (expect (flycheck-annotate--suppresses-echo-p) :to-be t))))
     (it "is nil when the current line is not annotated"
       (let ((flycheck-annotate-mode t)
@@ -533,8 +534,83 @@ block replaces that line's newline, so it begins with one."
                     ((symbol-function 'window-fringes) (lambda (&rest _) '(0 0 nil nil))))
             ;; room = 30 - 1 reserved - 14 code - 2 slack = 13, message 60
             (flycheck-annotate-sideline-style errs (line-end-position) t)
-            (expect (flycheck-annotate--truncated-at-point-p) :to-be t)
-            (expect (flycheck-annotate--suppresses-echo-p) :to-be nil))))))
+            (expect (flycheck-annotate--suppresses-echo-p) :to-be nil)))))
+
+    (describe "against the annotations of a window"
+      (cl-flet ((suppresses-at (text errors line col &rest settings)
+                  ;; Whether the echo is kept quiet at LINE and COL of
+                  ;; TEXT, its ERRORS given as (LINE COL LEVEL MESSAGE
+                  ;; . PROPERTIES), with the annotate SETTINGS bound
+                  (flycheck-buttercup-with-temp-buffer
+                    (save-window-excursion
+                      (set-window-buffer (selected-window) (current-buffer))
+                      (insert text)
+                      (setq-local flycheck-mode t)
+                      (pcase-dolist (`(,l ,c ,level ,message . ,props) errors)
+                        (flycheck-add-overlay
+                         (apply #'flycheck-error-new-at l c level message
+                                :buffer (current-buffer)
+                                :checker 'emacs-lisp props)))
+                      (goto-char (point-min))
+                      (forward-line (1- line))
+                      (forward-char (1- col))
+                      (cl-progv (mapcar #'car settings) (mapcar #'cdr settings)
+                        (let ((flycheck-annotate-mode t)
+                              (flycheck-annotate-suppress-echo t))
+                          (flycheck-annotate--refresh)
+                          (flycheck-annotate--suppresses-echo-p)))))))
+
+        (it "suppresses for an error the line's annotation shows"
+          (expect (suppresses-at "one two\n" '((1 1 error "bad")) 1 1
+                                 '(flycheck-annotate-current-line-style . eol))
+                  :to-be-truthy))
+
+        (it "does not suppress beside an error the level filter hides"
+          (expect (suppresses-at "one two\n"
+                                 '((1 1 error "bad") (1 1 warning "meh"))
+                                 1 1
+                                 '(flycheck-annotate-current-line-style . below)
+                                 '(flycheck-annotate-current-line-levels
+                                   . (error)))
+                  :to-be nil))
+
+        (it "suppresses with the next line empty and annotated"
+          ;; Its annotation starts right after this line's end
+          (expect (suppresses-at "one two\n\nthree\n"
+                                 '((1 1 error "bad") (2 1 error "blank"))
+                                 1 1
+                                 '(flycheck-annotate-current-line-style . eol))
+                  :to-be-truthy))
+
+        (it "does not suppress on a line the error only runs on to"
+          ;; It is annotated on the line it starts on
+          (expect (suppresses-at "one two\nthree\n"
+                                 '((1 5 warning "long"
+                                      :end-line 2 :end-column 3))
+                                 2 1
+                                 '(flycheck-annotate-current-line-style . eol))
+                  :to-be nil))))
+
+    (it "suppresses only for the error a compact style shows"
+      ;; It shows the line's most severe error, and only counts the rest
+      (flycheck-buttercup-with-temp-buffer
+        (test-annotate/setup)
+        (goto-char (point-min))
+        (forward-line 1)                ; line 2: a warning at 1, an error at 6
+        (let ((flycheck-annotate--overlays nil)
+              (flycheck-annotate-mode t)
+              (flycheck-annotate-suppress-echo t)
+              (flycheck-annotate-current-line-style 'eol)
+              (flycheck-annotate-levels t))
+          (flycheck-annotate-eol-style
+           (sort (seq-filter (lambda (err) (= (flycheck-error-line err) 2))
+                             flycheck-current-errors)
+                 #'flycheck--excessive-errors-<)
+           (line-end-position) t)
+          (forward-char 5)              ; onto the error, which it shows
+          (expect (flycheck-annotate--suppresses-echo-p) :to-be t)
+          (beginning-of-line)           ; onto the warning, which it counts
+          (expect (flycheck-annotate--suppresses-echo-p) :to-be nil)))))
 
   (describe "the two-tier layout"
     (it "uses the below style on the line at point and eol elsewhere"
@@ -767,6 +843,16 @@ block replaces that line's newline, so it begins with one."
               (flycheck-annotate--post-command)
               (expect flycheck-annotate--last-tick
                       :to-equal (buffer-chars-modified-tick))))))))
+
+    (it "rebuilds before the errors at point are displayed"
+      ;; Which needs to know what the line's annotation shows now
+      (flycheck-buttercup-with-temp-buffer
+        (flycheck-annotate-mode 1)
+        (flycheck-mode 1)
+        (let ((hook (remq t post-command-hook)))
+          (expect (seq-position hook #'flycheck-annotate--post-command)
+                  :to-be-less-than
+                  (seq-position hook #'flycheck-display-error-at-point-soon)))))
 
     (it "does not rebuild crossing between two clean lines"
       ;; Which line has point only matters through the current-line tier,
