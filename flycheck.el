@@ -13289,6 +13289,10 @@ counts `flycheck-verify-setup' shows."
               (when pushed
                 (flycheck-lsp--count-push recheck))
               (when recheck
+                ;; Bound buffer-locally, or the check copies the global
+                ;; binding's t into a local that outlives it
+                (unless (local-variable-p 'flycheck-lsp--suppress-recheck)
+                  (setq-local flycheck-lsp--suppress-recheck nil))
                 (let ((flycheck-lsp--suppress-recheck t))
                   (flycheck-buffer-automatically))))))))))
 
