@@ -354,19 +354,19 @@ on /private/tmp)."
           (expect flycheck-error-list-scope :to-be 'buffer)
           (kill-buffer flycheck-error-list-buffer))))))
 
-(describe "flycheck--path-under-prefixes-p"
-  (it "matches a path spelled through a symlink to a true-name prefix"
+(describe "flycheck--path-under-p"
+  (it "matches a path spelled through a symlink to a true-name directory"
     (let* ((real (file-name-as-directory
                   (file-truename (make-temp-file "flycheck-prefix" t))))
            (link (concat (directory-file-name real) "-link")))
       (make-symbolic-link (directory-file-name real) link)
       (unwind-protect
           (progn
-            (expect (flycheck--path-under-prefixes-p
-                     (expand-file-name "a.rb" link) (list real))
+            (expect (flycheck--path-under-p
+                     (expand-file-name "a.rb" link) real)
                     :to-be-truthy)
-            (expect (flycheck--path-under-prefixes-p
-                     (expand-file-name "a.rb" "/nowhere/else/") (list real))
+            (expect (flycheck--path-under-p
+                     (expand-file-name "a.rb" "/nowhere/else/") real)
                     :to-be nil))
         (delete-file link)
         (delete-directory real t)))))
