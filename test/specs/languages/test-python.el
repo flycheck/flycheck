@@ -5,6 +5,16 @@
 
 (describe "Language Python"
 
+  (describe "python-pycompile's patterns"
+    (it "read a TabError"
+      ;; As Python 3.14 prints it
+      (let ((err (car (flycheck-buttercup-parse
+                       'python-pycompile
+                       "Sorry: TabError: inconsistent use of tabs and spaces in indentation (tab.py, line 3)"))))
+        (expect (flycheck-error-line err) :to-equal 3)
+        (expect (flycheck-error-message err)
+                :to-equal "inconsistent use of tabs and spaces in indentation"))))
+
   (describe "flycheck--python-fallback"
     (it "keeps an executable the user chose"
       (spy-on 'call-process :and-return-value 1)

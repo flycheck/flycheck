@@ -19538,7 +19538,7 @@ See URL `https://docs.python.org/3.4/library/py_compile.html'."
   ((error line-start "  File \"" (file-name) "\", line " line "\n"
           (>= 2 (zero-or-more not-newline) "\n")
           "SyntaxError: " (message) line-end)
-   (error line-start "Sorry: IndentationError: "
+   (error line-start "Sorry: " (or "IndentationError" "TabError") ": "
           (message) "(" (file-name) ", line " line ")"
           line-end))
   :working-directory flycheck-python-find-project-root
