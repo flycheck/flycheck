@@ -7031,9 +7031,11 @@ included file."
                              (and faulty-include-filename
                                   (string= filename current-filename)))))
 
-            (setf (flycheck-error-level current-error) current-level
-                  (flycheck-error-message current-error)
-                  (format "In include %s" faulty-include-filename))))))
+            ;; A sentinel with no error after it has no level to take
+            (when current-level
+              (setf (flycheck-error-level current-error) current-level
+                    (flycheck-error-message current-error)
+                    (format "In include %s" faulty-include-filename)))))))
     errors))
 
 (defun flycheck-dequalify-error-ids (errors)
