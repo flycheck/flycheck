@@ -37,6 +37,7 @@
 
 ### Bugs fixed
 
+- [#2418](https://github.com/flycheck/flycheck/pull/2418): The `delimiters` highlighting style keeps the faces of tags such as `deprecated`.
 - [#2418](https://github.com/flycheck/flycheck/pull/2418): `flycheck-fold-include-levels` keeps the level of an included-file error with nothing after it, instead of leaving it with none.
 - [#2418](https://github.com/flycheck/flycheck/pull/2418): `flycheck-add-mode` adds a mode once however often it runs, and `flycheck-describe-checker` links to the definition of a checker defined with `flycheck-define-generic-checker`.
 - [#2418](https://github.com/flycheck/flycheck/pull/2418): An error about the buffer's own file, reported under another name for it such as through a symlink, no longer reads as one about another file.

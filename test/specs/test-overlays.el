@@ -92,6 +92,17 @@
           (expect (overlay-get overlay 'help-echo)
                   :to-be #'flycheck-help-echo))))
 
+    (it "keeps the tag faces with the delimiters highlighting style"
+      (flycheck-buttercup-with-temp-buffer
+        (insert "Foo bar")
+        (let* ((flycheck-highlighting-style '(delimiters "[" "]"))
+               (overlay (flycheck-add-overlay
+                         (flycheck-error-new-at 1 1 'warning "w"
+                                                :end-line 1 :end-column 4
+                                                :tags '(deprecated)))))
+          (expect (overlay-get overlay 'face)
+                  :to-equal '(flycheck-deprecated flycheck-delimited-error)))))
+
     (it "has the flycheck overlay property"
       (flycheck-buttercup-with-temp-buffer
         (insert "Foo bar")

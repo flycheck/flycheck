@@ -7216,7 +7216,11 @@ function resolves `conditional' style specifications."
        ;; Replace the highlighting with delimiters
        (let* ((fringe-face (flycheck-error-level-fringe-face level))
               (delim-face `(flycheck-error-delimiter ,fringe-face)))
-         (setf (overlay-get overlay 'face) 'flycheck-delimited-error)
+         ;; Tags still show, as they do with the level-face style
+         (setf (overlay-get overlay 'face)
+               (if-let* ((faces (flycheck--error-tag-faces err)))
+                   (append faces '(flycheck-delimited-error))
+                 'flycheck-delimited-error))
          (setf (overlay-get overlay 'before-string)
                (concat (propertize before 'face delim-face)
                        (or (overlay-get overlay 'before-string) "")))
