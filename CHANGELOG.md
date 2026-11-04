@@ -37,6 +37,7 @@
 
 ### Bugs fixed
 
+- [#2422](https://github.com/flycheck/flycheck/pull/2422): Where Eglot attaches the LSP diagnostic to one about an unvisited file, as Emacs 31's does, the project view shows it with the server's message and id, as it does for a visited file.
 - [#2422](https://github.com/flycheck/flycheck/pull/2422): `flycheck-lsp` names a document's language the way LSP does, such as `markdown` for `gfm-mode` and `javascript` for `js-mode`, so harper-ls checks GitHub Markdown buffers instead of dropping them.
 - [#2422](https://github.com/flycheck/flycheck/pull/2422): `flycheck-lsp` tells servers it reads diagnostic tags, code descriptions and data, so pyright, for one, reports unused and unreachable code to it.
 - [#2422](https://github.com/flycheck/flycheck/pull/2422): With `flycheck-lsp-prefer-server`, the checker the server stands in for no longer runs right after it as well, once a buffer in the same mode has turned `flycheck-lsp-mode` on.
