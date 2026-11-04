@@ -14498,6 +14498,9 @@ predicate refuses a buffer whose mode is off."
 (defvar-local flycheck-eglot--settle-timer nil
   "Timer that ends the run of reports arriving now, or nil.")
 
+(defvar-local flycheck-eglot--flymake-was-on nil
+  "Non-nil when turning the bridge on turned Flymake off in this buffer.")
+
 (defun flycheck-eglot--replaces-all-p (region)
   "Whether a report about REGION is to replace the buffer's diagnostics.
 
@@ -14813,6 +14816,7 @@ ORIG is the advised function; BEG, END and ARGS are its arguments."
     (advice-add 'flymake-diagnostics :around
                 #'flycheck-eglot--flymake-diagnostics)
     (when (bound-and-true-p flymake-mode)
+      (setq flycheck-eglot--flymake-was-on t)
       (flymake-mode -1))
     (unless flycheck-mode
       (flycheck-mode 1))
@@ -14821,7 +14825,12 @@ ORIG is the advised function; BEG, END and ARGS are its arguments."
 (defun flycheck-eglot--disable ()
   "Undo `flycheck-eglot--enable' in the current buffer."
   (when (flycheck-eglot--available-p)
-    (ignore-errors (eglot-flymake-backend #'ignore)))
+    (ignore-errors (eglot-flymake-backend #'ignore))
+    ;; Eglot still reports to Flymake, so Flymake shows its diagnostics
+    ;; again rather than nothing doing
+    (when flycheck-eglot--flymake-was-on
+      (flymake-mode 1)))
+  (setq flycheck-eglot--flymake-was-on nil)
   ;; Hand the buffer to the other bridge if it is still on, else back to
   ;; automatic selection
   (flycheck-lsp--select-primary-bridge)

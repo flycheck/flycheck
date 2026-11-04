@@ -500,7 +500,48 @@ TEST=1
             (expect flycheck-checker :to-be nil)
             (expect flycheck-eglot--diagnostics :to-be nil))
           (advice-remove 'flymake-diagnostics
-                         #'flycheck-eglot--flymake-diagnostics))))))
+                         #'flycheck-eglot--flymake-diagnostics))))
+
+    (describe "handing the diagnostics back to Flymake"
+      ;; What turning the bridge on and off did to Flymake: Eglot reports
+      ;; to it whenever the bridge doesn't take the reports
+      (cl-flet ((flymake-calls (flymake-on body)
+                  (let ((calls nil)
+                        (managed t))
+                    (setq-local flymake-mode flymake-on)
+                    (cl-letf (((symbol-function 'eglot-managed-p)
+                               (lambda () managed))
+                              ((symbol-function 'eglot-flymake-backend)
+                               #'ignore)
+                              ((symbol-function 'flycheck-mode) #'ignore)
+                              ((symbol-function 'flymake-mode)
+                               (lambda (arg)
+                                 (push arg calls)
+                                 (setq-local flymake-mode (> arg 0))))
+                              ((symbol-function 'flycheck-buffer-deferred)
+                               #'ignore))
+                      (flycheck-eglot-mode 1)
+                      (funcall body (lambda () (setq managed nil)))
+                      (flycheck-eglot-mode -1))
+                    (advice-remove 'flymake-diagnostics
+                                   #'flycheck-eglot--flymake-diagnostics)
+                    (nreverse calls))))
+
+        (it "turns Flymake back on when the bridge goes off under Eglot"
+          (flycheck-buttercup-with-temp-buffer
+            (text-mode)
+            (expect (flymake-calls t #'ignore) :to-equal '(-1 1))))
+
+        (it "leaves Flymake off once Eglot stopped managing the buffer"
+          (flycheck-buttercup-with-temp-buffer
+            (text-mode)
+            (expect (flymake-calls t (lambda (unmanage) (funcall unmanage)))
+                    :to-equal '(-1))))
+
+        (it "leaves Flymake off when the bridge didn't turn it off"
+          (flycheck-buttercup-with-temp-buffer
+            (text-mode)
+            (expect (flymake-calls nil #'ignore) :to-equal nil)))))))
 
 (describe "Diagnostics pushes"
   ;; A server publishes whenever it likes, and some republish an
