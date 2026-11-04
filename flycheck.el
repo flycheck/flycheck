@@ -12648,15 +12648,15 @@ is for (see `flycheck-lsp--column')."
                                        (plist-get end :character))
      :replacement (plist-get tedit :newText))))
 
-(defun flycheck-lsp--workspace-edit-fix (wedit description)
+(defun flycheck-lsp--workspace-edit-fix (wedit description &optional tick)
   "Build a `flycheck-fix' from the LSP WorkspaceEdit WEDIT, or nil.
 
 A fix is built only when WEDIT edits a single file that is the current
 buffer, since a `flycheck-fix' applies to one buffer; a multi-file edit,
 or one with resource operations (create, rename, delete), is declined.
-DESCRIPTION becomes the fix's description.  The tick is the buffer's
-current one: the edit was just fetched against this buffer state, and the
-fix is applied right after."
+DESCRIPTION becomes the fix's description.  TICK is the buffer's tick
+for the text the edit is about, by default the current one, for an edit
+just fetched against this buffer state and applied right after."
   (let* ((this (buffer-file-name))
          (dchanges (append (plist-get wedit :documentChanges) nil))
          (targets
@@ -12692,7 +12692,7 @@ fix is applied right after."
       (flycheck-fix-new
        :description description
        :edits (mapcar #'flycheck-lsp--text-edit (append (cdar targets) nil))
-       :tick (buffer-chars-modified-tick)))))
+       :tick (or tick (buffer-chars-modified-tick))))))
 
 (defun flycheck-lsp--count-push (rechecked)
   "Record a diagnostics push, RECHECKED non-nil if it triggered a check."
@@ -12973,11 +12973,30 @@ the last pulled report of it carried, for the next pull to refer to."
   ;; and answer pulls with others (rust-analyzer pushes what cargo
   ;; check says and hands out its own on request), and each channel
   ;; replaces only its own
-  (diags nil) (pulled nil))
+  (diags nil) (pulled nil)
+  ;; The buffer's tick for the text each channel's diagnostics are about,
+  ;; which the fixes they carry answer to
+  (diags-tick nil) (pulled-tick nil))
 
 (defun flycheck-lsp--doc-diagnostics (doc)
   "Return every raw LSP diagnostic held for DOC, pushed and pulled."
   (append (flycheck-lsp--doc-diags doc) (flycheck-lsp--doc-pulled doc)))
+
+(defun flycheck-lsp--doc-errors (doc buffer server uri)
+  "Convert the raw LSP diagnostics held for DOC to errors in BUFFER.
+
+SERVER and URI are as for `flycheck-lsp--diagnostic->error', which
+gets the tick of the text each channel's diagnostics are about, for the
+fixes they carry."
+  (append
+   (mapcar (lambda (d)
+             (flycheck-lsp--diagnostic->error
+              d buffer server uri (flycheck-lsp--doc-diags-tick doc)))
+           (flycheck-lsp--doc-diags doc))
+   (mapcar (lambda (d)
+             (flycheck-lsp--diagnostic->error
+              d buffer server uri (flycheck-lsp--doc-pulled-tick doc)))
+           (flycheck-lsp--doc-pulled doc))))
 
 (cl-defstruct (flycheck-lsp--server (:constructor flycheck-lsp--server-create)
                                     (:copier nil))
@@ -13162,6 +13181,12 @@ counts `flycheck-verify-setup' shows."
                  (not (equal version (flycheck-lsp--doc-version doc))))
       (when result-id
         (setf (flycheck-lsp--doc-result-id doc) result-id))
+      ;; A report is about the text last synced, as one about any other
+      ;; version was refused above; a repeat confirms the diagnostics
+      ;; for it too
+      (if pushed
+          (setf (flycheck-lsp--doc-diags-tick doc) (flycheck-lsp--doc-tick doc))
+        (setf (flycheck-lsp--doc-pulled-tick doc) (flycheck-lsp--doc-tick doc)))
       (let* ((new (append diagnostics nil))
              (changed (not (equal new (if pushed
                                           (flycheck-lsp--doc-diags doc)
@@ -13735,15 +13760,17 @@ as unavailable."
                                    :edit)))
         (flycheck-lsp--workspace-edit-fix edit (plist-get action :title))))))
 
-(defun flycheck-lsp--inline-fix (lsp)
+(defun flycheck-lsp--inline-fix (lsp &optional tick)
   "Build a fix from a quickfix CodeAction embedded in the diagnostic LSP, or nil.
 
 RuboCop and standardrb do not answer `textDocument/codeAction'; they ship
 their autocorrect actions inline in each diagnostic's `data' slot, as a
 `code_actions' array.  Pick the `isPreferred' one that carries an edit
 \(the autocorrect, not the \"disable for this line\" action) and convert
-its WorkspaceEdit into a `flycheck-fix'.  Returns the fix eagerly -- it is
-already in the payload, so no request is needed."
+its WorkspaceEdit into a `flycheck-fix'.  Returns the fix eagerly, as it
+is already in the payload and no request is needed.  The fix answers to
+TICK, the buffer's tick for the text LSP is about, defaulting to the
+current one."
   (when-let* ((actions (append (plist-get (plist-get lsp :data) :code_actions)
                                nil))
               (action (seq-find (lambda (a)
@@ -13751,13 +13778,14 @@ already in the payload, so no request is needed."
                                        (plist-get a :edit)))
                                 actions))
               (edit (plist-get action :edit)))
-    (flycheck-lsp--workspace-edit-fix edit (plist-get action :title))))
+    (flycheck-lsp--workspace-edit-fix edit (plist-get action :title) tick)))
 
-(defun flycheck-lsp--fix-provider (server uri lsp)
+(defun flycheck-lsp--fix-provider (server uri lsp &optional tick)
   "Return a code-action fix, or a lazy provider, for the diagnostic LSP.
 
 Return nil when there is none.  SERVER is the connection to ask, and URI
-names the document the diagnostic belongs to.
+names the document the diagnostic belongs to.  TICK is the buffer's tick
+for the text LSP is about, for a fix embedded in it.
 
 With `flycheck-lsp-code-actions' on, prefer a quickfix action the server
 embedded in the diagnostic's `data' (see `flycheck-lsp--inline-fix'),
@@ -13765,16 +13793,17 @@ building the fix eagerly.  Otherwise, when SERVER advertises code actions,
 return a lazy provider (see `flycheck-error-fix') that requests the
 quickfix from SERVER on demand via `flycheck-lsp--code-action-fix'."
   (when flycheck-lsp-code-actions
-    (or (flycheck-lsp--inline-fix lsp)
+    (or (flycheck-lsp--inline-fix lsp tick)
         (and (flycheck-lsp--capable server :codeActionProvider)
              (lambda (_err) (flycheck-lsp--code-action-fix server uri lsp))))))
 
-(defun flycheck-lsp--diagnostic->error (lsp buffer server uri)
+(defun flycheck-lsp--diagnostic->error (lsp buffer server uri &optional tick)
   "Convert the raw LSP diagnostic plist LSP for BUFFER to a `flycheck-error'.
 
 Reuses the shared LSP mapping for the level, id and related locations, and
 attaches a lazy quickfix from SERVER for the document URI (see
-`flycheck-lsp--fix-provider')."
+`flycheck-lsp--fix-provider').  TICK is BUFFER's tick for the text LSP is
+about, which a fix it carries answers to."
   (with-current-buffer buffer
     (let* ((range (plist-get lsp :range))
            (start (plist-get range :start))
@@ -13789,7 +13818,7 @@ attaches a lazy quickfix from SERVER for the document URI (see
        :id (flycheck-lsp--diagnostic-id lsp)
        :relations (flycheck-lsp--related-locations lsp)
        :tags (flycheck-lsp--tags lsp)
-       :fix (flycheck-lsp--fix-provider server uri lsp)
+       :fix (flycheck-lsp--fix-provider server uri lsp tick)
        :checker 'flycheck-lsp
        :buffer buffer
        :filename (buffer-file-name buffer)))))
@@ -13839,9 +13868,7 @@ handshake's completion re-triggers the check (see
                                      (flycheck-lsp--doc-pulled-version doc))))
                 (flycheck-lsp--pull-document server doc uri))
               (funcall callback 'finished
-                       (mapcar (lambda (d)
-                                 (flycheck-lsp--diagnostic->error d buffer server uri))
-                               (flycheck-lsp--doc-diagnostics doc)))))))
+                       (flycheck-lsp--doc-errors doc buffer server uri))))))
     (error (funcall callback 'errored (error-message-string err)))))
 
 (defun flycheck-lsp--enabled-p ()
