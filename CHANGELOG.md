@@ -37,6 +37,7 @@
 
 ### Bugs fixed
 
+- [#2419](https://github.com/flycheck/flycheck/pull/2419): `json-jq` no longer reports errors read out of the checked document itself, as jq no longer prints it back.
 - [#2419](https://github.com/flycheck/flycheck/pull/2419): `ruby-standard` checks buffers without a file, as `ruby-rubocop` does.
 - [#2419](https://github.com/flycheck/flycheck/pull/2419): `salt-lint` runs `python3`, falling back to `python` like the other Python checkers, and only where that interpreter has the `saltlint` module.
 - [#2419](https://github.com/flycheck/flycheck/pull/2419): Where `python3` doesn't work and Flycheck falls back to `python`, the Python checkers keep an interpreter set before Flycheck loads.

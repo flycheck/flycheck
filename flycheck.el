@@ -18043,7 +18043,9 @@ This checker accepts multiple consecutive JSON values in a
 single input, which is useful for jsonlines data.
 
 See URL `https://stedolan.github.io/jq/'."
-  :command ("jq" (eval flycheck-json-jq-args) "." source null-device)
+  ;; The `empty' program parses the input without printing it back: the
+  ;; error patterns would match text in the document itself
+  :command ("jq" (eval flycheck-json-jq-args) "empty" source null-device)
   ;; Example error message:
   ;;   jq: parse error: Expected another key-value pair at line 3, column 1
   ;; jq 1.7 grew the leading program name; older versions have neither it
