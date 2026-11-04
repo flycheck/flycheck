@@ -51,8 +51,6 @@
   (describe "Checkdoc"
 
     (it "exports all customizable variables"
-      (assume (version<= "25" emacs-version)
-              "Checkdoc has additional variables in Emacs 25")
       (let* ((checkdoc-custom-group (get 'checkdoc 'custom-group))
              (checkdoc-custom-pairs
               (seq-filter #'flycheck/custom-var-p checkdoc-custom-group))
@@ -254,16 +252,8 @@
       (let ((flycheck-emacs-lisp-check-declare t))
         (flycheck-buttercup-should-syntax-check
          "language/emacs-lisp/check-declare-warnings.el" 'emacs-lisp-mode
-         (cond
-          ((version< emacs-version "25")
-           '(0 nil warning "`this-function-is-not-declared' was defined in this-file-does-not-exist.el: file not found"
-               :checker emacs-lisp))
-          ((version< emacs-version "26")
-           '(9 1 warning "`this-function-is-not-declared' was defined in this-file-does-not-exist.el: file not found"
-               :checker emacs-lisp))
-          (t
-           '(9 nil warning "`this-function-is-not-declared' was defined in this-file-does-not-exist.el: file not found"
-               :checker emacs-lisp))))))
+         '(9 nil warning "`this-function-is-not-declared' was defined in this-file-does-not-exist.el: file not found"
+             :checker emacs-lisp))))
 
     (flycheck-buttercup-def-checker-test emacs-lisp emacs-lisp disable-check-declare
       (let ((flycheck-emacs-lisp-check-declare nil))

@@ -96,8 +96,6 @@
 
   (describe "Checker tests"
     (flycheck-buttercup-def-checker-test php php syntax-error
-      (when (version<= emacs-version "25")
-        (buttercup-skip "PHP mode (via CC mode) seems broken on 24.5."))
       (flycheck-buttercup-should-syntax-check
        "language/php/syntax-error.php" 'php-mode
        '(8 nil error "Assignments can only happen to writable values" :checker php)))
