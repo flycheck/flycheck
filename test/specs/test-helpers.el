@@ -275,15 +275,13 @@ The manifest path is relative to
 
 ;;; JavaScript modes constant
 
-(defconst flycheck-test-javascript-modes '(js-mode
+(defconst flycheck-test-javascript-modes '(js-jsx-mode
+                                           js-mode
                                            js2-mode
                                            js3-mode
                                            js2-jsx-mode
                                            rjsx-mode)
   "Major modes for JavaScript tests.")
-
-(when (version<= "25" emacs-version)
-  (add-to-list 'flycheck-test-javascript-modes 'js-jsx-mode))
 
 
 ;;; Test variables for checker-api tests

@@ -101,7 +101,6 @@ This function is ABSOLUTELY INSECURE, use only and exclusively for testing."
                 (ignore-errors (delete-file file-name))))))
 
       (it "recognizes an encrypted buffer"
-        (assume (version<= "25" emacs-version))
         ;; XXX: Don't test on Windows
         (assume (not (memq system-type '(cygwin windows-nt ms-dos))))
         (assume (flycheck/gnupg21-available-p) "gpg not installed")

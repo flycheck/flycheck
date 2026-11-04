@@ -29,28 +29,24 @@
 
 (describe "Language Scheme"
   (flycheck-buttercup-def-checker-test scheme-chicken scheme error-no-line-number
-    (assume (version<= "25.1" emacs-version))
     (flycheck-buttercup-should-syntax-check
      "language/chicken/error-no-line-number.scm" 'flycheck/chicken-mode
      '(0 nil error "(cddr) during expansion of (for-each ...) - bad argument type: ()\n\n\tCall history:\n\n\t<syntax>\t  (##core#begin (for-each))\n\t<syntax>\t  (for-each)\t<--"
          :checker scheme-chicken)))
 
   (flycheck-buttercup-def-checker-test scheme-chicken scheme syntax-error
-    (assume (version<= "25.1" emacs-version))
     (flycheck-buttercup-should-syntax-check
      "language/chicken/syntax-error.scm" 'flycheck/chicken-mode
      '(1 nil error "not enough arguments\n\n\t(define)\n\n\tExpansion history:\n\n\t<syntax>\t  (##core#begin (define))\n\t<syntax>\t  (define)\t<--"
          :checker scheme-chicken)))
 
   (flycheck-buttercup-def-checker-test scheme-chicken scheme syntax-error-no-line-number
-    (assume (version<= "25.1" emacs-version))
     (flycheck-buttercup-should-syntax-check
      "language/chicken/syntax-error-no-line-number.scm" 'flycheck/chicken-mode
      '(0 nil error "illegal atomic form\n\n\t()\n\n\tExpansion history:\n\n\t<syntax>\t  (##core#begin ())\t<--"
          :checker scheme-chicken)))
 
   (flycheck-buttercup-def-checker-test scheme-chicken scheme syntax-read-error
-    (assume (version<= "25.1" emacs-version))
     (flycheck-buttercup-should-syntax-check
      "language/chicken/syntax-read-error.scm" 'flycheck/chicken-mode
      '(1 nil error "invalid sharp-sign read syntax: #\\n"
