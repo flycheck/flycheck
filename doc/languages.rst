@@ -693,7 +693,8 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       .. defcustom:: flycheck-hlint-hint-packages
 
-         A list of additional hint packages to include.
+         A list of groups of hints to enable: hlint's built-in ones, such as
+         ``generalise`` or ``dollar``, or ones a configuration file defines.
 
       .. syntax-checker-config-file:: flycheck-hlint-config
 

@@ -301,6 +301,19 @@ Perhaps:
                 :checker 'haskell-ghc :buffer (current-buffer)
                 :filename "Warnings.hs"))))))
 
+  (describe "the haskell-hlint command"
+    (it "enables hint groups with --with-group"
+      ;; hlint 2 reads -h as a hint file, and fails on one it can't find
+      (flycheck-buttercup-with-temp-buffer
+        (let* ((flycheck-hlint-hint-packages '("Generalise" "dollar" "MyTeam"))
+               (flycheck-hlint-config nil)
+               (args (flycheck-checker-substituted-arguments 'haskell-hlint)))
+          (expect args :to-contain "--with-group=generalise")
+          (expect args :to-contain "--with-group=dollar")
+          ;; A configuration's own group, which hlint matches exactly
+          (expect args :to-contain "--with-group=MyTeam")
+          (expect args :not :to-contain "-hGeneralise")))))
+
   (describe "reading hlint's output"
 
     (it "attaches the replacement as a machine-applicable fix"
