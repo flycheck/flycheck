@@ -30,6 +30,14 @@
         (expect flycheck-python-pylint-executable :to-equal "python")
         (expect flycheck-salt-lint-executable :to-equal "python"))))
 
+  (describe "pyright's JSON"
+    (it "keeps the information severity, wherever the diagnostics come"
+      ;; The diagnostics after the summary, as JSON allows
+      (let ((errors (flycheck-pyright--parse-error
+                     "{\"summary\": {\"errorCount\": 0}, \"generalDiagnostics\": [{\"severity\": \"information\", \"message\": \"m\", \"rule\": \"r\", \"range\": {\"start\": {\"line\": 0, \"character\": 0}, \"end\": {\"line\": 0, \"character\": 1}}}]}"
+                     'python-pyright nil)))
+        (expect (mapcar #'flycheck-error-level errors) :to-equal '(info)))))
+
   (flycheck-buttercup-def-checker-test python-flake8 python syntax-error
     (assume (flycheck-buttercup-python-module-available-p
              'python-flake8 "flake8")
