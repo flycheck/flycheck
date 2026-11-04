@@ -12799,7 +12799,11 @@ enabling them in either order settles on the same one."
   (seq-find (lambda (checker)
               (pcase checker
                 ('eglot-check (flycheck-eglot--enabled-p))
-                ('flycheck-lsp (flycheck-lsp--enabled-p))))
+                ;; Not for `flycheck-lsp-prefer-server' alone: automatic
+                ;; selection takes the checker then, and lets it go
+                ;; once the preference does
+                ('flycheck-lsp (and (bound-and-true-p flycheck-lsp-mode)
+                                    (flycheck-lsp--enabled-p)))))
             flycheck-lsp--bridges))
 
 (defun flycheck-lsp--select-primary-bridge ()
