@@ -165,7 +165,19 @@
         (expect (flycheck-related-location-filename (nth 1 locs))
                 :to-equal "b.el")
         (expect (flycheck-related-location-line (nth 1 locs))
-                :to-equal 10))))
+                :to-equal 10)))
+
+    (it "counts a character outside the BMP once in a location's columns"
+      ;; In the diagnostic's own buffer, which the location points into
+      (flycheck-buttercup-with-temp-buffer
+        (insert "a\U0001F600 x\n")
+        (let ((loc (car (flycheck-lsp--related-locations
+                         '(:relatedInformation
+                           [(:location (:range (:start (:line 0 :character 4)
+                                                :end (:line 0 :character 5)))
+                             :message "here")])))))
+          (expect (flycheck-related-location-column loc) :to-equal 4)
+          (expect (flycheck-related-location-end-column loc) :to-equal 5)))))
 
   (describe "project diagnostics for unvisited documents"
 
@@ -303,15 +315,28 @@
 
   (describe "workspace-edit fixes (shared)"
     (it "converts an LSP TextEdit to a fix edit, one-basing positions"
-      (let ((fe (flycheck-lsp--text-edit
-                 '(:range (:start (:line 0 :character 4)
-                           :end (:line 0 :character 9))
-                   :newText "hello"))))
-        (expect (flycheck-fix-edit-line fe) :to-equal 1)
-        (expect (flycheck-fix-edit-column fe) :to-equal 5)
-        (expect (flycheck-fix-edit-end-line fe) :to-equal 1)
-        (expect (flycheck-fix-edit-end-column fe) :to-equal 10)
-        (expect (flycheck-fix-edit-replacement fe) :to-equal "hello")))
+      (flycheck-buttercup-with-temp-buffer
+        (insert "0123456789\n")
+        (let ((fe (flycheck-lsp--text-edit
+                   '(:range (:start (:line 0 :character 4)
+                             :end (:line 0 :character 9))
+                     :newText "hello"))))
+          (expect (flycheck-fix-edit-line fe) :to-equal 1)
+          (expect (flycheck-fix-edit-column fe) :to-equal 5)
+          (expect (flycheck-fix-edit-end-line fe) :to-equal 1)
+          (expect (flycheck-fix-edit-end-column fe) :to-equal 10)
+          (expect (flycheck-fix-edit-replacement fe) :to-equal "hello"))))
+
+    (it "counts a character outside the BMP once in a TextEdit's columns"
+      (flycheck-buttercup-with-temp-buffer
+        ;; The emoji is two UTF-16 code units, so `x' is at character 3
+        (insert "a\U0001F600 x\n")
+        (let ((fe (flycheck-lsp--text-edit
+                   '(:range (:start (:line 0 :character 4)
+                             :end (:line 0 :character 5))
+                     :newText "y"))))
+          (expect (flycheck-fix-edit-column fe) :to-equal 4)
+          (expect (flycheck-fix-edit-end-column fe) :to-equal 5))))
 
     (it "builds a fix from a single-file WorkspaceEdit"
       (flycheck-buttercup-with-temp-buffer

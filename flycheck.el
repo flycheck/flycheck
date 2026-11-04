@@ -12589,14 +12589,25 @@ directly to Flycheck's right-open end column."
          (uri (plist-get location :uri))
          (range (plist-get location :range))
          (start (plist-get range :start))
-         (end (plist-get range :end)))
+         (end (plist-get range :end))
+         (filename (and uri (flycheck-lsp--uri-to-path
+                             uri (file-remote-p default-directory))))
+         ;; LSP counts columns in UTF-16 code units, which only the text
+         ;; can turn into characters: the buffer's, when one visits the
+         ;; file
+         (buffer (if filename (find-buffer-visiting filename) (current-buffer)))
+         (column (lambda (position)
+                   (if (buffer-live-p buffer)
+                       (with-current-buffer buffer
+                         (flycheck-lsp--column (plist-get position :line)
+                                               (plist-get position :character)))
+                     (1+ (plist-get position :character))))))
     (flycheck-related-location-new
-     :filename (and uri (flycheck-lsp--uri-to-path
-                         uri (file-remote-p default-directory)))
+     :filename filename
      :line (and start (1+ (plist-get start :line)))
-     :column (and start (1+ (plist-get start :character)))
+     :column (and start (funcall column start))
      :end-line (and end (1+ (plist-get end :line)))
-     :end-column (and end (1+ (plist-get end :character)))
+     :end-column (and end (funcall column end))
      :message (plist-get info :message))))
 
 (defun flycheck-lsp--related-locations (lsp)
@@ -12623,14 +12634,18 @@ no rendering for would only be a symbol nothing acts on."
 (defun flycheck-lsp--text-edit (tedit)
   "Convert the LSP TextEdit TEDIT to a `flycheck-fix-edit'.
 LSP positions are zero-based and end-exclusive; Flycheck's are one-based
-and end-exclusive, so only the line/column need incrementing."
+and end-exclusive, so the lines need incrementing.  Columns count UTF-16
+code units, and are resolved against the current buffer, which the edit
+is for (see `flycheck-lsp--column')."
   (let ((start (plist-get (plist-get tedit :range) :start))
         (end (plist-get (plist-get tedit :range) :end)))
     (flycheck-fix-edit-new
      :line (1+ (plist-get start :line))
-     :column (1+ (plist-get start :character))
+     :column (flycheck-lsp--column (plist-get start :line)
+                                   (plist-get start :character))
      :end-line (1+ (plist-get end :line))
-     :end-column (1+ (plist-get end :character))
+     :end-column (flycheck-lsp--column (plist-get end :line)
+                                       (plist-get end :character))
      :replacement (plist-get tedit :newText))))
 
 (defun flycheck-lsp--workspace-edit-fix (wedit description)
@@ -13660,6 +13675,19 @@ pass instead of rescanning from `point-min' each time."
           (setq remaining (- remaining (if (<= #x10000 (char-after)) 2 1)))
           (forward-char 1))
         (point)))))
+
+(defun flycheck-lsp--column (line character)
+  "Return the one-based column of 0-based LINE and UTF-16 CHARACTER.
+
+The column counts characters, as Flycheck's do, so a character outside
+the Basic Multilingual Plane before it counts once rather than twice
+\(see `flycheck-lsp--position-to-point')."
+  (let ((pos (flycheck-lsp--position-to-point line character)))
+    (save-excursion
+      (save-restriction
+        (widen)
+        (goto-char pos)
+        (1+ (- pos (line-beginning-position)))))))
 
 (defun flycheck-lsp--resolve-action (server action)
   "Return ACTION with its edit filled in, resolving it against SERVER if needed.
