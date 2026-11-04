@@ -14203,15 +14203,20 @@ every file it reports on, including files no buffer visits."
 (defun flycheck-lsp--server-for-buffer ()
   "Return the registry key of the server serving the current buffer.
 
-The key `flycheck-lsp--start' would build, so this names the server that
-actually checks this buffer.  Project roots nest, and a workspace pull
-registers a document for every file it reports on, so several servers
-can hold the same document and the one holding it is not necessarily the
-one serving it."
-  (when-let* ((command (flycheck-lsp--command major-mode))
-              (key (cons (flycheck-lsp--root) command))
-              ((gethash key flycheck-lsp--servers)))
-    key))
+The server the buffer's document is registered with, while that one is
+still registered, as `flycheck-lsp-servers' may have changed since;
+otherwise the key `flycheck-lsp--start' would build.  Project roots
+nest, and a workspace pull registers a document for every file it
+reports on, so several servers can hold the same document and the one
+holding it is not necessarily the one serving it."
+  (or (when-let* ((server (car flycheck-lsp--open-document))
+                  (key (flycheck-lsp--server-key server))
+                  ((eq (gethash key flycheck-lsp--servers) server)))
+        key)
+      (when-let* ((command (flycheck-lsp--command major-mode))
+                  (key (cons (flycheck-lsp--root) command))
+                  ((gethash key flycheck-lsp--servers)))
+        key)))
 
 (defun flycheck-lsp-restart-server ()
   "Shut down the language server serving this buffer and forget it.

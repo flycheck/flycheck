@@ -1673,6 +1673,20 @@ holding its document"
               (expect (flycheck-lsp--server-for-buffer)
                       :to-equal '("/p/sub/" "ruby-lsp")))))
 
+        (it "finds the server the buffer's document is on"
+          ;; Even once `flycheck-lsp-servers' names another, until the
+          ;; next check moves the document over
+          (let ((server (flycheck-test--fake-server "/p/" '("ruby-lsp"))))
+            (flycheck-buttercup-with-temp-buffer
+              (setq-local flycheck-lsp--open-document
+                          (list server "/p/a.rb" "file:///p/a.rb"))
+              (cl-letf (((symbol-function 'flycheck-lsp--root)
+                         (lambda () "/p/"))
+                        ((symbol-function 'flycheck-lsp--command)
+                         (lambda (_mode) '("rubocop" "--lsp"))))
+                (expect (flycheck-lsp--server-for-buffer)
+                        :to-equal '("/p/" "ruby-lsp"))))))
+
         (it "shuts the buffer's server down and asks for a fresh check"
           (let ((stopped nil))
             (spy-on 'flycheck-lsp--shutdown-server
