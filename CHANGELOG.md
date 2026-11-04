@@ -37,6 +37,7 @@
 
 ### Bugs fixed
 
+- [#2420](https://github.com/flycheck/flycheck/pull/2420): Flycheck resolves a buffer's project again after its file moves to another directory, and no longer asks the project backend about every buffer each time it gathers the project's diagnostics.
 - [#2419](https://github.com/flycheck/flycheck/pull/2419): `html-tidy` checks buffers in Emacs 31's `mhtml-ts-mode`.
 - [#2419](https://github.com/flycheck/flycheck/pull/2419): `python-pycompile` reports a `TabError` for inconsistent tabs and spaces.
 - [#2419](https://github.com/flycheck/flycheck/pull/2419): `haskell-ghc` and `haskell-stack-ghc` link GHC's errors to the error index: they take GHC 9.6's error code alone as the id, without the warning flag after it, pad the codes JSON diagnostics give to five digits, and explain only error codes.
