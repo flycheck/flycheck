@@ -37,6 +37,7 @@
 
 ### Bugs fixed
 
+- [#2419](https://github.com/flycheck/flycheck/pull/2419): `haskell-ghc` and `haskell-stack-ghc` link GHC's errors to the error index: they take GHC 9.6's error code alone as the id, without the warning flag after it, pad the codes JSON diagnostics give to five digits, and explain only error codes.
 - [#2419](https://github.com/flycheck/flycheck/pull/2419): `json-jq` no longer reports errors read out of the checked document itself, as jq no longer prints it back.
 - [#2419](https://github.com/flycheck/flycheck/pull/2419): `ruby-standard` checks buffers without a file, as `ruby-rubocop` does.
 - [#2419](https://github.com/flycheck/flycheck/pull/2419): `salt-lint` runs `python3`, falling back to `python` like the other Python checkers, and only where that interpreter has the `saltlint` module.

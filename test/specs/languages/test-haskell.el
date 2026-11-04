@@ -30,6 +30,29 @@
 
 (describe "Language Haskell"
 
+  (describe "GHC's text output"
+    (it "takes the error code for the id, not the warning flag after it"
+      ;; As GHC 9.6 and 9.8 print it, without JSON diagnostics
+      (let ((err (car (flycheck-buttercup-parse
+                       'haskell-ghc
+                       "A.hs:3:1: warning: [GHC-40910] [-Wunused-top-binds]
+    Defined but not used: `foo'
+"))))
+        (expect (flycheck-error-id err) :to-equal "GHC-40910")
+        (expect (flycheck-error-message err)
+                :to-equal "Defined but not used: `foo'")))
+
+    (it "explains error codes, not warning flags"
+      (dolist (checker '(haskell-ghc haskell-stack-ghc))
+        (let ((explainer (flycheck-checker-get checker 'error-explainer)))
+          (expect (funcall explainer (flycheck-error-new-at
+                                      1 1 'warning "m" :id "-Wunused-top-binds"))
+                  :to-be nil)
+          (expect (funcall explainer (flycheck-error-new-at
+                                      1 1 'warning "m" :id "GHC-40910"))
+                  :to-equal
+                  '(url . "https://errors.haskell.org/messages/GHC-40910/"))))))
+
   (describe "Module names"
     (it "does not extract a module name from commented code"
       (expect flycheck-haskell-module-re
@@ -215,6 +238,21 @@ Perhaps:
                 :id "GHC-38417" :end-line 4 :end-column 5
                 :checker 'haskell-ghc :buffer (current-buffer)
                 :filename "Warnings.hs")))))
+
+    (it "pads a JSON code to the five digits the error index uses"
+      (flycheck-buttercup-with-temp-buffer
+        (expect
+         (flycheck-error-id
+          (car (flycheck-buttercup-parse
+                'haskell-ghc
+                (concat
+                 "{\"version\":\"1.0\",\"ghcVersion\":\"ghc-9.14.1\","
+                 "\"span\":{\"file\":\"A.hs\","
+                 "\"start\":{\"line\":1,\"column\":1},"
+                 "\"end\":{\"line\":1,\"column\":2}},"
+                 "\"severity\":\"Error\",\"code\":1239,"
+                 "\"message\":[\"m\"],\"hints\":[]}\n"))))
+         :to-equal "GHC-01239")))
 
     (it "keeps a hint as a suggested fix line and a parse error's id"
       (flycheck-buttercup-with-temp-buffer
