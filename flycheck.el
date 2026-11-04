@@ -5518,7 +5518,12 @@ determined if the error contains a full span, not just a
 beginning position)."
   (let* ((id (flycheck-error-id err))
          (fname (flycheck-error-filename err))
-         (other-file-p (and fname (not (equal fname (buffer-file-name))))))
+         ;; The same file may be spelled another way: through a symlink,
+         ;; say
+         (other-file-p (and fname
+                            (not (and (buffer-file-name)
+                                      (flycheck-same-files-p
+                                       fname (buffer-file-name)))))))
     (concat (and other-file-p (format "In %S:\n" (file-relative-name fname)))
             (and include-snippet
                  (when-let* ((snippet (flycheck-error-format-snippet err)))
