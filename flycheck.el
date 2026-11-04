@@ -5038,10 +5038,10 @@ trailing newline legitimately names one."
     (unless (and (integerp line) (>= line 1))
       (user-error "This fix names line %S, which is not a line; not applying it"
                   line))
-    (when (and column (< column 1))
+    (when (and column (not (and (integerp column) (>= column 1))))
       (user-error "This fix names column %S, and columns start at 1; \
 not applying it" column))
-    (when (and end-column (< end-column 1))
+    (when (and end-column (not (and (integerp end-column) (>= end-column 1))))
       (user-error "This fix names end column %S, and columns start at 1; \
 not applying it" end-column))
     (when (and end-line (< end-line line))
@@ -5052,21 +5052,25 @@ not applying it" end-line line))
       (user-error "This fix ends at column %S, before it starts at %S; \
 not applying it" end-column column))))
 
-(defun flycheck--apply-edits (edits)
+(defun flycheck--apply-edits (edits &optional dry-run)
   "Apply EDITS in the current, widened buffer as one undoable change.
 
 EDITS is a list of `flycheck-fix-edit' objects.  They are applied from
 the end of the buffer backwards, so applying one does not shift the
 positions of the ones above it.  Signal a `user-error', touching
-nothing, when an edit's coordinates make no sense or the edits overlap."
+nothing, when an edit's coordinates make no sense or the edits overlap.
+With DRY-RUN non-nil, only check that, and touch nothing either way."
   (mapc #'flycheck--check-fix-edit edits)
   (let ((regions
          ;; Apply from the bottom up; break ties on equal starts by the
-         ;; larger region first.
-         (sort (mapcar (lambda (edit)
-                         (cons (flycheck--fix-edit-region edit)
-                               (flycheck-fix-edit-replacement edit)))
-                       edits)
+         ;; larger region first.  The sort is stable, and edits with the
+         ;; same region go in last to first, so inserts at one position
+         ;; come out in the order EDITS gives them.
+         (sort (nreverse
+                (mapcar (lambda (edit)
+                          (cons (flycheck--fix-edit-region edit)
+                                (flycheck-fix-edit-replacement edit)))
+                        edits))
                (lambda (a b)
                  (let ((ra (car a)) (rb (car b)))
                    (or (> (car ra) (car rb))
@@ -5080,12 +5084,13 @@ nothing, when an edit's coordinates make no sense or the edits overlap."
         (when (and limit (> end limit))
           (user-error "This fix has overlapping edits; not applying it"))
         (setq limit beg)))
-    (atomic-change-group
-      (pcase-dolist (`((,beg . ,end) . ,replacement) regions)
-        (delete-region beg end)
-        (save-excursion
-          (goto-char beg)
-          (insert (or replacement "")))))))
+    (unless dry-run
+      (atomic-change-group
+        (pcase-dolist (`((,beg . ,end) . ,replacement) regions)
+          (delete-region beg end)
+          (save-excursion
+            (goto-char beg)
+            (insert (or replacement ""))))))))
 
 (defun flycheck--apply-fix-in (fix buffer &optional guard)
   "Apply FIX's edits in BUFFER as a single undoable change.
@@ -5122,6 +5127,17 @@ corrupt the buffer."
   (flycheck--apply-fix-in fix (or buffer (current-buffer))
                           #'flycheck--check-fix-tick))
 
+(defun flycheck--fix-sound-p (fix)
+  "Whether FIX's edits make sense and don't overlap one another.
+
+Resolve them in the current buffer, as `flycheck--apply-edits' would,
+without applying anything."
+  (condition-case nil
+      (progn
+        (flycheck--apply-edits (flycheck-fix-edits fix) 'dry-run)
+        t)
+    (user-error nil)))
+
 (defun flycheck--fix-span (fix)
   "Return the buffer region (BEG . END) that FIX's edits span.
 
@@ -5148,6 +5164,9 @@ applied and signals when they must not be applied; see
     (setq fixes (seq-filter #'flycheck-fix-edits fixes))
     (save-restriction
       (widen)
+      ;; A fix that couldn't be applied on its own is skipped, rather
+      ;; than refusing the lot
+      (setq fixes (seq-filter #'flycheck--fix-sound-p fixes))
       ;; Greedily select a non-overlapping subset, bottom-up: process the
       ;; fixes lowest in the buffer first and keep a fix only if its whole
       ;; span sits at or above every fix already selected below it.
@@ -5161,14 +5180,29 @@ applied and signals when they must not be applied; see
         ;; below it.  Sorting by start (not end) maximizes the number of
         ;; fixes applied: it is the classic interval-scheduling greedy, so
         ;; one wide-span fix can't crowd out several small ones.
-        (setq spanned (sort spanned (lambda (a b) (> (caar a) (caar b)))))
+        (setq spanned (sort spanned
+                            (lambda (a b)
+                              (or (> (caar a) (caar b))
+                                  ;; An insert at the start of a replacement
+                                  ;; comes after it, so both fit
+                                  (and (= (caar a) (caar b))
+                                       (> (cdar a) (cdar b)))))))
         (pcase-dolist (`((,beg . ,end) . ,fix) spanned)
           (when (<= end boundary)
             (push fix selected)
             (setq boundary (min boundary beg))))
         (when selected
+          ;; In the order FIXES gives them, for inserts at one position.
+          ;; Two errors may come with the very same fix, adding the same
+          ;; missing import, say; make it once.  Single edits stay apart:
+          ;; adjacent fixes can each insert a quote at the point where
+          ;; they meet, and both quotes are wanted.
           (flycheck--apply-edits
-           (apply #'append (mapcar #'flycheck-fix-edits selected))))
+           (apply #'append
+                  (seq-uniq (mapcar #'flycheck-fix-edits
+                                    (seq-filter (lambda (fix)
+                                                  (memq fix selected))
+                                                fixes))))))
         (length selected)))))
 
 (defun flycheck-apply-fixes (fixes &optional buffer)
@@ -5178,8 +5212,9 @@ FIXES is a list of `flycheck-fix' objects.  Their edits are merged and
 applied from the end of the buffer backwards as a single undoable
 change, so applying one does not invalidate the positions of the
 others.  A fix whose span would overlap an already-selected fix is
-skipped whole (never applied partially).  Return the number of fixes
-applied.
+skipped whole (never applied partially), as is one whose own edits
+make no sense or overlap.  Fixes that make the very same edits are
+applied once.  Return the number of fixes applied.
 
 Signal a `user-error', touching nothing, when BUFFER is not live or
 read-only, or when any fix is stale -- the buffer changed since it was
@@ -9969,8 +10004,9 @@ point has a fix."
 
 Gather the errors whose checker offered a fix (those the error list
 marks with a fix) and apply them together as a single undoable change,
-via `flycheck-apply-fixes'.  Fixes that would conflict with each other
-are skipped; fixes for other files are ignored."
+via `flycheck-apply-fixes'.  Fixes that would conflict with each other,
+or whose edits make no sense, are skipped; fixes for other files are
+ignored."
   (interactive)
   (let ((fixes (delq nil
                      (mapcar (lambda (err)
@@ -9983,10 +10019,14 @@ are skipped; fixes for other files are ignored."
     (let* ((total (length fixes))
            (applied (flycheck-apply-fixes fixes))
            (skipped (- total applied)))
+      (when (zerop applied)
+        (user-error "No fix could be applied: %s malformed"
+                    (if (= total 1) "it is" "they are")))
       (message "Applied %d fix%s%s"
                applied (if (= applied 1) "" "es")
                (if (> skipped 0)
-                   (format " (%d skipped as conflicting)" skipped)
+                   (format " (%d skipped as conflicting or malformed)"
+                           skipped)
                  "")))))
 
 

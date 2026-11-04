@@ -342,8 +342,9 @@ fix that may not exist, but the error list marks them ``[fix?]``.  Press
                 M-x flycheck-fix-all-errors
 
    Apply every machine-applicable fix in the current buffer at once, as a
-   single undoable change.  Fixes that would conflict with each other are
-   skipped; the echo area reports how many were applied.
+   single undoable change.  Fixes that would conflict with each other, or
+   whose edits make no sense, are skipped; the echo area reports how many
+   were applied.
 
 .. image:: /images/flycheck-fix-all.gif
 

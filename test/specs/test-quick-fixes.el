@@ -159,6 +159,17 @@
         (flycheck-apply-fix (flycheck-test--edit 1 2 1 4 ""))
         (expect (buffer-string) :to-equal "ab\n")))
 
+    (it "inserts at one position in the order of its edits"
+      (flycheck-buttercup-with-temp-buffer
+        (insert "x\n")
+        (flycheck-apply-fix
+         (flycheck-fix-new
+          :edits (list (flycheck-fix-edit-new :line 1 :column 1 :end-line 1
+                                              :end-column 1 :replacement "a")
+                       (flycheck-fix-edit-new :line 1 :column 1 :end-line 1
+                                              :end-column 1 :replacement "b"))))
+        (expect (buffer-string) :to-equal "abx\n")))
+
     (it "applies several edits from the bottom up"
       ;; A later edit must not shift the positions of an earlier one.
       (with-temp-buffer
@@ -339,6 +350,61 @@
                        (flycheck-test--edit 1 4 1 5 "C")))
                 :to-equal 2)))
 
+    (it "inserts at one position in the order the fixes come"
+      (flycheck-buttercup-with-temp-buffer
+        (insert "x\n")
+        (expect (flycheck-apply-fixes
+                 (list (flycheck-test--edit 1 1 1 1 "a")
+                       (flycheck-test--edit 1 1 1 1 "b")))
+                :to-equal 2)
+        (expect (buffer-string) :to-equal "abx\n")))
+
+    (it "makes an edit two fixes share once"
+      (flycheck-buttercup-with-temp-buffer
+        (insert "body\n")
+        (expect (flycheck-apply-fixes
+                 (list (flycheck-test--edit 1 1 1 1 "import x\n")
+                       (flycheck-test--edit 1 1 1 1 "import x\n")))
+                :to-equal 2)
+        (expect (buffer-string) :to-equal "import x\nbody\n")))
+
+    (it "keeps both quotes where two adjacent fixes meet"
+      ;; shellcheck's SC2086 fixes for `$a$b' each quote one variable
+      (flycheck-buttercup-with-temp-buffer
+        (insert "echo $a$b\n")
+        (cl-flet ((quote-at (column)
+                    (flycheck-fix-edit-new :line 1 :column column :end-line 1
+                                           :end-column column
+                                           :replacement "\"")))
+          (expect (flycheck-apply-fixes
+                   (list (flycheck-fix-new :edits (list (quote-at 6)
+                                                        (quote-at 8)))
+                         (flycheck-fix-new :edits (list (quote-at 8)
+                                                        (quote-at 10)))))
+                  :to-equal 2))
+        (expect (buffer-string) :to-equal "echo \"$a\"\"$b\"\n")))
+
+    (it "keeps an insert and a replacement that start at one place"
+      (dolist (order '(insert-first replacement-first))
+        (flycheck-buttercup-with-temp-buffer
+          (insert "abcd\n")
+          (let ((insert (flycheck-test--edit 1 1 1 1 "I"))
+                (replace (flycheck-test--edit 1 1 1 3 "R")))
+            (expect (flycheck-apply-fixes (if (eq order 'insert-first)
+                                              (list insert replace)
+                                            (list replace insert)))
+                    :to-equal 2))
+          (expect (buffer-string) :to-equal "IRcd\n"))))
+
+    (it "skips a malformed fix and applies the rest"
+      (flycheck-buttercup-with-temp-buffer
+        (insert "aaa bbb\n")
+        (expect (flycheck-apply-fixes
+                 (list (flycheck-test--edit 1 0 1 4 "X")
+                       (flycheck-test--edit 1 5 1 8 "Y")))
+                :to-equal 1)
+        (expect (buffer-string) :to-equal "aaa Y\n")))
+
     (it "refuses when a fix is stale"
       (flycheck-buttercup-with-temp-buffer
         (insert "aaa\n")
@@ -366,6 +432,16 @@
                                             :fix (flycheck-test--edit 1 9 1 12 "Y")))))
           (flycheck-fix-all-errors)
           (expect (buffer-string) :to-equal "X bbb Y\n"))))
+
+    (it "signals when no fix could be applied"
+      (flycheck-buttercup-with-temp-buffer
+        (insert "aaa\n")
+        (setq flycheck-current-errors
+              (list (flycheck-error-new-at 1 1 'error "x"
+                                           :fix (flycheck-test--edit
+                                                 1 0 1 2 "X"))))
+        (expect (flycheck-fix-all-errors) :to-throw 'user-error)
+        (expect (buffer-string) :to-equal "aaa\n")))
 
     (it "signals when the buffer has no fixable errors"
       (flycheck-buttercup-with-temp-buffer
