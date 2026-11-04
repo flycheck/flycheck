@@ -540,17 +540,28 @@
             ;; Position 5 is line 1, column 5 (x = emoji y | ).
             (expect (flycheck-fix-edit-column edit) :to-equal 5)))))
 
-    (it "drops a rustc suggestion span in another file"
-      ;; A suggestion reaching into a different file must not edit this buffer.
+    (it "keeps a rustc suggestion in another file at the primary span"
+      ;; Pointing at the other file, and without a fix: it would edit this
+      ;; buffer at that file's positions
       (let ((diag "{\"message\":\"m\",\"code\":{\"code\":\"E\"},\"level\":\"warning\",\
 \"spans\":[{\"file_name\":\"a.rs\",\"is_primary\":true,\
 \"line_start\":1,\"line_end\":1,\"column_start\":1,\"column_end\":2}],\
 \"children\":[{\"message\":\"help\",\"spans\":[\
 {\"file_name\":\"other.rs\",\"line_start\":9,\"column_start\":1,\"line_end\":9,\"column_end\":2,\
 \"suggested_replacement\":\"z\",\"suggestion_applicability\":\"MachineApplicable\"}]}]}"))
-        (let ((errors (flycheck-parse-rustc-diagnostic
-                       (car (flycheck-parse-json diag)) 'checker
-                       (current-buffer))))
+        (let* ((errors (flycheck-parse-rustc-diagnostic
+                        (car (flycheck-parse-json diag)) 'checker
+                        (current-buffer)))
+               (child (seq-find (lambda (err)
+                                  (equal (flycheck-error-message err)
+                                         "help: `z`"))
+                                errors))
+               (relation (car (flycheck-error-relations child))))
+          (expect (flycheck-error-filename child) :to-equal "a.rs")
+          (expect (flycheck-error-line child) :to-equal 1)
+          (expect (flycheck-related-location-filename relation)
+                  :to-equal "other.rs")
+          (expect (flycheck-related-location-line relation) :to-equal 9)
           (expect (seq-some #'flycheck-error-fix errors) :to-be nil))))
 
     (it "drops a SARIF fix change for another file"
