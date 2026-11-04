@@ -37,6 +37,7 @@
 
 ### Bugs fixed
 
+- [#2422](https://github.com/flycheck/flycheck/pull/2422): `flycheck-lsp-restart-server` restarts the server the buffer's document is on, even when `flycheck-lsp-servers` changed since the buffer was last checked.
 - [#2422](https://github.com/flycheck/flycheck/pull/2422): `flycheck-lsp` closes a buffer's document on the server once the buffer's file is renamed or its major mode changes, instead of leaving it open for the rest of the session, and no longer closes documents it never opened.
 - [#2422](https://github.com/flycheck/flycheck/pull/2422): `flycheck-lsp` takes a change to `flycheck-lsp-servers` in a buffer it already checked, instead of running the old server there until the major mode is set again.
 - [#2421](https://github.com/flycheck/flycheck/pull/2421): `emacs-lisp-checkdoc` uses the checkdoc settings saved through Customize even before checkdoc is loaded in the session.
