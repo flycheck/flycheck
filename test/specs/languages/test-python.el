@@ -86,6 +86,11 @@
        '(2 12 error "Incompatible return value type (got \"str\", expected \"int\")"
            :id "return-value" :checker python-mypy))))
 
+  (describe "flycheck-flake8-error-level-alist"
+    (it "is an option of python-ruff too, which reads the levels from it"
+      (expect (flycheck-checker-get 'python-ruff 'option-vars)
+              :to-contain 'flycheck-flake8-error-level-alist)))
+
   (describe "the python-mypy checker command"
     (it "appends flycheck-python-mypy-args before the source file"
       (let ((flycheck-python-mypy-config nil)

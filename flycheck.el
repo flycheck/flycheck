@@ -19440,7 +19440,7 @@ parent directory that doesn't have a __init__.py file."
       ("^D.*$"   . info)                ; Docstring issues from flake8-pep257
       ("^N.*$"   . info)                ; Naming issues from pep8-naming
       )
-    python-flake8
+    (python-flake8 python-ruff)
   "An alist mapping flake8 error IDs to Flycheck error levels.
 
 Each item in this list is a cons cell `(PATTERN . LEVEL)' where

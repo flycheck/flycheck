@@ -38,6 +38,7 @@
 
 ### Bugs fixed
 
+- [#2424](https://github.com/flycheck/flycheck/pull/2424): `flycheck-flake8-error-level-alist` is registered for `python-ruff` too, which takes its levels from it, so `flycheck-describe-checker` lists it there.
 - [#2424](https://github.com/flycheck/flycheck/pull/2424): `ruby-chef-cookstyle` explains the RuboCop cops it reports, and `flycheck-verify-setup` shows the RuboCop configuration file it uses.
 - [#2424](https://github.com/flycheck/flycheck/pull/2424): `ada-gnat` reads GNAT's message levels: errors without the `error:` prefix of GNAT 12 and later, `info:` messages as info and style checks as warnings, with the switch each comes under as its id.
 - [#2424](https://github.com/flycheck/flycheck/pull/2424): `flycheck-hlint-hint-packages` enables groups of hlint's built-in hints with `--with-group`, instead of failing every check on hlint 2 and later, which read `-h` as a hint file to load.
