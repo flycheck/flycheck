@@ -12828,23 +12828,29 @@ buffer: its predicate refuses the buffer, and Flycheck continues through
 it to the checkers behind it (see
 `flycheck-get-next-checker-for-buffer'), where a mode-matching entry is
 found.  That matters because `next-checkers' is a property of the
-checker, shared by every buffer, while the modes are buffer-local.
+checker, shared by every buffer, which is also why each major mode's
+command checker joins the chain rather than replacing the last one.
 
 Shared by the `flycheck-lsp' and `eglot-check' bridges."
   (unless (flycheck-checker-supports-major-mode-p checker major-mode)
     (flycheck-add-mode checker major-mode))
-  ;; Rebuild from scratch, so enabling a mode repeatedly cannot pile up
-  ;; duplicate entries
-  (setf (flycheck-checker-get checker 'next-checkers) nil)
-  (unless exclusive
-    (dolist (bridge (cdr (memq checker flycheck-lsp--bridges)))
-      (flycheck-add-next-checker checker bridge 'append))
-    (when-let* ((next (seq-find
-                       (lambda (c)
-                         (and (not (memq c flycheck-lsp--bridges))
-                              (flycheck-checker-supports-major-mode-p c major-mode)))
-                       flycheck-checkers)))
-      (flycheck-add-next-checker checker next 'append))))
+  (if exclusive
+      (setf (flycheck-checker-get checker 'next-checkers) nil)
+    ;; The bridges first: the first checker usable in a buffer takes the
+    ;; chain on, and a command checker's own chain leads to no bridge
+    (dolist (next (append (cdr (memq checker flycheck-lsp--bridges))
+                          (list (seq-find
+                                 (lambda (c)
+                                   (and (not (memq c flycheck-lsp--bridges))
+                                        (flycheck-checker-supports-major-mode-p
+                                         c major-mode)))
+                                 flycheck-checkers))))
+      ;; Added once, so enabling a mode repeatedly cannot pile up
+      ;; duplicate entries
+      (when (and next
+                 (not (memq next
+                            (flycheck-checker-get checker 'next-checkers))))
+        (flycheck-add-next-checker checker next 'append)))))
 
 
 ;;; Native LSP diagnostics client

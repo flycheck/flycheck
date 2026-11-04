@@ -659,6 +659,32 @@ TEST=1
        (expect (flycheck-checker-get 'flycheck-lsp 'next-checkers)
                :not :to-contain 'eglot-check))))
 
+  (it "keeps each major mode's command checker in the chain"
+    ;; `next-checkers' is the checker's, shared by every buffer: a buffer
+    ;; in another mode turning the bridge on must not take this one's
+    (let ((saved-next (flycheck-checker-get 'flycheck-lsp 'next-checkers))
+          (saved-modes (flycheck-checker-get 'flycheck-lsp 'modes)))
+      (unwind-protect
+          (progn
+            (dolist (mode '(python-mode ruby-mode))
+              (with-temp-buffer
+                (funcall mode)
+                (flycheck-lsp--register-checker 'flycheck-lsp nil)))
+            (with-temp-buffer
+              (python-mode)
+              (spy-on 'flycheck-may-use-checker :and-call-fake
+                      (lambda (checker)
+                        (flycheck-checker-supports-major-mode-p
+                         checker major-mode)))
+              (let ((next (flycheck-get-next-checker-for-buffer
+                           'flycheck-lsp)))
+                (expect next :to-be-truthy)
+                (expect (flycheck-checker-supports-major-mode-p
+                         next 'python-mode)
+                        :to-be-truthy))))
+        (setf (flycheck-checker-get 'flycheck-lsp 'next-checkers) saved-next
+              (flycheck-checker-get 'flycheck-lsp 'modes) saved-modes))))
+
   (it "does not pile up duplicate entries when a mode re-enables"
     (test-bridges/with-both
      '(eglot lsp eglot lsp)
