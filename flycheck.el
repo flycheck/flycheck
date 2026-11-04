@@ -20510,7 +20510,8 @@ See URL `https://github.com/testdouble/standard' for more information."
              "--cache" "false"
              (config-file "--config" flycheck-ruby-standard-config)
              (option-flag "--lint" flycheck-rubocop-lint-only)
-             "--stdin" source-original)
+             ;; A name for a buffer without a file, as for ruby-rubocop
+             "--stdin" (eval (flycheck-buffer-file-local-name "stdin")))
   :standard-input t
   :working-directory #'flycheck-ruby--find-project-root
   :error-parser #'flycheck-parse-rubocop
