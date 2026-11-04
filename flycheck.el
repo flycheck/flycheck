@@ -19866,8 +19866,10 @@ See URL `https://github.com/rpm-software-management/rpmlint'."
                 (message-id (save-match-data
                               (string-match "\\([^ ]+\\)" error-message)
                               (match-string 1 error-message))))
+      ;; rpmlint 1 explains with -I and rpmlint 2 with -e; both take the
+      ;; long option
       (flycheck-call-checker-process-for-output
-       'rpm-rpmlint nil t "-I" message-id)))
+       'rpm-rpmlint nil t "--explain" message-id)))
   :modes (sh-mode rpm-spec-mode)
   :predicate (lambda () (or (not (eq major-mode 'sh-mode))
                             ;; In `sh-mode', we need the proper shell
