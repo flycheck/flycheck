@@ -2082,34 +2082,49 @@ FILE-NAME is nil, return `default-directory'."
 (defun flycheck-goto-line (line)
   "Move point to beginning of line number LINE.
 
-This function assumes that the current buffer is not narrowed."
-  (flycheck--init-line-cache)
-  (goto-char (flycheck-line-cache-point flycheck--line-cache))
-  (let ((delta (- line (flycheck-line-cache-line flycheck--line-cache))))
-    (when (= 0 (forward-line delta))
-      (setf (flycheck-line-cache-point flycheck--line-cache) (point))
-      (setf (flycheck-line-cache-line flycheck--line-cache) line))))
+LINE counts from the start of the whole buffer, whatever its narrowing.
+A line outside the accessible portion leaves point at its nearest edge."
+  (save-restriction
+    (widen)
+    (flycheck--init-line-cache)
+    (goto-char (flycheck-line-cache-point flycheck--line-cache))
+    (let ((delta (- line (flycheck-line-cache-line flycheck--line-cache))))
+      ;; Not at the end of a last line without a newline, which
+      ;; `forward-line' counts as reaching the next line
+      (when (and (= 0 (forward-line delta)) (bolp))
+        (setf (flycheck-line-cache-point flycheck--line-cache) (point))
+        (setf (flycheck-line-cache-line flycheck--line-cache) line)))))
 
 (defun flycheck-line-column-to-position (line column)
   "Return the point closest to LINE, COLUMN on line LINE.
 
-COLUMN is one-based."
+COLUMN is one-based.  LINE counts from the start of the whole buffer,
+so the position may lie outside the accessible portion."
   (save-excursion
-    (flycheck-goto-line line)
-    (min (+ (point) (1- column)) (line-end-position))))
+    (save-restriction
+      (widen)
+      (flycheck-goto-line line)
+      (min (+ (point) (1- column)) (line-end-position)))))
 
 (defun flycheck-line-column-at-point ()
-  "Return the line and column number at point."
-  (cons (line-number-at-pos) (1+ (- (point) (line-beginning-position)))))
+  "Return the line and column number at point.
+
+The line counts from the start of the whole buffer, whatever its
+narrowing, as error lines do."
+  (flycheck-line-column-at-pos (point)))
 
 (defun flycheck-line-column-at-pos (pos)
   "Return the line and column number at position POS.
 
-COLUMN is one-based."
+COLUMN is one-based.  POS may lie outside the narrowing, and the line
+counts from the start of the whole buffer."
   (let ((inhibit-field-text-motion t))
     (save-excursion
-      (goto-char pos)
-      (flycheck-line-column-at-point))))
+      (save-restriction
+        (widen)
+        (goto-char pos)
+        (cons (line-number-at-pos)
+              (1+ (- (point) (line-beginning-position))))))))
 
 
 ;;; Minibuffer tools
@@ -4808,9 +4823,10 @@ end of the line."
       ;; If the current line is blank, highlight it in full; if it's
       ;; empty, include the previous line break character(s) to have
       ;; any region at all (when called with 0, `line-end-position'
-      ;; gives us the end of the previous line).
-      (cons (if (eolp) (if (= bol end) (line-end-position 0) bol) (point))
-            end))))
+      ;; gives us the end of the previous line).  An empty first line
+      ;; has none before it, so it takes its own.
+      (let ((beg (if (eolp) (if (= bol end) (line-end-position 0) bol) (point))))
+        (cons beg (if (= beg end) (min (1+ end) (point-max)) end))))))
 
 (defun flycheck--column-region (pos)
   "Get the column region of position POS.
@@ -7051,6 +7067,14 @@ function resolves `conditional' style specifications."
                (propertize after 'face delim-face))))
       (other (error "Unsupported highlighting style: %S" other)))))
 
+(defun flycheck--other-file-error-region ()
+  "Return the region (BEG . END) that shows an error about another file.
+
+That is the first line of the whole buffer, indentation and all."
+  (save-restriction
+    (widen)
+    (cons (point-min) (cdr (flycheck--line-region (point-min))))))
+
 (defun flycheck-add-overlay (err)
   "Add overlay for ERR.
 
@@ -7060,10 +7084,7 @@ Return the created overlay."
   ;; We erase the highlighting later on in this case
   (pcase-let* ((`(,beg . ,end)
                 (if (flycheck-relevant-error-other-file-p err)
-                    ;; Display overlays for other-file errors on the first line
-                    (cons (point-min)
-                          (save-excursion (goto-char (point-min))
-                                          (line-end-position)))
+                    (flycheck--other-file-error-region)
                   (flycheck-error-region-for-mode
                    err (or flycheck-highlighting-mode 'lines))))
                (overlay (make-overlay beg end))
@@ -7164,15 +7185,18 @@ overlays."
   (overlay-recenter (point-max))
   (flycheck-delete-marked-overlays)
   (setq flycheck--last-overlay-index 0)
+  (seq-do #'delete-overlay (flycheck--all-overlays)))
+
+(defun flycheck--all-overlays ()
+  "Return the Flycheck overlays of the whole buffer, whatever its narrowing."
   (save-restriction
     (widen)
-    (seq-do #'delete-overlay (flycheck-overlays-in (point-min) (point-max)))))
+    (flycheck-overlays-in (point-min) (point-max))))
 
 (defun flycheck-mark-all-overlays-for-deletion ()
   "Mark all current overlays for deletion."
   (setq flycheck-overlays-to-delete
-        (append (flycheck-overlays-in (point-min) (point-max))
-                flycheck-overlays-to-delete)))
+        (append (flycheck--all-overlays) flycheck-overlays-to-delete)))
 
 (defun flycheck-delete-marked-overlays ()
   "Delete all overlays marked for deletion."
@@ -7314,8 +7338,9 @@ buffer without a file stays within itself."
     (when-let* ((file (buffer-file-name))
                 (key (flycheck--buffer-project-key)))
       (let* ((forward (> n 0))
-             (line (line-number-at-pos))
-             (column (1+ (- (point) (line-beginning-position))))
+             (here (flycheck-line-column-at-point))
+             (line (car here))
+             (column (cdr here))
              (truenames (make-hash-table :test 'equal))
              (file-key
               ;; Sort files by their true names, memoized per file:
@@ -8425,6 +8450,12 @@ defaults to `point'."
             (when flycheck-mode
               (flycheck-buffer))))))))
 
+(defun flycheck--goto-char-widening (pos)
+  "Go to POS, widening the buffer only when POS lies outside the narrowing."
+  (unless (<= (point-min) pos (point-max))
+    (widen))
+  (goto-char pos))
+
 (defun flycheck-jump-in-buffer (buffer error)
   "In BUFFER, jump to ERROR."
   ;; FIXME: we assume BUFFER and the buffer of ERROR are the same.  We don't
@@ -8434,12 +8465,7 @@ defaults to `point'."
       ;; otherwise replace the current buffer.
       (pop-to-buffer buffer 'other-window)
     (switch-to-buffer buffer))
-  (let ((pos (flycheck-error-pos error)))
-    (unless (eq (goto-char pos) (point))
-      ;; If widening gets in the way of moving to the right place, remove it
-      ;; and try again
-      (widen)
-      (goto-char pos)))
+  (flycheck--goto-char-widening (flycheck-error-pos error))
   ;; Re-highlight the errors.  We have post-command-hook for that, but calls to
   ;; `flycheck-jump-in-buffer' that come from other buffers (e.g. from the error
   ;; list) won't trigger it.
@@ -9952,7 +9978,8 @@ in another window; otherwise reuse the current one."
           (pop-to-buffer buffer 'other-window)
         (switch-to-buffer buffer)))
     (when line
-      (goto-char (flycheck-line-column-to-position line (or column 1))))))
+      (flycheck--goto-char-widening
+       (flycheck-line-column-to-position line (or column 1))))))
 
 (define-button-type 'flycheck-related-location
   'action (lambda (button)

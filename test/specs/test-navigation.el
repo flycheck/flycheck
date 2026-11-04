@@ -599,6 +599,17 @@
                   :to-equal (expand-file-name "a.rb" dir))
           (expect (flycheck-error-line err) :to-equal 3)))))
 
+  (it "starts from the line point is on in a narrowed buffer"
+    (flycheck-test--with-nav-project '("a.rb")
+      (with-current-buffer (find-file-noselect (expand-file-name "a.rb" dir))
+        (flycheck-mode 1)
+        (flycheck-test--nav-record dir '("a.rb" 2 error) '("a.rb" 4 error))
+        (narrow-to-region (flycheck-line-column-to-position 3 1) (point-max))
+        (goto-char (point-min))
+        (let* ((flycheck-navigation-scope 'project)
+               (err (flycheck--next-project-error 1)))
+          (expect (flycheck-error-line err) :to-equal 4)))))
+
   (it "continues backwards into the previous file's last error"
     (flycheck-test--with-nav-project '("a.rb" "c.rb")
       (with-current-buffer (find-file-noselect (expand-file-name "c.rb" dir))

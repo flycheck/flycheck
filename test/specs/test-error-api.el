@@ -44,7 +44,12 @@
                 :to-equal '(11 . 16))
         ;; An error line beyond the end of file should highlight the last line
         (expect (flycheck--line-region (flycheck-line-column-to-position 4 3))
-                :to-equal '(16 . 17)))))
+                :to-equal '(16 . 17))))
+
+    (it "takes the newline of an empty first line"
+      (flycheck-buttercup-with-temp-buffer
+        (insert "\nfoo\n")
+        (expect (flycheck--line-region 1) :to-equal '(1 . 2)))))
 
   (describe "flycheck-error-column-region"
     (it "computes the region for a column"
@@ -198,6 +203,33 @@
         ;; A multi-line docstring, which python-mode reads as an empty
         ;; string and then the real one
         (expect (test-error-api/symbols-highlight 3 5) :to-equal "\""))))
+
+  (describe "Positions in a narrowed buffer"
+    (it "counts error lines from the start of the whole buffer"
+      (flycheck-buttercup-with-temp-buffer
+        (insert "one\ntwo\nthree\nfour\n")
+        (narrow-to-region (flycheck-line-column-to-position 3 1) (point-max))
+        (let ((pos (flycheck-line-column-to-position 4 2)))
+          (expect (flycheck-line-column-at-pos pos) :to-equal '(4 . 2))
+          (expect (flycheck-error-line (flycheck-error-new-at-pos pos 'error))
+                  :to-equal 4))
+        ;; Before the narrowing, where an LSP diagnostic may well point
+        (expect (flycheck-line-column-at-pos 6) :to-equal '(2 . 2))))
+
+    (it "doesn't let a narrowed lookup poison the line cache"
+      (flycheck-buttercup-with-temp-buffer
+        (insert "one\ntwo\nthree\nfour\n")
+        (save-restriction
+          ;; Literal bounds, so the cache is still fresh
+          (narrow-to-region 9 (point-max))
+          (flycheck-goto-line 2))
+        (expect (flycheck-line-column-to-position 4 1) :to-equal 15)))
+
+    (it "doesn't cache the end of a last line without a newline"
+      (flycheck-buttercup-with-temp-buffer
+        (insert "abc\ndef")
+        (flycheck-line-column-to-position 3 1)
+        (expect (flycheck-line-column-to-position 2 1) :to-equal 5))))
 
   (describe "flycheck-error-pos"
     (it "computes the error position"
