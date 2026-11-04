@@ -1808,7 +1808,8 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
    .. syntax-checker:: sh-shellcheck
 
-      Lint Bash and POSIX shell with ShellCheck_.
+      Lint Bash, POSIX, Korn, Dash, Ash and BusyBox shell scripts with
+      ShellCheck_.  BusyBox needs ShellCheck 0.10 or newer.
 
       .. _ShellCheck: https://github.com/koalaman/shellcheck/
 

@@ -86,6 +86,34 @@
        '(4 15 warning "Remove quotes from right-hand side of =~ to match as a regex rather than literally."
            :checker sh-shellcheck :id "SC2076"))))
 
+  (describe "sh-shellcheck and the script's shell"
+    (it "checks the shells ShellCheck knows under Emacs's names for them"
+      (dolist (shebang '("/bin/dash" "/bin/ksh93" "/bin/ash" "/bin/busybox sh"))
+        (flycheck-buttercup-with-temp-buffer
+          (insert "#!" shebang "\necho hi\n")
+          (let ((inhibit-message t))
+            (sh-mode))
+          (let ((flycheck-shellcheck-infer-shell nil))
+            (expect (funcall (flycheck-checker-get 'sh-shellcheck 'predicate))
+                    :to-be-truthy)
+            (expect (cadr (member "--shell"
+                                  (flycheck-checker-substituted-arguments
+                                   'sh-shellcheck)))
+                    :to-equal (symbol-name sh-shell))))))
+
+    (it "names the Korn shell clones ksh to ShellCheck"
+      (flycheck-buttercup-with-temp-buffer
+        (insert "#!/bin/mksh\necho hi\n")
+        (let ((inhibit-message t))
+          (sh-mode))
+        (let ((flycheck-shellcheck-infer-shell nil))
+          (expect (funcall (flycheck-checker-get 'sh-shellcheck 'predicate))
+                  :to-be-truthy)
+          (expect (cadr (member "--shell"
+                                (flycheck-checker-substituted-arguments
+                                 'sh-shellcheck)))
+                  :to-equal "ksh")))))
+
   (describe "sh-shellcheck JSON1 parser"
     (it "parses a comment and its fix replacements"
       (flycheck-buttercup-with-temp-buffer
@@ -114,6 +142,12 @@
               :to-be 'disable)
       (expect (car (flycheck--shellcheck-handle-suspicious
                     'sh-shellcheck 2 "t.sh: openBinaryFile: does not exist"))
+              :to-be 'disable))
+
+    (it "disables the checker when shellcheck doesn't know an option"
+      ;; As an older ShellCheck does for --shell busybox
+      (expect (car (flycheck--shellcheck-handle-suspicious
+                    'sh-shellcheck 4 "Unknown shell: busybox"))
               :to-be 'disable))
 
     (it "stays suspicious on any other status"
