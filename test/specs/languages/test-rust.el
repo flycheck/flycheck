@@ -333,6 +333,22 @@
           (expect args :to-contain "--edition")
           (expect args :to-contain "2021")))))
 
+  (describe "flycheck-rust-cargo-error-filter"
+    (it "expands file names against the root of the workspace"
+      (spy-on 'flycheck-rust-cargo-workspace-root :and-return-value "/ws/")
+      (let ((errors (flycheck-rust-cargo-error-filter
+                     (list (flycheck-error-new-at 1 1 'warning "w"
+                                                  :filename "member/src/lib.rs")
+                           (flycheck-error-new-at 1 1 'error "crate level"
+                                                  :filename nil)))))
+        (expect (mapcar #'flycheck-error-filename errors)
+                :to-equal (list (expand-file-name "member/src/lib.rs" "/ws/")
+                                nil))))
+
+    (it "is what rust-clippy filters with too, so a workspace member's errors stay"
+      (expect (flycheck-checker-get 'rust-clippy 'error-filter)
+              :to-be #'flycheck-rust-cargo-error-filter)))
+
   (describe "the `rust-clippy' checker command"
     (it "passes only --message-format by default"
       (let ((flycheck-rust-features nil)
