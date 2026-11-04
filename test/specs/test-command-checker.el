@@ -128,6 +128,27 @@ afterwards."
       (let ((coding-system-for-write 'utf-16le))
         (expect (flycheck--process-input-coding-system "flycheck-x" '("mytool"))
                 :to-be 'utf-16le))))
+
+  (describe "A source argument with a suffix"
+    ;; d-dmd checks a copy of the buffer named with a `.d' suffix
+
+    (it "says where its temporary file goes"
+      (flycheck-buttercup-with-temp-buffer
+        (expect (flycheck-temp-directory 'd-dmd)
+                :to-equal (temporary-file-directory))))
+
+    (it "stands for the buffer's file in a shell command"
+      (flycheck-buttercup-with-temp-buffer
+        (setq buffer-file-name "/project/a.d")
+        (let ((flycheck-temporaries nil))
+          (expect (flycheck--checker-substituted-shell-command-arguments
+                   'd-dmd)
+                  :to-contain "/project/a.d")
+          ;; No copy written for `flycheck-compile', which would never
+          ;; delete it
+          (expect flycheck-temporaries :to-be nil))
+        (set-buffer-modified-p nil))))
+
   (describe "flycheck-fix-error-filename"
     (it "gives the related locations in the checked copy the buffer's file"
       (flycheck-buttercup-with-temp-buffer
