@@ -13680,15 +13680,15 @@ the server down.  Return nil if the process could not be spawned at all."
            :timeout-fn (lambda () (flycheck-lsp--init-failed server "timeout")))
           server)
       (error
+       ;; Stopped and dropped before `jsonrpc-shutdown', which would
+       ;; otherwise wait out a grace of its own first - the order
+       ;; `flycheck-lsp--shutdown-server' uses.
+       (flycheck-lsp--force-quit server)
        ;; `delete-process' reads nil as the current buffer's process, so
        ;; a spawn that never happened must not reach it.
-       ;; Stopped before `jsonrpc-shutdown', which otherwise spends its
-       ;; grace dropping a process that being dropped does not stop - the
-       ;; order `flycheck-lsp--shutdown-server' uses.
-       (flycheck-lsp--force-quit server)
+       (when proc (ignore-errors (delete-process proc)))
        (when-let* ((conn (flycheck-lsp--server-connection server)))
          (ignore-errors (jsonrpc-shutdown conn 'cleanup-buffers)))
-       (when proc (ignore-errors (delete-process proc)))
        (ignore-errors (kill-buffer stderr))
        (message "Flycheck LSP: %s failed to start: %s"
                 (car command) (error-message-string err))
@@ -14116,19 +14116,32 @@ exit was already leaving.
 `jsonrpc-shutdown' stays outside them, and last.  It waits for a
 sentinel with no deadline of its own, pumping output as it goes, so
 running it before the servers nested inside that pumping have been
-stopped leaves its wait with nothing left to finish it."
+stopped leaves its wait with nothing left to finish it.
+
+A server that never finished its handshake is only told to exit, and
+not waited for: LSP has it refuse every request before `initialize',
+and one whose handshake never finished may well answer nothing at all,
+so asking it to shut down, or waiting for it, would only block."
   (let* ((conn (flycheck-lsp--server-connection server))
          (running (and conn (jsonrpc-running-p conn))))
     (unwind-protect
         (unwind-protect
             (when running
-              (ignore-errors (jsonrpc-request conn 'shutdown nil :timeout 1))
-              (ignore-errors (jsonrpc-notify conn 'exit nil))
-              (flycheck-lsp--await-exit server))
+              (if (not (flycheck-lsp--server-initialized server))
+                  (ignore-errors (jsonrpc-notify conn 'exit nil))
+                (ignore-errors (jsonrpc-request conn 'shutdown nil :timeout 1))
+                (ignore-errors (jsonrpc-notify conn 'exit nil))
+                (flycheck-lsp--await-exit server)))
           ;; A connection gone is not a server stopped, so this happens
           ;; whether or not the branch above ran.
           (with-demoted-errors "Flycheck LSP: %S"
-            (flycheck-lsp--force-quit server)))
+            (flycheck-lsp--force-quit server))
+          ;; Its grace spent, or never owed: `jsonrpc-shutdown' would
+          ;; only wait out a grace of its own before doing this
+          (with-demoted-errors "Flycheck LSP: %S"
+            (when-let* ((proc (flycheck-lsp--server-process server))
+                        ((process-live-p proc)))
+              (delete-process proc))))
       (with-demoted-errors "Flycheck LSP: %S"
         (when-let* ((stderr (flycheck-lsp--server-stderr server)))
           (when (buffer-live-p stderr) (kill-buffer stderr)))))

@@ -936,7 +936,7 @@
         (let* ((proc (flycheck-test-lsp-process 4242))
                (server (flycheck-lsp--server-create
                         :root "/mock:localhost:/p/" :connection 'conn
-                        :process proc)))
+                        :process proc :initialized t)))
           (unwind-protect
               (progn
                 (spy-on 'flycheck-lsp--host-connected-p :and-return-value t)
@@ -973,7 +973,7 @@
         (let* ((proc (flycheck-test-lsp-process 4242))
                (server (flycheck-lsp--server-create
                         :root "/mock:localhost:/p/" :connection 'conn
-                        :process proc))
+                        :process proc :initialized t))
                ;; Long enough that the stand-in's exit cannot lose a race
                ;; the spec is not about.
                (flycheck-lsp--exit-grace 5))
@@ -1007,7 +1007,7 @@
                (stderr (generate-new-buffer " *flycheck-test-lsp stderr*"))
                (server (flycheck-lsp--server-create
                         :root "/mock:localhost:/p/" :connection 'conn
-                        :process proc :stderr stderr)))
+                        :process proc :initialized t :stderr stderr)))
           (unwind-protect
               (progn
                 (spy-on 'flycheck-lsp--host-connected-p :and-return-value t)
@@ -1022,6 +1022,40 @@
                 (expect (buffer-live-p stderr) :to-be nil))
             (delete-process proc)
             (when (buffer-live-p stderr) (kill-buffer stderr)))))
+
+      (it "only tells a server that never finished its handshake to exit"
+        ;; It may answer nothing, and asking would block for the timeout
+        (let* ((proc (flycheck-test-lsp-process))
+               (server (flycheck-lsp--server-create
+                        :root "/p/" :connection 'conn :process proc))
+               (asked nil))
+          (unwind-protect
+              (flycheck-test-with-stub-jsonrpc t
+                (cl-letf (((symbol-function 'jsonrpc-request)
+                           (lambda (_conn method &rest _) (push method asked)))
+                          ((symbol-function 'jsonrpc-notify)
+                           (lambda (_conn method &rest _) (push method asked))))
+                  (flycheck-lsp--shutdown-server server))
+                (expect asked :to-equal '(exit))
+                (expect (process-live-p proc) :to-be nil))
+            (when (process-live-p proc) (delete-process proc)))))
+
+      (it "drops a server still running once its grace is spent"
+        ;; `jsonrpc-shutdown' would wait out a grace of its own first
+        (let* ((proc (flycheck-test-lsp-process))
+               (server (flycheck-lsp--server-create
+                        :root "/p/" :connection 'conn :process proc
+                        :initialized t))
+               (flycheck-lsp--exit-grace 0.05)
+               (live 'unset))
+          (unwind-protect
+              (flycheck-test-with-stub-jsonrpc t
+                (cl-letf (((symbol-function 'jsonrpc-shutdown)
+                           (lambda (&rest _)
+                             (setq live (process-live-p proc)))))
+                  (flycheck-lsp--shutdown-server server))
+                (expect live :to-be nil))
+            (when (process-live-p proc) (delete-process proc)))))
 
       (it "does not wait on jsonrpc for ever"
         ;; `jsonrpc-shutdown' waits for a sentinel with no deadline of its
