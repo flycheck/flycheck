@@ -10389,16 +10389,20 @@ argument, and returning its value.  Signal an error if the
 function returns a non-existing working directory.
 
 If the property is undefined or if the function returns nil
-return the `default-directory' of the current buffer."
+return the `default-directory' of the current buffer, which only a
+checker that runs a command needs to exist."
   (let* ((def-directory-fn (flycheck-checker-get checker 'working-directory))
-         (directory (or (and def-directory-fn
-                             (funcall def-directory-fn checker))
-                        ;; Default to the `default-directory' of the current
-                        ;; buffer
-                        default-directory)))
+         (own (and def-directory-fn (funcall def-directory-fn checker)))
+         ;; Default to the `default-directory' of the current buffer
+         (directory (or own default-directory)))
     (unless (file-exists-p directory)
-      (error ":working-directory %s of syntax checker %S does not exist"
-             directory checker))
+      (cond
+       (own
+        (error ":working-directory %s of syntax checker %S does not exist"
+               directory checker))
+       ((flycheck-checker-get checker 'command)
+        (error "Syntax checker %S cannot run in %s, which does not exist"
+               checker directory))))
     directory))
 
 ;;;###autoload
