@@ -29,7 +29,13 @@
     (it "threads flycheck-json-jq-args in before the filter"
       (let ((flycheck-json-jq-args '("--seq")))
         (expect (flycheck-checker-substituted-arguments 'json-jq)
-                :to-contain "--seq"))))
+                :to-contain "--seq")))
+
+    (it "doesn't have jq print the document, which the patterns would read"
+      (let ((flycheck-json-jq-args nil))
+        (flycheck-buttercup-with-temp-buffer
+          (let ((args (flycheck-checker-substituted-arguments 'json-jq)))
+            (expect (car args) :to-equal "empty"))))))
 
   (describe "reading the tool's output"
     ;; Read from output recorded earlier, so this runs whether or
