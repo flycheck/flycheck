@@ -241,6 +241,27 @@
                 :to-be 'flycheck--rubocop-handle-suspicious))))
 
 
+  (describe "the ruby-chef-cookstyle checker"
+    ;; Cookstyle is RuboCop with Chef's cops on top
+    (it "takes the RuboCop configuration file"
+      (expect (flycheck-checker-get 'ruby-chef-cookstyle 'config-file-var)
+              :to-be 'flycheck-rubocop-config))
+
+    (it "explains RuboCop's own cops, and not Chef's"
+      (let ((explainer (flycheck-checker-get 'ruby-chef-cookstyle
+                                             'error-explainer)))
+        (expect (funcall explainer
+                         (flycheck-error-new-at 1 1 'warning "m"
+                                                :id "Style/StringLiterals"))
+                :to-equal (cons 'url (concat "https://docs.rubocop.org/rubocop/"
+                                             "cops_style.html"
+                                             "#stylestringliterals")))
+        (expect (funcall explainer
+                         (flycheck-error-new-at
+                          1 1 'warning "m"
+                          :id "Chef/Deprecations/ResourceWithoutUnifiedTrue"))
+                :to-be nil))))
+
   (describe "reading rubocop's output"
     (flycheck-buttercup-def-parse-test ruby-rubocop "language/ruby/syntax-error.rb"
       '(5 7 error "unexpected token tCONSTANT

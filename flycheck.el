@@ -20594,7 +20594,8 @@ variant covers anything that expanded it first."
 
 (define-obsolete-variable-alias 'flycheck-rubocoprc
   'flycheck-rubocop-config "39")
-(flycheck-def-config-file-var flycheck-rubocop-config ruby-rubocop ".rubocop.yml")
+(flycheck-def-config-file-var flycheck-rubocop-config
+    (ruby-rubocop ruby-chef-cookstyle) ".rubocop.yml")
 
 (flycheck-def-option-var flycheck-rubocop-lint-only nil
                          (ruby-rubocop ruby-standard ruby-chef-cookstyle)
@@ -20764,6 +20765,9 @@ See URL `https://github.com/chef/cookstyle'."
   :working-directory #'flycheck-ruby--find-project-root
   :error-parser #'flycheck-parse-rubocop
   :error-filter #'flycheck-ruby--filter-rubocop-errors
+  ;; Cookstyle runs RuboCop's own cops beside its Chef ones, which the
+  ;; explainer leaves alone
+  :error-explainer #'flycheck-ruby-rubocop-error-explainer
   :handle-suspicious #'flycheck--rubocop-handle-suspicious
   :modes '(enh-ruby-mode ruby-mode ruby-ts-mode)
   :predicate
