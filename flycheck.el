@@ -17908,14 +17908,22 @@ string is an ignore rule (e.g. \"Use fmap\")."
 
 (flycheck-def-option-var flycheck-hlint-hint-packages
     nil haskell-hlint
-  "Hint packages to include for hlint checks.
+  "Groups of hints to enable for hlint checks.
 
-The value of this variable is a list of strings, where each
-string is a default hint package (e.g. (\"Generalise\"
-\"Default\" \"Dollar\"))."
-  :type '(repeat :tag "Hint packages" (string :tag "Hint package"))
+The value of this variable is a list of strings, each the name of a
+group of hlint's built-in hints, such as (\"generalise\" \"dollar\"),
+or of one a configuration file defines.  hlint 1's hint packages
+\"Default\", \"Dollar\" and \"Generalise\" name the groups they
+became."
+  :type '(repeat :tag "Hint groups" (string :tag "Hint group"))
   :safe #'flycheck-string-list-p
   :package-version '(flycheck . "0.24"))
+
+(defun flycheck-hlint--group (name)
+  "Return the name of the hlint group NAME names.
+hlint 1's hint packages became groups of the same names in lower case;
+hlint matches a group's name exactly."
+  (if (member name '("Default" "Dollar" "Generalise")) (downcase name) name))
 
 (defun flycheck-parse-hlint (output checker buffer)
   "Parse hlint JSON ideas from OUTPUT.
@@ -17979,7 +17987,8 @@ See URL `https://github.com/ndmitchell/hlint'."
             "--no-exit-code" "--json"
             (option-list "-X" flycheck-hlint-language-extensions concat)
             (option-list "-i=" flycheck-hlint-ignore-rules concat)
-            (option-list "-h" flycheck-hlint-hint-packages concat)
+            (option-list "--with-group=" flycheck-hlint-hint-packages concat
+                         flycheck-hlint--group)
             (config-file "-h" flycheck-hlint-config)
             (eval flycheck-hlint-args)
             source-inplace)
