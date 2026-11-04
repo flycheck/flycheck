@@ -144,6 +144,20 @@
       (expect (flycheck-lsp--tags '(:tags [99])) :to-be nil)
       (expect (flycheck-lsp--tags '(:tags [1 99])) :to-equal '(unnecessary))))
 
+  (describe "the client capabilities"
+    ;; Servers send these only to a client that says it reads them:
+    ;; pyright reports no unused or unreachable code without the tags
+    (it "advertise what Flycheck reads off a diagnostic"
+      (let ((publish (plist-get
+                      (plist-get
+                       (plist-get (flycheck-lsp--initialize-params "/proj/")
+                                  :capabilities)
+                       :textDocument)
+                      :publishDiagnostics)))
+        (expect (plist-get publish :tagSupport) :to-equal '(:valueSet [1 2]))
+        (expect (plist-get publish :codeDescriptionSupport) :to-be t)
+        (expect (plist-get publish :dataSupport) :to-be t))))
+
   (describe "flycheck-lsp--related-locations"
     (it "returns nil when there is no relatedInformation"
       (expect (flycheck-lsp--related-locations '(:message "x")) :to-be nil))
