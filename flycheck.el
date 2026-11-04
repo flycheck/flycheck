@@ -2745,7 +2745,8 @@ symbol, which continues unconditionally."
 (defconst flycheck-find-checker-regexp
   (rx line-start (zero-or-more (syntax whitespace))
       "(" symbol-start
-      (or "flycheck-define-checker" "flycheck-define-command-checker")
+      (or "flycheck-define-checker" "flycheck-define-command-checker"
+          "flycheck-define-generic-checker")
       symbol-end
       (eval (list 'regexp find-function-space-re))
       (? "'")
@@ -3395,7 +3396,8 @@ will be used in buffers with MODE."
     (error "%s is not a valid syntax checker" checker))
   (unless (symbolp mode)
     (error "%s is not a symbol" mode))
-  (push mode (flycheck-checker-get checker 'modes)))
+  ;; Once only: init files and mode hooks may well run this twice
+  (cl-pushnew mode (flycheck-checker-get checker 'modes)))
 
 
 ;;; Generic syntax checks

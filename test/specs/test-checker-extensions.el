@@ -146,6 +146,21 @@
                     :to-equal (cons 'emacs-lisp-mode modes))
           (put 'python-pylint 'flycheck-modes modes)
           (expect (flycheck-checker-get 'python-pylint 'modes)
-                  :to-equal modes))))))
+                  :to-equal modes))))
+
+    (it "adds a mode once"
+      (let ((modes (flycheck-checker-get 'python-pylint 'modes)))
+        (unwind-protect
+            (progn
+              (flycheck-add-mode 'python-pylint 'emacs-lisp-mode)
+              (flycheck-add-mode 'python-pylint 'emacs-lisp-mode)
+              (expect (flycheck-checker-get 'python-pylint 'modes)
+                      :to-equal (cons 'emacs-lisp-mode modes)))
+          (put 'python-pylint 'flycheck-modes modes)))))
+
+  (describe "flycheck-find-checker-regexp"
+    (it "finds a checker defined as a generic one"
+      (expect "(flycheck-define-generic-checker 'org-lint"
+              :to-match (format flycheck-find-checker-regexp "org-lint")))))
 
 ;;; test-checker-extensions.el ends here
