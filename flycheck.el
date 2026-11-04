@@ -12106,8 +12106,10 @@ lines, and returns the parsed JSON lines in a list."
               (push (funcall flycheck--json-parser) objects)
             ;; A plain-text line that merely starts with a brace or
             ;; bracket - a compiler's [1 of 2] progress line, say -
-            ;; is not an object; skip just that line
-            (json-parse-error nil)))
+            ;; is not an object; skip just that line.  So is one with
+            ;; bytes that aren't UTF-8 or a lone surrogate escape, which
+            ;; Emacs 30 and later don't count as parse errors.
+            (json-error nil)))
         (forward-line)))
     (nreverse objects)))
 
@@ -20838,7 +20840,7 @@ CHECKER and BUFFER are used to construct the error objects."
                      :buffer buffer
                      :filename filename)))
                 errors))
-    (json-parse-error nil)))
+    (json-error nil)))
 
 (defconst flycheck-scala--diagnostic-rx
   (rx line-start "-- "

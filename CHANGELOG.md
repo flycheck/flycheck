@@ -37,6 +37,7 @@
 
 ### Bugs fixed
 
+- [#2416](https://github.com/flycheck/flycheck/pull/2416): On Emacs 30 and later, a checker reading JSON skips a line with bytes that aren't UTF-8 or a lone surrogate escape instead of failing the whole check.
 - [#2415](https://github.com/flycheck/flycheck/pull/2415): The stylelint checkers handle stylelint's failures:
 - [#2415](https://github.com/flycheck/flycheck/pull/2415): `terraform-tflint` files each issue under the file tflint names, rather than showing every file's issues on the current buffer, and shows tflint's info findings as info rather than errors.
 - [#2415](https://github.com/flycheck/flycheck/pull/2415): `erlang-rebar3` checks files in `test` and `eqc` directories again, under the profile the directory names.

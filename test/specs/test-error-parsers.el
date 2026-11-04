@@ -31,7 +31,18 @@
       ;; GHC prints [1 of 2] progress lines; Bundler prints [DEPRECATED]
       (expect (flycheck-parse-json
                "[1 of 1] Compiling M ( M.hs, nothing )\n{\"a\": 1}\n")
-              :to-equal '(((a . 1))))))
+              :to-equal '(((a . 1)))))
+
+    (it "skips a line with a lone surrogate escape"
+      ;; As Python's json.dumps writes bytes it decoded with surrogateescape
+      (expect (flycheck-parse-json "{\"a\": \"\\udce9\"}\n{\"b\": 2}\n")
+              :to-equal '(((b . 2)))))
+
+    (it "skips a line that isn't UTF-8"
+      ;; A raw byte, as from a tool printing in another encoding
+      (expect (flycheck-parse-json
+               (concat "{\"a\": \"" (string #x3fffff) "\"}\n{\"b\": 2}\n"))
+              :to-equal '(((b . 2))))))
 
   (describe "The SARIF parser"
     (it "parses results with locations and rule metadata"
