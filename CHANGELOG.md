@@ -37,6 +37,7 @@
 
 ### Bugs fixed
 
+- [#2420](https://github.com/flycheck/flycheck/pull/2420): The project scope and the mode line's project counts collapse a diagnostic reported about one file under two spellings of its name, such as through a symlinked directory.
 - [#2420](https://github.com/flycheck/flycheck/pull/2420): Flycheck resolves a buffer's project again after its file moves to another directory, and no longer asks the project backend about every buffer each time it gathers the project's diagnostics.
 - [#2419](https://github.com/flycheck/flycheck/pull/2419): `html-tidy` checks buffers in Emacs 31's `mhtml-ts-mode`.
 - [#2419](https://github.com/flycheck/flycheck/pull/2419): `python-pycompile` reports a `TabError` for inconsistent tabs and spaces.

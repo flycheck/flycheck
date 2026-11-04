@@ -121,6 +121,27 @@ on /private/tmp)."
                                           :checker 'x)))))
         (expect (length (flycheck-test--project-errors "/proj/")) :to-equal 1))
 
+      (it "deduplicates errors about one file spelled two ways"
+        (let* ((real (file-name-as-directory
+                      (file-truename (make-temp-file "flycheck-store" t))))
+               (link (concat (directory-file-name real) "-link/")))
+          (unwind-protect
+              (progn
+                (write-region "" nil (expand-file-name "f.el" real))
+                (make-symbolic-link (directory-file-name real)
+                                    (directory-file-name link))
+                (dolist (spelling (list real link))
+                  (with-current-buffer (flycheck-test--project-buffer
+                                        " sp" real)
+                    (flycheck--project-record-errors
+                     (list (flycheck-error-new-at
+                            1 1 'error "dup" :checker 'x
+                            :filename (expand-file-name "f.el" spelling))))))
+                (expect (length (flycheck-test--project-errors real))
+                        :to-equal 1))
+            (delete-file (directory-file-name link))
+            (delete-directory real t))))
+
       (it "resolves each buffer's project once per directory"
         (let ((buffer (flycheck-test--project-buffer " once" "/proj/")))
           (with-current-buffer buffer

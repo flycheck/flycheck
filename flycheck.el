@@ -5822,11 +5822,15 @@ serves this buffer (see `flycheck-lsp--serving-p')."
   "Return a value uniquely identifying ERR contributed by BUFFER.
 
 Two errors compare `equal' when they describe the same problem in
-the same file -- e.g. one `cargo check' diagnostic reported once
-per open crate file -- so duplicates collapse.  Errors without a
+the same file, e.g. one `cargo check' diagnostic reported once per
+open crate file, so duplicates collapse.  Errors without a
 file name are distinguished by BUFFER, so identical diagnostics
 from different unsaved buffers are not mistaken for duplicates."
-  (list (or (flycheck-error-filename err) buffer)
+  ;; By true name, as buffers and checkers may spell one file differently:
+  ;; through a symlinked directory, say
+  (list (if-let* ((file (flycheck-error-filename err)))
+            (flycheck--memoized-truename file)
+          buffer)
         (flycheck-error-line err)
         (flycheck-error-column err)
         (flycheck-error-end-line err)
