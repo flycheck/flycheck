@@ -13088,6 +13088,11 @@ in once `initialized' turns non-nil (the handshake runs asynchronously)."
 (defvar flycheck-lsp--servers (make-hash-table :test 'equal)
   "Live `flycheck-lsp--server's, keyed by (ROOT . COMMAND).")
 
+(defvar-local flycheck-lsp--open-document nil
+  "The (SERVER KEY URI) of the document the buffer last registered.
+Remembered so the document is closed under the name it was opened with,
+after the buffer's file has been renamed.")
+
 (defvar-local flycheck-lsp--suppress-recheck nil
   "When non-nil, a diagnostics push does not re-trigger a check.
 Bound while a push-triggered check runs, so it cannot recurse.  Buffer-local
@@ -13917,9 +13922,10 @@ handshake's completion re-triggers the check (see
 `flycheck-lsp--on-initialized')."
   ;; `flycheck-lsp-mode' is not the only way a buffer gets a document
   ;; now: `flycheck-lsp-prefer-server' brings one here without the mode.
-  ;; Both of these are the mode's doing otherwise, and a buffer that skips
-  ;; them leaks its document and writes the recheck guard globally.
+  ;; These are the mode's doing otherwise, and a buffer that skips them
+  ;; leaks its document and writes the recheck guard globally.
   (add-hook 'kill-buffer-hook #'flycheck-lsp--close-buffer nil 'local)
+  (add-hook 'change-major-mode-hook #'flycheck-lsp--close-buffer nil 'local)
   (unless (local-variable-p 'flycheck-lsp--suppress-recheck)
     (setq-local flycheck-lsp--suppress-recheck flycheck-lsp--suppress-recheck))
   (condition-case err
@@ -13931,9 +13937,17 @@ handshake's completion re-triggers the check (see
         (if (not server)
             (funcall callback 'finished nil)
           (let* ((buffer (current-buffer))
-                 (doc (flycheck-lsp--document
-                       server (flycheck-lsp--doc-key
-                               uri (flycheck-lsp--server-remote server)))))
+                 (key (flycheck-lsp--doc-key
+                       uri (flycheck-lsp--server-remote server)))
+                 (doc nil))
+            ;; A file renamed since, or a server replaced: the document
+            ;; synced before would otherwise stay open for good
+            (pcase-let ((`(,open-server ,open-key ,_)
+                         flycheck-lsp--open-document))
+              (unless (and (eq open-server server) (equal open-key key))
+                (flycheck-lsp--close-buffer)))
+            (setq doc (flycheck-lsp--document server key))
+            (setq-local flycheck-lsp--open-document (list server key uri))
             (setf (flycheck-lsp--doc-buffer doc) buffer)
             (if (not (flycheck-lsp--server-initialized server))
                 (funcall callback 'finished nil)
@@ -14127,31 +14141,37 @@ stopped leaves its wait with nothing left to finish it."
         (ignore-errors (jsonrpc-shutdown conn t)))
       (flycheck--lsp-server-gone))))
 
-(defun flycheck-lsp--close-buffer ()
-  "Close the current buffer's document on any server holding it.
+(defun flycheck-lsp--close-document (server key uri)
+  "Forget the document KEY on SERVER, closing it there if it was opened.
 
-The server itself is left running -- like Eglot, it is kept for the rest
+URI names the document to SERVER.  A document registered by a workspace
+pull, or while the handshake was still in flight, never was opened, and
+the server is not told to close it."
+  (when-let* ((doc (gethash key (flycheck-lsp--server-documents server))))
+    (remhash key (flycheck-lsp--server-documents server))
+    (when (and (flycheck-lsp--doc-version doc)
+               (flycheck-lsp--server-live-p server))
+      (ignore-errors
+        (flycheck-lsp--notify server 'textDocument/didClose
+                              (list :textDocument (list :uri uri)))))))
+
+(defun flycheck-lsp--close-buffer ()
+  "Close the document the current buffer last registered.
+
+Only while the document is still the buffer's: an indirect clone
+copies the record from its base buffer, and a buffer visiting a file
+another buffer was renamed away from takes that one's document over.
+
+The server itself is left running: like Eglot, it is kept for the rest
 of the session and torn down only when Emacs exits (see
-`flycheck-lsp--shutdown-all') -- so reopening or checking another of its
+`flycheck-lsp--shutdown-all'), so reopening or checking another of its
 files does not pay to restart it."
-  (when-let* ((uri (flycheck-lsp--buffer-uri)))
-    ;; A local buffer's host is nil, which is a value, not an absence.
-    (let* ((remote (file-remote-p buffer-file-name))
-           (key (flycheck-lsp--doc-key uri remote)))
-      (maphash
-     (lambda (_server-key server)
-       ;; The key carries this buffer's host, so a server elsewhere
-       ;; holding the same path for another buffer does not match and
-       ;; keeps its document.
-       (progn
-         (when (gethash key (flycheck-lsp--server-documents server))
-           (remhash key (flycheck-lsp--server-documents server))
-           (when (flycheck-lsp--server-live-p server)
-             (ignore-errors
-               (flycheck-lsp--notify server 'textDocument/didClose
-                                       (list :textDocument
-                                             (list :uri uri))))))))
-       flycheck-lsp--servers))))
+  (pcase-let ((`(,server ,key ,uri) flycheck-lsp--open-document))
+    (setq flycheck-lsp--open-document nil)
+    (when-let* ((server)
+                (doc (gethash key (flycheck-lsp--server-documents server)))
+                ((eq (flycheck-lsp--doc-buffer doc) (current-buffer))))
+      (flycheck-lsp--close-document server key uri))))
 
 (defun flycheck-lsp--forget-server (key server)
   "Drop SERVER, registered under KEY, and shut it down.
@@ -14336,8 +14356,10 @@ For a full language server, prefer Eglot and `flycheck-eglot-mode'."
   (if flycheck-lsp-mode
       (progn
         (add-hook 'kill-buffer-hook #'flycheck-lsp--close-buffer nil t)
+        (add-hook 'change-major-mode-hook #'flycheck-lsp--close-buffer nil t)
         (flycheck-lsp--enable))
     (remove-hook 'kill-buffer-hook #'flycheck-lsp--close-buffer t)
+    (remove-hook 'change-major-mode-hook #'flycheck-lsp--close-buffer t)
     (flycheck-lsp--disable)))
 
 (defun flycheck-lsp--mode-on-safe ()

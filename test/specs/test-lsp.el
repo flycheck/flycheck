@@ -659,7 +659,98 @@
             (expect (flycheck-lsp--doc-buffer
                      (gethash (expand-file-name "/x/a.rb")
                               (flycheck-lsp--server-documents server)))
-                    :to-be (current-buffer))))))
+                    :to-be (current-buffer)))))
+
+      (describe "closing the document"
+        ;; What the buffer told SERVER while BODY ran, as (METHOD . URI)
+        (cl-flet ((sent-to (server body)
+                    (let (sent)
+                      (cl-letf (((symbol-function 'flycheck-lsp--ensure-server)
+                                 (lambda (&rest _) server))
+                                ((symbol-function 'jsonrpc-running-p) #'always)
+                                ((symbol-function 'jsonrpc-notify)
+                                 (lambda (_conn method params)
+                                   (push (cons method
+                                               (plist-get
+                                                (plist-get params :textDocument)
+                                                :uri))
+                                         sent))))
+                        (funcall body))
+                      (nreverse sent)))
+                  (check ()
+                    (flycheck-lsp--start 'flycheck-lsp #'ignore)))
+
+          (it "closes it under its old name once the file is renamed"
+            (flycheck-buttercup-with-temp-buffer
+              (setq-local major-mode 'ruby-mode)
+              (let ((buffer-file-name "/x/a.rb")
+                    (flycheck-lsp-servers '((ruby-mode "rubocop" "--lsp")))
+                    (server (flycheck-lsp--server-create :connection 'conn
+                                                         :initialized t))
+                    (a (flycheck-lsp--path-to-uri "/x/a.rb"))
+                    (b (flycheck-lsp--path-to-uri "/x/b.rb")))
+                (expect (sent-to server
+                                 (lambda ()
+                                   (check)
+                                   (setq buffer-file-name "/x/b.rb")
+                                   (check)
+                                   (flycheck-lsp--close-buffer)))
+                        :to-equal `((textDocument/didOpen . ,a)
+                                    (textDocument/didClose . ,a)
+                                    (textDocument/didOpen . ,b)
+                                    (textDocument/didClose . ,b)))
+                (expect (hash-table-count
+                         (flycheck-lsp--server-documents server))
+                        :to-equal 0))))
+
+          (it "closes it when the major mode changes"
+            (flycheck-buttercup-with-temp-buffer
+              (setq-local major-mode 'ruby-mode)
+              (let ((buffer-file-name "/x/a.rb")
+                    (flycheck-lsp-servers '((ruby-mode "rubocop" "--lsp")))
+                    (server (flycheck-lsp--server-create :connection 'conn
+                                                         :initialized t)))
+                (expect (mapcar #'car (sent-to server
+                                               (lambda ()
+                                                 (check)
+                                                 (fundamental-mode))))
+                        :to-equal '(textDocument/didOpen
+                                    textDocument/didClose)))))
+
+          (it "leaves the document to its base when an indirect clone goes"
+            ;; The clone copies the base buffer's record
+            (flycheck-buttercup-with-temp-buffer
+              (setq-local major-mode 'ruby-mode)
+              (let ((buffer-file-name "/x/a.rb")
+                    (flycheck-lsp-servers '((ruby-mode "rubocop" "--lsp")))
+                    (server (flycheck-lsp--server-create :connection 'conn
+                                                         :initialized t)))
+                (expect (mapcar #'car
+                                (sent-to server
+                                         (lambda ()
+                                           (check)
+                                           (kill-buffer
+                                            (clone-indirect-buffer nil nil)))))
+                        :to-equal '(textDocument/didOpen))
+                (expect (hash-table-count
+                         (flycheck-lsp--server-documents server))
+                        :to-equal 1))))
+
+          (it "tells the server to close only a document it opened"
+            ;; Registered while the handshake was still in flight
+            (flycheck-buttercup-with-temp-buffer
+              (setq-local major-mode 'ruby-mode)
+              (let ((buffer-file-name "/x/a.rb")
+                    (flycheck-lsp-servers '((ruby-mode "rubocop" "--lsp")))
+                    (server (flycheck-lsp--server-create :connection 'conn)))
+                (expect (sent-to server
+                                 (lambda ()
+                                   (check)
+                                   (flycheck-lsp--close-buffer)))
+                        :to-equal nil)
+                (expect (hash-table-count
+                         (flycheck-lsp--server-documents server))
+                        :to-equal 0)))))))
 
     (describe "flycheck-lsp--on-initialized"
       (it "stores caps, marks the server ready, and rechecks waiting buffers"
@@ -1688,34 +1779,24 @@ holding its document"
                   :to-equal '("/ssh:host:/srv/app/a.rb"))
           (expect doc :to-be-truthy)))
 
-      (it "closes a document only on its own host's server"
+      (it "closes a document only on the server it was synced to"
         ;; Two hosts can hold the same path.  Closing a buffer on one
         ;; must not tell the other to drop a file it is still serving.
-        (let ((flycheck-lsp--servers (make-hash-table :test 'equal))
-              (local (flycheck-lsp--server-create
-                      :root "/srv/app/" :command '("srv")))
-              (remote (flycheck-lsp--server-create
-                       :root "/ssh:host:/srv/app/" :command '("srv"))))
-          (flycheck-lsp--document local (flycheck-lsp--doc-key
-                                         "file:///srv/app/a.rb"))
-          (flycheck-lsp--document remote (flycheck-lsp--doc-key
-                                          "file:///srv/app/a.rb" "/ssh:host:"))
-          (puthash '("/srv/app/" "srv") local flycheck-lsp--servers)
-          (puthash '("/ssh:host:/srv/app/" "srv") remote flycheck-lsp--servers)
-          ;; Closing the local buffer leaves the remote server alone.
+        (let* ((local (flycheck-lsp--server-create
+                       :root "/srv/app/" :command '("srv")))
+               (remote (flycheck-lsp--server-create
+                        :root "/ssh:host:/srv/app/" :command '("srv")))
+               (uri "file:///srv/app/a.rb")
+               (remote-key (flycheck-lsp--doc-key uri "/ssh:host:")))
           (flycheck-buttercup-with-temp-buffer
-            (setq buffer-file-name "/srv/app/a.rb")
-            (flycheck-lsp--close-buffer))
-          (expect (hash-table-count (flycheck-lsp--server-documents local))
-                  :to-equal 0)
-          (expect (hash-table-count (flycheck-lsp--server-documents remote))
-                  :to-equal 1)
-          ;; And the other way round: put the local one back, then close
-          ;; the remote buffer and check only the remote server loses it.
-          (flycheck-lsp--document local (flycheck-lsp--doc-key
-                                         "file:///srv/app/a.rb"))
-          (flycheck-buttercup-with-temp-buffer
-            (setq buffer-file-name "/ssh:host:/srv/app/a.rb")
+            (setf (flycheck-lsp--doc-buffer
+                   (flycheck-lsp--document local (flycheck-lsp--doc-key uri)))
+                  (current-buffer)
+                  (flycheck-lsp--doc-buffer
+                   (flycheck-lsp--document remote remote-key))
+                  (current-buffer))
+            (setq-local flycheck-lsp--open-document
+                        (list remote remote-key uri))
             (flycheck-lsp--close-buffer))
           (expect (hash-table-count (flycheck-lsp--server-documents remote))
                   :to-equal 0)
