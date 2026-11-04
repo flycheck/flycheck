@@ -144,7 +144,8 @@ any of the following columns:
 * Message and checker
 
 Click twice or press :kbd:`S` repeatedly to flip the sort order from ascending
-to descending or vice versa.
+to descending or vice versa.  A grouped list keeps its groups in order and
+can't be sorted by a column.
 
 Tune error list display
 =======================

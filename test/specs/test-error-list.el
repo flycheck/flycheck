@@ -474,6 +474,50 @@ is when asked, so no earlier check has to vouch for it."
           (expect (flycheck-error-list-entry-level-< header err) :to-be nil)
           (expect (flycheck-error-list-entry-level-< err header) :to-be nil)))
 
+      (it "sorts by level the most severe first, then by location"
+        (let ((late (list (flycheck-error-new-at 5 1 'warning "w") nil))
+              (early (list (flycheck-error-new-at 2 1 'warning "w") nil))
+              (worse (list (flycheck-error-new-at 9 1 'error "e") nil)))
+          (expect (flycheck-error-list-entry-level-< early late) :to-be-truthy)
+          (expect (flycheck-error-list-entry-level-< late early) :not :to-be-truthy)
+          (expect (flycheck-error-list-entry-level-< worse early) :to-be-truthy)))
+
+      (it "keeps levels of one severity apart"
+        (unwind-protect
+            (progn
+              (flycheck-define-error-level 'test-warning
+                :severity (flycheck-error-level-severity 'warning)
+                :overlay-category 'flycheck-warning-overlay)
+              (let ((plain (list (flycheck-error-new-at 1 1 'warning "w") nil))
+                    (other (list (flycheck-error-new-at 5 1 'test-warning "t")
+                                 nil)))
+                (expect (flycheck-error-list-entry-level-< other plain)
+                        :to-be-truthy)
+                (expect (flycheck-error-list-entry-level-< plain other)
+                        :not :to-be-truthy)))
+          (setplist 'test-warning nil)))
+
+      (it "drops a sort key the grouping leaves without a sorter"
+        (flycheck/with-error-list-buffer
+          (setq flycheck-error-list-source-buffer source
+                tabulated-list-sort-key '("Line" . t)
+                flycheck-error-list-group-by '(file))
+          (flycheck-error-list--update-format)
+          (expect tabulated-list-sort-key :to-be nil)
+          (expect (tabulated-list-print) :not :to-throw)))
+
+      (it "can't be sorted by a column, which would scatter the groups"
+        (flycheck/with-error-list-buffer
+          (setq flycheck-error-list-source-buffer source)
+          (flycheck-error-list-group-by-file)
+          (flycheck-error-list--update-format)
+          (expect (seq-filter (lambda (column) (nth 2 column))
+                              tabulated-list-format)
+                  :to-be nil)
+          (flycheck-error-list-group-by-none)
+          (flycheck-error-list--update-format)
+          (expect (nth 2 (aref tabulated-list-format 1)) :to-be-truthy)))
+
       (describe "next-error navigation"
         (before-each
           (spy-on 'flycheck-error-list-goto-error))
