@@ -271,7 +271,26 @@
       (expect (flycheck-error-format-message-and-id
                (flycheck-error-new-at 3 5 'warning "Hello world"
                                       :id "Foo"))
-              :to-equal "Hello world [Foo]")))
+              :to-equal "Hello world [Foo]"))
+
+    (it "doesn't take the buffer's file under another name for another file"
+      (let* ((dir (file-name-as-directory (make-temp-file "flycheck-fmt" t)))
+             (link (concat (directory-file-name dir) "-link/"))
+             (file (expand-file-name "a.el" dir)))
+        (unwind-protect
+            (progn
+              (write-region "" nil file)
+              (make-symbolic-link dir (directory-file-name link))
+              (with-temp-buffer
+                (setq buffer-file-name file)
+                (expect (flycheck-error-format-message-and-id
+                         (flycheck-error-new-at 1 1 'warning "m"
+                                                :filename
+                                                (expand-file-name "a.el" link)))
+                        :to-equal "m")
+                (setq buffer-file-name nil)))
+          (delete-file (directory-file-name link))
+          (delete-directory dir t)))))
 
   (describe "flycheck-error-format"
     (it "formats a warning"
