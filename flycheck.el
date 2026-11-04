@@ -10748,6 +10748,14 @@ found or exits with a non-zero status."
   "Get the command arguments of CHECKER."
   (cdr (flycheck-checker-get checker 'command)))
 
+(defun flycheck--null-device ()
+  "Return the null device of the host `default-directory' is on.
+
+Taken in a temporary buffer: on Emacs 28 and 29, the function
+`null-device' applies connection-local variables to the current buffer,
+which runs its local variables hooks."
+  (with-temp-buffer (null-device)))
+
 (defun flycheck-substitute-argument (arg checker)
   "Substitute ARG for CHECKER.
 
@@ -10802,8 +10810,8 @@ STRING
      `null-device' first.
 
 symbol `null-device'
-     Return the value of variable `null-device', i.e. the system
-     null device.
+     Return the system null device of the host the syntax checker
+     runs on, as the function `null-device' names it.
 
      Use this option to ignore the output of a syntax checker.
      If the syntax checker cannot handle the null device, or
@@ -10899,7 +10907,7 @@ are substituted within the body of cells!"
      (let ((directory (flycheck-temp-dir-system)))
        (list (file-local-name
               (make-temp-name (expand-file-name "flycheck" directory))))))
-    (`null-device (list null-device))
+    (`null-device (list (flycheck--null-device)))
     (`(config-file ,option-name ,file-name-var)
      (when-let* ((value (symbol-value file-name-var))
                  (file-name (flycheck-locate-config-file value checker)))

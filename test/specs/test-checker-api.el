@@ -157,6 +157,13 @@
       (expect (flycheck-substitute-argument 'null-device 'emacs-lisp)
               :to-equal (list null-device)))
 
+    (it "null-device of a remote host"
+      ;; Windows Emacs checking a POSIX host over TRAMP
+      (let ((null-device "NUL")
+            (default-directory "/ssh:example.invalid:/home/me/"))
+        (expect (flycheck-substitute-argument 'null-device 'emacs-lisp)
+                :to-equal '("/dev/null"))))
+
     (it "config-file"
       (let* ((flycheck-test-config-var "substitute-dummy")
              (config-file (flycheck-buttercup-resource-filename "substitute-dummy"))
