@@ -329,6 +329,40 @@
         (flycheck-buffer-automatically)
         (expect (flycheck-deferred-check-p) :to-be-truthy))))
 
+  (describe "flycheck-buffer"
+
+    (it "queues a check requested from Lisp while one runs"
+      (flycheck-buttercup-with-temp-buffer
+        (flycheck-mode)
+        (let ((flycheck-current-syntax-check 'running))
+          (flycheck-buffer)
+          (expect (flycheck-deferred-check-p) :to-be-truthy))))
+
+    (it "starts the queued check once the running one finishes"
+      (let ((starts 0) finish)
+        (flycheck-define-generic-checker 'test-queued
+          "A fake checker that finishes later, like a process."
+          :start (lambda (_checker callback)
+                   (setq starts (1+ starts) finish callback))
+          :modes '(text-mode))
+        (let ((buffer (get-buffer-create "flycheck-queued-check"))
+              (flycheck-checkers '(test-queued)))
+          (unwind-protect
+              (save-window-excursion
+                ;; Shown in a window, or the queued check would wait for one
+                (switch-to-buffer buffer)
+                (text-mode)
+                (setq default-directory temporary-file-directory)
+                (let ((flycheck-check-syntax-automatically nil))
+                  (flycheck-mode))
+                (flycheck-buffer)
+                (flycheck-buffer)
+                (expect starts :to-equal 1)
+                (funcall finish 'finished nil)
+                (expect starts :to-equal 2))
+            (kill-buffer buffer)
+            (put 'test-queued 'flycheck-generic-checker-version nil))))))
+
   (describe "Deferred syntax checking"
 
     (it "flycheck-deferred-check-p returns nil"
