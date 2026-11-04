@@ -1612,6 +1612,14 @@ otherwise."
   (when (lookup-key global-map [menu-bar tools])
     (easy-menu-remove-item nil '("Tools") (cadr flycheck-mode-menu-map)))
   (remove-hook 'kill-emacs-hook #'flycheck-global-teardown)
+  ;; The bridges hook into Eglot and run servers that would otherwise
+  ;; call into functions about to go
+  (dolist (buffer (buffer-list))
+    (with-current-buffer buffer
+      (when (bound-and-true-p flycheck-eglot-mode)
+        (flycheck-eglot-mode -1))))
+  (advice-remove 'flymake-diagnostics #'flycheck-eglot--flymake-diagnostics)
+  (flycheck-lsp--shutdown-all)
   (advice-remove 'eldoc-display-in-buffer #'flycheck--eldoc-suppress-doc-window)
   (advice-remove 'eldoc-print-current-symbol-info
                  #'flycheck--eldoc-note-request)
@@ -1620,7 +1628,10 @@ otherwise."
   (remove-variable-watcher 'flymake-list-only-diagnostics
                            #'flycheck--project-diagnostics-changed)
   (setq find-function-regexp-alist
-        (assq-delete-all 'flycheck-checker find-function-regexp-alist)))
+        (assq-delete-all 'flycheck-checker find-function-regexp-alist))
+  ;; Leave the rest of the unloading to `unload-feature', which a non-nil
+  ;; value would tell it was done here
+  nil)
 
 ;;;###autoload
 (defun flycheck-manual ()
