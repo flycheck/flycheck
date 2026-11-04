@@ -56,6 +56,22 @@
         (expect (flycheck-checker-substituted-arguments 'erlang)
                 :to-contain "-DDEBUG=1"))))
 
+  (describe "flycheck-erlang-rebar3-get-profile"
+    (it "uses the profile a test or eqc directory names"
+      (dolist (dir '("test" "eqc"))
+        (with-temp-buffer
+          (let ((buffer-file-name (format "/project/%s/foo_SUITE.erl" dir))
+                (flycheck-erlang-rebar3-profile nil))
+            (expect (flycheck-erlang-rebar3-get-profile) :to-equal dir)))))
+
+    (it "uses the default profile anywhere else"
+      (dolist (dir '("src" "test.old"))
+        (with-temp-buffer
+          (let ((buffer-file-name (format "/project/%s/foo.erl" dir))
+                (flycheck-erlang-rebar3-profile nil))
+            (expect (flycheck-erlang-rebar3-get-profile)
+                    :to-equal "default"))))))
+
   (describe "reading the tool's output"
     ;; Read from output recorded earlier, so this runs whether or
     ;; not the tool is installed here
