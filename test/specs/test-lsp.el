@@ -447,7 +447,17 @@
             ;; even once the program looks absent, the cached command stands
             (setq flycheck-executable-find (lambda (_p) nil))
             (expect (flycheck-lsp--available-command 'ruby-mode)
-                    :to-equal '("rubocop" "--lsp"))))))
+                    :to-equal '("rubocop" "--lsp")))))
+
+      (it "takes a change to flycheck-lsp-servers"
+        (flycheck-buttercup-with-temp-buffer
+          (setq-local major-mode 'ruby-mode)
+          (let ((flycheck-lsp-servers '((ruby-mode "rubocop" "--lsp")))
+                (flycheck-executable-find (lambda (p) (concat "/usr/bin/" p))))
+            (flycheck-lsp--available-command 'ruby-mode)
+            (setq flycheck-lsp-servers '((ruby-mode "ruby-lsp")))
+            (expect (flycheck-lsp--available-command 'ruby-mode)
+                    :to-equal '("ruby-lsp"))))))
 
     (describe "the default flycheck-lsp-servers"
       (it "maps every mode to a non-empty command of strings"
