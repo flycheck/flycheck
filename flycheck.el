@@ -19621,8 +19621,15 @@ See URL `https://github.com/microsoft/pyright'."
           (const :tag "Write to the working directory" nil)
           (const :tag "Never write .mypy_cache directories" null-device)
           (string :tag "Path"))
-  :safe #'string-or-null-p
+  :safe (lambda (value) (or (string-or-null-p value) (eq value 'null-device)))
   :package-version '(flycheck . "32"))
+
+(defun flycheck-python-mypy--cache-dir (value)
+  "Return the directory VALUE of `flycheck-python-mypy-cache-dir' names.
+The symbol `null-device' names the null device of the host mypy runs
+on, which mypy takes for writing no cache at all.  In lower case, as
+mypy compares it with Python's, which is \"nul\" on Windows."
+  (if (eq value 'null-device) (downcase (flycheck--null-device)) value))
 
 (flycheck-def-option-var flycheck-python-mypy-python-executable nil python-mypy
   "Python executable to find the installed PEP 561 packages."
@@ -19680,7 +19687,8 @@ See URL `https://mypy-lang.org/'."
   :command ("mypy"
             "--output" "json"
             (config-file "--config-file" flycheck-python-mypy-config)
-            (option "--cache-dir" flycheck-python-mypy-cache-dir)
+            (option "--cache-dir" flycheck-python-mypy-cache-dir nil
+                    flycheck-python-mypy--cache-dir)
             (option "--python-executable" flycheck-python-mypy-python-executable)
             (eval flycheck-python-mypy-args)
             source-original)

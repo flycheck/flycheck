@@ -92,7 +92,15 @@
             (flycheck-python-mypy-args '("--strict" "--ignore-missing-imports")))
         (let ((args (flycheck-checker-substituted-arguments 'python-mypy)))
           (expect args :to-contain "--strict")
-          (expect args :to-contain "--ignore-missing-imports")))))
+          (expect args :to-contain "--ignore-missing-imports"))))
+
+    (it "writes no cache with a cache-dir of null-device"
+      (let ((flycheck-python-mypy-cache-dir 'null-device)
+            (null-device "NUL"))
+        (expect (cadr (member "--cache-dir"
+                              (flycheck-checker-substituted-arguments
+                               'python-mypy)))
+                :to-equal "nul"))))
 
   (describe "the python-flake8 checker command"
     (it "appends flycheck-flake8-args before the stdin marker"
