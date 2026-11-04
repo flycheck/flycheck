@@ -332,9 +332,18 @@ buffer\='s check from one an earlier spec left behind."
                 (let ((process (flycheck-test-checker-process)))
                   (expect process :to-be-truthy)
                   (expect (process-get process 'remote-pid) :to-be-truthy))
-                (spy-on 'interrupt-process :and-call-through)
-                (flycheck-stop)
-                (expect 'interrupt-process :to-have-been-called))))
+                ;; Noted before the call, not by a spy: a connection still
+                ;; busy can hold the interrupt past the second Flycheck
+                ;; gives it, and a spy records no call `with-timeout'
+                ;; throws out of
+                (let ((interrupt (symbol-function 'interrupt-process))
+                      (interrupted nil))
+                  (spy-on 'interrupt-process :and-call-fake
+                          (lambda (&rest args)
+                            (setq interrupted t)
+                            (apply interrupt args)))
+                  (flycheck-stop)
+                  (expect interrupted :to-be-truthy)))))
         (when (buffer-live-p buffer) (kill-buffer buffer))
         (ignore-errors (delete-file local)))))
 
