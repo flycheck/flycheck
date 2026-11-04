@@ -20648,6 +20648,27 @@ versions inferior to 1.25)."
   (let-alist (flycheck-rust-cargo-metadata)
     .workspace_root))
 
+(defun flycheck-rust-cargo-error-filter (errors)
+  "Filter ERRORS from Cargo as `flycheck-rust-error-filter' does.
+
+Cargo names files relative to the root of the workspace, which in a
+workspace member is not the directory it runs in, so expand them there.
+Leave them be when Cargo can't tell the root."
+  (let* ((errors (flycheck-rust-error-filter errors))
+         ;; Asking Cargo takes a process, a remote one over TRAMP, so only
+         ;; when a name needs it.  Some errors are crate level and do not
+         ;; have a filename.
+         (root (and (seq-some (lambda (err)
+                                (when-let* ((file (flycheck-error-filename err)))
+                                  (not (file-name-absolute-p file))))
+                              errors)
+                    (ignore-errors (flycheck-rust-cargo-workspace-root)))))
+    (when root
+      (dolist (err errors)
+        (when-let* ((file (flycheck-error-filename err)))
+          (setf (flycheck-error-filename err) (expand-file-name file root)))))
+    errors))
+
 (defun flycheck-rust-cargo-has-command-p (command)
   "Whether Cargo has COMMAND in its list of commands.
 
@@ -20691,18 +20712,7 @@ This syntax checker requires Rust 1.17 or newer.  See URL
             (eval flycheck-cargo-check-args)
             "--message-format=json")
   :error-parser flycheck-parse-cargo-rustc
-  :error-filter (lambda (errors)
-                  ;; In Rust 1.25+, filenames are relative to the workspace
-                  ;; root.
-                  (let ((root (flycheck-rust-cargo-workspace-root)))
-                    (seq-do (lambda (err)
-                              ;; Some errors are crate level and do not have a
-                              ;; filename
-                              (when (flycheck-error-filename err)
-                                (setf (flycheck-error-filename err)
-                                      (expand-file-name
-                                       (flycheck-error-filename err) root))))
-                            (flycheck-rust-error-filter errors))))
+  :error-filter flycheck-rust-cargo-error-filter
   :error-explainer flycheck-rust-error-explainer
   :modes (rust-mode rust-ts-mode)
   :predicate flycheck-buffer-saved-p
@@ -20776,7 +20786,7 @@ See URL `https://github.com/rust-lang/rust-clippy'."
             "--message-format=json"
             (eval flycheck-rust-clippy-args))
   :error-parser flycheck-parse-cargo-rustc
-  :error-filter flycheck-rust-error-filter
+  :error-filter flycheck-rust-cargo-error-filter
   :error-explainer flycheck-rust-error-explainer
   :modes (rust-mode rust-ts-mode)
   :predicate flycheck-buffer-saved-p
