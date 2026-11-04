@@ -37,6 +37,7 @@
 
 ### Bugs fixed
 
+- [#2422](https://github.com/flycheck/flycheck/pull/2422): With `flycheck-lsp-prefer-server`, the checker the server stands in for no longer runs right after it as well, once a buffer in the same mode has turned `flycheck-lsp-mode` on.
 - [#2422](https://github.com/flycheck/flycheck/pull/2422): With `flycheck-lsp-exclusive` or `flycheck-eglot-exclusive` off, the command checkers keep running behind the LSP bridges in every major mode, not only in the one a bridge was turned on in last.
 - [#2422](https://github.com/flycheck/flycheck/pull/2422): Turning `flycheck-eglot-mode` off in a buffer Eglot still manages turns Flymake back on, instead of leaving the buffer without Eglot's diagnostics.
 - [#2422](https://github.com/flycheck/flycheck/pull/2422): Turning `flycheck-lsp-mode` off in a buffer `flycheck-lsp-prefer-server` also serves no longer leaves the buffer pinned to `flycheck-lsp`, which stopped every check there once the preference was dropped too.

@@ -3630,7 +3630,11 @@ short: the checkers following it are considered in its place, so
 disabling one link keeps the rest of the chain reachable.  The
 unusable checker's error-level condition still gates the descent,
 since a chain that would not continue through it usable does not
-continue through it unusable either."
+continue through it unusable either.
+
+After `flycheck-lsp', a checker its server stands in for here, through
+`flycheck-lsp-prefer-server', counts as one that cannot run: the server
+has just reported in its place."
   (let ((visited (list checker))
         (queue (flycheck-checker-get checker 'next-checkers))
         (found nil))
@@ -3641,7 +3645,9 @@ continue through it unusable either."
                    (flycheck--next-checker-level-passes-p entry))
           (push next visited)
           (if (and (flycheck-registered-checker-p next)
-                   (flycheck-may-use-checker next))
+                   (flycheck-may-use-checker next)
+                   (not (and (eq checker 'flycheck-lsp)
+                             (flycheck-lsp--superseding-server next))))
               (setq found next)
             (setq queue (append (flycheck-checker-get next 'next-checkers)
                                 queue))))))

@@ -685,6 +685,24 @@ TEST=1
         (setf (flycheck-checker-get 'flycheck-lsp 'next-checkers) saved-next
               (flycheck-checker-get 'flycheck-lsp 'modes) saved-modes))))
 
+  (it "does not chain the server to the checker it stands in for"
+    ;; Another buffer's `flycheck-lsp-mode' put RuboCop in the chain
+    (let ((saved-next (flycheck-checker-get 'flycheck-lsp 'next-checkers))
+          (flycheck-lsp-prefer-server t)
+          (flycheck-lsp-servers '((ruby-mode "rubocop" "--lsp")))
+          (flycheck-lsp-checker-servers '((ruby-rubocop "rubocop" "--lsp")))
+          (flycheck-executable-find (lambda (program) program)))
+      (unwind-protect
+          (with-temp-buffer
+            (setq-local major-mode 'ruby-mode)
+            (setf (flycheck-checker-get 'flycheck-lsp 'next-checkers)
+                  '(ruby-rubocop))
+            (spy-on 'flycheck-may-use-checker :and-return-value t)
+            (expect (flycheck-get-next-checker-for-buffer 'flycheck-lsp)
+                    :not :to-be 'ruby-rubocop))
+        (setf (flycheck-checker-get 'flycheck-lsp 'next-checkers)
+              saved-next))))
+
   (it "does not pile up duplicate entries when a mode re-enables"
     (test-bridges/with-both
      '(eglot lsp eglot lsp)
