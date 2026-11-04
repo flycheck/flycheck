@@ -1823,8 +1823,10 @@ Return nil if the CHECKER does not write temporary files."
      ;; `flycheck-temp-file-system' creates the file with
      ;; `make-nearby-temp-file', i.e. on the host of `default-directory',
      ;; so probe that host's temporary directory, not the local one.
-     ((memq 'source args) (temporary-file-directory))
-     ((memq 'source-inplace args)
+     ;; `assq' finds the forms with a suffix, `(source SUFFIX)'.
+     ((or (memq 'source args) (assq 'source args))
+      (temporary-file-directory))
+     ((or (memq 'source-inplace args) (assq 'source-inplace args))
       (if buffer-file-name (file-name-directory buffer-file-name)
         temporary-file-directory))
      (t nil))))
@@ -1832,9 +1834,9 @@ Return nil if the CHECKER does not write temporary files."
 (defun flycheck-temp-files-writable-p (checker)
   "Whether CHECKER can write temporary files.
 
-If CHECKER has `source' or `source-inplace' in its `:command',
-return whether flycheck has the permissions to create the
-respective temporary files.
+If CHECKER has `source' or `source-inplace' in its `:command', with
+or without a suffix, return whether flycheck has the permissions to
+create the respective temporary files.
 
 Return t if CHECKER does not use temporary files."
   (let ((dir (flycheck-temp-directory checker)))
@@ -11548,9 +11550,12 @@ use with `compilation-error-regexp-alist'."
 (defun flycheck--substitute-shell-command-argument (arg checker)
   "Substitute ARG for CHECKER.
 
-Like `flycheck-substitute-argument', except for source,
-source-inplace, and source-original."
-  (if (memq arg '(source source-inplace source-original))
+Like `flycheck-substitute-argument', except for source-original and
+source and source-inplace, the last two with or without a suffix, which
+all stand for the buffer's own file: a temporary copy would never be
+deleted."
+  (if (or (memq arg '(source source-inplace source-original))
+          (memq (car-safe arg) '(source source-inplace)))
       ;; The command runs on the host of `default-directory', so strip any
       ;; remote prefix from the file name.
       (list (file-local-name buffer-file-name))
