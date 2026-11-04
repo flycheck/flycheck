@@ -72,7 +72,48 @@
         (let ((hack-local-variables-hook))
           (revert-buffer 'ignore-auto 'no-confirm))
         (expect flycheck-current-errors :not :to-be-truthy)
-        (expect (flycheck-deferred-check-p) :not :to-be-truthy))))
+        (expect (flycheck-deferred-check-p) :not :to-be-truthy)))
+
+    (describe "a revert that preserves modes"
+
+      (it "checks per flycheck-check-syntax-automatically"
+        (flycheck-buttercup-with-resource-buffer "automatic-check-dummy.el"
+          (emacs-lisp-mode)
+          (let ((flycheck-check-syntax-automatically nil))
+            (flycheck-mode)
+            (spy-on 'flycheck-buffer)
+            (revert-buffer 'ignore-auto 'no-confirm 'preserve-modes)
+            (expect 'flycheck-buffer :not :to-have-been-called)
+            (expect (flycheck-deferred-check-p) :not :to-be-truthy))))
+
+      (it "defers the check of a buffer no window shows"
+        (flycheck-buttercup-with-resource-buffer "automatic-check-dummy.el"
+          (emacs-lisp-mode)
+          (flycheck-mode)
+          (spy-on 'flycheck-buffer)
+          (revert-buffer 'ignore-auto 'no-confirm 'preserve-modes)
+          (expect 'flycheck-buffer :not :to-have-been-called)
+          (expect (flycheck-deferred-check-p) :to-be-truthy)))
+
+      (it "doesn't take the revert for an edit"
+        (flycheck-buttercup-with-resource-buffer "automatic-check-dummy.el"
+          (emacs-lisp-mode)
+          (let ((flycheck-check-syntax-automatically '(idle-change)))
+            (flycheck-mode)
+            (goto-char (point-min))
+            (insert "foo")
+            (flycheck--clear-idle-trigger-timer)
+            (revert-buffer 'ignore-auto 'no-confirm 'preserve-modes)
+            (expect flycheck--idle-trigger-timer :not :to-be-truthy))))
+
+      (it "keeps the global hooks in the last Flycheck buffer"
+        (flycheck-buttercup-with-resource-buffer "automatic-check-dummy.el"
+          (emacs-lisp-mode)
+          (flycheck-mode)
+          (spy-on 'flycheck-teardown :and-call-through)
+          (revert-buffer 'ignore-auto 'no-confirm 'preserve-modes)
+          (expect 'flycheck-teardown
+                  :to-have-been-called-with 'ignore-global)))))
 
   (describe "the context menu"
     (it "offers the Flycheck menu while the mode is on"
