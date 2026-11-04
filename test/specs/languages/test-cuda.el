@@ -14,6 +14,14 @@
     (flycheck-buttercup-should-syntax-check
      "language/cuda/syntax-warning.cu" 'cuda-mode
      '(3 0 warning "variable \"b\" was set but never used"
-         :checker cuda))))
+         :checker cuda)))
+
+  (describe "the cuda-nvcc command"
+    (it "writes its object file to the platform's null device"
+      (flycheck-buttercup-with-temp-buffer
+        (let* ((null-device "NUL")
+               (args (flycheck-checker-substituted-arguments 'cuda-nvcc)))
+          (expect (cadr (member "--output-file" args))
+                  :to-equal "NUL"))))))
 
 ;;; test-cuda.el ends here

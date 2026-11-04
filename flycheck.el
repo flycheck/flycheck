@@ -15936,7 +15936,8 @@ __device__ lambda functions."
 See URL `https://developer.nvidia.com/cuda-llvm-compiler'."
   :command ("nvcc"
             "-c" ;; Compile Only
-            "--output-file" "/dev/null" ;; avoid creating output .o
+            ;; avoid creating output .o, on Windows too
+            "--output-file" null-device
             "--x=cu" ;; explicitly specify it's a CUDA language file
             "-rdc=true" ;; Allow linking with external cuda funcions
             (option "-std=" flycheck-cuda-language-standard concat)
