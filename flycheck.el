@@ -8638,7 +8638,8 @@ related location; see `flycheck-visit-related-location'."
                               (mapcar #'car candidates) (caar candidates))
                              candidates)))
              (car relations))))
-      (flycheck-goto-related-location location (flycheck-error-filename error)))))
+      (flycheck-goto-related-location
+       location (flycheck--related-location-default error)))))
 
 (defun flycheck-error-list-apply-fix (&optional pos)
   "Apply the suggested fix of the error at POS in the error list.
@@ -10101,19 +10102,23 @@ candidates and echo-area display."
                       (t nil))))
     (if where (format "%s (%s)" message where) message)))
 
-(defun flycheck-goto-related-location (location &optional default-file)
+(defun flycheck-goto-related-location (location &optional default)
   "Visit the related LOCATION, a `flycheck-related-location'.
 
-When LOCATION carries no file of its own, fall back to DEFAULT-FILE, and
-then to the current buffer.  Push the current position on the `xref'
+When LOCATION carries no file of its own, fall back to DEFAULT, a file
+name or a buffer, such as those of the error LOCATION relates to, and
+then to the current buffer.  Signal a `user-error' when DEFAULT is a
+buffer that was killed.  Push the current position on the `xref'
 marker stack first, so the jump can be reverted with `xref-go-back'
 \(\\[xref-go-back]).  When invoked from the error list, show the target
 in another window; otherwise reuse the current one."
-  (let* ((filename (or (flycheck-related-location-filename location)
-                       default-file))
+  (let* ((target (or (flycheck-related-location-filename location) default))
          (line (flycheck-related-location-line location))
          (column (flycheck-related-location-column location))
-         (buffer (if filename (find-file-noselect filename) (current-buffer))))
+         (buffer (cond ((stringp target) (find-file-noselect target))
+                       ((null target) (current-buffer))
+                       ((buffer-live-p target) target)
+                       (t (user-error "The buffer of this location is gone")))))
     (require 'xref)
     (xref-push-marker-stack)
     (unless (eq buffer (current-buffer))
@@ -10127,20 +10132,34 @@ in another window; otherwise reuse the current one."
 (define-button-type 'flycheck-related-location
   'action (lambda (button)
             (flycheck-goto-related-location
-             (button-get button 'flycheck-related-location)))
+             (button-get button 'flycheck-related-location)
+             (button-get button 'flycheck-related-location-default)))
   'help-echo "mouse-1, RET: visit related location"
   'follow-link t)
 
-(defun flycheck--related-location-button (location)
+(defun flycheck--related-location-button (location &optional default)
   "Return LOCATION's formatted text as a button that visits it.
 
 Activating the button with RET or `mouse-1' calls
-`flycheck-goto-related-location' on LOCATION.  Displayed inertly (as
-plain text) in contexts without an active keymap, such as the echo area."
+`flycheck-goto-related-location' on LOCATION and DEFAULT.  Displayed
+inertly (as plain text) in contexts without an active keymap, such as
+the echo area."
   (let ((label (flycheck-related-location-format location)))
     (make-text-button label nil
                       'type 'flycheck-related-location
-                      'flycheck-related-location location)))
+                      'flycheck-related-location location
+                      'flycheck-related-location-default default)))
+
+(defun flycheck--related-location-default (err)
+  "Return the buffer or file of ERR's related locations without a file.
+
+That is the live buffer ERR was reported for when it visits ERR's file,
+or else that file, or the buffer, or nil when ERR has neither.  Not
+whichever buffer shows the location, such as the error list or the
+buffer showing the error message."
+  (or (flycheck--error-fix-buffer err)
+      (flycheck-error-filename err)
+      (flycheck-error-buffer err)))
 
 (defun flycheck-error-format-relations (err)
   "Return ERR's related locations as button lines, or nil when it has none.
@@ -10148,9 +10167,11 @@ plain text) in contexts without an active keymap, such as the echo area."
 Each line is indented and prefixed with a `↳' arrow, and is a button that
 visits the location when activated; see `flycheck--related-location-button'."
   (when-let* ((relations (flycheck-error-relations err)))
-    (mapconcat (lambda (loc)
-                 (concat "  ↳ " (flycheck--related-location-button loc)))
-               relations "\n")))
+    (let ((default (flycheck--related-location-default err)))
+      (mapconcat (lambda (loc)
+                   (concat "  ↳ "
+                           (flycheck--related-location-button loc default)))
+                 relations "\n"))))
 
 (defvar-local flycheck--related-location-walk nil
   "State of the in-progress related-location walk, or nil.

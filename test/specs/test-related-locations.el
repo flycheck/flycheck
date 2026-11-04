@@ -112,6 +112,27 @@ finds it."
          (flycheck-related-location-new :line 3 :column 1))
         (expect 'xref-push-marker-stack :to-have-been-called))))
 
+  (describe "the related location buttons"
+    (it "visit a location without a file in the buffer of its error"
+      (let* ((source (generate-new-buffer " source"))
+             (err (flycheck-error-new-at
+                   1 1 'error "x" :buffer source
+                   :relations (list (flycheck-related-location-new
+                                     :line 2 :column 3 :message "here")))))
+        (with-current-buffer source (insert "one\ntwo\n"))
+        (unwind-protect
+            (with-temp-buffer
+              (insert (flycheck-error-format-relations err))
+              (goto-char (point-min))
+              (save-window-excursion
+                (push-button (next-button (point-min)))
+                (expect (current-buffer) :to-be source)
+                (expect (flycheck-line-column-at-point) :to-equal '(2 . 3)))
+              (kill-buffer source)
+              (expect (push-button (next-button (point-min)))
+                      :to-throw 'user-error))
+          (when (buffer-live-p source) (kill-buffer source))))))
+
   (describe "flycheck-visit-related-location"
     (it "signals a user-error with no related location at point"
       (flycheck-buttercup-with-temp-buffer
