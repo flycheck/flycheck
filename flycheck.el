@@ -14206,11 +14206,19 @@ For a full language server, prefer Eglot and `flycheck-eglot-mode'."
     (remove-hook 'kill-buffer-hook #'flycheck-lsp--close-buffer t)
     (flycheck-lsp--disable)))
 
+(defun flycheck-lsp--mode-on-safe ()
+  "Enable `flycheck-lsp-mode' where `global-flycheck-lsp-mode' should.
+
+That is a buffer `global-flycheck-mode' would check, never an encrypted
+or ephemeral one (see `flycheck-may-enable-mode'), whose major mode has
+a server available."
+  (when (and (flycheck-may-enable-mode)
+             (flycheck-lsp--available-command major-mode))
+    (flycheck-lsp-mode 1)))
+
 ;;;###autoload
 (define-globalized-minor-mode global-flycheck-lsp-mode
-  flycheck-lsp-mode
-  (lambda ()
-    (when (flycheck-lsp--available-command major-mode) (flycheck-lsp-mode 1)))
+  flycheck-lsp-mode flycheck-lsp--mode-on-safe
   :group 'flycheck)
 
 

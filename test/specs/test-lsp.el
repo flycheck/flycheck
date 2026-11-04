@@ -492,6 +492,26 @@
                   (buffer-file-name "/x/a.rb"))
               (expect (flycheck-lsp--enabled-p) :to-be nil))))))
 
+    (describe "global-flycheck-lsp-mode"
+      (it "leaves an encrypted buffer alone"
+        (spy-on 'flycheck-lsp--available-command :and-return-value '("srv"))
+        (spy-on 'flycheck-lsp-mode)
+        (spy-on 'flycheck-encrypted-buffer-p :and-return-value t)
+        (with-temp-buffer
+          (rename-buffer "secret.rb.gpg" t)
+          (ruby-mode)
+          (flycheck-lsp--mode-on-safe))
+        (expect 'flycheck-lsp-mode :not :to-have-been-called))
+
+      (it "enables the mode where Flycheck may run and a server is there"
+        (spy-on 'flycheck-lsp--available-command :and-return-value '("srv"))
+        (spy-on 'flycheck-lsp-mode)
+        (with-temp-buffer
+          (rename-buffer "plain.rb" t)
+          (ruby-mode)
+          (flycheck-lsp--mode-on-safe))
+        (expect 'flycheck-lsp-mode :to-have-been-called-with 1)))
+
     (describe "flycheck-lsp--handle-notification"
       (it "caches diagnostics and re-triggers the owning buffer's check"
         (flycheck-buttercup-with-temp-buffer
