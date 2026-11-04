@@ -21607,6 +21607,7 @@ information about tflint."
                (pcase .rule.severity
                  ("error"   'error)
                  ("warning" 'warning)
+                 ("info"    'info)
                  (_         'error))
                .message
                :end-line .range.end.line
@@ -21614,7 +21615,18 @@ information about tflint."
                :id .rule.name
                :checker checker
                :buffer buffer
-               :filename (buffer-file-name buffer))))
+               ;; tflint lints the whole module the file is in, and names
+               ;; a file that may not exist for an issue about the module
+               ;; as a whole, such as a missing `required_version'
+               :filename (let ((file .range.filename)
+                               (dir (if (buffer-live-p buffer)
+                                        (buffer-local-value
+                                         'default-directory buffer)
+                                      default-directory)))
+                           (if (and file
+                                    (file-regular-p (expand-file-name file dir)))
+                               file
+                             (buffer-file-name buffer))))))
           (cdr (assq 'issues (car (flycheck-parse-json output))))))
 
 (flycheck-define-checker terraform-tflint

@@ -28,6 +28,43 @@
 (require 'test-helpers)
 
 (describe "Language Terraform"
+
+  (describe "flycheck-parse-tflint-linter"
+    (it "files each issue under the file tflint names"
+      ;; tflint 0.64 run over a module of a.tf and b.tf
+      (let ((default-directory (file-name-as-directory
+                                (make-temp-file "flycheck-tflint" t))))
+        (unwind-protect
+            (progn
+              (dolist (file '("a.tf" "b.tf"))
+                (write-region "" nil (expand-file-name file)))
+              (with-temp-buffer
+                (let ((errors (flycheck-parse-tflint-linter "{\"issues\":[{\"rule\":{\"name\":\"terraform_typed_variables\",\"severity\":\"warning\"},\"message\":\"`unused_a` variable has no type\",\"range\":{\"filename\":\"a.tf\",\"start\":{\"line\":1,\"column\":1},\"end\":{\"line\":1,\"column\":20}}},{\"rule\":{\"name\":\"terraform_typed_variables\",\"severity\":\"warning\"},\"message\":\"`unused_b` variable has no type\",\"range\":{\"filename\":\"b.tf\",\"start\":{\"line\":1,\"column\":1},\"end\":{\"line\":1,\"column\":20}}}],\"errors\":[]}"
+                                                            'terraform-tflint
+                                                            (current-buffer))))
+                  (expect (mapcar #'flycheck-error-filename errors)
+                          :to-equal '("a.tf" "b.tf")))))
+          (delete-directory default-directory t))))
+
+    (it "files an issue about a file that doesn't exist under the buffer's"
+      ;; tflint 0.64 over a module without a `terraform' block
+      (let ((default-directory (make-temp-file "flycheck-tflint" t)))
+        (unwind-protect
+            (with-temp-buffer
+              (setq buffer-file-name (expand-file-name "main.tf"))
+              (let ((err (car (flycheck-parse-tflint-linter "{\"issues\":[{\"rule\":{\"name\":\"terraform_required_version\",\"severity\":\"warning\"},\"message\":\"terraform \\\"required_version\\\" attribute is required\",\"range\":{\"filename\":\"terraform.tf\",\"start\":{\"line\":0,\"column\":0},\"end\":{\"line\":0,\"column\":0}}}],\"errors\":[]}"
+                                                           'terraform-tflint
+                                                           (current-buffer)))))
+                (expect (flycheck-error-filename err)
+                        :to-equal (expand-file-name "main.tf")))
+              (setq buffer-file-name nil))
+          (delete-directory default-directory t))))
+
+    (it "keeps tflint's info severity"
+      (expect (flycheck-error-level
+               (car (flycheck-parse-tflint-linter "{\"issues\":[{\"rule\":{\"name\":\"terraform_documented_variables\",\"severity\":\"info\"},\"message\":\"m\",\"range\":{\"filename\":\"\",\"start\":{\"line\":1,\"column\":1},\"end\":{\"line\":1,\"column\":2}}}],\"errors\":[]}"
+                                                  'terraform-tflint nil)))
+              :to-be 'info)))
   (flycheck-buttercup-def-checker-test terraform terraform nil
     (flycheck-buttercup-should-syntax-check
      "language/terraform/terraform/syntax-error.tf" 'terraform-mode
