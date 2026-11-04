@@ -37,6 +37,7 @@
 
 ### Bugs fixed
 
+- [#2419](https://github.com/flycheck/flycheck/pull/2419): `salt-lint` runs `python3`, falling back to `python` like the other Python checkers, and only where that interpreter has the `saltlint` module.
 - [#2419](https://github.com/flycheck/flycheck/pull/2419): Where `python3` doesn't work and Flycheck falls back to `python`, the Python checkers keep an interpreter set before Flycheck loads.
 - [#2419](https://github.com/flycheck/flycheck/pull/2419): `sh-shellcheck` checks dash, ksh93, ash and busybox scripts, and Korn shell scripts on GNU/Linux, and disables itself where an older ShellCheck doesn't know the script's shell instead of failing every check.
 - [#2419](https://github.com/flycheck/flycheck/pull/2419): The OCaml checkers check interface files in `neocaml-interface-mode`.
