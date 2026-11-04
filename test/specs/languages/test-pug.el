@@ -34,11 +34,47 @@
      "language/pug/pug-runtime-error.pug" 'pug-mode
      '(5 nil error "Cannot read property 'bar' of undefined" :checker pug)))
 
+  (describe "the pug command"
+    (it "takes a buffer without a file"
+      (flycheck-buttercup-with-temp-buffer
+        (expect (flycheck-checker-substituted-arguments 'pug)
+                :to-equal nil)))
+
+    (it "resolves includes against the buffer's file"
+      (flycheck-buttercup-with-temp-buffer
+        (setq buffer-file-name (expand-file-name "a.pug" temporary-file-directory))
+        (expect (car (flycheck-checker-substituted-arguments 'pug))
+                :to-equal "-p"))))
+
   (describe "reading the tool's output"
     ;; Read from output recorded earlier, so this runs whether or
     ;; not the tool is installed here
 
     (flycheck-buttercup-def-parse-test pug "language/pug/pug.pug"
-      '(2 1 error "unexpected token \"indent\""))))
+      '(2 1 error "unexpected token \"indent\""))
+
+    (it "keeps the errors of a buffer without a file in the buffer"
+      ;; Without -p, pug 3 names the file "Pug"
+      (flycheck-buttercup-with-temp-buffer
+        (insert "doctype html\n html\n  head\n")
+        (let ((errors (funcall (flycheck-checker-get 'pug 'error-filter)
+                               (flycheck-parse-output
+                                "Error: Pug:2:1
+    1| doctype html
+  > 2|  html
+-------^
+    3|   head
+    4|\s
+
+unexpected token \"indent\"
+    at makeError (/usr/local/lib/node_modules/pug-cli/node_modules/pug-error/index.js:32:13)
+"
+                                'pug (current-buffer)))))
+          (expect (mapcar (lambda (err)
+                            (list (flycheck-error-line err)
+                                  (flycheck-error-column err)
+                                  (flycheck-error-filename err)))
+                          errors)
+                  :to-equal '((2 1 nil))))))))
 
 ;;; test-pug.el ends here
