@@ -1099,7 +1099,43 @@
                             :edit (:documentChanges []))])))
                 :to-be nil))
       (it "is nil when the diagnostic carries no inline actions"
-        (expect (flycheck-lsp--inline-fix '(:code "X")) :to-be nil)))
+        (expect (flycheck-lsp--inline-fix '(:code "X")) :to-be nil))
+
+      (it "answers to the text the server saw, not the buffer as it is now"
+        ;; A push cached before an edit, converted by the check after it
+        (flycheck-buttercup-with-temp-buffer
+          (insert "abc\n")
+          (setq buffer-file-name "/proj/a.rb")
+          (cl-letf (((symbol-function 'flycheck-same-files-p) #'equal))
+            (let* ((flycheck-lsp-code-actions t)
+                   (server (flycheck-lsp--server-create :connection 'conn))
+                   (doc (flycheck-lsp--document server "/proj/a.rb"))
+                   (synced (buffer-chars-modified-tick)))
+              (setf (flycheck-lsp--doc-version doc) 1
+                    (flycheck-lsp--doc-tick doc) synced)
+              (flycheck-lsp--accept-diagnostics
+               server "/proj/a.rb"
+               (vector
+                '(:range (:start (:line 0 :character 0)
+                          :end (:line 0 :character 1))
+                  :message "m"
+                  :data (:code_actions
+                         [(:title "Fix" :isPreferred t
+                           :edit (:documentChanges
+                                  [(:textDocument (:uri "/proj/a.rb")
+                                    :edits [(:range (:start (:line 0 :character 0)
+                                                     :end (:line 0 :character 1))
+                                             :newText "")])]))])))
+               nil nil 'pushed)
+              (goto-char (point-min))
+              (insert "\n")
+              (let ((err (car (flycheck-lsp--doc-errors
+                               doc (current-buffer) server "/proj/a.rb"))))
+                (expect (flycheck-fix-tick (flycheck-error-fix err))
+                        :to-equal synced)
+                (expect (flycheck-apply-fix (flycheck-error-fix err))
+                        :to-throw 'user-error))))
+          (set-buffer-modified-p nil))))
 
     (describe "flycheck-lsp--code-action-fix"
       (it "requests, prefers the isPreferred action, and builds a fix"
