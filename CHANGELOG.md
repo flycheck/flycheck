@@ -37,6 +37,7 @@
 
 ### Bugs fixed
 
+- [#2411](https://github.com/flycheck/flycheck/pull/2411): Flycheck counts positions from the start of a narrowed buffer, so errors built from buffer positions, such as a language server's, land on the right lines, and a recheck no longer piles up copies of the highlighting outside the narrowing.
 - [#2407](https://github.com/flycheck/flycheck/pull/2407): Flycheck no longer says at every startup on Emacs 30+ that no syntax checker can run in `*scratch*`, which Emacs doesn't trust; the `emacs-lisp` docs show how to trust it ([#2402](https://github.com/flycheck/flycheck/issues/2402)).
 - [#2405](https://github.com/flycheck/flycheck/pull/2405): The Flycheck menu shows up in the context menu of `context-menu-mode` ([#2401](https://github.com/flycheck/flycheck/issues/2401)).
 - [#2406](https://github.com/flycheck/flycheck/pull/2406): Stop the `*eldoc*` window popping open with an eager `eldoc-documentation-strategy`, such as `eldoc-documentation-compose-eagerly`, which displays again each time a source answers ([#2387](https://github.com/flycheck/flycheck/issues/2387)).

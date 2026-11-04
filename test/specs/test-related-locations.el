@@ -88,6 +88,22 @@ finds it."
         (flycheck-goto-related-location
          (flycheck-related-location-new :line 2 :column 6))
         (expect (flycheck-line-column-at-point) :to-equal '(2 . 6))))
+    (it "widens when the location lies outside the narrowing"
+      (flycheck-buttercup-with-temp-buffer
+        (test-related/setup)
+        (narrow-to-region (point-min) (flycheck-line-column-to-position 2 1))
+        (flycheck-goto-related-location
+         (flycheck-related-location-new :line 3 :column 2))
+        (expect (buffer-narrowed-p) :not :to-be-truthy)
+        (expect (flycheck-line-column-at-point) :to-equal '(3 . 2))))
+    (it "keeps the narrowing when the location lies inside it"
+      (flycheck-buttercup-with-temp-buffer
+        (test-related/setup)
+        (narrow-to-region (point-min) (flycheck-line-column-to-position 3 1))
+        (flycheck-goto-related-location
+         (flycheck-related-location-new :line 2 :column 6))
+        (expect (buffer-narrowed-p) :to-be-truthy)
+        (expect (flycheck-line-column-at-point) :to-equal '(2 . 6))))
     (it "pushes onto the xref marker stack so the jump can be reverted"
       (flycheck-buttercup-with-temp-buffer
         (test-related/setup)

@@ -292,7 +292,35 @@
         ;; Remove restrictions and test that all errors are reported
         (widen)
         (expect (length (flycheck-overlays-in (point-min) (point-max)))
-                :to-equal (if (< emacs-major-version 30) 4 5)))))
+                :to-equal (if (< emacs-major-version 30) 4 5))))
+
+    (it "replaces the overlays outside the narrowing on a recheck"
+      (flycheck-buttercup-with-resource-buffer "narrowing.el"
+        (emacs-lisp-mode)
+        (flycheck-mode)
+        (flycheck-buttercup-buffer-sync)
+        (let ((count (length (flycheck-overlays-in (point-min) (point-max)))))
+          (re-search-forward "(defun .*")
+          (forward-line 1)
+          (narrow-to-defun)
+          ;; Not `flycheck-buttercup-buffer-sync': re-enabling the mode
+          ;; clears every overlay
+          (flycheck-buffer)
+          (flycheck-buttercup-wait-for-syntax-checker)
+          (widen)
+          (expect (length (flycheck-overlays-in (point-min) (point-max)))
+                  :to-equal count))))
+
+    (it "puts another file's error on the first line of the whole buffer"
+      (flycheck-buttercup-with-temp-buffer
+        (insert "\nfoo\nbar\n")
+        (narrow-to-region (flycheck-line-column-to-position 3 1) (point-max))
+        (let ((overlay (flycheck-add-overlay
+                        (flycheck-error-new-at 1 1 'error "elsewhere"
+                                               :filename "/other/file.el"))))
+          ;; Line 1 is empty, so the overlay takes its newline
+          (expect (overlay-start overlay) :to-equal 1)
+          (expect (overlay-end overlay) :to-equal 2)))))
 
   (describe "Error message overlays"
     (it "shows the error message as help echo"

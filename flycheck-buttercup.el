@@ -405,9 +405,7 @@ ERROR is a Flycheck error object."
          (region
           ;; Overlays of errors from other files are on the first line
           (if (flycheck-relevant-error-other-file-p error)
-              (cons (point-min)
-                    (save-excursion (goto-char (point-min))
-                                    (line-end-position)))
+              (flycheck--other-file-error-region)
             (flycheck-error-region-for-mode error 'symbols)))
          (level (flycheck-error-level error))
          (category (flycheck-error-level-overlay-category level))
