@@ -105,6 +105,13 @@
         (expect (flycheck-checker-substituted-arguments 'ruby-rubocop)
                 :to-contain "--display-time"))))
 
+  (describe "the ruby-standard checker command"
+    (it "names a buffer without a file to standardrb"
+      (flycheck-buttercup-with-temp-buffer
+        (expect (cadr (member "--stdin" (flycheck-checker-substituted-arguments
+                                         'ruby-standard)))
+                :to-equal "stdin"))))
+
   (describe "Checker tests"
     (flycheck-buttercup-def-checker-test ruby-rubocop ruby syntax-error
       (flycheck-buttercup-should-syntax-check
