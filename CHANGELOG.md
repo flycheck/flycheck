@@ -37,6 +37,7 @@
 
 ### Bugs fixed
 
+- [#2413](https://github.com/flycheck/flycheck/pull/2413): Applying several fixes at once, with `C-c ! F` or the error list's `X`, skips a malformed fix instead of refusing them all, makes a fix two errors share only once, and keeps text inserted at one place in the order the fixes give it.
 - [#2412](https://github.com/flycheck/flycheck/pull/2412): A revert checks the buffer only as `flycheck-check-syntax-automatically` allows, waits for a window to show the buffer, so `global-auto-revert-mode` no longer checks every buffer at once after a `git checkout`, and starts one check instead of two.
 - [#2412](https://github.com/flycheck/flycheck/pull/2412): In a remote buffer, checks after a change or a buffer switch follow `flycheck-check-syntax-automatically-remote`, so listing `idle-change` there works even when the local option leaves it out.
 - [#2412](https://github.com/flycheck/flycheck/pull/2412): Turning `flycheck-mode` on in a buffer where it's already on no longer keeps `next-error` from getting back to compilation and grep results once the mode is off.
