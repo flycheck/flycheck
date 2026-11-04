@@ -37,6 +37,7 @@
 
 ### Bugs fixed
 
+- [#2414](https://github.com/flycheck/flycheck/pull/2414): The error list no longer breaks redisplay once its source buffer is killed or when its message filter has a `%`, sizes its columns by display width so wide characters don't throw them off, and goes to the error on `RET` over an ID nothing explains.
 - [#2414](https://github.com/flycheck/flycheck/pull/2414): Prefix arguments such as `C-u` and `M--` work with `flycheck-next-error`, `flycheck-previous-error`, `flycheck-first-error` and the error list's `n` and `p`, and `flycheck-first-error` finds an error at the very start of the buffer and, with a negative argument, goes to the last error, as documented.
 - [#2413](https://github.com/flycheck/flycheck/pull/2413): A fix for another file is refused once that file was written after the check that produced the fix, also when a later checker of the chain, or a new run of the project checker, started since.
 - [#2413](https://github.com/flycheck/flycheck/pull/2413): Applying several fixes at once, with `C-c ! F` or the error list's `X`, skips a malformed fix instead of refusing them all, makes a fix two errors share only once, and keeps text inserted at one place in the order the fixes give it.

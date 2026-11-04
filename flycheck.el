@@ -7637,9 +7637,9 @@ Return a cons cell (FILE-WIDTH . ID-WIDTH)."
     (dolist (err errors)
       (when-let* ((file (flycheck-error-filename err)))
         (setq file-width (max file-width
-                              (length (file-name-nondirectory file)))))
+                              (string-width (file-name-nondirectory file)))))
       (when-let* ((id (flycheck-error-id err)))
-        (setq id-width (max id-width (length (format "%s" id))))))
+        (setq id-width (max id-width (string-width (format "%s" id))))))
     (cons (min file-width flycheck-error-list--file-column-max)
           (min id-width 24))))
 
@@ -8054,7 +8054,7 @@ already names it in a grouped list."
                   (flycheck-error-list-make-cell
                    id-str (if explainer 'flycheck-error-list-id-with-explainer
                             'flycheck-error-list-id)
-                   id-str 'flycheck-error-list-explain-error)
+                   id-str (and explainer 'flycheck-error-list-explain-error))
                   (flycheck-error-list-make-cell
                    msg-and-checker nil msg-and-checker)))))
 
@@ -8325,10 +8325,11 @@ See `flycheck-error-level-<'."
 
 Propertize the name of the current source buffer for use in the
 mode line indication of `flycheck-error-list-mode'."
-  (let ((name (replace-regexp-in-string
-               (rx "%") "%%"
-               (buffer-name flycheck-error-list-source-buffer)
-               'fixed-case 'literal)))
+  (let ((name (cond ((buffer-live-p flycheck-error-list-source-buffer)
+                      (string-replace
+                       "%" "%%" (buffer-name flycheck-error-list-source-buffer)))
+                     (flycheck-error-list-source-buffer "<killed>")
+                     (t "<none>"))))
     (propertize name 'face 'mode-line-buffer-id
                 'mouse-face 'mode-line-highlight
                 'help-echo "mouse-1: switch to source"
@@ -8395,7 +8396,9 @@ list."
    (when flycheck-error-list--checker-filter
      (format " [%s]" flycheck-error-list--checker-filter))
    (when flycheck-error-list--message-filter
-     (format " [/%s/]" flycheck-error-list--message-filter))))
+     ;; The mode line reads `%' as a construct of its own
+     (format " [/%s/]" (string-replace "%" "%%"
+                                       flycheck-error-list--message-filter)))))
 
 (defun flycheck-error-list-mode-line-scope-indicator ()
   "Create a string representing the current error list scope."
