@@ -477,6 +477,33 @@
           (setq enabled nil counter 0)
           (dotimes (_ 10) (flycheck-may-enable-checker 'emacs-lisp))
           (expect flycheck--automatically-disabled-checkers :to-equal '(emacs-lisp))
-          (expect counter :to-equal 1))))))
+          (expect counter :to-equal 1)))))
+
+  (describe "flycheck-unload-function"
+    (it "takes the bridges' hooks out of Eglot and stops the servers"
+      (spy-on 'flycheck-lsp--shutdown-all)
+      (spy-on 'advice-remove)
+      (cl-letf (((symbol-function 'global-flycheck-mode) #'ignore)
+                ((symbol-function 'easy-menu-remove-item) #'ignore)
+                ((symbol-function 'remove-hook) #'ignore)
+                ((symbol-function 'remove-variable-watcher) #'ignore))
+        (let ((find-function-regexp-alist
+               (copy-sequence find-function-regexp-alist)))
+          (flycheck-unload-function)))
+      (expect 'flycheck-lsp--shutdown-all :to-have-been-called)
+      (expect 'advice-remove :to-have-been-called-with
+              'flymake-diagnostics #'flycheck-eglot--flymake-diagnostics))
+
+    (it "leaves the rest of the unloading to unload-feature"
+      ;; Which takes a non-nil value for having been done
+      (cl-letf (((symbol-function 'global-flycheck-mode) #'ignore)
+                ((symbol-function 'easy-menu-remove-item) #'ignore)
+                ((symbol-function 'remove-hook) #'ignore)
+                ((symbol-function 'advice-remove) #'ignore)
+                ((symbol-function 'remove-variable-watcher) #'ignore)
+                ((symbol-function 'flycheck-lsp--shutdown-all) #'ignore))
+        (let ((find-function-regexp-alist
+               (copy-sequence find-function-regexp-alist)))
+          (expect (flycheck-unload-function) :to-be nil))))))
 
 ;;; test-checker-api.el ends here

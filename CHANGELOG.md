@@ -37,6 +37,7 @@
 
 ### Bugs fixed
 
+- [#2418](https://github.com/flycheck/flycheck/pull/2418): `unload-feature` unloads Flycheck: `flycheck-unload-function` no longer tells it the unloading was done already, and it takes the LSP bridges out of Eglot and stops their language servers.
 - [#2417](https://github.com/flycheck/flycheck/pull/2417): A quick fix a language server put in a diagnostic is refused once the buffer has changed since the server saw it, instead of being applied at stale positions when a check shows cached diagnostics after an edit.
 - [#2417](https://github.com/flycheck/flycheck/pull/2417): The quick fixes and related locations a language server sends count a character outside the Basic Multilingual Plane, such as an emoji, as one column, as Flycheck's errors already did, so they no longer land one column off after one.
 - [#2417](https://github.com/flycheck/flycheck/pull/2417): `global-flycheck-lsp-mode` leaves encrypted and ephemeral buffers alone, as `global-flycheck-mode` does, instead of sending the decrypted text of a `.gpg` file to a language server.
