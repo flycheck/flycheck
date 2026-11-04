@@ -7724,13 +7724,35 @@ ignored."
     (setf (aref format index)
           (cons name (cons width (cddr (aref format index)))))))
 
+(defvar flycheck-error-list--fetched nil
+  "The (ERRORS . FILTERED) a revert of the error list fetched, or nil.
+
+Bound by `flycheck-error-list--revert', so fitting the columns and
+printing the rows read the errors once between them: in the project
+scope, reading them takes a pass over the whole store.")
+
+(defun flycheck-error-list--fetch-errors ()
+  "Return the errors to list, as (ERRORS . FILTERED).
+ERRORS are `flycheck-error-list-current-errors', FILTERED those the
+filters let through."
+  (or flycheck-error-list--fetched
+      (let ((errors (flycheck-error-list-current-errors)))
+        (cons errors (flycheck-error-list-apply-filter errors)))))
+
+(defun flycheck-error-list--revert (&rest args)
+  "Revert the error list, reading its errors once.
+ARGS are passed on to `tabulated-list-revert'."
+  (let ((flycheck-error-list--fetched nil))
+    ;; Read afresh, not from a revert this one runs inside
+    (setq flycheck-error-list--fetched (flycheck-error-list--fetch-errors))
+    (apply #'tabulated-list-revert args)))
+
 (defun flycheck-error-list--update-format ()
   "Fit the File and ID column widths to the displayed errors.
 
 A grouped list also loses its column sorters, as sorting the rows by a
 column would scatter them away from their group headers."
-  (let* ((errors (flycheck-error-list-apply-filter
-                  (flycheck-error-list-current-errors)))
+  (let* ((errors (cdr (flycheck-error-list--fetch-errors)))
          (widths (flycheck-error-list--column-widths errors))
          (file-width
           (min flycheck-error-list--file-column-max
@@ -7761,6 +7783,7 @@ column would scatter them away from their group headers."
   ;; `revert-buffer', so that they never go stale
   (add-hook 'tabulated-list-revert-hook
             #'flycheck-error-list--update-format nil t)
+  (setq-local revert-buffer-function #'flycheck-error-list--revert)
   (setq tabulated-list-format flycheck-error-list-format
         ;; Sort by location initially
         tabulated-list-sort-key (cons "Line" nil)
@@ -8355,18 +8378,18 @@ only its header."
 When `flycheck-error-list-group-by' is non-nil the errors are laid
 out under a header per group; otherwise a flat list is returned and
 Tabulated List mode sorts it."
-  (when-let* ((errors (flycheck-error-list-current-errors))
-              (filtered (flycheck-error-list-apply-filter errors)))
-    (if-let* ((dimensions (flycheck-error-list--grouping-dimensions)))
-        (progn
-          ;; Prune against the unfiltered errors, so a filter that hides a
-          ;; group does not discard the collapse state the user set.
-          (flycheck-error-list--prune-collapsed errors)
-          ;; The file name is redundant under a file header, but relevant when
-          ;; grouping only by checker or level.
-          (flycheck-error-list--grouped-entries
-           filtered dimensions nil 0 (memq 'file dimensions)))
-      (mapcar #'flycheck-error-list-make-entry filtered))))
+  (pcase-let ((`(,errors . ,filtered) (flycheck-error-list--fetch-errors)))
+    (when (and errors filtered)
+      (if-let* ((dimensions (flycheck-error-list--grouping-dimensions)))
+          (progn
+            ;; Prune against the unfiltered errors, so a filter that hides
+            ;; a group does not discard the collapse state the user set.
+            (flycheck-error-list--prune-collapsed errors)
+            ;; The file name is redundant under a file header, but relevant
+            ;; when grouping only by checker or level.
+            (flycheck-error-list--grouped-entries
+             filtered dimensions nil 0 (memq 'file dimensions)))
+        (mapcar #'flycheck-error-list-make-entry filtered)))))
 
 (defun flycheck-error-list-entry-< (entry1 entry2)
   "Determine whether ENTRY1 is before ENTRY2 by location.

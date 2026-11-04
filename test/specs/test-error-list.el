@@ -40,6 +40,25 @@
   (it "has the correct buffer name"
     (expect flycheck-error-list-buffer :to-equal "*Flycheck errors*"))
 
+  (it "reads the errors once for each refresh"
+    ;; In the project scope, reading them takes a pass over the store
+    (flycheck-buttercup-with-temp-buffer
+      (let ((source (current-buffer))
+            (reads 0))
+        (flycheck/with-error-list-buffer
+          (setq flycheck-error-list-source-buffer source)
+          (cl-letf (((symbol-function 'flycheck-error-list-current-errors)
+                     (lambda ()
+                       (cl-incf reads)
+                       (list (flycheck-error-new-at 1 1 'error "Boom"
+                                                    :buffer source
+                                                    :checker 'emacs-lisp)))))
+            (revert-buffer)
+            (expect reads :to-equal 1)
+            ;; Printing the rows outside a revert reads them as they are
+            (tabulated-list-print)
+            (expect reads :to-equal 2))))))
+
   (it "has a permanently local source buffer"
     (flycheck/with-error-list-buffer
       (expect (get 'flycheck-error-list-source-buffer 'permanent-local)
