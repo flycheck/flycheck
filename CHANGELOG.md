@@ -37,6 +37,7 @@
 
 ### Bugs fixed
 
+- [#2423](https://github.com/flycheck/flycheck/pull/2423): The inline annotations reach the bottom of the window past folded text, instead of stopping as many lines below the window's top as it is high.
 - [#2423](https://github.com/flycheck/flycheck/pull/2423): The `sideline` annotations fit the window again after it changes width, as on splitting it or resizing the frame, instead of spilling past its edge.
 - [#2423](https://github.com/flycheck/flycheck/pull/2423): With `flycheck-annotate-suppress-echo`, the echo area still shows an error at point that the line's annotation doesn't, such as one the `eol` or `sideline` style only counts beside a more severe one.
 - [#2423](https://github.com/flycheck/flycheck/pull/2423): With errors displayed through Eldoc, an error fixed at point no longer stays in the echo area after the check that found it gone.
