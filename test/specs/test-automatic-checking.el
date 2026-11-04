@@ -67,6 +67,16 @@
             (expect (flycheck-may-check-automatically 'save)
                     :not :to-be-truthy))))
 
+      (it "arms the idle timers per the remote trigger set"
+        (flycheck-buttercup-with-resource-buffer "automatic-check-dummy.el"
+          (emacs-lisp-mode)
+          (spy-on 'file-remote-p :and-return-value "/ssh:host:")
+          (let ((flycheck-check-syntax-automatically '(save))
+                (flycheck-check-syntax-automatically-remote '(idle-change)))
+            (flycheck-mode)
+            (insert "x")
+            (expect flycheck--idle-trigger-timer :to-be-truthy))))
+
       (it "uses the local trigger set when set to t"
         (flycheck-buttercup-with-resource-buffer "automatic-check-dummy.el"
           (spy-on 'file-remote-p :and-return-value "/ssh:host:")

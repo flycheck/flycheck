@@ -4221,19 +4221,23 @@ under at least one of them, according to
 `flycheck-check-syntax-automatically'."
   (and (not (or buffer-read-only (flycheck-ephemeral-buffer-p)))
        (or (not conditions)
-           (let ((allowed
-                  ;; Remote buffers use a narrower set of trigger events by
-                  ;; default, since each check spawns a slow remote process
-                  (if (and (file-remote-p default-directory)
-                           (not (eq flycheck-check-syntax-automatically-remote
-                                    t)))
-                      flycheck-check-syntax-automatically-remote
-                    flycheck-check-syntax-automatically)))
+           (let ((allowed (flycheck--automatic-check-events)))
              (seq-some (lambda (condition) (memq condition allowed))
                        conditions)))
        ;; Checked last so a disallowed trigger short-circuits before this
        ;; possibly-remote (and thus blocking) stat of `default-directory'.
        (file-exists-p default-directory)))
+
+(defun flycheck--automatic-check-events ()
+  "Return the events that may trigger a check in the current buffer.
+
+That is `flycheck-check-syntax-automatically', except in a remote
+buffer, where `flycheck-check-syntax-automatically-remote' narrows the
+set unless it is t: each check there spawns a slow remote process."
+  (if (and (file-remote-p default-directory)
+           (not (eq flycheck-check-syntax-automatically-remote t)))
+      flycheck-check-syntax-automatically-remote
+    flycheck-check-syntax-automatically))
 
 (defvar-local flycheck--idle-trigger-timer nil
   "Timer used to trigger a syntax check after an idle delay.")
@@ -4319,7 +4323,7 @@ buffer."
     (when flycheck-mode
       (if (string-match-p (rx "\n") (buffer-substring beg end))
           (flycheck-buffer-automatically 'new-line 'force-deferred)
-        (when (memq 'idle-change flycheck-check-syntax-automatically)
+        (when (memq 'idle-change (flycheck--automatic-check-events))
           (flycheck--clear-idle-trigger-timer)
           (cl-pushnew 'idle-change flycheck--idle-trigger-conditions)
           (setq flycheck--idle-trigger-timer
@@ -4357,7 +4361,7 @@ If a buffer switch actually happened, schedule a syntax check."
                 (minibufferp))
       (setq flycheck--last-buffer (current-buffer))
       (when (and flycheck-mode
-                 (memq 'idle-buffer-switch flycheck-check-syntax-automatically))
+                 (memq 'idle-buffer-switch (flycheck--automatic-check-events)))
         (flycheck--clear-idle-trigger-timer)
         (cl-pushnew 'idle-buffer-switch flycheck--idle-trigger-conditions)
         (setq flycheck--idle-trigger-timer
