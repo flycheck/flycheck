@@ -7356,11 +7356,15 @@ search from the current point.
 Return the position of the next or previous error, or nil if
 there is none.  If N is zero, return `point', or `point-min' if
 RESET is non-nil."
-  (let ((n (or n 1))
-        (pos (if reset (point-min) (point))))
+  (let* ((n (or n 1))
+         ;; From the top, or with negative N from the bottom
+         (pos (cond ((not reset) (point))
+                    ((< n 0) (point-max))
+                    (t (point-min)))))
     (cond
      ((> n 0)
-      (nth (1- n) (seq-filter (lambda (p) (> p pos))
+      ;; From the top, an error right there is the first one
+      (nth (1- n) (seq-filter (lambda (p) (if reset (>= p pos) (> p pos)))
                               (flycheck--error-start-positions))))
      ((< n 0)
       (nth (1- (- n))
@@ -7515,9 +7519,10 @@ advances backwards.  With non-nil RESET, advance from the
 beginning of the buffer, otherwise advance from the current
 position."
   (interactive "P")
-  (when (consp n)
-    ;; Universal prefix argument means reset
-    (setq reset t n nil))
+  (if (consp n)
+      ;; Universal prefix argument means reset
+      (setq reset t n nil)
+    (setq n (and n (prefix-numeric-value n))))
   (flycheck-next-error-function n reset)
   (flycheck-display-error-at-point))
 
@@ -7526,7 +7531,7 @@ position."
 
 If given, N specifies the number of errors to move backwards by.
 If N is negative, move forwards instead."
-  (interactive "P")
+  (interactive "p")
   (flycheck-next-error (- (or n 1))))
 
 (defun flycheck-first-error (&optional n)
@@ -7534,7 +7539,7 @@ If N is negative, move forwards instead."
 
 If given, N specifies the number of errors to move forward from
 the beginning of the buffer."
-  (interactive "P")
+  (interactive "p")
   (flycheck-next-error n 'reset))
 
 
@@ -8709,12 +8714,12 @@ nil, if there is no next error."
 
 (defun flycheck-error-list-previous-error (n)
   "Go to the N'th previous error in the error list."
-  (interactive "P")
+  (interactive "p")
   (flycheck-error-list-next-error (- (or n 1))))
 
 (defun flycheck-error-list-next-error (n)
   "Go to the N'th next error in the error list."
-  (interactive "P")
+  (interactive "p")
   (let* ((n (or n 1))
          (dir (if (< n 0) -1 1))
          (remaining (abs n))

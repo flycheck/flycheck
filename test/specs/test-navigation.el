@@ -90,7 +90,40 @@
           (let ((err (should-error (flycheck-previous-error 4) :type 'user-error)))
             (expect (cadr err) :to-equal "No more Flycheck errors")))))
 
+    (describe "prefix arguments"
+
+      (it "takes M-- for one error back"
+        (flycheck-test-with-nav-buffer nil
+          (goto-char (point-max))
+          (let ((current-prefix-arg '-))
+            (call-interactively #'flycheck-next-error))
+          (expect (point) :to-be-at-flycheck-error 2)))
+
+      (it "takes C-u as four errors back for flycheck-previous-error"
+        (flycheck-test-with-nav-buffer nil
+          (goto-char (point-max))
+          (spy-on 'flycheck-next-error)
+          (let ((current-prefix-arg '(4)))
+            (call-interactively #'flycheck-previous-error))
+          (expect 'flycheck-next-error :to-have-been-called-with -4)))
+
+      (it "takes M-- as the last error for flycheck-first-error"
+        (flycheck-test-with-nav-buffer nil
+          (let ((current-prefix-arg '-))
+            (call-interactively #'flycheck-first-error))
+          (expect (point) :to-be-at-flycheck-error 2))))
+
     (describe "flycheck-first-error"
+
+      (it "goes to an error right at the start of the buffer"
+        (flycheck-buttercup-with-temp-buffer
+          (insert "abc\ndef\n")
+          (mapc #'flycheck-add-overlay
+                (list (flycheck-error-new-at 1 1 'error "first")
+                      (flycheck-error-new-at 2 1 'error "second")))
+          (goto-char (point-max))
+          (flycheck-first-error)
+          (expect (point) :to-equal 1)))
 
       (it "goes to first error"
         (flycheck-test-with-nav-buffer nil

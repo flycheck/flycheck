@@ -37,6 +37,7 @@
 
 ### Bugs fixed
 
+- [#2414](https://github.com/flycheck/flycheck/pull/2414): Prefix arguments such as `C-u` and `M--` work with `flycheck-next-error`, `flycheck-previous-error`, `flycheck-first-error` and the error list's `n` and `p`, and `flycheck-first-error` finds an error at the very start of the buffer and, with a negative argument, goes to the last error, as documented.
 - [#2413](https://github.com/flycheck/flycheck/pull/2413): A fix for another file is refused once that file was written after the check that produced the fix, also when a later checker of the chain, or a new run of the project checker, started since.
 - [#2413](https://github.com/flycheck/flycheck/pull/2413): Applying several fixes at once, with `C-c ! F` or the error list's `X`, skips a malformed fix instead of refusing them all, makes a fix two errors share only once, and keeps text inserted at one place in the order the fixes give it.
 - [#2412](https://github.com/flycheck/flycheck/pull/2412): A revert checks the buffer only as `flycheck-check-syntax-automatically` allows, waits for a window to show the buffer, so `global-auto-revert-mode` no longer checks every buffer at once after a `git checkout`, and starts one check instead of two.

@@ -504,6 +504,15 @@ is when asked, so no earlier check has to vouch for it."
             (expect (flycheck-error-line
                      (tabulated-list-get-id)) :to-equal 3)))
 
+        (it "takes M-- as one error back"
+          (flycheck/with-error-list-buffer
+            (flycheck/error-list-print-grouped source errors)
+            (forward-line 1)
+            (let ((current-prefix-arg '-))
+              (call-interactively #'flycheck-error-list-next-error))
+            (expect (flycheck-error-line
+                     (tabulated-list-get-id)) :to-equal 1)))
+
         (it "terminates at the top instead of looping forever"
           (flycheck/with-error-list-buffer
             (flycheck/error-list-print-grouped source errors)
