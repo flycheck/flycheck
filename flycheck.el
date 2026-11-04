@@ -16527,10 +16527,24 @@ See Info Node `(elisp)Byte Compilation'."
 (defun flycheck-emacs-lisp-checkdoc-variables-form ()
   "Make a sexp to pass relevant variables to a checkdoc subprocess.
 
-Variables are taken from `flycheck-emacs-lisp-checkdoc-variables'."
+Variables are taken from `flycheck-emacs-lisp-checkdoc-variables'.  One
+that isn't bound yet, as checkdoc isn't loaded here, passes on the value
+saved through Customize, unevaluated, for checkdoc to set as it loads in
+the subprocess, the way Customize would here.  Should it refer to what
+only this session defines, the subprocess falls back to the default."
   `(progn
-     ,@(mapcar (lambda (opt) `(setq-default ,opt ',(symbol-value opt)))
-                (seq-filter #'boundp flycheck-emacs-lisp-checkdoc-variables))))
+     ,@(delq nil
+             (mapcar
+              (lambda (opt)
+                (cond
+                 ((boundp opt) `(setq-default ,opt ',(symbol-value opt)))
+                 ((get opt 'saved-value)
+                  `(put ',opt 'saved-value
+                        '((condition-case nil
+                              ,(car (get opt 'saved-value))
+                            (error
+                             (eval (car (get ',opt 'standard-value)) t))))))))
+              flycheck-emacs-lisp-checkdoc-variables))))
 
 (defun flycheck-org-lint-available-p ()
   "Check if org-lint is available."
