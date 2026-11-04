@@ -1586,9 +1586,16 @@ Kept in sync with the `Version' header and the Eask package version, which
 a spec enforces.  Used as fallback when `package-get-version' returns nil,
 which is the case when Flycheck was not installed as a package.")
 
+(defconst flycheck--package-version (package-get-version)
+  "Flycheck's version from its package metadata, or nil.
+
+Taken as Flycheck loads, as `package-get-version' reads the file being
+loaded or compiled.  Called later from source, it would read whatever
+file the current buffer visits.")
+
 (defun flycheck--pkg-version ()
   "Extract FLYCHECK's package version from its package metadata."
-  (or (package-get-version) flycheck-version))
+  (or flycheck--package-version flycheck-version))
 
 ;;; Version information, manual and loading of Flycheck
 (defun flycheck-version (&optional show-version)
