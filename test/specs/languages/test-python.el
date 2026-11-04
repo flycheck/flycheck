@@ -4,6 +4,20 @@
 (require 'test-helpers)
 
 (describe "Language Python"
+
+  (describe "flycheck--python-fallback"
+    (it "keeps an executable the user chose"
+      (spy-on 'call-process :and-return-value 1)
+      ;; Bound, so the defaults it sets don't outlive the spec
+      (let ((flycheck-python-flake8-executable "/opt/py/bin/python3.12")
+            (flycheck-python-pylint-executable nil)
+            (flycheck-json-python-json-executable nil)
+            (flycheck-python-pycompile-executable nil))
+        (flycheck--python-fallback)
+        (expect flycheck-python-flake8-executable
+                :to-equal "/opt/py/bin/python3.12")
+        (expect flycheck-python-pylint-executable :to-equal "python"))))
+
   (flycheck-buttercup-def-checker-test python-flake8 python syntax-error
     (assume (flycheck-buttercup-python-module-available-p
              'python-flake8 "flake8")
