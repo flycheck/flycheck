@@ -34,7 +34,7 @@ Within the error list the following key bindings are available:
 :kbd:`e`     Explain the error
 :kbd:`j`     Visit a related location of the error, if it has one
 :kbd:`x`     Apply the error's fix, if it has one
-:kbd:`X`     Apply every fix in the source buffer, or in the project
+:kbd:`X`     Apply every fix the list shows
 :kbd:`f`     Filter the error list by level
 :kbd:`F`     Remove the filter
 :kbd:`S`     Sort the error list by the column at point

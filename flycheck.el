@@ -8668,7 +8668,8 @@ belongs to has changed since the check that produced it."
 (defun flycheck-error-list-fix-all ()
   "Apply every fix the error list shows.
 
-In the buffer scope that is every fix of the source buffer.  In the
+In the buffer scope that is every fix of the source buffer itself, as
+`flycheck-fix-all-errors' leaves out fixes for other files.  In the
 project scope (see `flycheck-error-list-scope') it is every fix in the
 project, including those for files no buffer visits: such a file is
 opened, fixed as a single undoable change and left unsaved, so the
@@ -8702,9 +8703,10 @@ are left alone."
            (t (user-error "No applicable fixes in this project")))))
     (if-let* ((buffer flycheck-error-list-source-buffer)
               ((buffer-live-p buffer)))
-        (progn
+        (let ((errors (flycheck-error-list-apply-filter
+                       (flycheck-error-list-current-errors))))
           (with-current-buffer buffer
-            (call-interactively #'flycheck-fix-all-errors))
+            (flycheck--fix-buffer-errors errors))
           (flycheck-error-list-refresh))
       (user-error "The error list has no live source buffer"))))
 
@@ -10045,12 +10047,18 @@ via `flycheck-apply-fixes'.  Fixes that would conflict with each other,
 or whose edits make no sense, are skipped; fixes for other files are
 ignored."
   (interactive)
+  (flycheck--fix-buffer-errors flycheck-current-errors))
+
+(defun flycheck--fix-buffer-errors (errors)
+  "Apply the fixes of those of ERRORS that edit the current buffer.
+
+`flycheck-fix-all-errors' does this for all of the buffer's errors."
   (let ((fixes (delq nil
                      (mapcar (lambda (err)
                                (and (eq (flycheck--error-fix-buffer err)
                                         (current-buffer))
                                     (flycheck-error-resolve-fix err)))
-                             flycheck-current-errors))))
+                             errors))))
     (unless fixes
       (user-error "No applicable fixes in this buffer"))
     (let* ((total (length fixes))

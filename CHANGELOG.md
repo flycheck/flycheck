@@ -37,6 +37,7 @@
 
 ### Bugs fixed
 
+- [#2414](https://github.com/flycheck/flycheck/pull/2414): `X` in the error list leaves the errors its filters hide alone, as documented.
 - [#2414](https://github.com/flycheck/flycheck/pull/2414): Sorting the error list by level keeps each level's errors in order, and a grouped list can't be sorted by a column any more, which scattered its rows away from their groups.
 - [#2414](https://github.com/flycheck/flycheck/pull/2414): The error list no longer breaks redisplay once its source buffer is killed or when its message filter has a `%`, sizes its columns by display width so wide characters don't throw them off, and goes to the error on `RET` over an ID nothing explains.
 - [#2414](https://github.com/flycheck/flycheck/pull/2414): Prefix arguments such as `C-u` and `M--` work with `flycheck-next-error`, `flycheck-previous-error`, `flycheck-first-error` and the error list's `n` and `p`, and `flycheck-first-error` finds an error at the very start of the buffer and, with a negative argument, goes to the last error, as documented.
