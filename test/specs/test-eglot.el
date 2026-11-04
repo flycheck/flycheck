@@ -643,6 +643,22 @@ TEST=1
   (describe "flycheck-lsp--primary-bridge"
     (it "is nil when neither bridge is on"
       (flycheck-buttercup-with-temp-buffer
-        (expect (flycheck-lsp--primary-bridge) :to-be nil)))))
+        (expect (flycheck-lsp--primary-bridge) :to-be nil)))
+
+    (it "leaves a buffer the server preference serves to automatic selection"
+      ;; Pinned to flycheck-lsp, the buffer would keep it once the
+      ;; preference went, with nothing left that could run
+      (flycheck-buttercup-with-temp-buffer
+        (text-mode)
+        (setq buffer-file-name "/x/a.txt")
+        (let ((flycheck-lsp-servers '((text-mode "true"))))
+          (spy-on 'flycheck-lsp--preferred-p :and-return-value t)
+          (cl-letf (((symbol-function 'flycheck-mode) #'ignore)
+                    ((symbol-function 'flycheck-lsp--close-buffer) #'ignore)
+                    ((symbol-function 'flycheck-buffer-deferred) #'ignore))
+            (flycheck-lsp-mode 1)
+            (expect flycheck-checker :to-be 'flycheck-lsp)
+            (flycheck-lsp-mode -1)
+            (expect flycheck-checker :to-be nil)))))))
 
 ;;; test-eglot.el ends here

@@ -37,6 +37,7 @@
 
 ### Bugs fixed
 
+- [#2422](https://github.com/flycheck/flycheck/pull/2422): Turning `flycheck-lsp-mode` off in a buffer `flycheck-lsp-prefer-server` also serves no longer leaves the buffer pinned to `flycheck-lsp`, which stopped every check there once the preference was dropped too.
 - [#2422](https://github.com/flycheck/flycheck/pull/2422): Tearing down a language server that never answered `initialize` no longer freezes Emacs for about two seconds each time `flycheck-lsp` retries it.
 - [#2422](https://github.com/flycheck/flycheck/pull/2422): `flycheck-lsp-restart-server` restarts the server the buffer's document is on, even when `flycheck-lsp-servers` changed since the buffer was last checked.
 - [#2422](https://github.com/flycheck/flycheck/pull/2422): `flycheck-lsp` closes a buffer's document on the server once the buffer's file is renamed or its major mode changes, instead of leaving it open for the rest of the session, and no longer closes documents it never opened.
