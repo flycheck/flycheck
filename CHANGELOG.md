@@ -37,6 +37,7 @@
 
 ### Bugs fixed
 
+- [#2421](https://github.com/flycheck/flycheck/pull/2421): The `null-device` command argument names the null device of the host the checker runs on, so checking files on a POSIX host over TRAMP from Windows passes `/dev/null` rather than `NUL`.
 - [#2421](https://github.com/flycheck/flycheck/pull/2421): `cuda-nvcc` discards its object file on Windows too, where there is no `/dev/null`.
 - [#2421](https://github.com/flycheck/flycheck/pull/2421): `python-pyright` shows pyright's information diagnostics as info rather than warnings.
 - [#2421](https://github.com/flycheck/flycheck/pull/2421): `markdown-markdownlint-cli2` shows the findings of rules configured as warnings as warnings.
