@@ -164,7 +164,8 @@ error messages differently from the default.
    Function to hide error message displayed by `flycheck-display-errors-function`.
 
    If set to a function, it will be called with no arguments to
-   clear all displayed errors at point.
+   clear all displayed errors at point.  If set to nil, displayed errors
+   are not cleared.
 
 By default, Flycheck only provides `flycheck-clear-displayed-error-messages` to
 clear the last Flycheck error message from the minibuffer:
