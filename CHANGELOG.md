@@ -37,6 +37,7 @@
 
 ### Bugs fixed
 
+- [#2419](https://github.com/flycheck/flycheck/pull/2419): `sh-shellcheck` checks dash, ksh93, ash and busybox scripts, and Korn shell scripts on GNU/Linux, and disables itself where an older ShellCheck doesn't know the script's shell instead of failing every check.
 - [#2419](https://github.com/flycheck/flycheck/pull/2419): The OCaml checkers check interface files in `neocaml-interface-mode`.
 - [#2419](https://github.com/flycheck/flycheck/pull/2419): `go-staticcheck` waits for the buffer to be saved, as it reads the package from disk, instead of reporting on the saved file at lines the edits have moved.
 - [#2419](https://github.com/flycheck/flycheck/pull/2419): The `rpm-rpmlint` error explainer works with rpmlint 2 as well as rpmlint 1, passing the `--explain` both take.

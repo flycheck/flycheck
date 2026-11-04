@@ -14908,10 +14908,11 @@ status 65 instead."
 
 OUTPUT is what it printed, for the message that says why.
 
-Shellcheck exits 2 when it cannot read the file and 3 on a bad
-invocation.  Findings, and even an unparsable script, come back as
-JSON with exit status 0 or 1."
-  (flycheck--handle-fatal-exit exit-status output '(2 3)))
+Shellcheck exits 2 when it cannot read the file, 3 on a bad
+invocation and 4 on an option it doesn't support, such as a shell an
+older version doesn't know.  Findings, and even an unparsable script,
+come back as JSON with exit status 0 or 1."
+  (flycheck--handle-fatal-exit exit-status output '(2 3 4)))
 
 (defun flycheck--stylelint-handle-suspicious (_checker exit-status output)
   "Disable a stylelint checker when EXIT-STATUS means it could not lint.
@@ -21432,8 +21433,18 @@ See URL `https://www.zsh.org/'."
   :predicate (lambda () (eq sh-shell 'zsh))
   :next-checkers ((warning . sh-shellcheck)))
 
-(defconst flycheck-shellcheck-supported-shells '(bash ksh88 sh)
-  "Shells supported by ShellCheck.")
+(defconst flycheck-shellcheck-supported-shells
+  '(bash ksh88 ksh93 pdksh mksh sh dash ash busybox)
+  "Shells supported by ShellCheck, as `sh-shell' names them.
+
+ShellCheck takes most of these names for its `--shell' as they are;
+busybox needs ShellCheck 0.10 or newer.  It knows the Korn shell
+clones `sh-mode' calls pdksh and mksh, the ksh of GNU/Linux among
+them, as ksh (see `flycheck--shellcheck-shell').")
+
+(defun flycheck--shellcheck-shell ()
+  "Return the name ShellCheck knows the buffer's `sh-shell' by."
+  (if (memq sh-shell '(pdksh mksh)) "ksh" (symbol-name sh-shell)))
 
 (flycheck-def-option-var flycheck-shellcheck-excluded-warnings nil sh-shellcheck
   "A list of excluded warnings for ShellCheck.
@@ -21541,7 +21552,7 @@ See URL `https://github.com/koalaman/shellcheck/'."
             "--format" "json1"
             (eval
              (unless flycheck-shellcheck-infer-shell
-               (list "--shell" (symbol-name sh-shell))))
+               (list "--shell" (flycheck--shellcheck-shell))))
             (option-flag "--external-sources"
                          flycheck-shellcheck-follow-sources)
             (option "--exclude" flycheck-shellcheck-excluded-warnings list
