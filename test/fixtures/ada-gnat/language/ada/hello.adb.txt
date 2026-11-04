@@ -1,0 +1,3 @@
+aarch64-linux-gnu-gcc-14 -c  -gnatf -gnatef -gnatwa -gnat2012 -I- -o hello.o hello.adb
+hello.adb:6:04: warning: variable "Name" is not referenced [-gnatwu]
+hello.adb:8:11: warning: unrecognized pragma "Foo" [-gnatwg]

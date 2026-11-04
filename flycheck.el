@@ -15189,17 +15189,34 @@ Uses the GNAT compiler from GCC.  See URL
             (eval flycheck-gnat-args)
             source)
   :error-patterns
-  ((error line-start
-          (message "In file included from") " " (file-name) ":" line ":"
-          column ":"
-          line-end)
-   (info line-start (file-name) ":" line ":" column
-         ": note: " (message) line-end)
+  ;; A message ends in a tag: the switch it comes under, such as
+  ;; [-gnatwu] or GCC's [-Wstack-usage=], which serves as its id, or a
+  ;; word on why it is there.  The "note: " lines come from GCC's back end.
+  ((info line-start (file-name) ":" line ":" column ": " (or "info: " "note: ")
+         (message (minimal-match (one-or-more not-newline)))
+         (optional " [" (or (id (or "-gnat" "-W")
+                                (one-or-more (not (any "]\n"))))
+                            "enabled by default" "restriction warning")
+                   "]")
+         line-end)
    (warning line-start (file-name) ":" line ":" column
-            ": warning: " (message) line-end)
-   ;; no specific error prefix in Ada
-   (error line-start (file-name) ":" line ":" column
-          ": " (message) line-end))
+            ": " (or "warning: " "(style) ")
+            (message (minimal-match (one-or-more not-newline)))
+            (optional " [" (or (id (or "-gnat" "-W")
+                                   (one-or-more (not (any "]\n"))))
+                               "enabled by default" "restriction warning")
+                      "]")
+            line-end)
+   ;; GNAT before 12 gives an error with no prefix
+   (error line-start (file-name) ":" line ":" column ": " (? "error: ")
+          (message (minimal-match (one-or-more not-newline)))
+          (optional " [" (or (id (or "-gnat" "-W")
+                                 (one-or-more (not (any "]\n"))))
+                             "enabled by default" "restriction warning")
+                    "]")
+          ;; From pragma Warning_As_Error
+          (optional " [warning-as-error]")
+          line-end))
   :modes ada-mode)
 
 (flycheck-define-checker asciidoctor
