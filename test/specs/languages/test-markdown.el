@@ -70,6 +70,17 @@
                        'markdown-markdownlint-cli2)))
             (expect args :to-contain "--no-globs"))))))
 
+  (describe "markdownlint-cli2's severities"
+    (it "keep a rule configured as a warning a warning"
+      ;; markdownlint-cli2 0.23 with MD012's severity set to warning
+      (let ((errors (flycheck-buttercup-parse
+                     'markdown-markdownlint-cli2
+                     "a.md:3 warning MD012/no-multiple-blanks Multiple consecutive blank lines [Expected: 1; Actual: 2]
+a.md:4 error MD012/no-multiple-blanks Multiple consecutive blank lines [Expected: 1; Actual: 3]
+")))
+        (expect (mapcar #'flycheck-error-level errors)
+                :to-equal '(warning error)))))
+
   (describe "the fixes markdownlint suggests"
     (it "converts each shape of fixInfo to an edit"
       (flycheck-buttercup-with-temp-buffer
