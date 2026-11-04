@@ -854,6 +854,25 @@ block replaces that line's newline, so it begins with one."
                   :to-be-less-than
                   (seq-position hook #'flycheck-display-error-at-point-soon)))))
 
+    (it "rebuilds once the window's width changed"
+      ;; A `sideline' annotation is fitted to the width, as after C-x 3
+      (flycheck-buttercup-with-temp-buffer
+        (save-window-excursion
+          (set-window-buffer (selected-window) (current-buffer))
+          (test-annotate/setup)
+          (goto-char (point-min))
+          (forward-line 1)               ; line 2 carries an error
+          (let ((geometry '(0 . 100)))
+            (cl-letf (((symbol-function 'flycheck-annotate--window-geometry)
+                       (lambda () geometry)))
+              (flycheck-annotate-mode 1)
+              (spy-on 'flycheck-annotate--refresh)
+              (flycheck-annotate--post-command)
+              (expect 'flycheck-annotate--refresh :not :to-have-been-called)
+              (setq geometry '(0 . 40))
+              (flycheck-annotate--post-command)
+              (expect 'flycheck-annotate--refresh :to-have-been-called))))))
+
     (it "does not rebuild crossing between two clean lines"
       ;; Which line has point only matters through the current-line tier,
       ;; and a line without errors renders nothing under any tier.

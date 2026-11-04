@@ -9471,6 +9471,10 @@ start of the buffer on every command.")
 (defvar-local flycheck-annotate--last-window-start nil
   "Window start the inline overlays were last built for.")
 
+(defvar-local flycheck-annotate--last-geometry nil
+  "Window geometry the inline overlays were last built for.
+See `flycheck-annotate--window-geometry' for its shape.")
+
 (defvar-local flycheck-annotate--last-tick nil
   "Buffer-modification tick the inline overlays were last built for.
 
@@ -9873,17 +9877,18 @@ another file."
 (defun flycheck-annotate--refresh ()
   "Rebuild the inline overlays for the visible part of the buffer.
 
-Records the line and window start the overlays were built for, so
-`flycheck-annotate--post-command' can skip rebuilds that would not change
-anything."
+Records the line, window start and window geometry the overlays were
+built for, so `flycheck-annotate--post-command' can skip rebuilds that
+would not change anything."
   (setq flycheck-annotate--last-line-start (line-beginning-position)
         flycheck-annotate--last-window-start (window-start)
+        flycheck-annotate--last-geometry (flycheck-annotate--window-geometry)
         flycheck-annotate--last-tick (buffer-chars-modified-tick))
   (flycheck-annotate--clear)
   (when (and (bound-and-true-p flycheck-annotate-mode) flycheck-mode)
     (pcase-let ((`(,beg . ,end) (flycheck-annotate--region))
                 (point-anchor (line-end-position))
-                (flycheck-annotate--geometry (flycheck-annotate--window-geometry)))
+                (flycheck-annotate--geometry flycheck-annotate--last-geometry))
       (pcase-dolist (`(,anchor . ,errors)
                      (flycheck-annotate--group-errors beg end))
         ;; The tier (focused vs not) selects both the style and the level
@@ -9924,12 +9929,12 @@ all the same."
   "Rebuild the inline overlays if point, the window or the buffer changed.
 
 Skips the rebuild when nothing that affects the annotations happened:
-point stayed on its line, the window did not scroll, and the buffer was
-not edited.  The buffer-change check catches edits that leave point on
-its line \(such as `open-line'), which the line and window checks alone
-would miss, and keeps a `below'-style connector aligned as the code
-under it changes.  The check runs once per command, so a bulk edit
-rebuilds once rather than once per change.
+point stayed on its line, the window did not scroll or change its
+width, and the buffer was not edited.  The buffer-change check catches
+edits that leave point on its line \(such as `open-line'), which the
+line and window checks alone would miss, and keeps a `below'-style
+connector aligned as the code under it changes.  The check runs once
+per command, so a bulk edit rebuilds once rather than once per change.
 
 Crossing between two lines that carry no errors is also a skip: which
 line has point only tells on the rendering through the current-line
@@ -9938,7 +9943,10 @@ navigation is over clean lines, and every skipped rebuild is a screen's
 worth of overlays not rebuilt mid-keystroke."
   (let ((same-window-and-text
          (and (eql (window-start) flycheck-annotate--last-window-start)
-              (eql (buffer-chars-modified-tick) flycheck-annotate--last-tick))))
+              (eql (buffer-chars-modified-tick) flycheck-annotate--last-tick)
+              ;; A `sideline' annotation is fitted to the window's width
+              (equal (flycheck-annotate--window-geometry)
+                     flycheck-annotate--last-geometry))))
     (unless (and same-window-and-text
                  (or (eql (line-beginning-position)
                           flycheck-annotate--last-line-start)
@@ -9977,6 +9985,12 @@ to know where the window ended up."
       ;; Laying out an annotation can scroll the window again, and this
       ;; runs inside redisplay, so guard against coming back round
       (flycheck-annotate--post-command))))
+
+(defun flycheck-annotate--after-resize (window)
+  "Rebuild the overlays for WINDOW after its size changed.
+Catches what no command does, such as resizing the frame; see
+`flycheck-annotate--after-scroll'."
+  (flycheck-annotate--after-scroll window nil))
 
 (defun flycheck-annotate--covers-p (overlays)
   "Return non-nil when the line's annotation shows OVERLAYS' errors in full.
@@ -10045,7 +10059,8 @@ point.
 
 The annotations track the window showing the buffer and the line at
 point, and are rebuilt after a check, when point changes line, and when
-the window scrolls.  When a buffer is shown in more than one window they
+the window scrolls or changes its width.  When a buffer is shown in more
+than one window they
 follow the selected one; lines revealed by an implicit scroll are
 annotated on the next command."
   :lighter nil
@@ -10056,12 +10071,16 @@ annotated on the next command."
     ;; the line's annotation covers the errors at point
     (add-hook 'post-command-hook #'flycheck-annotate--post-command -50 t)
     (add-hook 'window-scroll-functions #'flycheck-annotate--after-scroll nil t)
+    (add-hook 'window-size-change-functions
+              #'flycheck-annotate--after-resize nil t)
     (add-hook 'flycheck-after-syntax-check-hook
               #'flycheck-annotate--refresh nil t)
     (flycheck-annotate--refresh))
    (t
     (remove-hook 'post-command-hook #'flycheck-annotate--post-command t)
     (remove-hook 'window-scroll-functions #'flycheck-annotate--after-scroll t)
+    (remove-hook 'window-size-change-functions
+                 #'flycheck-annotate--after-resize t)
     (remove-hook 'flycheck-after-syntax-check-hook
                  #'flycheck-annotate--refresh t)
     (flycheck-annotate--clear))))
