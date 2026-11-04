@@ -3876,16 +3876,22 @@ interruption in `flycheck-buffer-automatically' instead."
           ;; A failure describes the cycle that recorded it, not this one
           (setq flycheck--last-failure nil)
           (flycheck-mark-all-overlays-for-deletion)
-          (condition-case err
-              (let* ((checker (flycheck-get-checker-for-buffer)))
-                (if checker
-                    (flycheck-start-current-syntax-check checker)
-                  (flycheck-clear)
-                  (flycheck--report-no-checker)
-                  (flycheck-report-status 'no-checker)))
-            (error
-             (flycheck-report-failed-syntax-check)
-             (signal (car err) (cdr err))))))
+          (let ((started nil))
+            (condition-case err
+                (let* ((checker (flycheck-get-checker-for-buffer)))
+                  (if checker
+                      (progn
+                        (setq started t)
+                        (flycheck-start-current-syntax-check checker))
+                    (flycheck-clear)
+                    (flycheck--report-no-checker)
+                    (flycheck-report-status 'no-checker)))
+              (error
+               ;; A checker that finished inside its start function may have
+               ;; failed the check already, starting the next one
+               (when (or (not started) (flycheck-running-p))
+                 (flycheck-report-failed-syntax-check))
+               (signal (car err) (cdr err)))))))
     (user-error "Flycheck mode disabled")))
 
 (defun flycheck-report-buffer-checker-status
@@ -4033,10 +4039,24 @@ WORKING-DIR."
              (flycheck--project-storable-errors
               (seq-remove (lambda (err) (memq err relevant)) all-errors))))
     (flycheck-report-current-errors reported)
-    (let ((next-checker (unless no-next
-                          (flycheck-get-next-checker-for-buffer checker))))
-      (if next-checker
-          (flycheck-start-current-syntax-check next-checker)
+    (let ((next-checker
+           (unless no-next
+             (condition-case err
+                 (when-let* ((next (flycheck-get-next-checker-for-buffer
+                                    checker)))
+                   (flycheck-start-current-syntax-check next)
+                   next)
+               ;; A next checker's predicate or start function signaled.
+               ;; Fail the check, saying why, rather than leave it running
+               ;; for good: the report of the checker that finished would
+               ;; be ignored once the next one is the current check
+               (error
+                (when (flycheck-running-p)
+                  (flycheck-report-buffer-checker-status
+                   flycheck-current-syntax-check 'errored
+                   (error-message-string err)))
+                (signal (car err) (cdr err)))))))
+      (unless next-checker
         (setq flycheck-current-syntax-check nil)
         (flycheck-report-status 'finished)
         ;; Delete overlays only after the very last checker has run, to avoid

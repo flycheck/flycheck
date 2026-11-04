@@ -390,6 +390,57 @@
           (expect (flycheck-get-next-checker-for-buffer 'test-chain-a)
                   :to-be nil)))))
 
+  (describe "A chain whose next checker signals"
+
+    (after-each
+      (dolist (checker '(test-chain-a test-chain-b))
+        (setq flycheck-checkers (delq checker flycheck-checkers))
+        (put checker 'flycheck-generic-checker-version nil)))
+
+    (it "fails the check instead of leaving it running"
+      (let (finish)
+        (flycheck-define-generic-checker 'test-chain-a
+          "A fake chain head that finishes later, like a process."
+          :start (lambda (_checker callback) (setq finish callback))
+          :modes '(text-mode)
+          :next-checkers '(test-chain-b))
+        (flycheck-define-generic-checker 'test-chain-b
+          "A fake next checker whose start signals."
+          :start (lambda (_checker _callback) (error "Broken start"))
+          :modes '(text-mode))
+        (flycheck-buttercup-with-temp-buffer
+          (text-mode)
+          (let ((flycheck-checkers '(test-chain-a test-chain-b)))
+            (flycheck-mode)
+            (flycheck-buffer)
+            (expect (flycheck-running-p) :to-be-truthy)
+            (expect (funcall finish 'finished nil) :to-throw 'error)
+            (expect (flycheck-running-p) :not :to-be-truthy)
+            (expect flycheck-last-status-change :to-be 'errored)
+            ;; Saying which checker failed, for `flycheck-verify-setup'
+            (expect (car flycheck--last-failure) :to-be 'test-chain-b)))))
+
+    (it "fails the check once when the head finished as it started"
+      (flycheck-define-generic-checker 'test-chain-a
+        "A fake chain head that finishes inside its start function."
+        :start (lambda (_checker callback) (funcall callback 'finished nil))
+        :modes '(text-mode)
+        :next-checkers '(test-chain-b))
+      (flycheck-define-generic-checker 'test-chain-b
+        "A fake next checker whose start signals."
+        :start (lambda (_checker _callback) (error "Broken start"))
+        :modes '(text-mode))
+      (flycheck-buttercup-with-temp-buffer
+        (text-mode)
+        (let ((flycheck-checkers '(test-chain-a test-chain-b))
+              (failures 0))
+          (flycheck-mode)
+          (let ((flycheck-syntax-check-failed-hook
+                 (list (lambda () (setq failures (1+ failures))))))
+            (expect (flycheck-buffer) :to-throw 'error))
+          (expect failures :to-equal 1)
+          (expect (flycheck-running-p) :not :to-be-truthy)))))
+
   (describe "flycheck-may-enable-checker"
     (it "emacs-lisp"
       (flycheck-buttercup-with-resource-buffer "language/emacs-lisp/warnings.el"
