@@ -85,6 +85,14 @@ Some more explanation here.")
               '(disable
                 . "ESLint couldn't find an eslint.config.(js|mjs|cjs) file.")))
 
+    (it "explains the fatal exit with its first line, trimmed"
+      ;; Ended as Windows ends it, where the output is decoded unconverted
+      (expect (flycheck--eslint-handle-suspicious
+               'javascript-eslint 2
+               "ESLint couldn't find a configuration file.\r\nMore.\r\n")
+              :to-equal
+              '(disable . "ESLint couldn't find a configuration file.")))
+
     (it "stays suspicious on unparsable lint results"
       ;; Exit status 1 means eslint found lint problems; reaching the
       ;; suspicious handler then means we failed to parse them
