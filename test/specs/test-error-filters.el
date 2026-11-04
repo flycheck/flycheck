@@ -114,6 +114,16 @@
                                       "xx was not declared in this scope"
                                       :filename "foo.cpp"))))))
 
+  (describe "flycheck-fold-include-levels, with nothing after a sentinel"
+    (it "keeps the sentinel's own level"
+      (let ((errors (list (flycheck-error-new-at 1 0 'warning
+                                                 "In file included from"
+                                                 :filename "foo.cpp"))))
+        (expect (flycheck-error-level
+                 (car (flycheck-fold-include-levels errors
+                                                    "In file included from")))
+                :to-be 'warning))))
+
   (describe "flycheck-collapse-error-message-whitespace"
     (it "collapses all whitespace in error messages"
       (let ((err (flycheck-error-new-at 1 1 'error
