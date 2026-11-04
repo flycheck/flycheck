@@ -13416,7 +13416,7 @@ LANGUAGE is the LSP languageId.  Send `textDocument/didOpen' the first
 time the document is seen (DOC's version is nil), then
 `textDocument/didChange' with the whole text whenever the buffer changed
 since the last sync (tracked by `buffer-chars-modified-tick'), and nothing
-when it did not -- so a push-triggered recheck does not re-send.  The
+when it did not, so a push-triggered recheck does not re-send.  The
 whole-buffer copy is taken only when a message is actually sent."
   (let ((tick (buffer-chars-modified-tick))
         (version (flycheck-lsp--doc-version doc)))
@@ -13426,7 +13426,7 @@ whole-buffer copy is taken only when a message is actually sent."
        server 'textDocument/didOpen
        (list :textDocument
              (list :uri uri :languageId language :version 1
-                   :text (buffer-substring-no-properties (point-min) (point-max)))))
+                   :text (flycheck-lsp--buffer-text))))
       (setf (flycheck-lsp--doc-version doc) 1
             (flycheck-lsp--doc-tick doc) tick))
      ((/= (flycheck-lsp--doc-tick doc) tick)
@@ -13435,9 +13435,14 @@ whole-buffer copy is taken only when a message is actually sent."
        server 'textDocument/didChange
        (list :textDocument (list :uri uri :version (flycheck-lsp--doc-version doc))
              :contentChanges
-             (vector (list :text (buffer-substring-no-properties
-                                  (point-min) (point-max))))))
+             (vector (list :text (flycheck-lsp--buffer-text)))))
       (setf (flycheck-lsp--doc-tick doc) tick)))))
+
+(defun flycheck-lsp--buffer-text ()
+  "Return the text of the whole current buffer, whatever its narrowing."
+  (save-restriction
+    (widen)
+    (buffer-substring-no-properties (point-min) (point-max))))
 
 (defun flycheck-lsp--position-to-point (line character)
   "Return the buffer point for 0-based LINE and UTF-16 CHARACTER.
