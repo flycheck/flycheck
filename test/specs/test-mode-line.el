@@ -236,7 +236,60 @@
           (funcall test-mode-line--finish 'finished nil)
           (expect flycheck-last-status-change :to-be 'finished)
           (expect (substring-no-properties (flycheck-mode-line-status-text))
-                  :to-equal " FlyC:0")))))
+                  :to-equal " FlyC:0"))))
+
+    (it "is interrupted after a clear that interrupts the check"
+      (flycheck-buttercup-with-temp-buffer
+        (text-mode)
+        (let ((flycheck-checkers '(test-status-a))
+              (flycheck-check-syntax-automatically nil))
+          (flycheck-mode)
+          (flycheck-buffer)
+          ;; Queued behind the running one
+          (flycheck-buffer)
+          (expect (flycheck-deferred-check-p) :to-be-truthy)
+          (let ((current-prefix-arg '(4)))
+            (call-interactively #'flycheck-clear))
+          (flycheck-perform-deferred-syntax-check)
+          (expect (flycheck-running-p) :not :to-be-truthy)
+          (expect flycheck-last-status-change :to-be 'interrupted)
+          (expect (substring-no-properties (flycheck-mode-line-status-text))
+                  :to-equal " FlyC."))))
+
+    (it "doesn't start the check queued behind the interrupted one"
+      ;; A buffer automatic checks run in: shown, and not ephemeral
+      (let ((buffer (get-buffer-create "test-mode-line-queued.txt")))
+        (unwind-protect
+            (save-window-excursion
+              (switch-to-buffer buffer)
+              (text-mode)
+              (let ((flycheck-checkers '(test-status-a))
+                    (flycheck-check-syntax-automatically '(idle-change)))
+                (flycheck-mode)
+                (flycheck-buffer)
+                (flycheck-buffer-automatically 'idle-change)
+                (expect (flycheck-deferred-check-p) :to-be-truthy)
+                (let ((current-prefix-arg '(4)))
+                  (call-interactively #'flycheck-clear))
+                (flycheck-perform-deferred-syntax-check)
+                (expect (flycheck-running-p) :not :to-be-truthy)
+                (expect flycheck-last-status-change :to-be 'interrupted)))
+          (kill-buffer buffer))))
+
+    (it "is not checked after a clear with no check to interrupt"
+      (flycheck-buttercup-with-temp-buffer
+        (text-mode)
+        (let ((flycheck-checkers '(test-status-a))
+              (flycheck-check-syntax-automatically nil))
+          (flycheck-mode)
+          (flycheck-buffer)
+          (flycheck-clear 'interrupt)
+          (flycheck-clear 'interrupt)
+          (expect flycheck-last-status-change :to-be 'not-checked)
+          (flycheck-buffer)
+          (funcall test-mode-line--finish 'finished nil)
+          (flycheck-clear)
+          (expect flycheck-last-status-change :to-be 'not-checked)))))
 
   (it "explains suppressed errors in the tooltip of the whole indicator"
     (flycheck-buttercup-with-temp-buffer
