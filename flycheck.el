@@ -2658,9 +2658,6 @@ Return non-nil if CHECKER supports MODE and nil otherwise."
   (let ((mode (or mode major-mode)))
     (memq mode (flycheck-checker-get checker 'modes))))
 
-(define-obsolete-variable-alias 'flycheck-enabled-checkers
-  'flycheck--automatically-enabled-checkers "32")
-
 (defvar flycheck--automatically-enabled-checkers nil
   "Syntax checkers included in automatic selection.
 
@@ -19845,9 +19842,6 @@ See URL `https://github.com/microsoft/pyright'."
   :working-directory flycheck-python-find-project-root
   :error-parser flycheck-pyright--parse-error
   :modes (python-mode python-ts-mode))
-
-(define-obsolete-variable-alias 'flycheck-python-mypy-ini
-  'flycheck-python-mypy-config "32")
 
 (flycheck-def-config-file-var flycheck-python-mypy-config python-mypy
                               '("mypy.ini" "pyproject.toml" "setup.cfg"))
