@@ -436,10 +436,13 @@ Flycheck’s current state via one of the following texts:
 +------------------+-------------------------------------------------------------+
 |``FlyC.``         |The last syntax check was manually interrupted.              |
 +------------------+-------------------------------------------------------------+
-|``FlyC?``         |The last syntax check had a dubious result.  The definition  |
-|                  |of a syntax checker may have a bug.  Inspect the             |
-|                  |``*Messages*`` buffer and consider :ref:`reporting a bug     |
-|                  |<flycheck-bug-reports>`.                                     |
+|``FlyC?``         |The last syntax check had a dubious result: a syntax checker |
+|                  |printed output Flycheck could not read.  The checker may be  |
+|                  |misconfigured, or its definition may have a bug.  Type       |
+|                  |`C-c ! v` to see what it printed, and consider               |
+|                  |:ref:`reporting a bug <flycheck-bug-reports>`.  Errors the   |
+|                  |other checkers found still show in the buffer, but aren't    |
+|                  |counted.                                                     |
 +------------------+-------------------------------------------------------------+
 
 You can entirely customise the mode line indicator with `flycheck-mode-line`:

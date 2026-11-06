@@ -4110,7 +4110,13 @@ WORKING-DIR."
                 (signal (car err) (cdr err)))))))
       (unless next-checker
         (setq flycheck-current-syntax-check nil)
-        (flycheck-report-status 'finished)
+        ;; A checker whose output could not be read leaves the whole check
+        ;; `suspicious', instead of the counts of a clean buffer for it.
+        ;; `flycheck-buffer' forgets the last failure as a check starts.
+        (flycheck-report-status
+         (if (eq (nth 1 flycheck--last-failure) 'suspicious)
+             'suspicious
+           'finished))
         ;; Delete overlays only after the very last checker has run, to avoid
         ;; flickering on intermediate re-displays
         (flycheck-delete-marked-overlays)
