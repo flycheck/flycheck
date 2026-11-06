@@ -200,11 +200,8 @@
           (expect (flycheck-error-fix err) :to-be nil)))))
 
   (describe "the python-ruff checker command"
-    ;; Bind the config-file var to nil so argument substitution never locates a
-    ;; pyproject.toml/ruff.toml and adds a stray --config.
     (it "passes only check, JSON output and stdin by default"
-      (let ((flycheck-python-ruff-config nil)
-            (flycheck-python-ruff-select nil)
+      (let ((flycheck-python-ruff-select nil)
             (flycheck-python-ruff-extend-select nil)
             (flycheck-python-ruff-ignore nil)
             (flycheck-python-ruff-target-version nil)
@@ -214,8 +211,7 @@
                 :to-equal '("check" "--output-format=json" "-"))))
 
     (it "passes --select, --extend-select and --ignore as comma lists"
-      (let ((flycheck-python-ruff-config nil)
-            (flycheck-python-ruff-select '("E" "F" "I"))
+      (let ((flycheck-python-ruff-select '("E" "F" "I"))
             (flycheck-python-ruff-extend-select '("B"))
             (flycheck-python-ruff-ignore '("E501" "D")))
         (let ((args (flycheck-checker-substituted-arguments 'python-ruff)))
@@ -224,20 +220,43 @@
           (expect args :to-contain "--ignore=E501,D"))))
 
     (it "passes --target-version and --preview"
-      (let ((flycheck-python-ruff-config nil)
-            (flycheck-python-ruff-target-version "py312")
+      (let ((flycheck-python-ruff-target-version "py312")
             (flycheck-python-ruff-preview t))
         (let ((args (flycheck-checker-substituted-arguments 'python-ruff)))
           (expect args :to-contain "--target-version=py312")
           (expect args :to-contain "--preview"))))
 
     (it "keeps --output-format=json last so it wins over user args"
-      (let ((flycheck-python-ruff-config nil)
-            (flycheck-python-ruff-args '("--output-format=text")))
+      (let ((flycheck-python-ruff-args '("--output-format=text")))
         (let* ((args (flycheck-checker-substituted-arguments 'python-ruff))
                (formats (seq-filter (lambda (a) (string-prefix-p "--output-format" a))
                                     args)))
-          (expect (car (last formats)) :to-equal "--output-format=json")))))
+          (expect (car (last formats)) :to-equal "--output-format=json"))))
+
+    (it "leaves finding the configuration to ruff by default"
+      (let ((directory (make-temp-file "flycheck-ruff" 'directory)))
+        (unwind-protect
+            (with-temp-buffer
+              ;; Next to the file, where the config-file lookup would
+              ;; find it
+              (write-region "" nil (expand-file-name "ruff.toml" directory))
+              (setq buffer-file-name (expand-file-name "test.py" directory))
+              (unwind-protect
+                  (expect (flycheck-checker-substituted-arguments 'python-ruff)
+                          :not :to-contain "--config")
+                (setq buffer-file-name nil)))
+          (delete-directory directory 'recursive))))
+
+    (it "passes a configuration file it is given with --config"
+      (let* ((config (make-temp-file "flycheck-ruff" nil ".toml"))
+             (flycheck-python-ruff-config config))
+        (unwind-protect
+            (expect (seq-take (member "--config"
+                                      (flycheck-checker-substituted-arguments
+                                       'python-ruff))
+                              2)
+                    :to-equal (list "--config" config))
+          (delete-file config)))))
 
   (flycheck-buttercup-def-checker-test python-pylint python nil
     (assume (flycheck-buttercup-python-module-available-p
