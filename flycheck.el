@@ -4213,24 +4213,30 @@ buffer; \\[universal-argument] \\[flycheck-disable-checker] re-enables it")
   "Clear all errors in the current buffer.
 
 With prefix arg or SHALL-INTERRUPT non-nil, also interrupt the
-current syntax check."
+current syntax check, and drop the one queued behind it."
   (interactive "P")
-  (when shall-interrupt
-    (flycheck-stop))
-  (flycheck-delete-all-overlays)
-  ;; Inline annotations are separate overlays that the error-overlay
-  ;; teardown above doesn't touch; drop them so a manual clear doesn't
-  ;; leave stale messages behind (a re-check rebuilds them).  Harmless
-  ;; no-op when inline display was never active.
-  (flycheck-annotate--clear)
-  (flycheck-clear-errors)
-  ;; Note: `flycheck--excessive-checkers' deliberately survives a clear,
-  ;; so that the truncation notification doesn't re-fire after every
-  ;; manual clear or transient no-checker pass
-  (setq flycheck--suppressed-error-count 0)
-  (flycheck-clear-displayed-error-messages)
-  (flycheck-error-list-refresh)
-  (flycheck-hide-error-buffer))
+  (let ((interrupted (and shall-interrupt (flycheck-running-p))))
+    (when shall-interrupt
+      (flycheck-stop)
+      ;; Or the queued check starts right after this command
+      (flycheck-clean-deferred-check))
+    (flycheck-delete-all-overlays)
+    ;; Inline annotations are separate overlays that the error-overlay
+    ;; teardown above doesn't touch; drop them so a manual clear doesn't
+    ;; leave stale messages behind (a re-check rebuilds them).  Harmless
+    ;; no-op when inline display was never active.
+    (flycheck-annotate--clear)
+    (flycheck-clear-errors)
+    ;; Clearing the errors says the buffer wasn't checked; say why
+    (when interrupted
+      (flycheck-report-status 'interrupted))
+    ;; Note: `flycheck--excessive-checkers' deliberately survives a clear,
+    ;; so that the truncation notification doesn't re-fire after every
+    ;; manual clear or transient no-checker pass
+    (setq flycheck--suppressed-error-count 0)
+    (flycheck-clear-displayed-error-messages)
+    (flycheck-error-list-refresh)
+    (flycheck-hide-error-buffer)))
 
 (defun flycheck--empty-variables ()
   "Empty variables used by Flycheck."
