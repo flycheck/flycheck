@@ -59,6 +59,63 @@
              ((symbol-function 'flycheck--lsp-server-gone) #'ignore))
      ,@body))
 
+(defun test-lsp/diagnostic (line)
+  "Return a raw LSP error on the 0-based LINE."
+  (list :severity 1 :message "m"
+        :range (list :start (list :line line :character 0)
+                     :end (list :line line :character 1))))
+
+(defvar test-lsp/reports nil
+  "What the checks of the current spec reported, newest first.
+Each is the status followed by the lines of the errors, or by the
+message of a failure.")
+
+(defvar test-lsp/pulls nil
+  "The keyword arguments of the pulls the current spec sent, newest first.")
+
+(defmacro test-lsp/with-checked-buffer (server &rest body)
+  "Run BODY in a buffer whose `flycheck-lsp' checks go to SERVER.
+
+Messages to SERVER go nowhere, the pulls sent to it are kept in
+`test-lsp/pulls', and `test-lsp/check' starts a check that reports
+into `test-lsp/reports'."
+  (declare (indent 1))
+  `(flycheck-buttercup-with-temp-buffer
+     (insert "one\ntwo\n")
+     (setq-local major-mode 'ruby-mode)
+     (setq-local flycheck-mode t)
+     (let ((buffer-file-name "/x/a.rb")
+           (flycheck-lsp-servers '((ruby-mode "srv")))
+           (test-lsp/reports nil)
+           (test-lsp/pulls nil))
+       (cl-letf (((symbol-function 'flycheck-lsp--ensure-server)
+                  (lambda (&rest _) ,server))
+                 ((symbol-function 'jsonrpc-notify) #'ignore)
+                 ((symbol-function 'jsonrpc-async-request)
+                  (lambda (_conn _method _params &rest args)
+                    (push args test-lsp/pulls))))
+         (unwind-protect
+             (progn ,@body)
+           (flycheck-lsp--interrupt nil nil)
+           (remove-hook 'kill-buffer-hook #'flycheck-lsp--close-buffer t))))))
+
+(defun test-lsp/check ()
+  "Start a `flycheck-lsp' check that reports into `test-lsp/reports'."
+  (flycheck-lsp--start 'flycheck-lsp
+                       (lambda (status &optional data)
+                         (push (cons status
+                                     (if (stringp data)
+                                         (list data)
+                                       (mapcar #'flycheck-error-line data)))
+                               test-lsp/reports))))
+
+(defun test-lsp/push (server line)
+  "Have SERVER push an error on the 0-based LINE of the spec's buffer."
+  (flycheck-lsp--handle-notification
+   server 'textDocument/publishDiagnostics
+   (list :uri "file:///x/a.rb"
+         :diagnostics (vector (test-lsp/diagnostic line)))))
+
 (describe "LSP diagnostics"
 
   (describe "flycheck-lsp--severity-level"
@@ -792,6 +849,154 @@
                          (flycheck-lsp--server-documents server))
                         :to-equal 0)))))))
 
+    (describe "waiting for the server's answer"
+      (it "reports the push about the text it synced, not what came before"
+        (let ((server (flycheck-lsp--server-create :connection 'conn
+                                                   :initialized t)))
+          (test-lsp/with-checked-buffer server
+            (spy-on 'flycheck-buffer-automatically)
+            (test-lsp/check)
+            (expect test-lsp/reports :to-be nil)
+            (test-lsp/push server 1)
+            (expect test-lsp/reports :to-equal '((finished 2)))
+            ;; A line inserted above the error
+            (goto-char (point-min))
+            (insert "zero\n")
+            (test-lsp/check)
+            (expect test-lsp/reports :to-equal '((finished 2)))
+            (test-lsp/push server 2)
+            (expect test-lsp/reports :to-equal '((finished 3) (finished 2)))
+            ;; The push went to the waiting check, not to a new one
+            (expect 'flycheck-buffer-automatically :not :to-have-been-called))))
+      (it "reports at once when the server has answered for the text"
+        (let ((server (flycheck-lsp--server-create :connection 'conn
+                                                   :initialized t)))
+          (test-lsp/with-checked-buffer server
+            (test-lsp/check)
+            (test-lsp/push server 1)
+            (test-lsp/check)
+            (expect test-lsp/reports :to-equal '((finished 2) (finished 2)))
+            (expect flycheck-lsp--pending :to-be nil))))
+      (it "reports what it holds when the server doesn't answer in time"
+        (let ((server (flycheck-lsp--server-create :connection 'conn
+                                                   :initialized t))
+              (flycheck-lsp--answer-timeout 0.01))
+          (test-lsp/with-checked-buffer server
+            (test-lsp/check)
+            (test-lsp/push server 1)
+            (goto-char (point-max))
+            (insert "three\n")
+            (test-lsp/check)
+            (let ((deadline (+ (float-time) 2)))
+              (while (and (null (cdr test-lsp/reports))
+                          (< (float-time) deadline))
+                (accept-process-output nil 0.02)))
+            (expect test-lsp/reports :to-equal '((finished 2) (finished 2)))
+            (expect flycheck-lsp--pending :to-be nil))))
+      (it "waits for the pull of a server on the pull model"
+        (let ((server (flycheck-lsp--server-create
+                       :connection 'conn :initialized t
+                       :capabilities '(:diagnosticProvider
+                                       (:interFileDependencies :json-false)))))
+          (test-lsp/with-checked-buffer server
+            (cl-flet ((answer (result)
+                        (funcall (plist-get (car test-lsp/pulls) :success-fn)
+                                 result)))
+              (test-lsp/check)
+              (expect test-lsp/reports :to-be nil)
+              ;; What it pushes besides is not the answer
+              (test-lsp/push server 0)
+              (expect test-lsp/reports :to-be nil)
+              (answer (list :kind "full" :resultId "r1"
+                            :items (vector (test-lsp/diagnostic 1))))
+              (expect test-lsp/reports :to-equal '((finished 1 2)))
+              ;; Unchanged holds for the new text too
+              (goto-char (point-max))
+              (insert "three\n")
+              (test-lsp/check)
+              (expect (length test-lsp/reports) :to-equal 1)
+              (answer '(:kind "unchanged" :resultId "r1"))
+              (expect (car test-lsp/reports) :to-equal '(finished 1 2))
+              ;; A failed pull reports what there is
+              (insert "four\n")
+              (test-lsp/check)
+              (expect (length test-lsp/reports) :to-equal 2)
+              (funcall (plist-get (car test-lsp/pulls) :error-fn) 'failed)
+              (expect (car test-lsp/reports) :to-equal '(finished 1 2))
+              (expect flycheck-lsp--pending :to-be nil)))))
+      (it "reports the failure to convert a diagnostic it waited for"
+        (let ((server (flycheck-lsp--server-create :connection 'conn
+                                                   :initialized t)))
+          (test-lsp/with-checked-buffer server
+            (test-lsp/check)
+            (flycheck-lsp--handle-notification
+             server 'textDocument/publishDiagnostics
+             (list :uri "file:///x/a.rb"
+                   :diagnostics (vector '(:severity 1 :message "no range"))))
+            (expect (caar test-lsp/reports) :to-be 'errored)
+            (expect flycheck-lsp--pending :to-be nil))))
+      (it "doesn't wait again for an answer about text that got none"
+        (let ((server (flycheck-lsp--server-create :connection 'conn
+                                                   :initialized t))
+              (flycheck-lsp--answer-timeout 0.01))
+          (test-lsp/with-checked-buffer server
+            (test-lsp/check)
+            (let ((deadline (+ (float-time) 2)))
+              (while (and (null test-lsp/reports)
+                          (< (float-time) deadline))
+                (accept-process-output nil 0.02)))
+            (expect test-lsp/reports :to-equal '((finished)))
+            (test-lsp/check)
+            (expect test-lsp/reports :to-equal '((finished) (finished))))))
+      (it "takes a pull reply with no report in it for no answer"
+        (let ((server (flycheck-lsp--server-create
+                       :connection 'conn :initialized t
+                       :capabilities '(:diagnosticProvider
+                                       (:interFileDependencies :json-false)))))
+          (test-lsp/with-checked-buffer server
+            (test-lsp/check)
+            (funcall (plist-get (car test-lsp/pulls) :success-fn) nil)
+            (expect test-lsp/reports :to-equal '((finished)))
+            ;; And asks again on the next check
+            (test-lsp/check)
+            (expect (length test-lsp/pulls) :to-equal 2))))
+      (it "stops the waiting check when the document closes"
+        (let ((server (flycheck-lsp--server-create :connection 'conn
+                                                   :initialized t)))
+          (test-lsp/with-checked-buffer server
+            (spy-on 'flycheck-stop)
+            (test-lsp/check)
+            (flycheck-test-with-stub-jsonrpc nil
+              (flycheck-lsp--close-buffer))
+            (expect 'flycheck-stop :to-have-been-called)
+            (expect flycheck-lsp--pending :to-be nil))))
+      (it "drops the waiting check when interrupted"
+        (let ((server (flycheck-lsp--server-create :connection 'conn
+                                                   :initialized t)))
+          (test-lsp/with-checked-buffer server
+            (spy-on 'flycheck-buffer-automatically)
+            (test-lsp/check)
+            (flycheck-lsp--interrupt 'flycheck-lsp nil)
+            (test-lsp/push server 1)
+            (expect test-lsp/reports :to-be nil)
+            ;; The push goes to a new check instead
+            (expect 'flycheck-buffer-automatically :to-have-been-called))))
+      (it "leaves the base buffer's waiting check alone in a clone"
+        (let ((server (flycheck-lsp--server-create :connection 'conn
+                                                   :initialized t)))
+          (test-lsp/with-checked-buffer server
+            (test-lsp/check)
+            (let ((pending flycheck-lsp--pending)
+                  (clone (clone-indirect-buffer nil nil)))
+              (unwind-protect
+                  (with-current-buffer clone
+                    (expect (flycheck-lsp--pending-check) :to-be nil)
+                    (flycheck-lsp--interrupt 'flycheck-lsp nil))
+                (kill-buffer clone))
+              (expect flycheck-lsp--pending :to-be pending)
+              (test-lsp/push server 1)
+              (expect test-lsp/reports :to-equal '((finished 2))))))))
+
     (describe "flycheck-lsp--on-initialized"
       (it "stores caps, marks the server ready, and rechecks waiting buffers"
         (flycheck-buttercup-with-temp-buffer
@@ -1494,6 +1699,9 @@
       (it "is a registered generic checker"
         (expect (flycheck-valid-checker-p 'flycheck-lsp) :to-be-truthy)
         (expect (flycheck-checker-get 'flycheck-lsp 'start) :to-be #'flycheck-lsp--start))
+      (it "can interrupt a check waiting for the server"
+        (expect (flycheck-checker-get 'flycheck-lsp 'interrupt)
+                :to-be #'flycheck-lsp--interrupt))
 
       (describe "preferring a resident server"
 

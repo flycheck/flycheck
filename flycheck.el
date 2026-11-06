@@ -12915,7 +12915,9 @@ just fetched against this buffer state and applied right after."
        :tick (or tick (buffer-chars-modified-tick))))))
 
 (defun flycheck-lsp--count-push (rechecked)
-  "Record a diagnostics push, RECHECKED non-nil if it triggered a check."
+  "Record a diagnostics push.
+RECHECKED is non-nil if it carried changes to a check, a new one or
+one waiting for the server's answer."
   (cl-incf flycheck-lsp--push-count)
   (when rechecked (flycheck-lsp--count-recheck))
   (setq flycheck-lsp--last-push-time (float-time))
@@ -13206,7 +13208,10 @@ the last pulled report of it carried, for the next pull to refer to."
   (diags nil) (pulled nil)
   ;; The buffer's tick for the text each channel's diagnostics are about,
   ;; which the fixes they carry answer to
-  (diags-tick nil) (pulled-tick nil))
+  (diags-tick nil) (pulled-tick nil)
+  ;; The tick of the text a check waited for an answer about in vain, so
+  ;; the checks after it don't wait for one again
+  (given-up-tick nil))
 
 (defun flycheck-lsp--doc-diagnostics (doc)
   "Return every raw LSP diagnostic held for DOC, pushed and pulled."
@@ -13414,6 +13419,89 @@ same path get different keys, and the key opens the right file."
   (let ((conn (flycheck-lsp--server-connection server)))
     (and conn (jsonrpc-running-p conn))))
 
+(defconst flycheck-lsp--answer-timeout 3
+  "Seconds a check waits for the server to answer for the text it synced.
+
+A server may skip a version of the document while the user types, or
+say nothing about one, so after this long the check reports what the
+server said about the text before.")
+
+(defvar-local flycheck-lsp--pending nil
+  "The buffer's check waiting for the server's answer, or nil.
+
+A list (CALLBACK TIMER BUFFER SERVER DOC URI): the check's callback,
+the timer that gives up on the answer, and what
+`flycheck-lsp--doc-errors' needs.  BUFFER tells the buffer's own check
+from the copy an indirect clone of the buffer inherits.  See
+`flycheck-lsp--start'.")
+
+(defun flycheck-lsp--answered-p (server doc)
+  "Whether SERVER's diagnostics for DOC are about the text last synced.
+
+A server on the pull model answers the pull of each version, and what
+it pushes besides is not waited for: rust-analyzer, for one, pushes
+what cargo check says only on saving.  Any other server answers with
+a push."
+  (let ((tick (flycheck-lsp--doc-tick doc)))
+    (or (eql (if (flycheck-lsp--capable server :diagnosticProvider)
+                 (flycheck-lsp--doc-pulled-tick doc)
+               (flycheck-lsp--doc-diags-tick doc))
+             tick)
+        ;; No answer came about this text before, so none is coming
+        (eql (flycheck-lsp--doc-given-up-tick doc) tick))))
+
+(defun flycheck-lsp--pending-check (&optional doc)
+  "Return the current buffer's own check waiting for an answer, or nil.
+
+With DOC, only one waiting for the answer about DOC.  See
+`flycheck-lsp--pending'."
+  (pcase flycheck-lsp--pending
+    ((and pending `(,_ ,_ ,buffer ,_ ,pending-doc ,_)
+          (guard (eq buffer (current-buffer)))
+          (guard (or (null doc) (eq pending-doc doc))))
+     pending)))
+
+(defun flycheck-lsp--finish-pending (pending)
+  "Report what the server holds to the waiting check PENDING.
+See `flycheck-lsp--pending'."
+  (pcase-let ((`(,callback ,timer ,buffer ,server ,doc ,uri) pending))
+    (cancel-timer timer)
+    (with-current-buffer buffer
+      (setq flycheck-lsp--pending nil))
+    ;; Converted first: out here, unlike in `flycheck-lsp--start', a
+    ;; diagnostic that fails to convert would leave the check running
+    (pcase-let ((`(,status . ,data)
+                 (condition-case err
+                     (cons 'finished
+                           (flycheck-lsp--doc-errors doc buffer server uri))
+                   (error (cons 'errored (error-message-string err))))))
+      (funcall callback status data))))
+
+(defun flycheck-lsp--settle-pending (doc)
+  "Finish the check waiting for an answer about DOC, if there is one."
+  (when-let* ((buffer (flycheck-lsp--doc-buffer doc))
+              ((buffer-live-p buffer)))
+    (with-current-buffer buffer
+      (when-let* ((pending (flycheck-lsp--pending-check doc)))
+        (flycheck-lsp--finish-pending pending)))))
+
+(defun flycheck-lsp--answer-timed-out (pending)
+  "Give up waiting for the answer the check PENDING waits for."
+  (pcase-let ((`(,_ ,_ ,buffer ,_ ,doc ,_) pending))
+    (when (and (buffer-live-p buffer)
+               (eq (buffer-local-value 'flycheck-lsp--pending buffer)
+                   pending))
+      (setf (flycheck-lsp--doc-given-up-tick doc)
+            (flycheck-lsp--doc-tick doc))
+      (flycheck-lsp--finish-pending pending))))
+
+(defun flycheck-lsp--interrupt (_checker _context)
+  "Drop the current buffer's check waiting for the server's answer.
+The `:interrupt' function of the `flycheck-lsp' checker."
+  (when-let* ((pending (flycheck-lsp--pending-check)))
+    (cancel-timer (nth 1 pending))
+    (setq flycheck-lsp--pending nil)))
+
 (defun flycheck-lsp--accept-diagnostics (server uri diagnostics
                                                 &optional version result-id
                                                 pushed)
@@ -13424,13 +13512,16 @@ pull.  With VERSION, a report about a document a buffer has since
 synced at another version is stale and ignored.  RESULT-ID, from a
 pull, is kept for the next pull to refer to; a report with one
 replaces the pulled diagnostics, a push the pushed ones, and the
-document shows both (see `flycheck-lsp--doc-diagnostics').  If a
-live buffer owns
-the document, re-trigger its check so the fresh diagnostics are
-published (guarded against recursion); a report repeating what the
-cache holds changes nothing about the buffer, and servers republish
-freely while they index.  PUSHED says the report was a push, for the
-counts `flycheck-verify-setup' shows."
+document shows both (see `flycheck-lsp--doc-diagnostics').
+
+A check of the buffer that owns the document waiting for an answer
+\(see `flycheck-lsp--pending') reports it once this is the answer, and
+reports any other report along with it.  With no check waiting,
+re-trigger the buffer's check so the fresh diagnostics are published
+\(guarded against recursion); a report repeating what the cache holds
+changes nothing about the buffer, and servers republish freely while
+they index.  PUSHED says the report was a push, for the counts
+`flycheck-verify-setup' shows."
   (let ((doc (flycheck-lsp--document
               server (flycheck-lsp--doc-key
                       uri (flycheck-lsp--server-remote server)))))
@@ -13457,18 +13548,26 @@ counts `flycheck-verify-setup' shows."
         (when-let* ((buffer (flycheck-lsp--doc-buffer doc))
                     ((buffer-live-p buffer)))
           (with-current-buffer buffer
-            (let ((recheck (and changed
-                                flycheck-mode
-                                (not flycheck-lsp--suppress-recheck))))
+            (let* ((pending (flycheck-lsp--pending-check doc))
+                   (answered (and pending
+                                  (flycheck-lsp--answered-p server doc)))
+                   ;; A waiting check reports all of it once answered
+                   (recheck (and changed
+                                 (not pending)
+                                 flycheck-mode
+                                 (not flycheck-lsp--suppress-recheck))))
               (when pushed
-                (flycheck-lsp--count-push recheck))
-              (when recheck
+                (flycheck-lsp--count-push (or recheck (and answered changed))))
+              (cond
+               (answered
+                (flycheck-lsp--finish-pending pending))
+               (recheck
                 ;; Bound buffer-locally, or the check copies the global
                 ;; binding's t into a local that outlives it
                 (unless (local-variable-p 'flycheck-lsp--suppress-recheck)
                   (setq-local flycheck-lsp--suppress-recheck nil))
                 (let ((flycheck-lsp--suppress-recheck t))
-                  (flycheck-buffer-automatically))))))))))
+                  (flycheck-buffer-automatically)))))))))))
 
 (defun flycheck-lsp--handle-notification (server method params)
   "Handle an LSP notification METHOD with PARAMS from SERVER.
@@ -13491,34 +13590,47 @@ document, and longer over the whole workspace.")
 The reply lands in the cache like a push would (see
 `flycheck-lsp--accept-diagnostics'), re-triggering the buffer's check
 only when it changes something, so a pull cannot chase its own tail.
-A reply of `unchanged', keyed on the result id of the last one, is
-just that.  A reply about a document closed in the meantime is
-dropped rather than resurrecting it; a failed or timed-out pull
-leaves the document to be asked about again by the next check."
+A reply of `unchanged', keyed on the result id of the last one, says
+the diagnostics pulled before hold for this version too.  A reply about
+a document closed in the meantime is dropped rather than resurrecting
+it; a failed or timed-out pull leaves the document to be asked about
+again by the next check.  A check waiting for the answer (see
+`flycheck-lsp--pending') reports what the cache holds once the pull of
+the current version ends, whichever way."
   (let ((version (flycheck-lsp--doc-version doc))
         (documents (flycheck-lsp--server-documents server)))
     (setf (flycheck-lsp--doc-pulled-version doc) version)
-    (jsonrpc-async-request
-     (flycheck-lsp--server-connection server)
-     'textDocument/diagnostic
-     (append (list :textDocument (list :uri uri))
-             (when-let* ((id (flycheck-lsp--doc-result-id doc)))
-               (list :previousResultId id)))
-     :timeout flycheck-lsp--pull-timeout
-     :success-fn (lambda (result)
-                   (when (and (equal (plist-get result :kind) "full")
-                              (eq doc (gethash
-                                       (flycheck-lsp--doc-key
-                                        uri (flycheck-lsp--server-remote
-                                             server))
-                                       documents)))
-                     (flycheck-lsp--accept-diagnostics
-                      server uri (plist-get result :items) version
-                      (plist-get result :resultId))))
-     :error-fn (lambda (_err)
-                 (setf (flycheck-lsp--doc-pulled-version doc) nil))
-     :timeout-fn (lambda ()
-                   (setf (flycheck-lsp--doc-pulled-version doc) nil)))))
+    (cl-flet ((failed ()
+                (setf (flycheck-lsp--doc-pulled-version doc) nil)
+                ;; No answer about this version is coming
+                (when (equal version (flycheck-lsp--doc-version doc))
+                  (flycheck-lsp--settle-pending doc))))
+      (jsonrpc-async-request
+       (flycheck-lsp--server-connection server)
+       'textDocument/diagnostic
+       (append (list :textDocument (list :uri uri))
+               (when-let* ((id (flycheck-lsp--doc-result-id doc)))
+                 (list :previousResultId id)))
+       :timeout flycheck-lsp--pull-timeout
+       :success-fn
+       (lambda (result)
+         (when (eq doc (gethash (flycheck-lsp--doc-key
+                                 uri (flycheck-lsp--server-remote server))
+                                documents))
+           (pcase (plist-get result :kind)
+             ("full"
+              (flycheck-lsp--accept-diagnostics
+               server uri (plist-get result :items) version
+               (plist-get result :resultId)))
+             ("unchanged"
+              (when (equal version (flycheck-lsp--doc-version doc))
+                (setf (flycheck-lsp--doc-pulled-tick doc)
+                      (flycheck-lsp--doc-tick doc))
+                (flycheck-lsp--settle-pending doc)))
+             ;; A reply with no report in it is no answer either
+             (_ (failed)))))
+       :error-fn (lambda (_err) (failed))
+       :timeout-fn #'failed))))
 
 (defun flycheck-lsp--pull-workspace (server)
   "Ask SERVER for the diagnostics of its whole workspace.
@@ -14096,10 +14208,14 @@ about, which a fix it carries answers to."
   "Start the `flycheck-lsp' syntax check, reporting through CALLBACK.
 
 Ensure the buffer's server is running, sync the document to it, and report
-the diagnostics cached for the buffer so far.  The server's later push
-re-triggers the check to deliver fresh diagnostics.  The command, file and
-server are all guaranteed by the checker's predicate, but a server that
-fails to start still yields no diagnostics rather than an error.
+the diagnostics cached for the buffer, once they are about the text just
+synced (see `flycheck-lsp--answered-p').  Until the server answers for
+it, or `flycheck-lsp--answer-timeout' passes, the check keeps running
+(see `flycheck-lsp--pending'), and the errors shown stay where the edits
+moved them.  A push the server sends later re-triggers the check to
+deliver it.  The command, file and server are all guaranteed by the
+checker's predicate, but a server that fails to start still yields no
+diagnostics rather than an error.
 
 While the server is still finishing its asynchronous `initialize'
 handshake, report nothing and leave the document registered: the
@@ -14113,6 +14229,9 @@ handshake's completion re-triggers the check (see
   (add-hook 'change-major-mode-hook #'flycheck-lsp--close-buffer nil 'local)
   (unless (local-variable-p 'flycheck-lsp--suppress-recheck)
     (setq-local flycheck-lsp--suppress-recheck flycheck-lsp--suppress-recheck))
+  ;; A wait no check ended, before closing a renamed document below
+  ;; would take it for this check's
+  (flycheck-lsp--interrupt nil nil)
   (condition-case err
       (let* ((command (flycheck-lsp--command major-mode))
              (uri (flycheck-lsp--buffer-uri))
@@ -14145,8 +14264,18 @@ handshake's completion re-triggers the check (see
                          (not (equal (flycheck-lsp--doc-version doc)
                                      (flycheck-lsp--doc-pulled-version doc))))
                 (flycheck-lsp--pull-document server doc uri))
-              (funcall callback 'finished
-                       (flycheck-lsp--doc-errors doc buffer server uri))))))
+              (if (flycheck-lsp--answered-p server doc)
+                  (funcall callback 'finished
+                           (flycheck-lsp--doc-errors doc buffer server uri))
+                ;; What the server said about the text before would put
+                ;; its errors back on the lines they were on, until the
+                ;; answer about this text comes in
+                (let ((pending (list callback nil buffer server doc uri)))
+                  (setf (nth 1 pending)
+                        (run-at-time flycheck-lsp--answer-timeout nil
+                                     #'flycheck-lsp--answer-timed-out
+                                     pending))
+                  (setq flycheck-lsp--pending pending)))))))
     (error (funcall callback 'errored (error-message-string err)))))
 
 (defun flycheck-lsp--enabled-p ()
@@ -14195,6 +14324,7 @@ Talks to the server configured for the buffer's major mode in
 no Eglot involved.  Enabled by `flycheck-lsp-mode', or used in place of
 a command checker by `flycheck-lsp-prefer-server'."
   :start #'flycheck-lsp--start
+  :interrupt #'flycheck-lsp--interrupt
   :predicate #'flycheck-lsp--enabled-p
   :verify #'flycheck-lsp--verify
   :modes '(prog-mode text-mode))
@@ -14359,11 +14489,16 @@ the server is not told to close it."
 Only while the document is still the buffer's: an indirect clone
 copies the record from its base buffer, and a buffer visiting a file
 another buffer was renamed away from takes that one's document over.
+A check waiting for the server's answer about it is stopped.
 
 The server itself is left running: like Eglot, it is kept for the rest
 of the session and torn down only when Emacs exits (see
 `flycheck-lsp--shutdown-all'), so reopening or checking another of its
 files does not pay to restart it."
+  ;; No answer about the document can reach a check waiting for one
+  (when (flycheck-lsp--pending-check)
+    (flycheck-lsp--interrupt nil nil)
+    (flycheck-stop))
   (pcase-let ((`(,server ,key ,uri) flycheck-lsp--open-document))
     (setq flycheck-lsp--open-document nil)
     (when-let* ((server)

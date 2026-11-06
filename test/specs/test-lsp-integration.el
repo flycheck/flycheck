@@ -149,6 +149,35 @@ down before the temp directory goes away."
           (expect (mapcar #'flycheck-error-level flycheck-current-errors)
                   :to-have-same-items-as '(warning error))))))
 
+  (it "never shows an error on the line an edit moved it from"
+    (assume (test-lsp-integration/possible-p) "No python3, or Windows")
+    (test-lsp-integration/preserving-checker 'flycheck-lsp
+      (test-lsp-integration/with-file-buffer
+        (let ((flycheck-lsp-servers
+               `((makefile-gmake-mode . ("python3" ,test-lsp-integration/server
+                                         "edit"))))
+              (flycheck-checkers '(flycheck-lsp))
+              (reported nil))
+          (add-hook 'flycheck-after-syntax-check-hook
+                    (lambda ()
+                      (push (mapcar #'flycheck-error-line
+                                    flycheck-current-errors)
+                            reported))
+                    nil 'local)
+          (flycheck-lsp-mode 1)
+          (flycheck-buffer)
+          (expect (test-lsp-integration/wait-until
+                   (lambda () (equal (car reported) '(2))) 10)
+                  :to-be-truthy)
+          (setq reported nil)
+          (goto-char (point-min))
+          (insert "# moves the recipe down a line\n")
+          (flycheck-buffer)
+          (expect (test-lsp-integration/wait-until
+                   (lambda () (equal (car reported) '(3))) 10)
+                  :to-be-truthy)
+          (expect reported :to-equal '((3)))))))
+
   (it "pulls a pull-model server's diagnostics, and its workspace on demand"
     (assume (test-lsp-integration/possible-p) "No python3, or Windows")
     (test-lsp-integration/preserving-checker 'flycheck-lsp

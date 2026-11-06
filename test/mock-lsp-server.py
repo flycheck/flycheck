@@ -15,6 +15,9 @@ picked by the first argument:
           that Emacs 31's Eglot receives.  Also publishes once on
           didOpen, like a real server, so a client that never pulls
           (Emacs 30's Eglot) still hears about the diagnostics
+  edit    publish a warning on the first line that runs echo, after
+          didOpen and after each didChange, so the warning follows the
+          line through edits that move it
 
 Every incoming method is counted, and the counts are rewritten to the
 file named by the MOCK_LSP_STATS environment variable after each
@@ -153,6 +156,17 @@ def workspace_report(previous_ids):
     return {"items": items}
 
 
+def echo_warning(text):
+    """Return a warning on the first line of TEXT that runs echo."""
+    for number, line in enumerate(text.split("\n")):
+        if "echo" in line:
+            return [dict(WARNING, range={
+                "start": {"line": number, "character": 0},
+                "end": {"line": number, "character": 1},
+            })]
+    return []
+
+
 def publish(uri, diags):
     notify(
         "textDocument/publishDiagnostics",
@@ -160,7 +174,7 @@ def publish(uri, diags):
     )
 
 
-def on_did_open(uri):
+def on_did_open(uri, text):
     if scenario == "workspace":
         opened.append(uri)
     elif scenario == "push":
@@ -171,6 +185,8 @@ def on_did_open(uri):
         publish(uri, [WARNING, ERROR])
     elif scenario == "pull":
         publish(uri, [WARNING])
+    elif scenario == "edit":
+        publish(uri, echo_warning(text))
 
 
 while True:
@@ -183,7 +199,11 @@ while True:
     if method == "initialize":
         respond(msg, {"capabilities": capabilities()})
     elif method == "textDocument/didOpen":
-        on_did_open(msg["params"]["textDocument"]["uri"])
+        on_did_open(msg["params"]["textDocument"]["uri"],
+                    msg["params"]["textDocument"]["text"])
+    elif method == "textDocument/didChange" and scenario == "edit":
+        publish(msg["params"]["textDocument"]["uri"],
+                echo_warning(msg["params"]["contentChanges"][-1]["text"]))
     elif method == "textDocument/diagnostic":
         if scenario == "workspace":
             respond(msg, document_report(
