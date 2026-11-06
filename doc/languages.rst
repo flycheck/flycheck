@@ -1285,7 +1285,9 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
       Lint with `ruff <https://docs.astral.sh/ruff/>`_.  The levels of its
       findings come from `flycheck-flake8-error-level-alist`, as Ruff
-      uses Flake8's rule codes.
+      uses Flake8's rule codes.  Ruff finds the configuration nearest to
+      the checked file on its own, so `flycheck-python-ruff-config` is
+      only needed to force a particular file.
 
       .. syntax-checker-config-file:: flycheck-python-ruff-config
 
