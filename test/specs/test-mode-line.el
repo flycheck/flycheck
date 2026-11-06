@@ -29,6 +29,9 @@
 (require 'flymake)
 (require 'project)
 
+(defvar test-mode-line--finish nil
+  "The status callback of the running `test-status-a' check.")
+
 (describe "Mode Line"
   (it "shows the number of errors, warnings, and infos"
     (let ((flycheck-current-errors
@@ -167,6 +170,73 @@
           (ignore flymake-list-only-diagnostics))
         (expect flycheck--project-diagnostics-generation
                 :to-be-greater-than before))))
+
+  (describe "the status a check ends in"
+
+    (before-each
+      (flycheck-define-generic-checker 'test-status-a
+        "A fake checker that finishes later, like a process."
+        :start (lambda (_checker callback)
+                 (setq test-mode-line--finish callback))
+        :modes '(text-mode))
+      (flycheck-define-generic-checker 'test-status-b
+        "A fake checker that reports an error as it starts."
+        :start (lambda (_checker callback)
+                 (funcall callback 'finished
+                          (list (flycheck-error-new-at
+                                 1 1 'error "boom" :buffer (current-buffer)
+                                 :checker 'test-status-b))))
+        :modes '(text-mode)))
+
+    (after-each
+      (setq test-mode-line--finish nil)
+      (dolist (checker '(test-status-a test-status-b))
+        (setq flycheck-checkers (delq checker flycheck-checkers))
+        (put checker 'flycheck-generic-checker-version nil)))
+
+    (it "is suspicious after a checker whose output could not be read"
+      (flycheck-buttercup-with-temp-buffer
+        (text-mode)
+        (let ((flycheck-checkers '(test-status-a))
+              (flycheck-check-syntax-automatically nil))
+          (flycheck-mode)
+          (flycheck-buffer)
+          (funcall test-mode-line--finish 'suspicious "odd output")
+          (funcall test-mode-line--finish 'finished nil)
+          (expect flycheck-last-status-change :to-be 'suspicious)
+          (expect (substring-no-properties (flycheck-mode-line-status-text))
+                  :to-equal " FlyC?"))))
+
+    (it "is suspicious even when another checker in the chain found errors"
+      (flycheck-buttercup-with-temp-buffer
+        (text-mode)
+        (let ((flycheck-checkers '(test-status-a test-status-b))
+              (flycheck-check-syntax-automatically nil))
+          (flycheck-add-next-checker 'test-status-a 'test-status-b)
+          (flycheck-mode)
+          (flycheck-buffer)
+          (funcall test-mode-line--finish 'suspicious "odd output")
+          (funcall test-mode-line--finish 'finished nil)
+          (expect flycheck-last-status-change :to-be 'suspicious)
+          ;; The errors still show, only the counts don't
+          (expect (mapcar #'flycheck-error-message flycheck-current-errors)
+                  :to-equal '("boom")))))
+
+    (it "gives way to the next check"
+      (flycheck-buttercup-with-temp-buffer
+        (text-mode)
+        (let ((flycheck-checkers '(test-status-a))
+              (flycheck-check-syntax-automatically nil))
+          (flycheck-mode)
+          (flycheck-buffer)
+          (funcall test-mode-line--finish 'suspicious "odd output")
+          (funcall test-mode-line--finish 'finished nil)
+          (flycheck-buffer)
+          (expect flycheck-last-status-change :to-be 'running)
+          (funcall test-mode-line--finish 'finished nil)
+          (expect flycheck-last-status-change :to-be 'finished)
+          (expect (substring-no-properties (flycheck-mode-line-status-text))
+                  :to-equal " FlyC:0")))))
 
   (it "explains suppressed errors in the tooltip of the whole indicator"
     (flycheck-buttercup-with-temp-buffer
