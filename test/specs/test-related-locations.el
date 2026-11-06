@@ -48,6 +48,36 @@ finds it."
     (goto-char (point-min))
     err))
 
+(defmacro test-related/with-other-file (file-var &rest body)
+  "Run BODY with FILE-VAR bound to a three-line temporary file.
+
+The file is deleted afterwards, and the buffer visiting it killed."
+  (declare (indent 1))
+  `(let ((,file-var (make-temp-file "flycheck-related" nil ".txt"
+                                    "one\ntwo\nthree\n")))
+     (unwind-protect
+         (progn ,@body)
+       (when-let* ((buffer (find-buffer-visiting ,file-var)))
+         (kill-buffer buffer))
+       (delete-file ,file-var))))
+
+(defun test-related/setup-other-file (file)
+  "Put an error a checker reported in FILE at the top of the buffer.
+
+The error has two related locations without a file of their own."
+  (insert "not the file\n")
+  (setq-local flycheck-mode t)
+  (let ((err (flycheck-error-new-at
+              1 1 'error "x" :buffer (current-buffer)
+              :filename file :checker 'emacs-lisp
+              :relations (list (flycheck-related-location-new
+                                :line 2 :column 3 :message "first")
+                               (flycheck-related-location-new
+                                :line 3 :column 1 :message "then")))))
+    (setq flycheck-current-errors (list err))
+    (mapc #'flycheck-add-overlay flycheck-current-errors)
+    (goto-char (point-min))))
+
 (describe "Related locations"
 
   (describe "flycheck-related-location-format"
@@ -160,7 +190,39 @@ finds it."
         (spy-on 'flycheck-completing-read
                 :and-return-value "then here (3:1)")
         (flycheck-visit-related-location)
-        (expect (flycheck-line-column-at-point) :to-equal '(3 . 1)))))
+        (expect (flycheck-line-column-at-point) :to-equal '(3 . 1))))
+    (it "visits a location without a file in the file of its error"
+      (test-related/with-other-file file
+        (flycheck-buttercup-with-temp-buffer
+          (test-related/setup-other-file file)
+          ;; The prompt names the file the location is in
+          (spy-on 'flycheck-completing-read
+                  :and-return-value
+                  (format "then (%s:3:1)" (file-name-nondirectory file)))
+          (save-window-excursion
+            (flycheck-visit-related-location)
+            (expect (buffer-file-name) :to-equal file)
+            (expect (flycheck-line-column-at-point) :to-equal '(3 . 1))))))
+    (it "stays in the buffer after its file is renamed"
+      (flycheck-buttercup-with-temp-buffer
+        (setq buffer-file-name (expand-file-name "before.txt"
+                                                 temporary-file-directory))
+        (unwind-protect
+            (let ((err (test-related/setup))
+                  (source (current-buffer)))
+              (setf (flycheck-error-filename err) buffer-file-name)
+              (flycheck-delete-all-overlays)
+              (flycheck-add-overlay err)
+              (setq buffer-file-name (expand-file-name
+                                      "after.txt" temporary-file-directory))
+              (spy-on 'flycheck-completing-read
+                      :and-return-value "first here (2:6)")
+              (save-window-excursion
+                (flycheck-visit-related-location)
+                (expect (current-buffer) :to-be source)
+                (expect (flycheck-line-column-at-point) :to-equal '(2 . 6))))
+          (set-buffer-modified-p nil)
+          (setq buffer-file-name nil)))))
 
   (describe "flycheck-next-related-location / -previous"
     (it "starts from the locations at point and then cycles"
@@ -177,6 +239,14 @@ finds it."
         (let ((last-command 'flycheck-next-related-location))
           (flycheck-next-related-location))
         (expect (flycheck-line-column-at-point) :to-equal '(2 . 6))))
+    (it "visits a location without a file in the file of its error"
+      (test-related/with-other-file file
+        (flycheck-buttercup-with-temp-buffer
+          (test-related/setup-other-file file)
+          (save-window-excursion
+            (flycheck-next-related-location)
+            (expect (buffer-file-name) :to-equal file)
+            (expect (flycheck-line-column-at-point) :to-equal '(2 . 3))))))
     (it "steps backward with -previous"
       (flycheck-buttercup-with-temp-buffer
         (test-related/setup)
