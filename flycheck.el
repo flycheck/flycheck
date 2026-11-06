@@ -10355,11 +10355,15 @@ visits the location when activated; see `flycheck--related-location-button'."
                            (flycheck--related-location-button loc default)))
                  relations "\n"))))
 
-(defvar-local flycheck--related-location-walk nil
+(defvar flycheck--related-location-walk nil
   "State of the in-progress related-location walk, or nil.
 
-A cons of (LOCATIONS . INDEX): the list being walked and the index of
-the location last visited.  See `flycheck-next-related-location'.")
+A list (LOCATIONS INDEX BUFFER): the list being walked, the index of
+the location last visited, and the buffer the walk started in, which
+the locations without a file of their own refer to.  Global rather
+than buffer-local, as a step into another file leaves that file's
+buffer current and the walk goes on from there.  See
+`flycheck-next-related-location'.")
 
 (defun flycheck--related-location-continue-p ()
   "Return non-nil when the last command was a related-location command."
@@ -10379,17 +10383,23 @@ there are none."
   (let* ((continue (flycheck--related-location-continue-p))
          (locations (if continue
                         (car flycheck--related-location-walk)
-                      (flycheck--related-locations-to-visit))))
+                      ;; Dropped even when there is nothing to start, or
+                      ;; the next step would go on with it from here
+                      (setq flycheck--related-location-walk nil)
+                      (flycheck--related-locations-to-visit)))
+         (buffer (if continue
+                     (nth 2 flycheck--related-location-walk)
+                   (current-buffer))))
     (unless locations
       (user-error "No related locations at point"))
     (let* ((count (length locations))
            (index (if continue
-                      (mod (+ (cdr flycheck--related-location-walk) n) count)
+                      (mod (+ (nth 1 flycheck--related-location-walk) n) count)
                     ;; No current location yet: a forward step starts at the
                     ;; first location, a backward step at the last.
                     (mod (if (> n 0) (1- n) n) count))))
-      (setq flycheck--related-location-walk (cons locations index))
-      (flycheck-goto-related-location (nth index locations))
+      (setq flycheck--related-location-walk (list locations index buffer))
+      (flycheck-goto-related-location (nth index locations) buffer)
       (when (> count 1)
         (message "Related location %d/%d" (1+ index) count)))))
 
@@ -10439,6 +10449,9 @@ Afterwards, step through the remaining locations with
 \\[flycheck-previous-related-location]).  Signal a `user-error' when no
 error at point has a related location."
   (interactive)
+  ;; Dropped first, so that neither a failure here nor a quit at the
+  ;; prompt leaves the last walk for the next step to go on with
+  (setq flycheck--related-location-walk nil)
   (let ((locations (flycheck--related-locations-to-visit)))
     (unless locations
       (user-error "No related locations at point"))
@@ -10454,7 +10467,8 @@ error at point has a related location."
                                      (caar candidates))))
                        (cdr (assoc choice candidates)))
                    0)))
-      (setq flycheck--related-location-walk (cons locations index))
+      (setq flycheck--related-location-walk
+            (list locations index (current-buffer)))
       (flycheck-goto-related-location (nth index locations)))))
 
 (defconst flycheck-explain-error-buffer "*Flycheck error explanation*"
