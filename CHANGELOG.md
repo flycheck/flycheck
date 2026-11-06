@@ -38,6 +38,7 @@
 
 ### Bugs fixed
 
+- [#2426](https://github.com/flycheck/flycheck/pull/2426): `flycheck-next-related-location` and `flycheck-previous-related-location` go on through an error's related locations after a step into another file, instead of stopping there with "No related locations at point", and pressing them again after that message no longer resumes the last walk.
 - [#2426](https://github.com/flycheck/flycheck/pull/2426): A related location without a file of its own, visited with `flycheck-visit-related-location` or `flycheck-next-related-location` from an error a checker reported in another file, opens in that file instead of in the current buffer.
 - [#2424](https://github.com/flycheck/flycheck/pull/2424): `flycheck-flake8-error-level-alist` is registered for `python-ruff` too, which takes its levels from it, so `flycheck-describe-checker` lists it there.
 - [#2424](https://github.com/flycheck/flycheck/pull/2424): `ruby-chef-cookstyle` explains the RuboCop cops it reports, and `flycheck-verify-setup` shows the RuboCop configuration file it uses.

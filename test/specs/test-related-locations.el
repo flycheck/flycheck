@@ -78,7 +78,25 @@ The error has two related locations without a file of their own."
     (mapc #'flycheck-add-overlay flycheck-current-errors)
     (goto-char (point-min))))
 
+(defun test-related/setup-cross-file (file)
+  "Put an error on line 1 related to line 2 of FILE and to line 3 here."
+  (insert "line one here\nline two here\nline three ok\n")
+  (setq-local flycheck-mode t)
+  (let ((err (flycheck-error-new-at
+              1 1 'error "x" :buffer (current-buffer) :checker 'emacs-lisp
+              :relations (list (flycheck-related-location-new
+                                :filename file :line 2 :column 2
+                                :message "there")
+                               (flycheck-related-location-new
+                                :line 3 :column 4 :message "here")))))
+    (setq flycheck-current-errors (list err))
+    (mapc #'flycheck-add-overlay flycheck-current-errors)
+    (goto-char (point-min))))
+
 (describe "Related locations"
+
+  (after-each
+    (setq flycheck--related-location-walk nil))
 
   (describe "flycheck-related-location-format"
     (it "combines message and file position"
@@ -247,6 +265,53 @@ The error has two related locations without a file of their own."
             (flycheck-next-related-location)
             (expect (buffer-file-name) :to-equal file)
             (expect (flycheck-line-column-at-point) :to-equal '(2 . 3))))))
+    (it "goes on from the buffer of another file's location"
+      (test-related/with-other-file file
+        (flycheck-buttercup-with-temp-buffer
+          (let ((source (current-buffer)))
+            (test-related/setup-cross-file file)
+            (save-window-excursion
+              (switch-to-buffer source)
+              (flycheck-next-related-location)
+              (expect (buffer-file-name) :to-equal file)
+              (expect (flycheck-line-column-at-point) :to-equal '(2 . 2))
+              ;; The location without a file is back in the buffer the
+              ;; walk started in
+              (let ((last-command 'flycheck-next-related-location))
+                (flycheck-next-related-location))
+              (expect (current-buffer) :to-be source)
+              (expect (flycheck-line-column-at-point) :to-equal '(3 . 4)))))))
+    (it "goes on after visiting a location in another file"
+      (test-related/with-other-file file
+        (flycheck-buttercup-with-temp-buffer
+          (let ((source (current-buffer)))
+            (test-related/setup-cross-file file)
+            (spy-on 'flycheck-completing-read
+                    :and-return-value
+                    (format "there (%s:2:2)" (file-name-nondirectory file)))
+            (save-window-excursion
+              (switch-to-buffer source)
+              (flycheck-visit-related-location)
+              (expect (buffer-file-name) :to-equal file)
+              (let ((last-command 'flycheck-visit-related-location))
+                (flycheck-next-related-location))
+              (expect (current-buffer) :to-be source)
+              (expect (flycheck-line-column-at-point) :to-equal '(3 . 4)))))))
+    (it "doesn't go on with the last walk after finding nothing to start"
+      (flycheck-buttercup-with-temp-buffer
+        (test-related/setup)
+        (flycheck-next-related-location)
+        ;; Past the error, with nothing to start a walk from
+        (goto-char (point-max))
+        (expect (flycheck-visit-related-location) :to-throw 'user-error)
+        (let ((last-command 'flycheck-visit-related-location))
+          (expect (flycheck-next-related-location) :to-throw 'user-error))
+        (goto-char (point-min))
+        (flycheck-next-related-location)
+        (goto-char (point-max))
+        (expect (flycheck-next-related-location) :to-throw 'user-error)
+        (let ((last-command 'flycheck-next-related-location))
+          (expect (flycheck-next-related-location) :to-throw 'user-error))))
     (it "steps backward with -previous"
       (flycheck-buttercup-with-temp-buffer
         (test-related/setup)
