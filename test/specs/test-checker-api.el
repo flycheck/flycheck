@@ -26,6 +26,13 @@
 (require 'flycheck-buttercup)
 (require 'test-helpers)
 
+(defun test-checker-api/config-file-result (checker)
+  "Return the configuration file line of verifying CHECKER here."
+  (seq-find (lambda (result)
+              (equal (flycheck-verification-result-label result)
+                     "configuration file"))
+            (flycheck-verify-command-checker checker)))
+
 (describe "Checker API"
 
   (describe "flycheck-valid-checker-p"
@@ -504,6 +511,23 @@
               (kill-buffer)))
           (expect (buffer-local-value 'flycheck-disabled-checkers source)
                   :not :to-contain 'emacs-lisp)))))
+
+  (describe "flycheck-verify-command-checker"
+    (it "says no configuration file is set, without a warning"
+      (flycheck-buttercup-with-temp-buffer
+        (let* ((flycheck-python-ruff-config nil)
+               (result (test-checker-api/config-file-result 'python-ruff)))
+          (expect (flycheck-verification-result-message result)
+                  :to-equal "None set")
+          (expect (flycheck-verification-result-face result) :to-be nil))))
+    (it "warns about a configuration file it can't find"
+      (flycheck-buttercup-with-temp-buffer
+        (let* ((flycheck-python-ruff-config "no-such-ruff-config.toml")
+               (result (test-checker-api/config-file-result 'python-ruff)))
+          (expect (flycheck-verification-result-message result)
+                  :to-equal "Not found")
+          (expect (flycheck-verification-result-face result)
+                  :to-be 'warning)))))
 
   (describe "flycheck-compute-working-directory"
     (it "doesn't need the buffer's directory for a checker running no command"
