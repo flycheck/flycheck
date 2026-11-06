@@ -11357,8 +11357,13 @@ CHECKER."
                  (path (and value (flycheck-locate-config-file value checker))))
             (list (flycheck-verification-result-new
                    :label "configuration file"
-                   :message (if path (format "Found at %S" path) "Not found")
-                   :face (if path 'success 'warning)))))
+                   ;; With none set, the tool goes by its own defaults or
+                   ;; finds a file itself, which is nothing to warn about
+                   :message (cond (path (format "Found at %S" path))
+                                  (value "Not found")
+                                  (t "None set"))
+                   :face (cond (path 'success)
+                               (value 'warning))))))
       ,@(unless (flycheck-temp-files-writable-p checker)
           (list (flycheck-verification-result-new
                  :label "temp directory"
