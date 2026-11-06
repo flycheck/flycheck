@@ -38,6 +38,7 @@
 
 ### Bugs fixed
 
+- [#2426](https://github.com/flycheck/flycheck/pull/2426): A related location without a file of its own, visited with `flycheck-visit-related-location` or `flycheck-next-related-location` from an error a checker reported in another file, opens in that file instead of in the current buffer.
 - [#2424](https://github.com/flycheck/flycheck/pull/2424): `flycheck-flake8-error-level-alist` is registered for `python-ruff` too, which takes its levels from it, so `flycheck-describe-checker` lists it there.
 - [#2424](https://github.com/flycheck/flycheck/pull/2424): `ruby-chef-cookstyle` explains the RuboCop cops it reports, and `flycheck-verify-setup` shows the RuboCop configuration file it uses.
 - [#2424](https://github.com/flycheck/flycheck/pull/2424): `ada-gnat` reads GNAT's message levels: errors without the `error:` prefix of GNAT 12 and later, `info:` messages as info and style checks as warnings, with the switch each comes under as its id.

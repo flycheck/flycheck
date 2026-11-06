@@ -7256,8 +7256,9 @@ Return the created overlay."
   ;; We must have a proper error region for the sake of fringe indication,
   ;; error display and error navigation, even if the highlighting is disabled.
   ;; We erase the highlighting later on in this case
-  (pcase-let* ((`(,beg . ,end)
-                (if (flycheck-relevant-error-other-file-p err)
+  (pcase-let* ((other-file (flycheck-relevant-error-other-file-p err))
+               (`(,beg . ,end)
+                (if other-file
                     (flycheck--other-file-error-region)
                   (flycheck-error-region-for-mode
                    err (or flycheck-highlighting-mode 'lines))))
@@ -7270,6 +7271,11 @@ Return the created overlay."
     (setf (overlay-get overlay 'flycheck-error-index) index)
     (setf (overlay-get overlay 'flycheck-overlay) t)
     (setf (overlay-get overlay 'flycheck-error) err)
+    ;; Kept for `flycheck--related-locations-to-visit': whether the error
+    ;; was another file's can't be told from the error once the buffer's
+    ;; file is renamed, or in an indirect buffer cloned from this one
+    (when other-file
+      (setf (overlay-get overlay 'flycheck-other-file) t))
     (setf (overlay-get overlay 'category) category)
     ;; A tag says something about the code, not about how bad the problem
     ;; is, so it adds a face rather than replacing the level's.  The
@@ -10237,6 +10243,29 @@ The result is the flattened `flycheck-error-relations' of every error
 overlay at point, in error order."
   (seq-mapcat #'flycheck-error-relations (flycheck-overlay-errors-at (point))))
 
+(defun flycheck--related-locations-to-visit ()
+  "Return the related locations at point, as they are visited from here.
+
+Like `flycheck-related-location-at-point', except for an error a checker
+reported in another file, shown at the top of the buffer (see
+`flycheck-relevant-error-other-file-p'): its locations without a file
+of their own come as copies naming that file, which their lines refer
+to.  Every other location without a file refers to the current buffer."
+  (seq-mapcat
+   (lambda (overlay)
+     (let* ((err (overlay-get overlay 'flycheck-error))
+            (file (and (overlay-get overlay 'flycheck-other-file)
+                       (flycheck-error-filename err))))
+       (mapcar (lambda (location)
+                 (if (or (null file)
+                         (flycheck-related-location-filename location))
+                     location
+                   (let ((copy (copy-sequence location)))
+                     (setf (flycheck-related-location-filename copy) file)
+                     copy)))
+               (flycheck-error-relations err))))
+   (flycheck-overlays-at (point))))
+
 (defun flycheck-related-location-format (location)
   "Format the related LOCATION as a human-readable string.
 
@@ -10350,7 +10379,7 @@ there are none."
   (let* ((continue (flycheck--related-location-continue-p))
          (locations (if continue
                         (car flycheck--related-location-walk)
-                      (flycheck-related-location-at-point))))
+                      (flycheck--related-locations-to-visit))))
     (unless locations
       (user-error "No related locations at point"))
     (let* ((count (length locations))
@@ -10410,7 +10439,7 @@ Afterwards, step through the remaining locations with
 \\[flycheck-previous-related-location]).  Signal a `user-error' when no
 error at point has a related location."
   (interactive)
-  (let ((locations (flycheck-related-location-at-point)))
+  (let ((locations (flycheck--related-locations-to-visit)))
     (unless locations
       (user-error "No related locations at point"))
     (let ((index (if (cdr locations)
