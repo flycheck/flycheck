@@ -5535,12 +5535,14 @@ determined if the error contains a full span, not just a
 beginning position)."
   (let* ((id (flycheck-error-id err))
          (fname (flycheck-error-filename err))
+         ;; An indirect buffer's text is its base buffer's file
+         (visited (buffer-file-name (buffer-base-buffer)))
          ;; The same file may be spelled another way: through a symlink,
          ;; say
          (other-file-p (and fname
-                            (not (and (buffer-file-name)
+                            (not (and visited
                                       (flycheck-same-files-p
-                                       fname (buffer-file-name)))))))
+                                       fname visited))))))
     (concat (and other-file-p (format "In %S:\n" (file-relative-name fname)))
             (and include-snippet
                  (when-let* ((snippet (flycheck-error-format-snippet err)))
@@ -7280,9 +7282,9 @@ Return the created overlay."
     (setf (overlay-get overlay 'flycheck-error-index) index)
     (setf (overlay-get overlay 'flycheck-overlay) t)
     (setf (overlay-get overlay 'flycheck-error) err)
-    ;; Kept for `flycheck--related-locations-to-visit': whether the error
-    ;; was another file's can't be told from the error once the buffer's
-    ;; file is renamed, or in an indirect buffer cloned from this one
+    ;; Whether the error was another file's can't be told from the error
+    ;; once the buffer visits another file, or in an indirect clone of
+    ;; it, which visits none
     (when other-file
       (setf (overlay-get overlay 'flycheck-other-file) t))
     (setf (overlay-get overlay 'category) category)
@@ -9500,6 +9502,11 @@ message style, so it applies even to lines whose style is nil."
 (defvar-local flycheck-annotate--overlays nil
   "Inline display overlays in the current buffer.")
 
+(defvar-local flycheck-annotate--overlays-owner nil
+  "The buffer whose overlays `flycheck-annotate--overlays' records.
+A buffer cloned from another inherits the record and this, which tells
+it the record is not its own.")
+
 (defvar-local flycheck-annotate--last-line-start nil
   "Beginning-of-line position the inline overlays were last built for.
 
@@ -9853,8 +9860,17 @@ gutter.  FOCUSED is ignored."
            (flycheck-error-level (car errors)))))))
 
 (defun flycheck-annotate--clear ()
-  "Delete all inline overlays in the current buffer."
-  (mapc #'delete-overlay flycheck-annotate--overlays)
+  "Delete all inline overlays in the current buffer.
+
+A buffer cloned from another inherits its record of them, which names
+the other buffer's overlays, and an indirect clone also holds copies of
+them: those copies are deleted instead, and the other buffer's left be."
+  (if (eq flycheck-annotate--overlays-owner (current-buffer))
+      (mapc #'delete-overlay flycheck-annotate--overlays)
+    (save-restriction
+      (widen)
+      (remove-overlays nil nil 'flycheck-annotate t))
+    (setq flycheck-annotate--overlays-owner (current-buffer)))
   (setq flycheck-annotate--overlays nil))
 
 (defun flycheck-annotate--effective-levels (tier)
@@ -9904,7 +9920,7 @@ another file, and errors in invisible text, as in a fold."
   (let ((groups nil))
     (dolist (ov (flycheck-overlays-in beg end))
       (when-let* ((err (overlay-get ov 'flycheck-error)))
-        (unless (or (flycheck-relevant-error-other-file-p err)
+        (unless (or (overlay-get ov 'flycheck-other-file)
                     ;; Folded away, never drawn, and a fold may hold
                     ;; any number of them
                     (invisible-p (overlay-start ov)))
@@ -10063,7 +10079,7 @@ compact style shows only the most severe of a line's errors."
          (seq-every-p
           (lambda (ov)
             (let ((err (overlay-get ov 'flycheck-error)))
-              (and (not (flycheck-relevant-error-other-file-p err))
+              (and (not (overlay-get ov 'flycheck-other-file))
                    (flycheck-annotate--filter-levels (list err) levels)
                    (<= bol (overlay-start ov) eol)
                    (or (null shown) (memq err shown)))))

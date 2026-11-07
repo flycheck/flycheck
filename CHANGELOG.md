@@ -41,6 +41,7 @@
 
 ### Bugs fixed
 
+- [#2432](https://github.com/flycheck/flycheck/pull/2432): Inline annotations show a buffer's own errors in an indirect clone of it, where they no longer delete the base buffer's annotations or name its file as another file's.
 - [#2430](https://github.com/flycheck/flycheck/pull/2430): `flycheck-lsp` waits for the server's diagnostics about the text it just sent, instead of first showing what the server said about the text before, which put an error back on the line an edit had moved it from until the server answered.
 - [#2429](https://github.com/flycheck/flycheck/pull/2429): Interrupting a check with `C-u C-c ! C` leaves `FlyC.` in the mode line, as documented, instead of the `FlyC` of a buffer that was never checked, and drops the check queued behind the interrupted one instead of starting it right away.
 - [#2429](https://github.com/flycheck/flycheck/pull/2429): A check in which a syntax checker printed output Flycheck could not read leaves `FlyC?` in the mode line until the next check, instead of the `FlyC:0` of a clean buffer, and counts no errors there even when another checker found some.

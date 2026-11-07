@@ -290,7 +290,19 @@
                         :to-equal "m")
                 (setq buffer-file-name nil)))
           (delete-file (directory-file-name link))
-          (delete-directory dir t)))))
+          (delete-directory dir t))))
+
+    (it "takes an indirect buffer's text for its base buffer's file"
+      (with-temp-buffer
+        (setq buffer-file-name "/tmp/flycheck-fmt/a.el")
+        (let ((err (flycheck-error-new-at 1 1 'warning "m"))
+              (clone (clone-indirect-buffer nil nil)))
+          (unwind-protect
+              (with-current-buffer clone
+                (expect (flycheck-error-format-message-and-id err)
+                        :to-equal "m"))
+            (kill-buffer clone)
+            (setq buffer-file-name nil))))))
 
   (describe "flycheck-error-format"
     (it "formats a warning"
