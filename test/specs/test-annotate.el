@@ -980,6 +980,83 @@ block replaces that line's newline, so it begins with one."
                                         flycheck-annotate--overlays))
                     :to-equal 1))))))
 
+  (describe "the errors of the buffer's own file"
+    (cl-flet ((shown ()
+                ;; The texts of the buffer's live annotations
+                (delq nil (mapcar (lambda (ov)
+                                    (and (overlay-buffer ov)
+                                         (test-annotate/text ov)))
+                                  flycheck-annotate--overlays)))
+              (annotate ()
+                (save-window-excursion
+                  (set-window-buffer (selected-window) (current-buffer))
+                  (set-window-start (selected-window) (point-min))
+                  (flycheck-annotate--refresh)))
+              (copies-left-p ()
+                ;; Whether the buffer holds annotations it doesn't track
+                (/= (seq-count (lambda (ov) (overlay-get ov 'flycheck-annotate))
+                               (overlays-in (point-min) (point-max)))
+                    (length flycheck-annotate--overlays))))
+      (it "stay annotated once the buffer visits another file"
+        (flycheck-buttercup-with-temp-buffer
+          (setq buffer-file-name "/tmp/flycheck-annotate/old.txt")
+          (test-annotate/setup)
+          (setq buffer-file-name "/tmp/flycheck-annotate/new.txt")
+          (goto-char (point-min))
+          (forward-line 3)              ; onto line 4's warning
+          (forward-char 2)
+          (let ((flycheck-annotate-mode t)
+                (flycheck-annotate-current-line-style 'eol)
+                (flycheck-annotate-other-lines-style 'eol)
+                (flycheck-annotate-suppress-echo t)
+                ;; Or only an error could be taken for another file's,
+                ;; and the warnings would always show
+                (flycheck-relevant-error-other-file-minimum-level nil))
+            (annotate)
+            (expect (length (shown)) :to-equal 2)
+            ;; Shown inline, so not echoed
+            (expect (flycheck-annotate--suppresses-echo-p) :to-be t))))
+      (it "stay annotated in an indirect clone, apart from the base buffer"
+        (flycheck-buttercup-with-temp-buffer
+          (setq buffer-file-name "/tmp/flycheck-annotate/own.txt")
+          (let ((flycheck-annotate-mode t)
+                (flycheck-annotate-current-line-style 'eol)
+                (flycheck-annotate-other-lines-style 'eol)
+                (flycheck-relevant-error-other-file-minimum-level nil)
+                (base (current-buffer)))
+            (test-annotate/setup)
+            (annotate)
+            (let ((clone (clone-indirect-buffer nil nil)))
+              (unwind-protect
+                  (with-current-buffer clone
+                    (annotate)
+                    (expect (length (shown)) :to-equal 2)
+                    ;; Not taken for another file's
+                    (dolist (text (shown))
+                      (expect text :not :to-match "In "))
+                    (expect (copies-left-p) :not :to-be-truthy)
+                    (with-current-buffer base
+                      (expect (length (shown)) :to-equal 2)))
+                (kill-buffer clone))))))
+      (it "leave no copies in a clone the base buffer rebuilt before"
+        (flycheck-buttercup-with-temp-buffer
+          (setq buffer-file-name "/tmp/flycheck-annotate/own.txt")
+          (let ((flycheck-annotate-mode t)
+                (flycheck-annotate-current-line-style 'eol)
+                (flycheck-annotate-other-lines-style 'eol))
+            (test-annotate/setup)
+            (annotate)
+            (let ((clone (clone-indirect-buffer nil nil)))
+              (unwind-protect
+                  (progn
+                    ;; Which leaves nothing of the base buffer's in the
+                    ;; record the clone inherited
+                    (annotate)
+                    (with-current-buffer clone
+                      (annotate)
+                      (expect (copies-left-p) :not :to-be-truthy)))
+                (kill-buffer clone))))))))
+
   (describe "the background tint"
     (it "adds no tint when disabled"
       (flycheck-buttercup-with-temp-buffer
