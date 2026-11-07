@@ -82,6 +82,7 @@ By default :mode:`flycheck` automatically checks a buffer whenever
 * it is enabled,
 * the buffer is saved,
 * the buffer is reverted (e.g. via ``global-auto-revert-mode``),
+* the buffer comes to visit another file, as when the file is renamed,
 * a new line is inserted,
 * or a short time after the last change was made in a buffer.
 
@@ -133,7 +134,9 @@ You can customise this behaviour with `flycheck-check-syntax-automatically`:
 
    Flycheck checks a reverted buffer under any of ``save``,
    ``mode-enabled``, ``new-line`` and ``idle-change``, since a revert both
-   brings back the file's contents and changes the buffer.
+   brings back the file's contents and changes the buffer.  It checks a
+   buffer that comes to visit another file, as when the file is renamed,
+   under ``save`` or ``mode-enabled``.
 
    For instance with the following setting :mode:`flycheck` will only check the
    buffer when it was saved:

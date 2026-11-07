@@ -373,6 +373,88 @@
             (kill-buffer buffer)
             (put 'test-queued 'flycheck-generic-checker-version nil))))))
 
+  (describe "a buffer that comes to visit another file"
+    :var (starts interrupts)
+    (cl-flet ((with-checked-file (body)
+                ;; Call BODY in a checked file buffer shown in a window,
+                ;; counting the checks that start and are interrupted
+                (let ((directory (make-temp-file "flycheck-rename" 'directory)))
+                  (setq starts 0 interrupts 0)
+                  (flycheck-define-generic-checker 'test-renamed
+                    "A fake checker reporting a warning on the first line."
+                    :start (lambda (_checker callback)
+                             (cl-incf starts)
+                             (funcall callback 'finished
+                                      (list (flycheck-error-new-at
+                                             1 1 'warning "w"
+                                             :checker 'test-renamed))))
+                    :interrupt (lambda (&rest _) (cl-incf interrupts))
+                    :modes '(text-mode))
+                  (let ((file (expand-file-name "old.txt" directory))
+                        (flycheck-checkers '(test-renamed)))
+                    (unwind-protect
+                        (progn
+                          (write-region "one\ntwo\n" nil file)
+                          (save-window-excursion
+                            (switch-to-buffer (find-file-noselect file))
+                            (unwind-protect
+                                (progn
+                                  (flycheck-mode)
+                                  (flycheck-buffer)
+                                  (funcall body))
+                              (set-buffer-modified-p nil)
+                              (kill-buffer))))
+                      (delete-directory directory 'recursive)
+                      (put 'test-renamed 'flycheck-generic-checker-version
+                           nil))))))
+      (it "is checked again once the command ends, and its errors name the file"
+        (let ((flycheck-check-syntax-automatically '(save)))
+          (with-checked-file
+           (lambda ()
+             (set-visited-file-name "new.txt" 'no-query)
+             (expect starts :to-equal 1)
+             (flycheck-perform-deferred-syntax-check)
+             (expect starts :to-equal 2)
+             (expect (mapcar #'flycheck-error-filename flycheck-current-errors)
+                     :to-equal (list buffer-file-name))))))
+      (it "is checked from the buffer it was renamed from, as Dired does"
+        (let ((flycheck-check-syntax-automatically '(save)))
+          (with-checked-file
+           (lambda ()
+             (let ((renamed (current-buffer)))
+               (with-temp-buffer
+                 (with-current-buffer renamed
+                   (set-visited-file-name "new.txt" 'no-query))
+                 ;; No command of the renamed buffer's ends
+                 (accept-process-output nil 0.05)
+                 (expect starts :to-equal 2)))))))
+      (it "interrupts a check still running on the old name"
+        (let ((flycheck-check-syntax-automatically '(save))
+              (flycheck-interrupt-running-checks t))
+          (with-checked-file
+           (lambda ()
+             (setq flycheck-current-syntax-check
+                   (flycheck-syntax-check-new
+                    :buffer (current-buffer) :checker 'test-renamed
+                    :context nil :working-directory default-directory
+                    :start-time (float-time)))
+             (set-visited-file-name "new.txt" 'no-query)
+             (expect interrupts :to-equal 1)
+             (expect (flycheck-running-p) :not :to-be-truthy)))))
+      (it "is checked once on `write-file', by the check of the save"
+        (let ((flycheck-check-syntax-automatically '(save)))
+          (with-checked-file
+           (lambda ()
+             (write-file "new.txt")
+             (flycheck-perform-deferred-syntax-check)
+             (expect starts :to-equal 2)))))
+      (it "is left alone without the events a new file amounts to"
+        (let ((flycheck-check-syntax-automatically '(idle-change)))
+          (with-checked-file
+           (lambda ()
+             (set-visited-file-name "new.txt" 'no-query)
+             (expect (flycheck-deferred-check-p) :not :to-be-truthy)))))))
+
   (describe "Deferred syntax checking"
 
     (it "flycheck-deferred-check-p returns nil"

@@ -896,7 +896,9 @@ The following events are known:
 
 Flycheck checks a reverted buffer under any of `save', `mode-enabled',
 `new-line' and `idle-change', since a revert both brings back the
-file's contents and changes the buffer.
+file's contents and changes the buffer.  It checks a buffer that comes
+to visit another file, as when the file is renamed, under `save' or
+`mode-enabled'.
 
 Flycheck performs syntax checks only on events, which are
 contained in this list.  For instance, if the value of this
@@ -3480,6 +3482,7 @@ displays.  Replace the copy with one that shows, where it is."
     (kill-buffer-hook       . flycheck-teardown)
     (change-major-mode-hook . flycheck-teardown)
     (before-revert-hook     . flycheck--handle-before-revert)
+    (after-set-visited-file-name-hook . flycheck--handle-visited-file-change)
     ;; Update the error list if necessary
     (post-command-hook . flycheck-error-list-update-source)
     (post-command-hook . flycheck-error-list-highlight-errors)
@@ -4332,14 +4335,7 @@ new check is deferred until it finishes."
     (setq flycheck--idle-trigger-conditions nil)
     (if (or force-deferred (flycheck--must-defer-regardless-of-running-p))
         (flycheck-buffer-deferred)
-      ;; A new check supersedes a running one: its results would be
-      ;; outdated by the time it finishes anyway.  But don't kill a useful
-      ;; running check when no new one could start in its place.
-      (when (and (flycheck-running-p)
-                 (flycheck--may-interrupt-at-condition-p condition)
-                 (flycheck--interruptible-check-p)
-                 (ignore-errors (flycheck-get-checker-for-buffer)))
-        (flycheck--interrupt-current-syntax-check))
+      (flycheck--interrupt-for-check-at condition)
       ;; When the running check was kept -- it cannot be interrupted, or
       ;; has made too much progress to throw away -- queue the new check
       ;; behind it, like older Flycheck versions did
@@ -4347,6 +4343,19 @@ new check is deferred until it finishes."
           (flycheck-buffer-deferred)
         (with-demoted-errors "Error while checking syntax automatically: %S"
           (flycheck-buffer))))))
+
+(defun flycheck--interrupt-for-check-at (condition)
+  "Interrupt the running check for a new one triggered at CONDITION.
+
+A new check supersedes a running one: its results would be outdated by
+the time it finishes anyway.  But don't kill a useful running check
+when no new one could start in its place.  See
+`flycheck--may-interrupt-at-condition-p'."
+  (when (and (flycheck-running-p)
+             (flycheck--may-interrupt-at-condition-p condition)
+             (flycheck--interruptible-check-p)
+             (ignore-errors (flycheck-get-checker-for-buffer)))
+    (flycheck--interrupt-current-syntax-check)))
 
 (defun flycheck--clear-idle-trigger-timer ()
   "Clear the idle trigger timer."
@@ -4442,6 +4451,28 @@ Keep the global hooks, even in the last Flycheck buffer: the mode
 stays on through a revert that preserves modes.  A revert that doesn't
 runs `change-major-mode-hook', which tears down the rest."
   (flycheck-teardown 'ignore-global))
+
+(defun flycheck--handle-visited-file-change ()
+  "Check the buffer again once it visits another file.
+
+Its errors name the file it was checked as, which after
+`set-visited-file-name' is gone or another buffer's: jumping to one,
+or to a related location of it, would open that.  And the checkers may
+read their configuration from elsewhere now.  Check as an automatic
+check would on saving or opening the file, interrupting a check of the
+old name, once the command ends: `write-file' saves right after, and
+the check of the save replaces this one."
+  (when (flycheck-may-check-automatically 'save 'mode-enabled)
+    (flycheck--interrupt-for-check-at 'save))
+  (flycheck-buffer-automatically '(save mode-enabled) 'force-deferred)
+  ;; Renamed from another buffer, as from Dired, the buffer runs no
+  ;; command of its own to start the check at the end of
+  (when (flycheck-deferred-check-p)
+    (let ((buffer (current-buffer)))
+      (run-at-time 0 nil (lambda ()
+                           (when (buffer-live-p buffer)
+                             (with-current-buffer buffer
+                               (flycheck-perform-deferred-syntax-check))))))))
 
 (defun flycheck-handle-revert ()
   "Handle a buffer revert.
