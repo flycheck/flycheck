@@ -1336,6 +1336,14 @@ to view the docstring of the syntax checker.  Likewise, you may use
 
          This syntax checker requires mypy 1.11 or newer; precise end positions need mypy 1.20.
 
+      Mypy finds its configuration on its own, in the directory it runs
+      from (the nearest parent with a ``pyproject.toml``, ``setup.cfg``,
+      ``mypy.ini`` or ``pyrightconfig.json``) and, from mypy 1.15 on, in
+      the parent directories up to the repository root.  Set
+      `flycheck-python-mypy-config` to force a particular file, or,
+      before mypy 1.15, to use a configuration further up, such as a
+      repository's ``mypy.ini`` above a package's own ``pyproject.toml``.
+
       .. syntax-checker-config-file:: flycheck-python-mypy-config
 
       .. defcustom:: flycheck-python-mypy-cache-dir
