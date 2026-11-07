@@ -54,6 +54,29 @@
                         (flycheck-buttercup-resource-filename
                          "global-mode-dummy.el"))))))
 
+    (it "puts another file's error's related locations without a file in it"
+      (with-temp-buffer
+        (setq buffer-file-name "/tmp/flycheck-fill/own.el")
+        (let* ((theirs (flycheck-related-location-new :line 2 :message "a"))
+               (named (flycheck-related-location-new
+                       :filename "/tmp/flycheck-fill/third.el" :line 3))
+               (own (flycheck-related-location-new :line 4 :message "b"))
+               (errors (list (flycheck-error-new
+                              :filename "/tmp/flycheck-fill/other.el"
+                              :relations (list theirs named))
+                             (flycheck-error-new :relations (list own)))))
+          (flycheck-fill-and-expand-error-file-names errors "/tmp/flycheck-fill/")
+          (expect (flycheck-related-location-filename theirs)
+                  :to-equal "/tmp/flycheck-fill/other.el")
+          (expect (flycheck-related-location-filename named)
+                  :to-equal "/tmp/flycheck-fill/third.el")
+          ;; The buffer's own, which the location refers to as it is
+          (expect (flycheck-related-location-filename own) :to-be nil)
+          ;; And so the label names the file
+          (expect (flycheck-related-location-format theirs)
+                  :to-equal "a (other.el:2)")
+          (setq buffer-file-name nil))))
+
     (describe "on a remote host"
 
       ;; A checker running on the remote host reports host-local names.

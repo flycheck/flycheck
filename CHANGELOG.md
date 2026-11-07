@@ -41,6 +41,7 @@
 
 ### Bugs fixed
 
+- [#2432](https://github.com/flycheck/flycheck/pull/2432): The related locations without a file of their own of an error in another file name that file, under the error's message, in the error list's `j` prompt and in its `↳` badge's tooltip, instead of a bare line and column that read as the current buffer's.
 - [#2432](https://github.com/flycheck/flycheck/pull/2432): A buffer that comes to visit another file, as when the file is renamed, is checked again under `save` or `mode-enabled`, instead of keeping errors that name the old file until the next edit, which jumping to an error or its related locations then opened.
 - [#2432](https://github.com/flycheck/flycheck/pull/2432): Inline annotations show a buffer's own errors in an indirect clone of it, where they no longer delete the base buffer's annotations or name its file as another file's.
 - [#2430](https://github.com/flycheck/flycheck/pull/2430): `flycheck-lsp` waits for the server's diagnostics about the text it just sent, instead of first showing what the server said about the text before, which put an error back on the line an edit had moved it from until the server answered.

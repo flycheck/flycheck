@@ -6313,7 +6313,9 @@ everything by file.  Returns the errors kept."
 
 Expand all file names of ERRORS against DIRECTORY.  If the file
 name of an error is nil fill in the result of function
-`buffer-file-name' in the current buffer.
+`buffer-file-name' in the current buffer.  An error about another file
+gives its related locations without a file of their own that file,
+which their lines refer to.
 
 Return ERRORS, modified in-place."
   (seq-do (lambda (err)
@@ -6325,7 +6327,18 @@ Return ERRORS, modified in-place."
             (setf (flycheck-error-filename err)
                   (if-let* ((filename (flycheck-error-filename err)))
                       (flycheck--expand-file-name filename directory)
-                    (buffer-file-name))))
+                    (buffer-file-name)))
+            ;; Decided now, while the buffer still visits the file it was
+            ;; checked as
+            (when-let* ((filename (flycheck-error-filename err))
+                        (relations (flycheck-error-relations err))
+                        ((not (and buffer-file-name
+                                   (flycheck-same-files-p
+                                    filename buffer-file-name)))))
+              (dolist (relation relations)
+                (unless (flycheck-related-location-filename relation)
+                  (setf (flycheck-related-location-filename relation)
+                        filename)))))
           errors)
   errors)
 
