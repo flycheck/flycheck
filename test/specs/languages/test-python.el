@@ -93,8 +93,7 @@
 
   (describe "the python-mypy checker command"
     (it "appends flycheck-python-mypy-args before the source file"
-      (let ((flycheck-python-mypy-config nil)
-            (flycheck-python-mypy-args '("--strict" "--ignore-missing-imports")))
+      (let ((flycheck-python-mypy-args '("--strict" "--ignore-missing-imports")))
         (let ((args (flycheck-checker-substituted-arguments 'python-mypy)))
           (expect args :to-contain "--strict")
           (expect args :to-contain "--ignore-missing-imports"))))
@@ -105,7 +104,32 @@
         (expect (cadr (member "--cache-dir"
                               (flycheck-checker-substituted-arguments
                                'python-mypy)))
-                :to-equal "nul"))))
+                :to-equal "nul")))
+
+    (it "leaves finding the configuration to mypy by default"
+      (let ((directory (make-temp-file "flycheck-mypy" 'directory)))
+        (unwind-protect
+            (with-temp-buffer
+              ;; Next to the file, where the config-file lookup would
+              ;; find it
+              (write-region "" nil (expand-file-name "mypy.ini" directory))
+              (setq buffer-file-name (expand-file-name "test.py" directory))
+              (unwind-protect
+                  (expect (flycheck-checker-substituted-arguments 'python-mypy)
+                          :not :to-contain "--config-file")
+                (setq buffer-file-name nil)))
+          (delete-directory directory 'recursive))))
+
+    (it "passes a configuration file it is given with --config-file"
+      (let* ((config (make-temp-file "flycheck-mypy" nil ".ini"))
+             (flycheck-python-mypy-config config))
+        (unwind-protect
+            (expect (seq-take (member "--config-file"
+                                      (flycheck-checker-substituted-arguments
+                                       'python-mypy))
+                              2)
+                    :to-equal (list "--config-file" config))
+          (delete-file config)))))
 
   (describe "the python-flake8 checker command"
     (it "appends flycheck-flake8-args before the stdin marker"

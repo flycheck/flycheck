@@ -20039,8 +20039,12 @@ See URL `https://github.com/microsoft/pyright'."
   :error-parser flycheck-pyright--parse-error
   :modes (python-mode python-ts-mode))
 
-(flycheck-def-config-file-var flycheck-python-mypy-config python-mypy
-                              '("mypy.ini" "pyproject.toml" "setup.cfg"))
+;; No default: mypy finds the configuration in the project root it runs
+;; from and, from 1.15 on, in the parents up to the repository root,
+;; nearest first; before 1.15 one further up has to be set
+;; (https://mypy.readthedocs.io/en/stable/config_file.html).
+(flycheck-def-config-file-var flycheck-python-mypy-config python-mypy nil
+  :package-version '(flycheck . "40"))
 
 (flycheck-def-option-var flycheck-python-mypy-cache-dir nil python-mypy
   "Directory used to write .mypy_cache directories."

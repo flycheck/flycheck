@@ -8,6 +8,7 @@
 
 ### Changes
 
+- [#2431](https://github.com/flycheck/flycheck/pull/2431): `python-mypy` lets mypy find its own configuration, from the project root it runs in, instead of passing it the first `mypy.ini`, `pyproject.toml` or `setup.cfg` Flycheck found in any parent or the home directory; `flycheck-python-mypy-config` now defaults to nil, and still forces a file when set, which a configuration above the project root needs before mypy 1.15.
 - [#2427](https://github.com/flycheck/flycheck/pull/2427): `flycheck-verify-setup` says no configuration file is set for a checker whose configuration file option is nil, as `python-ruff`'s now is, instead of warning that none was found.
 - [#2427](https://github.com/flycheck/flycheck/pull/2427): `python-ruff` lets Ruff find its own configuration, the one nearest to the checked file, instead of passing it the first `.ruff.toml`, `ruff.toml` or `pyproject.toml` Flycheck found in any parent or the home directory; `flycheck-python-ruff-config` now defaults to nil, and still forces a file when set.
 - [#2428](https://github.com/flycheck/flycheck/pull/2428): The variables obsolete since Flycheck 32 are gone: `flycheck-python-mypy-ini` (use `flycheck-python-mypy-config`), and `flycheck-enabled-checkers`, which named an internal variable and has no public replacement.
